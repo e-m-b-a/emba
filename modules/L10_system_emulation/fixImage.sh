@@ -117,105 +117,105 @@ if [ "${FILECOUNT}" -lt "5" ]; then
     TMP_BUSYBOX=""
   fi
 
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/mem c 1 1
-  "${TMP_BUSYBOX}" mknod -m 640 /dev/kmem c 1 2
-  "${TMP_BUSYBOX}" mknod -m 666 /dev/null c 1 3
-  "${TMP_BUSYBOX}" mknod -m 666 /dev/zero c 1 5
-  "${TMP_BUSYBOX}" mknod -m 444 /dev/random c 1 8
-  "${TMP_BUSYBOX}" mknod -m 444 /dev/urandom c 1 9
-  "${TMP_BUSYBOX}" mknod -m 666 /dev/armem c 1 13
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/mem c 1 1 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 640 /dev/kmem c 1 2 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 666 /dev/null c 1 3 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 666 /dev/zero c 1 5 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 444 /dev/random c 1 8 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 444 /dev/urandom c 1 9 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 666 /dev/armem c 1 13 2>/dev/null
 
-  "${TMP_BUSYBOX}" mknod -m 666 /dev/tty c 5 0
-  "${TMP_BUSYBOX}" mknod -m 622 /dev/console c 5 1
-  "${TMP_BUSYBOX}" mknod -m 666 /dev/ptmx c 5 2
+  "${TMP_BUSYBOX}" mknod -m 666 /dev/tty c 5 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 622 /dev/console c 5 1 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 666 /dev/ptmx c 5 2 2>/dev/null
 
-  "${TMP_BUSYBOX}" mknod -m 622 /dev/tty0 c 4 0
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS0 c 4 64
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS1 c 4 65
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS2 c 4 66
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS3 c 4 67
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA0 c 4 64
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA1 c 4 65
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA2 c 4 66
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA3 c 4 67
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS0 c 4 64
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS1 c 4 65
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS2 c 4 66
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS3 c 4 67
+  "${TMP_BUSYBOX}" mknod -m 622 /dev/tty0 c 4 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS0 c 4 64 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS1 c 4 65 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS2 c 4 66 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS3 c 4 67 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA0 c 4 64 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA1 c 4 65 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA2 c 4 66 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA3 c 4 67 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS0 c 4 64 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS1 c 4 65 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS2 c 4 66 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS3 c 4 67 2>/dev/null
 
   # AVM:
-  "${TMP_BUSYBOX}" mknod -m 600 /dev/ttyMSM0 c 251 0
+  "${TMP_BUSYBOX}" mknod -m 600 /dev/ttyMSM0 c 251 0 2>/dev/null
 
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/adsl0 c 100 0
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/ppp c 108 0
-  "${TMP_BUSYBOX}" mknod -m 666 /dev/hidraw0 c 251 0
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/adsl0 c 100 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/ppp c 108 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 666 /dev/hidraw0 c 251 0 2>/dev/null
 
   mkdir -p /dev/mtd
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/0 c 90 0
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/1 c 90 2
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/2 c 90 4
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/3 c 90 6
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/4 c 90 8
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/5 c 90 10
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/6 c 90 12
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/7 c 90 14
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/8 c 90 16
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/9 c 90 18
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/10 c 90 20
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/0 c 90 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/1 c 90 2 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/2 c 90 4 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/3 c 90 6 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/4 c 90 8 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/5 c 90 10 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/6 c 90 12 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/7 c 90 14 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/8 c 90 16 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/9 c 90 18 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd/10 c 90 20 2>/dev/null
 
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd0 c 90 0
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr0 c 90 1
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd1 c 90 2
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr1 c 90 3
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd2 c 90 4
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr2 c 90 5
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd3 c 90 6
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr3 c 90 7
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd4 c 90 8
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr4 c 90 9
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd5 c 90 10
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr5 c 90 11
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd6 c 90 12
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr6 c 90 13
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd7 c 90 14
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr7 c 90 15
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd8 c 90 16
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr8 c 90 17
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd9 c 90 18
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr9 c 90 19
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd10 c 90 20
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr10 c 90 21
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd0 c 90 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr0 c 90 1 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd1 c 90 2 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr1 c 90 3 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd2 c 90 4 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr2 c 90 5 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd3 c 90 6 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr3 c 90 7 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd4 c 90 8 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr4 c 90 9 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd5 c 90 10 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr5 c 90 11 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd6 c 90 12 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr6 c 90 13 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd7 c 90 14 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr7 c 90 15 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd8 c 90 16 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr8 c 90 17 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd9 c 90 18 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr9 c 90 19 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtd10 c 90 20 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdr10 c 90 21 2>/dev/null
 
   mkdir -p /dev/mtdblock
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/0 b 31 0
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/1 b 31 1
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/2 b 31 2
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/3 b 31 3
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/4 b 31 4
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/5 b 31 5
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/6 b 31 6
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/7 b 31 7
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/8 b 31 8
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/9 b 31 9
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/10 b 31 10
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/0 b 31 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/1 b 31 1 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/2 b 31 2 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/3 b 31 3 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/4 b 31 4 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/5 b 31 5 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/6 b 31 6 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/7 b 31 7 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/8 b 31 8 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/9 b 31 9 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock/10 b 31 10 2>/dev/null
 
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock0 b 31 0
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock1 b 31 1
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock2 b 31 2
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock3 b 31 3
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock4 b 31 4
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock5 b 31 5
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock6 b 31 6
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock7 b 31 7
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock8 b 31 8
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock9 b 31 9
-  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock10 b 31 10
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock0 b 31 0 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock1 b 31 1 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock2 b 31 2 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock3 b 31 3 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock4 b 31 4 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock5 b 31 5 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock6 b 31 6 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock7 b 31 7 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock8 b 31 8 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock9 b 31 9 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 644 /dev/mtdblock10 b 31 10 2>/dev/null
 
   mkdir -p /dev/tts
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/0 c 4 64
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/1 c 4 65
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/2 c 4 66
-  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/3 c 4 67
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/0 c 4 64 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/1 c 4 65 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/2 c 4 66 2>/dev/null
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/tts/3 c 4 67 2>/dev/null
 fi
 
 # create a gpio file required for linksys to make the watchdog happy
@@ -230,7 +230,7 @@ if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
     echo -ne "\xff\xff\xff\xff" > /dev/gpio/in
 else
   # just create an empty file
-  rm -r /dev/gpio
+  rm -r /dev/gpio 2>/dev/null
   touch /dev/gpio
 fi
 

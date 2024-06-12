@@ -253,10 +253,10 @@ pre_cleanup_emulator() {
   local lCHECK_MOUNTS_ARR=()
   local lMOUNT=""
 
-  print_output "[*] Checking for not unmounted proc, sys and run in log directory"
+  print_output "[*] Checking for not unmounted proc, sys and run in log directory" "no_log"
   mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
   for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
-    print_output "[*] Unmounting ${lMOUNT}"
+    print_output "[*] Unmounting ${lMOUNT}" "no_log"
     lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
     umount -l "${lMOUNT}" || true
   done
@@ -704,7 +704,7 @@ main_emulation() {
     local lETH_INT="eth0"
     set_network_config "${lIP_ADDRESS}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${lETH_INT}"
 
-    print_output "[*] Unmounting QEMU Image"
+    print_output "[*] Unmounting QEMU Image" "no_log"
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${IMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
 
@@ -2398,7 +2398,7 @@ check_online_stat() {
 
     lPING_CNT=$((lPING_CNT+1))
     if [[ "${lSYS_ONLINE}" -eq 0 ]]; then
-      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for the ${lPING_CNT} time." "no_log"
+      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s)." "no_log"
       lSYS_ONLINE=0
       sleep 5
     fi
