@@ -844,122 +844,16 @@ main_emulation() {
       IPS_INT_VLAN=("${lIPS_INT_VLAN_TMP[@]}")
 
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
-        SYS_ONLINE=0
-
-        print_ln
-        print_output "[*] Testing system emulation with configuration: ${ORANGE}${lIPS_INT_VLAN_CFG//\;/-}${NC}."
-
-        cleanup_tap
-        check_qemu_instance_l10
-
-        IP_ADDRESS_=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-        lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-        lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-        lNETWORK_MODE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
-        export NMAP_LOG="nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}.txt"
-
-        setup_network_emulation "${lIPS_INT_VLAN_CFG}"
-        run_emulated_system "${IP_ADDRESS_}" "${IMAGE_NAME}" "${lINIT_FILE}" "${lARCH_END}"
-
-        check_online_stat "${lIPS_INT_VLAN_CFG}" "${IMAGE_NAME}" &
-        local lCHECK_ONLINE_STAT_PID="$!"
-
-        print_keepalive &
-        local lALIVE_PID="$!"
-        disown "${lALIVE_PID}" 2> /dev/null || true
-
-        # we kill this process from "check_online_stat:"
-        tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
-        if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
-          kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+        emulation_with_config "${lIPS_INT_VLAN_CFG}"
+        if [[ "${TCP}" != "ok" ]] && [[ "${PORTS_1st:-0}" -gt 0 ]]; then
+          # just in case we have no running TCP service detected we try the other init mechanism (rdinit vs init)
+          # this is only done if we have already switched inits and our first detection run has also network services detected
+          switch_inits "${KINIT}"
+          emulation_with_config "${lIPS_INT_VLAN_CFG}"
+          switch_inits "${KINIT}"
         fi
-
-        kill "${lALIVE_PID}"
-
-        # set default state
-        ICMP="not ok"
-        TCP_0="not ok"
-        TCP="not ok"
-        if [[ -f "${TMP_DIR}"/online_stats.tmp ]]; then
-          if grep -q -E "Host with .* is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp; then
-            ICMP="ok"
-            SYS_ONLINE=1
-            BOOTED="yes"
-          fi
-          if grep -q -E "Host with .* is reachable on TCP port 0 via hping." "${TMP_DIR}"/online_stats.tmp; then
-            TCP_0="ok"
-            SYS_ONLINE=1
-            BOOTED="yes"
-          fi
-          if grep -q "tcp.*open" "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null; then
-            TCP="ok"
-            SYS_ONLINE=1
-            BOOTED="yes"
-          fi
-
-          # remove tmp files for next round
-          rm "${TMP_DIR}"/online_stats.tmp || true
-        fi
-
-        write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
-
-        cleanup_emulator "${IMAGE_NAME}"
-
-        if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
-          mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-        fi
-
-        if [[ "${SYS_ONLINE}" -eq 1 ]]; then
-          print_ln
-          print_output "[+] System emulation was successful."
-          if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
-            print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}." "" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-          else
-            print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}."
-          fi
-          print_ln
-
-          if [[ "${TCP}" == "ok" ]]; then
-            print_output "[+] Network services are available." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
-            print_ln
-          fi
-
-          create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
-
-          # if we have a working emulation we stop here
-          if [[ "${TCP}" == "ok" ]]; then
-            if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
-              # we only exit if we have more than 1 open port detected.
-              # Otherwise we try to find a better solution
-              # We stop the emulation now and restart it later on
-              stopping_emulation_process "${IMAGE_NAME}"
-              if [[ "${L10_DEBUG_MODE}" -eq 0 ]]; then
-                break 2
-              fi
-            fi
-          fi
-        else
-          if [[ "${L10_DEBUG_MODE}" -eq 1 ]]; then
-            print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
-            create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
-          else
-            print_output "[-] No working emulation - removing emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
-            if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
-              write_link "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-            fi
-            # print_output "[-] Emulation archive: $ARCHIVE_PATH."
-            # create_emulation_archive "$ARCHIVE_PATH"
-            rm -r "${ARCHIVE_PATH}" || true
-          fi
-        fi
-
-        stopping_emulation_process "${IMAGE_NAME}"
-
-        if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ ]]; then
-          mv "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ "${LOG_PATH_MODULE}"/nvram/nvram_files_"${IMAGE_NAME}".bak
-        fi
-        if ! [[ -f "${LOG_PATH_MODULE}/qemu.final.serial_${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}.log" ]]; then
-          print_output "[!] Warning: No Qemu log file generated for ${ORANGE}${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}${NC}"
+        if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
+          break
         fi
       done
     else
@@ -974,6 +868,127 @@ main_emulation() {
   done
 
   delete_device_entry "${IMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
+}
+
+emulation_with_config() {
+  lIPS_INT_VLAN_CFG="${1:-}"
+  SYS_ONLINE=0
+
+  print_ln
+  print_output "[*] Testing system emulation with configuration: ${ORANGE}${lIPS_INT_VLAN_CFG//\;/-}${NC}."
+
+  cleanup_tap
+  check_qemu_instance_l10
+
+  IP_ADDRESS_=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
+  lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
+  lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
+  lNETWORK_MODE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+  export NMAP_LOG="nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}.txt"
+
+  setup_network_emulation "${lIPS_INT_VLAN_CFG}"
+  run_emulated_system "${IP_ADDRESS_}" "${IMAGE_NAME}" "${lINIT_FILE}" "${lARCH_END}"
+
+  check_online_stat "${lIPS_INT_VLAN_CFG}" "${IMAGE_NAME}" &
+  local lCHECK_ONLINE_STAT_PID="$!"
+
+  print_keepalive &
+  local lALIVE_PID="$!"
+  disown "${lALIVE_PID}" 2> /dev/null || true
+
+  # we kill this process from "check_online_stat:"
+  tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
+  if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
+    kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+  fi
+
+  kill "${lALIVE_PID}"
+
+  # set default state
+  ICMP="not ok"
+  TCP_0="not ok"
+  TCP="not ok"
+  if [[ -f "${TMP_DIR}"/online_stats.tmp ]]; then
+    if grep -q -E "Host with .* is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp; then
+      ICMP="ok"
+      SYS_ONLINE=1
+      BOOTED="yes"
+    fi
+    if grep -q -E "Host with .* is reachable on TCP port 0 via hping." "${TMP_DIR}"/online_stats.tmp; then
+      TCP_0="ok"
+      SYS_ONLINE=1
+      BOOTED="yes"
+    fi
+    if grep -q "tcp.*open" "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null; then
+      TCP="ok"
+      SYS_ONLINE=1
+      BOOTED="yes"
+    fi
+
+    # remove tmp files for next round
+    rm "${TMP_DIR}"/online_stats.tmp || true
+  fi
+
+  write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
+
+  cleanup_emulator "${IMAGE_NAME}"
+
+  if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
+    mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
+  fi
+
+  if [[ "${SYS_ONLINE}" -eq 1 ]]; then
+    print_ln
+    print_output "[+] System emulation was successful."
+    if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
+      print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}." "" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
+    else
+      print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}."
+    fi
+    print_ln
+
+    if [[ "${TCP}" == "ok" ]]; then
+      print_output "[+] Network services are available." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+      print_ln
+    fi
+
+    create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
+
+    # if we have a working emulation we stop here
+    if [[ "${TCP}" == "ok" ]]; then
+      if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
+        # we only exit if we have more than 1 open port detected.
+        # Otherwise we try to find a better solution
+        # We stop the emulation now and restart it later on
+        stopping_emulation_process "${IMAGE_NAME}"
+        if [[ "${L10_DEBUG_MODE}" -eq 0 ]]; then
+          return
+        fi
+      fi
+    fi
+  else
+    if [[ "${L10_DEBUG_MODE}" -eq 1 ]]; then
+      print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
+      create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
+    else
+      print_output "[-] No working emulation - removing emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
+      if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
+        write_link "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
+      fi
+      # print_output "[-] Emulation archive: $ARCHIVE_PATH."
+      # create_emulation_archive "$ARCHIVE_PATH"
+      rm -r "${ARCHIVE_PATH}" || true
+    fi
+  fi
+
+  stopping_emulation_process "${IMAGE_NAME}"
+
+  if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ ]]; then
+    mv "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ "${LOG_PATH_MODULE}"/nvram/nvram_files_"${IMAGE_NAME}".bak
+  fi
+  if ! [[ -f "${LOG_PATH_MODULE}/qemu.final.serial_${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}.log" ]]; then
+    print_output "[!] Warning: No Qemu log file generated for ${ORANGE}${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}${NC}"
+  fi
 }
 
 switch_inits() {
