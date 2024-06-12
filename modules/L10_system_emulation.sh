@@ -2020,7 +2020,7 @@ nvram_check() {
       lCURRENT_DIR=$(pwd)
       cd "${MNT_POINT}" || exit
       # generate a file list of the firmware
-      mapfile -t lNVRAM_FILE_LIST < <(find . -xdev -type f -not -path "*/firmadyne*" || true)
+      mapfile -t lNVRAM_FILE_LIST < <(find . -xdev -type f -not -path "*/firmadyne*" -exec file {} \; | grep "ASCII text" || true)
 
       if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
         mkdir "${LOG_PATH_MODULE}"/nvram
@@ -2028,7 +2028,7 @@ nvram_check() {
 
       # need to check for firmadyne string in path
       for lNVRAM_FILE in "${lNVRAM_FILE_LIST[@]}"; do
-        nvram_searcher_emulation "${lNVRAM_FILE}" &
+        nvram_searcher_emulation "${lNVRAM_FILE/:*}" &
         lWAIT_PIDS_AE+=( "$!" )
         max_pids_protection "${lMAX_THREADS_NVRAM}" "${lWAIT_PIDS_AE[@]}"
       done
@@ -2071,14 +2071,6 @@ nvram_searcher_emulation() {
     lMAX_VALUES="${#NVRAMS[@]}"
   fi
 
-  if ! file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-    # currently only ASCII available
-    return
-  #   [[ ! -d "${TMP_DIR}/l10_nvram/" ]] && (mkdir "${TMP_DIR}/l10_nvram/" || true)
-  #   strings "${lNVRAM_FILE}" > "${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp" || true
-  #   lNVRAM_FILE_TMP="${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp"
-  fi
-
   for (( j=0; j<"${lMAX_VALUES}"; j++ )); do
     lNVRAM_ENTRY="${NVRAMS[${j}]}"
     lNVRAM_KEY=""
@@ -2097,12 +2089,7 @@ nvram_searcher_emulation() {
 
   if [[ "${lCOUNT}" -gt 5 ]]; then
     print_output "[*] ${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text"
-    if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-      echo "${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
-    else
-      # currently disabled in the function beginning ~ L2050
-      echo "${lNVRAM_FILE/\.} ${lCOUNT} BINARY" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
-    fi
+    echo "${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
   fi
 }
 
