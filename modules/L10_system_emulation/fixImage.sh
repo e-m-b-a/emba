@@ -224,7 +224,7 @@ if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
     echo "Creating /dev/gpio/in!"
     if ("${EMBA_BOOT}"); then
-      rm /dev/gpio
+      rm /dev/gpio 2>/dev/null
     fi
     mkdir -p /dev/gpio
     echo -ne "\xff\xff\xff\xff" > /dev/gpio/in

@@ -423,29 +423,24 @@ create_emulation_filesystem() {
     # quick check if we use stat/time or stat64/time64 on the target os - needed for libnvram
     mapfile -t lTMP_EXEC_64_CHECK_ARR < <(find "${MNT_POINT}" -type f \( -name "busybox" -o -name "sh" -o -name "ash" -o -name "bash" \) -not -path "*/firmadyne*")
     # default state for libnvram
-    local lTIME_T="time32"
+    local lMUSL_VER="1.1.24"
     for lTMP_EXEC_64_CHECK_FILE in "${lTMP_EXEC_64_CHECK_ARR[@]}"; do
       if (file "${lTMP_EXEC_64_CHECK_FILE}" | grep -q "ELF"); then
-        if [[ "$(nm -D "${lTMP_EXEC_64_CHECK_FILE}" | grep -c "stat64\|time64")" -gt 0 ]]; then
+        if [[ "$(nm -D "${lTMP_EXEC_64_CHECK_FILE}" 2>/dev/null | grep -c "stat64\|time64")" -gt 0 ]]; then
           # we use the libnvram compiled with musl 1.2.x which moves all 32-bit archs to 64-bit time_t
-          lTIME_T="time64"
+          lMUSL_VER="1.2.5"
         fi
       fi
     done
 
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
-      lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}")
-      if [[ ! -f "${lBINARY_PATH}" ]] && [[ ! -f "${lBINARY_PATH}_${lTIME_T}" ]]; then
+      lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}" "${lMUSL_VER}")
+      if [[ ! -f "${lBINARY_PATH}" ]]; then
         print_output "[-] Missing ${ORANGE}${lBINARY_NAME} / ${lBINARY_PATH:-NA} / ${lARCH_END}${NC} - no setup possible"
         continue
       fi
       print_output "[*] Setting up ${ORANGE}${lBINARY_NAME}${NC} - ${ORANGE}${lARCH_END}${NC} (${ORANGE}${lBINARY_PATH}${NC})"
-      if [[ -f "${lBINARY_PATH}" ]]; then
-        cp "${lBINARY_PATH}" "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
-      elif [[ -f "${lBINARY_PATH}_${lTIME_T}" ]]; then
-        # used for libnvram(_ioctl)
-        cp "${lBINARY_PATH}_${lTIME_T}" "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
-      fi
+      cp "${lBINARY_PATH}" "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
       chmod a+x "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
     done
 
@@ -738,9 +733,7 @@ main_emulation() {
     print_ln
 
     # the following condition is for switching and testing a different init= -> rdinit=
-    # This is currently not used as the results are probably better with sticking to init
     if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
-    # if [[ "${#PANICS[@]}" -gt 0 ]] && [[ "${lF_STARTUP}" -eq 0 ]] && [[ "${DETECTED_IP}" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
       # panic is caused from an init failure. If so, we are trying the other init kernel command (init vs rdinit)
       print_output "[*] Info: lF_STARTUP: ${lF_STARTUP} / lNETWORK_MODE: ${lNETWORK_MODE} / DETECTED_IP: ${DETECTED_IP} / PANICS: ${#PANICS[@]}"
@@ -2692,19 +2685,22 @@ write_script_exec() {
 get_binary() {
   local lBINARY_NAME="${1:-}"
   local lARCH_END="${2:-}"
+  local lMUSL_VER="${3:-}"
 
   # '${lBINARY_NAME/\.*}' -> strip the .so from libnvram.so and libnvram_ioctl.so
   if [[ "${lBINARY_NAME}" == *"busybox"* ]] && [[ -f "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     echo "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}"
+  else
     echo "NA"
   fi
 }

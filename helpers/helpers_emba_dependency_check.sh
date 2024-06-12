@@ -744,8 +744,8 @@ dependency_check()
         check_dep_file "netcat.*" "${EXT_DIR}""/EMBA_Live_bins/netcat/netcat.mipseb"
         check_dep_file "strace.*" "${EXT_DIR}""/EMBA_Live_bins/strace/strace.armelhf"
         check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox-v${L10_BB_VER}/busybox.mipsel"
-        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram/libnvram_dbg.so.armel"
-        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_dbg.so.mipsel"
+        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram/libnvram_dbg.so.armel_musl_1.2.5"
+        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_dbg.so.mipsel_musl_1.1.24"
         check_dep_file "Linux kernel v${L10_KERNEL_V_LONG} for MIPS architecture" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.mipsel.4"
         check_dep_file "Linux kernel v${L10_KERNEL_V_LONG} for ARM architecture" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.armel"
 
