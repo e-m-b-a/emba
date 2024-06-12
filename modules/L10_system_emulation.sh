@@ -850,10 +850,12 @@ main_emulation() {
           # this is only done if we have already switched inits and our first detection run has also network services detected
           switch_inits "${KINIT}"
           emulation_with_config "${lIPS_INT_VLAN_CFG}"
+          # we do not care about the results and switch back to the original init
+          # later on we are running the same process again
           switch_inits "${KINIT}"
         fi
         if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
-          break
+          break 2
         fi
       done
     else
@@ -930,7 +932,7 @@ emulation_with_config() {
   fi
 
   write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
-
+  stopping_emulation_process "${IMAGE_NAME}"
   cleanup_emulator "${IMAGE_NAME}"
 
   if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
@@ -953,19 +955,6 @@ emulation_with_config() {
     fi
 
     create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
-
-    # if we have a working emulation we stop here
-    if [[ "${TCP}" == "ok" ]]; then
-      if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
-        # we only exit if we have more than 1 open port detected.
-        # Otherwise we try to find a better solution
-        # We stop the emulation now and restart it later on
-        stopping_emulation_process "${IMAGE_NAME}"
-        if [[ "${L10_DEBUG_MODE}" -eq 0 ]]; then
-          return
-        fi
-      fi
-    fi
   else
     if [[ "${L10_DEBUG_MODE}" -eq 1 ]]; then
       print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
@@ -981,8 +970,6 @@ emulation_with_config() {
     fi
   fi
 
-  stopping_emulation_process "${IMAGE_NAME}"
-
   if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ ]]; then
     mv "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ "${LOG_PATH_MODULE}"/nvram/nvram_files_"${IMAGE_NAME}".bak
   fi
@@ -995,16 +982,15 @@ switch_inits() {
   # KINIT is global but for readability:
   KINIT="${1:-}"
   if [[ "${KINIT:0:2}" == "rd" ]]; then
-    print_output "[*] Warning: Switching rdinit to init"
+    print_output "[*] Note: Switching rdinit to init"
     # strip rd from rdinit
     KINIT="${KINIT:2}"
   else
-    print_output "[*] Warning: Switching init to rdinit"
+    print_output "[*] Note: Switching init to rdinit"
     # make rdinit from init
     KINIT="rd""${KINIT}"
   fi
 }
-
 
 umount_qemu_image() {
   local lDEVICE=${1:-}
