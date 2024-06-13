@@ -421,18 +421,15 @@ create_emulation_filesystem() {
     local lBINARIES_ARR=( "busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver" )
     local lBINARY_NAME=""
     local lBINARY_PATH=""
+    local lTMP_EXEC_64_CNT=0
     # quick check if we use stat/time or stat64/time64 on the target os - needed for libnvram
-    mapfile -t lTMP_EXEC_64_CHECK_ARR < <(find "${MNT_POINT}" -type f \( -name "busybox" -o -name "sh" -o -name "ash" -o -name "bash" \) -not -path "*/firmadyne*")
+    lTMP_EXEC_64_CNT=$(find "${MNT_POINT}" -type f -name "*libc*" -not -path "*/firmadyne*" -exec objdump -t {} \; | grep -c " stat64\| time64" || true)
     # default state for libnvram
     local lMUSL_VER="1.1.24"
-    for lTMP_EXEC_64_CHECK_FILE in "${lTMP_EXEC_64_CHECK_ARR[@]}"; do
-      if (file "${lTMP_EXEC_64_CHECK_FILE}" | grep -q "ELF"); then
-        if [[ "$(nm -D "${lTMP_EXEC_64_CHECK_FILE}" 2>/dev/null | grep -c " stat64\| time64")" -gt 0 ]]; then
-          # we use the libnvram compiled with musl 1.2.x which moves all 32-bit archs to 64-bit time_t
-          lMUSL_VER="1.2.5"
-        fi
-      fi
-    done
+    if [[ "${lTMP_EXEC_64_CNT}" -gt 0 ]]; then
+      # we use the libnvram compiled with musl 1.2.x which moves all 32-bit archs to 64-bit time_t
+      lMUSL_VER="1.2.5"
+    fi
 
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
       lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}" "${lMUSL_VER}")
