@@ -426,7 +426,7 @@ create_emulation_filesystem() {
     local lMUSL_VER="1.1.24"
     for lTMP_EXEC_64_CHECK_FILE in "${lTMP_EXEC_64_CHECK_ARR[@]}"; do
       if (file "${lTMP_EXEC_64_CHECK_FILE}" | grep -q "ELF"); then
-        if [[ "$(nm -D "${lTMP_EXEC_64_CHECK_FILE}" 2>/dev/null | grep -c "stat64\|time64")" -gt 0 ]]; then
+        if [[ "$(nm -D "${lTMP_EXEC_64_CHECK_FILE}" 2>/dev/null | grep -c " stat64\| time64")" -gt 0 ]]; then
           # we use the libnvram compiled with musl 1.2.x which moves all 32-bit archs to 64-bit time_t
           lMUSL_VER="1.2.5"
         fi
