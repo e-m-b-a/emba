@@ -10,6 +10,7 @@
 #
 # This module is licensed under MIT
 # See LICENSE file for usage of this software.
+# SPDX-License-Identifier: MIT
 #
 # Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
 # Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
