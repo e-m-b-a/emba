@@ -584,7 +584,7 @@ main_emulation() {
 
     if [[ -n "${lBAK_INIT_ORIG}" ]]; then
       print_output "[*] Restoring old init file: ${lBAK_INIT_ORIG}"
-      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}"
+      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_output "[-] Error restoring old init file ${lBAK_INIT_ORIG}" "no_log"
       lBAK_INIT_BACKUP=""
       lBAK_INIT_ORIG=""
     fi
