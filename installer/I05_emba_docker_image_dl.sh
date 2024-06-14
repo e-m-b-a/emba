@@ -50,6 +50,7 @@ I05_emba_docker_image_dl() {
           echo -e "${ORANGE}""EMBA docker image will be downloaded.""${NC}"
           echo -e "${ORANGE}""CONTAINER VARIABLE SET TO ""${CONTAINER}""${NC}"
           docker pull "${CONTAINER}"
+          docker pull "${CONTAINER/:*}:latest"
           sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
           export DOCKER_CLI_EXPERIMENTAL=disabled
           "${DOCKER_COMPOSE[@]}" up --no-start

@@ -10,6 +10,7 @@
 # See LICENSE file for usage of this software.
 #
 # EMBA is licensed under GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -215,7 +216,7 @@ fw_bin_detector() {
     write_csv_log "DJI-xV4" "yes" "NA"
   fi
   if [[ "${AVM_CHECK}" -gt 0 ]] || [[ "${FW_VENDOR}" == *"AVM"* ]]; then
-    print_output "[+] Identified AVM firmware - using AVM extraction module"
+    print_output "[+] Identified AVM firmware."
     export AVM_DETECTED=1
     write_csv_log "AVM firmware detected" "yes" "NA"
   fi

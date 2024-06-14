@@ -1,4 +1,21 @@
-#!/bin/bash
+#!/bin/bash -p
+# see: https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/ShellScriptSecurity/ShellScriptSecurity.html#//apple_ref/doc/uid/TP40004268-CH8-SW29
+
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2024 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Author(s): Michael Messner
+
+# Description:  Mounter/unmounter for L10 generated filesystems
+
 
 ## Color definition
 export RED="\033[0;31m"
@@ -49,7 +66,32 @@ add_partition_emulation() {
   local lCNT=0
   local lDEV_NR=0
 
-  losetup -Pf "${1}"
+  while (losetup | grep -q "${1}"); do
+    local lLOOP=""
+    ((lCNT+=1))
+    lLOOP=$(losetup -a | grep "${1}" | sort -u)
+    # we try to get rid of the entry nicely
+    losetup -d "${lLOOP/:*}"
+    if losetup -a | grep -q "${1}"; then
+      # and now we go the brutal way
+      losetup -D
+      dmsetup remove_all -f &>/dev/null || true
+    fi
+    if [[ "${lCNT}" -gt 10 ]]; then
+      break
+    fi
+    sleep 5
+  done
+
+  local lCNT=0
+  while (! losetup -Pf "${1}"); do
+    ((lCNT+=1))
+    if [[ "${lCNT}" -gt 10 ]]; then
+      break
+    fi
+    sleep 5
+  done
+
   while (! "${lFOUND}"); do
     sleep 1
     ((lCNT+=1))

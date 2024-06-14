@@ -9,6 +9,7 @@
 # See LICENSE file for usage of this software.
 #
 # EMBA is licensed under GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
 
@@ -47,7 +48,7 @@ enable_strict_mode() {
     trap 'wickStrictModeFail $? | tee -a "${LOG_DIR}"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
 
     if [[ "${PRINTER}" -eq 1 ]]; then
-      echo -e "[!] INFO: EMBA running in STRICT mode!"
+      echo -e "[!] INFO: EMBA running in STRICT mode!" || true
     fi
   fi
 }
@@ -72,7 +73,7 @@ disable_strict_mode() {
     set +x
 
     if [[ "${PRINTER}" -eq 1 ]]; then
-      echo -e "[!] INFO: EMBA STRICT mode disabled!"
+      echo -e "[!] INFO: EMBA STRICT mode disabled!" || true
     fi
   fi
 }

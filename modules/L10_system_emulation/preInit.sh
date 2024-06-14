@@ -37,7 +37,7 @@ print_keepalive() {
 "${BUSYBOX}" mount -t devpts devpts /dev/pts
 "${BUSYBOX}" mount -t tmpfs tmpfs /run
 
-"${BUSYBOX}" echo -e "${NC}[*] $(date) - Environment details ..."
+"${BUSYBOX}" echo -e "${NC}[*] $(${BUSYBOX} date) - Environment details ..."
 "${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
 "${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
 "${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"

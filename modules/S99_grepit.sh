@@ -10,6 +10,7 @@
 # See LICENSE file for usage of this software.
 #
 # EMBA is licensed under GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
 #
 # The original code (from line 187 till the end of the file) from the CRASS project is licensed the following way:
 # ----------------------------------------------------------------------------

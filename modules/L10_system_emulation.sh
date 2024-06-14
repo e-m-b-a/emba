@@ -10,6 +10,7 @@
 #
 # This module is licensed under MIT
 # See LICENSE file for usage of this software.
+# SPDX-License-Identifier: MIT
 #
 # Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
 # Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
@@ -253,10 +254,10 @@ pre_cleanup_emulator() {
   local lCHECK_MOUNTS_ARR=()
   local lMOUNT=""
 
-  print_output "[*] Checking for not unmounted proc, sys and run in log directory"
+  print_output "[*] Checking for not unmounted proc, sys and run in log directory" "no_log"
   mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
   for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
-    print_output "[*] Unmounting ${lMOUNT}"
+    print_output "[*] Unmounting ${lMOUNT}" "no_log"
     lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
     umount -l "${lMOUNT}" || true
   done
@@ -309,6 +310,11 @@ create_emulation_filesystem() {
   print_output "[*] Identify Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC}"
   DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
   if [[ "${DEVICE}" == "NA" ]]; then
+    print_output "[*] Info: Initial identification for Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC} failed ... trying again"
+    losetup || tee -a "${LOG_FILE}"
+    losetup -D
+    sleep 5
+    losetup || tee -a "${LOG_FILE}"
     DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
   fi
   if [[ "${DEVICE}" == "NA" ]]; then
@@ -415,9 +421,19 @@ create_emulation_filesystem() {
     local lBINARIES_ARR=( "busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver" )
     local lBINARY_NAME=""
     local lBINARY_PATH=""
+    local lTMP_EXEC_64_CNT=0
+    # quick check if we use stat/time or stat64/time64 on the target os - needed for libnvram
+    lTMP_EXEC_64_CNT=$(find "${MNT_POINT}" -type f -name "*libc*" -not -path "*/firmadyne*" -exec objdump -t {} \; | grep -c " stat64\| time64" 2>/dev/null || true)
+    # default state for libnvram
+    local lMUSL_VER="1.1.24"
+    if [[ "${lTMP_EXEC_64_CNT}" -gt 0 ]]; then
+      # we use the libnvram compiled with musl 1.2.x which moves all 32-bit archs to 64-bit time_t
+      lMUSL_VER="1.2.5"
+    fi
+
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
-      lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}")
-      if ! [[ -f "${lBINARY_PATH}" ]]; then
+      lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}" "${lMUSL_VER}")
+      if [[ ! -f "${lBINARY_PATH}" ]]; then
         print_output "[-] Missing ${ORANGE}${lBINARY_NAME} / ${lBINARY_PATH:-NA} / ${lARCH_END}${NC} - no setup possible"
         continue
       fi
@@ -568,7 +584,7 @@ main_emulation() {
 
     if [[ -n "${lBAK_INIT_ORIG}" ]]; then
       print_output "[*] Restoring old init file: ${lBAK_INIT_ORIG}"
-      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}"
+      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_output "[-] Error restoring old init file ${lBAK_INIT_ORIG}" "no_log"
       lBAK_INIT_BACKUP=""
       lBAK_INIT_ORIG=""
     fi
@@ -663,7 +679,7 @@ main_emulation() {
 
     print_ln
     print_output "[*] EMBA init starter file: ${ORANGE}${lINIT_OUT}${NC}"
-    tee -a "${LOG_FILE}" < "${lINIT_OUT}"
+    tee -a "${LOG_FILE}" < "${lINIT_OUT}" || true
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
       print_ln
       print_output "[*] Firmware Init file details: ${ORANGE}${lINIT_FILE}${NC}"
@@ -686,7 +702,7 @@ main_emulation() {
     local lETH_INT="eth0"
     set_network_config "${lIP_ADDRESS}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${lETH_INT}"
 
-    print_output "[*] Unmounting QEMU Image"
+    print_output "[*] Unmounting QEMU Image" "no_log"
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${IMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
 
@@ -715,9 +731,7 @@ main_emulation() {
     print_ln
 
     # the following condition is for switching and testing a different init= -> rdinit=
-    # This is currently not used as the results are probably better with sticking to init
     if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
-    # if [[ "${#PANICS[@]}" -gt 0 ]] && [[ "${lF_STARTUP}" -eq 0 ]] && [[ "${DETECTED_IP}" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
       # panic is caused from an init failure. If so, we are trying the other init kernel command (init vs rdinit)
       print_output "[*] Info: lF_STARTUP: ${lF_STARTUP} / lNETWORK_MODE: ${lNETWORK_MODE} / DETECTED_IP: ${DETECTED_IP} / PANICS: ${#PANICS[@]}"
@@ -828,122 +842,18 @@ main_emulation() {
       IPS_INT_VLAN=("${lIPS_INT_VLAN_TMP[@]}")
 
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
-        SYS_ONLINE=0
-
-        print_ln
-        print_output "[*] Testing system emulation with configuration: ${ORANGE}${lIPS_INT_VLAN_CFG//\;/-}${NC}."
-
-        cleanup_tap
-        check_qemu_instance_l10
-
-        IP_ADDRESS_=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-        lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-        lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-        lNETWORK_MODE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
-        export NMAP_LOG="nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}.txt"
-
-        setup_network_emulation "${lIPS_INT_VLAN_CFG}"
-        run_emulated_system "${IP_ADDRESS_}" "${IMAGE_NAME}" "${lINIT_FILE}" "${lARCH_END}"
-
-        check_online_stat "${lIPS_INT_VLAN_CFG}" "${IMAGE_NAME}" &
-        local lCHECK_ONLINE_STAT_PID="$!"
-
-        print_keepalive &
-        local lALIVE_PID="$!"
-        disown "${lALIVE_PID}" 2> /dev/null || true
-
-        # we kill this process from "check_online_stat:"
-        tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
-        if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
-          kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+        emulation_with_config "${lIPS_INT_VLAN_CFG}"
+        if [[ "${TCP}" != "ok" ]] && [[ "${PORTS_1st:-0}" -gt 0 ]]; then
+          # just in case we have no running TCP service detected we try the other init mechanism (rdinit vs init)
+          # this is only done if we have already switched inits and our first detection run has also network services detected
+          switch_inits "${KINIT}"
+          emulation_with_config "${lIPS_INT_VLAN_CFG}"
+          # we do not care about the results and switch back to the original init
+          # later on we are running the same process again
+          switch_inits "${KINIT}"
         fi
-
-        kill "${lALIVE_PID}"
-
-        # set default state
-        ICMP="not ok"
-        TCP_0="not ok"
-        TCP="not ok"
-        if [[ -f "${TMP_DIR}"/online_stats.tmp ]]; then
-          if grep -q -E "Host with .* is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp; then
-            ICMP="ok"
-            SYS_ONLINE=1
-            BOOTED="yes"
-          fi
-          if grep -q -E "Host with .* is reachable on TCP port 0 via hping." "${TMP_DIR}"/online_stats.tmp; then
-            TCP_0="ok"
-            SYS_ONLINE=1
-            BOOTED="yes"
-          fi
-          if grep -q "tcp.*open" "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null; then
-            TCP="ok"
-            SYS_ONLINE=1
-            BOOTED="yes"
-          fi
-
-          # remove tmp files for next round
-          rm "${TMP_DIR}"/online_stats.tmp || true
-        fi
-
-        write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
-
-        cleanup_emulator "${IMAGE_NAME}"
-
-        if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
-          mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-        fi
-
-        if [[ "${SYS_ONLINE}" -eq 1 ]]; then
-          print_ln
-          print_output "[+] System emulation was successful."
-          if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
-            print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}." "" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-          else
-            print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}."
-          fi
-          print_ln
-
-          if [[ "${TCP}" == "ok" ]]; then
-            print_output "[+] Network services are available." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
-            print_ln
-          fi
-
-          create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
-
-          # if we have a working emulation we stop here
-          if [[ "${TCP}" == "ok" ]]; then
-            if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
-              # we only exit if we have more than 1 open port detected.
-              # Otherwise we try to find a better solution
-              # We stop the emulation now and restart it later on
-              stopping_emulation_process "${IMAGE_NAME}"
-              if [[ "${L10_DEBUG_MODE}" -eq 0 ]]; then
-                break 2
-              fi
-            fi
-          fi
-        else
-          if [[ "${L10_DEBUG_MODE}" -eq 1 ]]; then
-            print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
-            create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
-          else
-            print_output "[-] No working emulation - removing emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
-            if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
-              write_link "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-            fi
-            # print_output "[-] Emulation archive: $ARCHIVE_PATH."
-            # create_emulation_archive "$ARCHIVE_PATH"
-            rm -r "${ARCHIVE_PATH}" || true
-          fi
-        fi
-
-        stopping_emulation_process "${IMAGE_NAME}"
-
-        if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ ]]; then
-          mv "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ "${LOG_PATH_MODULE}"/nvram/nvram_files_"${IMAGE_NAME}".bak
-        fi
-        if ! [[ -f "${LOG_PATH_MODULE}/qemu.final.serial_${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}.log" ]]; then
-          print_output "[!] Warning: No Qemu log file generated for ${ORANGE}${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}${NC}"
+        if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
+          break 2
         fi
       done
     else
@@ -960,20 +870,125 @@ main_emulation() {
   delete_device_entry "${IMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
 }
 
+emulation_with_config() {
+  lIPS_INT_VLAN_CFG="${1:-}"
+  SYS_ONLINE=0
+
+  print_ln
+  print_output "[*] Testing system emulation with configuration: ${ORANGE}${lIPS_INT_VLAN_CFG//\;/-}${NC}."
+
+  cleanup_tap
+  check_qemu_instance_l10
+
+  IP_ADDRESS_=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
+  lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
+  lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
+  lNETWORK_MODE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+  export NMAP_LOG="nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}.txt"
+
+  setup_network_emulation "${lIPS_INT_VLAN_CFG}"
+  run_emulated_system "${IP_ADDRESS_}" "${IMAGE_NAME}" "${lINIT_FILE}" "${lARCH_END}"
+
+  check_online_stat "${lIPS_INT_VLAN_CFG}" "${IMAGE_NAME}" &
+  local lCHECK_ONLINE_STAT_PID="$!"
+
+  print_keepalive &
+  local lALIVE_PID="$!"
+  disown "${lALIVE_PID}" 2> /dev/null || true
+
+  # we kill this process from "check_online_stat:"
+  tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
+  if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
+    kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+  fi
+
+  kill "${lALIVE_PID}"
+
+  # set default state
+  ICMP="not ok"
+  TCP_0="not ok"
+  TCP="not ok"
+  if [[ -f "${TMP_DIR}"/online_stats.tmp ]]; then
+    if grep -q -E "Host with .* is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp; then
+      ICMP="ok"
+      SYS_ONLINE=1
+      BOOTED="yes"
+    fi
+    if grep -q -E "Host with .* is reachable on TCP port 0 via hping." "${TMP_DIR}"/online_stats.tmp; then
+      TCP_0="ok"
+      SYS_ONLINE=1
+      BOOTED="yes"
+    fi
+    if grep -q "tcp.*open" "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null; then
+      TCP="ok"
+      SYS_ONLINE=1
+      BOOTED="yes"
+    fi
+
+    # remove tmp files for next round
+    rm "${TMP_DIR}"/online_stats.tmp || true
+  fi
+
+  write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
+  stopping_emulation_process "${IMAGE_NAME}"
+  cleanup_emulator "${IMAGE_NAME}"
+
+  if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
+    mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
+  fi
+
+  if [[ "${SYS_ONLINE}" -eq 1 ]]; then
+    print_ln
+    print_output "[+] System emulation was successful."
+    if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
+      print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}." "" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
+    else
+      print_output "[+] System should be available via IP ${ORANGE}${IP_ADDRESS_}${GREEN}."
+    fi
+    print_ln
+
+    if [[ "${TCP}" == "ok" ]]; then
+      print_output "[+] Network services are available." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+      print_ln
+    fi
+
+    create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
+  else
+    if [[ "${L10_DEBUG_MODE}" -eq 1 ]]; then
+      print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
+      create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${lIPS_INT_VLAN_CFG//\;/-}"
+    else
+      print_output "[-] No working emulation - removing emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
+      if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log ]]; then
+        write_link "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
+      fi
+      # print_output "[-] Emulation archive: $ARCHIVE_PATH."
+      # create_emulation_archive "$ARCHIVE_PATH"
+      rm -r "${ARCHIVE_PATH}" || true
+    fi
+  fi
+
+  if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ ]]; then
+    mv "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ "${LOG_PATH_MODULE}"/nvram/nvram_files_"${IMAGE_NAME}".bak
+  fi
+  if ! [[ -f "${LOG_PATH_MODULE}/qemu.final.serial_${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}.log" ]]; then
+    print_output "[!] Warning: No Qemu log file generated for ${ORANGE}${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}${NC}"
+  fi
+}
+
 switch_inits() {
   # KINIT is global but for readability:
   KINIT="${1:-}"
   if [[ "${KINIT:0:2}" == "rd" ]]; then
-    print_output "[*] Warning: Switching rdinit to init"
+    print_output "[*] Note: Switching rdinit to init"
     # strip rd from rdinit
     KINIT="${KINIT:2}"
   else
-    print_output "[*] Warning: Switching init to rdinit"
+    print_output "[*] Note: Switching init to rdinit"
     # make rdinit from init
     KINIT="rd""${KINIT}"
   fi
 }
-
 
 umount_qemu_image() {
   local lDEVICE=${1:-}
@@ -2003,7 +2018,7 @@ nvram_check() {
       lCURRENT_DIR=$(pwd)
       cd "${MNT_POINT}" || exit
       # generate a file list of the firmware
-      mapfile -t lNVRAM_FILE_LIST < <(find . -xdev -type f -not -path "*/firmadyne*" || true)
+      mapfile -t lNVRAM_FILE_LIST < <(find . -xdev -type f -not -path "*/firmadyne*" -exec file {} \; | grep "ASCII text" || true)
 
       if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
         mkdir "${LOG_PATH_MODULE}"/nvram
@@ -2011,7 +2026,7 @@ nvram_check() {
 
       # need to check for firmadyne string in path
       for lNVRAM_FILE in "${lNVRAM_FILE_LIST[@]}"; do
-        nvram_searcher_emulation "${lNVRAM_FILE}" &
+        nvram_searcher_emulation "${lNVRAM_FILE/:*}" &
         lWAIT_PIDS_AE+=( "$!" )
         max_pids_protection "${lMAX_THREADS_NVRAM}" "${lWAIT_PIDS_AE[@]}"
       done
@@ -2054,14 +2069,6 @@ nvram_searcher_emulation() {
     lMAX_VALUES="${#NVRAMS[@]}"
   fi
 
-  if ! file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-    # currently only ASCII available
-    return
-  #   [[ ! -d "${TMP_DIR}/l10_nvram/" ]] && (mkdir "${TMP_DIR}/l10_nvram/" || true)
-  #   strings "${lNVRAM_FILE}" > "${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp" || true
-  #   lNVRAM_FILE_TMP="${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp"
-  fi
-
   for (( j=0; j<"${lMAX_VALUES}"; j++ )); do
     lNVRAM_ENTRY="${NVRAMS[${j}]}"
     lNVRAM_KEY=""
@@ -2080,12 +2087,7 @@ nvram_searcher_emulation() {
 
   if [[ "${lCOUNT}" -gt 5 ]]; then
     print_output "[*] ${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text"
-    if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-      echo "${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
-    else
-      # currently disabled in the function beginning ~ L2050
-      echo "${lNVRAM_FILE/\.} ${lCOUNT} BINARY" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
-    fi
+    echo "${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
   fi
 }
 
@@ -2381,7 +2383,7 @@ check_online_stat() {
 
     lPING_CNT=$((lPING_CNT+1))
     if [[ "${lSYS_ONLINE}" -eq 0 ]]; then
-      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for the ${lPING_CNT} time." "no_log"
+      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s)." "no_log"
       lSYS_ONLINE=0
       sleep 5
     fi
@@ -2669,19 +2671,22 @@ write_script_exec() {
 get_binary() {
   local lBINARY_NAME="${1:-}"
   local lARCH_END="${2:-}"
+  local lMUSL_VER="${3:-}"
 
   # '${lBINARY_NAME/\.*}' -> strip the .so from libnvram.so and libnvram_ioctl.so
   if [[ "${lBINARY_NAME}" == *"busybox"* ]] && [[ -f "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     echo "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}"
+  else
     echo "NA"
   fi
 }
@@ -2693,10 +2698,27 @@ add_partition_emulation() {
   local lCNT=0
   local lDEV_NR=0
 
+  while (losetup | grep -q "${1}"); do
+    local lLOOP=""
+    ((lCNT+=1))
+    lLOOP=$(losetup -a | grep "${1}" | sort -u)
+    # we try to get rid of the entry nicely
+    losetup -d "${lLOOP/:*}"
+    if losetup -a | grep -q "${1}"; then
+      # and now we go the brutal way
+      losetup -D
+      dmsetup remove_all -f &>/dev/null || true
+    fi
+    if [[ "${lCNT}" -gt 10 ]]; then
+      break
+    fi
+    sleep 5
+  done
+
+  local lCNT=0
   while (! losetup -Pf "${1}"); do
     ((lCNT+=1))
-    if [[ "${lCNT}" -gt 5 ]]; then
-      print_output "[-] WARNING: losetup for ${1} failed ..."
+    if [[ "${lCNT}" -gt 10 ]]; then
       break
     fi
     sleep 5
