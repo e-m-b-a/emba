@@ -679,7 +679,7 @@ main_emulation() {
 
     print_ln
     print_output "[*] EMBA init starter file: ${ORANGE}${lINIT_OUT}${NC}"
-    tee -a "${LOG_FILE}" < "${lINIT_OUT}"
+    tee -a "${LOG_FILE}" < "${lINIT_OUT}" || true
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
       print_ln
       print_output "[*] Firmware Init file details: ${ORANGE}${lINIT_FILE}${NC}"
