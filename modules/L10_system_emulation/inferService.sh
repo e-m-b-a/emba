@@ -114,6 +114,13 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
         done
         "${BUSYBOX}" echo -e -n "${BINARY} -a 0.0.0.0 -m 3 -D -d 3\n" >> /firmadyne/service
       fi
+    elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnp" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
+        "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} -L eth0 -W eth0${NC}"
+        "${BUSYBOX}" echo -e -n "${BINARY} -L eth0 -W eth0\n" >> /firmadyne/service
+      fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
