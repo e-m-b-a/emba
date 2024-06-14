@@ -51,7 +51,8 @@ IP61_unblob() {
     # print_tool_info "unblob" 1
     print_pip_info "unblob"
 
-    # print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+
     # print_file_info "libext2fs2_1.47.0-3.ok2_amd64.deb" "libext2fs2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libext2fs2_1.47.0-3.ok2_amd64.deb" "external/libext2fs2_1.47.0-3.ok2_amd64.deb"
     # print_file_info "e2fsprogs_1.47.0-3.ok2_amd64.deb" "e2fsprogs_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/e2fsprogs_1.47.0-3.ok2_amd64.deb" "external/e2fsprogs_1.47.0-3.ok2_amd64.deb"
     # print_file_info "libss2_1.47.0-3.ok2_amd64.deb" "libss2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libss2_1.47.0-3.ok2_amd64.deb" "external/libss2_1.47.0-3.ok2_amd64.deb"
@@ -72,12 +73,12 @@ IP61_unblob() {
 
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component unblob" && exit 1 )
 
-        # download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
         # download_file "libext2fs2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libext2fs2_1.47.0-3.ok2_amd64.deb" "external/libext2fs2_1.47.0-3.ok2_amd64.deb"
         # download_file "libss2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libss2_1.47.0-3.ok2_amd64.deb" "external/libss2_1.47.0-3.ok2_amd64.deb"
         # download_file "e2fsprogs_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/e2fsprogs_1.47.0-3.ok2_amd64.deb" "external/e2fsprogs_1.47.0-3.ok2_amd64.deb"
 
-        # dpkg -i external/sasquatch_1.0_amd64.deb
+        dpkg -i external/sasquatch_1.0_amd64.deb
         # dpkg -i external/libss2_1.47.0-3.ok2_amd64.deb
         # dpkg -i external/libext2fs2_1.47.0-3.ok2_amd64.deb
         # dpkg -i external/e2fsprogs_1.47.0-3.ok2_amd64.deb
