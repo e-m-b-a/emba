@@ -600,7 +600,7 @@ main_emulation() {
     print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
     lBAK_INIT_ORIG="${lINIT_OUT}"
     lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${lINIT_OUT}".init)"
-    cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
+    cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}" || true
 
     print_output "[*] Add ${lINIT_FILE} entry to ${ORANGE}${lINIT_OUT}${NC}"
     # we always add the identified init entry to the EMBA preInit script
@@ -2039,7 +2039,7 @@ nvram_check() {
         # print_output "[*] Identified the following NVRAM files:"
         # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/nvram/nvram_files_final
 
-        sort -u -r -h -k2 "${LOG_PATH_MODULE}"/nvram/nvram_files_final | sort -u -k1,1 | sort -r -h -k2 | head -10 > "${MNT_POINT}"/firmadyne/nvram_files
+        sort -u -r -h -k2 "${LOG_PATH_MODULE}"/nvram/nvram_files_final | sort -u -k1,1 | sort -r -h -k2 | head -10 > "${MNT_POINT}"/firmadyne/nvram_files || true
         # store a copy in the log dir
         cp "${MNT_POINT}"/firmadyne/nvram_files "${LOG_PATH_MODULE}"/nvram/nvram_files_final_
 
