@@ -24,6 +24,10 @@ kernel_downloader() {
   local KERNEL_ARCH_PATH="${EXT_DIR}"/linux_kernel_sources/
   local OUTPUTTER=""
 
+  if [[ "${NO_UPDATE_CHECK}" -eq 1 ]]; then
+    return
+  fi
+
   if ! [[ -d "${KERNEL_ARCH_PATH}" ]]; then
     mkdir "${KERNEL_ARCH_PATH}"
   fi
