@@ -10270,6 +10270,7 @@ CVE-2024-27686;RouterOS 6.44 6.49.10 Denial Of Service;https://packetstormsecuri
 CVE-2024-27743;Petrol Pump Management Software 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177405/Petrol-Pump-Management-Software-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-27744;Petrol Pump Management Software 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177405/Petrol-Pump-Management-Software-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-27747;Petrol Pump Management System 1.0 Shell Upload;https://packetstormsecurity.com/files/177407/Petrol-Pump-Management-System-1.0-Shell-Upload.html;remote
+CVE-2024-27815;TURPENTINE XNU Kernel Buffer Overflow;https://packetstormsecurity.com/files/179172/TURPENTINE-XNU-Kernel-Buffer-Overflow.html;unknown
 CVE-2024-28085;util linux wall Escape Sequence Injection;https://packetstormsecurity.com/files/177840/util-linux-wall-Escape-Sequence-Injection.html;unknown
 CVE-2024-28121;StimulusReflex 3.5.0 Arbitrary Code Execution;https://packetstormsecurity.com/files/177595/StimulusReflex-3.5.0-Arbitrary-Code-Execution.html;unknown
 CVE-2024-28320;Hospital Management System 1.0 Insecure Direct Object Reference Account Takeover;https://packetstormsecurity.com/files/177326/Hospital-Management-System-1.0-Insecure-Direct-Object-Reference-Account-Takeover.html;unknown
@@ -10327,6 +10328,7 @@ CVE-2024-34058;Nethserver 7 8 Cross Site Scripting;https://packetstormsecurity.c
 CVE-2024-34241;Rocket LMS 1.9 Cross Site Scripting;https://packetstormsecurity.com/files/178629/Rocket-LMS-1.9-Cross-Site-Scripting.html;unknown
 CVE-2024-34481;Drupal Wiki 8.31 8.30 Cross Site Scripting;https://packetstormsecurity.com/files/178487/Drupal-Wiki-8.31-8.30-Cross-Site-Scripting.html;unknown
 CVE-2024-34724;PowerVR _UnrefAndMaybeDestroy Use After Free;https://packetstormsecurity.com/files/178647/PowerVR-_UnrefAndMaybeDestroy-Use-After-Free.html;unknown
+CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-36597;AEGON LIFE 1.0 SQL Injection;https://packetstormsecurity.com/files/179086/AEGON-LIFE-1.0-SQL-Injection.html;remote
 CVE-2024-36598;AEGON LIFE 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179087/AEGON-LIFE-1.0-Remote-Code-Execution.html;remote
 CVE-2024-36599;AEGON LIFE 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/179088/AEGON-LIFE-1.0-Cross-Site-Scripting.html;unknown
