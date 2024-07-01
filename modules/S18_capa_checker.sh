@@ -46,7 +46,7 @@ S18_capa_checker() {
   local lBIN_TO_CHECK=""
   local lWAIT_PIDS_S18=()
   local lBIN_TO_CHECK_ARR=()
-  export BINS_CHECKED_ARR=()
+  local lBINS_CHECKED_CNT=0
 
   for lBINARY in "${BINARIES[@]}"; do
     mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
@@ -61,11 +61,11 @@ S18_capa_checker() {
       fi
 
       if ( file "${lBIN_TO_CHECK}" | grep -q "ELF.*Intel" ); then
-        # ensure we have not tested this binary entry
+        # ensure we have not tested this binary
         local lBIN_MD5=""
         lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
-        if [[ "${BINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
-          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+        if ( grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
+          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with capa" "no_log"
           continue
         fi
 
@@ -81,13 +81,14 @@ S18_capa_checker() {
 
         # in normal operation we stop checking after the first 20 binaries
         # if FULL_TEST is activated we are testing all binaries -> this takes a long time
-        if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
+        if [[ "${lBINS_CHECKED_CNT/\ *}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
           print_output "[*] 20 binaries already analysed - ending capa binary analysis now." "no_log"
           print_output "[*] For complete analysis enable FULL_TEST." "no_log"
           break 2
         fi
       else
-        print_output "[-] Binary behavior testing with capa for $(print_path "${lBIN_TO_CHECK}") not possible ... unsupported architecture"
+        print_output "[-] Binary behavior testing with capa for $(print_path "${lBIN_TO_CHECK}") not possible ... unsupported architecture" "no_log"
       fi
     done
   done
@@ -95,9 +96,12 @@ S18_capa_checker() {
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S18[@]}"
 
   print_ln
-  print_output "[*] Found ${ORANGE}${#BINS_CHECKED_ARR[@]}${NC} capa results in ${ORANGE}${#BINARIES[@]}${NC} binaries"
+  lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
+  print_output "[*] Found ${ORANGE}${lBINS_CHECKED_CNT/\ *}${NC} capa results in ${ORANGE}${#BINARIES[@]}${NC} binaries"
+  cat "${TMP_DIR}"/s18_checked.tmp
+  rm "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
 
-  module_end_log "${FUNCNAME[0]}" "${#BINS_CHECKED_ARR[@]}"
+  module_end_log "${FUNCNAME[0]}" "${lBINS_CHECKED_CNT/\ *}"
 }
 
 capa_runner_fct() {
@@ -113,7 +117,9 @@ capa_runner_fct() {
     print_output "[+] Capa results for ${ORANGE}$(print_path "${lBINARY}")${NC}" "" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
-    BINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    if ( ! grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
+      echo "${lBIN_MD5}" >> "${TMP_DIR}"/s18_checked.tmp
+    fi
   else
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"
     rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true

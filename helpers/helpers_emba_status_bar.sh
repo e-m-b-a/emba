@@ -351,7 +351,7 @@ update_box_status_2() {
   fi
 
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" || true)
 
     PHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
     [[ "${PHASE_STR}" == "Pre" ]] && PHASE_STR="Extraction"
