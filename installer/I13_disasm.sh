@@ -57,8 +57,8 @@ I13_disasm() {
       y|Y )
         # apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         apt-get install "${INSTALL_APP_LIST[@]}" -y
- 
-        if ! [[ -f "external/capa" ]] ; then
+
+        if ! [[ -f "external/capa" ]]; then
           download_file "capa" "https://github.com/mandiant/capa/releases/download/v7.1.0/capa-v7.1.0-linux.zip" "external/capa-v7.1.0-linux.zip"
           unzip external/capa-v7.1.0-linux.zip -d external
           rm external/capa-v7.1.0-linux.zip

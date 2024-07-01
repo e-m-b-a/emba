@@ -12,7 +12,7 @@ services:
     # /root/.config is needed for cwe_checker
     # /root/.local is needed for cwe_checker
     tmpfs:
-      - /tmp
+      - /tmp:exec
       - /root/.config/
       - /root/.local/share/composer/
       - /root/.local/share/cwe_checker/
@@ -35,6 +35,7 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
+        - ${EMBA}/external/capa:/external/capa
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:
