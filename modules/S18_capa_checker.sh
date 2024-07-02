@@ -98,7 +98,6 @@ S18_capa_checker() {
   print_ln
   lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
   print_output "[*] Found ${ORANGE}${lBINS_CHECKED_CNT/\ *}${NC} capa results in ${ORANGE}${#BINARIES[@]}${NC} binaries"
-  cat "${TMP_DIR}"/s18_checked.tmp
   rm "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
 
   module_end_log "${FUNCNAME[0]}" "${lBINS_CHECKED_CNT/\ *}"
@@ -115,6 +114,8 @@ capa_runner_fct() {
 
   if [[ -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
     print_output "[+] Capa results for ${ORANGE}$(print_path "${lBINARY}")${NC}" "" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"
+    sed -i '/\ T[0-9]\{4\}\(\.[0-9]\)\?/a \[REF\] https://attack.mitre.org/techniques' "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
+    sed -i '/\ MBC Objective/a \[REF\] https://github.com/MBCProject/mbc-markdown' "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
     if ( ! grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then

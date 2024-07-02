@@ -2,7 +2,7 @@ version: "3"
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:1.4.1d
+    image: embeddedanalyzer/emba:1.4.1e
     container_name: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
@@ -12,7 +12,7 @@ services:
     # /root/.config is needed for cwe_checker
     # /root/.local is needed for cwe_checker
     tmpfs:
-      - /tmp:exec
+      - /tmp
       - /root/.config/
       - /root/.local/share/composer/
       - /root/.local/share/cwe_checker/
@@ -35,7 +35,6 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
-        - ${EMBA}/external/capa:/external/capa
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:
@@ -51,7 +50,7 @@ services:
         soft: 0
 
   emba_quest:
-    image: embeddedanalyzer/emba:1.4.1d
+    image: embeddedanalyzer/emba:1.4.1e
     container_name: emba_quest
     read_only: true
     tmpfs:
