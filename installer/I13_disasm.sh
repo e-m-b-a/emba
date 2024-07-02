@@ -27,6 +27,7 @@ I13_disasm() {
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] ; then
       print_file_info "${BINUTIL_VERSION_NAME}" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/${BINUTIL_VERSION_NAME}.tar.gz" "external/${BINUTIL_VERSION_NAME}.tar.gz" "external/objdump"
+      print_file_info "Capa" "Capa - Open-source tool to identify capabilities in executable files." "https://github.com/mandiant/capa/releases/download/v7.1.0/capa-v7.1.0-linux.zip" "external/capa-v7.1.0-linux.zip"
       print_tool_info "texinfo" 1
       print_tool_info "git" 1
       print_tool_info "wget" 1
@@ -57,6 +58,12 @@ I13_disasm() {
       y|Y )
         # apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+        if ! [[ -f "external/capa" ]]; then
+          download_file "Capa" "https://github.com/mandiant/capa/releases/download/v7.1.0/capa-v7.1.0-linux.zip" "external/capa-v7.1.0-linux.zip"
+          unzip external/capa-v7.1.0-linux.zip -d external
+          rm external/capa-v7.1.0-linux.zip
+        fi
 
         if ! [[ -f "external/objdump" ]] ; then
           download_file "${BINUTIL_VERSION_NAME}" "https://ftp.gnu.org/gnu/binutils/${BINUTIL_VERSION_NAME}.tar.gz" "external/${BINUTIL_VERSION_NAME}.tar.gz"
