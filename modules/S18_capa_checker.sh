@@ -106,17 +106,23 @@ S18_capa_checker() {
 capa_runner_fct() {
   local lBINARY="${1:-}"
 
+  local lATTACK_CODES_ARR=()
+  local lATTACK_CODE=""
   local lBIN_NAME=""
   lBIN_NAME="$(basename "${lBINARY}")"
+  local lBIN_MD5=""
 
   print_output "[*] Testing binary behavior with capa for $(print_path "${lBINARY}")" "no_log"
   "${EXT_DIR}"/capa "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_output "[-] Capa analysis failed for ${lBINARY}" "no_log"
 
   if [[ -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
     print_output "[+] Capa results for ${ORANGE}$(print_path "${lBINARY}")${NC}" "" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"
-    sed -i '/\ T[0-9]\{4\}\(\.[0-9]\)\?/a \[REF\] https://attack.mitre.org/techniques' "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
+    mapfile -t lATTACK_CODES_ARR < <(grep -o "T[0-9]\{4\}\(\.[0-9]\{3\}\)\?" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true)
+    for lATTACK_CODE in "${lATTACK_CODES_ARR[@]}"; do
+      # check for ATT&CK framework codes and insert the correct links
+      sed -i "/\ ${lATTACK_CODE}\ /a\[REF\] https://attack.mitre.org/techniques/${lATTACK_CODE/\./\/}" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
+    done
     sed -i '/\ MBC Objective/a \[REF\] https://github.com/MBCProject/mbc-markdown' "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
-    local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
     if ( ! grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
       echo "${lBIN_MD5}" >> "${TMP_DIR}"/s18_checked.tmp
