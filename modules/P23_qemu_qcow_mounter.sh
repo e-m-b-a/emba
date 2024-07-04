@@ -58,7 +58,7 @@ qcow_extractor() {
   local EXTRACTION_DIR_="${2:-}"
   local TMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
   local DIRS_QCOW_MOUNT=0
-  local NBD_DEV=""
+  local lNBD_DEV=""
   local NBD_DEVS=()
   local EXTRACTION_DIR_FINAL=""
   export FILES_QCOW_MOUNT=0
@@ -81,28 +81,44 @@ qcow_extractor() {
   fi
 
   print_output "[*] Checking nandsim kernel module"
-  if ! (lsmod | grep -q "nbd"); then
-    print_output "[-] WARNING: nbd kernel module not loaded - can't proceed"
+  if ! (lsmod | grep -E -q "^nbd\ "); then
+    print_output "[-] WARNING: Is the nbd kernel module loaded - can we proceed?"
     lsmod | grep -E "^nbd "
     # return
   fi
 
   # print_output "[*] Load kernel module ${ORANGE}nbd${NC}."
   # modprobe nbd max_part=8
-  print_output "[*] Qemu disconnect device ${ORANGE}/dev/nbd${NC}."
-  qemu-nbd --disconnect /dev/nbd0
-  print_output "[*] Qemu connect device ${ORANGE}/dev/nbd${NC}."
-  qemu-nbd --connect /dev/nbd0 "${QCOW_PATH_}"
+  # The following code is based on the code from here: https://superuser.com/a/1117082
+  local lNBD_SIZE=""
+  local lNBD_DEV_NAME=""
+  local lIS_MOUNTED="no"
+  for lNBD_DEV in /sys/class/block/nbd[0-9]{1,}; do
+    lNBD_SIZE=$(cat "${lNBD_DEV}"/size || true)
+    if [[ "${lNBD_SIZE}" == "0" ]]; then
+      lNBD_DEV_NAME=$(basename "${lNBD_DEV}")
+      print_output "[*] Qemu disconnect device ${ORANGE}/dev/${lNBD_DEV_NAME}${NC}."
+      qemu-nbd -d /dev/"${lNBD_DEV_NAME}" || true
+      print_output "[*] Qemu connecting device ${QCOW_PATH_} to /dev/${lNBD_DEV_NAME}"
+      if qemu-nbd -c /dev/"${lNBD_DEV_NAME}" "${QCOW_PATH_}"; then
+        lIS_MOUNTED="yes"
+      else
+        qemu-nbd -d /dev/"${lNBD_DEV_NAME}"
+      fi
+      [[ "${lIS_MOUNTED:-no}" != "yes" ]] && continue
+      break
+    fi
+  done
 
-  print_output "[*] Identification of partitions on ${ORANGE}/dev/nbd${NC}."
-  mapfile -t NBD_DEVS < <(fdisk -l /dev/nbd0 | grep "^/dev/" | awk '{print $1}' || true)
+  print_output "[*] Identification of partitions on ${ORANGE}/dev/${lNBD_DEV_NAME}${NC}."
+  mapfile -t NBD_DEVS < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
   if [[ "${#NBD_DEVS[@]}" -eq 0 ]]; then
     # sometimes we are not able to find the partitions with fdisk -> fallback
     NBD_DEVS+=( "/dev/nbd0" )
   fi
 
   print_ln
-  fdisk /dev/nbd0 -l
+  fdisk /dev/"${lNBD_DEV_NAME}" -l
   print_ln
 
   for NBD_DEV in "${NBD_DEVS[@]}"; do
@@ -124,7 +140,7 @@ qcow_extractor() {
       umount "${TMP_QCOW_MOUNT}"
     fi
   done
-  qemu-nbd --disconnect /dev/nbd0
+  qemu-nbd --disconnect /dev/"${lNBD_DEV_NAME}"
   rm -r "${TMP_QCOW_MOUNT}"
 }
 
