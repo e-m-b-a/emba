@@ -378,7 +378,9 @@ extract_kernel_arch() {
   ORIG_K_ARCH=${ORIG_K_ARCH/MIPS64/MIPS}
   ORIG_K_ARCH=${ORIG_K_ARCH/*PowerPC*/powerpc}
 
-  ORIG_K_ARCH=$(echo "${ORIG_K_ARCH}" | tr -d ' ' | tr "[:upper:]" "[:lower:]")
+  # ORIG_K_ARCH=$(echo "${ORIG_K_ARCH}" | tr -d ' ' | tr "[:upper:]" "[:lower:]")
+  ORIG_K_ARCH="${ORIG_K_ARCH,,}"
+  ORIG_K_ARCH="${ORIG_K_ARCH//\ }"
   print_output "[+] Identified kernel architecture ${ORANGE}${ORIG_K_ARCH}${NC}"
 }
 
@@ -442,6 +444,8 @@ compile_kernel() {
   local KERNEL_CONFIG_FILE="${1:-}"
   local KERNEL_DIR="${2:-}"
   local KARCH="${3:-}"
+  # KARCH=$(echo "${KARCH}" | tr '[:upper:]' '[:lower:]')
+  KARCH="${KARCH,,}"
   export COMPILE_SOURCE_FILES=0
   export COMPILE_SOURCE_FILES_VERIFIED=0
 
@@ -456,7 +460,6 @@ compile_kernel() {
   print_ln
   sub_module_title "Compile Linux kernel - dry run mode"
 
-  KARCH=$(echo "${KARCH}" | tr '[:upper:]' '[:lower:]')
   if ! [[ -d "${KERNEL_DIR}"/arch/"${KARCH}" ]]; then
     print_output "[!] No supported architecture found - ${ORANGE}${KARCH}${NC}"
     return
