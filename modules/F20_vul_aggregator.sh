@@ -1544,7 +1544,7 @@ get_busybox_verified() {
 
   if [[ -f "${S118_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S118_LOG}")."
-    readarray -t BUSYBOX_VERIFIED_CVE < <(cut -d\; -f1,3 "${S118_LOG}" | tail -n +2 | sort -u || true)
+    readarray -t BUSYBOX_VERIFIED_CVE < <(cut -d\; -f1,3 "${S118_LOG}" | tail -n +2 | grep -v "BusyBox VERSION;Verified CVE" | sort -u || true)
   fi
 }
 

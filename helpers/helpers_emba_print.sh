@@ -761,7 +761,8 @@ module_start_log() {
     # strip final slash from log dir
     LOG_DIR="${LOG_DIR:: -1}"
   fi
-  LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""$(echo "${MODULE_MAIN_NAME}" | tr '[:upper:]' '[:lower:]')")
+  # LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""$(echo "${MODULE_MAIN_NAME}" | tr '[:upper:]' '[:lower:]')")
+  LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""${MODULE_MAIN_NAME,,}")
   if [[ -d "${LOG_PATH_MODULE}" ]] ; then
     print_output "[*] Found old module log path for ${ORANGE}${MODULE_MAIN_NAME}${NC} ... creating a backup" "no_log"
     export OLD_LOG_DIR=""
