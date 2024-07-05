@@ -24,6 +24,35 @@
 # Use 'local' for variables if possible for better resource management
 # Use 'export' for variables which aren't only used in one file - it isn't necessary, but helps for readability
 
+# The following template should be used for the module documenation
+# Use a : NOOP and here document to embed documentation,
+# The documentation can be generated with the following command:
+# perl -ne "s/^\t+//; print if m/END_OF_DOCS'?\$/ .. m/^\s*'?END_OF_DOCS'?\$/ and not m/END_OF_DOCS'?$/;" modules/template_module.sh
+: <<'END_OF_DOCS'
+=head1 MODULE_NAME
+
+==head2 MODULE_NAME Description
+
+==head2 MODULE_NAME Testfirmware
+Testfirmware details:
+- Name:
+- Vendor:
+- Checksum (MD5/SHA1/SHA256):
+- Download Link:
+
+==head2 MODULE_NAME Output
+Example output of module
+
+==head2 MODULE_NAME License
+EMBA module MODULE_NAME is licensed under GPLv3
+SPDX-License-Identifier: GPL-3.0-only
+Note: Only GPL-3.0 will be accepted in the master EMBA repository
+
+==head2 MODULE_NAME Author(s)
+Michael Messner, Pascal Eckmann
+Note: List all authors including contributors to this module
+
+END_OF_DOCS
 
 template_module() {
   # Initialize module and creates a log file "template_module_log.txt" and directory "template_module" (if needed) in your log folder
