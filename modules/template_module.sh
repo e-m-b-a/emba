@@ -20,8 +20,9 @@
 # Comments: use # sign followed by a space. When needed, create a comment block. Blank lines: allowed.
 # All functions use snake_case (e.g. test_xyz()). One blank lines between functions.
 # Variables should be capitalized, with underscore as word separator (e.g. FILE_EXISTS=1).
-# If you use external code, add '# Test source: [LINK TO CODE]' above.
-# Use 'local' for variables if possible for better resource management
+# If you use external code, add '# Test source: [LINK TO CODE]' above. Ensure we do not run into licensing issues.
+# Use 'local' for variables if possible for better resource management and start the name of your variable with a
+# lower case l (e.g., local lVARIABLE="asdf")
 # Use 'export' for variables which aren't only used in one file - it isn't necessary, but helps for readability
 
 # The following template should be used for the module documenation
@@ -32,8 +33,11 @@
 =head1 MODULE_NAME
 
 ==head2 MODULE_NAME Description
+Please write a short description of your module. Usually ~2-3 sentences are fine to get an idea.
 
 ==head2 MODULE_NAME Testfirmware
+For verification of the module we need some testfirmware.
+
 Testfirmware details:
 - Name:
 - Vendor:
@@ -46,7 +50,14 @@ Example output of module
 ==head2 MODULE_NAME License
 EMBA module MODULE_NAME is licensed under GPLv3
 SPDX-License-Identifier: GPL-3.0-only
+Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
 Note: Only GPL-3.0 will be accepted in the master EMBA repository
+
+==head2 MODULE_NAME Todo
+Missing stuff that we need to consider.
+
+==head2 MODULE_NAME Known issues
+Any known issues or known limitations.
 
 ==head2 MODULE_NAME Author(s)
 Michael Messner, Pascal Eckmann
