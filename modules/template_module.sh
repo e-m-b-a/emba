@@ -29,14 +29,25 @@
 # Use a : NOOP and here document to embed documentation,
 # The documentation can be generated with the following command:
 # perl -ne "s/^\t+//; print if m/END_OF_DOCS'?\$/ .. m/^\s*'?END_OF_DOCS'?\$/ and not m/END_OF_DOCS'?$/;" modules/template_module.sh
+# or with pod2text modules/template_module.sh
 : <<'END_OF_DOCS'
 =pod
 
 =head1 MODULE_NAME
 
-==head2 MODULE_NAME Description
+==head2 MODULE_NAME Short description
 
 Please write a short description of your module. Usually ~2-3 sentences are fine to get an idea.
+
+==head2 MODULE_NAME Detailed description
+
+Please write a longer description of your module. This should also include further references and links
+that were used.
+
+==head2 MODULE_NAME 3rd party tools
+
+Any 3rd party tool that is needed from your module. Also include the tested and known working version and
+download link.
 
 ==head2 MODULE_NAME Testfirmware
 
