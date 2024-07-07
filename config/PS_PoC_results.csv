@@ -10099,6 +10099,7 @@ CVE-2023-4973;Academy LMS 6.2 Cross Site Scripting;https://packetstormsecurity.c
 CVE-2023-4974;Academy LMS 6.2 SQL Injection;https://packetstormsecurity.com/files/174681/Academy-LMS-6.2-SQL-Injection.html;remote
 CVE-2023-49786;Asterisk 20.1.0 Denial Of Service;https://packetstormsecurity.com/files/176251/Asterisk-20.1.0-Denial-Of-Service.html;DoS
 CVE-2023-4987;Taskhub 2.8.7 SQL Injection;https://packetstormsecurity.com/files/174760/Taskhub-2.8.7-SQL-Injection.html;remote
+CVE-2023-49976;Customer Support System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/179276/Customer-Support-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2023-50071;Customer Support System 1.0 SQL Injection;https://packetstormsecurity.com/files/177443/Customer-Support-System-1.0-SQL-Injection.html;remote
 CVE-2023-50917;MajorDoMo Remote Code Execution;https://packetstormsecurity.com/files/176273/MajorDoMo-Remote-Code-Execution.html;remote
 CVE-2023-51293;PHPJabbers Event Booking Calendar 4.0 Missing Rate Limiting;https://packetstormsecurity.com/files/176495/PHPJabbers-Event-Booking-Calendar-4.0-Missing-Rate-Limiting.html;unknown
@@ -10180,6 +10181,7 @@ CVE-2023-6875;WordPress POST SMTP Mailer 2.8.7 Authorization Bypass Cross Site S
 CVE-2023-7027;WordPress POST SMTP Mailer 2.8.7 Authorization Bypass Cross Site Scripting;https://packetstormsecurity.com/files/176525/WordPress-POST-SMTP-Mailer-2.8.7-Authorization-Bypass-Cross-Site-Scripting.html;unknown
 CVE-2023-7028;GitLab CE EE Password Reset;https://packetstormsecurity.com/files/177587/GitLab-CE-EE-Password-Reset.html;unknown
 CVE-2023-7137;Client Details System 1.0 SQL Injection;https://packetstormsecurity.com/files/177565/Client-Details-System-1.0-SQL-Injection.html;remote
+CVE-2023-7270;SoftMaker Office FreeOffice Local Privilege Escalation;https://packetstormsecurity.com/files/179360/SoftMaker-Office-FreeOffice-Local-Privilege-Escalation.html;local
 CVE-2024-0204;GoAnywhere MFT Authentication Bypass;https://packetstormsecurity.com/files/176683/GoAnywhere-MFT-Authentication-Bypass.html;unknown
 CVE-2024-0264;Clinic Queuing System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/178519/Clinic-Queuing-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-0265;Clinic Queuing System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/178519/Clinic-Queuing-System-1.0-Remote-Code-Execution.html;remote
@@ -10257,6 +10259,20 @@ CVE-2024-26182;Windows Kernel Subkey List Use After Free;https://packetstormsecu
 CVE-2024-26218;Windows PspBuildCreateProcessContext Double Fetch Buffer Overflow;https://packetstormsecurity.com/files/178377/Windows-PspBuildCreateProcessContext-Double-Fetch-Buffer-Overflow.html;unknown
 CVE-2024-26218;undefinedExploiting The NT Kernel In 24H2undefined;https://packetstormsecurity.com/files/178378/undefinedExploiting-The-NT-Kernel-In-24H2undefined.html;unknown
 CVE-2024-26630;Linux 6.5 Kernel Pointer Leak;https://packetstormsecurity.com/files/177943/Linux-6.5-Kernel-Pointer-Leak.html;unknown
+CVE-2024-27141;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27142;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27143;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27144;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27145;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27146;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27147;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27148;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27149;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27150;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27151;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27152;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27153;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
+CVE-2024-27154;Toshiba Multi Function Printers 40 Vulnerabilities;https://packetstormsecurity.com/files/179367/Toshiba-Multi-Function-Printers-40-Vulnerabilities.html;remote/local
 CVE-2024-27198;JetBrains TeamCity Authentication Bypass Remote Code Execution;https://packetstormsecurity.com/files/177445/JetBrains-TeamCity-Authentication-Bypass-Remote-Code-Execution.html;remote
 CVE-2024-27228;Google Pixel MFC H264 Processing Memory Corruption;https://packetstormsecurity.com/files/177899/Google-Pixel-MFC-H264-Processing-Memory-Corruption.html;unknown
 CVE-2024-27348;Apache HugeGraph Remote Command Execution;https://packetstormsecurity.com/files/178986/Apache-HugeGraph-Remote-Command-Execution.html;remote
@@ -10271,6 +10287,7 @@ CVE-2024-27743;Petrol Pump Management Software 1.0 Cross Site Scripting;https://
 CVE-2024-27744;Petrol Pump Management Software 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177405/Petrol-Pump-Management-Software-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-27747;Petrol Pump Management System 1.0 Shell Upload;https://packetstormsecurity.com/files/177407/Petrol-Pump-Management-System-1.0-Shell-Upload.html;remote
 CVE-2024-27815;TURPENTINE XNU Kernel Buffer Overflow;https://packetstormsecurity.com/files/179172/TURPENTINE-XNU-Kernel-Buffer-Overflow.html;unknown
+CVE-2024-28038;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-28085;util linux wall Escape Sequence Injection;https://packetstormsecurity.com/files/177840/util-linux-wall-Escape-Sequence-Injection.html;unknown
 CVE-2024-28121;StimulusReflex 3.5.0 Arbitrary Code Execution;https://packetstormsecurity.com/files/177595/StimulusReflex-3.5.0-Arbitrary-Code-Execution.html;unknown
 CVE-2024-28147;Edu Sharing Arbitrary File Upload;https://packetstormsecurity.com/files/179199/Edu-Sharing-Arbitrary-File-Upload.html;unknown
@@ -10282,13 +10299,16 @@ CVE-2024-28735;Financials By Coda Authorization Bypass;https://packetstormsecuri
 CVE-2024-28736;Debezium UI 2.5 Credential Disclosure;https://packetstormsecurity.com/files/178794/Debezium-UI-2.5-Credential-Disclosure.html;unknown
 CVE-2024-28741;NorthStar C2 Agent 1.0 Cross Site Scripting Remote Command Execution;https://packetstormsecurity.com/files/177542/NorthStar-C2-Agent-1.0-Cross-Site-Scripting-Remote-Command-Execution.html;unknown
 CVE-2024-2891;Xbox GamingService Arbitrary Folder Move;https://packetstormsecurity.com/files/177712/Xbox-GamingService-Arbitrary-Folder-Move.html;unknown
+CVE-2024-28955;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-28999;SolarWinds Platform 2024.1 SR1 Race Condition;https://packetstormsecurity.com/files/179214/SolarWinds-Platform-2024.1-SR1-Race-Condition.html;unknown
+CVE-2024-29146;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-29291;Laravel Framework 11 Credential Disclosure;https://packetstormsecurity.com/files/178210/Laravel-Framework-11-Credential-Disclosure.html;unknown
 CVE-2024-29301;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-29302;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-29303;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-29411;E Insurance 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177887/E-Insurance-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-29412;Hospital Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177890/Hospital-Management-System-1.0-Cross-Site-Scripting.html;unknown
+CVE-2024-29978;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-30162;Invision Community 4.7.16 Remote Code Execution;https://packetstormsecurity.com/files/177983/Invision-Community-4.7.16-Remote-Code-Execution.html;remote
 CVE-2024-30163;Invision Community 4.7.15 SQL Injection;https://packetstormsecurity.com/files/177982/Invision-Community-4.7.15-SQL-Injection.html;remote
 CVE-2024-30850;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecurity.com/files/178009/CHAOS-RAT-5.0.1-Remote-Command-Execution.html;unknown
@@ -10306,8 +10326,12 @@ CVE-2024-30929;DerbyNet 9.0 playlist.php Cross Site Scripting;https://packetstor
 CVE-2024-31225;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
 CVE-2024-31334;PowerVR DevmemXIntMapPages Mapping Issue;https://packetstormsecurity.com/files/178928/PowerVR-DevmemXIntMapPages-Mapping-Issue.html;unknown
 CVE-2024-31335;PowerVR DevmemIntChangeSparse2 Dangling Page Table Entry;https://packetstormsecurity.com/files/178648/PowerVR-DevmemIntChangeSparse2-Dangling-Page-Table-Entry.html;unknown
+CVE-2024-31337;PowerVR Driver Missing Sanitization;https://packetstormsecurity.com/files/179297/PowerVR-Driver-Missing-Sanitization.html;unknown
 CVE-2024-3139;Computer Laboratory Management System 1.0 Insecure Direct Object Reference;https://packetstormsecurity.com/files/177892/Computer-Laboratory-Management-System-1.0-Insecure-Direct-Object-Reference.html;unknown
 CVE-2024-3140;Computer Laboratory Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177893/Computer-Laboratory-Management-System-1.0-Cross-Site-Scripting.html;unknown
+CVE-2024-31484;Siemens CP 8000 CP 8021 CP8 022 CP 8031 CP 8050 SICORE Buffer Overread Escalation;https://packetstormsecurity.com/files/179354/Siemens-CP-8000-CP-8021-CP8-022-CP-8031-CP-8050-SICORE-Buffer-Overread-Escalation.html;unknown
+CVE-2024-31485;Siemens CP 8000 CP 8021 CP8 022 CP 8031 CP 8050 SICORE Buffer Overread Escalation;https://packetstormsecurity.com/files/179354/Siemens-CP-8000-CP-8021-CP8-022-CP-8031-CP-8050-SICORE-Buffer-Overread-Escalation.html;unknown
+CVE-2024-31486;Siemens CP 8000 CP 8021 CP8 022 CP 8031 CP 8050 SICORE Buffer Overread Escalation;https://packetstormsecurity.com/files/179354/Siemens-CP-8000-CP-8021-CP8-022-CP-8031-CP-8050-SICORE-Buffer-Overread-Escalation.html;unknown
 CVE-2024-31621;Flowise 1.6.5 Authentication Bypass;https://packetstormsecurity.com/files/178204/Flowise-1.6.5-Authentication-Bypass.html;unknown
 CVE-2024-31705;GLPI 10.x.x Remote Command Execution;https://packetstormsecurity.com/files/178062/GLPI-10.x.x-Remote-Command-Execution.html;remote
 CVE-2024-31777;GUnet OpenEclass E learning 3.15 File Upload Command Execution;https://packetstormsecurity.com/files/178017/GUnet-OpenEclass-E-learning-3.15-File-Upload-Command-Execution.html;remote
@@ -10316,9 +10340,13 @@ CVE-2024-31839;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecur
 CVE-2024-32017;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
 CVE-2024-32018;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
 CVE-2024-32136;BWL Advanced FAQ Manager 2.0.3 SQL Injection;https://packetstormsecurity.com/files/178874/BWL-Advanced-FAQ-Manager-2.0.3-SQL-Injection.html;remote
+CVE-2024-32151;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-32651;changedetection 0.45.20 Remote Code Execution;https://packetstormsecurity.com/files/178878/changedetection-0.45.20-Remote-Code-Execution.html;remote
 CVE-2024-33288;Prison Management System Using PHP SQL Injection;https://packetstormsecurity.com/files/178557/Prison-Management-System-Using-PHP-SQL-Injection.html;remote
 CVE-2024-33559;WordPress XStore Theme 9.3.8 SQL Injection;https://packetstormsecurity.com/files/178633/WordPress-XStore-Theme-9.3.8-SQL-Injection.html;remote
+CVE-2024-33605;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-33610;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-33616;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-33722;SOPlanning 1.52.00 SQL Injection;https://packetstormsecurity.com/files/178436/SOPlanning-1.52.00-SQL-Injection.html;remote
 CVE-2024-33724;SOPlanning 1.52.00 Cross Site Scripting;https://packetstormsecurity.com/files/178434/SOPlanning-1.52.00-Cross-Site-Scripting.html;unknown
 CVE-2024-3378;iboss Secure Web Gateway Cross Site Scripting;https://packetstormsecurity.com/files/178497/iboss-Secure-Web-Gateway-Cross-Site-Scripting.html;unknown
@@ -10327,10 +10355,14 @@ CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstor
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
 CVE-2024-34058;Nethserver 7 8 Cross Site Scripting;https://packetstormsecurity.com/files/178649/Nethserver-7-8-Cross-Site-Scripting.html;unknown
+CVE-2024-34162;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-34241;Rocket LMS 1.9 Cross Site Scripting;https://packetstormsecurity.com/files/178629/Rocket-LMS-1.9-Cross-Site-Scripting.html;unknown
 CVE-2024-34481;Drupal Wiki 8.31 8.30 Cross Site Scripting;https://packetstormsecurity.com/files/178487/Drupal-Wiki-8.31-8.30-Cross-Site-Scripting.html;unknown
 CVE-2024-34724;PowerVR _UnrefAndMaybeDestroy Use After Free;https://packetstormsecurity.com/files/178647/PowerVR-_UnrefAndMaybeDestroy-Use-After-Free.html;unknown
 CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
+CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-36251;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36495;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
 CVE-2024-36496;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
 CVE-2024-36497;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
@@ -10353,4 +10385,7 @@ CVE-2024-5411;ORing IAP 420 2.01e Cross Site Scripting Command Injection;https:/
 CVE-2024-5420;SEH utnserver Pro ProMAX INU 100 20.1.22 XSS DoS File Disclosure;https://packetstormsecurity.com/files/178999/SEH-utnserver-Pro-ProMAX-INU-100-20.1.22-XSS-DoS-File-Disclosure.html;DoS
 CVE-2024-5421;SEH utnserver Pro ProMAX INU 100 20.1.22 XSS DoS File Disclosure;https://packetstormsecurity.com/files/178999/SEH-utnserver-Pro-ProMAX-INU-100-20.1.22-XSS-DoS-File-Disclosure.html;DoS
 CVE-2024-5422;SEH utnserver Pro ProMAX INU 100 20.1.22 XSS DoS File Disclosure;https://packetstormsecurity.com/files/178999/SEH-utnserver-Pro-ProMAX-INU-100-20.1.22-XSS-DoS-File-Disclosure.html;DoS
+CVE-2024-5672;Helmholz Industrial Router REX100 MBConnectline mbNET.mini 2.2.11 Command Injection;https://packetstormsecurity.com/files/179369/Helmholz-Industrial-Router-REX100-MBConnectline-mbNET.mini-2.2.11-Command-Injection.html;unknown
 CVE-2024-5676;Paradox IP150 Internet Module 1.40.00 Cross Site Request Forgery;https://packetstormsecurity.com/files/179182/Paradox-IP150-Internet-Module-1.40.00-Cross-Site-Request-Forgery.html;unknown
+CVE-2024-5947;Deep Sea Electronics DSE855 Remote Authentication Bypass;https://packetstormsecurity.com/files/179342/Deep-Sea-Electronics-DSE855-Remote-Authentication-Bypass.html;unknown
+CVE-2024-6387;OpenSSH Server regreSSHion Remote Code Execution;https://packetstormsecurity.com/files/179290/OpenSSH-Server-regreSSHion-Remote-Code-Execution.html;unknown
