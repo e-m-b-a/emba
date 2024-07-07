@@ -30,12 +30,16 @@
 # The documentation can be generated with the following command:
 # perl -ne "s/^\t+//; print if m/END_OF_DOCS'?\$/ .. m/^\s*'?END_OF_DOCS'?\$/ and not m/END_OF_DOCS'?$/;" modules/template_module.sh
 : <<'END_OF_DOCS'
+=pod
+
 =head1 MODULE_NAME
 
 ==head2 MODULE_NAME Description
+
 Please write a short description of your module. Usually ~2-3 sentences are fine to get an idea.
 
 ==head2 MODULE_NAME Testfirmware
+
 For verification of the module we need some testfirmware.
 
 Testfirmware details:
@@ -45,25 +49,33 @@ Testfirmware details:
 - Download Link:
 
 ==head2 MODULE_NAME Output
+
 Example output of module
 
 ==head2 MODULE_NAME License
+
 EMBA module MODULE_NAME is licensed under GPLv3
 SPDX-License-Identifier: GPL-3.0-only
 Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
 Note: Only GPL-3.0 will be accepted in the master EMBA repository
 
 ==head2 MODULE_NAME Todo
+
 Missing stuff that we need to consider.
 
 ==head2 MODULE_NAME Known issues
+
 Any known issues or known limitations.
 
 ==head2 MODULE_NAME Author(s)
+
 Michael Messner, Pascal Eckmann
 Note: List all authors including contributors to this module
 
+=cut
+
 END_OF_DOCS
+
 
 template_module() {
   # Initialize module and creates a log file "template_module_log.txt" and directory "template_module" (if needed) in your log folder
