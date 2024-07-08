@@ -27,7 +27,7 @@ S23_lua_check()
   export S23_ISSUE_FOUND=0
   local WAIT_PIDS_S23=()
 
-  write_csv_log "Script path" "LUA issues detected" "LUA vulnarabilities detected" "common linux file"
+  write_csv_log "Script path" "LUA issues detected" "LUA vulnerabilities detected" "common linux file"
   mapfile -t S23_LUA_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   sub_module_title "LUA linter checks module"
