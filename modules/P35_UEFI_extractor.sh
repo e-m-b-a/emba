@@ -73,6 +73,7 @@ P35_UEFI_extractor() {
         for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
           uefi_firmware_parser "${UEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+            NEG_LOG=1
             break
           fi
         done
@@ -102,6 +103,7 @@ P35_UEFI_extractor() {
         for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
           uefi_firmware_parser "${UEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+            NEG_LOG=1
             break
           fi
         done
@@ -112,8 +114,10 @@ P35_UEFI_extractor() {
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       NEG_LOG=1
     fi
-
     if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+      NEG_LOG=1
+    fi
+    if [[ "${RTOS}" -eq 0 ]]; then
       NEG_LOG=1
     fi
 
