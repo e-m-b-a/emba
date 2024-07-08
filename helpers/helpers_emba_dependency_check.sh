@@ -695,6 +695,7 @@ dependency_check()
         # radare2
         check_dep_tool "radare2" "r2"
       fi
+      check_dep_file "Identify capabilities in executable files" "${EXT_DIR}/capa"
 
       # bandit python security tester
       check_dep_tool "bandit - python vulnerability scanner" "bandit"

@@ -120,11 +120,9 @@ L10_system_emulation() {
           if [[ -n "${D_END}" ]]; then
             export TAPDEV_0="tap0_0"
             local lARCH_END=""
-            export D_END_lower=""
 
-            D_END_lower="$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
-            lARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')"
-            lARCH_END+="${D_END_lower}"
+            lARCH_END="${ARCH,,}"
+            lARCH_END+="${D_END,,}"
 
             # default is ARM_SF -> we only need to check if it is HF
             # The information is based on the results of architecture_check()
@@ -1520,9 +1518,9 @@ get_networking_details_emulation() {
       lIP="${lIP/\.}"
 
       IP_ADDRESS_=""
-      if [[ "${D_END_lower}" == "eb" ]]; then
+      if [[ "${D_END,,}" == "eb" ]]; then
         IP_ADDRESS_="${lIP}"
-      elif [[ "${D_END_lower}" == "el" ]]; then
+      elif [[ "${D_END,,}" == "el" ]]; then
         IP_ADDRESS_=$(echo "${lIP}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
       fi
 
