@@ -68,6 +68,11 @@ S118_busybox_verifier()
     local BB_APPLET=""
     local SUMMARY=""
 
+    if tail -n +2 "${CSV_DIR}"/s118_busybox_verifier.csv | cut -d\; -f1 | grep -v "BusyBox VERSION" | grep -q "${BB_VERSION}"; then
+      # we already tested this version and ensure we do not duplicate this check
+      continue
+    fi
+
     get_cve_busybox_data "${BB_VERSION}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then

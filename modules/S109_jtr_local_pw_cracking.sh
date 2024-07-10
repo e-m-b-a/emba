@@ -73,9 +73,13 @@ S109_jtr_local_pw_cracking()
       fi
 
       if [[ "${HASH}" == "\$"*"\$"* ]]; then
+        print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
         # put ontop if linux-hash
-        [[ ! -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]] && touch "${LOG_PATH_MODULE}"/jtr_hashes.txt
-        sed -i "1s/^/${HASH}\n/" "${LOG_PATH_MODULE}"/jtr_hashes.txt
+        if [[ ! -s "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
+          echo "${HASH}" > "${LOG_PATH_MODULE}"/jtr_hashes.txt
+        else
+          sed -i "1s#^#${HASH}\n#" "${LOG_PATH_MODULE}"/jtr_hashes.txt
+        fi
       else
         print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
         echo "${HASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
