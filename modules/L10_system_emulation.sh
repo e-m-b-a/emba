@@ -2796,10 +2796,10 @@ get_kernel_version() {
 }
 
 set_network_config() {
-  local lIP_ADDRESS="${1:-}"
-  local lNETWORK_MODE="${2:-}"
-  local lNETWORK_DEVICE="${3:-}"
-  local lETH_INT="${4:-}"
+  local lIP_ADDRESS="${1:-192.168.0.1}"
+  local lNETWORK_MODE="${2:-bridge}"
+  local lNETWORK_DEVICE="${3:-br0}"
+  local lETH_INT="${4:-eth0}"
 
   echo "${lNETWORK_MODE}" > "${MNT_POINT}/firmadyne/network_type"
   echo "${lNETWORK_DEVICE}" > "${MNT_POINT}/firmadyne/net_bridge"
