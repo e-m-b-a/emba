@@ -145,7 +145,7 @@ analyse_fw_files() {
 
       if [[ "${MD5_FW_FILE1}" != "${MD5_FW_FILE2}" ]]; then
         # fuzzy hash diffing here:
-        SSDEEP_OUT=$(ssdeep -d -s "${FW_FILE1}" "${FW_FILE2}")
+        SSDEEP_OUT=$(ssdeep -a -d -s "${FW_FILE1}" "${FW_FILE2}")
         [[ -z "${SSDEEP_OUT}" ]] && return
         # extract the ssdeep ranking from the output
         SSDEEP_RANK=$(echo "${SSDEEP_OUT}" | rev | awk '{print $1}' | rev | tr -d '(' | tr -d ')')

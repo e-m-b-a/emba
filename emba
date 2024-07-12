@@ -538,7 +538,7 @@ main() {
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -f "${FIRMWARE_PATH1}" ]]; then
       DIFF_MODE=1
       print_output "[*] $(print_date) - Multiple firmware binarie detected." "no_log"
-      print_output "    EMBA starts in firmware diff mode ." "no_log"
+      print_output "    EMBA starts in firmware diff mode." "no_log"
     else
       print_output "[!] $(print_date) - Invalid firmware file" "no_log"
       print_help
