@@ -78,4 +78,3 @@ disable_strict_mode() {
   fi
 }
 
-

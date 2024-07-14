@@ -86,7 +86,7 @@ echo ""
 echo -e "==> ""${GREEN}""Imported ""${INSTALLER_COUNT}"" installer module files""${NC}"
 echo ""
 
-if [[ "$#" -le 1 ]] && [[ "$#" -gt 2 ]]; then
+if [[ "$#" -lt 1 ]] || [[ "$#" -gt 2 ]]; then
   echo -e "${RED}""${BOLD}""Invalid number of arguments""${NC}"
   echo -e "\n\n------------------------------------------------------------------"
   echo -e "If you are going to install EMBA in default mode you can use:"
