@@ -117,6 +117,7 @@ analyse_fw_files() {
   FW_FILE1="${OUTPUT_DIR_UNBLOB1}""${FW_FILE1#.}"
   export FW_FILE_NAME1=""
   FW_FILE_NAME1=$(basename "${FW_FILE1}")
+
   local UNMATCHED_FCTs=()
   local FW_FILES1in2=()
   local SSDEEP_OUT=""

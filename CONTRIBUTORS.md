@@ -35,8 +35,10 @@ These people have contributed to EMBA:
 * [Stefan Haboeck](https://github.com/StefanHaboeck)
 * [jblu42](https://github.com/jblu42)
 * [413x8](https://github.com/413x8)
+* [floyd-fuh](https://github.com/floyd-fuh)
 * [firmianay](https://github.com/firmianay)
 * [mj138](https://github.com/mj138)
+* [Grezzo](https://github.com/Grezzo)
 * [nightlark](https://github.com/nightlark)
 
 
