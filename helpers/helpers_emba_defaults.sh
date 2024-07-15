@@ -19,7 +19,7 @@
 
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
+  export RELEASE=0
   export EMBA_VERSION="1.4.1"
 
   export CLEANED=0              # used for the final cleaner function for not running it multiple times

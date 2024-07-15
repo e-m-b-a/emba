@@ -1075,7 +1075,7 @@ handle_fs_mounts() {
       if [[ -d "${MNT_POINT}"/"${lL_PATH}" ]]; then
         for lX_PATH in "${lNEWPATH_test_ARR[@]}"; do
           print_output "[*] Copy ${lX_PATH} to ${MNT_POINT}/${lL_PATH}/"
-          cp -prn "${lX_PATH}"/* "${MNT_POINT}"/"${lL_PATH}"/
+          cp -pr --update=none "${lX_PATH}"/* "${MNT_POINT}"/"${lL_PATH}"/
         done
       fi
     done
@@ -1094,14 +1094,14 @@ handle_fs_mounts() {
         mkdir -p "${MNT_POINT}""${lMOUNT_PT}"
       fi
       print_output "[*] Let's copy the identified area to the root filesystem - ${ORANGE}${lN_PATH}${NC} to ${ORANGE}${MNT_POINT}${lMOUNT_PT}${NC}"
-      cp -prn "${lN_PATH}"* "${MNT_POINT}""${lMOUNT_PT}"
+      cp -pr --update=none "${lN_PATH}"* "${MNT_POINT}""${lMOUNT_PT}"
       find "${MNT_POINT}""${lMOUNT_PT}" -xdev -ls || true
     done
 
     print_output "[*] Final copy of ${ORANGE}${lFS_FIND}${NC} to ${ORANGE}${MNT_POINT}${lMOUNT_PT}${NC} ..."
-    cp -prn "${lFS_FIND}"/* "${MNT_POINT}""${lMOUNT_PT}" || true
+    cp -pr --update=none "${lFS_FIND}"/* "${MNT_POINT}""${lMOUNT_PT}" || true
     # find "$MNT_POINT""$lMOUNT_PT" -xdev -ls || true
-    ls -lh "${MNT_POINT}""${lMOUNT_PT}"
+    ls -lh "${MNT_POINT}""${lMOUNT_PT}" || true
   done
 
   # now we need to startup the inferFile/inferService script again
@@ -2525,8 +2525,11 @@ create_emulation_archive() {
   local lIPS_INT_VLAN_CFG_mod="${4:-}"
   local lARCH_NAME=""
 
-  cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_output "[-] Error in kernel copy procedure" "no_log"
-  cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_output "[-] Error in image copy procedure" "no_log"
+  if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
+    # we only copy the kernel and the firmware image to the archive if FINAL_FW_RM is not set
+    cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_output "[-] Error in kernel copy procedure" "no_log"
+    cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_output "[-] Error in image copy procedure" "no_log"
+  fi
 
   if [[ -f "${LOG_PATH_MODULE}"/"${NMAP_LOG}" ]]; then
     mv "${LOG_PATH_MODULE}"/"${NMAP_LOG}" "${lARCHIVE_PATH}" ||  print_output "[-] Error in Nmap results copy procedure" "no_log"

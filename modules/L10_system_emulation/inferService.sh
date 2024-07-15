@@ -82,7 +82,8 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
   -o -name "telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
   -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
   -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \
-  -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f -o -name "nvram_daemon" -type f); do
+  -o -name "streamd" -type f -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f \
+  -o -name "nvram_daemon" -type f); do
 
   if [ -x "${BINARY}" ]; then
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")
