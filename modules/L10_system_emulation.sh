@@ -397,10 +397,6 @@ create_emulation_filesystem() {
         print_output "[*] Generated injection scripts with marker ${ORANGE}${lINJECTION_MARKER}${NC}."
         cat "${MNT_POINT}"/bin/a
       fi
-
-      # setup a marker for traversal tests
-      echo "EMBA_${lINJECTION_MARKER}_EMBA" > "${MNT_POINT}"/dir_trav_check
-      echo "${lINJECTION_MARKER}" > "${LOG_PATH_MODULE}"/injection_marker.log
     fi
 
     if [[ -e "${MNT_POINT}/kernelInit" ]]; then
