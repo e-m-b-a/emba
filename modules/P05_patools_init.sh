@@ -57,7 +57,7 @@ patools_extractor() {
 
   [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
-  patool -v test "${FIRMWARE_PATH_}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/paextract_test_"${FIRMWARE_NAME_}".log
+  patool -v test "${FIRMWARE_PATH_}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/paextract_test_"${FIRMWARE_NAME_}".log || print_output "[-] Patool test run failed - no extraction with patool module possible"
 
   [[ "${STRICT_MODE}" -eq 1 ]] && set -e
 
