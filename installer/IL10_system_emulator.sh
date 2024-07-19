@@ -45,7 +45,9 @@ IL10_system_emulator() {
 
     # future extension
     print_tool_info "xxd" 1
+    # EMBAbite
     print_tool_info "netcat-openbsd" 1
+    print_tool_info "tnftp" 1
 
     # Busybox version (1.29.3 / 1.36.1)
     BB_VER="1.36.1"
