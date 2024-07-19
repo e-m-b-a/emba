@@ -56,6 +56,7 @@ L10_system_emulation() {
     local lR_PATH_CNT=1
     local lIP_ADDRESS=""
     export R_PATH=""
+    export MIN_TCP_SERV=2
     ### export IP_ADDRESS_=""
 
     # if we have a supported arch we move on with out emulation attempt
@@ -846,7 +847,7 @@ main_emulation() {
           # later on we are running the same process again
           switch_inits "${KINIT}"
         fi
-        if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
+        if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge "${MIN_TCP_SERV}" ]]; then
           break 2
         fi
       done
