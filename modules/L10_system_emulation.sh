@@ -838,7 +838,9 @@ main_emulation() {
 
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         emulation_with_config "${lIPS_INT_VLAN_CFG}"
-        if [[ "${TCP}" != "ok" ]] && [[ "${PORTS_1st:-0}" -gt 0 ]]; then
+
+        if [[ "${TCP}" != "ok" ]]; then
+          print_output "[*] We are in the emergency init switch mode now"
           # just in case we have no running TCP service detected we try the other init mechanism (rdinit vs init)
           # this is only done if we have already switched inits and our first detection run has also network services detected
           switch_inits "${KINIT}"

@@ -31,7 +31,8 @@ if [ -e /etc/manual.starter ]; then
 fi
 
 if [ -d /etc/init.d/ ]; then
-  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -name "*httpd*" -o -name "ftpd" -o -name "miniupnpd" -o -name "*apache*"); do
+  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f -name "*httpd*" -o -type f -name "ftpd" -o -type f -name "miniupnpd" \
+    -o -type f -name "*apache*" -o -type f -name "*init*" -o -type f -name "*service*"); do
     if [ -e "${SERVICE}" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
@@ -79,11 +80,11 @@ fi
 # twonkystarter: F9K1119_WW_1.00.01.bin
 
 for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -type f -o -name "upnpd" -type f \
-  -o -name "telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
+  -o -name "*telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
   -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
   -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \
   -o -name "streamd" -type f -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f \
-  -o -name "nvram_daemon" -type f); do
+  -o -name "pppoe-server" -type f -o -name "pppd" -type f -o -name "nvram_daemon" -type f); do
 
   if [ -x "${BINARY}" ]; then
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")
