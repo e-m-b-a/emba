@@ -286,9 +286,6 @@ apt-get -y install python3-venv
 create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
-# initial installation of the host environment:
-I01_default_apps_host
-
 export DOCKER_COMPOSE=("docker-compose")
 # docker moved around v7 to a new API (API v2)
 # we need to check if our installed docker version has support for the compose sub-command:
@@ -296,7 +293,7 @@ if command -v docker > /dev/null; then
   if docker --help | grep -q compose; then
     # new docker API version v2 -> docker v7
     export DOCKER_COMPOSE=("docker" "compose")
-  else
+  elif command -v docker-compose > /dev/null; then
     # we only need to check the docker-compose version if we are running on the old API with docker-compose
     DOCKER_COMP_VER=$("${DOCKER_COMPOSE[@]}" -v | grep version | tr '-' ' ' | awk '{print $4}' | tr -d ',' | sed 's/^v//')
     if [[ $(version "${DOCKER_COMP_VER}") -lt $(version "1.28.5") ]]; then
@@ -307,6 +304,9 @@ if command -v docker > /dev/null; then
     fi
   fi
 fi
+
+# initial installation of the host environment:
+I01_default_apps_host
 
 if [[ "${OTHER_OS}" -eq 1 ]]; then
   # UBUNTU

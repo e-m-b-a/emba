@@ -77,6 +77,9 @@ print_tool_info(){
         INSTALL_APP_LIST+=("${1:-}")
       fi
     fi
+  else
+    echo -e "${RED}""${1:-}"" is not available anymore - installation can't proceed.""${NC}"
+    exit 1
   fi
 }
 
