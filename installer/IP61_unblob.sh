@@ -41,7 +41,7 @@ IP61_unblob() {
     print_tool_info "unar" 1
     print_tool_info "xz-utils" 1
     print_tool_info "zlib1g-dev" 1
-    print_tool_info "libmagic1" 1
+    # print_tool_info "libmagic1" 1
     print_tool_info "libhyperscan5" 1
     print_tool_info "libhyperscan-dev" 1
     print_tool_info "zstd" 1
