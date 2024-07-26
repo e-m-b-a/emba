@@ -95,10 +95,12 @@ S18_capa_checker() {
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S18[@]}"
 
-  print_ln
-  lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
-  print_output "[*] Found ${ORANGE}${lBINS_CHECKED_CNT/\ *}${NC} capa results in ${ORANGE}${#BINARIES[@]}${NC} binaries"
-  rm "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
+  if [[ -f "${TMP_DIR}"/s18_checked.tmp ]]; then
+    print_ln
+    lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
+    print_output "[*] Found ${ORANGE}${lBINS_CHECKED_CNT/\ *}${NC} capa results in ${ORANGE}${#BINARIES[@]}${NC} binaries"
+    rm "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
+  fi
 
   module_end_log "${FUNCNAME[0]}" "${lBINS_CHECKED_CNT/\ *}"
 }
