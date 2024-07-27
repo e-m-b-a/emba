@@ -9607,6 +9607,7 @@ CVE-2023-2224;WordPress Seo By 10Web Cross Site Scripting;https://packetstormsec
 CVE-2023-2225;WordPress SEO Alert 1.59 Cross Site Scripting;https://packetstormsecurity.com/files/173731/WordPress-SEO-Alert-1.59-Cross-Site-Scripting.html;unknown
 CVE-2023-2246;Online Pizza Ordering System 1.0 Shell Upload;https://packetstormsecurity.com/files/172182/Online-Pizza-Ordering-System-1.0-Shell-Upload.html;remote
 CVE-2023-22527;Atlassian Confluence 8.5.3 Remote Code Execution;https://packetstormsecurity.com/files/177643/Atlassian-Confluence-8.5.3-Remote-Code-Execution.html;remote
+CVE-2023-22527;Confluence Template Injection Remote Code Execution;https://packetstormsecurity.com/files/179520/Confluence-Template-Injection-Remote-Code-Execution.html;remote
 CVE-2023-22580;Tiki Wiki CMS Groupware 24.0 grid.php PHP Object Injection;https://packetstormsecurity.com/files/170434/Tiki-Wiki-CMS-Groupware-24.0-grid.php-PHP-Object-Injection.html;unknown
 CVE-2023-22620;SecurePoint UTM 12.x Session ID Leak;https://packetstormsecurity.com/files/171924/SecurePoint-UTM-12.x-Session-ID-Leak.html;unknown
 CVE-2023-22629;Titan FTP Path Traversal;https://packetstormsecurity.com/files/171737/Titan-FTP-Path-Traversal.html;unknown
@@ -10368,6 +10369,7 @@ CVE-2024-34162;Sharp Multi Function Printer 18 Vulnerabilities;https://packetsto
 CVE-2024-34241;Rocket LMS 1.9 Cross Site Scripting;https://packetstormsecurity.com/files/178629/Rocket-LMS-1.9-Cross-Site-Scripting.html;unknown
 CVE-2024-34481;Drupal Wiki 8.31 8.30 Cross Site Scripting;https://packetstormsecurity.com/files/178487/Drupal-Wiki-8.31-8.30-Cross-Site-Scripting.html;unknown
 CVE-2024-34724;PowerVR _UnrefAndMaybeDestroy Use After Free;https://packetstormsecurity.com/files/178647/PowerVR-_UnrefAndMaybeDestroy-Use-After-Free.html;unknown
+CVE-2024-34729;PowerVR Dangling Page Table Entry;https://packetstormsecurity.com/files/179593/PowerVR-Dangling-Page-Table-Entry.html;unknown
 CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
@@ -10387,8 +10389,11 @@ CVE-2024-37859;Lost And Found Information System 1.0 Cross Site Scripting;https:
 CVE-2024-38023;Microsoft SharePoint Remote Code Execution;https://packetstormsecurity.com/files/179460/Microsoft-SharePoint-Remote-Code-Execution.html;remote
 CVE-2024-38024;Microsoft SharePoint Remote Code Execution;https://packetstormsecurity.com/files/179460/Microsoft-SharePoint-Remote-Code-Execution.html;remote
 CVE-2024-38094;Microsoft SharePoint Remote Code Execution;https://packetstormsecurity.com/files/179460/Microsoft-SharePoint-Remote-Code-Execution.html;remote
+CVE-2024-38457;XenForo 2.2.15 Cross Site Request Forgery;https://packetstormsecurity.com/files/179585/XenForo-2.2.15-Cross-Site-Request-Forgery.html;unknown
+CVE-2024-38458;Xenforo 2.2.15 Remote Code Execution;https://packetstormsecurity.com/files/179586/Xenforo-2.2.15-Remote-Code-Execution.html;remote
 CVE-2024-39143;ResidenceCMS 2.10.1 Cross Site Scripting;https://packetstormsecurity.com/files/179401/ResidenceCMS-2.10.1-Cross-Site-Scripting.html;unknown
 CVE-2024-39248;SimpCMS 0.1 Cross Site Scripting;https://packetstormsecurity.com/files/179219/SimpCMS-0.1-Cross-Site-Scripting.html;unknown
+CVE-2024-40502;Hospital Management System Project In ASP.Net MVC 1 SQL Injection;https://packetstormsecurity.com/files/179583/Hospital-Management-System-Project-In-ASP.Net-MVC-1-SQL-Injection.html;remote
 CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
 CVE-2024-4358;Telerik Report Server Deserialization Authentication Bypass;https://packetstormsecurity.com/files/179406/Telerik-Report-Server-Deserialization-Authentication-Bypass.html;unknown
