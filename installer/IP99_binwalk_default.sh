@@ -64,7 +64,8 @@ IP99_binwalk_default() {
     print_tool_info "python3-pyqt5.qtopengl" 1
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
-    print_tool_info "python-setuptools" 1
+    # print_tool_info "python-setuptools" 1
+    print_pip_info "setuptools"
     # screcord is currently not available anymore via apt-get
     # Todo: Check if it is needed and we need to find some alternative solution
     # print_tool_info "srecord" 1
@@ -89,6 +90,7 @@ IP99_binwalk_default() {
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        pip_install "setuptools"
 
         git clone https://github.com/EMBA-support-repos/binwalk_ospg.git external/binwalk
         cd external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
