@@ -133,12 +133,15 @@ rpm_package_files_search() {
     write_csv_log "Packaging system" "package dir" "package" "version"
     print_output "[*] Found ${ORANGE}${#RPM_PACKAGE_DBS[@]}${NC} RPM package management directories."
     for PACKAGE_FILE in "${RPM_PACKAGE_DBS[@]}" ; do
-      RPM_DIR="$(dirname "${PACKAGE_FILE}" || continue)"
+      RPM_DIR="$(dirname "${PACKAGE_FILE}" || true)"
       # not sure this works on an offline system - we need further tests on this:
       mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "${RPM_DIR}" || print_output "[-] Failed to identify RPM packages in ${RPM_DIR}" "no_log")
       for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do
-        PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $3}' || continue)
-        PACKAGE_NAME=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $1}' || continue)
+        PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $3}' || true)
+        PACKAGE_NAME=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $1}' || true)
+        if [[ -z "${PACKAGE_VERSION}" || -z "${PACKAGE_NAME}" ]]; then
+          continue
+        fi
         print_output "[*] RPM package details: ${ORANGE}${PACKAGE_NAME}${NC} - ${ORANGE}${PACKAGE_VERSION}${NC}"
         write_csv_log "${PACKAGING_SYSTEM}" "${RPM_DIR}" "${PACKAGE_NAME}" "${PACKAGE_VERSION}"
       done
