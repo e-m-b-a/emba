@@ -137,8 +137,14 @@ rpm_package_files_search() {
       # not sure this works on an offline system - we need further tests on this:
       mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "${RPM_DIR}" || print_output "[-] Failed to identify RPM packages in ${RPM_DIR}" "no_log")
       for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do
-        PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $3}' || true)
-        PACKAGE_NAME=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $1}' || true)
+        print_output "[*] Testing RPM directory ${RPM_DIR} with PACKAGE_AND_VERSION: ${PACKAGE_AND_VERSION}" "no_log"
+        PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep "^Version" || true)
+        PACKAGE_VERSION="${PACKAGE_VERSION/*:\ }"
+        PACKAGE_NAME=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep "^Name" || true)
+        PACKAGE_NAME="${PACKAGE_NAME/*:\ }"
+        # just for output the details
+        rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" || true
+
         if [[ -z "${PACKAGE_VERSION}" || -z "${PACKAGE_NAME}" ]]; then
           continue
         fi
