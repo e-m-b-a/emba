@@ -10314,6 +10314,7 @@ CVE-2024-29412;Hospital Management System 1.0 Cross Site Scripting;https://packe
 CVE-2024-29849;Veeam Backup Enterprise Manager Authentication Bypass;https://packetstormsecurity.com/files/179408/Veeam-Backup-Enterprise-Manager-Authentication-Bypass.html;unknown
 CVE-2024-29855;Veeam Recovery Orchestrator Authentication Bypass;https://packetstormsecurity.com/files/179407/Veeam-Recovery-Orchestrator-Authentication-Bypass.html;unknown
 CVE-2024-29978;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-30088;Collateral Damage CVE 2024 30088 Privilege Escalation;https://packetstormsecurity.com/files/179642/Collateral-Damage-CVE-2024-30088-Privilege-Escalation.html;unknown
 CVE-2024-30104;Microsoft Office 365 Remote Code Execution;https://packetstormsecurity.com/files/179394/Microsoft-Office-365-Remote-Code-Execution.html;remote
 CVE-2024-30162;Invision Community 4.7.16 Remote Code Execution;https://packetstormsecurity.com/files/177983/Invision-Community-4.7.16-Remote-Code-Execution.html;remote
 CVE-2024-30163;Invision Community 4.7.15 SQL Injection;https://packetstormsecurity.com/files/177982/Invision-Community-4.7.15-SQL-Injection.html;remote
@@ -10365,6 +10366,7 @@ CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstor
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
 CVE-2024-34058;Nethserver 7 8 Cross Site Scripting;https://packetstormsecurity.com/files/178649/Nethserver-7-8-Cross-Site-Scripting.html;unknown
+CVE-2024-34102;Adobe Commerce Magento Open Source XML Injection User Impersonation;https://packetstormsecurity.com/files/179640/Adobe-Commerce-Magento-Open-Source-XML-Injection-User-Impersonation.html;unknown
 CVE-2024-34162;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-34241;Rocket LMS 1.9 Cross Site Scripting;https://packetstormsecurity.com/files/178629/Rocket-LMS-1.9-Cross-Site-Scripting.html;unknown
 CVE-2024-34481;Drupal Wiki 8.31 8.30 Cross Site Scripting;https://packetstormsecurity.com/files/178487/Drupal-Wiki-8.31-8.30-Cross-Site-Scripting.html;unknown
@@ -10411,3 +10413,6 @@ CVE-2024-5672;Helmholz Industrial Router REX100 MBConnectline mbNET.mini 2.2.11 
 CVE-2024-5676;Paradox IP150 Internet Module 1.40.00 Cross Site Request Forgery;https://packetstormsecurity.com/files/179182/Paradox-IP150-Internet-Module-1.40.00-Cross-Site-Request-Forgery.html;unknown
 CVE-2024-5947;Deep Sea Electronics DSE855 Remote Authentication Bypass;https://packetstormsecurity.com/files/179342/Deep-Sea-Electronics-DSE855-Remote-Authentication-Bypass.html;unknown
 CVE-2024-6387;OpenSSH Server regreSSHion Remote Code Execution;https://packetstormsecurity.com/files/179290/OpenSSH-Server-regreSSHion-Remote-Code-Execution.html;unknown
+CVE-2024-6911;Perten Instruments Process Plus Software 1.11.6507.0 LFI Hardcoded Credentials;https://packetstormsecurity.com/files/179663/Perten-Instruments-Process-Plus-Software-1.11.6507.0-LFI-Hardcoded-Credentials.html;local
+CVE-2024-6912;Perten Instruments Process Plus Software 1.11.6507.0 LFI Hardcoded Credentials;https://packetstormsecurity.com/files/179663/Perten-Instruments-Process-Plus-Software-1.11.6507.0-LFI-Hardcoded-Credentials.html;local
+CVE-2024-6913;Perten Instruments Process Plus Software 1.11.6507.0 LFI Hardcoded Credentials;https://packetstormsecurity.com/files/179663/Perten-Instruments-Process-Plus-Software-1.11.6507.0-LFI-Hardcoded-Credentials.html;local
