@@ -557,7 +557,8 @@ log_bin_hardening() {
   local lBIN="${1:-}"
   local lFUNC_LOG="${2:-}"
 
-  local lNAME="$(basename "${lBIN}")"
+  local lNAME=""
+  lNAME="$(basename "${lBIN}")"
 
   local lHEAD_BIN_PROT=""
   local lBIN_PROT=""
