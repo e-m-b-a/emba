@@ -179,7 +179,7 @@ ghidra_analyzer() {
     # FUNC_LOG is currently global for log_bin_hardening from modules/S13_weak_func_check.sh -> todo as parameter
     export FUNC_LOG="${lSEMGREPLOG_TXT}"
     write_log "\\n" "${lSEMGREPLOG_TXT}"
-    log_bin_hardening "${lNAME}" "${lSEMGREPLOG_TXT}"
+    log_bin_hardening "${lBINARY}" "${lSEMGREPLOG_TXT}"
     write_log "\\n-----------------------------------------------------------------\\n" "${lSEMGREPLOG_TXT}"
   fi
 

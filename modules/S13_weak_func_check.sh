@@ -189,7 +189,7 @@ function_check_NIOS2() {
       fi
       STRLEN_ADDR=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
 
-      log_bin_hardening "${NAME}" "${FUNC_LOG}"
+      log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
       log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -237,7 +237,7 @@ function_check_PPC32() {
     if ( readelf -r "${BINARY_}" --use-dynamic | awk '{print $5}' | grep -E -q "^${FUNCTION}" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      log_bin_hardening "${NAME}" "${FUNC_LOG}"
+      log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
       log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -291,7 +291,7 @@ function_check_MIPS() {
     NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     if [[ -n "${FUNC_ADDR}" ]] ; then
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      log_bin_hardening "${NAME}" "${FUNC_LOG}"
+      log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
       log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -338,7 +338,7 @@ function_check_ARM64() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-    log_bin_hardening "${NAME}" "${FUNC_LOG}"
+    log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
     log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
       "${OBJDUMP}" -d "${BINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
@@ -384,7 +384,7 @@ function_check_ARM32() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-    log_bin_hardening "${NAME}" "${FUNC_LOG}"
+    log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
     log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
       "${OBJDUMP}" -d "${BINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
@@ -430,7 +430,7 @@ function_check_x86() {
     if ( readelf -r --use-dynamic "${BINARY_}" | awk '{print $5}' | grep -E -q "^${FUNCTION}" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      log_bin_hardening "${NAME}" "${FUNC_LOG}"
+      log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
       log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -477,7 +477,7 @@ function_check_x86_64() {
     if ( readelf -r --use-dynamic "${BINARY_}" | awk '{print $5}' | grep -E -q "^${FUNCTION}" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      log_bin_hardening "${NAME}" "${FUNC_LOG}"
+      log_bin_hardening "${BINARY_}" "${FUNC_LOG}"
       log_func_header "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -554,21 +554,24 @@ print_top10_statistics() {
 }
 
 log_bin_hardening() {
-  local lNAME="${1:-}"
+  local lBIN="${1:-}"
   local lFUNC_LOG="${2:-}"
 
-  local HEAD_BIN_PROT=""
-  local BIN_PROT=""
+  local lNAME=""
+  lNAME="$(basename "${lBIN}")"
+
+  local lHEAD_BIN_PROT=""
+  local lBIN_PROT=""
 
   if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of ${ORANGE}${lNAME}${NC}" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
     # get headline:
-    HEAD_BIN_PROT=$(grep "FORTI.*FILE" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTI.*//'| sort -u || true)
-    write_log "  ${HEAD_BIN_PROT}" "${lFUNC_LOG}"
+    lHEAD_BIN_PROT=$(grep "FORTI.*FILE" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTI.*//'| sort -u || true)
+    write_log "  ${lHEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
-    BIN_PROT=$(grep '/'"${lNAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    write_log "  ${BIN_PROT}${NC}" "${lFUNC_LOG}"
+    lBIN_PROT=$(grep '/'"${lNAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    write_log "  ${lBIN_PROT}${NC}" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
   fi
 }

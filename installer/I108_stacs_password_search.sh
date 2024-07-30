@@ -27,7 +27,7 @@ I108_stacs_password_search() {
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
 
     print_tool_info "python3-pip" 1
-    print_tool_info "libarchive13" 1
+    # print_tool_info "libarchive13" 1
     print_tool_info "libarchive-dev" 1
     print_tool_info "pybind11-dev" 1
     print_tool_info "libssl-dev" 1
