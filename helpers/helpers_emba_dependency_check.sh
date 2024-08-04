@@ -501,7 +501,6 @@ dependency_check()
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 1 ]] && [[ "${ONLY_DEP}" -ne 2 ]]; then
     check_dep_tool "docker"
-    check_dep_tool "docker-compose"
     check_dep_tool "inotifywait"
     check_dep_tool "notify-send"
   fi
