@@ -10372,6 +10372,9 @@ CVE-2024-34241;Rocket LMS 1.9 Cross Site Scripting;https://packetstormsecurity.c
 CVE-2024-34481;Drupal Wiki 8.31 8.30 Cross Site Scripting;https://packetstormsecurity.com/files/178487/Drupal-Wiki-8.31-8.30-Cross-Site-Scripting.html;unknown
 CVE-2024-34724;PowerVR _UnrefAndMaybeDestroy Use After Free;https://packetstormsecurity.com/files/178647/PowerVR-_UnrefAndMaybeDestroy-Use-After-Free.html;unknown
 CVE-2024-34729;PowerVR Dangling Page Table Entry;https://packetstormsecurity.com/files/179593/PowerVR-Dangling-Page-Table-Entry.html;unknown
+CVE-2024-34732;PowerVR PMR Physical Memory Handling Flaw;https://packetstormsecurity.com/files/179768/PowerVR-PMR-Physical-Memory-Handling-Flaw.html;unknown
+CVE-2024-34733;PowerVR DevmemXIntMapPages DevmemXIntUnmapPages Integer Overflows;https://packetstormsecurity.com/files/179769/PowerVR-DevmemXIntMapPages-DevmemXIntUnmapPages-Integer-Overflows.html;unknown
+CVE-2024-34748;PowerVR _DevmemXReservationPageAddress Wrapping Addition Error;https://packetstormsecurity.com/files/179770/PowerVR-_DevmemXReservationPageAddress-Wrapping-Addition-Error.html;unknown
 CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
@@ -10396,6 +10399,8 @@ CVE-2024-38458;Xenforo 2.2.15 Remote Code Execution;https://packetstormsecurity.
 CVE-2024-39143;ResidenceCMS 2.10.1 Cross Site Scripting;https://packetstormsecurity.com/files/179401/ResidenceCMS-2.10.1-Cross-Site-Scripting.html;unknown
 CVE-2024-39248;SimpCMS 0.1 Cross Site Scripting;https://packetstormsecurity.com/files/179219/SimpCMS-0.1-Cross-Site-Scripting.html;unknown
 CVE-2024-40502;Hospital Management System Project In ASP.Net MVC 1 SQL Injection;https://packetstormsecurity.com/files/179583/Hospital-Management-System-Project-In-ASP.Net-MVC-1-SQL-Injection.html;remote
+CVE-2024-41332;Computer Laboratory Management System 1.0 Privilege Escalation;https://packetstormsecurity.com/files/179890/Computer-Laboratory-Management-System-1.0-Privilege-Escalation.html;unknown
+CVE-2024-41333;Tourism Management System 2.0 Cross Site Scripting;https://packetstormsecurity.com/files/179891/Tourism-Management-System-2.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
 CVE-2024-4358;Telerik Report Server Deserialization Authentication Bypass;https://packetstormsecurity.com/files/179406/Telerik-Report-Server-Deserialization-Authentication-Bypass.html;unknown
