@@ -33,6 +33,10 @@ fi
 if [ -d /etc/init.d/ ]; then
   for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f -name "*httpd*" -o -type f -name "ftpd" -o -type f -name "miniupnpd" \
     -o -type f -name "*apache*" -o -type f -name "*init*" -o -type f -name "*service*"); do
+    if "${BUSYBOX}" echo "${SERVICE}" | grep -q "factory"; then
+      # do not use entries like factory.init or init.factory and so on
+      continue
+    fi
     if [ -e "${SERVICE}" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
