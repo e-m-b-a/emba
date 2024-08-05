@@ -1523,8 +1523,21 @@ get_networking_details_emulation() {
         IP_ADDRESS_=$(echo "${lIP}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
       fi
 
+      # handle IP addresses 0.0.0.0 somehow:
+      if [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
+        # we use one of the idenfied IP addresses. If no IP address available we switch to default 192.168.0.1
+        if [[ -s "${LOG_DIR}/emulator_online_results.log" ]]; then
+          IP_ADDRESS_=$(cut -d\; -f8 "${LOG_DIR}/emulator_online_results.log" | sort -u | tail -n1)
+          IP_ADDRESS_="${IP_ADDRESS_/*\ /}"
+          print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
+        else
+          IP_ADDRESS_="192.168.0.1"
+          print_output "[*] Originally identified IP 0.0.0.0 -> using default IP ${IP_ADDRESS_}"
+        fi
+      fi
+
       # filter for non usable IP addresses:
-      if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127."* ]] && ! [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
+      if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127."* ]]; then
         print_ln
         print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC}"
         DETECTED_IP=1
@@ -1548,6 +1561,7 @@ get_networking_details_emulation() {
                 print_output "[*] Testing bridge interface ${ORANGE}${lBRIDGE_INT}${NC}"
                 lVLAN_ID="NONE"
                 # the lBRIDGE_INT entry also includes our lNETWORK_DEVICE ... eg br:br0 dev:eth1.1
+                l_NW_ENTRY_PRIO=3
                 if [[ "${lBRIDGE_INT}" == *"${lNETWORK_DEVICE}"* ]]; then
                   # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
                   # extract the eth1 from dev:eth1
@@ -1556,12 +1570,13 @@ get_networking_details_emulation() {
                   # do we have vlans?
                   if [[ -v lVLAN_INFOS[@] ]]; then
                     iterate_vlans "${lETH_INT}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${IP_ADDRESS_}" "${lVLAN_INFOS[@]}"
-                  # elif echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
-                  elif echo "${lBRIDGE_INT}" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+                  fi
+                  if echo "${lBRIDGE_INT}" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
                     # we have a vlan entry in our lBRIDGE_INT entry br:br0 dev:eth1.1:
                     # lVLAN_ID="$(echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
                     lVLAN_ID="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
-                  elif [[ -v lVLAN_HW_INFO_DEV[@] ]]; then
+                  fi
+                  if [[ -v lVLAN_HW_INFO_DEV[@] ]]; then
                     # if we have found some entry "adding VLAN [0-9] to HW filter on device ethX" in our qemu logs
                     # we check all these entries now and generate additional configurations for further evaluation
                     for lETH_INT in "${lVLAN_HW_INFO_DEV[@]}"; do
@@ -1584,9 +1599,6 @@ get_networking_details_emulation() {
                         store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
                       fi
                     done
-                  else
-                    lVLAN_ID="NONE"
-                    l_NW_ENTRY_PRIO=3
                   fi
                   # now we set the orig. network_device with the new details (lVLAN_ID=NONE):
                   store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
@@ -2402,6 +2414,13 @@ check_online_stat() {
 
     local lCNT=0
     while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -le 2 ]]; do
+      if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -gt 0 ]]; then
+        local lNMAP_INIT_LOG="${ARCHIVE_PATH}"/"${lNMAP_LOG/\.txt/\.${RANDOM}\.init}"
+        cp "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${lNMAP_INIT_LOG}"
+        print_output "[+] Already dedected running network services via Nmap ... further detection active"
+        write_link "${lNMAP_INIT_LOG}"
+        print_ln
+      fi
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
       sleep 60
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
