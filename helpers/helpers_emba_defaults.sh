@@ -72,8 +72,8 @@ set_defaults() {
   export L10_DEBUG_MODE=0
   export FULL_EMULATION=0       # full system emulation - set it via command line parameter -Q
   export QEMULATION=0           # user-mode emulation - set it via command line parameter -E
-  export L10_KERNEL_V_LONG="4.1.17"
-  # export L10_KERNEL_V_LONG="4.1.52"
+  # export L10_KERNEL_V_LONG="4.1.17"
+  export L10_KERNEL_V_LONG="4.1.52"
   export L10_BB_VER="1.36.1"
   export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
                                 # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
