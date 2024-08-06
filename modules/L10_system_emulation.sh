@@ -269,7 +269,7 @@ cleanup_tap() {
   mapfile -t lTAP_CLEAN_ARR < <(ifconfig | grep tap | cut -d: -f1 || true)
   for lTAP_TO_CLEAN in "${lTAP_CLEAN_ARR[@]}"; do
     print_output "[*] Cleaning up TAP interface ${lTAP_TO_CLEAN}"
-    tunctl -d "${lTAP_TO_CLEAN}" || print_output "[-] Error in tap cleanup"
+    tunctl -d "${lTAP_TO_CLEAN}" || print_error "[-] Error in tap cleanup"
   done
 }
 
@@ -579,7 +579,7 @@ main_emulation() {
 
     if [[ -n "${lBAK_INIT_ORIG}" ]]; then
       print_output "[*] Restoring old init file: ${lBAK_INIT_ORIG}"
-      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_output "[-] Error restoring old init file ${lBAK_INIT_ORIG}" "no_log"
+      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_error "[-] Error restoring old init file ${lBAK_INIT_ORIG}"
       lBAK_INIT_BACKUP=""
       lBAK_INIT_ORIG=""
     fi
@@ -651,7 +651,7 @@ main_emulation() {
       print_output "[*] Add network.sh entry to ${ORANGE}${lINIT_OUT}${NC}"
 
       echo "" >> "${lINIT_OUT}" || true
-      echo "/firmadyne/network.sh &" >> "${lINIT_OUT}" || print_output "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
+      echo "/firmadyne/network.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
     else
       print_output "[*] network.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
@@ -661,7 +661,7 @@ main_emulation() {
         while read -r lSERVICE_NAME; do
           print_output "[*] Created service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
         done < "${MNT_POINT}/firmadyne/service"
-        echo "/firmadyne/run_service.sh &" >> "${lINIT_OUT}" || print_output "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
+        echo "/firmadyne/run_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
       fi
     else
       print_output "[*] run_service.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
@@ -669,7 +669,7 @@ main_emulation() {
 
     if ! ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}"); then
       # trendnet TEW-828DRU_1.0.7.2, etc...
-      echo "/firmadyne/busybox sleep 36000" >> "${lINIT_OUT}" || print_output "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
+      echo "/firmadyne/busybox sleep 36000" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
     else
       print_output "[*] busybox sleep entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
@@ -2547,13 +2547,13 @@ create_emulation_archive() {
 
   if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
     # we only copy the kernel and the firmware image to the archive if FINAL_FW_RM is not set
-    cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_output "[-] Error in kernel copy procedure" "no_log"
-    cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_output "[-] Error in image copy procedure" "no_log"
+    cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_error "[-] Error in kernel copy procedure"
+    cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_error "[-] Error in image copy procedure"
   fi
 
   if [[ -f "${LOG_PATH_MODULE}"/"${NMAP_LOG}" ]]; then
-    mv "${LOG_PATH_MODULE}"/"${NMAP_LOG}" "${lARCHIVE_PATH}" ||  print_output "[-] Error in Nmap results copy procedure" "no_log"
-    mv "${LOG_PATH_MODULE}"/nmap_emba_"${lIPS_INT_VLAN_CFG_mod}"* "${lARCHIVE_PATH}" || print_output "[-] Error in Nmap results copy procedure" "no_log"
+    mv "${LOG_PATH_MODULE}"/"${NMAP_LOG}" "${lARCHIVE_PATH}" || print_error "[-] Error in Nmap results copy procedure"
+    mv "${LOG_PATH_MODULE}"/nmap_emba_"${lIPS_INT_VLAN_CFG_mod}"* "${lARCHIVE_PATH}" || print_error "[-] Error in Nmap results copy procedure"
   fi
 
   echo "${lIPS_INT_VLAN_CFG_mod}" >> "${lARCHIVE_PATH}"/emulation_config.txt || true

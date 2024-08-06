@@ -223,7 +223,7 @@ uefi_extractor() {
     mkdir -p "${EXTRACTION_DIR_}"
   fi
   cp "${FIRMWARE_PATH_}" "${EXTRACTION_DIR_}"
-  "${UEFI_EXTRACT_BIN}" "${EXTRACTION_DIR_}"/firmware all &> "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log || print_output "[-] UEFI firmware extraction failed" "no_log"
+  "${UEFI_EXTRACT_BIN}" "${EXTRACTION_DIR_}"/firmware all &> "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log || print_error "[-] UEFI firmware extraction failed"
 
   UEFI_EXTRACT_REPORT_FILE="${EXTRACTION_DIR_}"/firmware.report.txt
   if [[ -f "${UEFI_EXTRACT_REPORT_FILE}" ]]; then

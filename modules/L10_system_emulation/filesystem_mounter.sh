@@ -183,6 +183,7 @@ image_unmounter() {
   done
 }
 
+## main functionality:
 IMAGE="${1:-}"
 MOUNTER="${2:-}"
 

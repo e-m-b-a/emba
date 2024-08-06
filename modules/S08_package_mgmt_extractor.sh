@@ -135,7 +135,7 @@ rpm_package_files_search() {
     for PACKAGE_FILE in "${RPM_PACKAGE_DBS[@]}" ; do
       RPM_DIR="$(dirname "${PACKAGE_FILE}" || true)"
       # not sure this works on an offline system - we need further tests on this:
-      mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "${RPM_DIR}" || print_output "[-] Failed to identify RPM packages in ${RPM_DIR}" "no_log")
+      mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "${RPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${RPM_DIR}")
       for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do
         print_output "[*] Testing RPM directory ${RPM_DIR} with PACKAGE_AND_VERSION: ${PACKAGE_AND_VERSION}" "no_log"
         PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep "^Version" || true)

@@ -20,38 +20,38 @@
 export PRE_THREAD_ENA=0
 
 P18_BMC_decryptor() {
-  local NEG_LOG=0
+  local lNEG_LOG=0
 
   if [[ "${BMC_ENC_DETECTED}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "BMC encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
-    EXTRACTION_FILE="${LOG_DIR}"/firmware/firmware_bmc_dec.bin
+    local lEXTRACTION_FILE="${LOG_DIR}"/firmware/firmware_bmc_dec.bin
 
-    bmc_extractor "${FIRMWARE_PATH}" "${EXTRACTION_FILE}"
+    bmc_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
 
-    NEG_LOG=1
-    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    lNEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
 
 bmc_extractor() {
-  local BMC_FILE_PATH_="${1:-}"
-  local EXTRACTION_FILE_="${2:-}"
+  local lBMC_FILE_PATH_="${1:-}"
+  local lEXTRACTION_FILE_="${2:-}"
 
-  if ! [[ -f "${BMC_FILE_PATH_}" ]]; then
+  if ! [[ -f "${lBMC_FILE_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
     return
   fi
 
   sub_module_title "BMC encrypted firmware extractor"
 
-  "${EXT_DIR}"/smcbmc/smcbmc.py "${BMC_FILE_PATH_}" "${EXTRACTION_FILE_}"
+  "${EXT_DIR}"/smcbmc/smcbmc.py "${lBMC_FILE_PATH_}" "${lEXTRACTION_FILE_}"
 
   print_ln
-  if [[ -f "${EXTRACTION_FILE_}" ]]; then
-    export FIRMWARE_PATH="${EXTRACTION_FILE_}"
+  if [[ -f "${lEXTRACTION_FILE_}" ]]; then
+    export FIRMWARE_PATH="${lEXTRACTION_FILE_}"
     print_output "[+] Extracted BMC encrypted firmware file to ${ORANGE}${FIRMWARE_PATH}${NC}"
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     print_ln
@@ -60,9 +60,9 @@ bmc_extractor() {
     unblobber "${FIRMWARE_PATH}" "${LOG_DIR}"/firmware/firmware_bmc_decrypted
     detect_root_dir_helper "${LOG_DIR}"/firmware/firmware_bmc_decrypted
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "BMC encrypted" "${BMC_FILE_PATH_}" "${FIRMWARE_PATH}" "1" "NA" "NA"
+    write_csv_log "BMC encrypted" "${lBMC_FILE_PATH_}" "${FIRMWARE_PATH}" "1" "NA" "NA"
   else
     print_output "[-] Extraction of BMC encrypted firmware file failed - Trying unblob as last resort"
-    unblobber "${EXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_bmc_failed_extracted
+    unblobber "${lEXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_bmc_failed_extracted
   fi
 }
