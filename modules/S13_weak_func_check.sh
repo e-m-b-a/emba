@@ -569,8 +569,20 @@ log_bin_hardening() {
     # get headline:
     lHEAD_BIN_PROT=$(grep "FORTI.*FILE" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTI.*//'| sort -u || true)
     write_log "  ${lHEAD_BIN_PROT}" "${lFUNC_LOG}"
-    # get binary entry
-    lBIN_PROT=$(grep '/'"${lNAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    # get binary entry - we have three possibilities
+    # #1 - the full binary path
+    # #2 - stripped binary path from cut_path()
+    # #3 - only binary name - weakest mechanism
+    if [[ "$(grep "${lBIN}" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+      # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}${lBIN}${NC}"
+      lBIN_PROT=$(grep "${lBIN}" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    elif [[ "$(grep "$(cut_path "${lBIN}")" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+      # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}$(cut_path ${lBIN})${NC}"
+      lBIN_PROT=$(grep "$(cut_path "${lBIN}")" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    else
+      # print_output "[*] Binary protection state of ${GREEN}${lNAME}${NC} / ${lBIN}"
+      lBIN_PROT=$(grep '/'"${lNAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    fi
     write_log "  ${lBIN_PROT}${NC}" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
   fi
