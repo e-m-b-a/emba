@@ -70,6 +70,10 @@ if ("${EMBA_ETC}"); then
           # otherwise we move on to the next binary starter
           continue
         fi
+        if [ "${BINARY_NAME}" = "telnet" ] && ! [ "${EMBA_NC}" = "true" ]; then
+          "${BUSYBOX}" echo "[*] EMBA Telnet starter bypassed ... enable it via kernel environment EMBA_NC=true"
+          continue
+        fi
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &

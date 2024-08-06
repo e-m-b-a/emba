@@ -601,6 +601,8 @@ main_emulation() {
     # we always add the identified init entry to the EMBA preInit script
     if ! (grep -q "${lINIT_FILE}" "${lINIT_OUT}"); then
       echo "${lINIT_FILE} &" >> "${lINIT_OUT}" || true
+      # ensure we give the system some time to boot via the original init file
+      echo "/firmadyne/busybox sleep 120" >> "${lINIT_OUT}" || true
     fi
     if (grep -q "preInit.sh" "${MNT_POINT}""${lINIT_FILE}"); then
       # if have our own backup init script we need to remove our own entries now

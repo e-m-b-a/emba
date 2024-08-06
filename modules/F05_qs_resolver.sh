@@ -101,7 +101,7 @@ F05_qs_resolver() {
   fi
 
   # lets do a final cleanup to get rid of all the ASK_GPT entries:
-  find "${LOG_DIR}" -max-depth 1 -type f -name "*.txt" -exec sed -i '/ASK_GPT/d' {} \;
+  find "${LOG_DIR}" -maxdepth 1 -type f -name "*.txt" -exec sed -i '/ASK_GPT/d' {} \;
 
   # do not create a web reporter page
   module_end_log "${FUNCNAME[0]}" 0

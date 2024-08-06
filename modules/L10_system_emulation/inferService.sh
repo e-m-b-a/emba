@@ -163,6 +163,8 @@ done
 
 "${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA netcat listener${NC}"
 "${BUSYBOX}" echo -e -n "/firmadyne/netcat -nvlp 9876 -e /firmadyne/sh\n" >> /firmadyne/service
+"${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA telnet listener${NC}"
+"${BUSYBOX}" echo -e -n "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh\n" >> /firmadyne/service
 
 if [ -f /firmadyne/service ]; then
   "${BUSYBOX}" sort -u -o /firmadyne/service /firmadyne/service
