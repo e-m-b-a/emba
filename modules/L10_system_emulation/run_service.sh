@@ -10,7 +10,7 @@
 
 BUSYBOX=/firmadyne/busybox
 # we should build a real and useful PATH ... currently it is just guessing
-export PATH=$PATH:/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
+export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 # "${BUSYBOX}" touch /firmadyne/EMBA_service_init_done
 ORANGE="\033[0;33m"
