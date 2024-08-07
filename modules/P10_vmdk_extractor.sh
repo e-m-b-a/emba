@@ -18,7 +18,7 @@
 export PRE_THREAD_ENA=0
 
 P10_vmdk_extractor() {
-  local NEG_LOG=0
+  local lNEG_LOG=0
 
   if [[ "${VMDK_DETECTED-0}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -32,78 +32,78 @@ P10_vmdk_extractor() {
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi
-    NEG_LOG=1
-    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    lNEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
 
 vmdk_extractor() {
-  local VMDK_PATH_="${1:-}"
-  local EXTRACTION_DIR_="${2:-}"
-  local MOUNT_DEV=""
-  local DEV_NAME=""
-  local TMP_VMDK_MNT="${TMP_DIR}/vmdk_mount_${RANDOM}"
-  local VMDK_DIRS=0
-  local RET=0
+  local lVMDK_PATH_="${1:-}"
+  local lEXTRACTION_DIR_="${2:-}"
+  local lMOUNT_DEV=""
+  local lDEV_NAME=""
+  local lTMP_VMDK_MNT="${TMP_DIR}/vmdk_mount_${RANDOM}"
+  local lVMDK_DIRS=0
+  local lRET=0
   export VMDK_FILES=0
-  local VMDK_VIRT_FS=()
+  local lVMDK_VIRT_FS_ARR=()
 
-  if ! [[ -f "${VMDK_PATH_}" ]]; then
+  if ! [[ -f "${lVMDK_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
     return
   fi
 
   sub_module_title "VMDK (Virtual Machine Disk) extractor"
 
-  print_output "[*] Enumeration of devices in VMDK images ${ORANGE}${VMDK_PATH_}${NC}"
+  print_output "[*] Enumeration of devices in VMDK images ${ORANGE}${lVMDK_PATH_}${NC}"
   disable_strict_mode "${STRICT_MODE}" 0
-  virt-filesystems -a "${VMDK_PATH_}" > "${TMP_DIR}"/vmdk.log
-  RET="$?"
+  virt-filesystems -a "${lVMDK_PATH_}" > "${TMP_DIR}"/vmdk.log
+  lRET="$?"
 
-  if [[ "${RET}" -ne 0 ]]; then
+  if [[ "${lRET}" -ne 0 ]]; then
     # backup with 7z
-    7z x -o"${EXTRACTION_DIR_}" "${VMDK_PATH_}"
-    RET="$?"
-    if [[ "${RET}" -ne 0 ]]; then
+    7z x -o"${lEXTRACTION_DIR_}" "${lVMDK_PATH_}"
+    lRET="$?"
+    if [[ "${lRET}" -ne 0 ]]; then
       print_output "[-] WARNING: VMDK filesystem not enumerated"
       enable_strict_mode "${STRICT_MODE}" 0
       return
     fi
   else
-    mapfile -t VMDK_VIRT_FS < "${TMP_DIR}"/vmdk.log
-    for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
-      print_output "[*] Found device ${ORANGE}${MOUNT_DEV}${NC}"
+    mapfile -t lVMDK_VIRT_FS_ARR < "${TMP_DIR}"/vmdk.log
+    for lMOUNT_DEV in "${lVMDK_VIRT_FS_ARR[@]}"; do
+      print_output "[*] Found device ${ORANGE}${lMOUNT_DEV}${NC}"
     done
   fi
   enable_strict_mode "${STRICT_MODE}" 0
 
-  mkdir -p "${TMP_VMDK_MNT}" || true
+  mkdir -p "${lTMP_VMDK_MNT}" || true
 
-  for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
-    DEV_NAME=$(basename "${MOUNT_DEV}")
-    print_output "[*] Trying to mount ${ORANGE}${MOUNT_DEV}${NC} to ${ORANGE}${TMP_VMDK_MNT}${NC} directory"
+  for lMOUNT_DEV in "${lVMDK_VIRT_FS_ARR[@]}"; do
+    lDEV_NAME=$(basename "${lMOUNT_DEV}")
+    print_output "[*] Trying to mount ${ORANGE}${lMOUNT_DEV}${NC} to ${ORANGE}${lTMP_VMDK_MNT}${NC} directory"
     # if troubles ahead with vmdk mount, remove the error redirection
-    guestmount -a "${VMDK_PATH_}" -m "${MOUNT_DEV}" --ro "${TMP_VMDK_MNT}" 2>/dev/null || true
+    guestmount -a "${lVMDK_PATH_}" -m "${lMOUNT_DEV}" --ro "${lTMP_VMDK_MNT}" 2>/dev/null || true
     if mount | grep -q vmdk_mount; then
-      print_output "[*] Copying ${ORANGE}${MOUNT_DEV}${NC} to firmware directory ${ORANGE}${EXTRACTION_DIR_}/${DEV_NAME}${NC}"
-      mkdir -p "${EXTRACTION_DIR_}"/"${DEV_NAME}"/ || true
-      cp -pr "${TMP_VMDK_MNT}"/* "${EXTRACTION_DIR_}"/"${DEV_NAME}"/ || true
-      umount "${TMP_VMDK_MNT}"
+      print_output "[*] Copying ${ORANGE}${lMOUNT_DEV}${NC} to firmware directory ${ORANGE}${lEXTRACTION_DIR_}/${lDEV_NAME}${NC}"
+      mkdir -p "${lEXTRACTION_DIR_}"/"${lDEV_NAME}"/ || true
+      cp -pr "${lTMP_VMDK_MNT}"/* "${lEXTRACTION_DIR_}"/"${lDEV_NAME}"/ || true
+      umount "${lTMP_VMDK_MNT}"
     fi
   done
 
-  if [[ -d "${EXTRACTION_DIR_}" ]]; then
-    VMDK_FILES=$(find "${EXTRACTION_DIR_}" -type f | wc -l)
-    VMDK_DIRS=$(find "${EXTRACTION_DIR_}" -type d | wc -l)
+  if [[ -d "${lEXTRACTION_DIR_}" ]]; then
+    VMDK_FILES=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
+    lVMDK_DIRS=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
   fi
 
   if [[ "${VMDK_FILES}" -gt 0 ]]; then
     print_ln
-    print_output "[*] Extracted ${ORANGE}${VMDK_FILES}${NC} files and ${ORANGE}${VMDK_DIRS}${NC} directories from the firmware image."
+    print_output "[*] Extracted ${ORANGE}${VMDK_FILES}${NC} files and ${ORANGE}${lVMDK_DIRS}${NC} directories from the firmware image."
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "VMDK extractor" "${VMDK_PATH_}" "${EXTRACTION_DIR_}" "${VMDK_FILES}" "${VMDK_DIRS}" "NA"
+    write_csv_log "VMDK extractor" "${lVMDK_PATH_}" "${lEXTRACTION_DIR_}" "${VMDK_FILES}" "${lVMDK_DIRS}" "NA"
     # currently unblob has issues with VMDKs. We need to disable it for this extraction process
     safe_echo 0 > "${TMP_DIR}"/unblob_disable.cfg
   fi
-  rm -r "${TMP_VMDK_MNT}" || true
+  rm -r "${lTMP_VMDK_MNT}" || true
 }

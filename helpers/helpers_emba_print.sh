@@ -127,8 +127,22 @@ sub_module_title()
   fi
 }
 
-print_output()
-{
+print_error() {
+  local lOUTPUT="${1:-\n}"
+  # local lLOG_SETTING="${2:-}"
+
+  local lTYPE_CHECK=""
+  lTYPE_CHECK="$( echo "${lOUTPUT}" | cut -c1-3 )"
+
+  if ! [[ "${lTYPE_CHECK}" == "[E]" || "${lTYPE_CHECK}" == "[-]" ]] ; then
+    print_output "[*] Warning: Wrong error output declaration: ${lOUTPUT}" "${ERROR_LOG}"
+  fi
+  local lCOLOR_OUTPUT_STRING=""
+  lCOLOR_OUTPUT_STRING="$(color_output "${lOUTPUT}")"
+  safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${ERROR_LOG}"
+}
+
+print_output() {
   local OUTPUT="${1:-\n}"
   local LOG_SETTING="${2:-}"
   if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then

@@ -85,21 +85,24 @@ fi
 # we also use this rcS as fallback solution
 # for this we check different state files and execute the needed scripts
 mkdir -p "$(resolve_link /etc/init.d)"
-if [ ! -s /etc/init.d/rcS ]; then
-  echo '#!/bin/sh' > /etc/init.d/rcS
-  echo 'echo [*] Execute EMBA $0 script sleeping 10 secs ...' >> /etc/init.d/rcS
-  echo 'echo [*] Filesystem overview:' >> /etc/init.d/rcS
-  echo 'ls -l /' >> /etc/init.d/rcS
-  echo 'echo [*] EMBA helpers directory:' >> /etc/init.d/rcS
-  echo 'ls -l /firmadyne' >> /etc/init.d/rcS
-  echo 'sleep 10' >> /etc/init.d/rcS
-  echo 'echo "[*] Execute EMBA preInit.sh script starter .."' >> /etc/init.d/rcS
+
+# disabled for now
+if [ -s /etc/init.d/rcSX ]; then
+  echo '#!/firmadyne/sh' > /etc/init.d/rcS
+  echo 'BUSYBOX=/firmadyne/busybox' >> /etc/init.d/rcS
+  echo '${BUSYBOX} echo [*] Execute EMBA $0 script sleeping 10 secs ...' >> /etc/init.d/rcS
+  echo '${BUSYBOX} echo [*] Filesystem overview:' >> /etc/init.d/rcS
+  echo '${BUSYBOX} ls -l /' >> /etc/init.d/rcS
+  echo '${BUSYBOX} echo [*] EMBA helpers directory:' >> /etc/init.d/rcS
+  echo '${BUSYBOX} ls -l /firmadyne' >> /etc/init.d/rcS
+  echo '${BUSYBOX} sleep 10' >> /etc/init.d/rcS
+  echo '${BUSYBOX} echo "[*] Execute EMBA preInit.sh script starter .."' >> /etc/init.d/rcS
   echo '/firmadyne/preInit.sh &' >> /etc/init.d/rcS
-  echo 'sleep 10' >> /etc/init.d/rcS
-  echo 'echo "[*] Execute EMBA network.sh script starter .."' >> /etc/init.d/rcS
+  echo '${BUSYBOX} sleep 10' >> /etc/init.d/rcS
+  echo '${BUSYBOX} echo "[*] Execute EMBA network.sh script starter .."' >> /etc/init.d/rcS
   echo '/firmadyne/network.sh &' >>  /etc/init.d/rcS
-  echo 'sleep 10' >> /etc/init.d/rcS
-  echo 'echo "[*] Execute EMBA run_service.sh script starter .."' >> /etc/init.d/rcS
+  echo '${BUSYBOX} sleep 10' >> /etc/init.d/rcS
+  echo '${BUSYBOX} echo "[*] Execute EMBA run_service.sh script starter .."' >> /etc/init.d/rcS
   echo '/firmadyne/run_service.sh &' >> /etc/init.d/rcS
   chmod +x /etc/init.d/rcS
 fi

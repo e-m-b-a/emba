@@ -318,9 +318,9 @@ prepare_emulator() {
     cp "$(command -v busybox)" "${R_PATH}"
     chmod +x "${R_PATH}"/busybox
     if [[ "${CHROOT}" == "jchroot" ]]; then
-      "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "${LOG_PATH_MODULE}"/chroot_fixes.txt || print_output "[-] Something weird going wrong in jchroot filesystem fixing"
+      "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "${LOG_PATH_MODULE}"/chroot_fixes.txt || print_error "[-] Something weird going wrong in jchroot filesystem fixing for ${R_PATH}"
     else
-      "${CHROOT}" "${OPTS[@]}" "${R_PATH}" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "${LOG_PATH_MODULE}"/chroot_fixes.txt || print_output "[-] Something weird going wrong in chroot filesystem fixing"
+      "${CHROOT}" "${OPTS[@]}" "${R_PATH}" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "${LOG_PATH_MODULE}"/chroot_fixes.txt || print_error "[-] Something weird going wrong in chroot filesystem fixing for ${R_PATH}"
     fi
     rm "${R_PATH}"/fixImage_user_mode_emulation.sh || true
     rm "${R_PATH}"/busybox || true

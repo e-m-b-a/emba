@@ -150,14 +150,14 @@ ghidra_analyzer() {
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local IDENTIFIER="${RANDOM}"
 
-  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${IDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${IDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_output "[-] Error detected while Ghidra run for ${lNAME}" "no_log"
+  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${IDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${IDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra run for ${lNAME}"
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.rep" ]]; then
-    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.rep" || print_output "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep" "no_log"
+    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
   if [[ -f "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.gpr" ]]; then
-    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.gpr" || print_output "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep" "no_log"
+    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
 
   # if Ghidra was not able to produce code we can return now:
@@ -194,7 +194,7 @@ ghidra_analyzer() {
     fi
   done
 
-  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea /tmp/haruspex_"${lNAME}"/* >> "${lSEMGREPLOG}" || print_output "[-] Semgrep error detected on testing ${lNAME}" "no_log"
+  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea /tmp/haruspex_"${lNAME}"/* >> "${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
 
   # check if there are more details in our log (not only the header with the binary protections)
   if [[ "$(wc -l "${lSEMGREPLOG}" | awk '{print $1}' 2>/dev/null)" -gt 0 ]]; then
@@ -209,11 +209,11 @@ ghidra_analyzer() {
       # Todo: highlight the identified code areas in the decompiled code
     else
       print_output "[-] No C/C++ issues found for binary ${ORANGE}${lNAME}${NC}" "no_log"
-      rm "${lSEMGREPLOG}" || print_output "[-] Error detected while removing ${lSEMGREPLOG}" "no_log"
+      rm "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
       return
     fi
   else
-    rm "${lSEMGREPLOG}" || print_output "[-] Error detected while removing ${lSEMGREPLOG}" "no_log"
+    rm "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
     return
   fi
 
@@ -222,7 +222,7 @@ ghidra_analyzer() {
     mapfile -t lHARUSPEX_FILE_ARR < <(find /tmp/haruspex_"${lNAME}" -type f || true)
     # we only store decompiled code with issues:
     if ! [[ -d "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" ]]; then
-      mkdir "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_output "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}" "no_log"
+      mkdir "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}"
     fi
     for lHARUSPEX_FILE in "${lHARUSPEX_FILE_ARR[@]}"; do
       if [[ ${THREADED} -eq 1 ]]; then
@@ -257,7 +257,7 @@ s16_finish_the_log() {
 
   for lTMP_FILE in "${lSEMGREPLOG/\.json/}"_"${lNAME}"*.tmp; do
     if [[ -f "${lTMP_FILE}" ]]; then
-      cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_output "[-] Error in logfile processing - ${lTMP_FILE}" "no_log"
+      cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_error "[-] Error in logfile processing - ${lTMP_FILE}"
       rm "${lTMP_FILE}" || true
     fi
   done
@@ -289,7 +289,7 @@ s16_semgrep_logger() {
     return
   fi
   if [[ -f "${lHARUSPEX_FILE}" ]]; then
-    mv "${lHARUSPEX_FILE}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_output "[-] Error storing Ghidra decompiled code for ${lNAME} in log directory" "no_log"
+    mv "${lHARUSPEX_FILE}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error storing Ghidra decompiled code for ${lNAME} in log directory"
   fi
   # print_output "[*] moved ${lHARUSPEX_FILE} to ${LOG_PATH_MODULE}/haruspex_${lNAME}" "no_log"
   if [[ -f "${lSEMGREPLOG}" ]]; then

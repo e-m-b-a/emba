@@ -115,7 +115,7 @@ capa_runner_fct() {
   local lBIN_MD5=""
 
   print_output "[*] Testing binary behavior with capa for $(print_path "${lBINARY}")" "no_log"
-  "${EXT_DIR}"/capa "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_output "[-] Capa analysis failed for ${lBINARY}" "no_log"
+  "${EXT_DIR}"/capa "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_error "[-] Capa analysis failed for ${lBINARY}"
 
   if [[ -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
     print_output "[+] Capa results for ${ORANGE}$(print_path "${lBINARY}")${NC}" "" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"

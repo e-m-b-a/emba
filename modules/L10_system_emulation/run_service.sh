@@ -9,6 +9,8 @@
 # Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
+# we should build a real and useful PATH ... currently it is just guessing
+export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 # "${BUSYBOX}" touch /firmadyne/EMBA_service_init_done
 ORANGE="\033[0;33m"
@@ -63,17 +65,24 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo "[*] /proc filesytem:"
       "${BUSYBOX}" ls /proc
 
-      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
-        if [ "${BINARY_NAME}" = "netcat" ] && ! [ "${EMBA_NC}" = "true" ]; then
-          "${BUSYBOX}" echo "[*] EMBA Netcat starter bypassed ... enable it via kernel environment EMBA_NC=true"
+      # debugger bins - only started with EMBA_NC=true
+      if [ "${EMBA_NC}" = "true" ]; then
+        if [ "${BINARY_NAME}" = "netcat" ]; then
+          "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} debugging service ..."
           # we only start our netcat listener if we set EMBA_NC_STARTER on startup (see run.sh script)
           # otherwise we move on to the next binary starter
+          ${_BINARY} &
           continue
         fi
-        if [ "${BINARY_NAME}" = "telnet" ] && ! [ "${EMBA_NC}" = "true" ]; then
-          "${BUSYBOX}" echo "[*] EMBA Telnet starter bypassed ... enable it via kernel environment EMBA_NC=true"
+        if [ "${_BINARY}" = "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh" ]; then
+          "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}Telnetd${NC} debugging service ..."
+          ${_BINARY} &
           continue
         fi
+      fi
+
+      # normal service startups
+      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &

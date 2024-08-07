@@ -31,6 +31,12 @@ if ("${EMBA_NET}"); then
   if [ "${ACTION}" = "default" ]; then
     IP_DEFAULT=$("${BUSYBOX}" cat /firmadyne/ip_default)
     "${BUSYBOX}" echo -e "[*] Starting network configuration br0 - ${ORANGE}${IP_DEFAULT}${NC}"
+    # ensure nothing has configured our eth0 interface to a bridge
+    if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep "eth0"); then
+      # shellcheck disable=SC2016
+      WAN_BRIDGE=$("${BUSYBOX}" brctl show | "${BUSYBOX}" grep "eth0" | "${BUSYBOX}" awk '{print $1}')
+      "${BUSYBOX}" brctl delif "${WAN_BRIDGE}" eth0
+    fi
     "${BUSYBOX}" brctl addbr br0
     "${BUSYBOX}" ifconfig br0 "${IP_DEFAULT}"
     "${BUSYBOX}" echo -e "[*] Starting network configuration eth0 - ${ORANGE}0.0.0.0${NC}"
@@ -114,6 +120,11 @@ if ("${EMBA_NET}"); then
       if (! "${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
         "${BUSYBOX}" echo -e "[*] Setting fallback IP address: ${ORANGE}${IP} / mode: bridge${NC}"
         IP="192.168.0.1"
+      fi
+
+      if ! ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -q "${NET_BRIDGE}"); then
+        # just in case our bridge is not created automatically
+        "${BUSYBOX}" brctl addbr "${NET_BRIDGE}"
       fi
 
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"

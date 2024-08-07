@@ -95,6 +95,7 @@ set_defaults() {
   export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
   export MAX_EXT_SPACE=110000   # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
   export LOG_DIR="${INVOCATION_PATH}""/logs"
+  export ERROR_LOG="${LOG_DIR}/emba_error.log"
   export TMP_DIR="${LOG_DIR}""/tmp"
   export CSV_DIR="${LOG_DIR}""/csv_logs"
   export MAIN_LOG_FILE="emba.log"

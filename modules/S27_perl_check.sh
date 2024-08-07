@@ -101,11 +101,11 @@ s27_zarn_perl_checks() {
     # as zarn does not like cgi's, we need to temp rename these files now
     cp "${lPL_SCRIPT}" "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}"
     if [[ -f "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}" ]]; then
-      perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" | tee -a "${lPL_LOG}" || print_output "[-] Analysis of ${lNAME} failed" "no_log"
+      perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" | tee -a "${lPL_LOG}" || print_error "[-] Analysis of ${lNAME} failed"
       rm "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}" || true
     fi
   else
-    perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${lPL_SCRIPT}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" | tee -a "${lPL_LOG}" || print_output "[-] Analysis of ${lNAME} failed" "no_log"
+    perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${lPL_SCRIPT}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" | tee -a "${lPL_LOG}" || print_error "[-] Analysis of ${lNAME} failed"
   fi
 
   ## reporting starts here
@@ -154,7 +154,7 @@ s27_zarn_perl_checks() {
 
       # we need the original perl script to link to it and to highlight the affected lines of code
       if ! [[ -f "${LOG_PATH_MODULE}"/pl_source_files/"${lNAME}".txt ]]; then
-        cp "${lPL_SCRIPT}" "${LOG_PATH_MODULE}"/pl_source_files/"${lNAME}".txt || print_output "[-] Copy of ${lPL_SCRIPT} to log directory failed" "no_log"
+        cp "${lPL_SCRIPT}" "${LOG_PATH_MODULE}"/pl_source_files/"${lNAME}".txt || print_error "[-] Copy of ${lPL_SCRIPT} to log directory failed"
       fi
 
       lCODE_LINE="$(strip_color_codes "$(sed -n "${lZARN_VULN_LINE}"p "${LOG_PATH_MODULE}/pl_source_files/${lNAME}.txt" 2>/dev/null)")"

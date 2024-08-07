@@ -56,9 +56,9 @@ P55_unblob_extractor() {
     return
   fi
 
-  local FW_PATH_UNBLOB="${FIRMWARE_PATH}"
+  local lFW_PATH_UNBLOB="${FIRMWARE_PATH}"
 
-  if [[ -d "${FW_PATH_UNBLOB}" ]]; then
+  if [[ -d "${lFW_PATH_UNBLOB}" ]]; then
     print_output "[-] Unblob module only deals with firmware files - directories are handled via deep extractor"
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -69,10 +69,10 @@ P55_unblob_extractor() {
     return
   fi
 
-  local FILES_EXT_UB=0
-  local UNIQUE_FILES_UB=0
-  local DIRS_EXT_UB=0
-  local BINS_UB=0
+  local lFILES_EXT_UB=0
+  local lUNIQUE_FILES_UB=0
+  local lDIRS_EXT_UB=0
+  local lBINS_UB=0
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -80,8 +80,8 @@ P55_unblob_extractor() {
   export LINUX_PATH_COUNTER_UNBLOB=0
   export OUTPUT_DIR_UNBLOB="${LOG_DIR}"/firmware/unblob_extracted
 
-  if [[ -f "${FW_PATH_UNBLOB}" ]]; then
-    unblobber "${FW_PATH_UNBLOB}" "${OUTPUT_DIR_UNBLOB}"
+  if [[ -f "${lFW_PATH_UNBLOB}" ]]; then
+    unblobber "${lFW_PATH_UNBLOB}" "${OUTPUT_DIR_UNBLOB}"
   fi
 
   linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB}"
@@ -89,17 +89,17 @@ P55_unblob_extractor() {
   print_ln
 
   if [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
-    FILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l)
-    UNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    DIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
-    BINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true )
+    lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l)
+    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+    lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
+    lBINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true )
   fi
 
-  if [[ "${BINS_UB}" -gt 0 ]] || [[ "${FILES_EXT_UB}" -gt 0 ]]; then
+  if [[ "${lBINS_UB}" -gt 0 ]] || [[ "${lFILES_EXT_UB}" -gt 0 ]]; then
     sub_module_title "Firmware extraction details"
     print_output "[*] ${ORANGE}Unblob${NC} results:"
-    print_output "[*] Found ${ORANGE}${FILES_EXT_UB}${NC} files (${ORANGE}${UNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${DIRS_EXT_UB}${NC} directories at all."
-    print_output "[*] Found ${ORANGE}${BINS_UB}${NC} binaries."
+    print_output "[*] Found ${ORANGE}${lFILES_EXT_UB}${NC} files (${ORANGE}${lUNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${lDIRS_EXT_UB}${NC} directories at all."
+    print_output "[*] Found ${ORANGE}${lBINS_UB}${NC} binaries."
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
     print_ln
     tree -sh "${OUTPUT_DIR_UNBLOB}" | tee -a "${LOG_FILE}"
@@ -108,10 +108,10 @@ P55_unblob_extractor() {
     detect_root_dir_helper "${OUTPUT_DIR_UNBLOB}"
 
     write_csv_log "FILES Unblob" "UNIQUE FILES Unblob" "directories Unblob" "Binaries Unblob" "LINUX_PATH_COUNTER Unblob"
-    write_csv_log "${FILES_EXT_UB}" "${UNIQUE_FILES_UB}" "${DIRS_EXT_UB}" "${BINS_UB}" "${LINUX_PATH_COUNTER_UNBLOB}"
+    write_csv_log "${lFILES_EXT_UB}" "${lUNIQUE_FILES_UB}" "${lDIRS_EXT_UB}" "${lBINS_UB}" "${LINUX_PATH_COUNTER_UNBLOB}"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${FILES_EXT_UB}"
+  module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_UB}"
 }
 
 unblobber() {
