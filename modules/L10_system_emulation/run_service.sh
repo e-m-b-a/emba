@@ -80,6 +80,9 @@ if ("${EMBA_ETC}"); then
           continue
         fi
       fi
+      if [ "${BINARY_NAME}" = "netcat" ] || [ "${_BINARY}" = "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh" ]; then
+        continue
+      fi
 
       # normal service startups
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then

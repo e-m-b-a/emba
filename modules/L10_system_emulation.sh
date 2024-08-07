@@ -2802,7 +2802,7 @@ add_partition_emulation() {
 
   if [[ "${lDEV_PATH}" != "NA" ]]; then
     local lCNT=0
-    while (! find "${lDEV_PATH}" -ls | grep -q "disk"); do
+    while (! find "${lDEV_PATH}" -ls 2>/dev/null | grep -q "disk"); do
       sleep 1
       ((lCNT+=1))
       if [[ "${lCNT}" -gt 600 ]]; then
