@@ -32,13 +32,15 @@ P99_prepare_analyzer() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"
   pre_module_reporter "${FUNCNAME[0]}"
-  local FILES_EXT=0
-  local UNIQUE_FILES=0
-  local DIRS_EXT=0
-  local BINS=0
-  export LINUX_PATH_COUNTER=0
-  local R_PATH=""
 
+  local lNEG_LOG=1
+  local lFILES_EXT=0
+  local lUNIQUE_FILES=0
+  local lDIRS_EXT=0
+  local lBINS=0
+  local lR_PATH=""
+
+  export LINUX_PATH_COUNTER=0
   LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # we have a linux:
@@ -83,16 +85,15 @@ P99_prepare_analyzer() {
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]] && ! [[ -f "${CSV_DIR}"/p99_prepare_analyzer.csv ]]; then
     write_csv_log "FILES" "UNIQUE_FILES" "DIRS" "Binaries" "LINUX_PATH_COUNTER" "Root PATH detected" "architecture" "endianess"
-    for R_PATH in "${ROOT_PATH[@]}"; do
-      FILES_EXT=$(find "${ROOT_PATH}" -xdev -type f | wc -l )
-      UNIQUE_FILES=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-      DIRS_EXT=$(find "${ROOT_PATH}" -xdev -type d | wc -l )
-      BINS=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
-      write_csv_log "${FILES_EXT}" "${UNIQUE_FILES}" "${DIRS_EXT}" "${BINS}" "${LINUX_PATH_COUNTER}" "${R_PATH}" "${ARCH}" "${D_END:-"NA"}"
+    for lR_PATH in "${ROOT_PATH[@]}"; do
+      lFILES_EXT=$(find "${ROOT_PATH}" -xdev -type f | wc -l )
+      lUNIQUE_FILES=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+      lDIRS_EXT=$(find "${ROOT_PATH}" -xdev -type d | wc -l )
+      lBINS=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+      write_csv_log "${lFILES_EXT}" "${lUNIQUE_FILES}" "${lDIRS_EXT}" "${lBINS}" "${LINUX_PATH_COUNTER}" "${lR_PATH}" "${ARCH}" "${D_END:-"NA"}"
     done
   fi
 
-  local NEG_LOG=1
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
