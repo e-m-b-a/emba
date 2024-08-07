@@ -23,6 +23,8 @@
 #               Currently this is an experimental module and needs to be activated separately via the -Q switch.
 # Warning:      This module changes your network configuration and it could happen that your system looses
 #               network connectivity.
+#
+# shellcheck disable=SC2153
 
 L10_system_emulation() {
   module_log_init "${FUNCNAME[0]}"
@@ -584,12 +586,14 @@ main_emulation() {
       lBAK_INIT_ORIG=""
     fi
 
+    print_ln
     print_output "[*] Firmware Init file details:"
     file "${MNT_POINT}""${lINIT_FILE}" | tee -a "${LOG_FILE}"
     print_output "[*] EMBA Init starter file details:"
     file "${lINIT_OUT}" | tee -a "${LOG_FILE}"
+    print_ln
 
-    INIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
+    lINIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
     # we deal with something which is not a script:
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "symbolic link\|ELF"; then
       print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
@@ -651,8 +655,11 @@ main_emulation() {
       sed -i -r 's/(.*network.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
       sed -i -r 's/(.*run_service.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
     fi
-    if ! (grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
-      echo "/firmadyne/preInit.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
+
+    if [[ "${lINIT_OUT}" != *"preInit.sh" ]]; then
+      if ! (grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
+        echo "/firmadyne/preInit.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
+      fi
     fi
 
     if ! (grep -q "/firmadyne/network.sh" "${lINIT_OUT}"); then

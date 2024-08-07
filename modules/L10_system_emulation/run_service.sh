@@ -72,7 +72,7 @@ if ("${EMBA_ETC}"); then
           # otherwise we move on to the next binary starter
           continue
         fi
-        if [ "${BINARY_NAME}" = "telnet" ] && ! [ "${EMBA_NC}" = "true" ]; then
+        if [ "${_BINARY}" = "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh" ] && ! [ "${EMBA_NC}" = "true" ]; then
           "${BUSYBOX}" echo "[*] EMBA Telnet starter bypassed ... enable it via kernel environment EMBA_NC=true"
           continue
         fi
