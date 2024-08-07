@@ -589,11 +589,11 @@ main_emulation() {
     print_ln
     print_output "[*] Firmware Init file details:"
     file "${MNT_POINT}""${lINIT_FILE}" | tee -a "${LOG_FILE}"
+
     print_output "[*] EMBA Init starter file details:"
     file "${lINIT_OUT}" | tee -a "${LOG_FILE}"
     print_ln
 
-    lINIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
     # we deal with something which is not a script:
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "symbolic link\|ELF"; then
       print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
@@ -614,9 +614,14 @@ main_emulation() {
     fi
 
     local lFS_MOUNTS_INIT_ARR=()
+    # if we are dealing with a startup script we are going to use this as the init entry
+    # and add our starters at the end of the original script
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
       # we deal with a startup script
       lINIT_OUT="${MNT_POINT}""${lINIT_FILE}"
+
+      export KINIT="init=${lINIT_FILE}"
+
       find "${lINIT_OUT}" -xdev -maxdepth 1 -ls || true
       print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
       lBAK_INIT_ORIG="${lINIT_OUT}"
@@ -631,7 +636,7 @@ main_emulation() {
 
       # just in case there is an exit in the init -> comment it
       sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
-      # echo "${lINIT_FILE} &" >> "${lINIT_OUT}" || true
+
     fi
 
 
@@ -682,7 +687,8 @@ main_emulation() {
       print_output "[*] run_service.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
 
-    if ! ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}"); then
+    # ensure we have not sleep entry and it is not the EMBA backup init script
+    if ! ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}") && ! (grep -q "Execute EMBA " "${lINIT_OUT}"); then
       # trendnet TEW-828DRU_1.0.7.2, etc...
       echo "/firmadyne/busybox sleep 36000" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
     else

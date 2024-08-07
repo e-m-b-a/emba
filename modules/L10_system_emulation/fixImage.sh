@@ -85,9 +85,11 @@ fi
 # we also use this rcS as fallback solution
 # for this we check different state files and execute the needed scripts
 mkdir -p "$(resolve_link /etc/init.d)"
-if [ ! -s /etc/init.d/rcS ]; then
+
+# disabled for now
+if [ -s /etc/init.d/rcSX ]; then
   echo '#!/firmadyne/sh' > /etc/init.d/rcS
-  echo '${BUSYBOX}=/firmadyne/busybox' >> /etc/init.d/rcS
+  echo 'BUSYBOX=/firmadyne/busybox' >> /etc/init.d/rcS
   echo '${BUSYBOX} echo [*] Execute EMBA $0 script sleeping 10 secs ...' >> /etc/init.d/rcS
   echo '${BUSYBOX} echo [*] Filesystem overview:' >> /etc/init.d/rcS
   echo '${BUSYBOX} ls -l /' >> /etc/init.d/rcS
