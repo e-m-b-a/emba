@@ -106,10 +106,8 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           PEM_FILE=$("${BUSYBOX}" grep "ssl.pemfile" "${LIGHT_CONFIG}" | "${BUSYBOX}" sort -u | "${BUSYBOX}" cut -d\" -f2)
           if ! [ -f "${PEM_FILE}" ]; then
             "${BUSYBOX}" echo -e "[*] Disabling ssl configuration for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} -> ${LIGHT_CONFIG}_ssl_disable${NC}"
-            # sed 's/ssl\.engine = \"enable\"/ssl\.engine = \"disable\"/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
             sed 's/.*ssl\..*/# &/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
             "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable\n" >> /firmadyne/service
-            "${BUSYBOX}" cat "${LIGHT_CONFIG}_ssl_disable"
           fi
         fi
         "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
@@ -120,7 +118,6 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           if [ -f "${LIGHT_CONFIG}"_ssl_disable ]; then
             "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}_ssl_disable (disabled ssl configuration) - ${LIGHT_LIBS}${NC}"
             "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable -m ${LIGHT_LIBS}\n" >> /firmadyne/service
-            "${BUSYBOX}" cat "${LIGHT_CONFIG}_ssl_disable"
           fi
         done
       done
