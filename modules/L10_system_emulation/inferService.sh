@@ -101,7 +101,26 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
         for LIGHT_CONFIG in $("${BUSYBOX}" find / -name "*lighttpd*.conf" -type f); do
           # write the service starter with config file
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}${NC}"
+          if "${BUSYBOX}" grep -q "ssl.pemfile" "${LIGHT_CONFIG}"; then
+            # check if we have ssl enabled and the pem file is available
+            # see also https://www.greynoise.io/blog/debugging-d-link-emulating-firmware-and-hacking-hardware
+            PEM_FILE=$("${BUSYBOX}" grep "ssl.pemfile" "${LIGHT_CONFIG}" | "${BUSYBOX}" sort -u | "${BUSYBOX}" cut -d\" -f2)
+            if ! [ -f "${PEM_FILE}" ]; then
+              "${BUSYBOX}" echo -e "[*] Disabling ssl configuration for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} -> ${LIGHT_CONFIG}_ssl_disable${NC}"
+              sed 's/ssl\.engine = \"enable\"/ssl\.engine = \"disable\"/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
+              "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable\n" >> /firmadyne/service
+            fi
+          fi
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
+          for LIGHT_LIBS in $("${BUSYBOX}" find / -type d -path "*lighttpd/lib*"); do
+            # write the service starter with config file
+            "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} - ${LIGHT_LIBS}${NC}"
+            "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG} -m ${LIGHT_LIBS}\n" >> /firmadyne/service
+            if [ -f "${LIGHT_CONFIG}"_ssl_disable ]; then
+              "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}_ssl_disable - ${LIGHT_LIBS}${NC}"
+              "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable -m ${LIGHT_LIBS}\n" >> /firmadyne/service
+            fi
+          done
         done
       # fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniupnpd" ]; then
