@@ -109,6 +109,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
               "${BUSYBOX}" echo -e "[*] Disabling ssl configuration for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} -> ${LIGHT_CONFIG}_ssl_disable${NC}"
               sed 's/ssl\.engine = \"enable\"/ssl\.engine = \"disable\"/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
               "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable\n" >> /firmadyne/service
+              "${BUSYBOX}" cat "${LIGHT_CONFIG}_ssl_disable"
             fi
           fi
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
@@ -119,6 +120,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
             if [ -f "${LIGHT_CONFIG}"_ssl_disable ]; then
               "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}_ssl_disable - ${LIGHT_LIBS}${NC}"
               "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable -m ${LIGHT_LIBS}\n" >> /firmadyne/service
+              "${BUSYBOX}" cat "${LIGHT_CONFIG}_ssl_disable"
             fi
           done
         done
@@ -181,9 +183,9 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
   fi
 done
 
-"${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA netcat listener${NC}"
+"${BUSYBOX}" echo -e "[*] Writing EMBA debugging service for the ${ORANGE}EMBA netcat listener${NC}"
 "${BUSYBOX}" echo -e -n "/firmadyne/netcat -nvlp 9876 -e /firmadyne/sh\n" >> /firmadyne/service
-"${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA telnet listener${NC}"
+"${BUSYBOX}" echo -e "[*] Writing EMBA debugging service for the ${ORANGE}EMBA telnet listener${NC}"
 "${BUSYBOX}" echo -e -n "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh\n" >> /firmadyne/service
 
 if [ -f /firmadyne/service ]; then

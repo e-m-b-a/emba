@@ -250,7 +250,7 @@ fw_bin_detector() {
     write_csv_log "UBI filesystem" "yes" "NA"
   fi
   if [[ "${lDLINK_ENC_CHECK}" == *"SHRS"* ]]; then
-    print_output "[+] Identified D-Link SHRS encrpyted firmware - using D-Link extraction module"
+    print_output "[+] Identified D-Link SHRS encrpyted firmware - using D-Link extraction module via unblob"
     export DLINK_ENC_DETECTED=1
     lUEFI_CHECK=0
     write_csv_log "D-Link SHRS" "yes" "NA"
