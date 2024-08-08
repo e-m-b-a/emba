@@ -103,6 +103,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
         if "${BUSYBOX}" grep -q "ssl.pemfile" "${LIGHT_CONFIG}"; then
           # check if we have ssl enabled and the pem file is available
           # see also https://www.greynoise.io/blog/debugging-d-link-emulating-firmware-and-hacking-hardware
+          # lighttpd not fully starting up but bypasses multiple errors with the adjusted config
           PEM_FILE=$("${BUSYBOX}" grep "ssl.pemfile" "${LIGHT_CONFIG}" | "${BUSYBOX}" sort -u | "${BUSYBOX}" cut -d\" -f2)
           if ! [ -f "${PEM_FILE}" ]; then
             "${BUSYBOX}" echo -e "[*] Disabling ssl configuration for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} -> ${LIGHT_CONFIG}_ssl_disable${NC}"
