@@ -83,6 +83,7 @@ fi
 # Some examples for testing:
 # mini_httpd: F9K1119_WW_1.00.01.bin
 # twonkystarter: F9K1119_WW_1.00.01.bin
+# lighttpd with non working ssl config: https://www.greynoise.io/blog/debugging-d-link-emulating-firmware-and-hacking-hardware
 
 for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -type f -o -name "upnpd" -type f \
   -o -name "*telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
@@ -95,22 +96,39 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")
     # entry for lighttpd:
     if [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "lighttpd" ]; then
-      # check if this service is already in the service file:
-      # if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
-        # check if we have a configuration available and iterate
-        for LIGHT_CONFIG in $("${BUSYBOX}" find / -name "*lighttpd*.conf" -type f); do
+      # check if we have a configuration available and iterate
+      for LIGHT_CONFIG in $("${BUSYBOX}" find / -name "*lighttpd*.conf" -type f); do
+        # write the service starter with config file
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}${NC}"
+        if "${BUSYBOX}" grep -q "ssl.pemfile" "${LIGHT_CONFIG}"; then
+          # check if we have ssl enabled and the pem file is available
+          # see also https://www.greynoise.io/blog/debugging-d-link-emulating-firmware-and-hacking-hardware
+          # lighttpd not fully starting up but bypasses multiple errors with the adjusted config
+          PEM_FILE=$("${BUSYBOX}" grep "ssl.pemfile" "${LIGHT_CONFIG}" | "${BUSYBOX}" sort -u | "${BUSYBOX}" cut -d\" -f2)
+          if ! [ -f "${PEM_FILE}" ]; then
+            "${BUSYBOX}" echo -e "[*] Disabling ssl configuration for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} -> ${LIGHT_CONFIG}_ssl_disable${NC}"
+            sed 's/.*ssl\..*/# &/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
+            "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable\n" >> /firmadyne/service
+          fi
+        fi
+        "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
+        for LIGHT_LIBS in $("${BUSYBOX}" find / -type d -path "*lighttpd/lib*"); do
           # write the service starter with config file
-          "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}${NC}"
-          "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
+          "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} - ${LIGHT_LIBS}${NC}"
+          "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG} -m ${LIGHT_LIBS}\n" >> /firmadyne/service
+          if [ -f "${LIGHT_CONFIG}"_ssl_disable ]; then
+            "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${LIGHT_CONFIG}_ssl_disable (disabled ssl configuration) - ${LIGHT_LIBS}${NC}"
+            "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable -m ${LIGHT_LIBS}\n" >> /firmadyne/service
+          fi
         done
-      # fi
+      done
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniupnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         for MINIUPNPD_CONFIG in $("${BUSYBOX}" find / -name "*miniupnpd*.conf" -type f); do
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${MINIUPNPD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
-        "${BUSYBOX}" echo -e -n "${BINARY} -p 9876 -a 0.0.0.0 -i eth0 -d\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e -n "${BINARY} -p 9875 -a 0.0.0.0 -i eth0 -d\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
@@ -162,9 +180,9 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
   fi
 done
 
-"${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA netcat listener${NC}"
+"${BUSYBOX}" echo -e "[*] Writing EMBA debugging service for the ${ORANGE}EMBA netcat listener${NC}"
 "${BUSYBOX}" echo -e -n "/firmadyne/netcat -nvlp 9876 -e /firmadyne/sh\n" >> /firmadyne/service
-"${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA telnet listener${NC}"
+"${BUSYBOX}" echo -e "[*] Writing EMBA debugging service for the ${ORANGE}EMBA telnet listener${NC}"
 "${BUSYBOX}" echo -e -n "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh\n" >> /firmadyne/service
 
 if [ -f /firmadyne/service ]; then

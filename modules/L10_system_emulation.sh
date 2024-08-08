@@ -917,7 +917,7 @@ emulation_with_config() {
   disown "${lALIVE_PID}" 2> /dev/null || true
 
   # we kill this process from "check_online_stat:"
-  tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" | grep -v "klogd" 2>/dev/null || true
+  tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null | grep -a -v "klogd" || true
   if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
     kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
   fi
@@ -1289,7 +1289,7 @@ identify_networking_emulation() {
   local lALIVE_PID="$!"
   disown "${lALIVE_PID}" 2> /dev/null || true
 
-  timeout --preserve-status --signal SIGINT 660 tail -F "${LOG_PATH_MODULE}/qemu.initial.serial.log" | grep -v "klogd" 2>/dev/null || true
+  timeout --preserve-status --signal SIGINT 660 tail -F "${LOG_PATH_MODULE}/qemu.initial.serial.log" 2>/dev/null | grep -a -v "klogd" || true
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
 
@@ -2802,7 +2802,7 @@ add_partition_emulation() {
 
   if [[ "${lDEV_PATH}" != "NA" ]]; then
     local lCNT=0
-    while (! find "${lDEV_PATH}" -ls | grep -q "disk"); do
+    while (! find "${lDEV_PATH}" -ls 2>/dev/null | grep -q "disk"); do
       sleep 1
       ((lCNT+=1))
       if [[ "${lCNT}" -gt 600 ]]; then
