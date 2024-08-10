@@ -15,13 +15,16 @@ BUSYBOX="/busybox"
 
 if ("${EMBA_BOOT}"); then
   arr=()
+  # arr_prio are the entries identified from the kernel (module s24) and get a higher priority
+  arr_prio=()
   if [ -e /kernelInit ]; then
-    for FILE in $("${BUSYBOX}" strings ./kernelInit)
-    do
+    for FILE in $("${BUSYBOX}" strings ./kernelInit); do
       # shellcheck disable=SC2016
       FULL_PATH=$("${BUSYBOX}" echo "${FILE}" | "${BUSYBOX}" awk '{split($0,a,"="); print a[2]}')
-      "${BUSYBOX}" echo "[*] Found kernelInit ${FULL_PATH}"
-      arr+=("${FULL_PATH}")
+      if ! echo "${arr[*]}" | grep -q "${FULL_PATH}"; then
+        "${BUSYBOX}" echo "[*] Found kernelInit ${FULL_PATH}"
+        arr_prio+=("${FULL_PATH}")
+      fi
     done
   fi
   # kernel not handle this program
@@ -30,20 +33,17 @@ if ("${EMBA_BOOT}"); then
       arr+=(/init)
     fi
   fi
-  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc" -o -name "rc")
-  do
+  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc" -o -name "rc"); do
     "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     arr+=("${FILE}")
   done
 
   # find and parse inittab file
-  for FILE in $("${BUSYBOX}" find / -name "inittab" -type f)
-  do
+  for FILE in $("${BUSYBOX}" find / -name "inittab" -type f); do
     "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     # sysinit entry is the one to look for
     # shellcheck disable=SC2016
-    for STARTUP_FILE in $("${BUSYBOX}" grep "^:.*sysinit:" "${FILE}" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
-    do
+    for STARTUP_FILE in $("${BUSYBOX}" grep "^:.*sysinit:" "${FILE}" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u); do
       "${BUSYBOX}" echo "[*] Found possible startup file ${STARTUP_FILE}"
       arr+=("${STARTUP_FILE}")
       #if [ -e "${STARTUP_FILE}" ]; then
@@ -58,8 +58,7 @@ if ("${EMBA_BOOT}"); then
     # convert to the unique array following the original order
     # shellcheck disable=SC2207,SC2016
     uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
-    for FILE in "${uniq_arr[@]}"
-    do
+    for FILE in "${uniq_arr[@]}"; do
       if [ -d "${FILE}" ]; then
         continue
       fi
@@ -90,8 +89,20 @@ if ("${EMBA_BOOT}"); then
   fi
 fi
 
+# ensure we have our kernel entry in the beginning and all the other entries afterwards:
 "${BUSYBOX}" echo "[*] Re-creating firmadyne/init:"
-"${BUSYBOX}" sort /firmadyne/init_tmp > /firmadyne/init
+for entry in "${arr_prio[@]}"; do
+  "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
+done
+if [ -s /firmadyne/init_tmp ]; then
+  while read -r entry; do
+    if ! grep -q "${entry}" /firmadyne/init; then
+      "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
+    fi
+  done < /firmadyne/init_tmp
+fi
+
+# finally add the EMBA default/backup entry, print it and remove the temp file
 "${BUSYBOX}" echo '/firmadyne/preInit.sh' >> /firmadyne/init
 "${BUSYBOX}" cat /firmadyne/init
 "${BUSYBOX}" rm /firmadyne/init_tmp
