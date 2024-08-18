@@ -10387,6 +10387,7 @@ CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packe
 CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36251;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-36424;K7 Ultimate Security NULL Pointer Dereference;https://packetstormsecurity.com/files/180137/K7-Ultimate-Security-NULL-Pointer-Dereference.html;local/DoS
 CVE-2024-36495;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
 CVE-2024-36496;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
 CVE-2024-36497;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
@@ -10433,6 +10434,7 @@ CVE-2024-6205;WordPress PayPlus Payment Gateway SQL Injection;https://packetstor
 CVE-2024-6387;OpenSSH Server regreSSHion Remote Code Execution;https://packetstormsecurity.com/files/179290/OpenSSH-Server-regreSSHion-Remote-Code-Execution.html;unknown
 CVE-2024-6706;Open WebUI 0.1.105 Persistent Cross Site Scripting;https://packetstormsecurity.com/files/179997/Open-WebUI-0.1.105-Persistent-Cross-Site-Scripting.html;unknown
 CVE-2024-6707;Open WebUI 0.1.105 File Upload Path Traversal;https://packetstormsecurity.com/files/179998/Open-WebUI-0.1.105-File-Upload-Path-Traversal.html;unknown
+CVE-2024-6768;Microsoft CLFS.sys Denial of Service;https://packetstormsecurity.com/files/180132/Microsoft-CLFS.sys-Denial-of-Service.html;unknown
 CVE-2024-6890;Journyx 11.5.4 Unauthenticated Password Reset Bruteforce;https://packetstormsecurity.com/files/180000/Journyx-11.5.4-Unauthenticated-Password-Reset-Bruteforce.html;unknown
 CVE-2024-6891;Journyx 11.5.4 Authenticated Remote Code Execution;https://packetstormsecurity.com/files/180002/Journyx-11.5.4-Authenticated-Remote-Code-Execution.html;unknown
 CVE-2024-6892;Journyx 11.5.4 Cross Site Scripting;https://packetstormsecurity.com/files/180004/Journyx-11.5.4-Cross-Site-Scripting.html;unknown
@@ -10440,6 +10442,7 @@ CVE-2024-6893;Journyx 11.5.4 XML Injection;https://packetstormsecurity.com/files
 CVE-2024-6911;Perten Instruments Process Plus Software 1.11.6507.0 LFI Hardcoded Credentials;https://packetstormsecurity.com/files/179663/Perten-Instruments-Process-Plus-Software-1.11.6507.0-LFI-Hardcoded-Credentials.html;local
 CVE-2024-6912;Perten Instruments Process Plus Software 1.11.6507.0 LFI Hardcoded Credentials;https://packetstormsecurity.com/files/179663/Perten-Instruments-Process-Plus-Software-1.11.6507.0-LFI-Hardcoded-Credentials.html;local
 CVE-2024-6913;Perten Instruments Process Plus Software 1.11.6507.0 LFI Hardcoded Credentials;https://packetstormsecurity.com/files/179663/Perten-Instruments-Process-Plus-Software-1.11.6507.0-LFI-Hardcoded-Credentials.html;local
+CVE-2024-7313;WordPress Shield Security 20.0.5 Cross Site Scripting;https://packetstormsecurity.com/files/180193/WordPress-Shield-Security-20.0.5-Cross-Site-Scripting.html;unknown
 CVE-2024-7395;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
 CVE-2024-7396;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
 CVE-2024-7397;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
