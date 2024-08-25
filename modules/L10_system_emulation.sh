@@ -420,7 +420,7 @@ create_emulation_filesystem() {
     local lBINARY_PATH=""
     local lTMP_EXEC_64_CNT=0
     # quick check if we use stat/time or stat64/time64 on the target os - needed for libnvram
-    lTMP_EXEC_64_CNT=$(find "${MNT_POINT}" -type f -name "*libc*" -not -path "*/firmadyne*" -exec objdump -t {} \; | grep -c " stat64\| time64" 2>/dev/null || true)
+    lTMP_EXEC_64_CNT=$(find "${MNT_POINT}" -type f -name "*libc*" -not -path "*/firmadyne*" -exec objdump -t {} \; | grep -c " time64" 2>/dev/null || true)
     # default state for libnvram
     local lMUSL_VER="1.1.24"
     if [[ "${lTMP_EXEC_64_CNT}" -gt 0 ]]; then
