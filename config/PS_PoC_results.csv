@@ -10225,6 +10225,8 @@ CVE-2024-22900;Vinchin Backup And Recovery 7.2 setNetworkCardInfo Command Inject
 CVE-2024-22901;Vinchin Backup And Recovery 7.2 Default MySQL Credentials;https://packetstormsecurity.com/files/176794/Vinchin-Backup-And-Recovery-7.2-Default-MySQL-Credentials.html;unknown
 CVE-2024-22902;Vinchin Backup And Recovery 7.2 Default Root Credentials;https://packetstormsecurity.com/files/176795/Vinchin-Backup-And-Recovery-7.2-Default-Root-Credentials.html;unknown
 CVE-2024-22903;Vinchin Backup And Recovery 7.2 SystemHandler.class.php Command Injection;https://packetstormsecurity.com/files/176796/Vinchin-Backup-And-Recovery-7.2-SystemHandler.class.php-Command-Injection.html;unknown
+CVE-2024-23184;Dovecot IMAP Server 2.2 2.3 Denial Of Service;https://packetstormsecurity.com/files/180235/Dovecot-IMAP-Server-2.2-2.3-Denial-Of-Service.html;DoS
+CVE-2024-23184;Dovecot IMAP Server 2.2 2.3 Missing Rate Limiting;https://packetstormsecurity.com/files/180234/Dovecot-IMAP-Server-2.2-2.3-Missing-Rate-Limiting.html;unknown
 CVE-2024-23749;KiTTY 0.76.1.13 Command Injection;https://packetstormsecurity.com/files/177031/KiTTY-0.76.1.13-Command-Injection.html;remote
 CVE-2024-23897;Jenkins 2.441 LTS 2.426.3 Arbitrary File Read;https://packetstormsecurity.com/files/176840/Jenkins-2.441-LTS-2.426.3-Arbitrary-File-Read.html;remote
 CVE-2024-23897;Jenkins 2.441 LTS 2.426.3 CVE 2024 23897 Scanner;https://packetstormsecurity.com/files/176839/Jenkins-2.441-LTS-2.426.3-CVE-2024-23897-Scanner.html;unknown
@@ -10370,6 +10372,11 @@ CVE-2024-33722;SOPlanning 1.52.00 SQL Injection;https://packetstormsecurity.com/
 CVE-2024-33724;SOPlanning 1.52.00 Cross Site Scripting;https://packetstormsecurity.com/files/178434/SOPlanning-1.52.00-Cross-Site-Scripting.html;unknown
 CVE-2024-3378;iboss Secure Web Gateway Cross Site Scripting;https://packetstormsecurity.com/files/178497/iboss-Secure-Web-Gateway-Cross-Site-Scripting.html;unknown
 CVE-2024-33828;Zope 5.9 Command Injection;https://packetstormsecurity.com/files/178582/Zope-5.9-Command-Injection.html;unknown
+CVE-2024-33892;Ewon Cosy Password Disclosure;https://packetstormsecurity.com/files/180231/Ewon-Cosy-Password-Disclosure.html;remote
+CVE-2024-33893;Ewon Cosy Improper Neutralization Cross Site Scripting;https://packetstormsecurity.com/files/180230/Ewon-Cosy-Improper-Neutralization-Cross-Site-Scripting.html;remote
+CVE-2024-33895;Ewon Cosy Hardcoded Key;https://packetstormsecurity.com/files/180233/Ewon-Cosy-Hardcoded-Key.html;remote
+CVE-2024-33896;Ewon Cosy Command Injection;https://packetstormsecurity.com/files/180232/Ewon-Cosy-Command-Injection.html;remote
+CVE-2024-33897;Ewon Cosy Talk2M Remote Access Solution Improper Authentication;https://packetstormsecurity.com/files/180237/Ewon-Cosy-Talk2M-Remote-Access-Solution-Improper-Authentication.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstormsecurity.com/files/178100/Palo-Alto-OS-Command-Injection-Proof-Of-Concept.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
@@ -10388,6 +10395,13 @@ CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetsto
 CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36251;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36424;K7 Ultimate Security NULL Pointer Dereference;https://packetstormsecurity.com/files/180137/K7-Ultimate-Security-NULL-Pointer-Dereference.html;local/DoS
+CVE-2024-36439;DiCal RED 4009 Cryptography Failure;https://packetstormsecurity.com/files/180353/DiCal-RED-4009-Cryptography-Failure.html;unknown
+CVE-2024-36440;DiCal RED 4009 Weak Hashing;https://packetstormsecurity.com/files/180352/DiCal-RED-4009-Weak-Hashing.html;unknown
+CVE-2024-36441;DiCal RED 4009 Information Disclosure;https://packetstormsecurity.com/files/180357/DiCal-RED-4009-Information-Disclosure.html;unknown
+CVE-2024-36442;DiCal RED 4009 Path Traversal;https://packetstormsecurity.com/files/180354/DiCal-RED-4009-Path-Traversal.html;unknown
+CVE-2024-36443;DiCal RED 4009 Missing Authentication;https://packetstormsecurity.com/files/180351/DiCal-RED-4009-Missing-Authentication.html;unknown
+CVE-2024-36444;DiCal RED 4009 Log Disclosure;https://packetstormsecurity.com/files/180355/DiCal-RED-4009-Log-Disclosure.html;unknown
+CVE-2024-36445;DiCal RED 4009 Missing Authentication;https://packetstormsecurity.com/files/180350/DiCal-RED-4009-Missing-Authentication.html;unknown
 CVE-2024-36495;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
 CVE-2024-36496;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
 CVE-2024-36497;Faronics WINSelect Hardcoded Credentials Bad Permissions Unhashed Password;https://packetstormsecurity.com/files/179205/Faronics-WINSelect-Hardcoded-Credentials-Bad-Permissions-Unhashed-Password.html;unknown
@@ -10414,6 +10428,7 @@ CVE-2024-40502;Hospital Management System Project In ASP.Net MVC 1 SQL Injection
 CVE-2024-41332;Computer Laboratory Management System 1.0 Privilege Escalation;https://packetstormsecurity.com/files/179890/Computer-Laboratory-Management-System-1.0-Privilege-Escalation.html;unknown
 CVE-2024-41333;Tourism Management System 2.0 Cross Site Scripting;https://packetstormsecurity.com/files/179891/Tourism-Management-System-2.0-Cross-Site-Scripting.html;unknown
 CVE-2024-41958;Mailcow TFA Authentication Bypass;https://packetstormsecurity.com/files/179963/Mailcow-TFA-Authentication-Bypass.html;unknown
+CVE-2024-42318;Linux Landlock Logic Bug;https://packetstormsecurity.com/files/180261/Linux-Landlock-Logic-Bug.html;unknown
 CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
 CVE-2024-4358;Telerik Report Server Deserialization Authentication Bypass;https://packetstormsecurity.com/files/179406/Telerik-Report-Server-Deserialization-Authentication-Bypass.html;unknown
