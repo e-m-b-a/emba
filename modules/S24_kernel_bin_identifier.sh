@@ -96,13 +96,6 @@ S24_kernel_bin_identifier()
       extract_kconfig "${FILE}"
       enable_strict_mode "${STRICT_MODE}" 0
 
-      # double check we really have a Kernel config extracted
-      if [[ -f "${KCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${KCONFIG_EXTRACTED}") -gt 50 ]]; then
-        CFG_CNT=$(grep -c CONFIG_ "${KCONFIG_EXTRACTED}")
-        print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${FILE}")${NC}" "" "${KCONFIG_EXTRACTED}"
-        check_kconfig "${KCONFIG_EXTRACTED}"
-      fi
-
       K_VER_TMP="${K_VER/Linux version /}"
       demess_kv_version "${K_VER_TMP}"
       # -> KV_ARR
@@ -127,6 +120,13 @@ S24_kernel_bin_identifier()
         K_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
         [[ "${K_ARCH: -2}" == "le" ]] && K_ARCH_END="EL"
         [[ "${K_ARCH: -2}" == "be" ]] && K_ARCH_END="EB"
+      fi
+
+      # double check we really have a Kernel config extracted
+      if [[ -f "${KCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${KCONFIG_EXTRACTED}") -gt 50 ]]; then
+        CFG_CNT=$(grep -c CONFIG_ "${KCONFIG_EXTRACTED}")
+        print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${FILE}")${NC}" "" "${KCONFIG_EXTRACTED}"
+        check_kconfig "${KCONFIG_EXTRACTED}" "${K_ARCH}"
       fi
 
       # we should only get one element back, but as array
@@ -271,29 +271,35 @@ try_decompress() {
 }
 
 check_kconfig() {
-  local KCONFIG_FILE="${1:-}"
-  local KCONF_HARD_CHECKER="${EXT_DIR}"/kconfig-hardened-check/bin/kernel-hardening-checker
-  local FAILED_KSETTINGS=""
+  local lKCONFIG_FILE="${1:-}"
+  local lKCONFIG_ARCH="${2:NA}"
+  local lKCONF_HARD_CHECKER="${EXT_DIR}"/kconfig-hardened-check/bin/kernel-hardening-checker
+  local lFAILED_KSETTINGS=""
+  local lKCONF_LOG=""
 
-  if ! [[ -e "${KCONF_HARD_CHECKER}" ]]; then
+  if ! [[ -e "${lKCONF_HARD_CHECKER}" ]]; then
     print_output "[-] Kernel config hardening checker not found"
     return
   fi
 
-  if ! [[ -f "${KCONFIG_FILE}" ]]; then
+  if ! [[ -f "${lKCONFIG_FILE}" ]]; then
     return
   fi
 
-  print_output "[*] Testing kernel configuration file ${ORANGE}${KCONFIG_FILE}${NC} with kconfig-hardened-check"
-  local KCONF_LOG=""
-  KCONF_LOG="${LOG_PATH_MODULE}/kconfig_hardening_check_$(basename "${KCONFIG_FILE}").log"
-  "${KCONF_HARD_CHECKER}" -c "${KCONFIG_FILE}" | tee -a "${KCONF_LOG}" || true
-  if [[ -f "${KCONF_LOG}" ]]; then
-    FAILED_KSETTINGS=$(grep -c "FAIL: " "${KCONF_LOG}" || true)
-    if [[ "${FAILED_KSETTINGS}" -gt 0 ]]; then
-      print_output "[+] Found ${ORANGE}${FAILED_KSETTINGS}${GREEN} security related kernel settings which should be reviewed - ${ORANGE}$(print_path "${KCONFIG_FILE}")${NC}" "" "${KCONF_LOG}"
+  if [[ "${lKCONFIG_ARCH}" == *"MIPS"* ]]; then
+    print_output "[-] Architecture ${ORANGE}${lKCONFIG_ARCH}${NA} not supported by ${ORANGE}kernel-hardening-checker${NA}."
+    return
+  fi
+
+  print_output "[*] Testing kernel configuration file ${ORANGE}${lKCONFIG_FILE}${NC} with kconfig-hardened-check"
+  lKCONF_LOG="${LOG_PATH_MODULE}/kconfig_hardening_check_$(basename "${lKCONFIG_FILE}").log"
+  "${lKCONF_HARD_CHECKER}" -c "${lKCONFIG_FILE}" | tee -a "${lKCONF_LOG}" || true
+  if [[ -f "${lKCONF_LOG}" ]]; then
+    lFAILED_KSETTINGS=$(grep -c "FAIL: " "${lKCONF_LOG}" || true)
+    if [[ "${lFAILED_KSETTINGS}" -gt 0 ]]; then
+      print_output "[+] Found ${ORANGE}${lFAILED_KSETTINGS}${GREEN} security related kernel settings which should be reviewed - ${ORANGE}$(print_path "${lKCONFIG_FILE}")${NC}" "" "${lKCONF_LOG}"
       print_ln
-      write_log "[*] Statistics:${FAILED_KSETTINGS}"
+      write_log "[*] Statistics:${lFAILED_KSETTINGS}"
     fi
   fi
 }
