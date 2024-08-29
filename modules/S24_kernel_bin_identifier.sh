@@ -272,7 +272,7 @@ try_decompress() {
 
 check_kconfig() {
   local lKCONFIG_FILE="${1:-}"
-  local lKCONFIG_ARCH="${2:NA}"
+  local lKCONFIG_ARCH="${2:-NA}"
   local lKCONF_HARD_CHECKER="${EXT_DIR}"/kconfig-hardened-check/bin/kernel-hardening-checker
   local lFAILED_KSETTINGS=""
   local lKCONF_LOG=""
