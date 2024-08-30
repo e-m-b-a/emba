@@ -286,12 +286,12 @@ check_kconfig() {
     return
   fi
 
-  if [[ "${lKCONFIG_ARCH}" == *"MIPS"* ]]; then
-    print_output "[-] Architecture ${ORANGE}${lKCONFIG_ARCH}${NA} not supported by ${ORANGE}kernel-hardening-checker${NA}."
+  if [[ "${lKCONFIG_ARCH}" == *"MIPS"* || "${lKCONFIG_ARCH}" == *"mips"* ]]; then
+    print_output "[-] Architecture ${ORANGE}${lKCONFIG_ARCH}${NC} not supported by ${ORANGE}kernel-hardening-checker${NC}."
     return
   fi
 
-  print_output "[*] Testing kernel configuration file ${ORANGE}${lKCONFIG_FILE}${NC} with kconfig-hardened-check"
+  print_output "[*] Testing kernel configuration file ${ORANGE}${lKCONFIG_FILE}${NC} with kconfig-hardened-check (architecture ${lKCONFIG_ARCH})."
   lKCONF_LOG="${LOG_PATH_MODULE}/kconfig_hardening_check_$(basename "${lKCONFIG_FILE}").log"
   "${lKCONF_HARD_CHECKER}" -c "${lKCONFIG_FILE}" | tee -a "${lKCONF_LOG}" || true
   if [[ -f "${lKCONF_LOG}" ]]; then
