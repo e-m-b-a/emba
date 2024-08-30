@@ -52,7 +52,7 @@ S26_kernel_vuln_verifier()
   fi
 
   # extract kernel version
-  get_csv_data_s24 "${S24_CSV_LOG}"
+  get_kernel_version_csv_data_s24 "${S24_CSV_LOG}"
 
   local KERNEL_DATA=""
   local KERNEL_ELF_EMBA=()
@@ -63,7 +63,7 @@ S26_kernel_vuln_verifier()
   export COMPILE_SOURCE_FILES_VERIFIED=0
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
-    [[ "${K_VERSION}" != *"[0-9]"* ]] && continue
+    [[ "${K_VERSION}" =~ ^[0-9\.a-zA-Z]$ ]] && continue
 
     local K_FOUND=0
     print_output "[+] Identified kernel version: ${ORANGE}${K_VERSION}${NC}"
@@ -706,7 +706,7 @@ identify_exploits() {
   fi
 }
 
-get_csv_data_s24() {
+get_kernel_version_csv_data_s24() {
   local S24_CSV_LOG="${1:-}"
 
   if ! [[ -f "${S24_CSV_LOG}" ]];then
