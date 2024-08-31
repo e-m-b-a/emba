@@ -286,7 +286,7 @@ check_kconfig() {
     return
   fi
 
-  if [[ "${lKCONFIG_ARCH}" == *"MIPS"* || "${lKCONFIG_ARCH}" == *"mips"* ]]; then
+  if [[ "${lKCONFIG_ARCH,,}" == *"mips"* ]]; then
     print_output "[-] Architecture ${ORANGE}${lKCONFIG_ARCH}${NC} not supported by ${ORANGE}kernel-hardening-checker${NC}."
     return
   fi
