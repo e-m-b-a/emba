@@ -69,7 +69,8 @@ done
 # and use the URLs from it for further crawling:
 if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
   echo -e "[*] Adding already knwon URLs from current configuration file"
-  cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv >> "${SAVE_PATH}"/"${LINKS}"
+  # remove first line which is the header
+  cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv | sed 1d >> "${SAVE_PATH}"/"${LINKS}"
 else
   echo -e "${RED}[-] WARNING: No Snyk configuration file found"
 fi
@@ -151,7 +152,8 @@ while IFS= read -r -d '' ADV; do
   else
     PoC_XML="no"
   fi
-  mapfile -t CVEs < <(grep -a -o -E "CVE-[0-9]{4}-[0-9]+" "${ADV}" | sort -u)
+  # we check only for valid cves and remove "id=" with cut
+  mapfile -t CVEs < <(grep -a -o -E "id=CVE-[0-9]{4}-[0-9]+" "${ADV}" | sort -u | cut -c 4-)
 
   if [[ "${PoC}" -gt 0 ]] && [[ "${#CVEs[@]}" -gt 0 ]]; then
     for CVE in "${CVEs[@]}"; do
