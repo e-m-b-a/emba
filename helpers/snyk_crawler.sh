@@ -151,7 +151,8 @@ while IFS= read -r -d '' ADV; do
   else
     PoC_XML="no"
   fi
-  mapfile -t CVEs < <(grep -a -o -E "CVE-[0-9]{4}-[0-9]+" "${ADV}" | sort -u)
+  # we check only for valid cves and remove "id=" with cut
+  mapfile -t CVEs < <(grep -a -o -E "id=CVE-[0-9]{4}-[0-9]+" "${ADV}" | sort -u | cut -c 4-)
 
   if [[ "${PoC}" -gt 0 ]] && [[ "${#CVEs[@]}" -gt 0 ]]; then
     for CVE in "${CVEs[@]}"; do
