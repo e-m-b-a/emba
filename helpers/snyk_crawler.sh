@@ -69,7 +69,8 @@ done
 # and use the URLs from it for further crawling:
 if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
   echo -e "[*] Adding already knwon URLs from current configuration file"
-  cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv >> "${SAVE_PATH}"/"${LINKS}"
+  # remove first line which is the header
+  cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv | sed 1d >> "${SAVE_PATH}"/"${LINKS}"
 else
   echo -e "${RED}[-] WARNING: No Snyk configuration file found"
 fi
