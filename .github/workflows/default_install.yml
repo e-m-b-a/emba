@@ -32,7 +32,7 @@ jobs:
       - name: EMBA default install
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 600
+          timeout_minutes: 800
           max_attempts: 3
           command: |
             sudo rm -r ./external || true
