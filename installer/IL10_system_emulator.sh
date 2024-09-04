@@ -29,7 +29,9 @@ IL10_system_emulator() {
     print_tool_info "git" 1
     print_tool_info "dmsetup" 1
     print_tool_info "kpartx" 1
-    print_tool_info "uml-utilities" 1
+    # uml-utilities provides tunctl for L10 -> uml-utilities was removed somewhere in August 2024
+    # print_tool_info "uml-utilities" 1
+    print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-1+b1_amd64.deb" "external/uml-utilities.deb"
     print_tool_info "util-linux" 1
     print_tool_info "vlan" 1
     print_tool_info "qemu-utils" 1
@@ -77,6 +79,10 @@ IL10_system_emulator() {
       mkdir -p external/EMBA_Live_bins
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+
+      download_file "uml-utilities.deb" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-1+b1_amd64.deb" "external/uml-utilities.deb"
+      dpkg -i "external/uml-utilities.deb"
+      rm -f "external/uml-utilities.deb"
 
       download_file "busybox.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/busybox-v${BB_VER}.zip" "external/EMBA_Live_bins/busybox.zip"
       download_file "console.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/console.zip" "external/EMBA_Live_bins/console.zip"
