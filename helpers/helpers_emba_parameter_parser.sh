@@ -136,8 +136,10 @@ emba_parameter_parsing() {
         check_path_input "${OPTARG}"
         export PROFILE=""
         PROFILE="$(escape_echo "${OPTARG}")"
+        PROFILE="${INVOCATION_PATH}/scan-profiles/$(basename "${PROFILE}")"
         if ! [[ -f "${PROFILE}" ]]; then
           print_output "[-] No profile found!" "no_log"
+          print_output "[*] Note: A profile needs to be stored in the EMBA scan-profile directory!" "no_log"
           exit 1
         fi
        ;;
