@@ -134,6 +134,10 @@ print_error() {
   local lTYPE_CHECK=""
   lTYPE_CHECK="$( echo "${lOUTPUT}" | cut -c1-3 )"
 
+  if [[ ! -f "${ERROR_LOG}" ]]; then
+    touch "${ERROR_LOG}"
+  fi
+
   if ! [[ "${lTYPE_CHECK}" == "[E]" || "${lTYPE_CHECK}" == "[-]" ]] ; then
     print_output "[*] Warning: Wrong error output declaration: ${lOUTPUT}" "${ERROR_LOG}"
   fi
