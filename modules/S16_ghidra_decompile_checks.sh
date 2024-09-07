@@ -38,7 +38,7 @@ S16_ghidra_decompile_checks()
 
   local BINARY=""
   local BIN_TO_CHECK=""
-  local TMP_PID=""
+  local lTMP_PID=""
   local VULN_COUNTER=0
   local WAIT_PIDS_S16=()
   local BIN_TO_CHECK_ARR=()
@@ -80,9 +80,9 @@ S16_ghidra_decompile_checks()
         BINS_CHECKED_ARR+=( "${BIN_MD5}" )
         if [[ "${THREADED}" -eq 1 ]]; then
           ghidra_analyzer "${BIN_TO_CHECK}" &
-          TMP_PID="$!"
-          store_kill_pids "${TMP_PID}"
-          WAIT_PIDS_S16+=( "${TMP_PID}" )
+          lTMP_PID="$!"
+          store_kill_pids "${lTMP_PID}"
+          WAIT_PIDS_S16+=( "${lTMP_PID}" )
           max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" "${WAIT_PIDS_S16[@]}"
         else
           ghidra_analyzer "${BIN_TO_CHECK}"
@@ -112,14 +112,14 @@ S16_ghidra_decompile_checks()
     print_ln
     sub_module_title "Results - Ghidra decompiled code analysis via Semgrep"
     print_output "[+] Found ""${ORANGE}""${VULN_COUNTER}""${GREEN}"" possible vulnerabilities (${ORANGE}via semgrep on Ghidra decompiled code${GREEN}) in ""${ORANGE}""${#BINS_CHECKED_ARR[@]}""${GREEN}"" tested binaries:""${NC}"
-    local VULN_CAT_CNT=0
-    local VULN_CATS_ARR=()
-    local VULN_CATEGORY=""
-    mapfile -t VULN_CATS_ARR < <(grep -h -o "external.semgrep-rules-0xdea.c.raptor-[a-zA-Z0-9_\-]*" "${LOG_PATH_MODULE}"/semgrep_*.csv | sort -u)
-    for VULN_CATEGORY in "${VULN_CATS_ARR[@]}"; do
-      VULN_CAT_CNT=$(grep -h -o "${VULN_CATEGORY}" "${LOG_PATH_MODULE}"/semgrep_*.csv | wc -l)
-      local VULN_CATEGORY_STRIPPED=${VULN_CATEGORY//external.semgrep-rules-0xdea.c.raptor-/}
-      print_output "$(indent "${GREEN}${VULN_CATEGORY_STRIPPED}${ORANGE} - ${VULN_CAT_CNT} times.${NC}")"
+    local lVULN_CAT_CNT=0
+    local lVULN_CATS_ARR=()
+    local lVULN_CATEGORY=""
+    mapfile -t lVULN_CATS_ARR < <(grep -h -o "external.semgrep-rules-0xdea.c.raptor-[a-zA-Z0-9_\-]*" "${LOG_PATH_MODULE}"/semgrep_*.csv | sort -u)
+    for lVULN_CATEGORY in "${lVULN_CATS_ARR[@]}"; do
+      lVULN_CAT_CNT=$(grep -h -o "${lVULN_CATEGORY}" "${LOG_PATH_MODULE}"/semgrep_*.csv | wc -l)
+      local lVULN_CATEGORY_STRIPPED=${lVULN_CATEGORY//external.semgrep-rules-0xdea.c.raptor-/}
+      print_output "$(indent "${GREEN}${lVULN_CATEGORY_STRIPPED}${ORANGE} - ${lVULN_CAT_CNT} times.${NC}")"
     done
     print_bar
   fi
@@ -131,10 +131,10 @@ S16_ghidra_decompile_checks()
 ghidra_analyzer() {
   local lBINARY="${1:-}"
   local lNAME=""
-  local GPT_PRIO_=2
-  local S16_SEMGREP_ISSUES=0
+  local lGPT_PRIO_=2
+  local lS16_SEMGREP_ISSUES=0
   local lHARUSPEX_FILE_ARR=()
-  local WAIT_PIDS_S16_1=()
+  local lWAIT_PIDS_S16_1=()
 
   if ! [[ -f "${lBINARY}" ]]; then
     return
@@ -148,16 +148,16 @@ ghidra_analyzer() {
   fi
 
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
-  local IDENTIFIER="${RANDOM}"
+  local lIDENTIFIER="${RANDOM}"
 
-  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${IDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${IDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra run for ${lNAME}"
+  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra run for ${lNAME}"
 
   # Ghidra cleanup:
-  if [[ -d "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.rep" ]]; then
-    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
+  if [[ -d "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then
+    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
-  if [[ -f "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.gpr" ]]; then
-    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${IDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
+  if [[ -f "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.gpr" ]]; then
+    rm -r "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
 
   # if Ghidra was not able to produce code we can return now:
@@ -184,13 +184,13 @@ ghidra_analyzer() {
   fi
 
   # cleanup filenames
-  local FPATH_ARR=()
-  mapfile -t FPATH_ARR < <(find /tmp/haruspex_"${lNAME}" -type f)
-  local FNAME=""
-  for FPATH in "${FPATH_ARR[@]}"; do
-    FNAME=$(basename "${FPATH}")
-    if ! [[ -f /tmp/haruspex_"${lNAME}"/"${FNAME//[^A-Za-z0-9._-]/_}" ]]; then
-      mv "${FPATH}" /tmp/haruspex_"${lNAME}"/"${FNAME//[^A-Za-z0-9._-]/_}" || true
+  local lFPATH_ARR=()
+  mapfile -t lFPATH_ARR < <(find /tmp/haruspex_"${lNAME}" -type f)
+  local lFNAME=""
+  for FPATH in "${lFPATH_ARR[@]}"; do
+    lFNAME=$(basename "${FPATH}")
+    if ! [[ -f /tmp/haruspex_"${lNAME}"/"${lFNAME//[^A-Za-z0-9._-]/_}" ]]; then
+      mv "${FPATH}" /tmp/haruspex_"${lNAME}"/"${lFNAME//[^A-Za-z0-9._-]/_}" || true
     fi
   done
 
@@ -199,13 +199,13 @@ ghidra_analyzer() {
   # check if there are more details in our log (not only the header with the binary protections)
   if [[ "$(wc -l "${lSEMGREPLOG}" | awk '{print $1}' 2>/dev/null)" -gt 0 ]]; then
     jq  -rc '.results[] | "\(.path),\(.check_id),\(.end.line),\(.extra.message)"' "${lSEMGREPLOG}" >> "${lSEMGREPLOG_CSV}" || true
-    S16_SEMGREP_ISSUES=$(wc -l "${lSEMGREPLOG_CSV}" | awk '{print $1}' || true)
+    lS16_SEMGREP_ISSUES=$(wc -l "${lSEMGREPLOG_CSV}" | awk '{print $1}' || true)
 
-    if [[ "${S16_SEMGREP_ISSUES}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${S16_SEMGREP_ISSUES}"" issues""${GREEN}"" in native binary ""${ORANGE}""${lNAME}""${NC}" "" "${lSEMGREPLOG_TXT}"
+    if [[ "${lS16_SEMGREP_ISSUES}" -gt 0 ]]; then
+      print_output "[+] Found ""${ORANGE}""${lS16_SEMGREP_ISSUES}"" issues""${GREEN}"" in native binary ""${ORANGE}""${lNAME}""${NC}" "" "${lSEMGREPLOG_TXT}"
       # highlight security findings in the main semgrep log:
       # sed -i -r "s/.*external\.semgrep-rules-0xdea.*/\x1b[32m&\x1b[0m/" "${lSEMGREPLOG}"
-      GPT_PRIO_=$((GPT_PRIO_+1))
+      lGPT_PRIO_=$((lGPT_PRIO_+1))
       # Todo: highlight the identified code areas in the decompiled code
     else
       print_output "[-] No C/C++ issues found for binary ${ORANGE}${lNAME}${NC}" "no_log"
@@ -228,20 +228,20 @@ ghidra_analyzer() {
       if [[ ${THREADED} -eq 1 ]]; then
         # threading is currently not working because of mangled output
         # we need to rewrite the logging functionality in here to provide threading
-        s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${GPT_PRIO_}" &
-        local TMP_PID="$!"
-        WAIT_PIDS_S16_1+=( "${TMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S16_1[@]}"
+        s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}" &
+        local lTMP_PID="$!"
+        lWAIT_PIDS_S16_1+=( "${lTMP_PID}" )
+        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S16_1[@]}"
       else
-        s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${GPT_PRIO_}"
+        s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}"
       fi
     done
 
     if [[ ${THREADED} -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S16_1[@]}"
+      wait_for_pid "${lWAIT_PIDS_S16_1[@]}"
       s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}" &
-      local TMP_PID="$!"
-      WAIT_PIDS_S16+=( "${TMP_PID}" )
+      local lTMP_PID="$!"
+      WAIT_PIDS_S16+=( "${lTMP_PID}" )
     else
       s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}"
     fi
@@ -272,7 +272,7 @@ s16_semgrep_logger() {
   local lSEMGREPLOG_CSV="${lSEMGREPLOG/\.json/\.csv}"
   local lSEMGREPLOG_TXT="${lSEMGREPLOG/\.json/\.log}"
   local lGPT_ANCHOR=""
-  local CODE_LINE=""
+  local lCODE_LINE=""
   local lLINE_NR=""
   local lHARUSPEX_FILE_NAME=""
 
@@ -305,10 +305,10 @@ s16_semgrep_logger() {
       write_log "" "${lSEMGREPLOG_TMP}"
       if [[ -f "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" ]]; then
         # extract the identified code line from the source code to show it in the overview page
-        CODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" 2>/dev/null)")"
+        lCODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" 2>/dev/null)")"
         shopt -s extglob
-        CODE_LINE="${CODE_LINE##+([[:space:]])}"
-        CODE_LINE="$(echo -e "${CODE_LINE}" | tr -d '\0')"
+        lCODE_LINE="${lCODE_LINE##+([[:space:]])}"
+        lCODE_LINE="$(echo -e "${lCODE_LINE}" | tr -d '\0')"
         shopt -u extglob
         # with a normal echo we automatically remove the null bytes which caused issues
         # shellcheck disable=SC2116
@@ -316,10 +316,10 @@ s16_semgrep_logger() {
         # color the identified line in the source file:
         sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" || true
         # this is the output
-        write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${CODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
+        write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${lCODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
 
         # BINARY;source function;semgrep rule;code line nr; code line
-        write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${CODE_LINE/\;}" "${lMESSAGE/\;}"
+        write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${lCODE_LINE/\;}" "${lMESSAGE/\;}"
       fi
       write_log "\\n-----------------------------------------------------------------\\n" "${lSEMGREPLOG_TMP}"
     done < "${lSEMGREPLOG_CSV}"

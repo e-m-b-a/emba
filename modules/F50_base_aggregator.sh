@@ -23,7 +23,7 @@ F50_base_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   # Todo: move all the log vars to a dedicated variable loader from EMBA
-  # todo: Change all log usages to these vars in EMBA
+  # Todo: Change all log usages to these vars in EMBA
   export CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   export F20_EXPLOITS_LOG="${LOG_DIR}"/f20_vul_aggregator/exploits-overview.txt
   export P02_CSV_LOG="${CSV_DIR}""/p02_firmware_bin_file_check.csv"
@@ -33,6 +33,7 @@ F50_base_aggregator() {
   export S05_LOG="s05_firmware_details.txt"
   export S06_LOG="s06_distribution_identification.txt"
   export S12_LOG="s12_binary_protection.txt"
+  export S12_CSV_LOG="${CSV_DIR}""/s12_binary_protection.csv"
   export S13_LOG="s13_weak_func_check.txt"
   export S14_LOG="s14_weak_func_radare_check.txt"
   export S16_LOG="s16_ghidra_decompile_checks.txt"
@@ -439,13 +440,14 @@ output_binaries() {
   local DETAIL_SYSTEM=0
 
   if [[ -v BINARIES[@] ]]; then
-    if [[ -f "${LOG_DIR}"/"${S12_LOG}" ]]; then
-      CANARY=$(grep -c "No canary" "${LOG_DIR}"/"${S12_LOG}" || true)
-      RELRO=$(grep -c "No RELRO" "${LOG_DIR}"/"${S12_LOG}" || true)
-      NX=$(grep -c "NX disabled" "${LOG_DIR}"/"${S12_LOG}" || true)
-      PIE=$(grep -c "No PIE" "${LOG_DIR}"/"${S12_LOG}" || true)
-      STRIPPED=$(grep -c "No Symbols" "${LOG_DIR}"/"${S12_LOG}" || true)
-      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "${LOG_DIR}"/"${S12_LOG}" || true)
+    if [[ -f "${S12_CSV_LOG}" ]]; then
+      echo "checking for binary protections ..."
+      CANARY=$(grep -c "No Canary" "${S12_CSV_LOG}" || true)
+      RELRO=$(grep -c "No RELRO" "${S12_CSV_LOG}" || true)
+      NX=$(grep -c "NX disabled" "${S12_CSV_LOG}" || true)
+      PIE=$(grep -c "No PIE" "${S12_CSV_LOG}" || true)
+      STRIPPED=$(grep -c "No Symbols" "${S12_CSV_LOG}" || true)
+      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "${S12_CSV_LOG}" || true)
       if [[ "${BINS_CHECKED}" -gt 0 ]]; then
         # we have to remove the first line of the original output:
         (( BINS_CHECKED-- ))

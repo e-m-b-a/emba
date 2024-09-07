@@ -123,6 +123,12 @@ check_live_metasploit() {
       done
     done
 
+    # color results:
+    sed -i -r 's/.*Vulnerability identified.*/\x1b[32m&\x1b[0m/' "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt
+    sed -i -r 's/.*Session state.*for module.*/\x1b[32m&\x1b[0m/' "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt
+    sed -i -r 's/Active sessions/\x1b[32m&\x1b[0m/' "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt
+    sed -i -r 's/Via:\ .*/\x1b[32m&\x1b[0m/' "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt
+
     print_ln
 
     if grep -q "Active sessions" "${LOG_PATH_MODULE}/metasploit-check-${IP_ADDRESS_}.txt"; then
