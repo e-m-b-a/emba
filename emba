@@ -455,6 +455,7 @@ main() {
     # create log directory, if not exists and needed subdirectories
     # do not create a log dir for dep check
     export MAIN_LOG="${LOG_DIR}""/""${MAIN_LOG_FILE}"
+    export ERROR_LOG="${LOG_DIR}"/emba_error.log
     [[ "${ONLY_DEP}" -eq 0 ]] && create_log_dir
 
     # kernel downloader runs on the host and waits for an identified kernel version. Afterwards
