@@ -5789,6 +5789,7 @@ CVE-2018-1466;IBM Flashsystem Storwize CSRF Arbitrary File Read Information Disc
 CVE-2018-1467;IBM Flashsystem Storwize CSRF Arbitrary File Read Information Disclosure;https://packetstormsecurity.com/files/147601/IBM-Flashsystem-Storwize-CSRF-Arbitrary-File-Read-Information-Disclosure.html;unknown
 CVE-2018-14701;Drobo 5N2 4.1.1 Remote Command Injection;https://packetstormsecurity.com/files/156710/Drobo-5N2-4.1.1-Remote-Command-Injection.html;remote
 CVE-2018-14709;Drobo 5N2 4.1.1 Remote Command Injection;https://packetstormsecurity.com/files/156710/Drobo-5N2-4.1.1-Remote-Command-Injection.html;remote
+CVE-2018-14714;ASUS RT AC3200 3.0.0.4.382.50010 Command Injection;https://packetstormsecurity.com/files/181357/ASUS-RT-AC3200-3.0.0.4.382.50010-Command-Injection.html;remote
 CVE-2018-14728;Responsive Filemanager 9.13.1 Server Side Request Forgery;https://packetstormsecurity.com/files/148742/Responsive-Filemanager-9.13.1-Server-Side-Request-Forgery.html;unknown
 CVE-2018-14777;DataLife Engine 13.0 Cross Site Scripting;https://packetstormsecurity.com/files/148768/DataLife-Engine-13.0-Cross-Site-Scripting.html;unknown
 CVE-2018-14840;Subrion CMS 4.2.1 Cross Site Scripting;https://packetstormsecurity.com/files/148815/Subrion-CMS-4.2.1-Cross-Site-Scripting.html;unknown
@@ -8082,6 +8083,7 @@ CVE-2020-27533;DedeCMS 5.8 Cross Site Scripting;https://packetstormsecurity.com/
 CVE-2020-27693;Trend Micro IMSVA CSRF XML Injection SSRF File Disclosure;https://packetstormsecurity.com/files/159914/Trend-Micro-IMSVA-CSRF-XML-Injection-SSRF-File-Disclosure.html;unknown
 CVE-2020-27694;Trend Micro IMSVA CSRF XML Injection SSRF File Disclosure;https://packetstormsecurity.com/files/159914/Trend-Micro-IMSVA-CSRF-XML-Injection-SSRF-File-Disclosure.html;unknown
 CVE-2020-2771;Oracle Solaris 11.x 10 whodo w Buffer Overflow;https://packetstormsecurity.com/files/157282/Oracle-Solaris-11.x-10-whodo-w-Buffer-Overflow.html;local
+CVE-2020-27796;Linux Kernel 5.6.13 Use After Free;https://packetstormsecurity.com/files/181335/Linux-Kernel-5.6.13-Use-After-Free.html;unknown
 CVE-2020-27930;Apple Safari Remote Code Execution;https://packetstormsecurity.com/files/161294/Apple-Safari-Remote-Code-Execution.html;remote
 CVE-2020-27932;XNU Kernel Turnstiles Type Confusion;https://packetstormsecurity.com/files/161295/XNU-Kernel-Turnstiles-Type-Confusion.html;unknown
 CVE-2020-27943;Apple CoreText libType1Scaler.dylib Buffer Overflow;https://packetstormsecurity.com/files/161298/Apple-CoreText-libType1Scaler.dylib-Buffer-Overflow.html;unknown
@@ -10438,6 +10440,7 @@ CVE-2024-41012;Linux lock_get_status Use After Free;https://packetstormsecurity.
 CVE-2024-41020;Linux lock_get_status Use After Free;https://packetstormsecurity.com/files/180403/Linux-lock_get_status-Use-After-Free.html;unknown
 CVE-2024-41332;Computer Laboratory Management System 1.0 Privilege Escalation;https://packetstormsecurity.com/files/179890/Computer-Laboratory-Management-System-1.0-Privilege-Escalation.html;unknown
 CVE-2024-41333;Tourism Management System 2.0 Cross Site Scripting;https://packetstormsecurity.com/files/179891/Tourism-Management-System-2.0-Cross-Site-Scripting.html;unknown
+CVE-2024-41629;Texas Instruments Fusion Digital Power Designer 7.10.1 Credential Disclosure;https://packetstormsecurity.com/files/181281/Texas-Instruments-Fusion-Digital-Power-Designer-7.10.1-Credential-Disclosure.html;local
 CVE-2024-41819;Notemark 0.13.0 Cross Site Scripting;https://packetstormsecurity.com/files/180456/Notemark-0.13.0-Cross-Site-Scripting.html;unknown
 CVE-2024-41958;Mailcow TFA Authentication Bypass;https://packetstormsecurity.com/files/179963/Mailcow-TFA-Authentication-Bypass.html;unknown
 CVE-2024-42318;Linux Landlock Logic Bug;https://packetstormsecurity.com/files/180261/Linux-Landlock-Logic-Bug.html;unknown
@@ -10448,6 +10451,17 @@ CVE-2024-4358;Telerik Report Server Deserialization Authentication Bypass;https:
 CVE-2024-44777;vTiger CRM 7.4.0 Cross Site Scripting;https://packetstormsecurity.com/files/180462/vTiger-CRM-7.4.0-Cross-Site-Scripting.html;unknown
 CVE-2024-44778;vTiger CRM 7.4.0 Cross Site Scripting;https://packetstormsecurity.com/files/180462/vTiger-CRM-7.4.0-Cross-Site-Scripting.html;unknown
 CVE-2024-44779;vTiger CRM 7.4.0 Cross Site Scripting;https://packetstormsecurity.com/files/180462/vTiger-CRM-7.4.0-Cross-Site-Scripting.html;unknown
+CVE-2024-45170;C MOR Video Surveillance 5.2401 Improper Access Control;https://packetstormsecurity.com/files/181379/C-MOR-Video-Surveillance-5.2401-Improper-Access-Control.html;unknown
+CVE-2024-45171;C MOR Video Surveillance 5.2401 Remote Shell Upload;https://packetstormsecurity.com/files/181381/C-MOR-Video-Surveillance-5.2401-Remote-Shell-Upload.html;remote
+CVE-2024-45172;C MOR Video Surveillance 5.2401 6.00PL01 Cross Site Request Forgery;https://packetstormsecurity.com/files/181377/C-MOR-Video-Surveillance-5.2401-6.00PL01-Cross-Site-Request-Forgery.html;unknown
+CVE-2024-45173;C MOR Video Surveillance 5.2401 6.00PL01 Privilege Escalation;https://packetstormsecurity.com/files/181382/C-MOR-Video-Surveillance-5.2401-6.00PL01-Privilege-Escalation.html;unknown
+CVE-2024-45174;C MOR Video Surveillance 5.2401 6.00PL01 SQL Injection;https://packetstormsecurity.com/files/181378/C-MOR-Video-Surveillance-5.2401-6.00PL01-SQL-Injection.html;remote
+CVE-2024-45175;C MOR Video Surveillance 5.2401 6.00PL01 Information Disclosure Cleartext Secret;https://packetstormsecurity.com/files/181383/C-MOR-Video-Surveillance-5.2401-6.00PL01-Information-Disclosure-Cleartext-Secret.html;unknown
+CVE-2024-45176;C MOR Video Surveillance 5.2401 Cross Site Scripting;https://packetstormsecurity.com/files/181375/C-MOR-Video-Surveillance-5.2401-Cross-Site-Scripting.html;unknown
+CVE-2024-45177;C MOR Video Surveillance 5.2401 6.00PL01 Cross Site Scripting;https://packetstormsecurity.com/files/181376/C-MOR-Video-Surveillance-5.2401-6.00PL01-Cross-Site-Scripting.html;unknown
+CVE-2024-45178;C MOR Video Surveillance 5.2401 Path Traversal;https://packetstormsecurity.com/files/181380/C-MOR-Video-Surveillance-5.2401-Path-Traversal.html;unknown
+CVE-2024-45179;C MOR Video Surveillance 5.2401 6.00PL01 Command Injection;https://packetstormsecurity.com/files/181385/C-MOR-Video-Surveillance-5.2401-6.00PL01-Command-Injection.html;unknown
+CVE-2024-45622;ASIS 3.2.0 SQL Injection;https://packetstormsecurity.com/files/181355/ASIS-3.2.0-SQL-Injection.html;remote
 CVE-2024-4577;PHP Remote Code Execution;https://packetstormsecurity.com/files/179085/PHP-Remote-Code-Execution.html;remote
 CVE-2024-4883;Progress WhatsUp Gold WriteDatafile Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179405/Progress-WhatsUp-Gold-WriteDatafile-Unauthenticated-Remote-Code-Execution.html;remote
 CVE-2024-4885;Progress WhatsUp Gold GetFileWithoutZip Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179404/Progress-WhatsUp-Gold-GetFileWithoutZip-Unauthenticated-Remote-Code-Execution.html;remote
