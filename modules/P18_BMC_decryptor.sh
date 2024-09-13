@@ -47,7 +47,7 @@ bmc_extractor() {
 
   sub_module_title "BMC encrypted firmware extractor"
 
-  "${EXT_DIR}"/smcbmc/smcbmc.py "${lBMC_FILE_PATH_}" "${lEXTRACTION_FILE_}"
+  "${EXT_DIR}"/smcbmc/smcbmc.py "${lBMC_FILE_PATH_}" "${lEXTRACTION_FILE_}" || print_error "[-] BMC decryption failed for ${lBMC_FILE_PATH_}"
 
   print_ln
   if [[ -f "${lEXTRACTION_FILE_}" ]]; then

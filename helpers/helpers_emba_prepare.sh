@@ -386,13 +386,13 @@ architecture_check() {
         fi
       else
         print_output "[*] No architecture was enforced, so the automatically detected one is used." "no_log"
+        export ARCH=""
         ARCH="${D_ARCH}"
-        export ARCH
       fi
     elif [[ -n "${EFI_ARCH}" ]]; then
       print_output "$(indent "Detected architecture of the UEFI firmware: ""${ORANGE}""${EFI_ARCH}""${NC}")""\\n"
+      export ARCH=""
       ARCH="${EFI_ARCH}"
-      export ARCH
     else
       print_output "$(indent "$(red "Based on binary identification no architecture was detected.")")"
       if [[ -n "${ARCH}" ]] ; then

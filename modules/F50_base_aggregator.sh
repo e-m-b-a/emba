@@ -28,7 +28,9 @@ F50_base_aggregator() {
   export F20_EXPLOITS_LOG="${LOG_DIR}"/f20_vul_aggregator/exploits-overview.txt
   export P02_CSV_LOG="${CSV_DIR}""/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}""/p99_prepare_analyzer.csv"
+  export P99_LOG="${LOG_DIR}""/p99_prepare_analyzer.txt"
   export P35_LOG="p35_uefi_extractor.txt"
+  export S02_LOG="s02_uefi_fwhunt.txt"
   export S03_LOG="s03_firmware_bin_base_analyzer.txt"
   export S05_LOG="s05_firmware_details.txt"
   export S06_LOG="s06_distribution_identification.txt"
@@ -39,7 +41,6 @@ F50_base_aggregator() {
   export S16_LOG="s16_ghidra_decompile_checks.txt"
   export S17_CSV_LOG="${CSV_DIR}""/s17_apk_check.csv"
   export S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
-  export S02_LOG="s02_uefi_fwhunt.txt"
   export S20_LOG="s20_shell_check.txt"
   export S21_LOG="s21_python_check.txt"
   export S22_LOG="s22_php_check.txt"
@@ -441,7 +442,6 @@ output_binaries() {
 
   if [[ -v BINARIES[@] ]]; then
     if [[ -f "${S12_CSV_LOG}" ]]; then
-      echo "checking for binary protections ..."
       CANARY=$(grep -c "No Canary" "${S12_CSV_LOG}" || true)
       RELRO=$(grep -c "No RELRO" "${S12_CSV_LOG}" || true)
       NX=$(grep -c "NX disabled" "${S12_CSV_LOG}" || true)
@@ -851,18 +851,13 @@ get_data() {
     EFI_ARCH="${EFI_ARCH%\/}"
     EFI_ARCH=$(strip_color_codes "${EFI_ARCH}")
   fi
-  if [[ -f "${P99_CSV_LOG}" ]]; then
-    P99_ARCH="$(tail -n +2 "${P99_CSV_LOG}" | cut -d\; -f 4 | sort -u | head -1)"
-    P99_ARCH_END="$(tail -n +2 "${P99_CSV_LOG}" | cut -d\; -f 3 | sort -u | head -1)"
-    if [[ "${P99_ARCH_END}" == *"little endian"* ]]; then
-      P99_ARCH_END="LE"
-    else
-      P99_ARCH_END="BE"
-    fi
+  if [[ -f "${P99_LOG}" ]]; then
+    P99_ARCH="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 2)"
+    P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3)"
   fi
   if [[ -f "${S24_CSV_LOG}" ]]; then
-    K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | head -1)"
-    K_ARCH_END="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 9 | sort -u | head -1)"
+    K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1)"
+    K_ARCH_END="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 9 | sort -u | grep "\S" | head -1)"
   fi
 
   if [[ -f "${LOG_DIR}"/"${S02_LOG}" ]]; then
