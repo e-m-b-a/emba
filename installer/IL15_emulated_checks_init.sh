@@ -21,8 +21,6 @@ IL15_emulated_checks_init() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
     cd "${HOME_PATH}" || ( echo "Could not install EMBA component system emulator" && exit 1 )
-    print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
-    print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
     print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
     # print_file_info "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "Arachni web application scanner" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni"
     print_git_info "Nikto" "sullo/nikto" "external/nikto"
@@ -89,40 +87,6 @@ IL15_emulated_checks_init() {
       if ! [[ -d external/nikto ]]; then
         git clone https://github.com/sullo/nikto.git external/nikto
       fi
-
-      if ! [[ -d external/routersploit ]]; then
-        # currently this gentle guy has started to update routersploit on this fork:
-        git clone --branch dev_rework https://github.com/GH0st3rs/routersploit.git external/routersploit
-      fi
-
-      cd external/routersploit || ( echo "Could not install EMBA component routersploit" && exit 1 )
-
-      if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
-        # is already applied in the used fork (leave this here for future usecases):
-        download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "docs/routersploit_patch"
-        patch -f -p1 < docs/routersploit_patch || true
-      else
-        echo -e "${GREEN}""routersploit_patch already downloaded""${NC}"
-      fi
-
-      python3 -m pip install -r requirements.txt --break-system-packages
-      # if the default log path is set we reset it to /tmp
-      if ! grep -q "/tmp/routersploit.log" rsf.py; then
-        sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
-      fi
-      # patch some code to write the history files to a subdirectory in /root
-      # shellcheck disable=SC2088
-      # we do not want to expand the tilde
-      if grep -q  '~/.history' ./routersploit/interpreter.py; then
-        sed -i 's/~\/\.history/~\/\.routersploit\/\.history/' ./routersploit/interpreter.py
-      fi
-      # shellcheck disable=SC2088
-      # we do not want to expand the tilde
-      if grep -q  '~/.rsf_history' ./routersploit/interpreter.py; then
-        sed -i 's/~\/\.rsf_history/~\/\.routersploit\/\.rsf_history/' ./routersploit/interpreter.py
-      fi
-
-      cd "${HOME_PATH}" || ( echo "Could not install EMBA component routersploit" && exit 1 )
 
       # future extension
       pip_install "upnpclient"
