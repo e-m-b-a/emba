@@ -19,12 +19,12 @@
 
 # helper for box drawing
 repeat_char() {
-  local REP_CHAR="${1:-}"
-  local REP_COUNT="${2:-0}"
-  local RET=""
-  local A=0
-  for ((A=1; A<=REP_COUNT; A++)) ; do RET+="${REP_CHAR}"; done
-  echo -e "${RET}"
+  local lREP_CHAR="${1:-}"
+  local lREP_COUNT="${2:-0}"
+  local lRET=""
+  local lA=0
+  for ((lA=1; lA<=lREP_COUNT; lA++)) ; do lRET+="${lREP_CHAR}"; done
+  echo -e "${lRET}"
 }
 
 draw_box() {
@@ -33,17 +33,17 @@ draw_box() {
   local lLINES=""
   [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
-  local BOX_W="${1:-0}"
-  local BOX_TITLE="${2:-}"
-  BOX_TITLE=" ${BOX_TITLE} "
-  local BOX_L="${3:-0}"
-  local BOX=""
-  BOX+="\e[$((lLINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[0m$(repeat_char "─" "$((BOX_W - "${#BOX_TITLE}" - 2))")┐"
-  BOX+="\e[$((lLINES - 3));${BOX_L}f│""$(repeat_char " " "$((BOX_W - 2))")""│"
-  BOX+="\e[$((lLINES - 2));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
-  BOX+="\e[$((lLINES - 1));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
-  BOX+="\e[${lLINES};${BOX_L}f└$(repeat_char "─" "$((BOX_W - 2))")┘"
-  echo -e "${BOX}"
+  local lBOX_W="${1:-0}"
+  local lBOX_TITLE="${2:-}"
+  lBOX_TITLE=" ${lBOX_TITLE} "
+  local lBOX_L="${3:-0}"
+  local lBOX=""
+  lBOX+="\e[$((lLINES - 4));${lBOX_L}f┌\033[1m${lBOX_TITLE}\033[0m$(repeat_char "─" "$((lBOX_W - "${#lBOX_TITLE}" - 2))")┐"
+  lBOX+="\e[$((lLINES - 3));${lBOX_L}f│""$(repeat_char " " "$((lBOX_W - 2))")""│"
+  lBOX+="\e[$((lLINES - 2));${lBOX_L}f│$(repeat_char " " "$((lBOX_W - 2))")│"
+  lBOX+="\e[$((lLINES - 1));${lBOX_L}f│$(repeat_char " " "$((lBOX_W - 2))")│"
+  lBOX+="\e[${lLINES};${lBOX_L}f└$(repeat_char "─" "$((lBOX_W - 2))")┘"
+  echo -e "${lBOX}"
 }
 
 draw_arrows() {
@@ -379,9 +379,9 @@ remove_status_bar() {
   fi
 
   shopt -s checkwinsize
-  local LINE_POS=""
+  local lLINE_POS=""
   local lLINES=""
-  [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
+  [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" 2>/dev/null || true)
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
@@ -419,15 +419,17 @@ remove_status_bar() {
     kill_box_pid "${PID_STATUS_2}" &
   fi
 
-  if ! [[ -v lLINES ]] ; then
+  if [[ ! -v lLINES ]] || [[ "${lLINES}" -lt 6 ]]; then
     return
   fi
 
   sleep 1
-  local RM_STR=""
-  LINE_POS="$(( lLINES - 6 ))"
-  RM_STR="\e[""${LINE_POS}"";1f\e[0J\e[;r\e[""${LINE_POS}"";1f"
-  printf "%b" "${RM_STR}"
+  local lRM_STR=""
+  lLINE_POS="$(( lLINES - 6 ))"
+  # lRM_STR="\e[""${lLINE_POS}"";1f\e[0J\e[;r\e[""${lLINE_POS}"";1f"
+  # clear from cursor to the end of the screen -> removes status bar
+  lRM_STR="\e[""${lLINE_POS}"";1f\e[0J\e[;r"
+  printf "%b" "${lRM_STR}"
 }
 
 box_updaters() {
@@ -475,14 +477,14 @@ box_updaters() {
 }
 
 kill_box_pid() {
-  local PID="${1:-}"
-  # echo "$PID" >> "${TMP_DIR}"/pids_to_kill.txt
-  if ! [[ -e /proc/"${PID}" ]]; then
+  local lPID="${1:-}"
+  # echo "$lPID" >> "${TMP_DIR}"/pids_to_kill.txt
+  if ! [[ -e /proc/"${lPID}" ]]; then
     return
   fi
-  while [[ -e /proc/"${PID}" ]]; do
-    # print_output "[*] Status bar - kill pid: $PID" "no_log"
-    kill -9 "${PID}" 2>/dev/null || true
+  while [[ -e /proc/"${lPID}" ]]; do
+    # print_output "[*] Status bar - kill pid: $lPID" "no_log"
+    kill -9 "${lPID}" 2>/dev/null || true
   done
 }
 
@@ -513,8 +515,8 @@ initial_status_bar() {
   if ! [[ -v LINES ]] ; then
     return
   fi
-  local LINE_POS="$(( LINES - 6 ))"
-  printf "\e[%s;1f\e[0J\e[%s;1f" "${LINE_POS}" "${LINE_POS}"
+  local lLINE_POS="$(( LINES - 6 ))"
+  printf "\e[%s;1f\e[0J\e[%s;1f" "${lLINE_POS}" "${lLINE_POS}"
   echo "${LINES}" > "${TMP_DIR}""/LINES.log"
 
   # we need to restart our foreground logging:
@@ -522,13 +524,16 @@ initial_status_bar() {
   if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
     touch "${LOG_DIR}"/emba.log
   fi
-  # reset
-  # clear
+  # resets adn clears the screen for the status bar
   printf "\x1Bc"
+  #lRM_STR="\e[0J"
+  #printf "%b" "${lRM_STR}"
+  #lRM_STR="\e[1J"
+  #printf "%b" "${lRM_STR}"
 
   tail -f "${LOG_DIR}"/emba.log &
-  local TAIL_PID="$!"
-  disown "${TAIL_PID}" 2> /dev/null || true
+  local lTAIL_PID="$!"
+  disown "${lTAIL_PID}" 2> /dev/null || true
 
   # create new tmp file with empty lines
   STATUS_TMP_PATH="${TMP_DIR}/status"
@@ -536,41 +541,41 @@ initial_status_bar() {
     echo -e "\\n\\n\\n\\n" > "${STATUS_TMP_PATH}"
   fi
   # calculate boxes fitting and draw them
-  local INITIAL_STR=""
-  INITIAL_STR="\e[${LINE_POS};1f\e[0J\e[0;${LINE_POS}r\e[${LINE_POS};1f"
+  local lINITIAL_STR=""
+  lINITIAL_STR="\e[${lLINE_POS};1f\e[0J\e[0;${lLINE_POS}r\e[${lLINE_POS};1f"
   if [[ ${LINES} -gt 10 ]] ; then
     # column has to be increased with 2 characters because of possible arrow column
-    local ARROW_POS=0
+    local lARROW_POS=0
     export STATUS_BAR_BOX_COUNT=0
     if [[ ${COLUMNS} -ge 27 ]] ; then
-      INITIAL_STR+="$(draw_box 26 "SYSTEM LOAD" 0)"
+      lINITIAL_STR+="$(draw_box 26 "SYSTEM LOAD" 0)"
       STATUS_BAR_BOX_COUNT=1
-      ARROW_POS=27
+      lARROW_POS=27
     fi
     if [[ ${COLUMNS} -ge 54 ]] ; then
-      INITIAL_STR+="$(draw_box 26 "STATUS" 27)"
+      lINITIAL_STR+="$(draw_box 26 "STATUS" 27)"
       STATUS_BAR_BOX_COUNT=2
-      ARROW_POS=53
+      lARROW_POS=53
     fi
     if [[ ${COLUMNS} -ge 80 ]] ; then
-      INITIAL_STR+="$(draw_box 26 "MODULES" 53)"
+      lINITIAL_STR+="$(draw_box 26 "MODULES" 53)"
       STATUS_BAR_BOX_COUNT=3
-      ARROW_POS=79
+      lARROW_POS=79
     fi
     if [[ ${COLUMNS} -ge 104 ]] ; then
-      INITIAL_STR+="$(draw_box 26 "STATUS 2" 79)"
+      lINITIAL_STR+="$(draw_box 26 "STATUS 2" 79)"
       STATUS_BAR_BOX_COUNT=4
     fi
 
     if [[ ${STATUS_BAR_BOX_COUNT} -lt 4 ]] ; then
-      INITIAL_STR+="$(draw_arrows "${ARROW_POS}")"
+      lINITIAL_STR+="$(draw_arrows "${lARROW_POS}")"
     fi
   fi
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     sed -i "1s/.*/${STATUS_BAR_BOX_COUNT}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
   fi
-  INITIAL_STR+="\e[H"
+  lINITIAL_STR+="\e[H"
   # set cursor and boxes
-  printf "%b" "${INITIAL_STR}"
+  printf "%b" "${lINITIAL_STR}"
   box_updaters
 }

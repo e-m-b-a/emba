@@ -30,6 +30,8 @@ I20_sourcecode_check() {
     print_tool_info "shellcheck" 1
     print_tool_info "php" 1
     print_tool_info "luarocks" 1
+    # pydantic update needed for semgrep
+    print_pip_info "pydantic"
     print_pip_info "semgrep"
     print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
     print_git_info "0xdea C/C++ semgrep-rules" "EMBA-support-repos/semgrep-rules-0xdea" "C/C++ Semgrep rules by 0xdea"
@@ -52,6 +54,7 @@ I20_sourcecode_check() {
 
         luarocks install luacheck
 
+        pip_install "pydantic" "-U"
         pip_install "semgrep"
         if ! [[ -d external/semgrep-rules ]]; then
           git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
