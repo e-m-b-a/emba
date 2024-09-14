@@ -214,12 +214,12 @@ get_cve_busybox_data() {
     local lFIRST_EPSS=""
     local lCVE_SUMMARY=""
 
-    while read lCVE_LINE_ENTRY; do
+    while read -r lCVE_LINE_ENTRY; do
       lCVE_ID="${lCVE_LINE_ENTRY/:*}"
-      lCVSS_V2=$(echo ${lCVE_LINE_ENTRY} | cut -d: -f2)
-      lCVSS_V3=$(echo ${lCVE_LINE_ENTRY} | cut -d: -f3)
-      lFIRST_EPSS=$(echo ${lCVE_LINE_ENTRY} | cut -d: -f5)
-      lCVE_SUMMARY=$(echo ${lCVE_LINE_ENTRY} | cut -d: -f6-)
+      lCVSS_V2=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f2)
+      lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f3)
+      lFIRST_EPSS=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
+      lCVE_SUMMARY=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f6-)
 
       write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
       write_log "$(indent "CVSSv2: ${ORANGE}${lCVSS_V2}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
