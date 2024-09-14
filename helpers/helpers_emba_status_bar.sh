@@ -526,10 +526,6 @@ initial_status_bar() {
   fi
   # resets adn clears the screen for the status bar
   printf "\x1Bc"
-  #lRM_STR="\e[0J"
-  #printf "%b" "${lRM_STR}"
-  #lRM_STR="\e[1J"
-  #printf "%b" "${lRM_STR}"
 
   tail -f "${LOG_DIR}"/emba.log &
   local lTAIL_PID="$!"
