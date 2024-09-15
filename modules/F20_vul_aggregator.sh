@@ -1008,11 +1008,11 @@ cve_extractor() {
   #  fi
   # fi
 
-  if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
-    if [[ "${#CVEs_OUTPUT[@]}" == 0 ]]; then
-      write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE:-NA}" "${CVSS_VALUE:-NA}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL:-NA}" "${REMOTE:-NA}" "${DOS:-NA}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED:-NA}" "${FIRST_EPSS:-NA}" "${FIRST_PERC:-NA}"
-    fi
+  if [[ "${#CVEs_OUTPUT[@]}" == 0 ]]; then
+    write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE:-NA}" "${CVSS_VALUE:-NA}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL:-NA}" "${REMOTE:-NA}" "${DOS:-NA}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED:-NA}" "${FIRST_EPSS:-NA}" "${FIRST_PERC:-NA}"
+  fi
 
+  if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
     local WAIT_PIDS_TACTOR=()
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       # CVE_OUTPUT is for one CVE value
