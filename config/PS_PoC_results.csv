@@ -9029,6 +9029,7 @@ CVE-2022-0847;Linux 4.20 KTLS Read Only Write;https://packetstormsecurity.com/fi
 CVE-2022-0848;part db 0.5.11 Remote Code Execution;https://packetstormsecurity.com/files/166217/part-db-0.5.11-Remote-Code-Execution.html;remote
 CVE-2022-0864;WordPress UpdraftPlus Cross Site Scripting;https://packetstormsecurity.com/files/166631/WordPress-UpdraftPlus-Cross-Site-Scripting.html;unknown
 CVE-2022-0901;WordPress Ad Inserter Cross Site Scripting;https://packetstormsecurity.com/files/166626/WordPress-Ad-Inserter-Cross-Site-Scripting.html;unknown
+CVE-2022-0944;GitHub sqlpad sqlpad Template Injection Remote Code Execution;https://packetstormsecurity.com/files/181440/GitHub-sqlpad-sqlpad-Template-Injection-Remote-Code-Execution.html;remote
 CVE-2022-0953;WordPress Anti Malware Security And Brute Force Firewall Cross Site Scripting;https://packetstormsecurity.com/files/166680/WordPress-Anti-Malware-Security-And-Brute-Force-Firewall-Cross-Site-Scripting.html;unknown
 CVE-2022-0967;Showdoc 2.10.3 Cross Site Scripting;https://packetstormsecurity.com/files/167198/Showdoc-2.10.3-Cross-Site-Scripting.html;unknown
 CVE-2022-0971;Chrome content DisplayCutoutHostImpl SendSafeAreaToFrame Use After Free;https://packetstormsecurity.com/files/167005/Chrome-content-DisplayCutoutHostImpl-SendSafeAreaToFrame-Use-After-Free.html;unknown
@@ -10256,6 +10257,11 @@ CVE-2024-25003;KiTTY 0.76.1.13 Buffer Overflows;https://packetstormsecurity.com/
 CVE-2024-25004;KiTTY 0.76.1.13 Buffer Overflows;https://packetstormsecurity.com/files/177032/KiTTY-0.76.1.13-Buffer-Overflows.html;unknown
 CVE-2024-25153;Fortra FileCatalyst Workflow 5.x Remote Code Execution;https://packetstormsecurity.com/files/177664/Fortra-FileCatalyst-Workflow-5.x-Remote-Code-Execution.html;remote
 CVE-2024-25228;Vinchin Backup And Recovery 7.2 Command Injection;https://packetstormsecurity.com/files/177605/Vinchin-Backup-And-Recovery-7.2-Command-Injection.html;unknown
+CVE-2024-25282;3DSecure 2.0 3DS Method Authentication Cross Site Scripting;https://packetstormsecurity.com/files/181492/3DSecure-2.0-3DS-Method-Authentication-Cross-Site-Scripting.html;remote
+CVE-2024-25283;3DSecure 2.0 3DS Authorization Challenge Cross Site Scripting;https://packetstormsecurity.com/files/181493/3DSecure-2.0-3DS-Authorization-Challenge-Cross-Site-Scripting.html;unknown
+CVE-2024-25284;3DSecure 2.0 3DS Authorization Method Cross Site Scripting;https://packetstormsecurity.com/files/181494/3DSecure-2.0-3DS-Authorization-Method-Cross-Site-Scripting.html;unknown
+CVE-2024-25285;3DSecure 2.0 3DS Method Authentication Cross Site Scripting;https://packetstormsecurity.com/files/181495/3DSecure-2.0-3DS-Method-Authentication-Cross-Site-Scripting.html;unknown
+CVE-2024-25286;3DSecure 2.0 3DS Authorization Method Cross Site Request Forgery;https://packetstormsecurity.com/files/181496/3DSecure-2.0-3DS-Authorization-Method-Cross-Site-Request-Forgery.html;unknown
 CVE-2024-25327;FullCourt Enterprise 8.2 Cross Site Scripting;https://packetstormsecurity.com/files/177500/FullCourt-Enterprise-8.2-Cross-Site-Scripting.html;unknown
 CVE-2024-25344;ITFlow Cross Site Request Forgery;https://packetstormsecurity.com/files/177224/ITFlow-Cross-Site-Request-Forgery.html;unknown
 CVE-2024-25641;Cacti 1.2.26 Remote Code Execution;https://packetstormsecurity.com/files/178584/Cacti-1.2.26-Remote-Code-Execution.html;remote
@@ -10328,9 +10334,11 @@ CVE-2024-29302;Task Management System 1.0 SQL Injection;https://packetstormsecur
 CVE-2024-29303;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-29411;E Insurance 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177887/E-Insurance-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-29412;Hospital Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177890/Hospital-Management-System-1.0-Cross-Site-Scripting.html;unknown
+CVE-2024-29847;Ivanti EPM Remote Code Execution;https://packetstormsecurity.com/files/181519/Ivanti-EPM-Remote-Code-Execution.html;remote
 CVE-2024-29849;Veeam Backup Enterprise Manager Authentication Bypass;https://packetstormsecurity.com/files/179408/Veeam-Backup-Enterprise-Manager-Authentication-Bypass.html;unknown
 CVE-2024-29855;Veeam Recovery Orchestrator Authentication Bypass;https://packetstormsecurity.com/files/179407/Veeam-Recovery-Orchestrator-Authentication-Bypass.html;unknown
 CVE-2024-29978;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-30051;Microsoft Windows DWM Core Library Privilege Escalation;https://packetstormsecurity.com/files/181402/Microsoft-Windows-DWM-Core-Library-Privilege-Escalation.html;unknown
 CVE-2024-30088;Collateral Damage CVE 2024 30088 Privilege Escalation;https://packetstormsecurity.com/files/179642/Collateral-Damage-CVE-2024-30088-Privilege-Escalation.html;unknown
 CVE-2024-30104;Microsoft Office 365 Remote Code Execution;https://packetstormsecurity.com/files/179394/Microsoft-Office-365-Remote-Code-Execution.html;remote
 CVE-2024-30162;Invision Community 4.7.16 Remote Code Execution;https://packetstormsecurity.com/files/177983/Invision-Community-4.7.16-Remote-Code-Execution.html;remote
@@ -10396,11 +10404,13 @@ CVE-2024-34724;PowerVR _UnrefAndMaybeDestroy Use After Free;https://packetstorms
 CVE-2024-34729;PowerVR Dangling Page Table Entry;https://packetstormsecurity.com/files/179593/PowerVR-Dangling-Page-Table-Entry.html;unknown
 CVE-2024-34732;PowerVR PMR Physical Memory Handling Flaw;https://packetstormsecurity.com/files/179768/PowerVR-PMR-Physical-Memory-Handling-Flaw.html;unknown
 CVE-2024-34733;PowerVR DevmemXIntMapPages DevmemXIntUnmapPages Integer Overflows;https://packetstormsecurity.com/files/179769/PowerVR-DevmemXIntMapPages-DevmemXIntUnmapPages-Integer-Overflows.html;unknown
+CVE-2024-34747;PowerVR DEVMEMXINT_RESERVATION ppsPMR Use After Free;https://packetstormsecurity.com/files/181438/PowerVR-DEVMEMXINT_RESERVATION-ppsPMR-Use-After-Free.html;unknown
 CVE-2024-34748;PowerVR _DevmemXReservationPageAddress Wrapping Addition Error;https://packetstormsecurity.com/files/179770/PowerVR-_DevmemXReservationPageAddress-Wrapping-Addition-Error.html;unknown
 CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36251;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-36401;GeoServer Remote Code Execution;https://packetstormsecurity.com/files/181518/GeoServer-Remote-Code-Execution.html;remote
 CVE-2024-36424;K7 Ultimate Security NULL Pointer Dereference;https://packetstormsecurity.com/files/180137/K7-Ultimate-Security-NULL-Pointer-Dereference.html;local/DoS
 CVE-2024-36439;DiCal RED 4009 Cryptography Failure;https://packetstormsecurity.com/files/180353/DiCal-RED-4009-Cryptography-Failure.html;unknown
 CVE-2024-36440;DiCal RED 4009 Weak Hashing;https://packetstormsecurity.com/files/180352/DiCal-RED-4009-Weak-Hashing.html;unknown
@@ -10417,6 +10427,7 @@ CVE-2024-36598;AEGON LIFE 1.0 Remote Code Execution;https://packetstormsecurity.
 CVE-2024-36599;AEGON LIFE 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/179088/AEGON-LIFE-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-36840;Boelter Blue System Management 1.3 SQL Injection;https://packetstormsecurity.com/files/178978/Boelter-Blue-System-Management-1.3-SQL-Injection.html;remote
 CVE-2024-37032;Ollama Remote Code Execution;https://packetstormsecurity.com/files/179218/Ollama-Remote-Code-Execution.html;remote
+CVE-2024-37084;Spring Cloud Data Flow Remote Code Execution;https://packetstormsecurity.com/files/181439/Spring-Cloud-Data-Flow-Remote-Code-Execution.html;remote
 CVE-2024-37856;Lost And Found Information System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/179078/Lost-And-Found-Information-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-37857;Lost And Found Information System 1.0 SQL Injection;https://packetstormsecurity.com/files/179080/Lost-And-Found-Information-System-1.0-SQL-Injection.html;remote
 CVE-2024-37858;Lost And Found Information System 1.0 SQL Injection;https://packetstormsecurity.com/files/179079/Lost-And-Found-Information-System-1.0-SQL-Injection.html;remote
@@ -10495,3 +10506,5 @@ CVE-2024-7313;WordPress Shield Security 20.0.5 Cross Site Scripting;https://pack
 CVE-2024-7395;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
 CVE-2024-7396;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
 CVE-2024-7397;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
+CVE-2024-8503;VICIdial 2.14 917a SQL Injection;https://packetstormsecurity.com/files/181460/VICIdial-2.14-917a-SQL-Injection.html;unknown
+CVE-2024-8504;VICIdial 2.14 917a Remote Code Execution;https://packetstormsecurity.com/files/181461/VICIdial-2.14-917a-Remote-Code-Execution.html;unknown
