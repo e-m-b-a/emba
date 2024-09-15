@@ -38,7 +38,7 @@ L20_snmp_checks() {
           return
         fi
       fi
-      if [[ "${NMAP_PORTS_SERVICES[*]}" == *"snmp"* ]]; then
+      if [[ "${NMAP_PORTS_SERVICES_ARR[*]}" == *"snmp"* ]]; then
         check_basic_snmp "${IP_ADDRESS_}"
         check_snmp_vulns "${IP_ADDRESS_}"
       else

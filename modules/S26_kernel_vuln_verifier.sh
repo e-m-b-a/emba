@@ -532,7 +532,7 @@ report_kvulns_csv() {
   lCVSS3="$(echo "${lVULN}" | cut -d: -f3)"
   lCVE_SYMBOL_FOUND=$(find "${LOG_PATH_MODULE}" -name "${lCVE}_symbol_verified.txt" | wc -l)
   lCVE_COMPILE_FOUND=$(find "${LOG_PATH_MODULE}" -name "${lCVE}_compiled_verified.txt" | wc -l)
-  echo "${lK_VERSION};${ORIG_K_ARCH};${lCVE};${lCVSS2};${lCVSS3};${lCVE_SYMBOL_FOUND};${lCVE_COMPILE_FOUND}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${lK_VERSION}".csv
+  echo "${lK_VERSION};${ORIG_K_ARCH};${lCVE};${lCVSS2};${lCVSS3};${lCVE_SYMBOL_FOUND:-0};${lCVE_COMPILE_FOUND:-0}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${lK_VERSION}".csv
 }
 
 final_log_kernel_vulns() {

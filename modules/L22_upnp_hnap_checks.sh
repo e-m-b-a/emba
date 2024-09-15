@@ -93,8 +93,8 @@ check_basic_hnap_jnap() {
 
   sub_module_title "HNAP/JNAP enumeration for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
 
-  if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
-    for lPORT_SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
+  if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
+    for lPORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
       [[ "${HNAP_UP}" -eq 1 && "${JNAP_UP}" -eq 1 ]] && break
 
       lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
