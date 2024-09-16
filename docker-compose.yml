@@ -22,6 +22,7 @@ services:
       - /root/.ghidra/
       - /root/.msf4
       - /root/.john
+      - /root/.gnupg
       - /run/lock
       - /var/run
       - /var/tmp
