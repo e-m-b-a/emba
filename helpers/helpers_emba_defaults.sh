@@ -152,6 +152,4 @@ set_defaults() {
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
   export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
-
-  alias printf="/bin/printf"
 }

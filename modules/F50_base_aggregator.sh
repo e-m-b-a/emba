@@ -458,7 +458,7 @@ output_binaries() {
 
     if [[ "${CANARY:-0}" -gt 0 ]]; then
       CAN_PER=$(bc -l <<< "${CANARY}/(${BINS_CHECKED}/100)" 2>/dev/null)
-      CAN_PER=$(printf "%.0f" "${CAN_PER}" 2>/dev/null || true)
+      CAN_PER=$(/bin/printf "%.0f" "${CAN_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${CANARY}"" (""${CAN_PER}""%)""${GREEN}"" binaries without enabled stack canaries in ${ORANGE}""${BINS_CHECKED}""${GREEN} binaries."
       write_link "s12"
       write_csv_log "canary" "${CANARY}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -467,7 +467,7 @@ output_binaries() {
     fi
     if [[ "${RELRO:-0}" -gt 0 ]]; then
       RELRO_PER=$(bc -l <<< "${RELRO}/(${BINS_CHECKED}/100)" 2>/dev/null)
-      RELRO_PER=$(printf "%.0f" "${RELRO_PER}" 2>/dev/null || true)
+      RELRO_PER=$(/bin/printf "%.0f" "${RELRO_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${RELRO}"" (""${RELRO_PER}""%)""${GREEN}"" binaries without enabled RELRO in ${ORANGE}""${BINS_CHECKED}""${GREEN} binaries."
       write_link "s12"
       write_csv_log "relro" "${RELRO}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -476,7 +476,7 @@ output_binaries() {
     fi
     if [[ "${NX:-0}" -gt 0 ]]; then
       NX_PER=$(bc -l <<< "${NX}/(${BINS_CHECKED}/100)" 2>/dev/null)
-      NX_PER=$(printf "%.0f" "${NX_PER}" 2>/dev/null || true)
+      NX_PER=$(/bin/printf "%.0f" "${NX_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${NX}"" (""${NX_PER}""%)""${GREEN}"" binaries without enabled NX in ${ORANGE}""${BINS_CHECKED}""${GREEN} binaries."
       write_link "s12"
       write_csv_log "nx" "${NX}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -485,7 +485,7 @@ output_binaries() {
     fi
     if [[ "${PIE:-0}" -gt 0 ]]; then
       PIE_PER=$(bc -l <<< "${PIE}/(${BINS_CHECKED}/100)" 2>/dev/null)
-      PIE_PER=$(printf "%.0f" "${PIE_PER}" 2>/dev/null || true)
+      PIE_PER=$(/bin/printf "%.0f" "${PIE_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${PIE}"" (""${PIE_PER}""%)""${GREEN}"" binaries without enabled PIE in ${ORANGE}""${BINS_CHECKED}""${GREEN} binaries."
       write_link "s12"
       write_csv_log "pie" "${PIE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -494,7 +494,7 @@ output_binaries() {
     fi
     if [[ "${STRIPPED:-0}" -gt 0 ]]; then
       STRIPPED_PER=$(bc -l <<< "${STRIPPED}/(${BINS_CHECKED}/100)" 2>/dev/null)
-      STRIPPED_PER=$(printf "%.0f" "${STRIPPED_PER}" 2>/dev/null || true)
+      STRIPPED_PER=$(/bin/printf "%.0f" "${STRIPPED_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${STRIPPED}"" (""${STRIPPED_PER}""%)""${GREEN}"" stripped binaries without symbols in ${ORANGE}""${BINS_CHECKED}""${GREEN} binaries."
       write_link "s12"
       write_csv_log "stripped" "${STRIPPED}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
