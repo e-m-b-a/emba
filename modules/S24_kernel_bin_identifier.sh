@@ -24,23 +24,23 @@ S24_kernel_bin_identifier()
   module_title "Kernel Binary and Configuration Identifier"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local NEG_LOG=0
-  local FILE=""
-  local K_VER=""
-  local K_INITS=()
-  local K_INIT=""
-  local CFG_MD5=""
-  export KCFG_MD5=()
+  local lNEG_LOG=0
+  local lFILE=""
+  local lK_VER=""
+  local lK_INITS_ARR=()
+  local lK_INIT=""
+  local lCFG_MD5=""
+  export KCFG_MD5_ARR=()
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
 
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
-  for FILE in "${FILE_ARR_LIMITED[@]}" ; do
-    local K_ELF="NA"
-    local KCONFIG_EXTRACTED="NA"
-    local K_VER_CLEAN="NA"
-    local K_INIT="NA"
+  for lFILE in "${FILE_ARR_LIMITED[@]}" ; do
+    local lK_ELF="NA"
+    local lKCONFIG_EXTRACTED="NA"
+    local lK_VER_CLEAN="NA"
+    local lK_INIT="NA"
     local CFG_CNT=0
     local K_SYMBOLS=0
     local K_ARCH="NA"
@@ -49,41 +49,41 @@ S24_kernel_bin_identifier()
     local K_FILE=""
     local K_VER_TMP=""
 
-    if file "${FILE}" | grep -q "ASCII text"; then
+    if file "${lFILE}" | grep -q "ASCII text"; then
       # reduce false positive rate
       continue
     fi
-    K_VER=$(strings "${FILE}" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" | sort -u || true)
+    lK_VER=$(strings "${lFILE}" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" | sort -u || true)
 
-    if [[ "${K_VER}" =~ Linux\ version\ .* ]]; then
+    if [[ "${lK_VER}" =~ Linux\ version\ .* ]]; then
       print_ln
-      print_output "[+] Possible Linux Kernel found: ${ORANGE}${FILE}${NC}"
+      print_output "[+] Possible Linux Kernel found: ${ORANGE}${lFILE}${NC}"
       print_ln
-      print_output "$(indent "$(orange "${K_VER}")")"
+      print_output "$(indent "$(orange "${lK_VER}")")"
       print_ln
 
       # not perfect, but not too bad for now:
-      mapfile -t K_INITS < <(strings "${FILE}" 2>/dev/null | grep -E "init=\/" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | tr -d '"' | sort -u || true)
-      for K_INIT in "${K_INITS[@]}"; do
-        if [[ "${K_INIT}" =~ init=\/.* ]]; then
-          print_output "[+] Init found in Linux kernel file ${ORANGE}${FILE}${NC}"
+      mapfile -t lK_INITS_ARR < <(strings "${lFILE}" 2>/dev/null | grep -E "init=\/" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | tr -d '"' | sort -u || true)
+      for lK_INIT in "${lK_INITS_ARR[@]}"; do
+        if [[ "${lK_INIT}" =~ init=\/.* ]]; then
+          print_output "[+] Init found in Linux kernel file ${ORANGE}${lFILE}${NC}"
           print_ln
-          print_output "$(indent "$(orange "${K_INIT}")")"
+          print_output "$(indent "$(orange "${lK_INIT}")")"
           print_ln
         else
-          K_INIT="NA"
+          lK_INIT="NA"
         fi
       done
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
-        print_output "[*] Testing possible Linux kernel file ${ORANGE}${FILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
+        print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
         print_ln
-        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${FILE}" "${FILE}".elf 2>/dev/null | tee -a "${LOG_FILE}" || true
-        if [[ -f "${FILE}".elf ]]; then
-          K_ELF=$(file "${FILE}".elf)
-          if [[ "${K_ELF}" == *"ELF "* ]]; then
+        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE}" "${lFILE}".elf 2>/dev/null | tee -a "${LOG_FILE}" || true
+        if [[ -f "${lFILE}".elf ]]; then
+          lK_ELF=$(file "${lFILE}".elf)
+          if [[ "${lK_ELF}" == *"ELF "* ]]; then
             print_ln
-            print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${FILE}.elf${NC}"
+            print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE}.elf${NC}"
           else
             print_ln
             print_output "[-] No Linux kernel elf file was created."
@@ -93,17 +93,17 @@ S24_kernel_bin_identifier()
       fi
 
       disable_strict_mode "${STRICT_MODE}" 0
-      extract_kconfig "${FILE}"
+      extract_kconfig "${lFILE}"
       enable_strict_mode "${STRICT_MODE}" 0
 
-      K_VER_TMP="${K_VER/Linux version /}"
+      K_VER_TMP="${lK_VER/Linux version /}"
       demess_kv_version "${K_VER_TMP}"
       # -> KV_ARR
 
-      if [[ "${K_ELF}" == *"ELF "* ]]; then
-        K_ELF="$(echo "${K_ELF}" | cut -d: -f1)"
-        K_SYMBOLS="$(readelf -s "${K_ELF}" | grep -c "FUNC\|OBJECT" || true)"
-        K_FILE="$(file "${K_ELF}" | cut -d: -f2-)"
+      if [[ "${lK_ELF}" == *"ELF "* ]]; then
+        lK_ELF="$(echo "${lK_ELF}" | cut -d: -f1)"
+        K_SYMBOLS="$(readelf -s "${lK_ELF}" | grep -c "FUNC\|OBJECT" || true)"
+        K_FILE="$(file "${lK_ELF}" | cut -d: -f2-)"
 
         [[ "${K_FILE}" == *"LSB"* ]] && K_ARCH_END="EL"
         [[ "${K_FILE}" == *"MSB"* ]] && K_ARCH_END="EB"
@@ -123,44 +123,44 @@ S24_kernel_bin_identifier()
       fi
 
       # double check we really have a Kernel config extracted
-      if [[ -f "${KCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${KCONFIG_EXTRACTED}") -gt 50 ]]; then
-        CFG_CNT=$(grep -c CONFIG_ "${KCONFIG_EXTRACTED}")
-        print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${FILE}")${NC}" "" "${KCONFIG_EXTRACTED}"
-        check_kconfig "${KCONFIG_EXTRACTED}" "${K_ARCH}"
+      if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
+        CFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+        print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE}")${NC}" "" "${lKCONFIG_EXTRACTED}"
+        check_kconfig "${lKCONFIG_EXTRACTED}" "${K_ARCH}"
       fi
 
       # we should only get one element back, but as array
-      for K_VER_CLEAN in "${KV_ARR[@]}"; do
-        if [[ "${#K_INITS[@]}" -gt 0 ]]; then
-          for K_INIT in "${K_INITS[@]}"; do
+      for lK_VER_CLEAN in "${KV_ARR[@]}"; do
+        if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
+          for lK_INIT in "${lK_INITS_ARR[@]}"; do
             if [[ "${CFG_CNT}" -lt 50 ]]; then
-              KCONFIG_EXTRACTED="NA"
+              lKCONFIG_EXTRACTED="NA"
             fi
-            write_csv_log "${K_VER}" "${K_VER_CLEAN}" "${FILE}" "${K_ELF}" "${K_INIT}" "${KCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+            write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
           done
         else
-          write_csv_log "${K_VER}" "${K_VER_CLEAN}" "${FILE}" "${K_ELF}" "NA" "${KCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+          write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "NA" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
         fi
       done
-      NEG_LOG=1
+      lNEG_LOG=1
 
     # ASCII kernel config files:
-    elif file "${FILE}" | grep -q "ASCII"; then
-      CFG_MD5=$(md5sum "${FILE}" | awk '{print $1}')
-      if [[ ! " ${KCFG_MD5[*]} " =~ ${CFG_MD5} ]]; then
-        K_CON_DET=$(strings "${FILE}" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
+    elif file "${lFILE}" | grep -q "ASCII"; then
+      lCFG_MD5=$(md5sum "${lFILE}" | awk '{print $1}')
+      if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
+        K_CON_DET=$(strings "${lFILE}" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
         if [[ "${K_CON_DET}" =~ \ Kernel\ Configuration ]]; then
           print_ln
-          print_output "[+] Found kernel configuration file: ${ORANGE}${FILE}${NC}"
-          check_kconfig "${FILE}"
-          NEG_LOG=1
-          KCFG_MD5+=("${CFG_MD5}")
+          print_output "[+] Found kernel configuration file: ${ORANGE}${lFILE}${NC}"
+          check_kconfig "${lFILE}"
+          lNEG_LOG=1
+          KCFG_MD5_ARR+=("${lCFG_MD5}")
         fi
       fi
     fi
   done
 
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
 extract_kconfig() {
@@ -225,7 +225,7 @@ extract_kconfig() {
 dump_config() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
   local IMG_="${1:-}"
-  local CFG_MD5=""
+  local lCFG_MD5=""
 
   if ! [[ -f "${IMG_}" ]]; then
     print_output "[-] No kernel file to analyze here - ${ORANGE}${IMG_}${NC}"
@@ -244,11 +244,11 @@ dump_config() {
         return
       fi
 
-      CFG_MD5=$(md5sum "${TMP1}" | awk '{print $1}')
-      if [[ ! " ${KCFG_MD5[*]} " =~ ${CFG_MD5} ]]; then
+      lCFG_MD5=$(md5sum "${TMP1}" | awk '{print $1}')
+      if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
         KCONFIG_EXTRACTED="${LOG_PATH_MODULE}/kernel_config_extracted_$(basename "${IMG_}").log"
         cp "${TMP1}" "${KCONFIG_EXTRACTED}"
-        KCFG_MD5+=("${CFG_MD5}")
+        KCFG_MD5_ARR+=("${lCFG_MD5}")
         # return value of 4 means we are done and we are going back to the main function of this module for the next file
         return 4
       else

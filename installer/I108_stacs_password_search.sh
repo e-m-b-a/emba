@@ -50,8 +50,14 @@ I108_stacs_password_search() {
         # fi
 
         # cd ./external/stacs || ( echo "Could not install EMBA component STACS" && exit 1 )
+
+        # deactivate python venv for stacs - this is needed to bypass the pydantic dependency clash with semgrep
+        # we install stacs in the system and semgrep into the virtual environment
+        deactivate
         pip_install "setuptools" "-U"
         pip_install "stacs"
+        activate_pipenv "./external/emba_venv"
+
         # python3 setup.py install
         # cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
 

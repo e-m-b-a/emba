@@ -58,8 +58,8 @@ main_web_check() {
   WEB_RESULTS=0
 
   # NMAP_PORTS_SERVICES from L15
-  if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
-    for PORT_SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
+  if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
+    for PORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
       PORT=$(echo "${PORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
       SERVICE=$(echo "${PORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
       print_output "[*] Analyzing service ${ORANGE}${SERVICE} - ${PORT} - ${IP_ADDRESS_}${NC}" "no_log"

@@ -1,4 +1,5 @@
 FROM kalilinux/kali-rolling
+# FROM kalilinux/kali-last-release
 
 COPY ./installer.sh /
 COPY ./installer /installer
