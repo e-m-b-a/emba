@@ -755,9 +755,6 @@ dependency_check()
         check_dep_file "inferFile.sh" "${MOD_DIR}""/L10_system_emulation/inferFile.sh"
         check_dep_file "inferService.sh" "${MOD_DIR}""/L10_system_emulation/inferService.sh"
 
-        # routersploit for full system emulation
-        check_dep_file "Routersploit installation" "${EXT_DIR}""/routersploit/rsf.py"
-
         check_dep_file "TestSSL.sh installation" "${EXT_DIR}""/testssl.sh/testssl.sh"
         check_dep_file "Nikto web server analyzer" "${EXT_DIR}""/nikto/program/nikto.pl"
         check_dep_tool "Cutycapt screenshot tool" "cutycapt"
