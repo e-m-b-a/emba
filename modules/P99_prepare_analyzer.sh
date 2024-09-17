@@ -94,6 +94,7 @@ P99_prepare_analyzer() {
     done
   fi
 
+  write_log "[*] Statistics:${ARCH:-NA}:${D_END:-NA}"
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 

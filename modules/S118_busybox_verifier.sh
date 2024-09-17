@@ -105,7 +105,7 @@ S118_busybox_verifier()
 
     print_ln
     sub_module_title "BusyBox - Vulnerability verification"
-    print_output "[+] Extracted ${ORANGE}${#ALL_BB_VULNS[@]}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH}"
+    print_output "[+] Extracted ${ORANGE}${#ALL_BB_VULNS[@]}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
     print_ln
 
     local VULN_CNT=0
@@ -205,7 +205,30 @@ get_cve_busybox_data() {
 
   if [[ -f "${CVE_DETAILS_PATH}" ]]; then
     lVULN_CNT="$(wc -l "${CVE_DETAILS_PATH}" | awk '{print $1}')"
-    print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH}"
+
+    # lets create a more beautifull log for the report:
+    local lCVE_LINE_ENTRY=""
+    local lCVE_ID=""
+    local lCVSS_V2=""
+    local lCVSS_V3=""
+    local lFIRST_EPSS=""
+    local lCVE_SUMMARY=""
+
+    while read -r lCVE_LINE_ENTRY; do
+      lCVE_ID="${lCVE_LINE_ENTRY/:*}"
+      lCVSS_V2=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f2)
+      lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f3)
+      lFIRST_EPSS=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
+      lCVE_SUMMARY=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f6-)
+
+      write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+      write_log "$(indent "CVSSv2: ${ORANGE}${lCVSS_V2}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+      write_log "$(indent "CVSSv3: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+      write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+      write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+      write_log "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+    done < "${CVE_DETAILS_PATH}"
+
+    print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
   fi
 }
-

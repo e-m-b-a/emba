@@ -1,7 +1,7 @@
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:1.4.1f
+    image: embeddedanalyzer/emba:1.4.2d
     container_name: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
@@ -20,9 +20,9 @@ services:
       - /root/.cache/
       - /root/.semgrep/
       - /root/.ghidra/
-      - /root/.routersploit/
       - /root/.msf4
       - /root/.john
+      - /root/.gnupg
       - /run/lock
       - /var/run
       - /var/tmp
@@ -50,7 +50,7 @@ services:
         soft: 0
 
   emba_quest:
-    image: embeddedanalyzer/emba:1.4.1f
+    image: embeddedanalyzer/emba:1.4.2d
     container_name: emba_quest
     read_only: true
     tmpfs:
