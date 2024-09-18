@@ -86,14 +86,14 @@ print_fw_file_details() {
 
 generate_pixde() {
   local lFIRMWARE_PATH_BIN="${1:-}"
-  local PIXD_PNG_PATH="${LOG_DIR}"/pixd.png
+  local lPIXD_PNG_PATH="${LOG_DIR}"/pixd.png
 
   if [[ -x "${EXT_DIR}"/pixde ]]; then
     print_output "[*] Visualized firmware file (first 2000 bytes):"
     print_ln "no_log"
     "${EXT_DIR}"/pixde -r-0x2000 "${lFIRMWARE_PATH_BIN}" | tee -a "${LOG_DIR}"/p02_pixd.txt
-    python3 "${EXT_DIR}"/pixd_png.py -i "${LOG_DIR}"/p02_pixd.txt -o "${PIXD_PNG_PATH}" -p 10 > /dev/null
-    write_link "${PIXD_PNG_PATH}"
+    python3 "${EXT_DIR}"/pixd_png.py -i "${LOG_DIR}"/p02_pixd.txt -o "${lPIXD_PNG_PATH}" -p 10 > /dev/null
+    write_link "${lPIXD_PNG_PATH}"
     print_ln "no_log"
   fi
 }
@@ -151,7 +151,7 @@ generate_entropy_graph() {
 fw_bin_detector() {
   local lCHECK_FILE="${1:-}"
   local lFILE_BIN_OUT=""
-  local lDLINK_ENC_CHECK=""
+  local lHEX_FIRST_LINE=""
   local lQNAP_ENC_CHECK=""
   local lAVM_CHECK=0
   local lUEFI_CHECK=0
@@ -163,22 +163,22 @@ fw_bin_detector() {
   set_p02_default_exports
 
   lFILE_BIN_OUT=$(file "${lCHECK_FILE}")
-  lDLINK_ENC_CHECK=$(hexdump -C "${lCHECK_FILE}" | head -1 || true)
+  lHEX_FIRST_LINE=$(hexdump -C "${lCHECK_FILE}" | head -1 || true)
   lAVM_CHECK=$(strings "${lCHECK_FILE}" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   lBMC_CHECK=$(strings "${lCHECK_FILE}" | grep -c "libipmi.so" || true)
   lDJI_PRAK_ENC_CHECK=$(strings "${lCHECK_FILE}" | grep -c "PRAK\|RREK\|IAEK\|PUEK" || true)
   lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
   # we are running binwalk on the file to analyze the output afterwards:
-  "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${TMP_DIR}"/s02_binwalk_output.txt
-  if [[ -f "${TMP_DIR}"/s02_binwalk_output.txt ]]; then
-    lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${TMP_DIR}"/s02_binwalk_output.txt || true)
+  "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${TMP_DIR}"/p02_binwalk_output.txt
+  if [[ -f "${TMP_DIR}"/p02_binwalk_output.txt ]]; then
+    lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${TMP_DIR}"/p02_binwalk_output.txt || true)
   else
     lQNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${lCHECK_FILE}")
   fi
 
   # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
   # further checks will follow in P35
-  lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/s02_binwalk_output.txt || true)
+  lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/p02_binwalk_output.txt || true)
   lUEFI_CHECK=$(( "${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${lCHECK_FILE}" || true)" ))
 
   if [[ -f "${KERNEL_CONFIG}" ]] && [[ "${KERNEL}" -eq 1 ]]; then
@@ -249,25 +249,25 @@ fw_bin_detector() {
     lUEFI_CHECK=0
     write_csv_log "UBI filesystem" "yes" "NA"
   fi
-  if [[ "${lDLINK_ENC_CHECK}" == *"SHRS"* ]]; then
+  if [[ "${lHEX_FIRST_LINE}" == *"SHRS"* ]]; then
     print_output "[+] Identified D-Link SHRS encrpyted firmware - using D-Link extraction module via unblob"
     export DLINK_ENC_DETECTED=1
     lUEFI_CHECK=0
     write_csv_log "D-Link SHRS" "yes" "NA"
   fi
-  if [[ "${lDLINK_ENC_CHECK}" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
+  if [[ "${lHEX_FIRST_LINE}" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
     lUEFI_CHECK=0
     write_csv_log "EnGenius encrypted" "yes" "NA"
   fi
-  if [[ "${lDLINK_ENC_CHECK}" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
+  if [[ "${lHEX_FIRST_LINE}" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
     lUEFI_CHECK=0
     write_csv_log "EnGenius encrypted" "yes" "NA"
   fi
-  if [[ "${lDLINK_ENC_CHECK}" == *"encrpted_img"* ]]; then
+  if [[ "${lHEX_FIRST_LINE}" == *"encrpted_img"* ]]; then
     print_output "[+] Identified D-Link encrpted_img encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=2
     lUEFI_CHECK=0
@@ -359,7 +359,7 @@ fw_bin_detector() {
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
   # Currently this detection mechanism works quite good on the known firmware images
-  if [[ "${lDLINK_ENC_CHECK}" =~ 00000000\ \ a3\ 01\  ]]; then
+  if [[ "${lHEX_FIRST_LINE}" =~ 00000000\ \ a3\ 01\  ]]; then
     lGPG_CHECK="$(gpg --list-packets "${FIRMWARE_PATH}" | grep "compressed packet:" || true)"
     if [[ "${lGPG_CHECK}" == *"compressed packet: algo="* ]]; then
       print_output "[+] Identified GPG compressed firmware - using GPG extraction module"
@@ -368,7 +368,7 @@ fw_bin_detector() {
       write_csv_log "GPG compressed firmware" "yes" "NA"
     fi
   fi
-  if [[ "${lDLINK_ENC_CHECK}" == *"CrAU"* ]]; then
+  if [[ "${lHEX_FIRST_LINE}" == *"CrAU"* ]]; then
     print_output "[+] Identified Android OTA payload.bin update file - using Android extraction module"
     export ANDROID_OTA=1
     lUEFI_CHECK=0
@@ -381,7 +381,7 @@ fw_bin_detector() {
     write_csv_log "OpenSSL encrypted" "yes" "NA"
   fi
   # This check is currently only tested on one firmware - further tests needed:
-  if [[ "${lDLINK_ENC_CHECK}" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\  ]]; then
+  if [[ "${lHEX_FIRST_LINE}" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\  ]]; then
     print_output "[+] Identified Buffalo encrpyted firmware - using Buffalo extraction module"
     export BUFFALO_ENC_DETECTED=1
     write_csv_log "Buffalo encrypted" "yes" "NA"
@@ -399,7 +399,7 @@ fw_bin_detector() {
   if [[ "${lUEFI_CHECK}" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI/BIOS firmware - using UEFI extraction module"
     UEFI_DETECTED=1
-    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/s02_binwalk_output.txt || true)
+    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/p02_binwalk_output.txt || true)
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
       print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
     fi
