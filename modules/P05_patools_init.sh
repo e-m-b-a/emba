@@ -68,13 +68,11 @@ patools_extractor() {
   fi
 
   if grep -q "patool: ... tested ok." "${LOG_PATH_MODULE}"/paextract_test_"${lFIRMWARE_NAME_}".log ; then
-
     print_ln
     print_output "[*] Valid compressed file detected - extraction process via patool started"
 
     patool -v extract "${lFIRMWARE_PATH_}" --outdir "${lEXTRACTION_DIR_}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/paextract_extract_"${lFIRMWARE_NAME_}".log
     cat "${LOG_PATH_MODULE}"/paextract_extract_"${lFIRMWARE_NAME_}".log >> "${LOG_FILE}"
-
   else
     # Fallback if unzip does not work:
     print_ln
