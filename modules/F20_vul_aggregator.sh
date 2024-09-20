@@ -33,22 +33,6 @@ F20_vul_aggregator() {
   local FOUND_CVE=0
   local S26_LOGS_ARR=()
 
-  export CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
-
-  local S02_LOG="${CSV_DIR}"/s02_uefi_fwhunt.csv
-  local S06_LOG="${CSV_DIR}"/s06_distribution_identification.csv
-  local S08_LOG="${CSV_DIR}"/s08_package_mgmt_extractor.csv
-  local S09_LOG="${CSV_DIR}"/s09_firmware_base_version_check.csv
-  local S24_LOG="${CSV_DIR}"/s24_kernel_bin_identifier.csv
-  local S25_LOG="${CSV_DIR}"/s25_kernel_check.csv
-  export S26_LOG_DIR="${LOG_DIR}"/s26_kernel_vuln_verifier/
-  local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
-  local S116_LOG="${CSV_DIR}"/s116_qemu_version_detection.csv
-  local S118_LOG="${CSV_DIR}"/s118_busybox_verifier.csv
-  local L15_LOG="${CSV_DIR}"/l15_emulated_checks_nmap.csv
-  local L25_LOG="${CSV_DIR}"/l25_web_checks.csv
-  local L35_LOG="${CSV_DIR}"/l35_metasploit_check.csv
-
   if [[ -d "${S26_LOG_DIR}" ]]; then
     mapfile -t S26_LOGS_ARR < <(find "${S26_LOG_DIR}" -name "cve_results_kernel_*.csv")
   fi
@@ -70,7 +54,7 @@ F20_vul_aggregator() {
     print_output "[*] Aggregate vulnerability details"
 
     # get the kernel version from s24 and s25:
-    get_kernel_check "${S24_LOG}" "${S25_LOG}"
+    get_kernel_check "${S24_CSV_LOG}" "${S25_CSV_LOG}"
     # if we found a kernel in the kernel checker module we are going to use this kernel version (usually this version is better)
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
@@ -86,16 +70,16 @@ F20_vul_aggregator() {
       get_kernel_verified "${S26_LOGS_ARR[@]}"
     fi
 
-    get_uefi_details "${S02_LOG}"
-    get_firmware_details "${S06_LOG}"
-    get_package_details "${S08_LOG}"
-    get_lighttpd_details "${S36_LOG}"
-    get_firmware_base_version_check "${S09_LOG}"
-    get_usermode_emulator "${S116_LOG}"
-    get_systemmode_emulator "${L15_LOG}"
-    get_systemmode_webchecks "${L25_LOG}"
-    get_msf_verified "${L35_LOG}"
-    get_busybox_verified "${S118_LOG}"
+    get_uefi_details "${S02_CSV_LOG}"
+    get_firmware_details "${S06_CSV_LOG}"
+    get_package_details "${S08_CSV_LOG}"
+    get_lighttpd_details "${S36_CSV_LOG}"
+    get_firmware_base_version_check "${S09_CSV_LOG}"
+    get_usermode_emulator "${S116_CSV_LOG}"
+    get_systemmode_emulator "${L15_CSV_LOG}"
+    get_systemmode_webchecks "${L25_CSV_LOG}"
+    get_msf_verified "${L35_CSV_LOG}"
+    get_busybox_verified "${S118_CSV_LOG}"
 
     aggregate_versions
 
@@ -406,9 +390,9 @@ generate_special_log() {
     done
 
     write_log "\n[*] Exploit summary:" "${EXPLOIT_OVERVIEW_LOG}"
-    grep -E "Exploit\ \(" "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "${EXPLOIT_OVERVIEW_LOG}" || true
+    grep -E "Exploit\ \(" "${F20_LOG}" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "${EXPLOIT_OVERVIEW_LOG}" || true
 
-    mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" | sort -t : -k 4 -h -r || true)
+    mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "${F20_LOG}" | sort -t : -k 4 -h -r || true)
     if [[ "${#EXPLOITS_AVAIL[@]}" -gt 0 ]]; then
       print_ln
       print_output "[*] Minimal exploit summary file generated."
@@ -890,8 +874,8 @@ cve_extractor() {
   # VSOURCE is used to track the source of version details, this is relevant for the
   # final report. With this in place we know if it is from live testing via the network
   # or if it is found via static analysis or via user-mode emulation
-  if [[ -v S06_LOG && -v S09_LOG ]]; then
-    if grep -q "${VERSION_orig}" "${S06_LOG}" 2>/dev/null || grep -q "${VERSION_orig}" "${S09_LOG}" 2>/dev/null; then
+  if [[ -f "${S06_CSV_LOG}" && -f "${S09_CSV_LOG}" ]]; then
+    if grep -q "${VERSION_orig}" "${S06_CSV_LOG}" 2>/dev/null || grep -q "${VERSION_orig}" "${S09_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="STAT"
       else
@@ -900,9 +884,9 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v S25_LOG ]]; then
+  if [[ -v "${S25_CSV_LOG}" ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
-      if grep -q "kernel;${VERSION};" "${S25_LOG}" 2>/dev/null; then
+      if grep -q "kernel;${VERSION};" "${S25_CSV_LOG}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
@@ -912,9 +896,9 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v S24_LOG ]]; then
+  if [[ -f "${S24_CSV_LOG}" ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
-      if tail -n +2 "${S24_LOG}" | grep -i -q "linux.*${VERSION}" 2>/dev/null; then
+      if tail -n +2 "${S24_CSV_LOG}" | grep -i -q "linux.*${VERSION}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
@@ -924,8 +908,8 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v S116_LOG ]]; then
-    if grep -q "${VERSION_orig}" "${S116_LOG}" 2>/dev/null; then
+  if [[ -f "${S116_CSV_LOG}" ]]; then
+    if grep -q "${VERSION_orig}" "${S116_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="UEMU"
       else
@@ -934,8 +918,8 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v S02_LOG ]]; then
-    if grep -q "${VERSION_orig}" "${S02_LOG}" 2>/dev/null; then
+  if [[ -f "${S02_CSV_LOG}" ]]; then
+    if grep -q "${VERSION_orig}" "${S02_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="FwHunt"
       else
@@ -946,8 +930,8 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v L35_LOG ]]; then
-    if grep -q "${VERSION_orig}" "${L35_LOG}" 2>/dev/null; then
+  if [[ -f "${L35_CSV_LOG}" ]]; then
+    if grep -q "${VERSION_orig}" "${L35_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="MSF verified"
       else
@@ -958,8 +942,8 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v S08_LOG ]]; then
-    if grep -q "${BINARY};.*${VERSION}" "${S08_LOG}" 2>/dev/null; then
+  if [[ -f "${S08_CSV_LOG}" ]]; then
+    if grep -q "${BINARY};.*${VERSION}" "${S08_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="PACK"
       else
@@ -968,8 +952,8 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v S36_LOG ]]; then
-    if grep -q "${BINARY};.*${VERSION}" "${S36_LOG}" 2>/dev/null; then
+  if [[ -f "${S36_CSV_LOG}" ]]; then
+    if grep -q "${BINARY};.*${VERSION}" "${S36_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="STAT"
       elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
@@ -978,8 +962,8 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v L15_LOG && -v L25_LOG ]]; then
-    if grep -q "${VERSION_orig}" "${L15_LOG}" 2>/dev/null || grep -q "${VERSION_orig}" "${L25_LOG}" 2>/dev/null; then
+  if [[ -f "${L15_CSV_LOG}" && -f "${L25_CSV_LOG}" ]]; then
+    if grep -q "${VERSION_orig}" "${L15_CSV_LOG}" 2>/dev/null || grep -q "${VERSION_orig}" "${L25_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="SEMU"
       else
@@ -1001,7 +985,7 @@ cve_extractor() {
   # same CVE here via version detection.
 
   # if [[ "${BINARY}" == *kernel* ]]; then
-  #  if [[ -f "${S25_LOG}" ]]; then
+  #  if [[ -f "${S25_CSV_LOG}" ]]; then
   #    for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
   #      KCVE_VALUE=$(echo "${KERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
   #    done

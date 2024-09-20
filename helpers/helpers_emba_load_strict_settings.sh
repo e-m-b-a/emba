@@ -46,7 +46,7 @@ enable_strict_mode() {
     source ./installer/wickStrictModeFail.sh
     load_strict_mode_settings
     # just in case the error is very early we have not log directory
-    if [[ -d "${LOG_DIR}" ]]; then
+    if [[ -d "${LOG_DIR:-}" ]]; then
       trap 'wickStrictModeFail $? | tee -a "${ERROR_LOG}"' ERR  # The ERR trap is triggered when a script catches an error
     else
       trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error

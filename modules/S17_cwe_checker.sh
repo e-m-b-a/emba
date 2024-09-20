@@ -87,11 +87,11 @@ cwe_check() {
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
-  if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
+  if [[ -f "${S13_CSV_LOG}" ]]; then
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${S13_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   for lBINARY in "${BINARIES[@]}" ; do

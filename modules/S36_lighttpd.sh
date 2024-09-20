@@ -68,9 +68,9 @@ lighttpd_binary_analysis() {
   local lVULNERABLE_FUNCTIONS_ARR=()
   local lLIGHT_BIN=""
 
-  if [[ -f "${CSV_DIR}/s09_firmware_base_version_check.csv" ]] && grep -q "lighttpd" "${CSV_DIR}"/s09_firmware_base_version_check.csv; then
+  if [[ -f "${S09_CSV_LOG}" ]] && grep -q "lighttpd" "${S09_CSV_LOG}"; then
     # if we already have results from s09 we just use them
-    mapfile -t LIGHT_VERSIONS < <(grep "lighttpd" "${CSV_DIR}"/s09_firmware_base_version_check.csv | cut -d\; -f4 | sort -u || true)
+    mapfile -t LIGHT_VERSIONS < <(grep "lighttpd" "${S09_CSV_LOG}" | cut -d\; -f4 | sort -u || true)
   else
     # most of the time we run through the lighttpd version identifiers and check them against the lighttpd binaries
     while read -r lVERSION_LINE; do

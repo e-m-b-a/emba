@@ -31,7 +31,6 @@ S26_kernel_vuln_verifier()
   HOME_DIR="$(pwd)"
   # lKERNEL_ARCH_PATH is the directory where we store all the kernels
   local lKERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
-  S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
   local lWAIT_PIDS_S26_ARR=()
   export NEG_LOG=0
 

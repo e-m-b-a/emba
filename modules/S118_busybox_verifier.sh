@@ -33,14 +33,14 @@ S118_busybox_verifier()
   module_wait "S116_qemu_version_detection"
   module_wait "S09_firmware_base_version_check"
 
-  if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
-    mapfile -t BB_VERSIONS_ARR < <(grep ";busybox;" "${CSV_DIR}"/s116_qemu_version_detection.csv | cut -d\; -f1,4 | sort -u || true)
+  if [[ -f "${S116_CSV_LOG}" ]]; then
+    mapfile -t BB_VERSIONS_ARR < <(grep ";busybox;" "${S116_CSV_LOG}" | cut -d\; -f1,4 | sort -u || true)
   fi
 
   # if don't get our version details from S116/S115 we need to fallback to s09
   if [[ "${#BB_VERSIONS_ARR[@]}" -eq 0 ]]; then
-    if [[ -f "${CSV_DIR}"/s09_firmware_base_version_check.csv ]]; then
-      mapfile -t BB_VERSIONS_ARR < <(grep ";busybox;" "${CSV_DIR}"/s09_firmware_base_version_check.csv | cut -d\; -f1,4 | sort -u || true)
+    if [[ -f "${S09_CSV_LOG}" ]]; then
+      mapfile -t BB_VERSIONS_ARR < <(grep ";busybox;" "${S09_CSV_LOG}" | cut -d\; -f1,4 | sort -u || true)
     fi
   fi
 
@@ -68,7 +68,7 @@ S118_busybox_verifier()
     local BB_APPLET=""
     local SUMMARY=""
 
-    if tail -n +2 "${CSV_DIR}"/s118_busybox_verifier.csv | cut -d\; -f1 | grep -v "BusyBox VERSION" | grep -q "${BB_VERSION}"; then
+    if tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -v "BusyBox VERSION" | grep -q "${BB_VERSION}"; then
       # we already tested this version and ensure we do not duplicate this check
       continue
     fi

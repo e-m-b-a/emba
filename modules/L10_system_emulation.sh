@@ -45,7 +45,6 @@ L10_system_emulation() {
   if [[ "${FULL_EMULATION}" -eq 1 && "${RTOS}" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
     export MODULE_SUB_PATH="${MOD_DIR}"/"${FUNCNAME[0]}"
-    export S25_LOG="s25_kernel_check.txt"
 
     local lIMAGE_DIR=""
     export IMAGE_NAME=""
@@ -74,13 +73,13 @@ L10_system_emulation() {
       find "${LOG_PATH_MODULE}" -name "run.sh" --delete 2>/dev/null || true
 
       # handling restarted scans with old emulation processes:
-      if [[ -f "${LOG_DIR}"/emulator_online_results.log ]] && grep -q "L10_system_emulation finished" "${LOG_DIR}"/emba.log; then
+      if [[ -f "${L10_SYS_EMU_RESULTS}" ]] && grep -q "L10_system_emulation finished" "${LOG_DIR}"/emba.log; then
         print_ln
         print_output "[*] Found finished emulation process - trying to recover old emulation process"
 
-        lEMULATION_ENTRY="$(grep "TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1)"
-        lIP_ADDRESS=$(grep "TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
-        lIMAGE_DIR="$(grep "TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+        lEMULATION_ENTRY="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1)"
+        lIP_ADDRESS=$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
+        lIMAGE_DIR="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
         ARCHIVE_PATH="${OLD_LOG_DIR}""/""${lIMAGE_DIR}"
 
         print_output "[*] Recovered IP address: ${ORANGE}${lIP_ADDRESS}${NC}"
@@ -112,12 +111,12 @@ L10_system_emulation() {
         # shellcheck disable=SC2153
         for R_PATH in "${ROOT_PATH[@]}" ; do
           print_output "[*] Testing root path (${ORANGE}${lR_PATH_CNT}${NC}/${ORANGE}${#ROOT_PATH[@]}${NC}): ${ORANGE}${R_PATH}${NC}"
-          if grep -q "P55_unblob_extractor nothing reported" "${LOG_DIR}"/p55_unblob_extractor.txt 2>/dev/null; then
-            if ! grep -q "P60_deep_extractor nothing reported" "${LOG_DIR}"/p60_deep_extractor.txt 2>/dev/null; then
-              [[ -f "${LOG_DIR}"/p60_deep_extractor.txt ]] && write_link "p60"
+          if grep -q "P55_unblob_extractor nothing reported" "${P55_LOG}" 2>/dev/null; then
+            if ! grep -q "P60_deep_extractor nothing reported" "${P60_LOG}" 2>/dev/null; then
+              [[ -f "${P60_LOG}" ]] && write_link "p60"
             fi
           else
-            [[ -f "${LOG_DIR}"/p55_unblob_extractor.txt ]] && write_link "p55"
+            [[ -f "${P55_LOG}" ]] && write_link "p55"
           fi
 
           if [[ -n "${D_END}" ]]; then
@@ -136,7 +135,7 @@ L10_system_emulation() {
 
             if [[ "${lARCH_END}" == "armbe"* ]] || [[ "${lARCH_END}" == "mips64r2"* ]] || [[ "${lARCH_END}" == "mips64_3"* ]]; then
               print_output "[-] Found NOT supported architecture ${ORANGE}${lARCH_END}${NC}"
-              [[ -f "${LOG_DIR}"/p99_prepare_analyzer.txt ]] && write_link "p99"
+              [[ -f "${P99_LOG}" ]] && write_link "p99"
               print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
               lUNSUPPORTED_ARCH=1
               return
@@ -179,14 +178,14 @@ L10_system_emulation() {
     fi
   fi
 
-  if [[ "${lMODULE_END}" -ne 0 ]] && [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
-    if [[ $(grep -c "TCP ok" "${LOG_DIR}"/emulator_online_results.log || true) -gt 0 ]]; then
+  if [[ "${lMODULE_END}" -ne 0 ]] && [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
+    if [[ $(grep -c "TCP ok" "${L10_SYS_EMU_RESULTS}" || true) -gt 0 ]]; then
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
       export HOSTNETDEV_ARR=()
       local lIMAGE_DIR=""
       local lSYS_EMUL_POS_ENTRY=""
-      lSYS_EMUL_POS_ENTRY="$(grep "TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -t ';' -k7 -n -r | head -1 || true)"
+      lSYS_EMUL_POS_ENTRY="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "${lSYS_EMUL_POS_ENTRY}")")"
 
       lIP_ADDRESS=$(echo "${lSYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
@@ -223,16 +222,15 @@ L10_system_emulation() {
 }
 
 check_bmc_supermicro() {
-  local lS06_LOG="${CSV_DIR}/s06_distribution_identification.csv"
-  if [[ -f "${lS06_LOG}" ]]; then
-    if grep -q "supermicro:bmc" "${lS06_LOG}"; then
+  if [[ -f "${S06_CSV_LOG}" ]]; then
+    if grep -q "supermicro:bmc" "${S06_CSV_LOG}"; then
       print_output "[-] WARNING: Supermicro firmware found - Specific qemu emulation not supported"
     fi
   fi
 }
 
 print_system_emulation_results() {
-  if [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
+  if [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     sub_module_title "System emulation results"
     print_output "EMBA was able to identify the following system emulation results:"
     print_ln
@@ -246,7 +244,7 @@ print_system_emulation_results() {
       else
         print_output "[*] ${lEMU_RES}"
       fi
-    done < "${LOG_DIR}"/emulator_online_results.log
+    done < "${L10_SYS_EMU_RESULTS}"
   fi
 }
 
@@ -350,15 +348,15 @@ create_emulation_filesystem() {
     cp "$(command -v busybox)" "${MNT_POINT}" || true
     cp "$(command -v bash-static)" "${MNT_POINT}" || true
 
-    if [[ -f "${CSV_DIR}"/s24_kernel_bin_identifier.csv ]]; then
+    if [[ -f "${S24_CSV_LOG}" ]]; then
       # kernelInit is getting the output of the init command line we get from s24
-      if grep -q ";rdinit=" "${CSV_DIR}"/s24_kernel_bin_identifier.csv; then
-        print_output "[*] Found ${ORANGE}rdinit${NC} entry for kernel - see ${ORANGE}${LOG_DIR}/s24_kernel_bin_identifier.txt${NC}:"
-        grep ";rdinit=/" "${CSV_DIR}"/s24_kernel_bin_identifier.csv | cut -d\; -f5 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+      if grep -q ";rdinit=" "${S24_CSV_LOG}"; then
+        print_output "[*] Found ${ORANGE}rdinit${NC} entry for kernel - see ${ORANGE}${S24_LOG}${NC}:"
+        grep ";rdinit=/" "${S24_CSV_LOG}" | cut -d\; -f5 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
-      elif grep -q ";init=" "${CSV_DIR}"/s24_kernel_bin_identifier.csv; then
-        print_output "[*] Found ${ORANGE}init${NC} entry for kernel - see ${ORANGE}${LOG_DIR}/s24_kernel_bin_identifier.txt${NC}:"
-        grep ";init=/" "${CSV_DIR}"/s24_kernel_bin_identifier.csv | cut -d\; -f5 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+      elif grep -q ";init=" "${S24_CSV_LOG}"; then
+        print_output "[*] Found ${ORANGE}init${NC} entry for kernel - see ${ORANGE}${S24_LOG}${NC}:"
+        grep ";init=/" "${S24_CSV_LOG}" | cut -d\; -f5 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
       fi
     else
@@ -1552,8 +1550,8 @@ get_networking_details_emulation() {
       if [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
         local lADJUST_PRIO+=-1
         # we use one of the idenfied IP addresses. If no IP address available we switch to default 192.168.0.1
-        if [[ -s "${LOG_DIR}/emulator_online_results.log" ]]; then
-          IP_ADDRESS_=$(cut -d\; -f8 "${LOG_DIR}/emulator_online_results.log" | sort -u | tail -n1)
+        if [[ -s "${L10_SYS_EMU_RESULTS}" ]]; then
+          IP_ADDRESS_=$(cut -d\; -f8 "${L10_SYS_EMU_RESULTS}" | sort -u | tail -n1)
           IP_ADDRESS_="${IP_ADDRESS_/*\ /}"
           print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
         else
@@ -2583,7 +2581,7 @@ create_emulation_archive() {
   fi
 
   echo "${lIPS_INT_VLAN_CFG_mod}" >> "${lARCHIVE_PATH}"/emulation_config.txt || true
-  cat "${LOG_DIR}"/emulator_online_results.log >> "${lARCHIVE_PATH}"/emulation_config.txt || true
+  cat "${L10_SYS_EMU_RESULTS}" >> "${lARCHIVE_PATH}"/emulation_config.txt || true
 
   if [[ -v ARCHIVE_PATH ]] && [[ -f "${lARCHIVE_PATH}"/run.sh ]]; then
     chmod +x "${lARCHIVE_PATH}"/run.sh
@@ -2818,8 +2816,8 @@ get_kernel_version() {
   local lKV=""
   local lKERNELV_ARR=()
 
-  if [[ -f "${LOG_DIR}"/"${S25_LOG}" ]]; then
-    mapfile -t lKERNELV_ARR < <(grep "Statistics:" "${LOG_DIR}"/"${S25_LOG}" | cut -d: -f2 | sort -u || true)
+  if [[ -f "${S25_LOG}" ]]; then
+    mapfile -t lKERNELV_ARR < <(grep "Statistics:" "${S25_LOG}" | cut -d: -f2 | sort -u || true)
     if [[ -v lKERNELV_ARR[@] ]]; then
       # if we have found a kernel it is a Linux system:$
       for lKV in "${lKERNELV_ARR[@]}"; do
@@ -2880,10 +2878,10 @@ write_results() {
   fi
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   lARCHIVE_PATH="$(echo "${lARCHIVE_PATH}" | rev | cut -d '/' -f1 | rev)"
-  if ! [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
-    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" > "${LOG_DIR}"/emulator_online_results.log
+  if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
+    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" > "${L10_SYS_EMU_RESULTS}"
   fi
-  echo "${FIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${LOG_DIR}"/emulator_online_results.log
+  echo "${FIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 
