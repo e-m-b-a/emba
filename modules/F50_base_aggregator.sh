@@ -856,8 +856,8 @@ get_data() {
     P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3)"
   fi
   if [[ -f "${S24_CSV_LOG}" ]]; then
-    K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1)"
-    K_ARCH_END="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 9 | sort -u | grep "\S" | head -1)"
+    K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1 || true)"
+    K_ARCH_END="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 9 | sort -u | grep "\S" | head -1 || true)"
   fi
 
   if [[ -f "${LOG_DIR}"/"${S02_LOG}" ]]; then
