@@ -45,7 +45,12 @@ enable_strict_mode() {
     # shellcheck disable=SC1091
     source ./installer/wickStrictModeFail.sh
     load_strict_mode_settings
-    trap 'wickStrictModeFail $? | tee -a "${ERROR_LOG}"' ERR  # The ERR trap is triggered when a script catches an error
+    # just in case the error is very early we have not log directory
+    if [[ -d "${LOG_DIR}" ]]; then
+      trap 'wickStrictModeFail $? | tee -a "${ERROR_LOG}"' ERR  # The ERR trap is triggered when a script catches an error
+    else
+      trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+    fi
 
     if [[ "${PRINTER}" -eq 1 ]]; then
       echo -e "[!] INFO: EMBA running in STRICT mode!" || true
