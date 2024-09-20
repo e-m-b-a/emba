@@ -18,27 +18,27 @@
 export PRE_THREAD_ENA=0
 
 P23_qemu_qcow_mounter() {
-  local NEG_LOG=0
+  local lNEG_LOG=0
   if [[ "${QCOW_DETECTED}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Qemu QCOW filesystem extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
 
-    EXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_mount_filesystem/
-    local FIRMWARE_PATHx=""
+    local lEXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_mount_filesystem/
+    local lFIRMWARE_PATHx=""
 
     if [[ "${IN_DOCKER}" -eq 1 ]]; then
       # we need rw access to firmware -> in docker container we need to copy
       # the firmware to TMP_DIR and use this for extraction
       # afterwards we are going to remove this path
       cp /firmware "${TMP_DIR}"
-      FIRMWARE_PATHx="${TMP_DIR}"/firmware
+      lFIRMWARE_PATHx="${TMP_DIR}"/firmware
     else
-      FIRMWARE_PATHx="${FIRMWARE_PATH}"
+      lFIRMWARE_PATHx="${FIRMWARE_PATH}"
     fi
 
-    qcow_extractor "${FIRMWARE_PATHx}" "${EXTRACTION_DIR}"
+    qcow_extractor "${lFIRMWARE_PATHx}" "${lEXTRACTION_DIR}"
 
     if [[ -f "${TMP_DIR}"/firmware ]]; then
       rm "${TMP_DIR}"/firmware
@@ -47,31 +47,31 @@ P23_qemu_qcow_mounter() {
     if [[ "${FILES_QCOW_MOUNT}" -gt 0 ]]; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
-      NEG_LOG=1
+      lNEG_LOG=1
     fi
-    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
 
 qcow_extractor() {
-  local QCOW_PATH_="${1:-}"
-  local EXTRACTION_DIR_="${2:-}"
-  local TMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
-  local DIRS_QCOW_MOUNT=0
+  local lQCOW_PATH_="${1:-}"
+  local lEXTRACTION_DIR_="${2:-}"
+  local lTMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
+  local lDIRS_QCOW_MOUNT=0
   local lNBD_DEV=""
-  local NBD_DEVS=()
-  local EXTRACTION_DIR_FINAL=""
+  local lNBD_DEVS_ARR=()
+  local lEXTRACTION_DIR_FINAL=""
   export FILES_QCOW_MOUNT=0
 
-  if ! [[ -f "${QCOW_PATH_}" ]]; then
+  if ! [[ -f "${lQCOW_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
     return
   fi
 
   sub_module_title "Qemu QCOW filesystem extractor"
 
-  mkdir -p "${TMP_QCOW_MOUNT}" 2>/dev/null || true
-  print_output "[*] Trying to mount ${ORANGE}${QCOW_PATH_}${NC} to ${ORANGE}${TMP_QCOW_MOUNT}${NC} directory"
+  mkdir -p "${lTMP_QCOW_MOUNT}" 2>/dev/null || true
+  print_output "[*] Trying to mount ${ORANGE}${lQCOW_PATH_}${NC} to ${ORANGE}${lTMP_QCOW_MOUNT}${NC} directory"
 
   # if lsmod | grep -q nbd; then
   #   rmmod nbd || true
@@ -99,8 +99,8 @@ qcow_extractor() {
       lNBD_DEV_NAME=$(basename "${lNBD_DEV}")
       print_output "[*] Qemu disconnect device ${ORANGE}/dev/${lNBD_DEV_NAME}${NC}."
       qemu-nbd -d /dev/"${lNBD_DEV_NAME}" || true
-      print_output "[*] Qemu connecting device ${QCOW_PATH_} to /dev/${lNBD_DEV_NAME}"
-      if qemu-nbd -c /dev/"${lNBD_DEV_NAME}" "${QCOW_PATH_}"; then
+      print_output "[*] Qemu connecting device ${lQCOW_PATH_} to /dev/${lNBD_DEV_NAME}"
+      if qemu-nbd -c /dev/"${lNBD_DEV_NAME}" "${lQCOW_PATH_}"; then
         lIS_MOUNTED="yes"
       else
         qemu-nbd -d /dev/"${lNBD_DEV_NAME}"
@@ -111,51 +111,51 @@ qcow_extractor() {
   done
 
   print_output "[*] Identification of partitions on ${ORANGE}/dev/${lNBD_DEV_NAME}${NC}."
-  mapfile -t NBD_DEVS < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
-  if [[ "${#NBD_DEVS[@]}" -eq 0 ]]; then
+  mapfile -t lNBD_DEVS_ARR < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
+  if [[ "${#lNBD_DEVS_ARR[@]}" -eq 0 ]]; then
     # sometimes we are not able to find the partitions with fdisk -> fallback
-    NBD_DEVS+=( "/dev/nbd0" )
+    lNBD_DEVS_ARR+=( "/dev/nbd0" )
   fi
 
   print_ln
   fdisk /dev/"${lNBD_DEV_NAME}" -l
   print_ln
 
-  for NBD_DEV in "${NBD_DEVS[@]}"; do
+  for NBD_DEV in "${lNBD_DEVS_ARR[@]}"; do
     print_output "[*] Extract data from partition ${ORANGE}${NBD_DEV}${NC}"
-    mount "${NBD_DEV}" "${TMP_QCOW_MOUNT}" || true
+    mount "${NBD_DEV}" "${lTMP_QCOW_MOUNT}" || true
 
     if mount | grep -q "${NBD_DEV}"; then
-      EXTRACTION_DIR_FINAL="${EXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
 
-      copy_qemu_nbd "${TMP_QCOW_MOUNT}" "${EXTRACTION_DIR_FINAL}"
+      copy_qemu_nbd "${lTMP_QCOW_MOUNT}" "${lEXTRACTION_DIR_FINAL}"
 
-      FILES_QCOW_MOUNT=$(find "${EXTRACTION_DIR_FINAL}" -type f | wc -l)
-      DIRS_QCOW_MOUNT=$(find "${EXTRACTION_DIR_FINAL}" -type d | wc -l)
-      print_output "[*] Extracted ${ORANGE}${FILES_QCOW_MOUNT}${NC} files and ${ORANGE}${DIRS_QCOW_MOUNT}${NC} directories from the firmware image."
+      FILES_QCOW_MOUNT=$(find "${lEXTRACTION_DIR_FINAL}" -type f | wc -l)
+      lDIRS_QCOW_MOUNT=$(find "${lEXTRACTION_DIR_FINAL}" -type d | wc -l)
+      print_output "[*] Extracted ${ORANGE}${FILES_QCOW_MOUNT}${NC} files and ${ORANGE}${lDIRS_QCOW_MOUNT}${NC} directories from the firmware image."
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-      write_csv_log "Qemu QCOW filesystem extractor" "${QCOW_PATH_}" "${EXTRACTION_DIR_FINAL}" "${FILES_QCOW_MOUNT}" "${DIRS_QCOW_MOUNT}" "NA"
+      write_csv_log "Qemu QCOW filesystem extractor" "${lQCOW_PATH_}" "${lEXTRACTION_DIR_FINAL}" "${FILES_QCOW_MOUNT}" "${lDIRS_QCOW_MOUNT}" "NA"
 
-      print_output "[*] Unmounting ${ORANGE}${TMP_QCOW_MOUNT}${NC} directory"
-      umount "${TMP_QCOW_MOUNT}"
+      print_output "[*] Unmounting ${ORANGE}${lTMP_QCOW_MOUNT}${NC} directory"
+      umount "${lTMP_QCOW_MOUNT}"
     fi
   done
   qemu-nbd --disconnect /dev/"${lNBD_DEV_NAME}"
-  rm -r "${TMP_QCOW_MOUNT}"
+  rm -r "${lTMP_QCOW_MOUNT}"
 }
 
 copy_qemu_nbd() {
-  local SOURCE_CP="${1:-}"
-  local DEST_CP="${2:-}"
-  if ! [[ -d "${SOURCE_CP}" ]]; then
+  local lSOURCE_CP="${1:-}"
+  local lDEST_CP="${2:-}"
+  if ! [[ -d "${lSOURCE_CP}" ]]; then
     return
   fi
 
-  print_output "[*] Copying ${ORANGE}${SOURCE_CP}${NC} to firmware tmp directory (${ORANGE}${DEST_CP}${NC})"
-  mkdir -p "${DEST_CP}" 2>/dev/null || true
-  cp -pri "${SOURCE_CP}"/* "${DEST_CP}" 2>/dev/null || true
+  print_output "[*] Copying ${ORANGE}${lSOURCE_CP}${NC} to firmware tmp directory (${ORANGE}${lDEST_CP}${NC})"
+  mkdir -p "${lDEST_CP}" 2>/dev/null || true
+  cp -pri "${lSOURCE_CP}"/* "${lDEST_CP}" 2>/dev/null || true
   print_ln
-  print_output "[*] Using the following firmware directory (${ORANGE}${DEST_CP}${NC}) as base directory:"
-  find "${DEST_CP}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+  print_output "[*] Using the following firmware directory (${ORANGE}${lDEST_CP}${NC}) as base directory:"
+  find "${lDEST_CP}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
   print_ln
 }
