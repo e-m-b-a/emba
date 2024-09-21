@@ -1571,10 +1571,10 @@ get_systemmode_webchecks() {
   export VERSIONS_SYS_EMULATOR_WEB=()
 
   # disabled for now
-  # if [[ -f "${L25_LOG}" ]]; then
-  #  print_output "[*] Collect version details of module $(basename "${L25_LOG}")."
+  if [[ -f "${L25_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${L25_LOG}")."
   #  readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "${L25_LOG}" | tail -n +2 | sort -u || true)
-  # fi
+  fi
 }
 
 get_msf_verified() {

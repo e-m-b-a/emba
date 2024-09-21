@@ -44,6 +44,7 @@ S26_kernel_vuln_verifier()
   module_wait "S24_kernel_bin_identifier"
 
   # now we should have a csv log with a kernel version:
+  # shellcheck disable=SC2153
   if ! [[ -f "${S24_CSV_LOG}" ]] || [[ "$(wc -l "${S24_CSV_LOG}" | awk '{print $1}')" -lt 2 ]]; then
     print_output "[-] No Kernel version file (s24 results) identified ..."
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
