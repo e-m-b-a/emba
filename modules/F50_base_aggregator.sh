@@ -22,53 +22,6 @@ F50_base_aggregator() {
   module_title "Final aggregator"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  # Todo: move all the log vars to a dedicated variable loader from EMBA
-  # Todo: Change all log usages to these vars in EMBA
-  export CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
-  export F20_EXPLOITS_LOG="${LOG_DIR}"/f20_vul_aggregator/exploits-overview.txt
-  export P02_CSV_LOG="${CSV_DIR}""/p02_firmware_bin_file_check.csv"
-  export P99_CSV_LOG="${CSV_DIR}""/p99_prepare_analyzer.csv"
-  export P99_LOG="${LOG_DIR}""/p99_prepare_analyzer.txt"
-  export P35_LOG="p35_uefi_extractor.txt"
-  export S02_LOG="s02_uefi_fwhunt.txt"
-  export S03_LOG="s03_firmware_bin_base_analyzer.txt"
-  export S05_LOG="s05_firmware_details.txt"
-  export S06_LOG="s06_distribution_identification.txt"
-  export S12_LOG="s12_binary_protection.txt"
-  export S12_CSV_LOG="${CSV_DIR}""/s12_binary_protection.csv"
-  export S13_LOG="s13_weak_func_check.txt"
-  export S14_LOG="s14_weak_func_radare_check.txt"
-  export S16_LOG="s16_ghidra_decompile_checks.txt"
-  export S17_CSV_LOG="${CSV_DIR}""/s17_apk_check.csv"
-  export S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
-  export S20_LOG="s20_shell_check.txt"
-  export S21_LOG="s21_python_check.txt"
-  export S22_LOG="s22_php_check.txt"
-  export S24_LOG="s24_kernel_bin_identifier.txt"
-  export S25_LOG="s25_kernel_check.txt"
-  export S26_LOG="s26_kernel_vuln_verifier.txt"
-  export S30_LOG="s30_version_vulnerability_check.txt"
-  export S40_LOG="s40_weak_perm_check.txt"
-  export S45_LOG="s45_pass_file_check.txt"
-  export S50_LOG="s50_authentication_check.txt"
-  export S55_LOG="s55_history_file_check.txt"
-  export S60_LOG="s60_cert_file_check.txt"
-  export S85_LOG="s85_ssh_check.txt"
-  export S95_LOG="s95_interesting_files_check.txt"
-  export S107_LOG="s107_deep_password_search.txt"
-  export S108_LOG="s108_stacs_password_search.txt"
-  export S109_LOG="s109_jtr_local_pw_cracking.txt"
-  export S110_LOG="s110_yara_check.txt"
-  export S17_LOG="s17_cwe_checker.txt"
-  # L10_LOG="l10_system_emulator.txt"
-  export L15_LOG="l15_emulated_checks_init.txt"
-  export L20_LOG="l20_snmp_checks.txt"
-  export L25_LOG="l25_web_checks.txt"
-  export L30_LOG="l30_routersploit.txt"
-  export Q02_LOG="q02_openai_question.txt"
-  export L35_CSV_LOG="${CSV_DIR}""/l35_metasploit_check.csv"
-  export SYS_EMU_RESULTS="${LOG_DIR}"/emulator_online_results.log
-
   if [[ "${RESTART}" -eq 1 ]] && [[ -f "${LOG_FILE}" ]]; then
     rm "${LOG_FILE}"
   fi
@@ -131,8 +84,8 @@ output_overview() {
     write_csv_log "emba_command" "${EMBA_COMMAND}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
 
-  if [[ -f "${LOG_DIR}"/"${Q02_LOG}" ]] && [[ "${GPT_OPTION}" -gt 0 ]]; then
-    GPT_RESULTS=$(grep -c "AI analysis for" "${LOG_DIR}"/"${Q02_LOG}" || true)
+  if [[ -f "${Q02_LOG}" ]] && [[ "${GPT_OPTION}" -gt 0 ]]; then
+    GPT_RESULTS=$(grep -c "AI analysis for" "${Q02_LOG}" || true)
     if [[ "${GPT_RESULTS}" -gt 0 ]]; then
       print_output "[+] EMBA AI analysis discovered ${ORANGE}${GPT_RESULTS}${GREEN} results."
       write_link "q02"
@@ -167,7 +120,7 @@ output_overview() {
       print_output "[+] Detected architecture (""${ORANGE}""verified${GREEN}):""${ORANGE}"" ""${K_ARCH}""${NC}"
     fi
     write_link "s24"
-  elif [[ -f "${LOG_DIR}"/"${S03_LOG}" ]]; then
+  elif [[ -f "${S03_LOG}" ]]; then
     if [[ -n "${PRE_ARCH}" ]]; then
       print_output "[+] Detected architecture:""${ORANGE}"" ""${PRE_ARCH}""${NC}"
       write_link "s03"
@@ -196,7 +149,7 @@ output_details() {
 
   if [[ "${FILE_ARR_COUNT:-0}" -gt 0 ]]; then
     print_output "[+] ""${ORANGE}""${FILE_ARR_COUNT}""${GREEN}"" files and ""${ORANGE}""${DETECTED_DIR}"" ""${GREEN}""directories detected."
-    if [[ -f "${LOG_DIR}"/"${S05_LOG}" ]]; then
+    if [[ -f "${S05_LOG}" ]]; then
       write_link "s05"
     else
       write_link "p99"
@@ -452,8 +405,8 @@ output_binaries() {
         # we have to remove the first line of the original output:
         (( BINS_CHECKED-- ))
       fi
-    elif [[ -f "${LOG_DIR}"/"${S13_LOG}" ]]; then
-      BINS_CHECKED=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S13_LOG}" | cut -d: -f3 || true)
+    elif [[ -f "${S13_LOG}" ]]; then
+      BINS_CHECKED=$(grep -a "\[\*\]\ Statistics:" "${S13_LOG}" | cut -d: -f3 || true)
     fi
 
     if [[ "${CANARY:-0}" -gt 0 ]]; then
@@ -610,23 +563,23 @@ binary_fct_output() {
   local CWE_CNT=0
   local SEMGREP_CNT=0
 
-  if grep -q "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" 2>/dev/null; then
-    if grep "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" | grep -o -q "No RELRO"; then
+  if grep -q "${BINARY}" "${S12_LOG}" 2>/dev/null; then
+    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "No RELRO"; then
       RELRO="${RED_}""No RELRO${NC_}"
     else
       RELRO="${GREEN_}""RELRO   ${NC_}"
     fi
-    if grep "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" | grep -o -q "No canary found"; then
+    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "No canary found"; then
       CANARY="${RED_}""No Canary${NC_}"
     else
       CANARY="${GREEN_}""Canary   ${NC_}"
     fi
-    if grep "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" | grep -o -q "NX disabled"; then
+    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "NX disabled"; then
       NX="${RED_}""NX disabled${NC_}"
     else
       NX="${GREEN_}""NX enabled ${NC_}"
     fi
-    if grep "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" | grep -o -q "No Symbols"; then
+    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "No Symbols"; then
       SYMBOLS="${GREEN_}""No Symbols${NC_}"
     else
       SYMBOLS="${RED_}""Symbols   ${NC_}"
@@ -846,8 +799,8 @@ get_data() {
   if [[ -f "${P02_CSV_LOG}" ]]; then
     ENTROPY=$(grep -a "Entropy" "${P02_CSV_LOG}" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${P35_LOG}" ]]; then
-    EFI_ARCH=$(grep -a "Possible architecture details found" "${LOG_DIR}"/"${P35_LOG}" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' '/' || true)
+  if [[ -f "${P35_LOG}" ]]; then
+    EFI_ARCH=$(grep -a "Possible architecture details found" "${P35_LOG}" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' '/' || true)
     EFI_ARCH="${EFI_ARCH%\/}"
     EFI_ARCH=$(strip_color_codes "${EFI_ARCH}")
   fi
@@ -856,137 +809,136 @@ get_data() {
     P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3)"
   fi
   if [[ -f "${S24_CSV_LOG}" ]]; then
-    K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1)"
-    K_ARCH_END="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 9 | sort -u | grep "\S" | head -1)"
+    K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1 || true)"
+    K_ARCH_END="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 9 | sort -u | grep "\S" | head -1 || true)"
   fi
 
-  if [[ -f "${LOG_DIR}"/"${S02_LOG}" ]]; then
-    # FWHUNTER_CNT_CVE=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S02_LOG}" | cut -d: -f2 || true)
-    FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S02_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S02_LOG}" ]]; then
+    # FWHUNTER_CNT_CVE=$(grep -a "\[\*\]\ Statistics:" "${S02_LOG}" | cut -d: -f2 || true)
+    FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "${S02_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S03_LOG}" ]]; then
-    PRE_ARCH="$(strip_color_codes "$(grep -a "Possible architecture details found" "${LOG_DIR}"/"${S03_LOG}" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' ' ' | sed 's/\ /\ \//' || true)")"
+  if [[ -f "${S03_LOG}" ]]; then
+    PRE_ARCH="$(strip_color_codes "$(grep -a "Possible architecture details found" "${S03_LOG}" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' ' ' | sed 's/\ /\ \//' || true)")"
     PRE_ARCH="${PRE_ARCH%\/}"
   fi
-  if [[ -f "${LOG_DIR}"/"${S05_LOG}" ]]; then
-    FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S05_LOG}" | cut -d: -f2 || true)
-    DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S05_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S05_LOG}" ]]; then
+    FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "${S05_LOG}" | cut -d: -f2 || true)
+    DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "${S05_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S06_LOG}" ]]; then
-    mapfile -t LINUX_DISTRIS < <(grep "Version information found" "${LOG_DIR}"/"${S06_LOG}" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u || true)
+  if [[ -f "${S06_LOG}" ]]; then
+    mapfile -t LINUX_DISTRIS < <(grep "Version information found" "${S06_LOG}" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u || true)
   fi
   if ! [[ "${FILE_ARR_COUNT-0}" -gt 0 ]]; then
     FILE_ARR_COUNT=$(find "${FIRMWARE_PATH_CP}" -type f 2>/dev/null| wc -l || true)
     DETECTED_DIR=$(find "${FIRMWARE_PATH_CP}" -type d 2>/dev/null | wc -l || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S13_LOG}" ]]; then
-    STRCPY_CNT_13=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S13_LOG}" | cut -d: -f2 || true)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S13_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S13_LOG}" ]]; then
+    STRCPY_CNT_13=$(grep -a "\[\*\]\ Statistics:" "${S13_LOG}" | cut -d: -f2 || true)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "${S13_LOG}" | cut -d: -f2 || true)
   else
     STRCPY_CNT_13=0
   fi
-  if [[ -f "${LOG_DIR}"/"${S14_LOG}" ]]; then
-    STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S14_LOG}" | cut -d: -f2 || true)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S14_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S14_LOG}" ]]; then
+    STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "${S14_LOG}" | cut -d: -f2 || true)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "${S14_LOG}" | cut -d: -f2 || true)
     STRCPY_CNT=$((STRCPY_CNT_14+STRCPY_CNT_13))
   else
     STRCPY_CNT="${STRCPY_CNT_13}"
   fi
-  if [[ -f "${LOG_DIR}"/"${S16_LOG}" ]]; then
-    S16_GHIDRA_SEMGREP=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S16_LOG}" | cut -d: -f2 || true)
-    S16_BINS_CHECKED=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S16_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S16_LOG}" ]]; then
+    S16_GHIDRA_SEMGREP=$(grep -a "\[\*\]\ Statistics:" "${S16_LOG}" | cut -d: -f2 || true)
+    S16_BINS_CHECKED=$(grep -a "\[\*\]\ Statistics:" "${S16_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S20_LOG}" ]]; then
-    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S20_LOG}" | cut -d: -f2 || true)
-    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S20_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S20_LOG}" ]]; then
+    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "${S20_LOG}" | cut -d: -f2 || true)
+    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${S20_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S21_LOG}" ]]; then
-    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S21_LOG}" | cut -d: -f2 || true)
-    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S21_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S21_LOG}" ]]; then
+    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "${S21_LOG}" | cut -d: -f2 || true)
+    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${S21_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S22_LOG}" ]]; then
-    S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S22_LOG}" | cut -d: -f2 || true)
-    S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S22_LOG}" | cut -d: -f3 || true)
-    S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S22_LOG}" | cut -d: -f4 || true)
-    S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S22_LOG}" | cut -d: -f5 || true)
-    S22_PHP_VULNS_SEMGREP=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S22_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S22_LOG}" ]]; then
+    S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f2 || true)
+    S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f3 || true)
+    S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f4 || true)
+    S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f5 || true)
+    S22_PHP_VULNS_SEMGREP=$(grep -a "\[\*\]\ Statistics1:" "${S22_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S24_LOG}" ]]; then
+  if [[ -f "${S24_LOG}" ]]; then
     # we currently only respect one kernel settings analysis in our final aggregator.
-    S24_FAILED_KSETTINGS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S24_LOG}" | cut -d: -f2 | head -1 || true)
+    S24_FAILED_KSETTINGS=$(grep -a "\[\*\]\ Statistics:" "${S24_LOG}" | cut -d: -f2 | head -1 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S25_LOG}" ]]; then
-    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S25_LOG}" | cut -d: -f2 || true)
-    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S25_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S25_LOG}" ]]; then
+    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "${S25_LOG}" | cut -d: -f2 || true)
+    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "${S25_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S26_LOG}" ]]; then
-    K_CVE_VERIFIED_SYMBOLS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S26_LOG}" | cut -d: -f4 || true)
-    K_CVE_VERIFIED_COMPILED=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S26_LOG}" | cut -d: -f5 || true)
+  if [[ -f "${S26_LOG}" ]]; then
+    K_CVE_VERIFIED_SYMBOLS=$(grep -a "\[\*\]\ Statistics:" "${S26_LOG}" | cut -d: -f4 || true)
+    K_CVE_VERIFIED_COMPILED=$(grep -a "\[\*\]\ Statistics:" "${S26_LOG}" | cut -d: -f5 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S30_LOG}" ]]; then
-    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S30_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S30_LOG}" ]]; then
+    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${S30_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S40_LOG}" ]]; then
-    S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S40_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S40_LOG}" ]]; then
+    S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${S40_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S45_LOG}" ]]; then
-    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S45_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S45_LOG}" ]]; then
+    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "${S45_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S50_LOG}" ]]; then
-    S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S50_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S50_LOG}" ]]; then
+    S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "${S50_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S55_LOG}" ]]; then
-    S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S55_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S55_LOG}" ]]; then
+    S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${S55_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S60_LOG}" ]]; then
-    TOTAL_CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S60_LOG}" | cut -d: -f2 || true)
-    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S60_LOG}" | cut -d: -f3 || true)
-    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S60_LOG}" | cut -d: -f4 || true)
-    CERT_WARNING_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S60_LOG}" | cut -d: -f5 || true)
+  if [[ -f "${S60_LOG}" ]]; then
+    TOTAL_CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "${S60_LOG}" | cut -d: -f2 || true)
+    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "${S60_LOG}" | cut -d: -f3 || true)
+    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "${S60_LOG}" | cut -d: -f4 || true)
+    CERT_WARNING_CNT=$(grep -a "\[\*\]\ Statistics:" "${S60_LOG}" | cut -d: -f5 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S85_LOG}" ]]; then
-    S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S85_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S85_LOG}" ]]; then
+    S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "${S85_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S95_LOG}" ]]; then
-    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S95_LOG}" | cut -d: -f2 || true)
-    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S95_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S95_LOG}" ]]; then
+    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "${S95_LOG}" | cut -d: -f2 || true)
+    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "${S95_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S107_LOG}" ]]; then
-    PW_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S107_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S107_LOG}" ]]; then
+    PW_COUNTER=$(grep -a "\[\*\]\ Statistics:" "${S107_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S108_LOG}" ]]; then
-    STACS_HASHES=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S108_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S108_LOG}" ]]; then
+    STACS_HASHES=$(grep -a "\[\*\]\ Statistics:" "${S108_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S109_LOG}" ]]; then
-    HASHES_CRACKED=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S109_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S109_LOG}" ]]; then
+    HASHES_CRACKED=$(grep -a "\[\*\]\ Statistics:" "${S109_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S110_LOG}" ]]; then
-    YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S110_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${S110_LOG}" ]]; then
+    YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "${S110_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S17_LOG}" ]]; then
-    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f2 || true)
-    TOTAL_CWE_BINS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f3 || true)
+  if [[ -f "${S17_LOG}" ]]; then
+    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${S17_LOG}" | cut -d: -f2 || true)
+    TOTAL_CWE_BINS=$(grep -a "\[\*\]\ Statistics:" "${S17_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${SYS_EMU_RESULTS}" ]]; then
-    BOOTED=$(grep -c "Booted yes;" "${SYS_EMU_RESULTS}" || true)
-    ICMP=$(grep -c "ICMP ok;" "${SYS_EMU_RESULTS}" || true)
-    TCP_0=$(grep -c "TCP-0 ok;" "${SYS_EMU_RESULTS}" || true)
-    TCP=$(grep -c "TCP ok;" "${SYS_EMU_RESULTS}" || true)
-    IP_ADDR=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${SYS_EMU_RESULTS}" | grep -E -c "IP\ address:\ [0-9]+" || true)
+  if [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
+    BOOTED=$(grep -c "Booted yes;" "${L10_SYS_EMU_RESULTS}" || true)
+    ICMP=$(grep -c "ICMP ok;" "${L10_SYS_EMU_RESULTS}" || true)
+    TCP_0=$(grep -c "TCP-0 ok;" "${L10_SYS_EMU_RESULTS}" || true)
+    TCP=$(grep -c "TCP ok;" "${L10_SYS_EMU_RESULTS}" || true)
+    IP_ADDR=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | grep -E -c "IP\ address:\ [0-9]+" || true)
     # we make something like this: "bridge-default-normal"
-    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${SYS_EMU_RESULTS}" | cut -d\; -f9 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
+    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f9 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${L15_LOG}" ]]; then
-    # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${L15_LOG}" | cut -d: -f2 || true)
-    SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${L20_LOG}" | cut -d: -f2 || true)
-    WEB_UP=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${L25_LOG}" | cut -d: -f2 || true)
-    ROUTERSPLOIT_VULN=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${L30_LOG}" | cut -d: -f2 || true)
+  if [[ -f "${L15_LOG}" ]]; then
+    # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "${L15_LOG}" | cut -d: -f2 || true)
+    SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "${L20_LOG}" | cut -d: -f2 || true)
+    WEB_UP=$(grep -a "\[\*\]\ Statistics:" "${L25_LOG}" | cut -d: -f2 || true)
   fi
   if [[ -f "${L35_CSV_LOG}" ]]; then
     MSF_VERIFIED=$(grep -v -c "Source" "${L35_CSV_LOG}" || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" ]]; then
-    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" | sort -u | cut -d: -f2 || true)
+  if [[ -f "${F20_LOG}" ]]; then
+    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "${F20_LOG}" | sort -u | cut -d: -f2 || true)
   fi
   if [[ -f "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp ]]; then
     HIGH_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp)
@@ -1046,9 +998,9 @@ os_detector() {
   local SYSTEM_VERSION=()
 
   #### The following check is based on the results of the aggregator:
-  if [[ -f "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" ]]; then
+  if [[ -f "${F20_LOG}" ]]; then
     for OS_TO_CHECK in "${OSES[@]}"; do
-      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" | grep aggregated | grep "${OS_TO_CHECK}" | cut -d: -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
+      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "${F20_LOG}" | grep aggregated | grep "${OS_TO_CHECK}" | cut -d: -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
       if [[ "${#SYSTEM_VERSION[@]}" -gt 0 ]]; then
         if [[ "${OS_TO_CHECK}" == "kernel" ]]; then
           SYSTEM="Linux"
@@ -1079,9 +1031,9 @@ os_detector() {
   fi
 
   #### The following check is needed if the aggreagator has failed till now
-  if [[ ${VERIFIED} -eq 0 && -f "${LOG_DIR}"/"${S03_LOG}" ]]; then
+  if [[ ${VERIFIED} -eq 0 && -f "${S03_LOG}" ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "${LOG_DIR}"/"${S03_LOG}" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
+    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "${S03_LOG}" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED_S03=1
@@ -1091,7 +1043,7 @@ os_detector() {
     fi
 
     # we print the unverified OS only if we have no verified results:
-    mapfile -t OS_DETECT < <(grep "\ detected" "${LOG_DIR}"/"${S03_LOG}" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2 || true)
+    mapfile -t OS_DETECT < <(grep "\ detected" "${S03_LOG}" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2 || true)
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "${VERIFIED}" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
@@ -1115,14 +1067,14 @@ os_detector() {
 os_kernel_module_detect() {
   local LINUX_VERSIONS=""
   local KV=""
-  local KERNELV=()
+  local KERNELV_ARR=()
 
-  if [[ -f "${LOG_DIR}"/"${S25_LOG}" ]]; then
-    mapfile -t KERNELV < <(grep "Statistics:" "${LOG_DIR}"/"${S25_LOG}" | cut -d: -f2 | sort -u || true)
-    if [[ "${#KERNELV[@]}" -ne 0 ]]; then
+  if [[ -f "${S25_LOG}" ]]; then
+    mapfile -t KERNELV_ARR < <(grep "Statistics:" "${S25_LOG}" | cut -d: -f2 | sort -u || true)
+    if [[ "${#KERNELV_ARR[@]}" -ne 0 ]]; then
       # if we have found a kernel it is a Linux system:
       LINUX_VERSIONS="Linux"
-      for KV in "${KERNELV[@]}"; do
+      for KV in "${KERNELV_ARR[@]}"; do
         LINUX_VERSIONS="${LINUX_VERSIONS}"" / v${KV}"
         VERIFIED=1
       done

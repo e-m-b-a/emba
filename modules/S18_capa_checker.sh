@@ -35,11 +35,11 @@ S18_capa_checker() {
     # we only need to wait if we are not using the full_scan profile
     module_wait "S13_weak_func_check"
   fi
-  if [[ -s "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
+  if [[ -s "${S13_CSV_LOG}" ]]; then
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${S13_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   local lBINARY=""

@@ -30,9 +30,12 @@ P35_UEFI_extractor() {
     if [[ -d "${FIRMWARE_PATH}" ]]; then
       # as we currently handle only firmware files in the UEFI extraction module
       # we need to work with the original firmware file - if this is also a directory
-      # we exit the module now
+      # or we already have a linux filesytem we can exit now
+      detect_root_dir_helper "${FIRMWARE_PATH}"
+
       FIRMWARE_PATH="${FIRMWARE_PATH_BAK}"
-      if [[ -d "${FIRMWARE_PATH}" ]]; then
+      if [[ -d "${FIRMWARE_PATH}" || "${RTOS}" -ne 1 ]]; then
+        # we exit the module now
         module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
         return
       fi

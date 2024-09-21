@@ -93,10 +93,10 @@ S09_firmware_base_version_check() {
     BIN_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
     CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
 
-    if [[ -f "${CSV_DIR}"/s09_firmware_base_version_check.csv ]]; then
+    if [[ -f "${S09_CSV_LOG}" ]]; then
       # this should prevent double checking - if a version identifier was already successful we do not need to
       # test the other identifiers. In threaded mode this usually does not decrease testing speed.
-      if [[ "$(tail -n +2 "${CSV_DIR}"/s09_firmware_base_version_check.csv | cut -d\; -f2 | grep -c "^${BIN_NAME}$")" -gt 0 ]]; then
+      if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${BIN_NAME}$")" -gt 0 ]]; then
         print_output "[*] Already identified component for identifier ${BIN_NAME} - ${CSV_REGEX} ... skipping further tests" "no_log"
         continue
       fi

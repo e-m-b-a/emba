@@ -143,15 +143,15 @@ radare_decomp_log_bin_hardening() {
   local HEAD_BIN_PROT=""
   local BIN_PROT=""
 
-  if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
+  if [[ -f "${S12_LOG}" ]]; then
     write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${lFUNC_LOG}"
     # write_link "$LOG_DIR/s12_binary_protection.txt" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
     # get headline:
-    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u || true)
+    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${S12_LOG}" | sed 's/FORTIFY.*//'| sort -u || true)
     write_log "  ${HEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
-    BIN_PROT=$(grep '/'"${NAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    BIN_PROT=$(grep '/'"${NAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
     write_log "  ${BIN_PROT}" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
   fi

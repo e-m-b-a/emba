@@ -20,7 +20,6 @@ F21_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
   module_title "CycloneDX SBOM converter"
   pre_module_reporter "${FUNCNAME[0]}"
-  local F20_LOG="${CSV_DIR}""/f20_vul_aggregator.csv"
   local BIN_VER_SBOM_ARR=()
   local BIN_VER_SBOM_ENTRY=""
   local BINARY=""
@@ -32,26 +31,26 @@ F21_cyclonedx_sbom() {
     return
   fi
 
-  if [[ -f "${F20_LOG}" ]] && [[ "$(wc -l "${F20_LOG}" | awk '{print $1}')" -gt 1 ]]; then
-    if [[ -f "${CSV_DIR}"/f21_cyclonedx_sbom.csv ]]; then
-      rm "${CSV_DIR}"/f21_cyclonedx_sbom.csv
+  if [[ -f "${F20_CSV_LOG}" ]] && [[ "$(wc -l "${F20_CSV_LOG}" | awk '{print $1}')" -gt 1 ]]; then
+    if [[ -f "${F21_CSV_LOG}" ]]; then
+      rm "${F21_CSV_LOG}"
     fi
     if [[ -f "${CSV_DIR}"/f21_cyclonedx_sbom.json ]]; then
       rm "${CSV_DIR}"/f21_cyclonedx_sbom.json
     fi
 
     write_csv_log "Type" "MimeType" "Supplier" "Author" "Publisher" "Group" "Name" "Version" "Scope" "LicenseExpressions" "LicenseNames" "Copyright" "Cpe" "Purl" "Modified" "SwidTagId" "SwidName" "SwidVersion" "SwidTagVersion" "SwidPatch" "SwidTextContentType" "SwidTextEncoding" "SwidTextContent" "SwidUrl" "MD5" "SHA-1" "SHA-256" "SHA-512" "BLAKE2b-256" "BLAKE2b-384" "BLAKE2b-512" "SHA-384" "SHA3-256" "SHA3-384" "SHA3-512" "BLAKE3" "Description"
-    print_output "[*] Collect SBOM details of module $(basename "${F20_LOG}")."
-    mapfile -t BIN_VER_SBOM_ARR < <(cut -d\; -f1,2 "${F20_LOG}" | tail -n +2 | sort -u)
+    print_output "[*] Collect SBOM details of module $(basename "${F20_CSV_LOG}")."
+    mapfile -t BIN_VER_SBOM_ARR < <(cut -d\; -f1,2 "${F20_CSV_LOG}" | tail -n +2 | sort -u)
     for BIN_VER_SBOM_ENTRY in "${BIN_VER_SBOM_ARR[@]}"; do
       BINARY=$(echo "${BIN_VER_SBOM_ENTRY}" | cut -d\; -f1)
       VERSION=$(echo "${BIN_VER_SBOM_ENTRY}" | cut -d\; -f2)
       write_csv_log "" "" "" "" "" "" "${BINARY}" "${VERSION}" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
     done
-    if [[ -f "${CSV_DIR}"/f21_cyclonedx_sbom.csv ]]; then
+    if [[ -f "${F21_CSV_LOG}" ]]; then
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick tranlation
-      sed -i 's/\;/,/g' "${CSV_DIR}"/f21_cyclonedx_sbom.csv
-      cyclonedx convert --input-file "${CSV_DIR}"/f21_cyclonedx_sbom.csv --output-file "${LOG_DIR}"/f21_cyclonedx_sbom.json || true
+      sed -i 's/\;/,/g' "${F21_CSV_LOG}"
+      cyclonedx convert --input-file "${F21_CSV_LOG}" --output-file "${LOG_DIR}"/f21_cyclonedx_sbom.json || true
     fi
     if [[ -f "${LOG_DIR}"/f21_cyclonedx_sbom.json ]]; then
       print_output "[+] SBOM in json format created:" "" "${LOG_DIR}/f21_cyclonedx_sbom.json"

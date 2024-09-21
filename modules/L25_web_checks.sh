@@ -456,7 +456,7 @@ web_access_crawler() {
           VULN_NAME=$(echo "${C_VULN}" | tr ' ' '\n' | grep "^name=" | cut -d '=' -f2 || true)
           VULN_FILE=$(echo "${C_VULN}" | tr ' ' '\n' | grep "^file=" | cut -d '=' -f2 || true)
 
-          if ! [[ -f "${CSV_DIR}"/l25_web_checks.csv ]]; then
+          if ! [[ -f "${L25_CSV_LOG}" ]]; then
             write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
           fi
           print_output "[+] Found possible vulnerability ${ORANGE}${VULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${WEB_NAME}${NC}." "" "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log
@@ -465,18 +465,18 @@ web_access_crawler() {
       done  < "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}-200ok.log"
     fi
 
-    if [[ -f "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}-200ok.log" ]] && [[ -f "${LOG_DIR}"/23_lua_check.txt ]]; then
+    if [[ -f "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}-200ok.log" ]] && [[ -f "${S23_LOG}" ]]; then
       while read -r WEB_PATH; do
         WEB_NAME="$(basename "${WEB_PATH}")"
-        mapfile -t CRAWLED_VULNS < <(grep "Found lua.*${WEB_NAME}.*capabilities" "${LOG_DIR}"/23_lua_check.txt || true)
+        mapfile -t CRAWLED_VULNS < <(grep "Found lua.*${WEB_NAME}.*capabilities" "${S23_LOG}" || true)
         for C_VULN in "${CRAWLED_VULNS[@]}"; do
           [[ "${C_VULN}" == *"command execution"* ]] && VULN_NAME="os exec"
           [[ "${C_VULN}" == *"file access"* ]] && VULN_NAME="file read/write"
 
-          if ! [[ -f "${CSV_DIR}"/l25_web_checks.csv ]]; then
+          if ! [[ -f "${L25_CSV_LOG}" ]]; then
             write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
           fi
-          print_output "[+] Found possible vulnerability in lua analysis for ${ORANGE}${WEB_NAME}${NC}." "${LOG_DIR}"/s23_lua_check.txt
+          print_output "[+] Found possible vulnerability in lua analysis for ${ORANGE}${WEB_NAME}${NC}." "${S23_LOG}"
           write_csv_log "${WEB_NAME}" "lua check" "lua" "${VULN_NAME}" "${WEB_PATH}"
         done
       done  < "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}-200ok.log"

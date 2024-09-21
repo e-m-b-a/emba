@@ -127,23 +127,23 @@ check_live_nmap_basic() {
         continue
       fi
 
-      if [[ -f "${CSV_DIR}"/s09_firmware_base_version_check.csv ]]; then
+      if [[ -f "${S09_CSV_LOG}" ]]; then
         # Let's check if we have already found details about this service in our other modules (S09, S115/S116)
-        mapfile -t lS09_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"${lSERVICE_NAME}"'/' "${CSV_DIR}"/s09_firmware_base_version_check.csv || true)
+        mapfile -t lS09_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"${lSERVICE_NAME}"'/' "${S09_CSV_LOG}" || true)
         if [[ "${#lS09_L15_CHECK_ARR[@]}" -gt 0 ]]; then
           for lS09_L15_MATCH in "${lS09_L15_CHECK_ARR[@]}"; do
-            echo "${lS09_L15_MATCH}" >> "${CSV_DIR}"/l15_emulated_checks_nmap.csv
+            echo "${lS09_L15_MATCH}" >> "${L15_CSV_LOG}"
             lS09_L15_MATCH=$(echo "${lS09_L15_MATCH}" | cut -d ';' -f3)
             print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${lS09_L15_MATCH}${NC}"
           done
         fi
       fi
 
-      if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
-        mapfile -t lS116_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"${lSERVICE_NAME}"'/' "${CSV_DIR}"/s116_qemu_version_detection.csv || true)
+      if [[ -f "${S116_CSV_LOG}" ]]; then
+        mapfile -t lS116_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"${lSERVICE_NAME}"'/' "${S116_CSV_LOG}" || true)
         if [[ "${#lS116_L15_CHECK_ARR[@]}" -gt 0 ]]; then
           for lS116_L15_MATCH in "${lS116_L15_CHECK_ARR[@]}"; do
-            echo "${lS116_L15_MATCH}" >> "${CSV_DIR}"/l15_emulated_checks_nmap.csv
+            echo "${lS116_L15_MATCH}" >> "${L15_CSV_LOG}"
             lS116_L15_MATCH=$(echo "${lS116_L15_MATCH}" | cut -d ';' -f3)
             print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${lS116_L15_MATCH}${NC}"
           done

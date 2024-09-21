@@ -49,11 +49,11 @@ S16_ghidra_decompile_checks()
     # we only need to wait if we are not using the full_scan profile
     module_wait "S13_weak_func_check"
   fi
-  if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
+  if [[ -f "${S13_CSV_LOG}" ]]; then
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${S13_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   for BINARY in "${BINARIES[@]}"; do
@@ -174,7 +174,7 @@ ghidra_analyzer() {
     local lSEMGREPLOG="${LOG_PATH_MODULE}"/semgrep_"${lNAME}"_"${RANDOM}".json
   fi
 
-  if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
+  if [[ -f "${S12_LOG}" ]]; then
     # we start the log file with the binary protection mechanisms
     # FUNC_LOG is currently global for log_bin_hardening from modules/S13_weak_func_check.sh -> todo as parameter
     export FUNC_LOG="${lSEMGREPLOG_TXT}"

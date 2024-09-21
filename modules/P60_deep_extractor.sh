@@ -81,7 +81,7 @@ P60_deep_extractor() {
 }
 
 check_disk_space() {
-  export DISK_SPACE
+  export DISK_SPACE=0
   DISK_SPACE=$(du -hm "${FIRMWARE_PATH_CP}" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1 || true)
 }
 

@@ -31,7 +31,6 @@ S26_kernel_vuln_verifier()
   HOME_DIR="$(pwd)"
   # lKERNEL_ARCH_PATH is the directory where we store all the kernels
   local lKERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
-  S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
   local lWAIT_PIDS_S26_ARR=()
   export NEG_LOG=0
 
@@ -45,6 +44,7 @@ S26_kernel_vuln_verifier()
   module_wait "S24_kernel_bin_identifier"
 
   # now we should have a csv log with a kernel version:
+  # shellcheck disable=SC2153
   if ! [[ -f "${S24_CSV_LOG}" ]] || [[ "$(wc -l "${S24_CSV_LOG}" | awk '{print $1}')" -lt 2 ]]; then
     print_output "[-] No Kernel version file (s24 results) identified ..."
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
