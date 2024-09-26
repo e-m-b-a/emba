@@ -57,6 +57,9 @@ I01_default_apps(){
     print_tool_info "ssdeep" 1
     print_tool_info "xdot" 1
 
+    # exif parser for s08
+    print_tool_info "libimage-exiftool-perl" 1
+
     # tools only available on Kali Linux:
     if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1

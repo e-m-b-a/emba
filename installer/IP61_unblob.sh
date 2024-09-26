@@ -49,8 +49,10 @@ IP61_unblob() {
     print_tool_info "pkg-config" 1
     print_tool_info "pkgconf" 1
     # print_tool_info "unblob" 1
-    print_pip_info "cmake"
-    print_pip_info "unblob"
+    # print_pip_info "cmake"
+    print_tool_info "python3-lief" 1
+    # print_pip_info "unblob"
+    print_tool_info "unblob" 1
 
     print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
@@ -89,8 +91,8 @@ IP61_unblob() {
         # rm -f external/e2fsprogs_1.47.0-3.ok2_amd64.deb
         # rm -f external/libss2_1.47.0-3.ok2_amd64.deb
 
-        pip_install "cmake"
-        pip_install "unblob"
+        # pip_install "cmake"
+        # pip_install "unblob"
 
         # install poetry
         # python3 -m pip install --upgrade poetry --break-system-packages

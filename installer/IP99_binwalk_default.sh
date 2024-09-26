@@ -96,6 +96,7 @@ IP99_binwalk_default() {
         cd external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
         # pip --user makes problems -> lets remove it for now
         sed -i 's/--user //' ./deps.sh
+        sed -i 's/python3-distutils\ //' ./deps.sh
         ./deps.sh --yes || ( echo "Could not install EMBA component binwalk" && exit 1 )
         python3 setup.py install || ( echo "Could not install EMBA component binwalk" && exit 1 )
         BINWALK_GIT_HASH=$(git describe --always)
@@ -131,7 +132,7 @@ IP99_binwalk_default() {
           if ! [[ -d "${HOME}"/.config/binwalk/config/ ]]; then
             mkdir -p "${HOME}"/.config/binwalk/config/
           fi
-          cp ./external/emba_venv/lib/python3.11/site-packages/binwalk-2.4.1+"${BINWALK_GIT_HASH}"-py3.11.egg/binwalk/config/extract.conf "${HOME}"/.config/binwalk/config/
+          cp ./external/emba_venv/lib/python3.12/site-packages/binwalk-2.4.2+"${BINWALK_GIT_HASH}"-py3.12.egg/binwalk/config/extract.conf "${HOME}"/.config/binwalk/config/
 
           # sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/local/lib/python3.11/dist-packages/binwalk/config/extract.conf
           sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' "${HOME}"/.config/binwalk/config/extract.conf
