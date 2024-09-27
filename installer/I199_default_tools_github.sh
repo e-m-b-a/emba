@@ -51,7 +51,7 @@ I199_default_tools_github() {
         # pixd installation
         pip_install "pillow"
         echo -e "\\n""${ORANGE}""${BOLD}""Downloading of pixd""${NC}"
-        git clone https://github.com/EMBA-support-repos/pixd_image.git
+        git clone https://github.com/EMBA-support-repos/pixd_image.git ./external/pixd/
         cd ./external/pixd/ || ( echo "Could not install EMBA component pixd" && exit 1 )
         make
         mv pixd ../pixde
