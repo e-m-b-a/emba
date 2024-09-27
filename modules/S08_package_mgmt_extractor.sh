@@ -1039,6 +1039,7 @@ debian_status_files_search() {
   local lPACKAGE_VERSION=""
   local lPACKAGE=""
   local lVERSION=""
+  local lINSTALL_STATE=""
   local lAPP_LIC="NA"
   local lPOS_RES=0
   local lSHA512_CHECKSUM=""
@@ -1072,6 +1073,12 @@ debian_status_files_search() {
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
           lVERSION=$(clean_package_details "${lVERSION}")
           clean_package_versions "${lVERSION}"
+
+          lINSTALL_STATE=$(safe_echo "${lPACKAGE_VERSION}" | cut -d: -f3)
+          if [[ "${lINSTALL_STATE}" == *"deinstall ok"* ]]; then
+            write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC} - ${RED}STATE: Not installed${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+            continue
+          fi
 
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
