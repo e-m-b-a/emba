@@ -18,153 +18,1259 @@
 S08_package_mgmt_extractor()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Search package management details"
+  module_title "Non binary SBOM module"
   pre_module_reporter "${FUNCNAME[0]}"
 
   local NEG_LOG=0
-  export DEBIAN_MGMT_STATUS=()
-  export OPENWRT_MGMT_CONTROL=()
+  local lWAIT_PIDS_S08_ARR=()
 
-  debian_status_files_search
-  openwrt_control_files_search
-  rpm_package_files_search
+  if [[ ${THREADED} -eq 1 ]]; then
+    debian_status_files_search &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-  [[ "${#DEBIAN_MGMT_STATUS[@]}" -gt 0 || "${#OPENWRT_MGMT_CONTROL[@]}" -gt 0 || "${#RPM_PACKAGES[@]}" -gt 0 ]] && NEG_LOG=1
+    openwrt_control_files_search &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    rpm_package_files_search &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    rpm_package_check &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    deb_package_check &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    bsd_pkg_archive &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    python_pip_packages &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    python_requirements &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    java_archives &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    ruby_gem_archive &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    alpine_apk_package &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    windows_exifparser &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    rust_cargo_lock_parser &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
+    wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
+  else
+    debian_status_files_search
+    openwrt_control_files_search
+    rpm_package_files_search
+    rpm_package_check
+    deb_package_check
+    bsd_pkg_archive
+    python_pip_packages
+    python_requirements
+    java_archives
+    ruby_gem_archive
+    alpine_apk_package
+    windows_exifparser
+    rust_cargo_lock_parser
+  fi
+
+  [[ -s "${S08_CSV_LOG}" ]] && NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
-debian_status_files_search() {
-  sub_module_title "Debian package management identification"
+deb_package_check() {
+  # └─$ ar x liblzma5_5.6.1-1_amd64.deb --output dirname
+  # └─$ tar xvf control.tar.xz
+  # └─$ cat control
+  #
+  # Package: liblzma5
+  # Source: xz-utils
+  # Version: 5.6.1-1
+  # Architecture: amd64
+  # Maintainer: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+  # Installed-Size: 401
+  # Depends: libc6 (>= 2.34)
+  local lPACKAGING_SYSTEM="debian_deb"
 
-  local PACKAGING_SYSTEM="debian"
-  local PACKAGE_FILE=""
-  local DEBIAN_PACKAGES=()
-  local PACKAGE_VERSION=""
-  local PACKAGE=""
-  local VERSION=""
+  sub_module_title "Debian deb package parser" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-  mapfile -t DEBIAN_MGMT_STATUS < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
+  local lDEB_ARCHIVES_ARR=()
+  local lDEB_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
 
-  if [[ -v DEBIAN_MGMT_STATUS[@] ]] ; then
-    write_csv_log "Packaging system" "package file" "package" "original version" "stripped version"
-    print_output "[*] Found ${ORANGE}${#DEBIAN_MGMT_STATUS[@]}${NC} debian package management files:"
-    for PACKAGE_FILE in "${DEBIAN_MGMT_STATUS[@]}" ; do
-      print_output "$(indent "$(orange "$(print_path "${PACKAGE_FILE}")")")"
+  mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
+
+  if [[ -v lDEB_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lDEB_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
-    for PACKAGE_FILE in "${DEBIAN_MGMT_STATUS[@]}" ; do
-      if grep -q "Package: " "${PACKAGE_FILE}"; then
-        mapfile -t DEBIAN_PACKAGES < <(grep "^Package: \|^Status: \|^Version: " "${PACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' | sed -z 's/\nStatus: / - Status: /g')
-        print_output "[*] Found debian package details:"
-        for PACKAGE_VERSION in "${DEBIAN_PACKAGES[@]}" ; do
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lDEB_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"Debian binary package"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+      mkdir "${TMP_DIR}/deb_package/"
+      ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/"
+
+      if [[ ! -f "${TMP_DIR}/deb_package/control.tar.xz" ]]; then
+        write_log "[-] No debian control.tar.xz found for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      fi
+
+      tar xf "${TMP_DIR}/deb_package/control.tar.xz" -C "${TMP_DIR}/deb_package/"
+
+      if [[ ! -f "${TMP_DIR}/deb_package/control" ]]; then
+        write_log "[-] No debian control extracted for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      fi
+
+      lAPP_NAME=$(grep "Package: " "${TMP_DIR}/deb_package/control")
+      lAPP_NAME=${lAPP_NAME/*:\ }
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      lAPP_LIC="NA"
+
+      lAPP_VERS=$(grep "Version: " "${TMP_DIR}/deb_package/control")
+      lAPP_VERS=${lAPP_VERS/*:\ }
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      # Todo: Company Name, Copyright, Mime-Type
+
+      write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+      lPOS_RES=1
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No Debian deb archives found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No Debian deb archives found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Debian archives SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Debian archives SBOM results available"
+  fi
+}
+
+windows_exifparser() {
+  local lPACKAGING_SYSTEM="windows_exe"
+
+  sub_module_title "Windows Exif parser" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lEXE_ARCHIVES_ARR=()
+  local lEXE_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" \))
+
+  if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lEXE_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lEXE_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ "${lR_FILE}" == *"PE32+ executable"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      exiftool "${lEXE_ARCHIVE}" > "${TMP_DIR}/windows_exe_exif_data.txt"
+
+      lAPP_NAME=$(grep "Product Name" "${TMP_DIR}/windows_exe_exif_data.txt")
+      lAPP_NAME=${lAPP_NAME/*:\ }
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      if [[ -z "${lAPP_NAME}" ]]; then
+        lAPP_NAME=$(grep "Internal Name" "${TMP_DIR}/windows_exe_exif_data.txt")
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      fi
+
+      if [[ -z "${lAPP_NAME}" ]]; then
+        lAPP_NAME=$(grep "File Name" "${TMP_DIR}/windows_exe_exif_data.txt")
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      fi
+
+      lAPP_LIC="NA"
+
+      lAPP_VERS=$(grep "Product Version" "${TMP_DIR}/windows_exe_exif_data.txt")
+      lAPP_VERS=${lAPP_VERS/*:\ }
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      # Todo: Company Name, Copyright, Mime-Type
+
+      write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+      lPOS_RES=1
+      rm -f "${TMP_DIR}/windows_exe_exif_data.txt"
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No Windows executables found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No Windows executables found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Windows executables SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Rust Windows executables SBOM results available"
+  fi
+}
+
+rust_cargo_lock_parser() {
+  local lPACKAGING_SYSTEM="rust_cargo_lock"
+
+  sub_module_title "Rust cargo lock identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lRST_ARCHIVES_ARR=()
+  local lRST_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
+
+  if [[ -v lRST_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lRST_ARCHIVE in "${lRST_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lRST_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lRST_ARCHIVE in "${lRST_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lRST_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lRST_ARCHIVE}" | awk '{print $1}')"
+      # we start with the following file structure:
+      # [[package]]
+      # name = "windows-sys"
+      # version = "0.42.0"
+      # source = "registry+https://github.com/rust-lang/crates.io-index"
+      # checksum = "5a3e1820f08b8513f676f7ab6c1f99ff312fb97b553d30ff4dd86f9f15728aa7"
+      # dependencies = [
+      #  "windows_aarch64_gnullvm",
+      #
+      #  and transform it to a one liner like the following:
+      #  name = "windows_x86_64_msvc" -- version = "0.42.0" -- source = "registry+https://github.com/rust-lang/crates.io-index" -- checksum = "f40009d85759725a34da6d89a94e63d7bdc50a862acf0dbc7c8e488f1edcb6f5" --
+
+      sed ':a;N;$!ba;s/\"\n/\"|/g' "${lRST_ARCHIVE}" | grep name | sed 's/|dependencies = \[//' > "${TMP_DIR}/Cargo.lock.tmp"
+
+      while read -r lCARGO_ENTRY; do
+        lAPP_NAME=${lCARGO_ENTRY/|*}
+        lAPP_NAME=${lAPP_NAME/name\ =\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+        lAPP_LIC="NA"
+
+        lAPP_VERS=$(echo "${lCARGO_ENTRY}" | cut -d\| -f2)
+        lAPP_VERS=${lAPP_VERS/version\ =\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        clean_package_versions "${lAPP_VERS}"
+
+        lSHA512_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
+        lSHA512_CHECKSUM=${lSHA512_CHECKSUM/checksum\ =\ }
+        clean_package_versions "${lSHA512_CHECKSUM}"
+
+        # Todo: source
+
+        write_log "[*] Rust Cargo.lock archive details: ${ORANGE}${lRST_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lRST_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+        lPOS_RES=1
+      done < "${TMP_DIR}/Cargo.lock.tmp"
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No Rust Cargo.lock packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No Rust Cargo.lock package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Rust Cargo.lock SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Rust Cargo.lock SBOM results available"
+  fi
+}
+
+alpine_apk_package() {
+  local lPACKAGING_SYSTEM="alpine_apk"
+
+  sub_module_title "Alpine apk archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lAPK_ARCHIVES_ARR=()
+  local lAPK_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
+
+  if [[ -v lAPK_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lAPK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lAPK_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"gzip compressed data"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
+
+      mkdir "${TMP_DIR}"/apk
+      tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
+
+      if ! [[ -f "${TMP_DIR}"/apk/.PKGINFO ]]; then
+        continue
+      fi
+
+      lAPP_NAME=$(grep '^pkgname = ' "${TMP_DIR}"/apk/.PKGINFO || true)
+      lAPP_NAME=${lAPP_NAME/pkgname\ =\ }
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      lAPP_LIC=$(grep '^license = ' "${TMP_DIR}"/apk/.PKGINFO || true)
+      lAPP_LIC=${lAPP_LIC/license\ =\ }
+      lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+
+      lAPP_VERS=$(grep '^pkgver = ' "${TMP_DIR}"/apk/.PKGINFO || true)
+      lAPP_VERS=${lAPP_VERS/pkgver\ =\ }
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+      lPOS_RES=1
+      rm -rf "${TMP_DIR}"/apk || true
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No Alpine apk packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No Alpine apk package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Alpine APK archives SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Alpine APK archives SBOM results available"
+  fi
+}
+
+ruby_gem_archive() {
+  local lPACKAGING_SYSTEM="ruby_gem"
+
+  sub_module_title "Ruby gem archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lGEM_ARCHIVES_ARR=()
+  local lGEM_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
+
+  if [[ -v lGEM_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lGEM_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lGEM_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"POSIX tar archive"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
+
+      mkdir "${TMP_DIR}"/gems
+      tar -x -f "${lGEM_ARCHIVE}" -C "${TMP_DIR}"/gems || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
+      # └─$ gunzip -k metadata.gz
+      # └─$ cat metadata
+      # -> name, version
+      if ! [[ -f "${TMP_DIR}"/gems/metadata.gz ]]; then
+        write_log "[-] No metadata.gz extracted from ${lGEM_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        continue
+      fi
+      gunzip -k -c "${TMP_DIR}"/gems/metadata.gz > "${TMP_DIR}"/gems/metadata
+
+      if ! [[ -f "${TMP_DIR}"/gems/metadata ]]; then
+        write_log "[-] No metadata extracted from ${lGEM_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        continue
+      fi
+
+      lAPP_NAME=$(grep '^name: ' "${TMP_DIR}"/gems/metadata || true)
+      lAPP_NAME=${lAPP_NAME/name:\ }
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      lAPP_LIC="NA"
+      # lAPP_LIC=$(grep '^licenses' "${TMP_DIR}"/gems/metadata || true)
+      # lAPP_LIC=$(safe_echo "${lAPP_LIC}" | tr -dc '[:print:]')
+
+      # grep -A1 "^version: " metadata | grep "[0-9]\."
+      lAPP_VERS=$(grep -A1 '^version' "${TMP_DIR}"/gems/metadata | grep "[0-9]" || true)
+      lAPP_VERS=${lAPP_VERS/*version:\ }
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+      lPOS_RES=1
+      rm -rf "${TMP_DIR}"/gems || true
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No Ruby gems packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No Ruby gems package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Ruby gems package files SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Ruby gemx package SBOM results available"
+  fi
+}
+
+bsd_pkg_archive() {
+  # └─$ file boost-libs-1.84.0.pkg
+  #     boost-libs-1.84.0.pkg: Zstandard compressed data (v0.8+), Dictionary ID: None
+  # tar --zstd -x -f ./boost-libs-1.84.0.pkg +COMPACT_MANIFEST
+  local lPACKAGING_SYSTEM="freebsd_pkg"
+
+  sub_module_title "FreeBSD pkg archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lPKG_ARCHIVES_ARR=()
+  local lPKG_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
+
+  if [[ -v lPKG_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPKG_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lPKG_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"Zstandard"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
+
+      tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}" +COMPACT_MANIFEST || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
+      if ! [[ -f "${TMP_DIR}"/+COMPACT_MANIFEST ]]; then
+        continue
+      fi
+      # jq -r '.' "${TMP_DIR}"/+COMPACT_MANIFEST
+      # jq -r '.name' "${TMP_DIR}"/+COMPACT_MANIFEST
+      # boost-libs
+      #
+      # jq -r '.version' "${TMP_DIR}"/+COMPACT_MANIFEST
+      # 1.84.0
+      #
+      # jq -cr '.licenses' "${TMP_DIR}"/+COMPACT_MANIFEST
+      # ["BSL"]
+
+      lAPP_NAME=$(jq -r '.name' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      lAPP_LIC=$(jq -cr '.licenses' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+      lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+
+      lAPP_VERS=$(jq -r '.version' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+      lPOS_RES=1
+      rm -f "${TMP_DIR}"/+COMPACT_MANIFEST || true
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No FreeBSD pkg packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No FreeBSD pkg package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] FreeBSD pkg package files SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No FreeBSD pkg package SBOM results available"
+  fi
+}
+
+rpm_package_check() {
+  local lPACKAGING_SYSTEM="rpm_package"
+
+  sub_module_title "RPM archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lRPM_ARCHIVES_ARR=()
+  local lRPM_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
+
+  if [[ -v lRPM_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lRPM_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lRPM_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"RPM"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
+
+      lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "Name" || true)
+      lAPP_NAME=${lAPP_NAME/*:\ /}
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      lAPP_LIC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "License" || true)
+      lAPP_LIC=${lAPP_LIC/*:\ /}
+      lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+
+      lAPP_VERS=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "Version" || true)
+      lAPP_VERS=${lAPP_VERS/*:\ /}
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      write_log "[*] RPM archive details: ${ORANGE}${lRPM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+      lPOS_RES=1
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No RPM packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No RPM package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] RPM packages SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No RPM package SBOM results available"
+  fi
+}
+
+python_requirements() {
+  local lPACKAGING_SYSTEM="python_requirements"
+
+  sub_module_title "Python requirements identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lPY_REQUIREMENTS_ARR=()
+  local lPY_REQ_FILE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+  local lRES_ENTRY="NA"
+
+  mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
+
+  if [[ -v lPY_REQUIREMENTS_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPY_REQ_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}" ; do
+      lR_FILE=$(file "${lPY_REQ_FILE}")
+      if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lPY_REQ_FILE}" | awk '{print $1}')"
+
+      # read entry line by line
+      while read -r lRES_ENTRY; do
+        if [[ "${lRES_ENTRY}" =~ ^#.*$ ]]; then
+          continue
+        fi
+        if [[ "${lRES_ENTRY}" == *"=="* ]]; then
+          lAPP_NAME=${lRES_ENTRY/==*}
+          lAPP_VERS=${lRES_ENTRY/*==}
+        elif [[ "${lRES_ENTRY}" == *">="* ]]; then
+          lAPP_NAME=${lRES_ENTRY/>=*}
+          lAPP_VERS=${lRES_ENTRY/*>=}
+          lAPP_VERS='>='"${lAPP_VERS}"
+        elif [[ "${lRES_ENTRY}" == *"<"* ]]; then
+          lAPP_NAME=${lRES_ENTRY/<*}
+          lAPP_VERS=${lRES_ENTRY/*<}
+          lAPP_VERS='<'"${lAPP_VERS}"
+        elif [[ "${lRES_ENTRY}" == *"=~"* ]]; then
+          lAPP_NAME=${lRES_ENTRY/=~*}
+          lAPP_VERS=${lRES_ENTRY/*=~}
+          lAPP_VERS='=~'"${lAPP_VERS}"
+        else
+          lAPP_NAME=${lRES_ENTRY}
+          lAPP_VERS="NA"
+        fi
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        clean_package_versions "${lAPP_VERS}"
+
+        write_log "[*] Python requirement details: ${ORANGE}${lPY_REQ_FILE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE:-NA}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+        lPOS_RES=1
+      done < "${lPY_REQ_FILE}"
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No python requirements!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No python requirement files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Python requirements SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Python requirements SBOM results available"
+  fi
+}
+
+python_pip_packages() {
+  local lPACKAGING_SYSTEM="python_pip"
+
+  sub_module_title "Python PIP package identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lPIP_PACKAGES_SITE_ARR=()
+  local lPIP_PACKAGES_DIST_ARR=()
+  local lPIP_DIST_DIR=""
+  local lPIP_SITE_DIR=""
+  local lPIP_DIST_INSTALLED_PACKAGES_ARR=()
+  local lPIP_SITE_INSTALLED_PACKAGES_ARR=()
+  local lPIP_DIST_META_PACKAGE=""
+  local lPIP_SITE_META_PACKAGE=""
+  local lAPP_LIC="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  # pip packages are in site-packages or in dist-packages directories installed
+  # metadata can be found in METADATA of in PKG-INFO
+  mapfile -t lPIP_PACKAGES_SITE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "site-packages" -type d)
+  mapfile -t lPIP_PACKAGES_DIST_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "dist-packages" -type d)
+
+  if [[ -v lPIP_PACKAGES_DIST_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPIP_DIST_DIR}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
+      mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "METADATA" -type f)
+      for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
+        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+
+        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
+        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
+        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+
+        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+        lPOS_RES=1
+      done
+
+      mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "PKG-INFO" -type f)
+      for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
+        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+
+        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
+        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
+        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+
+        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+        lPOS_RES=1
+      done
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No PIP dist packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No PIP dist package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  local lPOS_RES=0
+  if [[ -v lPIP_PACKAGES_SITE_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_SITE_ARR[@]}${NC} PIP site-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPIP_SITE_DIR}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lPIP_PACKAGES_SITE_ARR[@]}${NC} PIP site-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
+      mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "METADATA" -type f)
+      for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
+        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+
+        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
+        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
+        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+
+        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+        lPOS_RES=1
+      done
+
+      mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "PKG-INFO" -type f)
+      for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
+        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+
+        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
+        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
+        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+
+        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}"
+        lPOS_RES=1
+      done
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No PIP site packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No PIP site package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Python PIP database SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Python PIP SBOM results available"
+  fi
+}
+
+java_archives() {
+  local lPACKAGING_SYSTEM="java_archive"
+
+  sub_module_title "Java archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lJAVA_ARCHIVES_ARR=()
+  local lJAVA_ARCHIVES_JAR_ARR=()
+  local lJAVA_ARCHIVES_WAR_ARR=()
+  local lJAVA_ARCHIVE=""
+  local lJ_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lIMPLEMENT_TITLE="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lJAVA_ARCHIVES_JAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.jar" -type f)
+  mapfile -t lJAVA_ARCHIVES_WAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.war" -type f)
+  lJAVA_ARCHIVES_ARR=( "${lJAVA_ARCHIVES_JAR_ARR[@]}" "${lJAVA_ARCHIVES_WAR_ARR[@]}" )
+
+  if [[ -v lJAVA_ARCHIVES_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lJAVA_ARCHIVE in "${lJAVA_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lJAVA_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lJAVA_ARCHIVE in "${lJAVA_ARCHIVES_ARR[@]}" ; do
+      lJ_FILE=$(file "${lJAVA_ARCHIVE}")
+      if [[ ! "${lJ_FILE}" == *"Java archive data"* && ! "${lJ_FILE}" == *"Zip archive"* ]]; then
+        continue
+      fi
+      lSHA512_CHECKSUM="$(sha512sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+
+      lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" || true)
+      lAPP_NAME=${lAPP_NAME/*:\ /}
+      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+
+      lAPP_LIC=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "License" || true)
+      lAPP_LIC=${lAPP_LIC/*:\ /}
+      lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+
+      lIMPLEMENT_TITLE=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Title" || true)
+      lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE/*:/}
+      lIMPLEMENT_TITLE=$(clean_package_details "${lIMPLEMENT_TITLE}")
+
+      lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" || true)
+      lAPP_VERS=${lAPP_VERS/*:\ /}
+      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+      clean_package_versions "${lAPP_VERS}"
+
+      if [[ -z "${lAPP_NAME}" && -z "${lAPP_LIC}" && -z "${lIMPLEMENT_TITLE}" && -z "${lAPP_VERS}" ]]; then
+        continue
+      fi
+      if [[ -z "${lAPP_NAME}" && -n "${lIMPLEMENT_TITLE}" ]]; then
+        # in case APP_NAME is not set but we have an lIMPLEMENT_TITLE we use this
+        lAPP_NAME="${lIMPLEMENT_TITLE}"
+      fi
+
+      write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}"
+      lPOS_RES=1
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No JAVA packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No JAVA package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Java package SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Java package SBOM results available"
+  fi
+}
+
+debian_status_files_search() {
+  local lPACKAGING_SYSTEM="debian_pkg_mgmt"
+
+  sub_module_title "Debian package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lDEBIAN_MGMT_STATUS_ARR=()
+  local lPACKAGE_FILE=""
+  local lDEBIAN_PACKAGES_ARR=()
+  local lPACKAGE_VERSION=""
+  local lPACKAGE=""
+  local lVERSION=""
+  local lAPP_LIC="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+
+  mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
+
+  if [[ -v lDEBIAN_MGMT_STATUS_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
+      lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if grep -q "Package: " "${lPACKAGE_FILE}"; then
+        mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' | sed -z 's/\nStatus: / - Status: /g')
+        write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_log "[*] Found debian package details in ${ORANGE}${lPACKAGE_FILE}${NC}:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        for lPACKAGE_VERSION in "${lDEBIAN_PACKAGES_ARR[@]}" ; do
           # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
-          PACKAGE=$(safe_echo "${PACKAGE_VERSION}" | awk '{print $2}' | tr -dc '[:print:]')
-          VERSION=${PACKAGE_VERSION/*Version:\ /}
+          lPACKAGE=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}')
+          lPACKAGE=$(clean_package_details "${lPACKAGE}")
+
+          lVERSION=${lPACKAGE_VERSION/*Version:\ /}
+          lVERSION=$(clean_package_details "${lVERSION}")
+          clean_package_versions "${lVERSION}"
+
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
-          # if ! echo "${PACKAGE_VERSION}" | grep -q "installed"; then
+          # if ! echo "${lPACKAGE_VERSION}" | grep -q "installed"; then
           #  # a not installed package - skip it
           #  continue
           # fi
-          clean_package_versions "${VERSION}"
-          print_output "[*] Debian package details: ${ORANGE}${PACKAGE_FILE}${NC} - ${ORANGE}${PACKAGE}${NC} - ${ORANGE}${VERSION}${NC}"
-          write_csv_log "${PACKAGING_SYSTEM}" "${PACKAGE_FILE}" "${PACKAGE}" "${VERSION}" "${STRIPPED_VERSION}"
+          #
+          write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}"
+          lPOS_RES=1
         done
       fi
     done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No debian packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
   else
-    print_output "[-] No debian package files found!"
+    write_log "[-] No debian package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Debian packages SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Debian packages SBOM results available"
   fi
 }
 
 openwrt_control_files_search() {
-  sub_module_title "OpenWRT package management identification"
+  local lPACKAGING_SYSTEM="OpenWRT"
 
-  local PACKAGING_SYSTEM="OpenWRT"
-  local PACKAGE_FILE=""
-  local OPENWRT_PACKAGES=()
-  local PACKAGE_VERSION=""
-  local PACKAGE=""
-  local VERSION=""
+  sub_module_title "OpenWRT package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-  mapfile -t OPENWRT_MGMT_CONTROL < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
+  local lPACKAGE_FILE=""
+  local lOPENWRT_PACKAGES_ARR=()
+  local lPACKAGE_VERSION=""
+  local lPACKAGE=""
+  local lVERSION=""
+  local lAPP_LIC="NA"
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
+  local lOPENWRT_MGMT_CONTROL_ARR=()
 
-  if [[ -v OPENWRT_MGMT_CONTROL[@] ]] ; then
-    write_csv_log "Packaging system" "package file" "package" "version"
-    print_output "[*] Found ${ORANGE}${#OPENWRT_MGMT_CONTROL[@]}${NC} OpenWRT package management files."
-    for PACKAGE_FILE in "${OPENWRT_MGMT_CONTROL[@]}" ; do
-      if grep -q "Package: " "${PACKAGE_FILE}"; then
-        mapfile -t OPENWRT_PACKAGES < <(grep "^Package: \|^Version: " "${PACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g')
-        for PACKAGE_VERSION in "${OPENWRT_PACKAGES[@]}" ; do
-          PACKAGE=$(safe_echo "${PACKAGE_VERSION}" | awk '{print $2}' | tr -dc '[:print:]')
-          VERSION=${PACKAGE_VERSION/*Version:\ /}
-          # What is the state in an offline firmware image? Is it installed or not?
-          # Futher investigation needed!
-          clean_package_versions "${VERSION}"
-          print_output "[*] OpenWRT package details: ${ORANGE}${PACKAGE_FILE}${NC} - ${ORANGE}${PACKAGE}${NC} - ${ORANGE}${VERSION}${NC}"
-          write_csv_log "${PACKAGING_SYSTEM}" "${PACKAGE_FILE}" "${PACKAGE}" "${VERSION}" "${STRIPPED_VERSION}"
+  mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
+
+  if [[ -v lOPENWRT_MGMT_CONTROL_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+
+    write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      if grep -q "Package: " "${lPACKAGE_FILE}"; then
+        lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+        mapfile -t lOPENWRT_PACKAGES_ARR < <(grep "^Package: \|^Version: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g')
+        for lPACKAGE_VERSION in "${lOPENWRT_PACKAGES_ARR[@]}" ; do
+          lPACKAGE=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}' | tr -dc '[:print:]')
+          lPACKAGE=$(clean_package_details "${lPACKAGE}")
+
+          lVERSION=${lPACKAGE_VERSION/*Version:\ /}
+          lVERSION=$(clean_package_details "${lVERSION}")
+          clean_package_versions "${lVERSION}"
+
+          write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}"
+          lPOS_RES=1
         done
       fi
     done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No OpenWRT packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
   else
-    print_output "[-] No OpenWRT package files found!"
+    write_log "[-] No OpenWRT package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] OpenWRT packages SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No OpenWRT packages SBOM results available"
   fi
 }
 
 rpm_package_files_search() {
-  sub_module_title "RPM package management identification"
-  export RPM_PACKAGES=()
+  local lPACKAGING_SYSTEM="RPM_pkg_mgmt"
+
+  sub_module_title "RPM package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   if ! command -v rpm > /dev/null; then
-    print_output "[-] RPM command not found ... not executing RPM test module"
+    write_log "[-] RPM command not found ... not executing RPM test module" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     return
   fi
 
-  local PACKAGING_SYSTEM="RPM"
-  local RPM_PACKAGE_DBS=()
-  local PACKAGE_FILE=""
-  local RPM_DIR=""
-  local PACKAGE_VERSION=""
-  local PACKAGE_NAME=""
-  local PACKAGE_AND_VERSION=""
+  local lRPM_PACKAGE_DBS_ARR=()
+  local lPACKAGE_FILE=""
+  local lRPM_PACKAGES_ARR=()
+  local lRPM_DIR=""
+  local lPACKAGE_VERSION=""
+  local lPACKAGE_NAME=""
+  local lPACKAGE_AND_VERSION=""
+  local lPOS_RES=0
+  local lSHA512_CHECKSUM=""
 
-  mapfile -t RPM_PACKAGE_DBS < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+  mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 
-  if [[ -v RPM_PACKAGE_DBS[@] ]] ; then
-    write_csv_log "Packaging system" "package dir" "package" "version"
-    print_output "[*] Found ${ORANGE}${#RPM_PACKAGE_DBS[@]}${NC} RPM package management directories."
-    for PACKAGE_FILE in "${RPM_PACKAGE_DBS[@]}" ; do
-      RPM_DIR="$(dirname "${PACKAGE_FILE}" || true)"
+  if [[ -v lRPM_PACKAGE_DBS_ARR[@] ]] ; then
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license"
+    fi
+    write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
       # not sure this works on an offline system - we need further tests on this:
-      mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "${RPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${RPM_DIR}")
-      for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do
-        print_output "[*] Testing RPM directory ${RPM_DIR} with PACKAGE_AND_VERSION: ${PACKAGE_AND_VERSION}" "no_log"
-        PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep "^Version" || true)
-        PACKAGE_VERSION="${PACKAGE_VERSION/*:\ }"
-        PACKAGE_NAME=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep "^Name" || true)
-        PACKAGE_NAME="${PACKAGE_NAME/*:\ }"
-        # just for output the details
-        rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" || true
+      mapfile -t lRPM_PACKAGES_ARR < <(rpm -qa --dbpath "${lRPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${lRPM_DIR}")
+      for lPACKAGE_AND_VERSION in "${lRPM_PACKAGES_ARR[@]}" ; do
+        write_log "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        lPACKAGE_VERSION=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
+        lPACKAGE_VERSION="${lPACKAGE_VERSION/*:\ }"
+        lPACKAGE_VERSION=$(clean_package_details "${lPACKAGE_VERSION}")
 
-        if [[ -z "${PACKAGE_VERSION}" || -z "${PACKAGE_NAME}" ]]; then
+        lPACKAGE_NAME=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Name" || true)
+        lPACKAGE_NAME="${lPACKAGE_NAME/*:\ }"
+        lPACKAGE_NAME=$(clean_package_details "${lPACKAGE_NAME}")
+
+        # just for output the details
+        rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true
+
+        if [[ -z "${lPACKAGE_NAME}" ]]; then
           continue
         fi
-        print_output "[*] RPM package details: ${ORANGE}${PACKAGE_NAME}${NC} - ${ORANGE}${PACKAGE_VERSION}${NC}"
-        write_csv_log "${PACKAGING_SYSTEM}" "${RPM_DIR}" "${PACKAGE_NAME}" "${PACKAGE_VERSION}"
+        write_log "[*] RPM package details: ${ORANGE}${lPACKAGE_NAME}${NC} - ${ORANGE}${lPACKAGE_VERSION:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE_NAME}" "${lPACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}"
+        lPOS_RES=1
       done
     done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No RPM packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
   else
-    print_output "[-] No RPM package management database found!"
+    write_log "[-] No RPM package management database found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] RPM package managment database SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No RPM package management database SBOM results available"
   fi
 }
 
+clean_package_details() {
+  local lCLEAN_ME_UP="${1}"
+
+  lCLEAN_ME_UP=$(safe_echo "${lCLEAN_ME_UP}" | tr -dc '[:print:]')
+  lCLEAN_ME_UP=${lCLEAN_ME_UP/\"}
+  # Turn on extended globbing
+  shopt -s extglob
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\(\)\]])}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP##+( )}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP%%+( )}
+  # Turn off extended globbing
+  shopt -u extglob
+  lCLEAN_ME_UP=${lCLEAN_ME_UP,,}
+  echo "${lCLEAN_ME_UP}"
+}
+
 clean_package_versions() {
-  local VERSION_="${1:-}"
+  local lVERSION="${1:-}"
   export STRIPPED_VERSION=""
 
   # usually we get a version like 1.2.3-4 or 1.2.3-0kali1bla or 1.2.3-unknown
   # this is a quick approach to clean this version identifier
   # there is a lot of room for future improvement
-  STRIPPED_VERSION=$(safe_echo "${VERSION_}" | sed -r 's/-[0-9]+$//g')
+  STRIPPED_VERSION=$(safe_echo "${lVERSION}" | sed -r 's/-[0-9]+$//g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-unknown$//g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+kali[0-9]+.*$//g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+ubuntu[0-9]+.*$//g')

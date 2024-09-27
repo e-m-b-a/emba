@@ -72,7 +72,7 @@ F20_vul_aggregator() {
 
     get_uefi_details "${S02_CSV_LOG}"
     get_firmware_details "${S06_CSV_LOG}"
-    get_package_details "${S08_CSV_LOG}"
+    get_sbom_package_details "${S08_CSV_LOG}"
     get_lighttpd_details "${S36_CSV_LOG}"
     get_firmware_base_version_check "${S09_CSV_LOG}"
     get_usermode_emulator "${S116_CSV_LOG}"
@@ -145,9 +145,9 @@ aggregate_versions() {
   local VERSIONS_KERNEL=()
   local KERNELS=()
 
-  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
-    ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
-    "${#VERSIONS_S36_DETAILS[@]}" -gt 0 || ${#KERNEL_CVE_VERIFIED[@]} -gt 0 || ${#BUSYBOX_VERIFIED_CVE[@]} -gt 0 ]]; then
+  if [[ "${#VERSIONS_STAT_CHECK[@]}" -gt 0 || "${#VERSIONS_EMULATOR[@]}" -gt 0 || "${#KERNEL_CVE_EXPLOITS[@]}" -gt 0 || "${#VERSIONS_SYS_EMULATOR[@]}" -gt 0 || \
+    "${#VERSIONS_S06_FW_DETAILS[@]}" -gt 0 || "${#VERSIONS_SYS_EMULATOR_WEB[@]}" -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
+    "${#VERSIONS_S36_DETAILS[@]}" -gt 0 || "${#KERNEL_CVE_VERIFIED[@]}" -gt 0 || "${#BUSYBOX_VERIFIED_CVE[@]}" -gt 0 || "${#VERSIONS_S08_PACKAGE_DETAILS[@]}" -gt 0 ]]; then
 
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
@@ -1618,12 +1618,12 @@ get_lighttpd_details() {
   fi
 }
 
-get_package_details() {
+get_sbom_package_details() {
   local S08_LOG="${1:-}"
   export VERSIONS_S08_PACKAGE_DETAILS=()
 
   if [[ -f "${S08_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "${S08_LOG}" | tail -n +2 | sort -u | tr ';' ':'|| true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f4,5 "${S08_LOG}" | tail -n +2 | sort -u | tr ';' ':' | tr ' ' '_' || true)
   fi
 }

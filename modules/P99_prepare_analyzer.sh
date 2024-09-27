@@ -33,6 +33,11 @@ P99_prepare_analyzer() {
   module_title "Analysis preparation"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
+  fi
+
   local lNEG_LOG=1
   local lFILES_EXT=0
   local lUNIQUE_FILES=0

@@ -75,6 +75,9 @@ S24_kernel_bin_identifier()
         fi
       done
 
+      lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
+      write_log "linux_kernel;${lFILE:-NA};${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}");${lK_VER:-NA};NA;GPL" "${S08_CSV_LOG}"
+
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
         print_ln
@@ -84,6 +87,8 @@ S24_kernel_bin_identifier()
           if [[ "${lK_ELF}" == *"ELF "* ]]; then
             print_ln
             print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE}.elf${NC}"
+            lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
+            write_log "linux_kernel;${lFILE:-NA}.elf;${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}").elf;${lK_VER:-NA};NA;GPL" "${S08_CSV_LOG}"
           else
             print_ln
             print_output "[-] No Linux kernel elf file was created."
@@ -92,58 +97,60 @@ S24_kernel_bin_identifier()
         print_ln
       fi
 
-      disable_strict_mode "${STRICT_MODE}" 0
-      extract_kconfig "${lFILE}"
-      enable_strict_mode "${STRICT_MODE}" 0
+      # ensure this is only done in non SBOM_MINIMAL mode
+      if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
+        disable_strict_mode "${STRICT_MODE}" 0
+        extract_kconfig "${lFILE}"
+        enable_strict_mode "${STRICT_MODE}" 0
 
-      K_VER_TMP="${lK_VER/Linux version /}"
-      demess_kv_version "${K_VER_TMP}"
-      # -> KV_ARR
+        K_VER_TMP="${lK_VER/Linux version /}"
+        demess_kv_version "${K_VER_TMP}"
+        # -> KV_ARR
 
-      if [[ "${lK_ELF}" == *"ELF "* ]]; then
-        lK_ELF="$(echo "${lK_ELF}" | cut -d: -f1)"
-        K_SYMBOLS="$(readelf -s "${lK_ELF}" | grep -c "FUNC\|OBJECT" || true)"
-        K_FILE="$(file "${lK_ELF}" | cut -d: -f2-)"
+        if [[ "${lK_ELF}" == *"ELF "* ]]; then
+          lK_ELF="$(echo "${lK_ELF}" | cut -d: -f1)"
+          K_SYMBOLS="$(readelf -s "${lK_ELF}" | grep -c "FUNC\|OBJECT" || true)"
+          K_FILE="$(file "${lK_ELF}" | cut -d: -f2-)"
 
-        [[ "${K_FILE}" == *"LSB"* ]] && K_ARCH_END="EL"
-        [[ "${K_FILE}" == *"MSB"* ]] && K_ARCH_END="EB"
+          [[ "${K_FILE}" == *"LSB"* ]] && K_ARCH_END="EL"
+          [[ "${K_FILE}" == *"MSB"* ]] && K_ARCH_END="EB"
 
-        [[ "${K_FILE}" == *"MIPS"* ]] && K_ARCH="MIPS"
-        [[ "${K_FILE}" == *"ARM"* ]] && K_ARCH="ARM"
-        [[ "${K_FILE}" == *"80386"* ]] && K_ARCH="x86"
-        [[ "${K_FILE}" == *"x86-64"* ]] && K_ARCH="x64"
-        [[ "${K_FILE}" == *"PowerPC"* ]] && K_ARCH="PPC"
-        [[ "${K_FILE}" == *"UCB RISC-V"* ]] && K_ARCH="RISCV"
-        [[ "${K_FILE}" == *"QUALCOMM DSP6"* ]] && K_ARCH="QCOM_DSP6"
-      else
-        # fallback
-        K_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
-        [[ "${K_ARCH: -2}" == "le" ]] && K_ARCH_END="EL"
-        [[ "${K_ARCH: -2}" == "be" ]] && K_ARCH_END="EB"
-      fi
-
-      # double check we really have a Kernel config extracted
-      if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
-        CFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
-        print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE}")${NC}" "" "${lKCONFIG_EXTRACTED}"
-        check_kconfig "${lKCONFIG_EXTRACTED}" "${K_ARCH}"
-      fi
-
-      # we should only get one element back, but as array
-      for lK_VER_CLEAN in "${KV_ARR[@]}"; do
-        if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
-          for lK_INIT in "${lK_INITS_ARR[@]}"; do
-            if [[ "${CFG_CNT}" -lt 50 ]]; then
-              lKCONFIG_EXTRACTED="NA"
-            fi
-            write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
-          done
+          [[ "${K_FILE}" == *"MIPS"* ]] && K_ARCH="MIPS"
+          [[ "${K_FILE}" == *"ARM"* ]] && K_ARCH="ARM"
+          [[ "${K_FILE}" == *"80386"* ]] && K_ARCH="x86"
+          [[ "${K_FILE}" == *"x86-64"* ]] && K_ARCH="x64"
+          [[ "${K_FILE}" == *"PowerPC"* ]] && K_ARCH="PPC"
+          [[ "${K_FILE}" == *"UCB RISC-V"* ]] && K_ARCH="RISCV"
+          [[ "${K_FILE}" == *"QUALCOMM DSP6"* ]] && K_ARCH="QCOM_DSP6"
         else
-          write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "NA" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+          # fallback
+          K_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
+          [[ "${K_ARCH: -2}" == "le" ]] && K_ARCH_END="EL"
+          [[ "${K_ARCH: -2}" == "be" ]] && K_ARCH_END="EB"
         fi
-      done
-      lNEG_LOG=1
 
+        # double check we really have a Kernel config extracted
+        if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
+          CFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+          print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE}")${NC}" "" "${lKCONFIG_EXTRACTED}"
+          check_kconfig "${lKCONFIG_EXTRACTED}" "${K_ARCH}"
+        fi
+
+        # we should only get one element back, but as array
+        for lK_VER_CLEAN in "${KV_ARR[@]}"; do
+          if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
+            for lK_INIT in "${lK_INITS_ARR[@]}"; do
+              if [[ "${CFG_CNT}" -lt 50 ]]; then
+                lKCONFIG_EXTRACTED="NA"
+              fi
+              write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+            done
+          else
+            write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "NA" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+          fi
+        done
+        lNEG_LOG=1
+      fi
     # ASCII kernel config files:
     elif file "${lFILE}" | grep -q "ASCII"; then
       lCFG_MD5=$(md5sum "${lFILE}" | awk '{print $1}')

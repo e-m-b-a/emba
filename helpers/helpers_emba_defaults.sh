@@ -152,7 +152,9 @@ set_defaults() {
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
   export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
+}
 
+set_log_paths() {
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export P55_LOG="${LOG_DIR}/p55_unblob_extractor.txt"

@@ -705,6 +705,9 @@ dependency_check()
       # yara
       check_dep_tool "yara"
 
+      # exiftool for windows binary analysis
+      check_dep_tool "exiftool"
+
       # ssdeep
       check_dep_tool "ssdeep"
 

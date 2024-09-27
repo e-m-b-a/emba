@@ -56,7 +56,14 @@ S118_busybox_verifier()
       VERSION_IDENTIFIER=$(strings "${BB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/busybox:\1/' | sort -u | head -1 || true)
       # build the needed array
       BB_VERSIONS_ARR+=( "${BB_BIN};${VERSION_IDENTIFIER}" )
+      lSHA512_CHECKSUM="$(sha512sum "${BB_BIN}" | awk '{print $1}')"
+      write_log "static_bin_analysis;${BB_BIN:-NA};${lSHA512_CHECKSUM};$(basename "${BB_BIN}");${VERSION_IDENTIFIER:-NA};NA;GPL-2.0-only" "${S08_CSV_LOG}"
     done
+  fi
+
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    return
   fi
 
   for BB_ENTRY in "${BB_VERSIONS_ARR[@]}"; do

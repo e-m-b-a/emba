@@ -301,7 +301,7 @@ analyse_bin_fct() {
   lFW_FILE_NAME1=$(basename "${lFW_FILE1}")
 
   write_log "" "${LOG_FILE_DETAILS}"
-  radiff2 -e bin.cache=true -md -g "${lFCT}" "${lFW_FILE2}" "${lFW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot
+  radiff2 -e bin.cache=true -md -g "${lFCT}" "${lFW_FILE2}" "${lFW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot || print_error "[-] Radiff diff analysis failed for function ${lFCT} / file 1 ${lFW_FILE2} / file 2 ${lFW_FILE1}"
 
   if ! [[ -s "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot ]]; then
     return

@@ -109,7 +109,7 @@ sub_module_title()
   local SUB_MODULE_TITLE="${1:-}"
   local LOG_FILE_TO_LOG="${2:-}"
   # if $2 is not set, we are going to log to the original LOG_FILE
-  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
+  if [[ -z "${LOG_FILE_TO_LOG:-}" ]]; then
     LOG_FILE_TO_LOG="${LOG_FILE}"
   fi
 
