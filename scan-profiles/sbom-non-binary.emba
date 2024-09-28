@@ -26,7 +26,7 @@ SBOM_MINIMAL=1
 export QEMULATION=0
 
 # If you just have a directory or some kind of zip file you can just enable P02 and P05
-# export SELECT_MODULES+=( "P02" "P05" )
+export SELECT_MODULES+=( "P02" "P05" )
 # Currently the complete pre-checking phase is enabled:
 export SELECT_MODULES+=( "S08" "S25" "S118" "F21" )
 

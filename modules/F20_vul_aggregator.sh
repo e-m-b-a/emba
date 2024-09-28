@@ -161,7 +161,7 @@ aggregate_versions() {
       if [ -z "${VERSION}" ]; then
         continue
       fi
-      print_output "[+] Found Version details (${ORANGE}package management system check${GREEN}): ""${ORANGE}${VERSION}${NC}"
+      print_output "[+] Found Version details (${ORANGE}SBOM environment${GREEN}): ""${ORANGE}${VERSION}${NC}"
     done
     for VERSION in "${VERSIONS_S36_DETAILS[@]}"; do
       if [ -z "${VERSION}" ]; then
@@ -1624,6 +1624,6 @@ get_sbom_package_details() {
 
   if [[ -f "${S08_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f4,5 "${S08_LOG}" | tail -n +2 | sort -u | tr ';' ':' | tr ' ' '_' || true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' || true)
   fi
 }

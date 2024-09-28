@@ -48,6 +48,7 @@ S24_kernel_bin_identifier()
     local K_CON_DET=""
     local K_FILE=""
     local K_VER_TMP=""
+    local lSTRIPPED_VERS=""
 
     if file "${lFILE}" | grep -q "ASCII text"; then
       # reduce false positive rate
@@ -76,7 +77,7 @@ S24_kernel_bin_identifier()
       done
 
       lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
-      write_log "linux_kernel;${lFILE:-NA};${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}");${lK_VER:-NA};NA;GPL" "${S08_CSV_LOG}"
+      write_log "linux_kernel;${lFILE:-NA};${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}");${lK_VER:-NA};NA;GPL-2.0-only" "${S08_CSV_LOG}"
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
@@ -88,7 +89,8 @@ S24_kernel_bin_identifier()
             print_ln
             print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE}.elf${NC}"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            write_log "linux_kernel;${lFILE:-NA}.elf;${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}").elf;${lK_VER:-NA};NA;GPL" "${S08_CSV_LOG}"
+            lSTRIPPED_VERS=$(echo "${lKV_VER}" | sed -r 's/Linux\ kernel\ version\ ([1-6](\.[0-9]+)+?).*/linux_kernel:\1/' || true)
+            write_log "linux_kernel;${lFILE:-NA}.elf;${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS};GPL-2.0-only" "${S08_CSV_LOG}"
           else
             print_ln
             print_output "[-] No Linux kernel elf file was created."
