@@ -22,7 +22,6 @@ export HTML=1
 # export QEMULATION=1
 
 export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F21" "F50" )
-SBOM_MINIMAL=1
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0
