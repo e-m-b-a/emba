@@ -330,7 +330,7 @@ module_analyzer() {
     write_log "kernel_module;${lKMODULE:-NA};${lSHA512_CHECKSUM};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE}" "${S08_CSV_LOG}"
     # ensure we do not log the kernel multiple times
     if ! grep -q "linux_kernel;.*;${lK_VERSION};${KV_ARR[*]};GPLv2" "${S08_CSV_LOG}";then
-      write_log "linux_kernel;${lKMODULE:-NA};${lSHA512_CHECKSUM};${lAPP_NAME};${lK_VERSION};${KV_ARR[*]};GPLv2" "${S08_CSV_LOG}"
+      write_log "linux_kernel;${lKMODULE:-NA};${lSHA512_CHECKSUM};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then

@@ -32,6 +32,7 @@ P99_prepare_analyzer() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"
   pre_module_reporter "${FUNCNAME[0]}"
+  local lNEG_LOG=0
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
