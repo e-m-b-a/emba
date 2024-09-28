@@ -89,7 +89,7 @@ S24_kernel_bin_identifier()
             print_ln
             print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE}.elf${NC}"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            lSTRIPPED_VERS=$(echo "${lKV_VER}" | sed -r 's/Linux\ kernel\ version\ ([1-6](\.[0-9]+)+?).*/linux_kernel:\1/' || true)
+            lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ kernel\ version\ ([1-6](\.[0-9]+)+?).*/linux_kernel:\1/' || true)
             write_log "linux_kernel;${lFILE:-NA}.elf;${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS};GPL-2.0-only" "${S08_CSV_LOG}"
           else
             print_ln

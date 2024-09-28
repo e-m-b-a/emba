@@ -35,6 +35,7 @@ P99_prepare_analyzer() {
   local lNEG_LOG=0
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    prepare_file_arr "${FIRMWARE_PATH}"
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
     return
   fi
