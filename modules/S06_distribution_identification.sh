@@ -43,27 +43,36 @@ S06_distribution_identification()
       SEARCH_FILE="$(safe_echo "${CONFIG}" | cut -d\; -f2)"
       mapfile -t FOUND_FILES < <(find "${FIRMWARE_PATH}" -xdev -iwholename "*${SEARCH_FILE}" || true)
       for FILE in "${FOUND_FILES[@]}"; do
+        echo "FILE: $FILE"
         if [[ -f "${FILE}" ]]; then
           PATTERN="$(safe_echo "${CONFIG}" | cut -d\; -f3)"
           # do not use safe_echo for SED_COMMAND
           SED_COMMAND="$(echo "${CONFIG}" | cut -d\; -f4)"
           FILE_QUOTED=$(escape_echo "${FILE}")
           OUT1="$(eval "${PATTERN}" "${FILE_QUOTED}" || true)"
-          # echo "PATTERN: $PATTERN"
-          # echo "SED command: $SED_COMMAND"
-          # echo "identified: $OUT1"
-          # echo "FILE: $FILE_QUOTED"
+          echo "PATTERN: $PATTERN"
+          echo "SED command: $SED_COMMAND"
+          echo "identified: $OUT1"
+          echo "FILE: $FILE_QUOTED"
           IDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          echo "[*] IDENTIFIER: $IDENTIFIER"
 
           if [[ $(basename "${FILE}") == "image_sign" ]]; then
             # dlink image_sign file handling
             dlink_image_sign
           fi
 
+          lSHA512_CHECKSUM="$(sha512sum "${FILE}" | awk '{print $1}')"
+          if [[ ! -f "${S08_CSV_LOG}" ]]; then
+            write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+          fi
+
+          # spcial case - bmc identifier
           if [[ "${IDENTIFIER}" != *[0-9]* ]] && [[ "${IDENTIFIER}" == *"supermicro:bmc"* ]]; then
-              print_output "[+] Version information found ${ORANGE}${IDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${FILE}")${GREEN} with Linux distribution detection"
-              get_csv_rule_distri "${IDENTIFIER}"
-              write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
+            print_output "[+] Version information found ${ORANGE}${IDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${FILE}")${GREEN} with Linux distribution detection"
+            get_csv_rule_distri "${IDENTIFIER}"
+            write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
+            write_log "static_distri_analysis;${FILE:-NA};${lSHA512_CHECKSUM:-NA};$(basename ${FILE,,});${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
           # check if not zero and not only spaces
@@ -77,6 +86,7 @@ S06_distribution_identification()
               get_csv_rule_distri "${IDENTIFIER}"
               write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             fi
+            write_log "static_distri_analysis;${FILE:-NA};${lSHA512_CHECKSUM:-NA};$(basename ${FILE,,});${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
             OUTPUT=1
           fi
         fi

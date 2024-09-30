@@ -327,10 +327,13 @@ module_analyzer() {
     fi
     # we log to our sbom log with the kernel module details
     # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
-    write_log "kernel_module;${lKMODULE:-NA};${lSHA512_CHECKSUM};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE}" "${S08_CSV_LOG}"
+    if [[ ! -f "${S08_CSV_LOG}" ]]; then
+      write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+    fi
+    write_log "kernel_module;${lKMODULE:-NA};${lSHA512_CHECKSUM};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     # ensure we do not log the kernel multiple times
     if ! grep -q "linux_kernel;.*;${lK_VERSION};${KV_ARR[*]};GPLv2" "${S08_CSV_LOG}";then
-      write_log "linux_kernel;${lKMODULE:-NA};${lSHA512_CHECKSUM};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only" "${S08_CSV_LOG}"
+      write_log "linux_kernel;${lKMODULE:-NA};${lSHA512_CHECKSUM};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only;MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then

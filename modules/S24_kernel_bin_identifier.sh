@@ -76,8 +76,9 @@ S24_kernel_bin_identifier()
         fi
       done
 
-      lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
-      write_log "linux_kernel;${lFILE:-NA};${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}");${lK_VER:-NA};NA;GPL-2.0-only" "${S08_CSV_LOG}"
+      if [[ ! -f "${S08_CSV_LOG}" ]]; then
+        write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+      fi
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
@@ -89,8 +90,8 @@ S24_kernel_bin_identifier()
             print_ln
             print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE}.elf${NC}"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ kernel\ version\ ([1-6](\.[0-9]+)+?).*/linux_kernel:\1/' || true)
-            write_log "linux_kernel;${lFILE:-NA}.elf;${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS};GPL-2.0-only" "${S08_CSV_LOG}"
+            lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/linux_kernel:\1/' || true)
+            write_log "linux_kernel;${lFILE:-NA}.elf;${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS};GPL-2.0-only;community;${lK_ELF:-NA};Linux Kernel" "${S08_CSV_LOG}"
           else
             print_ln
             print_output "[-] No Linux kernel elf file was created."
@@ -98,6 +99,8 @@ S24_kernel_bin_identifier()
         fi
         print_ln
       fi
+      lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
+      write_log "linux_kernel;${lFILE:-NA};${lSHA512_CHECKSUM};Linux Kernel $(basename "${lFILE}");${lK_VER:-NA};NA;GPL-2.0-only;community;${lK_ELF:-NA};Linux Kernel" "${S08_CSV_LOG}"
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
