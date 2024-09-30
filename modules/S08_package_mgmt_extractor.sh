@@ -14,6 +14,7 @@
 # Author(s): Michael Messner
 
 # Description:  Searches known locations for package management information
+# shellcheck disable=SC2094
 
 S08_package_mgmt_extractor()
 {
