@@ -66,6 +66,11 @@ S08_package_mgmt_extractor()
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
+    python_poetry_lock_parser &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
     java_archives &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
@@ -101,6 +106,7 @@ S08_package_mgmt_extractor()
     bsd_pkg_archive
     python_pip_packages
     python_requirements
+    python_poetry_lock_parser
     java_archives
     ruby_gem_archive
     alpine_apk_package
@@ -175,27 +181,27 @@ deb_package_check() {
         write_log "[-] No debian control extracted for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       fi
 
-      lAPP_NAME=$(grep "Package: " "${TMP_DIR}/deb_package/control")
+      lAPP_NAME=$(grep "Package: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_NAME=${lAPP_NAME/*:\ }
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-      lAPP_ARCH=$(grep "Architecture: " "${TMP_DIR}/deb_package/control")
+      lAPP_ARCH=$(grep "Architecture: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_ARCH=${lAPP_ARCH/*:\ }
       lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
 
-      lAPP_MAINT=$(grep "Maintainer: " "${TMP_DIR}/deb_package/control")
+      lAPP_MAINT=$(grep "Maintainer: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_MAINT=${lAPP_MAINT/*:\ }
       lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
 
-      lAPP_DESC=$(grep "Description: " "${TMP_DIR}/deb_package/control")
+      lAPP_DESC=$(grep "Description: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_DESC=${lAPP_DESC/*:\ }
       lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
-      lAPP_LIC=$(grep "License: " "${TMP_DIR}/deb_package/control")
+      lAPP_LIC=$(grep "License: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_LIC=${lAPP_LIC/*:\ }
       lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
-      lAPP_VERS=$(grep "Version: " "${TMP_DIR}/deb_package/control")
+      lAPP_VERS=$(grep "Version: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       clean_package_versions "${lAPP_VERS}"
@@ -205,6 +211,7 @@ deb_package_check() {
       write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
+      rm -r "${TMP_DIR}/deb_package/" || true
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then
@@ -262,27 +269,27 @@ windows_exifparser() {
         continue
       fi
       lSHA512_CHECKSUM="$(sha512sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
-      exiftool "${lEXE_ARCHIVE}" > "${TMP_DIR}/windows_exe_exif_data.txt"
+      exiftool "${lEXE_ARCHIVE}" > "${TMP_DIR}/windows_exe_exif_data.txt" || true
 
-      lAPP_NAME=$(grep "Product Name" "${TMP_DIR}/windows_exe_exif_data.txt")
+      lAPP_NAME=$(grep "Product Name" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
       lAPP_NAME=${lAPP_NAME/*:\ }
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
       if [[ -z "${lAPP_NAME}" ]]; then
-        lAPP_NAME=$(grep "Internal Name" "${TMP_DIR}/windows_exe_exif_data.txt")
+        lAPP_NAME=$(grep "Internal Name" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       fi
 
       if [[ -z "${lAPP_NAME}" ]]; then
-        lAPP_NAME=$(grep "File Name" "${TMP_DIR}/windows_exe_exif_data.txt")
+        lAPP_NAME=$(grep "File Name" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       fi
 
       lAPP_LIC="NA"
 
-      lAPP_VERS=$(grep "Product Version" "${TMP_DIR}/windows_exe_exif_data.txt")
+      lAPP_VERS=$(grep "Product Version" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       clean_package_versions "${lAPP_VERS}"
