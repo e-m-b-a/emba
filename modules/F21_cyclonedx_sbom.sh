@@ -68,8 +68,9 @@ F21_cyclonedx_sbom() {
       fi
       lLICENSE="${COL7}"
       lMAINTAINER="${COL8}"
-      lARCH="${COL9}"
-      lDESC="${COL10}"
+      # Todo
+      lARCH="${COL9:-NA}"
+      lDESC="${COL10:-NA}"
       # local lBOM_REF="bom-ref-todo"
       # Todo: we need to define this more in detail (image, font, executable, ...)
       lMIME_TYPE="executable"

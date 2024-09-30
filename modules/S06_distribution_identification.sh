@@ -41,21 +41,25 @@ S06_distribution_identification()
   while read -r CONFIG; do
     if safe_echo "${CONFIG}" | grep -q "^[^#*/;]"; then
       SEARCH_FILE="$(safe_echo "${CONFIG}" | cut -d\; -f2)"
+      # echo "SEARCH_FILE: $SEARCH_FILE - asdf"
+      # echo "FIRMWARE_PATH: $FIRMWARE_PATH - asdf"
       mapfile -t FOUND_FILES < <(find "${FIRMWARE_PATH}" -xdev -iwholename "*${SEARCH_FILE}" || true)
       for FILE in "${FOUND_FILES[@]}"; do
-        echo "FILE: $FILE"
+        # echo "FILE: $FILE"
         if [[ -f "${FILE}" ]]; then
           PATTERN="$(safe_echo "${CONFIG}" | cut -d\; -f3)"
           # do not use safe_echo for SED_COMMAND
           SED_COMMAND="$(echo "${CONFIG}" | cut -d\; -f4)"
           FILE_QUOTED=$(escape_echo "${FILE}")
           OUT1="$(eval "${PATTERN}" "${FILE_QUOTED}" || true)"
-          echo "PATTERN: $PATTERN"
-          echo "SED command: $SED_COMMAND"
-          echo "identified: $OUT1"
-          echo "FILE: $FILE_QUOTED"
+          # echo "PATTERN: $PATTERN"
+          # echo "SED command: $SED_COMMAND"
+          # echo "FILE: $FILE_QUOTED"
+          # echo "identified before: $OUT1"
+          OUT1=$(echo "${OUT1}" | tr -d '\n')
+          # echo "identified mod: $OUT1"
           IDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
-          echo "[*] IDENTIFIER: $IDENTIFIER"
+          # echo "[*] IDENTIFIER: $IDENTIFIER"
 
           if [[ $(basename "${FILE}") == "image_sign" ]]; then
             # dlink image_sign file handling

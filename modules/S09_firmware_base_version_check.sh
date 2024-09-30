@@ -125,7 +125,7 @@ S09_firmware_base_version_check() {
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
         # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-        lBIN_ARCH=$(file "${BIN}" | cut -d\: -f2-)
+        lBIN_ARCH=$(file "${BIN}" | cut -d ':' -f2-)
         if [[ "${lBIN_ARCH}" == *"ELF"* ]] ; then
           MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
           BIN_NAME="$(basename "${BIN}")"
@@ -172,7 +172,7 @@ S09_firmware_base_version_check() {
         print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN_PATH}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
         write_csv_log "${BIN_PATH}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
         lSHA512_CHECKSUM="$(sha512sum "${BIN_PATH}" | awk '{print $1}')"
-        lBIN_ARCH=$(file "${BIN}" | cut -d\: -f2-)
+        lBIN_ARCH=$(file "${BIN}" | cut -d ':' -f2-)
         if [[ ! -f "${S08_CSV_LOG}" ]]; then
           write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
         fi
@@ -212,7 +212,7 @@ S09_firmware_base_version_check() {
           get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
           write_csv_log "firmware" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           lSHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')"
-          lBIN_ARCH=$(file "${FIRMWARE_PATH}" | cut -d\: -f2-)
+          lBIN_ARCH=$(file "${FIRMWARE_PATH}" | cut -d ':' -f2-)
           if [[ ! -f "${S08_CSV_LOG}" ]]; then
             write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
           fi
