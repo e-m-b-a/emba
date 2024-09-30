@@ -204,7 +204,7 @@ deb_package_check() {
       lAPP_VERS=$(grep "Version: " "${TMP_DIR}/deb_package/control" || true)
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       # Todo: Company Name, Copyright, Mime-Type
 
@@ -292,7 +292,7 @@ windows_exifparser() {
       lAPP_VERS=$(grep "Product Version" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       # Todo: Company Name, Copyright, Mime-Type
 
@@ -342,23 +342,23 @@ python_poetry_lock_parser() {
       write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
-    write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Found ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPY_LCK_ARCHIVE in "${lPY_LCK_ARCHIVES_ARR[@]}" ; do
-      write_log "$(indent "$(orange "$(print_path "${lRST_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_log "$(indent "$(orange "$(print_path "${lPY_LCK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    write_log "[*] Analyzing ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPY_LCK_ARCHIVE in "${lPY_LCK_ARCHIVES_ARR[@]}" ; do
-      lR_FILE=$(file "${lRST_ARCHIVE}")
+      lR_FILE=$(file "${lPY_LCK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
       lSHA512_CHECKSUM="$(sha512sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
 
-      sed ':a;N;$!ba;s/\"\n/\"|/g' "${lPY_LCK_ARCHIVE}" | grep name > "${TMP_DIR}/poetry.lock.tmp"
+      sed ':a;N;$!ba;s/\"\n/\"|/g' "${lPY_LCK_ARCHIVE}" | grep name > "${TMP_DIR}/poetry.lock.tmp" || true
 
       while read -r lPOETRY_ENTRY; do
         lAPP_NAME=${lPOETRY_ENTRY/|*}
@@ -370,7 +370,7 @@ python_poetry_lock_parser() {
         lAPP_VERS=$(echo "${lPOETRY_ENTRY}" | cut -d\| -f2)
         lAPP_VERS=${lAPP_VERS/version\ =\ }
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-        clean_package_versions "${lAPP_VERS}"
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lAPP_DESC=$(echo "${lPOETRY_ENTRY}" | cut -d\| -f3)
         lAPP_DESC=${lAPP_DESC/description\ =\ }
@@ -378,7 +378,7 @@ python_poetry_lock_parser() {
 
         # lSHA512_CHECKSUM=$(echo "${lPOETRY_ENTRY}" | cut -d\| -f4)
         # lSHA512_CHECKSUM=${lSHA512_CHECKSUM/checksum\ =\ }
-        # clean_package_versions "${lSHA512_CHECKSUM}"
+        # lSHA512_CHECKSUM=$(clean_package_versions "${lSHA512_CHECKSUM}")
 
         # Todo: checksum
 
@@ -468,11 +468,11 @@ rust_cargo_lock_parser() {
         lAPP_VERS=$(echo "${lCARGO_ENTRY}" | cut -d\| -f2)
         lAPP_VERS=${lAPP_VERS/version\ =\ }
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-        clean_package_versions "${lAPP_VERS}"
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lSHA512_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
         lSHA512_CHECKSUM=${lSHA512_CHECKSUM/checksum\ =\ }
-        clean_package_versions "${lSHA512_CHECKSUM}"
+        lSHA512_CHECKSUM=$(clean_package_versions "${lSHA512_CHECKSUM}")
 
         # Todo: source
 
@@ -556,7 +556,7 @@ alpine_apk_package() {
       lAPP_VERS=$(grep '^pkgver = ' "${TMP_DIR}"/apk/.PKGINFO || true)
       lAPP_VERS=${lAPP_VERS/pkgver\ =\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -648,7 +648,7 @@ ruby_gem_archive() {
       lAPP_VERS=$(grep -A1 '^version' "${TMP_DIR}"/gems/metadata | grep "[0-9]" || true)
       lAPP_VERS=${lAPP_VERS/*version:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -737,7 +737,7 @@ bsd_pkg_archive() {
 
       lAPP_VERS=$(jq -r '.version' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -812,7 +812,7 @@ rpm_package_check() {
       lAPP_VERS=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "Version" || true)
       lAPP_VERS=${lAPP_VERS/*:\ /}
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       write_log "[*] RPM archive details: ${ORANGE}${lRPM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -902,7 +902,7 @@ python_requirements() {
         fi
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-        clean_package_versions "${lAPP_VERS}"
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         # with internet we can query further details
         # └─$ curl -sH "accept: application/json" https://pypi.org/pypi/"${lAPP_NAME}"/json | jq '.info.author, .info.classifiers'
@@ -983,7 +983,7 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
         lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -1000,7 +1000,7 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
         lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -1042,7 +1042,7 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
         lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -1059,7 +1059,7 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
         lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        clean_package_versions "${lPIP_PACKAGE_VERSION}"
+        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -1143,7 +1143,7 @@ java_archives() {
       lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" || true)
       lAPP_VERS=${lAPP_VERS/*:\ /}
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      clean_package_versions "${lAPP_VERS}"
+      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
       if [[ -z "${lAPP_NAME}" && -z "${lAPP_LIC}" && -z "${lIMPLEMENT_TITLE}" && -z "${lAPP_VERS}" ]]; then
         continue
@@ -1221,7 +1221,7 @@ debian_status_files_search() {
 
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
           lVERSION=$(clean_package_details "${lVERSION}")
-          clean_package_versions "${lVERSION}"
+          lVERSION=$(clean_package_versions "${lVERSION}")
 
           lINSTALL_STATE=$(safe_echo "${lPACKAGE_VERSION}" | cut -d: -f3)
           if [[ "${lINSTALL_STATE}" == *"deinstall ok"* ]]; then
@@ -1303,7 +1303,7 @@ openwrt_control_files_search() {
 
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
           lVERSION=$(clean_package_details "${lVERSION}")
-          clean_package_versions "${lVERSION}"
+          lVERSION=$(clean_package_versions "${lVERSION}")
 
           write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
           write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
@@ -1427,7 +1427,7 @@ clean_package_details() {
 
 clean_package_versions() {
   local lVERSION="${1:-}"
-  export STRIPPED_VERSION=""
+  local STRIPPED_VERSION=""
 
   # usually we get a version like 1.2.3-4 or 1.2.3-0kali1bla or 1.2.3-unknown
   # this is a quick approach to clean this version identifier
@@ -1442,4 +1442,6 @@ clean_package_versions() {
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/:[0-9]:/:/g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/^[0-9]://g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | tr -dc '[:print:]')
+  STRIPPED_VERSION=${STRIPPED_VERSION//,\ /\.}
+  echo "${STRIPPED_VERSION}"
 }
