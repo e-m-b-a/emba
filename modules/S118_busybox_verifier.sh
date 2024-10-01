@@ -65,7 +65,7 @@ S118_busybox_verifier()
       lSHA256_CHECKSUM="$(sha256sum "${lBB_BIN}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lBB_BIN}" | awk '{print $1}')"
 
-      if [[ ! -F "${S08_CSV_LOG}" ]]; then
+      if [[ ! -f "${S08_CSV_LOG}" ]]; then
         write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
       fi
 
