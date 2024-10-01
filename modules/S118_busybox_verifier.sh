@@ -30,6 +30,9 @@ S118_busybox_verifier()
   local lBB_BIN=""
   local lBB_ENTRY=""
   local lVERSION_IDENTIFIER=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   module_wait "S116_qemu_version_detection"
   module_wait "S09_firmware_base_version_check"
@@ -57,8 +60,16 @@ S118_busybox_verifier()
       lVERSION_IDENTIFIER=$(strings "${lBB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/busybox:\1/' | sort -u | head -1 || true)
       # build the needed array
       lBB_VERSIONS_ARR+=( "${lBB_BIN};${lVERSION_IDENTIFIER}" )
+
+      lMD5_CHECKSUM="$(md5sum "${lBB_BIN}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lBB_BIN}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lBB_BIN}" | awk '{print $1}')"
-      write_log "static_bin_analysis;${lBB_BIN:-NA};${lSHA512_CHECKSUM};$(basename "${lBB_BIN}");${lVERSION_IDENTIFIER:-NA};NA;GPL-2.0-only" "${S08_CSV_LOG}"
+
+      if [[ ! -F "${S08_CSV_LOG}" ]]; then
+        write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      fi
+
+      write_log "static_busybox_analysis;${lBB_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${lBB_BIN}");${lVERSION_IDENTIFIER:-NA};NA;GPL-2.0-only" "${S08_CSV_LOG}"
       print_output "[*] Found busybox binary - ${lBB_BIN} - ${lVERSION_IDENTIFIER:-NA} - GPL-2.0-only" "no_log"
     done
   fi

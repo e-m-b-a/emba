@@ -291,6 +291,9 @@ module_analyzer() {
   if [[ "${lKMODULE}" == *".ko" ]]; then
     local lLICENSE=""
     local lK_VERSION=""
+    local lMD5_CHECKSUM="NA"
+    local lSHA256_CHECKSUM="NA"
+    local lSHA512_CHECKSUM="NA"
 
     lLICENSE=$(modinfo "${lKMODULE}" | grep "^license:" || true)
     lLICENSE=${lLICENSE/license:\ }
@@ -308,6 +311,8 @@ module_analyzer() {
     lAPP_NAME="$(basename "${lKMODULE}")"
     lAPP_NAME=${lAPP_NAME,,}
 
+    lMD5_CHECKSUM="$(md5sum "${lKMODULE}" | awk '{print $1}')"
+    lSHA256_CHECKSUM="$(sha256sum "${lKMODULE}" | awk '{print $1}')"
     lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
 
     if file "${lKMODULE}" 2>/dev/null | grep -q 'not stripped'; then
@@ -328,12 +333,12 @@ module_analyzer() {
     # we log to our sbom log with the kernel module details
     # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+      write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
     fi
-    write_log "kernel_module;${lKMODULE:-NA};${lSHA512_CHECKSUM};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;${lK_VERSION};${KV_ARR[*]};GPLv2" "${S08_CSV_LOG}";then
-      write_log "linux_kernel;${lKMODULE:-NA};${lSHA512_CHECKSUM};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only;MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+    if ! grep -q "linux_kernel;.*;${lK_VERSION};${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
+      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only;MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then

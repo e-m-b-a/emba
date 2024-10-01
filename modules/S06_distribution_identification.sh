@@ -35,6 +35,9 @@ S06_distribution_identification()
   local SEARCH_FILE=""
   local FOUND_FILES=()
   local lFILENAME=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
   export CSV_RULE=""
 
   write_csv_log "file" "type" "identifier" "csv_rule"
@@ -68,9 +71,11 @@ S06_distribution_identification()
             dlink_image_sign
           fi
 
+          lMD5_CHECKSUM="$(md5sum "${FILE}" | awk '{print $1}')"
+          lSHA256_CHECKSUM="$(sha256sum "${FILE}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FILE}" | awk '{print $1}')"
           if [[ ! -f "${S08_CSV_LOG}" ]]; then
-            write_log "Packaging system;package file;SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
           fi
 
           # spcial case - bmc identifier
@@ -78,7 +83,7 @@ S06_distribution_identification()
             print_output "[+] Version information found ${ORANGE}${IDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${FILE}")${GREEN} with Linux distribution detection"
             get_csv_rule_distri "${IDENTIFIER}"
             write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
-            write_log "static_distri_analysis;${FILE:-NA};${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
           # check if not zero and not only spaces
@@ -92,7 +97,7 @@ S06_distribution_identification()
               get_csv_rule_distri "${IDENTIFIER}"
               write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             fi
-            write_log "static_distri_analysis;${FILE:-NA};${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
             OUTPUT=1
           fi
         fi

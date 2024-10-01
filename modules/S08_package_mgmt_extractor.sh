@@ -144,13 +144,15 @@ deb_package_check() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
+  local lMD5_CHECKSUM=""
+  local lSHA256_CHECKSUM=""
   local lSHA512_CHECKSUM=""
 
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
   if [[ -v lDEB_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -167,7 +169,6 @@ deb_package_check() {
       if [[ ! "${lR_FILE}" == *"Debian binary package"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
       mkdir "${TMP_DIR}/deb_package/"
       ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/"
 
@@ -206,10 +207,14 @@ deb_package_check() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+
       # Todo: Company Name, Copyright, Mime-Type
 
       write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -r "${TMP_DIR}/deb_package/" || true
     done
@@ -245,13 +250,15 @@ windows_exifparser() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" \))
 
   if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -294,10 +301,14 @@ windows_exifparser() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+
       # Todo: Company Name, Copyright, Mime-Type
 
       write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -f "${TMP_DIR}/windows_exe_exif_data.txt"
     done
@@ -333,13 +344,15 @@ python_poetry_lock_parser() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
 
   if [[ -v lPY_LCK_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -356,7 +369,10 @@ python_poetry_lock_parser() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
+
       lSHA512_CHECKSUM="$(sha512sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
+      lMD5_CHECKSUM="$(md5sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
 
       sed ':a;N;$!ba;s/\"\n/\"|/g' "${lPY_LCK_ARCHIVE}" | grep name > "${TMP_DIR}/poetry.lock.tmp" || true
 
@@ -383,7 +399,7 @@ python_poetry_lock_parser() {
         # Todo: checksum
 
         write_log "[*] Python poetry.lock archive details: ${ORANGE}${lPY_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_LCK_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${TMP_DIR}/poetry.lock.tmp"
       rm -f "${TMP_DIR}/poetry.lock.tmp"
@@ -420,13 +436,15 @@ rust_cargo_lock_parser() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
 
   if [[ -v lRST_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -443,7 +461,6 @@ rust_cargo_lock_parser() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lRST_ARCHIVE}" | awk '{print $1}')"
       # we start with the following file structure:
       # [[package]]
       # name = "windows-sys"
@@ -470,14 +487,14 @@ rust_cargo_lock_parser() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lSHA512_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
-        lSHA512_CHECKSUM=${lSHA512_CHECKSUM/checksum\ =\ }
-        lSHA512_CHECKSUM=$(clean_package_versions "${lSHA512_CHECKSUM}")
+        lSHA256_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
+        lSHA256_CHECKSUM=${lSHA256_CHECKSUM/checksum\ =\ }
+        lSHA256_CHECKSUM=$(clean_package_versions "${lSHA256_CHECKSUM}")
 
         # Todo: source
 
         write_log "[*] Rust Cargo.lock archive details: ${ORANGE}${lRST_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lRST_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lRST_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${TMP_DIR}/Cargo.lock.tmp"
     done
@@ -513,13 +530,15 @@ alpine_apk_package() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
 
   if [[ -v lAPK_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -536,7 +555,6 @@ alpine_apk_package() {
       if [[ ! "${lR_FILE}" == *"gzip compressed data"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
 
       mkdir "${TMP_DIR}"/apk
       tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
@@ -558,8 +576,12 @@ alpine_apk_package() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
+
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -rf "${TMP_DIR}"/apk || true
     done
@@ -595,13 +617,15 @@ ruby_gem_archive() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
 
   if [[ -v lGEM_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -618,7 +642,6 @@ ruby_gem_archive() {
       if [[ ! "${lR_FILE}" == *"POSIX tar archive"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
 
       mkdir "${TMP_DIR}"/gems
       tar -x -f "${lGEM_ARCHIVE}" -C "${TMP_DIR}"/gems || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
@@ -650,8 +673,12 @@ ruby_gem_archive() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
+
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -rf "${TMP_DIR}"/gems || true
     done
@@ -690,13 +717,15 @@ bsd_pkg_archive() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
 
   if [[ -v lPKG_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -713,7 +742,6 @@ bsd_pkg_archive() {
       if [[ ! "${lR_FILE}" == *"Zstandard"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
 
       tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}" +COMPACT_MANIFEST || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
       if ! [[ -f "${TMP_DIR}"/+COMPACT_MANIFEST ]]; then
@@ -739,8 +767,12 @@ bsd_pkg_archive() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
+
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -f "${TMP_DIR}"/+COMPACT_MANIFEST || true
     done
@@ -776,13 +808,15 @@ rpm_package_check() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
 
   if [[ -v lRPM_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -799,7 +833,6 @@ rpm_package_check() {
       if [[ ! "${lR_FILE}" == *"RPM"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
 
       lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
@@ -814,8 +847,12 @@ rpm_package_check() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
+
       write_log "[*] RPM archive details: ${ORANGE}${lRPM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
     done
 
@@ -850,14 +887,16 @@ python_requirements() {
   local lAPP_ARCH="NA"
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
-  local lSHA512_CHECKSUM=""
   local lRES_ENTRY="NA"
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
 
   if [[ -v lPY_REQUIREMENTS_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -874,7 +913,6 @@ python_requirements() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lPY_REQ_FILE}" | awk '{print $1}')"
 
       # read entry line by line
       while read -r lRES_ENTRY; do
@@ -904,6 +942,10 @@ python_requirements() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lMD5_CHECKSUM="$(md5sum "${lPY_REQ_FILE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPY_REQ_FILE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lPY_REQ_FILE}" | awk '{print $1}')"
+
         # with internet we can query further details
         # └─$ curl -sH "accept: application/json" https://pypi.org/pypi/"${lAPP_NAME}"/json | jq '.info.author, .info.classifiers'
         # "Chris P"
@@ -912,7 +954,7 @@ python_requirements() {
         #   "License :: OSI Approved :: MIT License",
 
         write_log "[*] Python requirement details: ${ORANGE}${lPY_REQ_FILE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${lPY_REQ_FILE}"
     done
@@ -951,7 +993,9 @@ python_pip_packages() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   # pip packages are in site-packages or in dist-packages directories installed
   # metadata can be found in METADATA of in PKG-INFO
@@ -960,7 +1004,7 @@ python_pip_packages() {
 
   if [[ -v lPIP_PACKAGES_DIST_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -975,7 +1019,6 @@ python_pip_packages() {
     for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "METADATA" -type f)
       for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
         lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
         lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
@@ -985,14 +1028,17 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
         lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
+        lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "PKG-INFO" -type f)
       for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
         lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
         lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
@@ -1002,8 +1048,12 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
         lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
+        lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
+
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -1015,7 +1065,6 @@ python_pip_packages() {
     write_log "[-] No PIP dist package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   fi
 
-  local lPOS_RES=0
   if [[ -v lPIP_PACKAGES_SITE_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
       write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
@@ -1034,7 +1083,6 @@ python_pip_packages() {
     for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "METADATA" -type f)
       for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
         lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
         lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
@@ -1044,14 +1092,17 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
         lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
+        lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "PKG-INFO" -type f)
       for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
         lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
         lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
@@ -1061,8 +1112,12 @@ python_pip_packages() {
         lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
         lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
 
+        lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
+
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lSHA512_CHECKSUM}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -1101,7 +1156,9 @@ java_archives() {
   local lAPP_DESC="NA"
   local lIMPLEMENT_TITLE="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lJAVA_ARCHIVES_JAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.jar" -type f)
   mapfile -t lJAVA_ARCHIVES_WAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.war" -type f)
@@ -1109,7 +1166,7 @@ java_archives() {
 
   if [[ -v lJAVA_ARCHIVES_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1126,7 +1183,6 @@ java_archives() {
       if [[ ! "${lJ_FILE}" == *"Java archive data"* && ! "${lJ_FILE}" == *"Zip archive"* ]]; then
         continue
       fi
-      lSHA512_CHECKSUM="$(sha512sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
 
       lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
@@ -1145,6 +1201,10 @@ java_archives() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      lMD5_CHECKSUM="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+
       if [[ -z "${lAPP_NAME}" && -z "${lAPP_LIC}" && -z "${lIMPLEMENT_TITLE}" && -z "${lAPP_VERS}" ]]; then
         continue
       fi
@@ -1154,7 +1214,7 @@ java_archives() {
       fi
 
       write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lSHA512_CHECKSUM}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
       lPOS_RES=1
     done
 
@@ -1191,13 +1251,15 @@ debian_status_files_search() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
   if [[ -v lDEBIAN_MGMT_STATUS_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1209,19 +1271,39 @@ debian_status_files_search() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
-      lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
-        mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' | sed -z 's/\nStatus: / - Status: /g')
+        mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
+          | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g')
         write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_log "[*] Found debian package details in ${ORANGE}${lPACKAGE_FILE}${NC}:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+        lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+
         for lPACKAGE_VERSION in "${lDEBIAN_PACKAGES_ARR[@]}" ; do
-          # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
+          # Package: dbus - Status: install ok installed - Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com> - Version: 1.12.16-2ubuntu2.1 - Description: simple interprocess messaging system (daemon and utilities)
           lPACKAGE=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}')
           lPACKAGE=$(clean_package_details "${lPACKAGE}")
 
+          lAPP_MAINT=${lPACKAGE_VERSION/*Maintainer:\ /}
+          lAPP_MAINT=${lAPP_MAINT/- Architecture:\ */}
+          lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+          lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
+          lVERSION=${lVERSION/ - Description:\ */}
           lVERSION=$(clean_package_details "${lVERSION}")
           lVERSION=$(clean_package_versions "${lVERSION}")
+
+          lAPP_ARCH=${lPACKAGE_VERSION/*Architecture:\ /}
+          lAPP_ARCH=${lAPP_ARCH/ - Description:\ */}
+          lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+          lAPP_ARCH=$(clean_package_versions "${lAPP_ARCH}")
+
+          lAPP_DESC=${lPACKAGE_VERSION/*Description:\ /}
+          lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+          lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
           lINSTALL_STATE=$(safe_echo "${lPACKAGE_VERSION}" | cut -d: -f3)
           if [[ "${lINSTALL_STATE}" == *"deinstall ok"* ]]; then
@@ -1229,15 +1311,8 @@ debian_status_files_search() {
             continue
           fi
 
-          # What is the state in an offline firmware image? Is it installed or not?
-          # Futher investigation needed!
-          # if ! echo "${lPACKAGE_VERSION}" | grep -q "installed"; then
-          #  # a not installed package - skip it
-          #  continue
-          # fi
-          #
           write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
           lPOS_RES=1
         done
       fi
@@ -1274,14 +1349,16 @@ openwrt_control_files_search() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
   local lOPENWRT_MGMT_CONTROL_ARR=()
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
 
   if [[ -v lOPENWRT_MGMT_CONTROL_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
 
     write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1295,6 +1372,8 @@ openwrt_control_files_search() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
+        lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         mapfile -t lOPENWRT_PACKAGES_ARR < <(grep "^Package: \|^Version: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g')
         for lPACKAGE_VERSION in "${lOPENWRT_PACKAGES_ARR[@]}" ; do
@@ -1306,7 +1385,7 @@ openwrt_control_files_search() {
           lVERSION=$(clean_package_versions "${lVERSION}")
 
           write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
           lPOS_RES=1
         done
       fi
@@ -1349,13 +1428,15 @@ rpm_package_files_search() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lPOS_RES=0
-  local lSHA512_CHECKSUM=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 
   if [[ -v lRPM_PACKAGE_DBS_ARR[@] ]] ; then
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
+      write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
     fi
     write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1367,7 +1448,10 @@ rpm_package_files_search() {
     write_log "[*] Analyzing ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+
       lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
       # not sure this works on an offline system - we need further tests on this:
       mapfile -t lRPM_PACKAGES_ARR < <(rpm -qa --dbpath "${lRPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${lRPM_DIR}")
@@ -1388,7 +1472,7 @@ rpm_package_files_search() {
           continue
         fi
         write_log "[*] RPM package details: ${ORANGE}${lPACKAGE_NAME}${NC} - ${ORANGE}${lPACKAGE_VERSION:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lSHA512_CHECKSUM}" "${lPACKAGE_NAME}" "${lPACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE_NAME}" "${lPACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
