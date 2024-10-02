@@ -306,7 +306,7 @@ module_analyzer() {
     # intree - if the module is maintained in the kernel Git repository
     lK_INTREE=$(modinfo "${lKMODULE}" | grep "^intree:" || true)
     lK_INTREE=${lK_INTREE/vermagic:\ }
-    lK_INTREE=$(clean_package_details "${lK_lINTREE}")
+    lK_INTREE=$(clean_package_details "${lK_INTREE}")
     [[ "${lK_INTREE}" == "Y" ]] && lLICENSE="GPL-2.0-only"
 
     lK_VERSION=$(modinfo "${lKMODULE}" | grep "^vermagic:" || true)
