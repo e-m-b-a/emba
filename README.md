@@ -64,7 +64,7 @@ sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan.emba
 ## Quick start with default SBOM profile:
 For further details on EMBA's SBOM capabilities check the [wiki](https://github.com/e-m-b-a/emba/wiki/SBOM-environment)
 ```console
-sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-sbom.emba
+sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/sbom-default.emba
 
 ```
 ## Quick start with system-emulation scan profile:
