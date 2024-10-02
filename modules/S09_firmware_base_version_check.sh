@@ -88,6 +88,10 @@ S09_firmware_base_version_check() {
     local BIN_PATH=""
     export CSV_REGEX=""
 
+    local lSHA512_CHECKSUM=""
+    local lSHA256_CHECKSUM=""
+    local lPURL_IDENTIFIER="NA"
+
     STRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
     LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
     BIN_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
@@ -111,7 +115,6 @@ S09_firmware_base_version_check() {
     if [[ "${STRICT}" == *"strict"* ]]; then
       local STRICT_BINS=()
       local BIN=""
-      local lSHA512_CHECKSUM=""
       local lBIN_ARCH=""
 
       # strict mode
@@ -143,10 +146,9 @@ S09_firmware_base_version_check() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
 
-            if [[ ! -f "${S08_CSV_LOG}" ]]; then
-              write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-            fi
-            write_log "static_bin_analysis;${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};DESC" "${S08_CSV_LOG}"
+            check_for_csv_log "${S08_CSV_LOG}"
+            lCPE_IDENTIFIER="todo"
+            write_log "static_bin_analysis;${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
             continue
           fi
         fi
@@ -178,10 +180,9 @@ S09_firmware_base_version_check() {
         lSHA256_CHECKSUM="$(sha256sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${BIN_PATH}" | awk '{print $1}')"
         lBIN_ARCH=$(file "${BIN}" | cut -d ':' -f2-)
-        if [[ ! -f "${S08_CSV_LOG}" ]]; then
-          write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-        fi
-        write_log "static_bin_analysis;${BIN_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${lBIN_ARCH};DESC" "${S08_CSV_LOG}"
+        check_for_csv_log "${S08_CSV_LOG}"
+        lCPE_IDENTIFIER="todo"
+        write_log "static_bin_analysis;${BIN_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${lBIN_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
       done
       print_dot
 
@@ -200,10 +201,9 @@ S09_firmware_base_version_check() {
           lMD5_CHECKSUM="$(md5sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
-          if [[ ! -f "${S08_CSV_LOG}" ]]; then
-            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-          fi
-          write_log "static_bin_analysis;${EXTRACTOR_LOG:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;unknown;DESC" "${S08_CSV_LOG}"
+          check_for_csv_log "${S08_CSV_LOG}"
+          lCPE_IDENTIFIER="todo"
+          write_log "static_bin_analysis;${EXTRACTOR_LOG:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
           print_dot
         fi
       fi
@@ -222,10 +222,9 @@ S09_firmware_base_version_check() {
           lSHA256_CHECKSUM="$(sha256sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lBIN_ARCH=$(file "${FIRMWARE_PATH}" | cut -d ':' -f2-)
-          if [[ ! -f "${S08_CSV_LOG}" ]]; then
-            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-          fi
-          write_log "static_bin_analysis;${FIRMWARE_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${FIRMWARE_PATH}");${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${lBIN_ARCH:-NA};DESC" "${S08_CSV_LOG}"
+          check_for_csv_log "${S08_CSV_LOG}"
+          lCPE_IDENTIFIER="todo"
+          write_log "static_bin_analysis;${FIRMWARE_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${FIRMWARE_PATH}");${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
         fi
         print_dot
       fi
@@ -312,6 +311,7 @@ bin_string_checker() {
 
   local BIN_FILE=""
   local BIN=""
+  local lPURL_IDENTIFIER="NA"
 
   if [[ ${RTOS} -eq 0 ]]; then
     local FILE_ARR=( "${BINARIES[@]}" )
@@ -360,10 +360,9 @@ bin_string_checker() {
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
-            if [[ ! -f "${S08_CSV_LOG}" ]]; then
-              write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-            fi
-            write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${BIN_FILE};DESC" "${S08_CSV_LOG}"
+            check_for_csv_log "${S08_CSV_LOG}"
+            lCPE_IDENTIFIER="todo"
+            write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
             # we test the next binary
             continue 2
           fi
@@ -378,10 +377,9 @@ bin_string_checker() {
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
-            if [[ ! -f "${S08_CSV_LOG}" ]]; then
-              write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-            fi
-            write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${BIN_FILE};DESC" "${S08_CSV_LOG}"
+            check_for_csv_log "${S08_CSV_LOG}"
+            lCPE_IDENTIFIER="todo"
+            write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
             continue 2
           fi
         fi
@@ -403,10 +401,9 @@ bin_string_checker() {
           lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
-          if [[ ! -f "${S08_CSV_LOG}" ]]; then
-            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
-          fi
-          write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${BIN_FILE};DESC" "${S08_CSV_LOG}"
+          check_for_csv_log "${S08_CSV_LOG}"
+          lCPE_IDENTIFIER="todo"
+          write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};MAINT_TODO;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
           # we test the next binary
           continue 2
         fi

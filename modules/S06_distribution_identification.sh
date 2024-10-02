@@ -38,6 +38,7 @@ S06_distribution_identification()
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
+  local lCPE_IDENTIFIER="NA"
   export CSV_RULE=""
 
   write_csv_log "file" "type" "identifier" "csv_rule"
@@ -74,8 +75,9 @@ S06_distribution_identification()
           lMD5_CHECKSUM="$(md5sum "${FILE}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${FILE}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FILE}" | awk '{print $1}')"
+
           if [[ ! -f "${S08_CSV_LOG}" ]]; then
-            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifierDescription" "${S08_CSV_LOG}"
           fi
 
           # spcial case - bmc identifier
@@ -83,6 +85,7 @@ S06_distribution_identification()
             print_output "[+] Version information found ${ORANGE}${IDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${FILE}")${GREEN} with Linux distribution detection"
             get_csv_rule_distri "${IDENTIFIER}"
             write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
+            lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
             write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
@@ -97,7 +100,9 @@ S06_distribution_identification()
               get_csv_rule_distri "${IDENTIFIER}"
               write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             fi
-            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
+            # CSV_RULE has 5 fields and looks like the following: o:dlink:device:version:*:
+            lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
             OUTPUT=1
           fi
         fi
@@ -150,40 +155,40 @@ get_csv_rule_distri() {
 
   ### handle versions of linux distributions:
   # debian 9 (stretch) - installer build 20170615+deb9u5
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/o:\1:\1_linux:\2\.\3:*:/')"
   # Fedora 17 (Beefy Miracle)
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(fedora)\ ([0-9]+).*/\1project:\1:\2/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(fedora)\ ([0-9]+).*/o:\1project:\1:\2:*:/')"
   # CentOS
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/centos\ linux\ ([0-9]+(\.[0-9]+)+?).*/centos:centos:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/centos\ linux\ ([0-9]+(\.[0-9]+)+?).*/o:centos:centos:\1:*:/')"
   # Ubuntu
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(ubuntu)\ ([0-9]+\,[0-9]+).*/\1_linux:\1:\2/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(ubuntu)\ ([0-9]+\,[0-9]+).*/o:\1_linux:\1:\2:*:/')"
   # OpenWRT KAMIKAZE r18* -> 8.09.2
   # see also: https://openwrt.org/about/history
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(openwrt)\ (kamikaze)\ r1[4-8][0-9][0-9][0-9].*/\1:\2:8.09/')"
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(openwrt)\ (backfire)\ r2[0-9][0-9][0-9][0-9].*/\1:\2:10.03/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(openwrt)\ (kamikaze)\ r1[4-8][0-9][0-9][0-9].*/o:\1:\2:8.09:*:/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(openwrt)\ (backfire)\ r2[0-9][0-9][0-9][0-9].*/o:\1:\2:10.03:*:/')"
   # OpenWrt 18.06.2 r7676-cddd7b4c77
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(openwrt)\ ([0-9]+\.[0-9]+\.[0-9]+)\ (r[0-9]+\-[a-z0-9]+).*/openwrt:\2:\3/')"
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/openwrt:\1:\3/')"
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/openwrt\ ([0-9]+\.[0-9]+)/openwrt:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(openwrt)\ ([0-9]+\.[0-9]+\.[0-9]+)\ (r[0-9]+\-[a-z0-9]+).*/o:openwrt:openwrt:\2:\3:/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/o:openwrt:openwrt:\1:\3:/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/openwrt\ ([0-9]+\.[0-9]+)/o:openwrt:openwrt:\1:*:/')"
   # OpenWrt Attitude Adjustment r7549 -> 12.09
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/openwrt\ attitude\ adjustment\ r([0-9]+).*/openwrt:12\.09/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/openwrt\ attitude\ adjustment\ r([0-9]+).*/o:openwrt:openwrt:12\.09:*:/')"
   # d-link dir-300 v2.14b01
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/o:dlink:\1_firmware:\2:*:/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/o:dlink:\1_firmware:\2:*:/')"
   # dd-wrt v24-sp2
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/dd-wrt\ v([0-9]+)-?(sp[0-9])?.*/dd-wrt:dd-wrt:\1:\2/')"
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/dd-wrt\ \#([0-9]+).*/dd-wrt:dd-wrt:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/dd-wrt\ v([0-9]+)-?(sp[0-9])?.*/o:dd-wrt:dd-wrt:\1:\2:/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/dd-wrt\ \#([0-9]+).*/o:dd-wrt:dd-wrt:\1:*:/')"
   # iotgoat v1.0
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/iotgoat\ v([0-9]\.[0-9]+)/iotgoat:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/iotgoat\ v([0-9]\.[0-9]+)/o:iotgoat:iotgoat:\1:*:/')"
   # F5 BigIP
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/big-ip\ ltm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_local_traffic_manager:\1/')"
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/big-ip\ asm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_application_security_manager:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/big-ip\ ltm\ ([0-9]+(\.[0-9]+)+?)/a:f5:big-ip_local_traffic_manager:\1:*:/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/big-ip\ asm\ ([0-9]+(\.[0-9]+)+?)/a:f5:big-ip_application_security_manager:\1:*:/')"
   # Yocto linux - e.g.: poky:(yocto:project:reference:distro):2.2:(morty)
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/.*\(yocto:project:reference:distro\):([0-9]+(\.[0-9]+)+?):\(.*\)$/yoctoproject:yocto:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/.*\(yocto:project:reference:distro\):([0-9]+(\.[0-9]+)+?):\(.*\)$/o:yoctoproject:yocto:\1/')"
   # Buildroot 2022.01.01
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/buildroot:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/a:buildroot:buildroot:\1:*:/')"
   #   MikroTik routerOS V2.4 (c) 1999-2001       http://mikrotik.com/
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/.*mikrotik\ routeros\ v([0-9]\.[0-9]+).*/mikrotik:routeros:\1/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/.*mikrotik\ routeros\ v([0-9]\.[0-9]+).*/o:mikrotik:routeros:\1:*:/')"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER// /:}"
   CSV_RULE="$(safe_echo "${VERSION_IDENTIFIER}" | tr -dc '[:print:]')"
 }

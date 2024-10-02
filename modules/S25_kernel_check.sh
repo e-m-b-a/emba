@@ -294,28 +294,52 @@ module_analyzer() {
     local lMD5_CHECKSUM="NA"
     local lSHA256_CHECKSUM="NA"
     local lSHA512_CHECKSUM="NA"
+    local lK_ARCH="NA"
+    local lK_AUTHOR="NA"
+    local lK_INTREE="NA"
+    local lK_DESC="NA"
 
     lLICENSE=$(modinfo "${lKMODULE}" | grep "^license:" || true)
     lLICENSE=${lLICENSE/license:\ }
     lLICENSE=${lLICENSE//[[:space:]]}
-    lK_VERSION=$(modinfo "${lKMODULE}" | grep "^vermagic:" | awk '{print $2}' || true)
-    # lK_VERSION=${lK_VERSION/vermagic:\ }
-    # Todo: why is the following not working?
-    # lK_VERSION=${lK_VERSION##+([[:space:]])}
-    # lK_VERSION=${lK_VERSION%%+([[:space:]])}
+    [[ "${lLICENSE}" == "GPL" ]] && lLICENSE="GPL-2.0-only"
+    # intree - if the module is maintained in the kernel Git repository
+    lINTREE=$(modinfo "${lKMODULE}" | grep "^intree:" || true)
+    lINTREE=${lINTREE/vermagic:\ }
+    lINTREE=$(clean_package_details "${lINTREE}")
+    [[ "${lINTREE}" == "Y" ]] && lLICENSE="GPL-2.0-only"
+
+    lK_VERSION=$(modinfo "${lKMODULE}" | grep "^vermagic:" || true)
+    lK_VERSION=${lK_VERSION/vermagic:\ }
+    lK_VERSION=$(clean_package_details "${lK_VERSION}")
     demess_kv_version "${lK_VERSION}"
-    # lK_VERSION=${lK_VERSION//[[:space:]]}
+
     lMOD_VERSION=$(modinfo "${lKMODULE}" | grep "^version:" || true)
     lMOD_VERSION=${lMOD_VERSION/version:\ }
     lMOD_VERSION=${lMOD_VERSION//[[:space:]]}
+
     lAPP_NAME="$(basename "${lKMODULE}")"
     lAPP_NAME=${lAPP_NAME,,}
+
+    lK_AUTHOR=$(modinfo "${lKMODULE}" | grep "^author:" || true)
+    lK_AUTHOR="${lK_AUTHOR//author:\ }"
+    lK_AUTHOR="$(echo "${lK_AUTHOR}" | tr '\n' '-')"
+    lK_AUTHOR=$(clean_package_details "${lK_AUTHOR}")
+
+    lK_DESC=$(modinfo "${lKMODULE}" | grep "^description:" || true)
+    lK_DESC=${lK_DESC/description:\ }
+    lK_DESC=$(clean_package_details "${lK_DESC}")
 
     lMD5_CHECKSUM="$(md5sum "${lKMODULE}" | awk '{print $1}')"
     lSHA256_CHECKSUM="$(sha256sum "${lKMODULE}" | awk '{print $1}')"
     lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
 
-    if file "${lKMODULE}" 2>/dev/null | grep -q 'not stripped'; then
+    lK_FILE_OUT=$(file -b "${lKMODULE}" 2>/dev/null)
+    lK_ARCH="${lK_ARCH/*, }"
+    lK_ARCH="${lK_ARCH/, *}"
+    lK_ARCH=$(clean_package_details "${lK_ARCH}")
+
+    if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then
       # if echo "${lMODINFO}" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
       if [[ "${lLICENSE}" == *"GPL"* || "${lLICENSE}" == *"BSD"* ]] ; then
         # kernel module is GPL/BSD license then not stripped is fine
@@ -330,15 +354,18 @@ module_analyzer() {
     else
       print_output "[*] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License ${lLICENSE}""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
+
     # we log to our sbom log with the kernel module details
     # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
     if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;Description" "${S08_CSV_LOG}"
+      write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifier;Description" "${S08_CSV_LOG}"
     fi
-    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE_TODO;PURL-todo;Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
+
     # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;${lK_VERSION};${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
-      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only;MAINT_TODO;ARCH_TODO;Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+    if ! grep -q "linux_kernel;.*;${lK_VERSION};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only" "${S08_CSV_LOG}";then
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
+      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};PURL-todo;Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then
