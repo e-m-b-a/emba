@@ -76,9 +76,7 @@ S06_distribution_identification()
           lSHA256_CHECKSUM="$(sha256sum "${FILE}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FILE}" | awk '{print $1}')"
 
-          if [[ ! -f "${S08_CSV_LOG}" ]]; then
-            write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifierDescription" "${S08_CSV_LOG}"
-          fi
+          check_for_s08_csv_log "${S08_CSV_LOG}"
 
           # spcial case - bmc identifier
           if [[ "${IDENTIFIER}" != *[0-9]* ]] && [[ "${IDENTIFIER}" == *"supermicro:bmc"* ]]; then
@@ -86,7 +84,7 @@ S06_distribution_identification()
             get_csv_rule_distri "${IDENTIFIER}"
             write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
-            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;Linux distribution identification module" "${S08_CSV_LOG}"
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;PURL;Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
           # check if not zero and not only spaces
@@ -100,9 +98,9 @@ S06_distribution_identification()
               get_csv_rule_distri "${IDENTIFIER}"
               write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             fi
-            # CSV_RULE has 5 fields and looks like the following: o:dlink:device:version:*:
+            # CSV_RULE has 5 fields and looks like the following: o:dlink:device:version:*
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
-            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};PURL;Linux distribution identification module" "${S08_CSV_LOG}"
             OUTPUT=1
           fi
         fi

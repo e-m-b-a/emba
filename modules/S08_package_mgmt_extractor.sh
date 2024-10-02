@@ -119,7 +119,7 @@ S08_package_mgmt_extractor()
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
-check_for_csv_log() {
+check_for_s08_csv_log() {
   lS08_CSV_LOG="${1:-}"
   if [[ ! -f "${lS08_CSV_LOG}" ]]; then
     # using write_log as this always works
@@ -189,7 +189,7 @@ deb_package_check() {
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
   if [[ -v lDEB_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -305,7 +305,7 @@ windows_exifparser() {
   mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" \))
 
   if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -403,7 +403,7 @@ python_poetry_lock_parser() {
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
 
   if [[ -v lPY_LCK_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -500,7 +500,7 @@ rust_cargo_lock_parser() {
   mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
 
   if [[ -v lRST_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -599,7 +599,7 @@ alpine_apk_package_check() {
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
 
   if [[ -v lAPK_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -691,7 +691,7 @@ ruby_gem_archive_check() {
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
 
   if [[ -v lGEM_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -796,7 +796,7 @@ bsd_pkg_check() {
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
 
   if [[ -v lPKG_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -892,7 +892,7 @@ rpm_package_check() {
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
 
   if [[ -v lRPM_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -977,7 +977,7 @@ python_requirements() {
   mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
 
   if [[ -v lPY_REQUIREMENTS_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1090,7 +1090,7 @@ python_pip_packages() {
   mapfile -t lPIP_PACKAGES_DIST_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "dist-packages" -type d)
 
   if [[ -v lPIP_PACKAGES_DIST_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1266,7 +1266,7 @@ java_archives_check() {
   lJAVA_ARCHIVES_ARR=( "${lJAVA_ARCHIVES_JAR_ARR[@]}" "${lJAVA_ARCHIVES_WAR_ARR[@]}" )
 
   if [[ -v lJAVA_ARCHIVES_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1364,7 +1364,7 @@ debian_status_files_analysis() {
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
   if [[ -v lDEBIAN_MGMT_STATUS_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1471,7 +1471,7 @@ openwrt_control_files_analysis() {
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
 
   if [[ -v lOPENWRT_MGMT_CONTROL_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1552,7 +1552,7 @@ rpm_package_mgmt_analysis() {
   mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 
   if [[ -v lRPM_PACKAGE_DBS_ARR[@] ]] ; then
-    check_for_csv_log "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
 
     write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
