@@ -544,6 +544,7 @@ rust_cargo_lock_parser() {
 
         lSHA256_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
         lSHA256_CHECKSUM=${lSHA256_CHECKSUM/checksum\ =\ }
+        lSHA256_CHECKSUM=$(clean_package_details "${lSHA256_CHECKSUM}")
         lSHA256_CHECKSUM=$(clean_package_versions "${lSHA256_CHECKSUM}")
 
         lAPP_VENDOR="${lAPP_NAME}"

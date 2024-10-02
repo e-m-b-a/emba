@@ -61,7 +61,7 @@ F21_cyclonedx_sbom() {
       lCHKSUM="${COL3}"
       lMD5_CHKSUM=${lCHKSUM/\/*}
       lSHA256_CHKSUM=${lCHKSUM/\/*}
-      lSHA256_CHKSUM=${lCHKSUM/*\/}
+      lSHA256_CHKSUM=$(echo "${lCHKSUM}" | cut -d '/' -f2)
       lSHA512_CHKSUM=${lCHKSUM/*\/}
       lBIN_NAME="${COL4}"
       # COL5 -> identified version
