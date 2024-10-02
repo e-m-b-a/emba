@@ -114,6 +114,7 @@ S08_package_mgmt_extractor()
     rust_cargo_lock_parser
   fi
 
+  # shellcheck disable=SC2153
   [[ -s "${S08_CSV_LOG}" ]] && NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }

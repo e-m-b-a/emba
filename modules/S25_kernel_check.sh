@@ -304,10 +304,10 @@ module_analyzer() {
     lLICENSE=${lLICENSE//[[:space:]]}
     [[ "${lLICENSE}" == "GPL" ]] && lLICENSE="GPL-2.0-only"
     # intree - if the module is maintained in the kernel Git repository
-    lINTREE=$(modinfo "${lKMODULE}" | grep "^intree:" || true)
-    lINTREE=${lINTREE/vermagic:\ }
-    lINTREE=$(clean_package_details "${lINTREE}")
-    [[ "${lINTREE}" == "Y" ]] && lLICENSE="GPL-2.0-only"
+    lK_INTREE=$(modinfo "${lKMODULE}" | grep "^intree:" || true)
+    lK_INTREE=${lK_INTREE/vermagic:\ }
+    lK_INTREE=$(clean_package_details "${lK_lINTREE}")
+    [[ "${lK_INTREE}" == "Y" ]] && lLICENSE="GPL-2.0-only"
 
     lK_VERSION=$(modinfo "${lKMODULE}" | grep "^vermagic:" || true)
     lK_VERSION=${lK_VERSION/vermagic:\ }
