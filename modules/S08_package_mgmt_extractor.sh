@@ -1011,10 +1011,10 @@ python_requirements() {
           lAPP_NAME=${lRES_ENTRY/<*}
           lAPP_VERS=${lRES_ENTRY/*<}
           lAPP_VERS='<'"${lAPP_VERS}"
-        elif [[ "${lRES_ENTRY}" == *"=~"* ]]; then
-          lAPP_NAME=${lRES_ENTRY/=~*}
-          lAPP_VERS=${lRES_ENTRY/*=~}
-          lAPP_VERS='=~'"${lAPP_VERS}"
+        elif [[ "${lRES_ENTRY}" == *"~="* ]]; then
+          lAPP_NAME=${lRES_ENTRY/~=*}
+          lAPP_VERS=${lRES_ENTRY/*~=}
+          lAPP_VERS='~='"${lAPP_VERS}"
         else
           lAPP_NAME=${lRES_ENTRY}
           lAPP_VERS="NA"
