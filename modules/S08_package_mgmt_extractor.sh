@@ -134,7 +134,9 @@ distri_check() {
   local lOS_IDENTIFIED=""
   local lOS_VERS_IDENTIFIED=""
 
-  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -iwholename "*/etc/os-release")
+  # currently this is a weak check via /etc/os-release
+  # Todo: If this check failes we can use further tests like lsb-release or motd
+  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release")
   for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
     lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}")
     lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}
@@ -253,7 +255,11 @@ deb_package_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      lPURL_IDENTIFIER="pkg:deb/${lOS_IDENTIFIED/-*}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
+      if [[ -s "${lOS_IDENTIFIED}" ]]; then
+        lPURL_IDENTIFIER="pkg:deb/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
+      else
+        lPURL_IDENTIFIER="pkg:deb/debian-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
+      fi
 
       # Todo: Company Name, Copyright, Mime-Type
 
@@ -1418,9 +1424,14 @@ debian_status_files_analysis() {
             continue
           fi
 
+          if [[ -s "${lOS_IDENTIFIED}" ]]; then
+            # lOS_IDENTIFIED -> debian-12 -> debian
+            lPURL_IDENTIFIER="pkg:deb/${lOS_IDENTIFIED/-*}/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
+          else
+            lPURL_IDENTIFIER="pkg:deb/debian-based/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
+          fi
           lAPP_VENDOR="${lPACKAGE}"
           lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
-          lPURL_IDENTIFIER="pkg:deb/${lOS_IDENTIFIED/-*}/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
 
           write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
           write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
