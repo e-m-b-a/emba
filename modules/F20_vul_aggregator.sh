@@ -17,6 +17,7 @@
 #               S115/S116 and L15.
 #               The versions are used for identification of known vulnerabilities cve-search,
 #               finally it creates a list of exploits that are matching for the CVEs.
+# shellcheck disable=SC2153
 
 F20_vul_aggregator() {
   module_log_init "${FUNCNAME[0]}"
