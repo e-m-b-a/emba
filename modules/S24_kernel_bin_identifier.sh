@@ -77,7 +77,7 @@ S24_kernel_bin_identifier()
       done
 
       check_for_s08_csv_log "${S08_CSV_LOG}"
-      lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/:linux:linux_kernel:\1/' || true)
+      lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/linux:linux_kernel:\1/' || true)
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lSTRIPPED_VERS}:*:*:*:*:*:*"
       lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}")
       lK_VER="${lK_VER//[,;\/()\[\]\\#]}"

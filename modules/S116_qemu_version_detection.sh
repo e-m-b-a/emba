@@ -168,7 +168,7 @@ version_detection_thread() {
       lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}')"
-      write_log "user_mode_bin_analysis;${BINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+      write_log "user_mode_bin_analysis;${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
     done
   done
 }

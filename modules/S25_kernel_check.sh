@@ -339,7 +339,6 @@ module_analyzer() {
     lK_ARCH=${lK_ARCH//,\ /\ -\ }
 
     if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then
-      # if echo "${lMODINFO}" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
       if [[ "${lLICENSE}" == *"GPL"* || "${lLICENSE}" == *"BSD"* ]] ; then
         # kernel module is GPL/BSD license then not stripped is fine
         print_output "[*] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License ${lLICENSE}""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
@@ -362,10 +361,10 @@ module_analyzer() {
     write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE_TODO;PURL-todo;Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
 
     # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only" "${S08_CSV_LOG}";then
+    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
       lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}")
-      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};linux_kernel:${KV_ARR[*]}:;GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then
