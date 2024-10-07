@@ -151,7 +151,7 @@ S09_firmware_base_version_check() {
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
 
-            write_log "static_bin_analysis;${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_FINDER:-NA};${lBIN_VERS:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+            write_log "static_bin_analysis;${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
             continue
           fi
         fi
