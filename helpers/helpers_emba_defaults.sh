@@ -218,6 +218,6 @@ set_log_paths() {
   export F20_CSV_LOG="${CSV_DIR}/f20_vul_aggregator.csv"
   export F20_LOG_DIR="${F20_LOG/\.txt/\/}"
   export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
-  export F21_LOG="${LOG_DIR}/f21_cyclonedx_sbom.txt"
-  export F21_CSV_LOG="${CSV_DIR}/f21_cyclonedx_sbom.csv"
+  export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
+  export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
 }

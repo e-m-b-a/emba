@@ -18,7 +18,7 @@
 
 # shellcheck disable=SC2034
 
-F21_cyclonedx_sbom() {
+F15_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
   module_title "CycloneDX SBOM converter"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -41,11 +41,11 @@ F21_cyclonedx_sbom() {
   fi
 
   if [[ -f "${S08_CSV_LOG}" ]] && [[ "$(wc -l "${S08_CSV_LOG}" | awk '{print $1}')" -gt 1 ]]; then
-    if [[ -f "${F21_CSV_LOG}" ]]; then
-      rm "${F21_CSV_LOG}"
+    if [[ -f "${F15_CSV_LOG}" ]]; then
+      rm "${F15_CSV_LOG}"
     fi
-    if [[ -f "${CSV_DIR}"/f21_cyclonedx_sbom.json ]]; then
-      rm "${CSV_DIR}"/f21_cyclonedx_sbom.json
+    if [[ -f "${CSV_DIR}"/f15_cyclonedx_sbom.json ]]; then
+      rm "${CSV_DIR}"/f15_cyclonedx_sbom.json
     fi
 
     write_csv_log "Type" "MimeType" "Supplier" "Author" "Publisher" "Group" "Name" "Version" "Scope" "LicenseExpressions" "LicenseNames" "Copyright" "Cpe" "Purl" "Modified" "SwidTagId" "SwidName" "SwidVersion" "SwidTagVersion" "SwidPatch" "SwidTextContentType" "SwidTextEncoding" "SwidTextContent" "SwidUrl" "MD5" "SHA-1" "SHA-256" "SHA-512" "BLAKE2b-256" "BLAKE2b-384" "BLAKE2b-512" "SHA-384" "SHA3-256" "SHA3-384" "SHA3-512" "BLAKE3" "Description"
@@ -90,7 +90,7 @@ F21_cyclonedx_sbom() {
       # if we found a linux distri we can use this. If we set a VENDOR we can use this
       lSUPPLIER="${FW_VENDOR:-unknown}"
 
-      if grep -q ";${lBIN_NAME}\;${lSTRIPPED_VER};.*;${lSHA512_CHKSUM};" "${F21_CSV_LOG}"; then
+      if grep -q ";${lBIN_NAME}\;${lSTRIPPED_VER};.*;${lSHA512_CHKSUM};" "${F15_CSV_LOG}"; then
         # just to ensure we have not already reported the identifier
         print_output "[*] Removing duplicate SBOM entry: ${COL1} - ${COL2} - ${COL4} - ${COL5} - ${COL6} - ${COL7}" "no_log"
         continue
@@ -99,33 +99,33 @@ F21_cyclonedx_sbom() {
       write_csv_log "${lTYPE}" "${lMIME_TYPE}" "${lSUPPLIER}" "${lMAINTAINER}" "" "${COL1}" "${lBIN_NAME}" "${lSTRIPPED_VER:-NA}" "" "" "${lLICENSE:-NA}" "" "${lCPE}" "${lPURL}" "" "" "" "" "" "" "" "" "" "" "${lMD5_CHKSUM:-NA}" "" "${lSHA256_CHKSUM:-NA}" "${lSHA512_CHKSUM:-NA}" "" "" "" "" "" "" "" "" "${lDESCRIPTION}"
     done < <(tail -n +2 "${S08_CSV_LOG}" | sort -u)
 
-    if [[ -f "${F21_CSV_LOG}" ]]; then
+    if [[ -f "${F15_CSV_LOG}" ]]; then
       print_output "[*] Converting CSV SBOM to Cyclonedx SBOM ..." "no_log"
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick tranlation
-      sed -i 's/\;/,/g' "${F21_CSV_LOG}"
-      cyclonedx convert --input-file "${F21_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json || print_error "[-] Error while generating json SBOM for CSV ${F21_CSV_LOG}"
-      cyclonedx convert --output-format xml --input-file "${F21_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_xml.txt || print_error "[-] Error while generating xml SBOM for CSV ${F21_CSV_LOG}"
-      if [[ -f "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json ]]; then
+      sed -i 's/\;/,/g' "${F15_CSV_LOG}"
+      cyclonedx convert --input-file "${F15_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json || print_error "[-] Error while generating json SBOM for CSV ${F15_CSV_LOG}"
+      cyclonedx convert --output-format xml --input-file "${F15_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_xml.txt || print_error "[-] Error while generating xml SBOM for CSV ${F15_CSV_LOG}"
+      if [[ -f "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json ]]; then
         # clean the unicodes after converting
-        sed -i 's/\\u0026/\&/g' "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json
-        sed -i 's/\\u002B/+/g' "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json
-        sed -i 's/\\u003C/</g' "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json
-        sed -i 's/\\u003E/>/g' "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json
-        sed -i 's/\\u007E/~/g' "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json
+        sed -i 's/\\u0026/\&/g' "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
+        sed -i 's/\\u002B/+/g' "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
+        sed -i 's/\\u003C/</g' "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
+        sed -i 's/\\u003E/>/g' "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
+        sed -i 's/\\u007E/~/g' "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
       else
         print_output "[-] No SBOM created!"
       fi
     fi
 
-    if [[ -f "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json ]]; then
+    if [[ -f "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json ]]; then
       print_output "[+] Cyclonedx SBOM in json and CSV format created:"
-      print_output "$(indent "$(orange "-> Download SBOM as JSON${NC}")")" "" "${LOG_PATH_MODULE}/f21_cyclonedx_sbom_json.json"
-      print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${LOG_PATH_MODULE}/f21_cyclonedx_sbom_xml.txt"
-      print_output "$(indent "$(orange "-> Download SBOM as CSV${NC}")")" "" "${F21_CSV_LOG}"
+      print_output "$(indent "$(orange "-> Download SBOM as JSON${NC}")")" "" "${LOG_PATH_MODULE}/f15_cyclonedx_sbom_json.json"
+      print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${LOG_PATH_MODULE}/f15_cyclonedx_sbom_xml.txt"
+      print_output "$(indent "$(orange "-> Download SBOM as CSV${NC}")")" "" "${F15_CSV_LOG}"
       print_ln
       print_output "[+] Cyclonedx SBOM in json format:"
       print_ln
-      tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/f21_cyclonedx_sbom_json.json
+      tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
       print_ln
       local lNEG_LOG=1
     fi
