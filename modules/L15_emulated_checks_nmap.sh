@@ -217,7 +217,7 @@ l15_version_detector() {
     if [[ -n ${lVERSION_FINDER} ]]; then
       print_output "[+] Version information found ${RED}""${lVERSION_FINDER}""${NC}${GREEN} in ${lTYPE} log."
       # use get_csv_rule from s09:
-      get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}"
+      CSV_RULE=$(get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}")
       # get rid of ; which destroys our csv:
       lVERSION_FINDER="${lVERSION_FINDER/;}"
       write_csv_log "---" "${lIDENTIFIER}" "${lVERSION_FINDER}" "${CSV_RULE}" "${lLIC}" "${lTYPE}"

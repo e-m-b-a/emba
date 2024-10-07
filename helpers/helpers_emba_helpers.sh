@@ -292,12 +292,14 @@ function_exists() {
 
 # used by CSV search to get the search rule for csv search:
 get_csv_rule() {
-  local VERSION_STRING="${1:-}"
-  local CSV_REGEX=""
-  CSV_REGEX=$(echo "${2:-}" | sed 's/^\"//' | sed 's/\"$//')
-  export CSV_RULE="NA"
+  local lVERSION_STRING="${1:-}"
+  local lCSV_REGEX=""
+  lCSV_REGEX=$(echo "${2:-}" | sed 's/^\"//' | sed 's/\"$//')
+  local lCSV_RULE="NA"
 
-  CSV_RULE="$(echo "${VERSION_STRING}" | eval "${CSV_REGEX}" || true)"
+  lCSV_RULE="$(echo "${lVERSION_STRING}" | eval "${lCSV_REGEX}" || true)"
+
+  echo "${lCSV_RULE}"
 }
 
 restore_permissions() {

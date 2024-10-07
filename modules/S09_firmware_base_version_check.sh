@@ -140,7 +140,7 @@ S09_firmware_base_version_check() {
           if [[ -n ${VERSION_FINDER} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${BIN_NAME} ${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - strict - deprecated${GREEN})."
-            get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+            CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
             write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
 
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
@@ -176,7 +176,7 @@ S09_firmware_base_version_check() {
         CSV_REGEX="${CSV_REGEX/\"}"
         CSV_REGEX="${CSV_REGEX%\"}"
         VERSION_FINDER=$(safe_echo "${SFILE}" | cut -d ":" -f2-3 | tr -dc '[:print:]')
-        get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+        CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
         print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN_PATH}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
         write_csv_log "${BIN_PATH}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
 
@@ -203,7 +203,7 @@ S09_firmware_base_version_check() {
         if [[ -n ${VERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in unblob logs (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+          CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
           write_csv_log "unblob logs" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           lMD5_CHECKSUM="$(md5sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
@@ -226,7 +226,7 @@ S09_firmware_base_version_check() {
         if [[ -n ${VERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in original firmware file (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+          CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
           write_csv_log "firmware" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           lMD5_CHECKSUM="$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${FIRMWARE_PATH}" | awk '{print $1}')"
@@ -248,7 +248,7 @@ S09_firmware_base_version_check() {
         if [[ -n ${VERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in original firmware file (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+          CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
           write_csv_log "firmware" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
         fi
       fi
@@ -414,7 +414,7 @@ bin_string_checker() {
             fi
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-            get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+            CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
             write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
@@ -432,7 +432,7 @@ bin_string_checker() {
           if [[ -n ${VERSION_FINDER} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in kernel image ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-            get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+            CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
             write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
@@ -457,7 +457,7 @@ bin_string_checker() {
           fi
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+          CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
           write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"

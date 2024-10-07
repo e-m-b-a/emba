@@ -149,7 +149,7 @@ version_detection_thread() {
       VERSION_DETECTED="$(echo "${VERSION_DETECTED}" | cut -d: -f2- | sort -u)"
     fi
 
-    get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}"
+    CSV_RULE=$(get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}")
 
     for BINARY_PATH in "${BINARY_PATHS[@]}"; do
       print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"

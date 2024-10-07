@@ -95,7 +95,7 @@ lighttpd_binary_analysis() {
         if [[ -n ${lVERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${lVERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lLIGHT_BIN}")${GREEN} (license: ${ORANGE}${lLIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}"
+          CSV_RULE=$(get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}")
           LIGHT_VERSIONS+=( "${CSV_RULE}" )
           continue
         fi
