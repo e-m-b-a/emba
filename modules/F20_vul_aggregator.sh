@@ -517,7 +517,8 @@ cve_db_lookup_version() {
 
   local CVE_ID=""
   local BIN_NAME=""
-  BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
+  # BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
+  BIN_NAME=$(echo "${BIN_VERSION_%:}" | cut -d':' -f1-3)
   # we create something like "binary_1.2.3" for log paths
   # remove last : if it is there
   local VERSION_PATH="${BIN_VERSION_%:}"
@@ -538,7 +539,7 @@ cve_db_lookup_version() {
   # we test for the binary_name:version and for binary_name:*:
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:.*:.*:.*:.*:.*:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:${CPE_VERSION}:[aoh]${BIN_VERSION_%:}:.*:.*:.*:.*:.*:\|cpe:${CPE_VERSION}:[aoh]${BIN_NAME}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
 
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_} / ${BIN_NAME}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
@@ -547,7 +548,7 @@ cve_db_lookup_version() {
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "${BIN_VERSION_}" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}${VERSION_SEARCHx}${NC}" "no_log"
-    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${VERSION_SEARCHx}" "${NVD_DIR}" || true)
+    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe:${CPE_VERSION}:[aoh]:.*${VERSION_SEARCHx}" "${NVD_DIR}" || true)
     CVE_VER_SOURCES_ARR+=( "${CVE_VER_SOURCES_ARR_DLINK[@]}" )
   fi
 
@@ -604,9 +605,11 @@ check_cve_sources() {
 
   local BIN_VERSION_ONLY=""
   # if we have a version identifier like binary:1.2.3: we need to remove the last ':' before cutting it correctly
-  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
+  # BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
+  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | cut -d':' -f4-5 | rev)
   local BIN_NAME=""
-  BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
+  # BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
+  BIN_NAME=$(echo "${BIN_VERSION_%:}" | cut -d':' -f1-3)
   local CVE_VER_START_INCL=""
   local CVE_VER_START_EXCL=""
   local CVE_VER_END_INCL=""
@@ -634,7 +637,7 @@ check_cve_sources() {
   lFIRST_EPSS=$(get_epss_data "${CVE_ID}")
 
   # if our cpe with the binary version matches we have a vuln and we can continue
-  if grep -q "cpe.*:${BIN_VERSION_%:}:" "${CVE_VER_SOURCES_FILE}"; then
+  if grep -q "cpe:${CPE_VERSION}:.*:${BIN_VERSION_%:}:" "${CVE_VER_SOURCES_FILE}"; then
     # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} / BIN: ${BIN_VERSION_}" "no_log"
     write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-NA}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
     return
@@ -646,7 +649,7 @@ check_cve_sources() {
   #   .versionStartExcluding
   #   .versionEndIncluding
   #   .versionEndExcluding
-  mapfile -t CVE_CPEs_vuln_ARR < <(jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' "${CVE_VER_SOURCES_FILE}" | grep "cpe:[0-9]\.[0-9]:[a-z]:.*:${BIN_NAME}:\*:" || true)
+  mapfile -t CVE_CPEs_vuln_ARR < <(jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' "${CVE_VER_SOURCES_FILE}" | grep "cpe:${CPE_VERSION}:[aoh]:.*:${BIN_NAME}:\*:" || true)
   # the result looks like the following:
   # └─$ jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' external/nvd-json-data-feeds/CVE-2023/CVE-2023-02xx/CVE-2023-0215.json
   # {"vulnerable":true,"criteria":"cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*","versionStartIncluding":"1.0.2","versionEndExcluding":"1.0.2zg","matchCriteriaId":"70985D55-A574-4151-B451-4D500CBFC29A"}
@@ -1625,6 +1628,6 @@ get_sbom_package_details() {
 
   if [[ -f "${S08_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' | sed 's/::/:\*:/g' || true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' | sed 's/::/:\.\*:/g' || true)
   fi
 }

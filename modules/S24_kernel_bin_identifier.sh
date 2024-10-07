@@ -77,8 +77,9 @@ S24_kernel_bin_identifier()
       done
 
       check_for_s08_csv_log "${S08_CSV_LOG}"
-      lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/linux_kernel:\1/' || true)
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:${lSTRIPPED_VERS}:*:*:*:*:*:*"
+      lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/:linux:linux_kernel:\1/' || true)
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lSTRIPPED_VERS}:*:*:*:*:*:*"
+      lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}")
       lK_VER="${lK_VER//[,;\/()\[\]\\#]}"
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
@@ -97,7 +98,7 @@ S24_kernel_bin_identifier()
             lMD5_CHECKSUM="$(md5sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            write_log "linux_kernel;${lFILE:-NA}.elf;${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};PURL-todo;Linux Kernel" "${S08_CSV_LOG}"
+            write_log "linux_kernel;${lFILE:-NA}.elf;${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
           else
             print_ln
             print_output "[-] No Linux kernel elf file was created."
@@ -109,7 +110,7 @@ S24_kernel_bin_identifier()
       lMD5_CHECKSUM="$(md5sum "${lFILE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
-      write_log "linux_kernel;${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};PURL;Linux Kernel" "${S08_CSV_LOG}"
+      write_log "linux_kernel;${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
