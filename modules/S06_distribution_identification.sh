@@ -39,6 +39,7 @@ S06_distribution_identification()
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lCPE_IDENTIFIER="NA"
+  local lPURL_IDENTIFIER="NA"
   export CSV_RULE=""
 
   write_csv_log "file" "type" "identifier" "csv_rule"
@@ -84,7 +85,8 @@ S06_distribution_identification()
             get_csv_rule_distri "${IDENTIFIER}"
             write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
-            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;PURL;Linux distribution identification module" "${S08_CSV_LOG}"
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
           # check if not zero and not only spaces
@@ -100,7 +102,8 @@ S06_distribution_identification()
             fi
             # CSV_RULE has 5 fields and looks like the following: o:dlink:device:version:*
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
-            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};PURL;Linux distribution identification module" "${S08_CSV_LOG}"
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+            write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
             OUTPUT=1
           fi
         fi
