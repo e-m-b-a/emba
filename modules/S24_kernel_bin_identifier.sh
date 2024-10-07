@@ -88,9 +88,6 @@ S24_kernel_bin_identifier()
         "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE}" "${lFILE}".elf 2>/dev/null | tee -a "${LOG_FILE}" || true
         if [[ -f "${lFILE}".elf ]]; then
           lK_ELF=$(file -b "${lFILE}".elf)
-          lK_ARCH="${lK_ELF/*, }"
-          lK_ARCH="${lK_ARCH/, *}"
-          lK_ARCH=$(clean_package_details "${lK_ARCH}")
 
           if [[ "${lK_ELF}" == *"ELF "* ]]; then
             print_ln
@@ -98,6 +95,8 @@ S24_kernel_bin_identifier()
             lMD5_CHECKSUM="$(md5sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
+            lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
+            lK_ELF=${lK_ELF//,\ /\ -\ }
             write_log "linux_kernel;${lFILE:-NA}.elf;${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
           else
             print_ln
@@ -110,6 +109,9 @@ S24_kernel_bin_identifier()
       lMD5_CHECKSUM="$(md5sum "${lFILE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
+      lK_ELF=$(file -b "${lFILE}")
+      lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
+      lK_ELF=${lK_ELF//,\ /\ -\ }
       write_log "linux_kernel;${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
 
       # ensure this is only done in non SBOM_MINIMAL mode

@@ -335,9 +335,8 @@ module_analyzer() {
     lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
 
     lK_FILE_OUT=$(file -b "${lKMODULE}" 2>/dev/null)
-    lK_ARCH="${lK_ARCH/*, }"
-    lK_ARCH="${lK_ARCH/, *}"
-    lK_ARCH=$(clean_package_details "${lK_ARCH}")
+    lK_ARCH=$(echo "${lK_ARCH}" | cut -d ',' -f2-3)
+    lK_ARCH=${lK_ARCH//,\ /\ -\ }
 
     if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then
       # if echo "${lMODINFO}" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then

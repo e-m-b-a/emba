@@ -116,6 +116,9 @@ version_detection_thread() {
   local BINARY_PATHS=()
   local LOG_PATH_=""
   local lCSV_RULE=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ ${STRICT} == "strict" ]]; then
@@ -162,7 +165,10 @@ version_detection_thread() {
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
-      write_log "static_bin_analysis;${BINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+      lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}')"
+      write_log "user_mode_bin_analysis;${BINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
     done
   done
 }
