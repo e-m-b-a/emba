@@ -1523,12 +1523,12 @@ get_kernel_check() {
 }
 
 get_busybox_verified() {
-  local S118_LOG="${1:-}"
+  local lS118_CSV_LOG="${1:-}"
   export BUSYBOX_VERIFIED_CVE=()
 
-  if [[ -f "${S118_LOG}" ]]; then
-    print_output "[*] Collect version details of module $(basename "${S118_LOG}")."
-    readarray -t BUSYBOX_VERIFIED_CVE < <(cut -d\; -f1,3 "${S118_LOG}" | tail -n +2 | grep -v "BusyBox VERSION;Verified CVE" | sort -u || true)
+  if [[ -f "${lS118_CSV_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${lS118_CSV_LOG}")."
+    readarray -t BUSYBOX_VERIFIED_CVE < <(cut -d\; -f1,3 "${lS118_CSV_LOG}" | tail -n +2 | grep -v "BusyBox VERSION;Verified CVE" | sort -u || true)
   fi
 }
 
@@ -1624,6 +1624,6 @@ get_sbom_package_details() {
 
   if [[ -f "${S08_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' || true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' | sed 's/::/:\*:/g' || true)
   fi
 }

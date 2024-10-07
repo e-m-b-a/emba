@@ -50,7 +50,7 @@ S24_kernel_bin_identifier()
     local K_VER_TMP=""
     local lSTRIPPED_VERS=""
 
-    if file "${lFILE}" | grep -q "ASCII text"; then
+    if file -b "${lFILE}" | grep -q "ASCII text"; then
       # reduce false positive rate
       continue
     fi
@@ -124,7 +124,7 @@ S24_kernel_bin_identifier()
         if [[ "${lK_ELF}" == *"ELF "* ]]; then
           lK_ELF="$(echo "${lK_ELF}" | cut -d: -f1)"
           K_SYMBOLS="$(readelf -s "${lK_ELF}" | grep -c "FUNC\|OBJECT" || true)"
-          K_FILE="$(file "${lK_ELF}" | cut -d: -f2-)"
+          K_FILE="$(file -b "${lK_ELF}")"
 
           [[ "${K_FILE}" == *"LSB"* ]] && K_ARCH_END="EL"
           [[ "${K_FILE}" == *"MSB"* ]] && K_ARCH_END="EB"
@@ -166,7 +166,7 @@ S24_kernel_bin_identifier()
         lNEG_LOG=1
       fi
     # ASCII kernel config files:
-    elif file "${lFILE}" | grep -q "ASCII"; then
+    elif file -b "${lFILE}" | grep -q "ASCII"; then
       lCFG_MD5=$(md5sum "${lFILE}" | awk '{print $1}')
       if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
         K_CON_DET=$(strings "${lFILE}" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)

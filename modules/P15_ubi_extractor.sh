@@ -57,7 +57,7 @@ ubi_extractor() {
   sub_module_title "UBI filesystem extractor"
 
   print_output "[*] Extracts UBI firmware image ${ORANGE}${lUBI_PATH_}${NC} with ${ORANGE}ubireader_extract_images${NC}."
-  print_output "[*] File details: ${ORANGE}$(file "${lUBI_PATH_}" | cut -d ':' -f2-)${NC}"
+  print_output "[*] File details: ${ORANGE}$(file -b "${lUBI_PATH_}")${NC}"
   ubireader_extract_images -i -v -w -o "${lEXTRACTION_DIR_}"/ubi_images "${lUBI_PATH_}" | tee -a "${LOG_FILE}" || true
   FILES_UBI_EXT=$(find "${lEXTRACTION_DIR_}"/ubi_images -type f | wc -l)
   lDIRS_UBI_EXT=$(find "${lEXTRACTION_DIR_}"/ubi_images -type d | wc -l)
@@ -70,7 +70,7 @@ ubi_extractor() {
   print_output "[*] Extracted ${ORANGE}${FILES_UBI_EXT}${NC} files and ${ORANGE}${lDIRS_UBI_EXT}${NC} directories from the firmware image via UBI extraction round 2."
 
   if [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f -exec file {} \; | grep "UBI image" || true)
+    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f -exec file -b {} \; | grep "UBI image" || true)
 
     for lUBI_DATA in "${lUBI_1st_ROUND_ARR[@]}"; do
       lUBI_FILE=$(safe_echo "${lUBI_DATA}" | cut -d: -f1)
@@ -78,7 +78,7 @@ ubi_extractor() {
       if [[ "${lUBI_INFO}" == *"UBIfs image"* ]]; then
         sub_module_title "UBIfs deep extraction"
         print_output "[*] Extracts UBIfs firmware image ${ORANGE}${lUBI_PATH_}${NC} with ${ORANGE}ubireader_extract_files${NC}."
-        print_output "[*] File details: ${ORANGE}$(file "${lUBI_FILE}" | cut -d ':' -f2-)${NC}"
+        print_output "[*] File details: ${ORANGE}$(file -b "${lUBI_FILE}")${NC}"
         ubireader_extract_files -l -i -w -v -o "${lEXTRACTION_DIR_}"/UBIfs_extracted "${lUBI_FILE}" | tee -a "${LOG_FILE}" || true
         FILES_UBI_EXT=$(find "${lEXTRACTION_DIR_}"/UBIfs_extracted -type f | wc -l)
         lDIRS_UBI_EXT=$(find "${lEXTRACTION_DIR_}"/UBIfs_extracted -type d | wc -l)

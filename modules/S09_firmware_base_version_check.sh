@@ -128,7 +128,7 @@ S09_firmware_base_version_check() {
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
         # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-        lBIN_ARCH=$(file "${BIN}" | cut -d ':' -f2-)
+        lBIN_ARCH=$(file -b "${BIN}")
         if [[ "${lBIN_ARCH}" == *"ELF"* ]] ; then
           MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
           BIN_NAME="$(basename "${BIN}")"
@@ -183,7 +183,7 @@ S09_firmware_base_version_check() {
         lMD5_CHECKSUM="$(md5sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${BIN_PATH}" | awk '{print $1}')"
-        lBIN_ARCH=$(file "${BIN}" | cut -d ':' -f2-)
+        lBIN_ARCH=$(file -b "${BIN}")
         check_for_s08_csv_log "${S08_CSV_LOG}"
 
         lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
@@ -231,7 +231,7 @@ S09_firmware_base_version_check() {
           lMD5_CHECKSUM="$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')"
-          lBIN_ARCH=$(file "${FIRMWARE_PATH}" | cut -d ':' -f2-)
+          lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
@@ -344,7 +344,7 @@ generate_strings() {
 
   # if we do not talk about a RTOS it is a Linux and we test ELF files
   if [[ ${RTOS} -eq 0 ]]; then
-    BIN_FILE=$(file "${BIN}" || true)
+    BIN_FILE=$(file -b "${BIN}" || true)
     if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
       return
     fi
@@ -396,7 +396,7 @@ bin_string_checker() {
         VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
       fi
       if [[ ${RTOS} -eq 0 ]]; then
-        BIN_FILE=$(file "${BIN}" | cut -d: -f2- || true)
+        BIN_FILE=$(file -b "${BIN}" || true)
         # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
         if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
           continue 2

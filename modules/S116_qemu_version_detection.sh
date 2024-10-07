@@ -111,6 +111,7 @@ version_detection_thread() {
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
   local BINARY_PATH=""
+  local BIN_NAME=""
   local BINARY_PATHS=()
   local LOG_PATH_=""
 
@@ -144,16 +145,21 @@ version_detection_thread() {
   fi
 
   for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
+    check_for_s08_csv_log "${S08_CSV_LOG}"
     LOG_PATH_="$(strip_color_codes "$(echo "${VERSION_DETECTED}" | cut -d: -f1 | sort -u || true)")"
     if [[ ${STRICT} != "strict" ]]; then
       VERSION_DETECTED="$(echo "${VERSION_DETECTED}" | cut -d: -f2- | sort -u)"
     fi
 
     CSV_RULE=$(get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}")
+    lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
+    lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
 
     for BINARY_PATH in "${BINARY_PATHS[@]}"; do
       print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+      BIN_NAME=$(basename "${BINARY_PATH}")
+      write_log "static_bin_analysis;${BINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_FINDER:-NA};${lBIN_VERS:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
     done
   done
 }

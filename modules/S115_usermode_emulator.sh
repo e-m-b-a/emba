@@ -95,7 +95,7 @@ S115_usermode_emulator() {
 
       local DIR=""
       DIR=$(pwd)
-      mapfile -t BIN_EMU_TMP < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "${DIR}" || exit)
+      mapfile -t BIN_EMU_TMP < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file -b {} \; 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "${DIR}" || exit)
       # we re-create the BIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in MD5_DONE_INT (for all root dirs) we test every bin only once
       BIN_EMU_ARR=()
@@ -142,38 +142,38 @@ S115_usermode_emulator() {
             fi
           fi
           if [[ "${BIN_}" != './qemu-'*'-static' ]]; then
-            if ( file "${FULL_BIN_PATH}" | grep -q "version\ .\ (FreeBSD)" ) ; then
+            if ( file -b "${FULL_BIN_PATH}" | grep -q "version\ .\ (FreeBSD)" ) ; then
               # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
               print_output "[-] No working emulator found for FreeBSD binary ${ORANGE}${BIN_}${NC}."
               EMULATOR="NA"
               continue
-            elif ( file "${FULL_BIN_PATH}" | grep -q "x86-64" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "x86-64" ) ; then
               EMULATOR="qemu-x86_64-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "Intel 80386" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "Intel 80386" ) ; then
               EMULATOR="qemu-i386-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "32-bit LSB.*ARM" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "32-bit LSB.*ARM" ) ; then
               EMULATOR="qemu-arm-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "32-bit MSB.*ARM" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "32-bit MSB.*ARM" ) ; then
               EMULATOR="qemu-armeb-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "64-bit LSB.*ARM aarch64" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "64-bit LSB.*ARM aarch64" ) ; then
               EMULATOR="qemu-aarch64-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "64-bit MSB.*ARM aarch64" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "64-bit MSB.*ARM aarch64" ) ; then
               EMULATOR="qemu-aarch64_be-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "32-bit LSB.*MIPS" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "32-bit LSB.*MIPS" ) ; then
               EMULATOR="qemu-mipsel-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1" ) ; then
               EMULATOR="qemu-mipsn32-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "32-bit MSB.*MIPS" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "32-bit MSB.*MIPS" ) ; then
               EMULATOR="qemu-mips-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "64-bit LSB.*MIPS" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "64-bit LSB.*MIPS" ) ; then
               EMULATOR="qemu-mips64el-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "64-bit MSB.*MIPS" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "64-bit MSB.*MIPS" ) ; then
               EMULATOR="qemu-mips64-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "32-bit MSB.*PowerPC" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "32-bit MSB.*PowerPC" ) ; then
               EMULATOR="qemu-ppc-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "ELF 32-bit LSB executable, Altera Nios II" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "ELF 32-bit LSB executable, Altera Nios II" ) ; then
               EMULATOR="qemu-nios2-static"
-            elif ( file "${FULL_BIN_PATH}" | grep -q "ELF 32-bit LSB shared object, QUALCOMM DSP6" ) ; then
+            elif ( file -b "${FULL_BIN_PATH}" | grep -q "ELF 32-bit LSB shared object, QUALCOMM DSP6" ) ; then
               EMULATOR="qemu-hexagon-static"
             else
               print_output "[-] No working emulator found for ${BIN_}"
@@ -565,7 +565,7 @@ emulate_strace_run() {
         if [[ -n "${FILENAME_FOUND}" ]]; then
           write_log "[*] Copy file ${ORANGE}${FILENAME_FOUND}${NC} to ${ORANGE}${R_PATH}${PATH_MISSING}/${NC}" "${LOG_FILE_STRACER}"
           local OUTPUT=""
-          OUTPUT=$(file "${FILENAME_FOUND}" | cut -d ':' -f2)
+          OUTPUT=$(file -b "${FILENAME_FOUND}")
           if [[ "${OUTPUT}" != *"(named pipe)" ]];then
             cp -L "${FILENAME_FOUND}" "${R_PATH}""${PATH_MISSING}" 2> /dev/null || true
           fi
