@@ -72,6 +72,13 @@ F15_cyclonedx_sbom() {
         # already post-processed version
         lSTRIPPED_VER="${COL6}"
       fi
+      if [[ "${lSTRIPPED_VER}" == ":"* ]]; then
+        # we have a version entry from our static analysis mechanism
+        lSTRIPPED_VER=$(echo "${lSTRIPPED_VER}" | cut -d ':' -f4-)
+      elif [[ "${COL1}" == "static_distri_analysis" ]]; then
+        # additionally we need to parse the entries from static_distri_analysis (module s06)
+        lSTRIPPED_VER=$(echo "${lSTRIPPED_VER}" | cut -d ':' -f4)
+      fi
       lLICENSE="${COL7}"
       lMAINTAINER="${COL8}"
       # Todo
