@@ -326,7 +326,7 @@ windows_exifparser() {
     lOS_IDENTIFIED=$(distri_check)
 
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
-      lR_FILE=$(file "${lEXE_ARCHIVE}")
+      lR_FILE=$(file -b "${lEXE_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ "${lR_FILE}" == *"PE32+ executable"* ]]; then
         continue
       fi
@@ -354,6 +354,12 @@ windows_exifparser() {
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+
+      if [[ "${lR_FILE}" == *"Intel 80386"* ]]; then
+        lAPP_ARCH="x86"
+      else
+        lAPP_ARCH="${lR_FILE//\ /-}"
+      fi
 
       lMD5_CHECKSUM="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
@@ -974,18 +980,30 @@ rpm_package_check() {
         continue
       fi
 
-      lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "Name" || true)
+      lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-      lAPP_LIC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "License" || true)
+      lAPP_LIC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^License" || true)
       lAPP_LIC=${lAPP_LIC/*:\ /}
       lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
-      lAPP_VERS=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "Version" || true)
+      lAPP_VERS=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Version" || true)
       lAPP_VERS=${lAPP_VERS/*:\ /}
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+
+      lAPP_MAINT=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Vendor" || true)
+      lAPP_MAINT=${lAPP_MAINT/*:\ /}
+      lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+
+      lAPP_ARCH=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Architecture" || true)
+      lAPP_ARCH=${lAPP_ARCH/*:\ /}
+      lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+
+      lAPP_DESC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Summary" || true)
+      lAPP_DESC=${lAPP_DESC/*:\ /}
+      lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
       lMD5_CHECKSUM="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
@@ -995,7 +1013,7 @@ rpm_package_check() {
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
       if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:rpm/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
+        lPURL_IDENTIFIER="pkg:rpm/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
       else
         lPURL_IDENTIFIER="pkg:rpm/${lAPP_NAME}@${lAPP_VERS}"
       fi

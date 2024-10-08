@@ -357,8 +357,8 @@ fw_bin_detector() {
     export WINDOWS_EXE=1
     if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").exe" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").exe" || print_error "[-] Windows executable copy process failed"
+      export FIRMWARE_PATH="${LOG_DIR}"/firmware/
     fi
-    export FIRMWARE_PATH="${LOG_DIR}"/firmware/
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
   # Currently this detection mechanism works quite good on the known firmware images

@@ -1628,6 +1628,6 @@ get_sbom_package_details() {
 
   if [[ -f "${S08_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' | sed 's/::/:\.\*:/g' || true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' || true)
   fi
 }

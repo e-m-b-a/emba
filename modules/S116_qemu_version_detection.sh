@@ -141,6 +141,7 @@ version_detection_thread() {
           mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "${LOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
             # BINARY_PATH is the final array which we are using further
+            BINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${BINARY_PATH_}" | sort -u | head)
             BINARY_PATHS+=( "${BINARY_PATH_}" )
           done
         done
@@ -165,9 +166,9 @@ version_detection_thread() {
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
-      lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}')"
-      lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}')"
+      lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}' || true)"
+      lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}' || true)"
+      lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}' || true)"
       write_log "user_mode_bin_analysis;${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
     done
   done
