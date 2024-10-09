@@ -511,9 +511,16 @@ cve_db_lookup_cve() {
 }
 
 cve_db_lookup_version() {
-  # BIN_VERSION_ is something like "binary:1.2.3"
+  # BIN_VERSION_ needs to be in the format ":vendor:binary:1.2.3:" or "::binary:1.2.3:" or "::binary:1.2.3"
+  # somthing like "binary:1.2.3" or ":binary:1.2.3" results in unexpected behavior
+
   # function writes log files to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
   local BIN_VERSION_="${1:-}"
+
+  if [[ "$(echo "${BIN_VERSION_}" | tr ':' '\n' | wc -l)" -lt 4 ]]; then
+    print_output "[-] WARNING: Identifier ${BIN_VERSION_} is probably incorrect and should be in the following format:" "no_log"
+    print_output "[-] :vendor:binary:1.2.3: or ::binary:1.2.3: or ::binary:1.2.3" "no_log"
+  fi
 
   local CVE_ID=""
   local BIN_NAME=""
@@ -521,7 +528,11 @@ cve_db_lookup_version() {
   BIN_NAME=$(echo "${BIN_VERSION_%:}" | cut -d':' -f1-3)
   # we create something like "binary_1.2.3" for log paths
   # remove last : if it is there
-  local VERSION_PATH="${BIN_VERSION_%:}"
+  local VERSION_PATH=""
+  VERSION_PATH=$(echo "${BIN_VERSION_%:}" | cut -d':' -f2-4)
+  VERSION_PATH="${VERSION_PATH//\.\*}"
+  VERSION_PATH="${VERSION_PATH%:}"
+  VERSION_PATH="${VERSION_PATH#:}"
   VERSION_PATH="${VERSION_PATH//:/_}"
   local WAIT_PIDS_F19_CVE_SOURCE=()
   local CVE_VER_SOURCES_ARR=()
@@ -538,10 +549,26 @@ cve_db_lookup_version() {
   fi
   # we test for the binary_name:version and for binary_name:*:
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
+  local lCPE_BIN_VERSION_SEARCH=${BIN_VERSION_%:}
+  lCPE_BIN_VERSION_SEARCH=${lCPE_BIN_VERSION_SEARCH//::/:\.\*:}
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:${CPE_VERSION}:[aoh]${BIN_VERSION_%:}:.*:.*:.*:.*:.*:\|cpe:${CPE_VERSION}:[aoh]${BIN_NAME}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
+  local lCPE_BIN_NAME_SEARCH=${BIN_NAME%:}
+  lCPE_BIN_NAME_SEARCH=${lCPE_BIN_NAME_SEARCH//::/:\.\*:}
 
-  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_} / ${BIN_NAME}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
+  print_output "[*] Testing: cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" "no_log"
+  # "criteria": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
+
+  local lCVE_VER_SOURCES_ARR_tmp=""
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r -E "cpe:${CPE_VERSION}:.*${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_VERSION_SEARCH}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
+  print_output "[*] Testing: cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "no_log"
+  # "criteria": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
+  mapfile -t lCVE_VER_SOURCES_ARR_tmp < <(grep -l -r -E "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_NAME_SEARCH}${NC} resulted in ${ORANGE}${#lCVE_VER_SOURCES_ARR_tmp[@]}${NC} possible vulnerabilities" "no_log"
+
+  CVE_VER_SOURCES_ARR+=( "${lCVE_VER_SOURCES_ARR_tmp[@]}" )
+
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_VERSION_SEARCH} / ${lCPE_BIN_NAME_SEARCH}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
@@ -605,11 +632,13 @@ check_cve_sources() {
 
   local BIN_VERSION_ONLY=""
   # if we have a version identifier like binary:1.2.3: we need to remove the last ':' before cutting it correctly
-  # BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
-  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | cut -d':' -f4-5 | rev)
+  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | cut -d':' -f4-5)
+  BIN_VERSION_ONLY="${BIN_VERSION_ONLY%:}"
   local BIN_NAME=""
   # BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
   BIN_NAME=$(echo "${BIN_VERSION_%:}" | cut -d':' -f1-3)
+  BIN_NAME="${BIN_NAME%:}"
+  BIN_NAME="${BIN_NAME#:}"
   local CVE_VER_START_INCL=""
   local CVE_VER_START_EXCL=""
   local CVE_VER_END_INCL=""
@@ -620,7 +649,7 @@ check_cve_sources() {
   local CVE_CPEMATCH=""
   local CVE_SUMMARY=""
   local lFIRST_EPSS=""
-  # print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} for CVE matches ..." "no_log"
+  print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} (${BIN_VERSION_}) for CVE matches ..." "no_log"
 
   CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
   # CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -628,8 +657,8 @@ check_cve_sources() {
   CVE_SUMMARY=$(escape_echo "$(jq -r '.descriptions[] | select(.lang=="en") | .value' "${CVE_VER_SOURCES_FILE}")")
   # we need to check if any cpe of the CVE is vulnerable
   # └─$ cat external/nvd-json-data-feeds/CVE-2011/CVE-2011-24xx/CVE-2011-2416.json | jq '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' | grep linux
-  if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -c "${BIN_NAME}")" -eq 0 ]]; then
-    # print_output "[-] No matching criteria found - binary ${BIN_NAME} not vulnerable for CVE ${CVE_ID}" "no_log"
+  if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -c "${BIN_NAME//\.\*}")" -eq 0 ]]; then
+    print_output "[-] No matching criteria found - binary ${BIN_NAME} not vulnerable for CVE ${CVE_ID}" "no_log"
     return
   fi
 
@@ -637,7 +666,7 @@ check_cve_sources() {
   lFIRST_EPSS=$(get_epss_data "${CVE_ID}")
 
   # if our cpe with the binary version matches we have a vuln and we can continue
-  if grep -q "cpe:${CPE_VERSION}:.*:${BIN_VERSION_%:}:" "${CVE_VER_SOURCES_FILE}"; then
+  if grep -q "cpe:${CPE_VERSION}:.*${BIN_VERSION_%:}:" "${CVE_VER_SOURCES_FILE}"; then
     # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} / BIN: ${BIN_VERSION_}" "no_log"
     write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-NA}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
     return
@@ -649,7 +678,9 @@ check_cve_sources() {
   #   .versionStartExcluding
   #   .versionEndIncluding
   #   .versionEndExcluding
-  mapfile -t CVE_CPEs_vuln_ARR < <(jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' "${CVE_VER_SOURCES_FILE}" | grep "cpe:${CPE_VERSION}:[aoh]:.*:${BIN_NAME}:\*:" || true)
+  #
+  # BIN_NAME is somthing like ".*:BIN_NAME"
+  mapfile -t CVE_CPEs_vuln_ARR < <(jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' "${CVE_VER_SOURCES_FILE}" | grep "cpe:${CPE_VERSION}:[aoh]:${BIN_NAME}:\*:" || true)
   # the result looks like the following:
   # └─$ jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' external/nvd-json-data-feeds/CVE-2023/CVE-2023-02xx/CVE-2023-0215.json
   # {"vulnerable":true,"criteria":"cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*","versionStartIncluding":"1.0.2","versionEndExcluding":"1.0.2zg","matchCriteriaId":"70985D55-A574-4151-B451-4D500CBFC29A"}
@@ -691,7 +722,7 @@ check_cve_sources() {
           if version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
               check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
             fi
           fi
@@ -703,7 +734,7 @@ check_cve_sources() {
           if version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_END_EXCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
               check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_EXCL}" "${CVE_ID}"
             fi
           fi
@@ -713,7 +744,7 @@ check_cve_sources() {
         # No end version is specified and start version already satisfied.
         # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
         write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-        if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+        if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
           check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_INCL}" "${CVE_ID}"
         fi
         continue
@@ -734,7 +765,7 @@ check_cve_sources() {
           if version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
               check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
             fi
           fi
@@ -745,7 +776,7 @@ check_cve_sources() {
           if version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_END_EXCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
               check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_EXCL}" "${CVE_ID}"
             fi
           fi
@@ -755,7 +786,7 @@ check_cve_sources() {
         # No end version is specified and start version already satisfied.
         # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN} / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
         write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-        if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+        if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
           check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_EXCL}" "${CVE_ID}"
         fi
         continue
@@ -777,7 +808,7 @@ check_cve_sources() {
 
         # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL: ${ORANGE}NA${GREEN} / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
         write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-        if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+        if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
           check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
         fi
         continue
@@ -795,7 +826,7 @@ check_cve_sources() {
 
         # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
         write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${lFIRST_EPSS}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-        if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+        if [[ "${BIN_NAME}" == *"linux_kernel"* ]]; then
           check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_EXCL}" "${CVE_ID}"
         fi
         continue
