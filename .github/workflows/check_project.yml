@@ -22,8 +22,8 @@ jobs:
     - name: Install dependencies for check script
       run: |
         sudo apt-get install -y shellcheck python3-pip
-        pip3 install -U requests
-        pip3 install semgrep
+        pip3 install -U requests --break-system-packages
+        pip3 install semgrep --break-system-packages
         mkdir ./external
         git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
     - name: Run check_project.sh
