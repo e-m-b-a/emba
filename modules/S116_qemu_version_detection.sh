@@ -124,7 +124,12 @@ version_detection_thread() {
   if [[ ${STRICT} == "strict" ]]; then
     if [[ -f "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt ]]; then
       mapfile -t VERSIONS_DETECTED < <(grep -a -o -E "${VERSION_IDENTIFIER}" "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt | sort -u 2>/dev/null || true)
-      mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+      mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a -h "Emulating binary:" "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+      for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
+        # BINARY_PATH is the final array which we are using further
+        BINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${BINARY_PATH_}" | sort -u | head)
+        BINARY_PATHS+=( "${BINARY_PATH_}" )
+      done
       TYPE="emulation/strict"
     fi
   else
