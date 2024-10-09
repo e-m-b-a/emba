@@ -138,7 +138,7 @@ version_detection_thread() {
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
         mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "${VERSION_DETECTED}" | cut -d: -f1 | sort -u || true)")
         for LOG_PATH_ in "${LOG_PATHS[@]}"; do
-          mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "${LOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+          mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${LOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
             # BINARY_PATH is the final array which we are using further
             BINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${BINARY_PATH_}" | sort -u | head)
