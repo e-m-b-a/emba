@@ -34,11 +34,6 @@ P99_prepare_analyzer() {
   pre_module_reporter "${FUNCNAME[0]}"
   local lNEG_LOG=0
 
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
-    return
-  fi
-
   local lNEG_LOG=1
   local lFILES_EXT=0
   local lUNIQUE_FILES=0
@@ -55,6 +50,11 @@ P99_prepare_analyzer() {
     # FIRMWARE_PATH="$(abs_path "${OUTPUT_DIR}")"
     export FIRMWARE_PATH="${LOG_DIR}"/firmware
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+  fi
+
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
   fi
 
   print_output "[*] Quick check if it is a real Linux system"

@@ -355,16 +355,15 @@ module_analyzer() {
 
     # we log to our sbom log with the kernel module details
     # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
-    if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifier;Description" "${S08_CSV_LOG}"
-    fi
-    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE_TODO;PURL-todo;Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
+    check_for_s08_csv_log "${S08_CSV_LOG}"
+
+    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
 
     # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
+    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
       lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}")
-      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then

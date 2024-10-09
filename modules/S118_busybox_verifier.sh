@@ -57,19 +57,19 @@ S118_busybox_verifier()
         continue
       fi
       # now modify the version identifier to use it also for our CVE identification
-      lVERSION_IDENTIFIER=$(strings "${lBB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/busybox:\1/' | sort -u | head -1 || true)
+      lVERSION_IDENTIFIER=$(strings "${lBB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/:busybox:busybox:\1/' | sort -u | head -1 || true)
       # build the needed array
       lBB_VERSIONS_ARR+=( "${lBB_BIN};${lVERSION_IDENTIFIER}" )
+
+      check_for_s08_csv_log "${S08_CSV_LOG}"
 
       lMD5_CHECKSUM="$(md5sum "${lBB_BIN}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lBB_BIN}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lBB_BIN}" | awk '{print $1}')"
+      lCPE_IDENTIFIER=$(build_cpe_identifier "${lVERSION_IDENTIFIER}")
+      lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}")
 
-      if [[ ! -f "${S08_CSV_LOG}" ]]; then
-        write_csv_log "Packaging system" "package file" "MD5/SHA-256/SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
-      fi
-
-      write_log "static_busybox_analysis;${lBB_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${lBB_BIN}");${lVERSION_IDENTIFIER:-NA};NA;GPL-2.0-only" "${S08_CSV_LOG}"
+      write_log "static_busybox_analysis;${lBB_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${lBB_BIN}");${lVERSION_IDENTIFIER:-NA};NA;GPL-2.0-only;maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
       print_output "[*] Found busybox binary - ${lBB_BIN} - ${lVERSION_IDENTIFIER:-NA} - GPL-2.0-only" "no_log"
     done
   fi
