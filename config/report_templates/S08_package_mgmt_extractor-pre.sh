@@ -1,3 +1,16 @@
 #!/bin/bash
 
-print_output "The package mgmt extractor module extracts package information from Debian, OpenWRT and RPM packaging systems, including package names and versions."
+print_output "This ist the main module for building the non-binary SBOM of the firmware. It analyzes the following package types and environments:"
+print_output "$(indent "debian_status_files_search")"
+print_output "$(indent "openwrt_control_files_search")"
+print_output "$(indent "rpm_package_files_search")"
+print_output "$(indent "rpm_package_check")"
+print_output "$(indent "deb_package_check")"
+print_output "$(indent "bsd_pkg_archive")"
+print_output "$(indent "python_pip_packages")"
+print_output "$(indent "python_requirements")"
+print_output "$(indent "java_archives")"
+print_output "$(indent "ruby_gem_archive")"
+print_output "$(indent "alpine_apk_package")"
+print_output "$(indent "windows_exifparser")"
+print_output "$(indent "rust_cargo_lock_parser")"

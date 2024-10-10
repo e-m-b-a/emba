@@ -22,6 +22,7 @@ I17_apk_check() {
     print_tool_info "golang-go" 1
     print_tool_info "jadx" 1
     print_tool_info "dex2jar" 1
+    print_tool_info "apktool" 1
     print_git_info "APKHunt" "EMBA-support-repos/APKHunt" "APKHunt | OWASP MASVS Static Analyzer"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then

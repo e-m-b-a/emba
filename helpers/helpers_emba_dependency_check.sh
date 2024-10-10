@@ -638,7 +638,7 @@ dependency_check()
       # UEFI
       check_dep_tool "UEFI Firmware parser" "uefi-firmware-parser"
       check_dep_file "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
-      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/AMI_PFAT_Extract.py"
+      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/biosutilities/ami_pfat_extract.py"
       check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
 
       if function_exists F20_vul_aggregator; then
@@ -704,6 +704,9 @@ dependency_check()
 
       # yara
       check_dep_tool "yara"
+
+      # exiftool for windows binary analysis
+      check_dep_tool "exiftool"
 
       # ssdeep
       check_dep_tool "ssdeep"

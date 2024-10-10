@@ -22,7 +22,7 @@ I13_disasm() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
 
     BINUTIL_VERSION_NAME="binutils-2.35.1"
-    CAPA_VERSION="7.2.0"
+    CAPA_VERSION="7.3.0"
 
     INSTALL_APP_LIST=()
 

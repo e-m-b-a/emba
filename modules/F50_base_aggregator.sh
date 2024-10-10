@@ -805,8 +805,8 @@ get_data() {
     EFI_ARCH=$(strip_color_codes "${EFI_ARCH}")
   fi
   if [[ -f "${P99_LOG}" ]]; then
-    P99_ARCH="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 2)"
-    P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3)"
+    P99_ARCH="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 2 || true)"
+    P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3 || true)"
   fi
   if [[ -f "${S24_CSV_LOG}" ]]; then
     K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1 || true)"

@@ -346,6 +346,7 @@ main() {
   EMBA_COMMAND="$(dirname "${0}")""/emba ""$*"
 
   emba_parameter_parsing "$@"
+  set_log_paths
 
   print_ln "no_log"
 

@@ -287,6 +287,14 @@ create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
 export DOCKER_COMPOSE=("docker-compose")
+# if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
+if ! command -v docker > /dev/null; then
+  echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
+  if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
+    apt-get install docker-cli -y
+  fi
+fi
+
 # docker moved around v7 to a new API (API v2)
 # we need to check if our installed docker version has support for the compose sub-command:
 if command -v docker > /dev/null; then
