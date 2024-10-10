@@ -159,6 +159,8 @@ get_csv_rule_distri() {
   ### handle versions of linux distributions:
   # debian 9 (stretch) - installer build 20170615+deb9u5
   VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/:\1:\1_linux:\2\.\3/')"
+  # debian 9
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/^(debian) ([0-9]+(\.[0-9]+)+?)$/:\1:\1_linux:\2/')"
   # Fedora 17 (Beefy Miracle)
   VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(fedora)\ ([0-9]+).*/:\1project:\1:\2/')"
   # CentOS
