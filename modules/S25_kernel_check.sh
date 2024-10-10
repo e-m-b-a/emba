@@ -236,7 +236,7 @@ get_kernel_vulns() {
                 lKNOWN_EXPLOITED=1
               fi
             fi
-            write_csv_log "linux_kernel" "${lVER}" "${lLES_CVE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "${lKNOWN_EXPLOITED}"
+            write_csv_log ":linux:linux_kernel" "${lVER}" "${lLES_CVE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "${lKNOWN_EXPLOITED}"
           done
         fi
       done

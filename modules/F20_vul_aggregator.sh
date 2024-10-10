@@ -202,7 +202,7 @@ aggregate_versions() {
       VERSION="$(echo "${VERSION}" | cut -d\; -f1-2 | tr ';' ':')"
       print_output "[+] Found Version details (${ORANGE}kernel${GREEN}): ""${ORANGE}${VERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
-      VERSION=${VERSION/%/:}
+      # VERSION=${VERSION/%/:}
       VERSIONS_KERNEL+=( "${VERSION}" )
       # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
@@ -653,7 +653,7 @@ check_cve_sources() {
 
   # ensure we replace :: with :.*: to use the BIN_VERSION_ in our grep command
   BIN_VERSION_=${BIN_VERSION_//::/:\.\*:}
-  print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} (${BIN_VERSION_}) for CVE matches in ${CVE_VER_SOURCES_FILE}" "no_log"
+  # print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} (${BIN_VERSION_}) for CVE matches in ${CVE_VER_SOURCES_FILE}" "no_log"
 
   CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
   # CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -664,7 +664,7 @@ check_cve_sources() {
 
   # check if our binary name is somewhere in the cpe identifier - if not we can drop this vulnerability:
   if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -c "${BIN_NAME//\.\*}")" -eq 0 ]]; then
-    print_output "[-] No matching criteria found - binary ${BIN_NAME} not vulnerable for CVE ${CVE_ID}" "no_log"
+    # print_output "[-] No matching criteria found - binary ${BIN_NAME} not vulnerable for CVE ${CVE_ID}" "no_log"
     return
   fi
 
@@ -1546,12 +1546,12 @@ get_kernel_check() {
   if [[ -f "${S25_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S25_LOG}")."
     readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "${S25_LOG}" | tail -n +2 | sort -u || true)
-    # we get something like this: "linux_kernel;5.10.59;CVE-2021-3490"
+    # we get something like this: ":linux:linux_kernel;5.10.59;CVE-2021-3490"
   fi
   if [[ -f "${S24_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S24_LOG}")."
-    readarray -t KERNEL_VERSION_S24 < <(cut -d\; -f2 "${S24_LOG}" | tail -n +2 | sort -u | sed 's/^/linux_kernel;/' | sed 's/$/;NA/' || true)
-    # we get something like this: "linux_kernel;5.10.59;NA"
+    readarray -t KERNEL_VERSION_S24 < <(cut -d\; -f2 "${S24_LOG}" | tail -n +2 | sort -u | sed 's/^/:linux:linux_kernel;/' | sed 's/$/;NA/' || true)
+    # we get something like this: ":linux:linux_kernel;5.10.59;NA"
     KERNEL_CVE_EXPLOITS+=( "${KERNEL_VERSION_S24[@]}" )
   fi
 }

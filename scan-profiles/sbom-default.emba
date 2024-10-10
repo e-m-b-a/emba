@@ -17,6 +17,9 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
+# for the binary sbom we limit the detection to only known vulnerable components
+# set to 0 if all components should be tested
+export QUICK_SCAN=1
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 # export QEMULATION=1
