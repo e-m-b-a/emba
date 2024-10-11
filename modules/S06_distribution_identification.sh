@@ -51,22 +51,22 @@ S06_distribution_identification()
       # echo "FIRMWARE_PATH: $FIRMWARE_PATH"
       mapfile -t FOUND_FILES < <(find "${FIRMWARE_PATH}" -xdev -iwholename "*${SEARCH_FILE}" || true)
       for FILE in "${FOUND_FILES[@]}"; do
-        print_output "FILE: ${FILE}"
+        # print_output "FILE: ${FILE}"
         if [[ -f "${FILE}" ]]; then
           PATTERN="$(safe_echo "${CONFIG}" | cut -d\; -f3)"
           # do not use safe_echo for SED_COMMAND
           SED_COMMAND="$(echo "${CONFIG}" | cut -d\; -f4)"
           FILE_QUOTED=$(escape_echo "${FILE}")
           OUT1="$(eval "${PATTERN}" "${FILE_QUOTED}" || true)"
-          print_output "PATTERN: ${PATTERN}"
-          print_output "SED command: ${SED_COMMAND}"
-          print_output "FILE: ${FILE_QUOTED}"
-          print_output "identified before: ${OUT1}"
+          # print_output "PATTERN: ${PATTERN}"
+          # print_output "SED command: ${SED_COMMAND}"
+          # print_output "FILE: ${FILE_QUOTED}"
+          # print_output "identified before: ${OUT1}"
           OUT1=$(echo "${OUT1}" | sort -u | tr '\n' ' ')
           OUT1=$(echo "${OUT1}" | tr -d '"')
-          print_output "identified mod: ${OUT1}"
+          # print_output "identified mod: ${OUT1}"
           IDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
-          print_output "[*] IDENTIFIER: ${IDENTIFIER}"
+          # print_output "[*] IDENTIFIER: ${IDENTIFIER}"
           lFILENAME=$(basename "${FILE,,}")
 
           if [[ $(basename "${FILE}") == "image_sign" ]]; then
