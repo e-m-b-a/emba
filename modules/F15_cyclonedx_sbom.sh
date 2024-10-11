@@ -112,6 +112,8 @@ F15_cyclonedx_sbom() {
       sed -i 's/\;/,/g' "${F15_CSV_LOG}"
       cyclonedx convert --input-file "${F15_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json || print_error "[-] Error while generating json SBOM for CSV ${F15_CSV_LOG}"
       cyclonedx convert --output-format xml --input-file "${F15_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_xml.txt || print_error "[-] Error while generating xml SBOM for CSV ${F15_CSV_LOG}"
+      cyclonedx convert --output-format protobuf --input-file "${F15_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_proto.txt || print_error "[-] Error while generating protobuf SBOM for CSV ${F15_CSV_LOG}"
+      # cyclonedx convert --output-format spdxjson --input-file "${F15_CSV_LOG}" --output-file "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_spdx.txt || print_error "[-] Error while generating spdxjson SBOM for CSV ${F15_CSV_LOG}"
       if [[ -f "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json ]]; then
         # clean the unicodes after converting
         sed -i 's/\\u0026/\&/g' "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
@@ -128,7 +130,10 @@ F15_cyclonedx_sbom() {
       print_output "[+] Cyclonedx SBOM in json and CSV format created:"
       print_output "$(indent "$(orange "-> Download SBOM as JSON${NC}")")" "" "${LOG_PATH_MODULE}/f15_cyclonedx_sbom_json.json"
       print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${LOG_PATH_MODULE}/f15_cyclonedx_sbom_xml.txt"
+      # print_output "$(indent "$(orange "-> Download SBOM as SPDX JSON${NC}")")" "" "${LOG_PATH_MODULE}/f15_cyclonedx_sbom_spdx.txt"
+      print_output "$(indent "$(orange "-> Download SBOM as PROTOBUF${NC}")")" "" "${LOG_PATH_MODULE}/f15_cyclonedx_sbom_proto.txt"
       print_output "$(indent "$(orange "-> Download SBOM as CSV${NC}")")" "" "${F15_CSV_LOG}"
+      print_output "$(indent "$(orange "-> Download SBOM as EMBA CSV${NC}")")" "" "${S08_CSV_LOG}"
       print_ln
       print_output "[+] Cyclonedx SBOM in json format:"
       print_ln
