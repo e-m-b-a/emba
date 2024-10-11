@@ -918,7 +918,7 @@ cve_extractor() {
     fi
   fi
 
-  if [[ -v "${S25_CSV_LOG}" ]]; then
+  if [[ -f "${S25_CSV_LOG}" ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
       if grep -q "kernel;${VERSION};" "${S25_CSV_LOG}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
@@ -964,6 +964,16 @@ cve_extractor() {
     fi
   fi
 
+  if [[ -f "${S06_CSV_LOG}" ]]; then
+    if grep -q "${VERSION_orig}" "${S06_CSV_LOG}" 2>/dev/null; then
+      if [[ "${VSOURCE}" == "unknown" ]]; then
+        VSOURCE="STAT"
+      else
+        VSOURCE+="/STAT"
+      fi
+    fi
+  fi
+
   if [[ -f "${L35_CSV_LOG}" ]]; then
     if grep -q "${VERSION_orig}" "${L35_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
@@ -979,9 +989,9 @@ cve_extractor() {
   if [[ -f "${S08_CSV_LOG}" ]]; then
     if grep -q "${BINARY};.*${VERSION}" "${S08_CSV_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
-        VSOURCE="PACK"
+        VSOURCE="SBOM"
       else
-        VSOURCE+="/PACK"
+        VSOURCE+="/SBOM"
       fi
     fi
   fi

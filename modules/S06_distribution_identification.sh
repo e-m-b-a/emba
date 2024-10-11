@@ -102,9 +102,9 @@ S06_distribution_identification()
               print_output "[*] CSV_RULE: ${CSV_RULE}"
               write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
             fi
-            # CSV_RULE has 5 fields and looks like the following: o:dlink:device:version:*
-            lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${CSV_RULE}:*:*:*:*:*:*"
-            lPURL_IDENTIFIER=$(build_generic_purl ":${CSV_RULE}")
+            # CSV_RULE has 5 fields and looks like the following: :dlink:device:version:*
+            lCPE_IDENTIFIER="cpe:${CPE_VERSION}${CSV_RULE}:*:*:*:*:*:*"
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
             write_log "static_distri_analysis;${FILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${IDENTIFIER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
             OUTPUT=1
           fi
@@ -160,7 +160,7 @@ get_csv_rule_distri() {
   # debian 9 (stretch) - installer build 20170615+deb9u5
   VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/:\1:\1_linux:\2\.\3/')"
   # debian 9
-  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/^(debian) ([0-9]+(\.[0-9]+)+?)$/:\1:\1_linux:\2/')"
+  VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(debian) ([0-9]+(\.[0-9]+)+?).*/:\1:\1_linux:\2/')"
   # Fedora 17 (Beefy Miracle)
   VERSION_IDENTIFIER="$(safe_echo "${VERSION_IDENTIFIER}" | sed -r 's/(fedora)\ ([0-9]+).*/:\1project:\1:\2/')"
   # CentOS

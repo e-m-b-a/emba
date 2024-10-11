@@ -96,6 +96,11 @@ S08_package_mgmt_extractor()
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
+    node_js_package_lock_parser &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
   else
     debian_status_files_analysis
@@ -112,6 +117,7 @@ S08_package_mgmt_extractor()
     alpine_apk_package_check
     windows_exifparser
     rust_cargo_lock_parser
+    node_js_package_lock_parser
   fi
 
   # shellcheck disable=SC2153
@@ -152,6 +158,94 @@ distri_check() {
     fi
   done
   echo "${lOS_IDENTIFIED}"
+}
+
+node_js_package_lock_parser() {
+  local lPACKAGING_SYSTEM="node_js_lock"
+
+  sub_module_title "Node.js package lock identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  local lNODE_LCK_ARCHIVES_ARR=()
+  local lNODE_LCK_ARCHIVE=""
+  local lR_FILE=""
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS="NA"
+  local lAPP_ARCH="NA"
+  local lAPP_MAINT="NA"
+  local lAPP_DESC="NA"
+  local lAPP_VENDOR="NA"
+  local lCPE_IDENTIFIER="NA"
+  local lPOS_RES=0
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
+  local lPURL_IDENTIFIER="NA"
+
+  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "package*json" -type f)
+
+  if [[ -v lNODE_LCK_ARCHIVES_ARR[@] ]] ; then
+    check_for_s08_csv_log "${S08_CSV_LOG}"
+
+    write_log "[*] Found ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} Node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lNODE_LCK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+    for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
+      lR_FILE=$(file "${lNODE_LCK_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
+        continue
+      fi
+
+      jq -r '.packages | keys[] as $k | "\($k);\(.[$k] | "\(.version);\(.license);\(.integrity);\(.dependencies)")"' > "${TMP_DIR}/node.lock.tmp" || true
+
+      while IFS=";" read -r lAPP_NAME lAPP_VERS lAPP_LIC lAPP_CHECKSUM lAPP_DEPS; do
+        lAPP_NAME=$(echo "${lAPP_NAME}" | rev | cut -d '/' -f1 | rev)
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+        lAPP_CHECKSUM=$(clean_package_details "${lAPP_CHECKSUM}")
+        lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
+
+        [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lMD5_CHECKSUM=${lAPP_CHECKSUM}
+        [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lSHA256_CHECKSUM=${lAPP_CHECKSUM}
+        [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lSHA512_CHECKSUM=${lAPP_CHECKSUM}
+
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+
+        lPURL_IDENTIFIER="pkg:npm/${lAPP_NAME}@${lAPP_VERS}"
+
+        # Todo: checksum
+
+        write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lNODE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        lPOS_RES=1
+      done < "${TMP_DIR}/node.lock.tmp"
+      rm -f "${TMP_DIR}/node.lock.tmp"
+    done
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No Node.js lock packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No Node.js lock package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] Node.js lock SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No Node.js lock SBOM results available"
+  fi
+
 }
 
 deb_package_check() {
@@ -327,45 +421,71 @@ windows_exifparser() {
 
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file -b "${lEXE_ARCHIVE}")
-      if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ "${lR_FILE}" == *"PE32+ executable"* ]]; then
+      if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ ! "${lR_FILE}" == *"PE32+ executable"* ]]; then
         continue
       fi
-      exiftool "${lEXE_ARCHIVE}" > "${TMP_DIR}/windows_exe_exif_data.txt" || true
+      lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
+      lEXIF_LOG="${LOG_PATH_MODULE}/windows_exe_exif_data_${lEXE_NAME}.txt"
 
-      lAPP_NAME=$(grep "Product Name" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
+      exiftool "${lEXE_ARCHIVE}" > "${lEXIF_LOG}" || true
+
+      lAPP_NAME=$(grep "Product Name" "${lEXIF_LOG}" || true)
       lAPP_NAME=${lAPP_NAME/*:\ }
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      lAPP_NAME=$(clean_package_versions "${lAPP_NAME}")
 
       if [[ -z "${lAPP_NAME}" ]]; then
-        lAPP_NAME=$(grep "Internal Name" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
+        lAPP_NAME=$(grep "Internal Name" "${lEXIF_LOG}" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       fi
 
       if [[ -z "${lAPP_NAME}" ]]; then
-        lAPP_NAME=$(grep "File Name" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
+        lAPP_NAME=$(grep "File Name" "${lEXIF_LOG}" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       fi
+
+      lAPP_VENDOR=$(grep "Company Name" "${lEXIF_LOG}" || true)
+      lAPP_VENDOR=${lAPP_VENDOR/*:\ }
+      lAPP_VENDOR=$(clean_package_details "${lAPP_VENDOR}")
+      lAPP_VENDOR=$(clean_package_versions "${lAPP_VENDOR}")
+
+      if [[ -z "${lAPP_VENDOR}" ]]; then
+        lAPP_VENDOR="${lAPP_NAME}"
+      fi
+
+      lAPP_DESC=$(grep "File Description" "${lEXIF_LOG}" || true)
+      lAPP_DESC=${lAPP_DESC/*:\ }
+      lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
       lAPP_LIC="NA"
 
-      lAPP_VERS=$(grep "Product Version" "${TMP_DIR}/windows_exe_exif_data.txt" || true)
+      lAPP_VERS=$(grep "Product Version" "${lEXIF_LOG}" || true)
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-      if [[ "${lR_FILE}" == *"Intel 80386"* ]]; then
+      lAPP_ARCH=$(grep "Machine Type" "${lEXIF_LOG}" || true)
+      lAPP_ARCH=${lAPP_ARCH/*:\ }
+      lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+
+      if [[ "${lAPP_ARCH}" == *"intel_386_or_later"* ]]; then
         lAPP_ARCH="x86"
-      else
-        lAPP_ARCH="${lR_FILE//\ /-}"
+      fi
+      if [[ -z "${lAPP_ARCH}" ]]; then
+        if [[ "${lR_FILE}" == *"Intel 80386"* ]]; then
+          lAPP_ARCH="x86"
+        else
+          lAPP_ARCH="${lR_FILE//\ /-}"
+          lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+        fi
       fi
 
       lMD5_CHECKSUM="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
 
-      lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
       if [[ -n "${lOS_IDENTIFIED}" ]]; then
@@ -374,10 +494,8 @@ windows_exifparser() {
         lPURL_IDENTIFIER="pkg:exe/windows-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
       fi
 
-
-      # Todo: Company Name, Copyright, Mime-Type
-
       write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_link "${lEXIF_LOG}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -f "${TMP_DIR}/windows_exe_exif_data.txt"
@@ -1777,13 +1895,14 @@ clean_package_details() {
   lCLEAN_ME_UP=${lCLEAN_ME_UP/\"}
   # Turn on extended globbing
   shopt -s extglob
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\(\)\]])}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\/\<\>\(\)\]])}
   lCLEAN_ME_UP=${lCLEAN_ME_UP##+( )}
   lCLEAN_ME_UP=${lCLEAN_ME_UP%%+( )}
   # Turn off extended globbing
   shopt -u extglob
   lCLEAN_ME_UP=${lCLEAN_ME_UP,,}
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//,/ }
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//,/\.}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}
   echo "${lCLEAN_ME_UP}"
 }
 
@@ -1804,6 +1923,6 @@ clean_package_versions() {
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/:[0-9]:/:/g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/^[0-9]://g')
   STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | tr -dc '[:print:]')
-  STRIPPED_VERSION=${STRIPPED_VERSION//,\ /\.}
+  STRIPPED_VERSION=${STRIPPED_VERSION//,/\.}
   echo "${STRIPPED_VERSION}"
 }
