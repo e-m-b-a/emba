@@ -351,7 +351,7 @@ fw_bin_detector() {
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").apk" || print_error "[-] APK file copy process failed"
     fi
   fi
-  if [[ "${lFILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"PE32+ executable"* ]]; then
+  if [[ "${lFILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"PE32+ executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"MSI Installer"* ]]; then
     print_output "[+] Identified Windows executable"
     export DISABLE_DEEP=1
     export WINDOWS_EXE=1

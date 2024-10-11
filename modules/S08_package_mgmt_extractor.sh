@@ -19,7 +19,7 @@
 S08_package_mgmt_extractor()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Non binary SBOM module"
+  module_title "EMBA central SBOM environment"
   pre_module_reporter "${FUNCNAME[0]}"
 
   local NEG_LOG=0
@@ -402,7 +402,14 @@ windows_exifparser() {
   local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
-  mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" \))
+  if [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+    # if we already know that we have a windows binary to analyze we can check every file with the file command
+    # to ensure we do not miss anything
+    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -l "PE32\|MSI")
+  else
+    # if we just search through an unknwon environment we search for exe, dll and msi files
+    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.msi" \))
+  fi
 
   if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
     check_for_s08_csv_log "${S08_CSV_LOG}"
@@ -461,7 +468,11 @@ windows_exifparser() {
 
       lAPP_LIC="NA"
 
-      lAPP_VERS=$(grep "Product Version" "${lEXIF_LOG}" || true)
+      lAPP_VERS=$(grep "Product Version Number" "${lEXIF_LOG}" || true)
+      if [[ -z "${lAPP_VERS}" ]]; then
+        # backup
+        lAPP_VERS=$(grep "Product Version" "${lEXIF_LOG}" || true)
+      fi
       lAPP_VERS=${lAPP_VERS/*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
@@ -513,7 +524,7 @@ windows_exifparser() {
   if [[ "${lPOS_RES}" -eq 1 ]]; then
     print_output "[+] Windows executables SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   else
-    print_output "[*] No Rust Windows executables SBOM results available"
+    print_output "[*] No Windows executables SBOM results available"
   fi
 }
 
