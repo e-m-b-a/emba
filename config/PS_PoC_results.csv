@@ -9543,6 +9543,7 @@ CVE-2023-0329;Elementor Website Builder SQL Injection;https://packetstormsecurit
 CVE-2023-0455;Bumsys Business Management System 1.0.3 beta Shell Upload;https://packetstormsecurity.com/files/172674/Bumsys-Business-Management-System-1.0.3-beta-Shell-Upload.html;remote
 CVE-2023-0493;BTCPay Server 1.7.4 HTML Injection;https://packetstormsecurity.com/files/171732/BTCPay-Server-1.7.4-HTML-Injection.html;unknown
 CVE-2023-0527;Online Security Guards Hiring System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/172667/Online-Security-Guards-Hiring-System-1.0-Cross-Site-Scripting.html;unknown
+CVE-2023-0636;ABB Cylon Aspect 3.07.00 Remote Code Execution;https://packetstormsecurity.com/files/181827/ABB-Cylon-Aspect-3.07.00-Remote-Code-Execution.html;unknown
 CVE-2023-0669;Goanywhere Encryption Helper 7.1.1 Remote Code Execution;https://packetstormsecurity.com/files/171789/Goanywhere-Encryption-Helper-7.1.1-Remote-Code-Execution.html;remote
 CVE-2023-0744;Answerdev 1.0.3 Account Takeover;https://packetstormsecurity.com/files/171733/Answerdev-1.0.3-Account-Takeover.html;unknown
 CVE-2023-0777;modoboa 2.0.4 Admin Takeover;https://packetstormsecurity.com/files/171744/modoboa-2.0.4-Admin-Takeover.html;unknown
@@ -9956,6 +9957,7 @@ CVE-2023-39796;WBCE 1.6.0 SQL Injection;https://packetstormsecurity.com/files/17
 CVE-2023-40278;OpenClinic GA 5.247.01 Information Disclosure;https://packetstormsecurity.com/files/178042/OpenClinic-GA-5.247.01-Information-Disclosure.html;unknown
 CVE-2023-40279;OpenClinic GA 5.247.01 Path Traversal;https://packetstormsecurity.com/files/178041/OpenClinic-GA-5.247.01-Path-Traversal.html;unknown
 CVE-2023-40304;BMC Compuware iStrobe Web 20.13 Shell Upload;https://packetstormsecurity.com/files/178059/BMC-Compuware-iStrobe-Web-20.13-Shell-Upload.html;remote
+CVE-2023-40459;ALEOS 4.16 Denial Of Service;https://packetstormsecurity.com/files/181977/ALEOS-4.16-Denial-Of-Service.html;DoS
 CVE-2023-40834;OpenCart CMS 4.0.2.2 Brute Force;https://packetstormsecurity.com/files/174525/OpenCart-CMS-4.0.2.2-Brute-Force.html;unknown
 CVE-2023-41109;SmartNode SN200 3.21.2 23021 OS Command Injection;https://packetstormsecurity.com/files/175945/SmartNode-SN200-3.21.2-23021-OS-Command-Injection.html;remote
 CVE-2023-4110;PHPJabbers Availability Booking Calendar 5.0 Cross Site Scripting;https://packetstormsecurity.com/files/173926/PHPJabbers-Availability-Booking-Calendar-5.0-Cross-Site-Scripting.html;unknown
@@ -10163,6 +10165,7 @@ CVE-2023-5204;WordPress AI ChatBot 4.8.9 SQL Injection Traversal File Deletion;h
 CVE-2023-5212;WordPress AI ChatBot 4.8.9 SQL Injection Traversal File Deletion;https://packetstormsecurity.com/files/175371/WordPress-AI-ChatBot-4.8.9-SQL-Injection-Traversal-File-Deletion.html;remote
 CVE-2023-5222;Viessmann Vitogate 300 2.1.3.0 Remote Code Execution;https://packetstormsecurity.com/files/177571/Viessmann-Vitogate-300-2.1.3.0-Remote-Code-Execution.html;remote
 CVE-2023-5241;WordPress AI ChatBot 4.8.9 SQL Injection Traversal File Deletion;https://packetstormsecurity.com/files/175371/WordPress-AI-ChatBot-4.8.9-SQL-Injection-Traversal-File-Deletion.html;remote
+CVE-2023-52709;TI Bluetooth Denial Of Service;https://packetstormsecurity.com/files/181852/TI-Bluetooth-Denial-Of-Service.html;DoS
 CVE-2023-5347;Korenix JetNet Series Unauthenticated Access;https://packetstormsecurity.com/files/176550/Korenix-JetNet-Series-Unauthenticated-Access.html;unknown
 CVE-2023-5360;WordPress Royal Elementor 1.3.78 Shell Upload;https://packetstormsecurity.com/files/175107/WordPress-Royal-Elementor-1.3.78-Shell-Upload.html;remote
 CVE-2023-5376;Korenix JetNet Series Unauthenticated Access;https://packetstormsecurity.com/files/176550/Korenix-JetNet-Series-Unauthenticated-Access.html;unknown
@@ -10377,6 +10380,7 @@ CVE-2024-32018;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Ac
 CVE-2024-32136;BWL Advanced FAQ Manager 2.0.3 SQL Injection;https://packetstormsecurity.com/files/178874/BWL-Advanced-FAQ-Manager-2.0.3-SQL-Injection.html;remote
 CVE-2024-32151;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-32651;changedetection 0.45.20 Remote Code Execution;https://packetstormsecurity.com/files/178878/changedetection-0.45.20-Remote-Code-Execution.html;remote
+CVE-2024-33060;fastrpc_mmap_create Use After Free;https://packetstormsecurity.com/files/181999/fastrpc_mmap_create-Use-After-Free.html;unknown
 CVE-2024-33288;Prison Management System Using PHP SQL Injection;https://packetstormsecurity.com/files/178557/Prison-Management-System-Using-PHP-SQL-Injection.html;remote
 CVE-2024-33326;LumisXP 16.1.x Cross Site Scripting;https://packetstormsecurity.com/files/179506/LumisXP-16.1.x-Cross-Site-Scripting.html;unknown
 CVE-2024-33327;LumisXP 16.1.x Cross Site Scripting;https://packetstormsecurity.com/files/179505/LumisXP-16.1.x-Cross-Site-Scripting.html;unknown
@@ -10411,7 +10415,9 @@ CVE-2024-34747;PowerVR DEVMEMXINT_RESERVATION ppsPMR Use After Free;https://pack
 CVE-2024-34748;PowerVR _DevmemXReservationPageAddress Wrapping Addition Error;https://packetstormsecurity.com/files/179770/PowerVR-_DevmemXReservationPageAddress-Wrapping-Addition-Error.html;unknown
 CVE-2024-34831;GibbonEdu Core 26.0.00 Cross Site Scripting;https://packetstormsecurity.com/files/181591/GibbonEdu-Core-26.0.00-Cross-Site-Scripting.html;unknown
 CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
+CVE-2024-35214;BlackBerry CylanceOPTICS Uninstall Password Bypass;https://packetstormsecurity.com/files/181909/BlackBerry-CylanceOPTICS-Uninstall-Password-Bypass.html;unknown
 CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
+CVE-2024-35288;Nitro PDF Pro Local Privilege Escalation;https://packetstormsecurity.com/files/181954/Nitro-PDF-Pro-Local-Privilege-Escalation.html;unknown
 CVE-2024-36248;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36251;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-36401;GeoServer Remote Code Execution;https://packetstormsecurity.com/files/181518/GeoServer-Remote-Code-Execution.html;remote
@@ -10441,12 +10447,14 @@ CVE-2024-38024;Microsoft SharePoint Remote Code Execution;https://packetstormsec
 CVE-2024-38063;Microsoft Windows IPv6 CVE 2024 38063 Checker Denial Of Service;https://packetstormsecurity.com/files/180458/Microsoft-Windows-IPv6-CVE-2024-38063-Checker-Denial-Of-Service.html;DoS
 CVE-2024-38063;Microsoft Windows IPv6 Memory Corruption;https://packetstormsecurity.com/files/180422/Microsoft-Windows-IPv6-Memory-Corruption.html;unknown
 CVE-2024-38094;Microsoft SharePoint Remote Code Execution;https://packetstormsecurity.com/files/179460/Microsoft-SharePoint-Remote-Code-Execution.html;remote
+CVE-2024-38200;Microsoft Office NTLMv2 Disclosure;https://packetstormsecurity.com/files/181971/Microsoft-Office-NTLMv2-Disclosure.html;unknown
 CVE-2024-38457;XenForo 2.2.15 Cross Site Request Forgery;https://packetstormsecurity.com/files/179585/XenForo-2.2.15-Cross-Site-Request-Forgery.html;unknown
 CVE-2024-38458;Xenforo 2.2.15 Remote Code Execution;https://packetstormsecurity.com/files/179586/Xenforo-2.2.15-Remote-Code-Execution.html;remote
 CVE-2024-39123;Calibre Web 0.6.21 Cross Site Scripting;https://packetstormsecurity.com/files/180376/Calibre-Web-0.6.21-Cross-Site-Scripting.html;unknown
 CVE-2024-39143;ResidenceCMS 2.10.1 Cross Site Scripting;https://packetstormsecurity.com/files/179401/ResidenceCMS-2.10.1-Cross-Site-Scripting.html;unknown
 CVE-2024-39248;SimpCMS 0.1 Cross Site Scripting;https://packetstormsecurity.com/files/179219/SimpCMS-0.1-Cross-Site-Scripting.html;unknown
 CVE-2024-39486;Linux DRM drm_file_update_pid Race Condition Use After Free;https://packetstormsecurity.com/files/179909/Linux-DRM-drm_file_update_pid-Race-Condition-Use-After-Free.html;unknown
+CVE-2024-4007;ABB Cylon Aspect 3.07.01 Hard Coded Credentials;https://packetstormsecurity.com/files/181853/ABB-Cylon-Aspect-3.07.01-Hard-Coded-Credentials.html;unknown
 CVE-2024-40101;Microweber 2.0.15 Cross Site Scripting;https://packetstormsecurity.com/files/179921/Microweber-2.0.15-Cross-Site-Scripting.html;unknown
 CVE-2024-40422;Devika 1 Path Traversal;https://packetstormsecurity.com/files/179904/Devika-1-Path-Traversal.html;unknown
 CVE-2024-40502;Hospital Management System Project In ASP.Net MVC 1 SQL Injection;https://packetstormsecurity.com/files/179583/Hospital-Management-System-Project-In-ASP.Net-MVC-1-SQL-Injection.html;remote
@@ -10459,7 +10467,9 @@ CVE-2024-41333;Tourism Management System 2.0 Cross Site Scripting;https://packet
 CVE-2024-41629;Texas Instruments Fusion Digital Power Designer 7.10.1 Credential Disclosure;https://packetstormsecurity.com/files/181281/Texas-Instruments-Fusion-Digital-Power-Designer-7.10.1-Credential-Disclosure.html;local
 CVE-2024-41819;Notemark 0.13.0 Cross Site Scripting;https://packetstormsecurity.com/files/180456/Notemark-0.13.0-Cross-Site-Scripting.html;unknown
 CVE-2024-41958;Mailcow TFA Authentication Bypass;https://packetstormsecurity.com/files/179963/Mailcow-TFA-Authentication-Bypass.html;unknown
+CVE-2024-42259;Linux i915 PTE Use After Free;https://packetstormsecurity.com/files/181725/Linux-i915-PTE-Use-After-Free.html;unknown
 CVE-2024-42318;Linux Landlock Logic Bug;https://packetstormsecurity.com/files/180261/Linux-Landlock-Logic-Bug.html;unknown
+CVE-2024-42831;Elaines Realtime CRM Automation 6.18.17 Cross Site Scripting;https://packetstormsecurity.com/files/181792/Elaines-Realtime-CRM-Automation-6.18.17-Cross-Site-Scripting.html;unknown
 CVE-2024-42845;Invesalius 3.1 Remote Code Execution;https://packetstormsecurity.com/files/180378/Invesalius-3.1-Remote-Code-Execution.html;remote
 CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
@@ -10468,6 +10478,7 @@ CVE-2024-4358;Telerik Report Server Deserialization Authentication Bypass;https:
 CVE-2024-44777;vTiger CRM 7.4.0 Cross Site Scripting;https://packetstormsecurity.com/files/180462/vTiger-CRM-7.4.0-Cross-Site-Scripting.html;unknown
 CVE-2024-44778;vTiger CRM 7.4.0 Cross Site Scripting;https://packetstormsecurity.com/files/180462/vTiger-CRM-7.4.0-Cross-Site-Scripting.html;unknown
 CVE-2024-44779;vTiger CRM 7.4.0 Cross Site Scripting;https://packetstormsecurity.com/files/180462/vTiger-CRM-7.4.0-Cross-Site-Scripting.html;unknown
+CVE-2024-44825;Invesalius 3.1.99995 Arbitrary File Write Directory Traversal;https://packetstormsecurity.com/files/181738/Invesalius-3.1.99995-Arbitrary-File-Write-Directory-Traversal.html;unknown
 CVE-2024-45170;C MOR Video Surveillance 5.2401 Improper Access Control;https://packetstormsecurity.com/files/181379/C-MOR-Video-Surveillance-5.2401-Improper-Access-Control.html;unknown
 CVE-2024-45171;C MOR Video Surveillance 5.2401 Remote Shell Upload;https://packetstormsecurity.com/files/181381/C-MOR-Video-Surveillance-5.2401-Remote-Shell-Upload.html;remote
 CVE-2024-45172;C MOR Video Surveillance 5.2401 6.00PL01 Cross Site Request Forgery;https://packetstormsecurity.com/files/181377/C-MOR-Video-Surveillance-5.2401-6.00PL01-Cross-Site-Request-Forgery.html;unknown
@@ -10480,9 +10491,14 @@ CVE-2024-45178;C MOR Video Surveillance 5.2401 Path Traversal;https://packetstor
 CVE-2024-45179;C MOR Video Surveillance 5.2401 6.00PL01 Command Injection;https://packetstormsecurity.com/files/181385/C-MOR-Video-Surveillance-5.2401-6.00PL01-Command-Injection.html;unknown
 CVE-2024-45622;ASIS 3.2.0 SQL Injection;https://packetstormsecurity.com/files/181355/ASIS-3.2.0-SQL-Injection.html;remote
 CVE-2024-4577;PHP Remote Code Execution;https://packetstormsecurity.com/files/179085/PHP-Remote-Code-Execution.html;remote
+CVE-2024-45873;VegaBird Yaazhini 2.0.2 DLL Hijacking;https://packetstormsecurity.com/files/181912/VegaBird-Yaazhini-2.0.2-DLL-Hijacking.html;unknown
+CVE-2024-45874;VegaBird Vooki 5.2.9 DLL Hijacking;https://packetstormsecurity.com/files/181913/VegaBird-Vooki-5.2.9-DLL-Hijacking.html;unknown
+CVE-2024-46409;SeedDMS 6.0.28 Cross Site Scripting;https://packetstormsecurity.com/files/181974/SeedDMS-6.0.28-Cross-Site-Scripting.html;unknown
+CVE-2024-47176;CUPS Arbitrary Command Execution;https://packetstormsecurity.com/files/181978/CUPS-Arbitrary-Command-Execution.html;remote
 CVE-2024-4883;Progress WhatsUp Gold WriteDatafile Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179405/Progress-WhatsUp-Gold-WriteDatafile-Unauthenticated-Remote-Code-Execution.html;remote
 CVE-2024-4885;Progress WhatsUp Gold GetFileWithoutZip Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179404/Progress-WhatsUp-Gold-GetFileWithoutZip-Unauthenticated-Remote-Code-Execution.html;remote
 CVE-2024-4956;Nexus Repository Manager 3 Path Traversal;https://packetstormsecurity.com/files/181661/Nexus-Repository-Manager-3-Path-Traversal.html;unknown
+CVE-2024-4956;Nexus Repository Traversal Scanner;https://packetstormsecurity.com/files/181887/Nexus-Repository-Traversal-Scanner.html;unknown
 CVE-2024-5009;Progress WhatsUp Gold SetAdminPassword Privilege Escalation;https://packetstormsecurity.com/files/179403/Progress-WhatsUp-Gold-SetAdminPassword-Privilege-Escalation.html;local
 CVE-2024-5230;FleetCart 4.1.1 Information Disclosure;https://packetstormsecurity.com/files/178770/FleetCart-4.1.1-Information-Disclosure.html;unknown
 CVE-2024-5274;Google Chrome V8 Type Confusion;https://packetstormsecurity.com/files/180477/Google-Chrome-V8-Type-Confusion.html;unknown
@@ -10496,6 +10512,8 @@ CVE-2024-5676;Paradox IP150 Internet Module 1.40.00 Cross Site Request Forgery;h
 CVE-2024-5932;WordPress GiveWP Donation Fundraising Platform 3.14.1 File Deletion Command Execution;https://packetstormsecurity.com/files/180421/WordPress-GiveWP-Donation-Fundraising-Platform-3.14.1-File-Deletion-Command-Execution.html;remote
 CVE-2024-5947;Deep Sea Electronics DSE855 Remote Authentication Bypass;https://packetstormsecurity.com/files/179342/Deep-Sea-Electronics-DSE855-Remote-Authentication-Bypass.html;unknown
 CVE-2024-6205;WordPress PayPlus Payment Gateway SQL Injection;https://packetstormsecurity.com/files/179961/WordPress-PayPlus-Payment-Gateway-SQL-Injection.html;remote
+CVE-2024-6209;ABB Cylon Aspect 3.08.01 Arbitrary File Deletion;https://packetstormsecurity.com/files/181802/ABB-Cylon-Aspect-3.08.01-Arbitrary-File-Deletion.html;unknown
+CVE-2024-6298;ABB Cylon Aspect 3.08.01 Remote Code Execution;https://packetstormsecurity.com/files/181803/ABB-Cylon-Aspect-3.08.01-Remote-Code-Execution.html;remote
 CVE-2024-6387;OpenSSH Server regreSSHion Remote Code Execution;https://packetstormsecurity.com/files/179290/OpenSSH-Server-regreSSHion-Remote-Code-Execution.html;unknown
 CVE-2024-6670;Progress Software WhatsUp Gold SQL Injection;https://packetstormsecurity.com/files/180479/Progress-Software-WhatsUp-Gold-SQL-Injection.html;remote
 CVE-2024-6706;Open WebUI 0.1.105 Persistent Cross Site Scripting;https://packetstormsecurity.com/files/179997/Open-WebUI-0.1.105-Persistent-Cross-Site-Scripting.html;unknown
@@ -10514,8 +10532,13 @@ CVE-2024-7313;WordPress Shield Security 20.0.5 Cross Site Scripting;https://pack
 CVE-2024-7395;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
 CVE-2024-7396;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
 CVE-2024-7397;Korenix JetPort Series 1.2 Command Injection Insufficient Authentication;https://packetstormsecurity.com/files/179922/Korenix-JetPort-Series-1.2-Command-Injection-Insufficient-Authentication.html;unknown
+CVE-2024-7479;TeamViewer Privilege Escalation;https://packetstormsecurity.com/files/182012/TeamViewer-Privilege-Escalation.html;unknown
+CVE-2024-7481;TeamViewer Privilege Escalation;https://packetstormsecurity.com/files/182012/TeamViewer-Privilege-Escalation.html;unknown
 CVE-2024-8503;VICIdial 2.14 917a SQL Injection;https://packetstormsecurity.com/files/181460/VICIdial-2.14-917a-SQL-Injection.html;unknown
 CVE-2024-8503;VICIdial SQL Injection Remote Code Execution;https://packetstormsecurity.com/files/181542/VICIdial-SQL-Injection-Remote-Code-Execution.html;unknown
 CVE-2024-8504;VICIdial 2.14 917a Remote Code Execution;https://packetstormsecurity.com/files/181461/VICIdial-2.14-917a-Remote-Code-Execution.html;unknown
 CVE-2024-8504;VICIdial SQL Injection Remote Code Execution;https://packetstormsecurity.com/files/181542/VICIdial-SQL-Injection-Remote-Code-Execution.html;unknown
 CVE-2024-8522;WordPress LMS 4.2.7 SQL Injection;https://packetstormsecurity.com/files/181662/WordPress-LMS-4.2.7-SQL-Injection.html;remote
+CVE-2024-8877;Netman 204 4.05 SQL Injection Unauthenticated Password Reset;https://packetstormsecurity.com/files/181794/Netman-204-4.05-SQL-Injection-Unauthenticated-Password-Reset.html;remote
+CVE-2024-8878;Netman 204 4.05 SQL Injection Unauthenticated Password Reset;https://packetstormsecurity.com/files/181794/Netman-204-4.05-SQL-Injection-Unauthenticated-Password-Reset.html;remote
+CVE-2024-9014;pgAdmin 8.11 Information Disclosure;https://packetstormsecurity.com/files/181851/pgAdmin-8.11-Information-Disclosure.html;unknown
