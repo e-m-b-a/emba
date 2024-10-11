@@ -13,8 +13,6 @@
 #
 # Author(s): Michael Messner
 
-# The following template should be used for the module documenation
-# Use a : NOOP and here document to embed documentation,
 # The documentation can be generated with the following command:
 # perl -ne "s/^\t+//; print if m/END_OF_DOCS'?\$/ .. m/^\s*'?END_OF_DOCS'?\$/ and not m/END_OF_DOCS'?$/;" modules/template_module.sh
 # or with pod2text modules/template_module.sh
@@ -25,7 +23,7 @@
 
 ==head2 S04_windows_basic_analysis Short description
 
-Module uses exiftool to show details of Windows binaries.
+This module uses exiftool to show exif details of Windows binaries.
 
 ==head2 S04_windows_basic_analysis Detailed description
 
@@ -81,11 +79,11 @@ Tag 080904b 0                   :
 
 ==head2 S04_windows_basic_analysis 3rd party tools
 
-Any 3rd party tool that is needed from your module. Also include the tested and known working version and
-download link:
-* exiftool:
+Any 3rd party tool that is needed from your module. Also include the tested and known working
+version and download link:
+* exiftool installation on current Kali Linux:
 
-ii  libimage-exiftool-perl                         12.76+dfsg-1                            all          library and program to read and write meta information in multimedia files
+ii  libimage-exiftool-perl     12.76+dfsg-1        all       library and program to read and write meta information in multimedia files
 
 ==head2 S04_windows_basic_analysis Testfirmware
 
@@ -93,7 +91,7 @@ Any Windows binary (exe) file should be fine.
 
 ==head2 S04_windows_basic_analysis Output
 
-Example output of module
+Example output of module see "Detailed description"
 
 ==head2 S04_windows_basic_analysis License
 
@@ -125,7 +123,14 @@ S04_windows_basic_analysis() {
   local lEXE_ARCHIVES_ARR=()
   local lEXE_ARCHIVE=""
 
-  mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" \))
+  if [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+    # if we already know that we have a windows binary to analyze we can check every file with the file command
+    # to ensure we do not miss anything
+    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -l "PE32\|MSI")
+  else
+    # if we just search through an unknwon environment we search for exe, dll and msi files
+    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.msi" \))
+  fi
 
   if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do

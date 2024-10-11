@@ -23,7 +23,7 @@
 
 ==head2 P07_windows_exe_extract Short description
 
-Please write a short description of your module. Usually ~2-3 sentences are fine to get an idea.
+This module extracts Windows executables with 7z.
 
 ==head2 P07_windows_exe_extract Detailed description
 
@@ -32,22 +32,61 @@ that were used.
 
 ==head2 P07_windows_exe_extract 3rd party tools
 
-Any 3rd party tool that is needed from your module. Also include the tested and known working version and
-download link.
+Any 3rd party tool that is needed from your module. Also include the tested and known working
+version and download link:
+
+* 7zip installation on current Kali Linux:
+
+└─$ dpkg -l | grep 7z
+ii  7zip                      23.01+dfsg-8                    amd64        7-Zip file archiver with a high compression ratio
+ii  p7zip-full                16.02+transitional.1            all          transitional package
 
 ==head2 P07_windows_exe_extract Testfirmware
 
-For verification of the module we need some testfirmware.
-
-Testfirmware details:
-- Name:
-- Vendor:
-- Checksum (MD5/SHA1/SHA256):
-- Download Link:
+Most Windows exe files should work fine.
 
 ==head2 P07_windows_exe_extract Output
 
-Example output of module
+7-Zip 24.08 (x64) : Copyright (c) 1999-2024 Igor Pavlov : 2024-08-11
+ 64-bit locale=C.UTF-8 Threads:128 OPEN_MAX:1048576
+
+Scanning the drive for archives:
+1 file, 1974272 bytes (1928 KiB)
+
+Extracting archive: /firmware
+--
+Path = /firmware
+Type = Compound
+Physical Size = 1974272
+Extension = msi
+Cluster Size = 4096
+Sector Size = 64
+----
+Path = media1.cab
+Size = 1184244
+Packed Size = 1187840
+--
+Path = media1.cab
+Type = Cab
+Physical Size = 1184244
+Method = MSZip
+Blocks = 1
+Volumes = 1
+Volume Index = 0
+ID = 0
+
+Everything is Ok
+
+Files: 32
+Size:       6280647
+Compressed: 1974272
+
+[*] Using the following firmware directory (/logs/firmware/exe_extraction/) as base directory:
+  3407924      4 drwxr-xr-x   2 root     root         4096 Oct 11 15:30 /logs/firmware/exe_extraction/
+  3407955    116 -rw-r--r--   1 root     root       114896 Jul 22  2014 /logs/firmware/exe_extraction/file_F25F71FF5ED347D6AF737982BCA5AF43
+  <snip>
+
+[*] Extracted 32 files and 1 directories from the Windows executable.
 
 ==head2 P07_windows_exe_extract License
 
@@ -57,10 +96,12 @@ Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
 
 ==head2 P07_windows_exe_extract Todo
 
-This module is in very early state and is only able to extract exe files that are provided via the -f switch
+This module is in very early state and is currently only able to extract exe files that are provided via the -f switch
 to an EMBA analysis process.
 In the future we need better detection if it will be possible to extract the exe via 7z or if we need a different
 approach.
+Additionally, we need to walk through the extracted content if we can extract further exe files. This could be also done
+via the deep extractor.
 
 ==head2 P07_windows_exe_extract Known issues
 
