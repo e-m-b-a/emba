@@ -25,6 +25,9 @@ S08_package_mgmt_extractor()
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
 
+  node_js_package_lock_parser
+  exit
+
   if [[ ${THREADED} -eq 1 ]]; then
     debian_status_files_analysis &
     local lTMP_PID="$!"
@@ -199,7 +202,7 @@ node_js_package_lock_parser() {
 
     for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lNODE_LCK_ARCHIVE}")
-      if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
+      if [[ ! "${lR_FILE}" == *"JSON text"* ]]; then
         continue
       fi
 

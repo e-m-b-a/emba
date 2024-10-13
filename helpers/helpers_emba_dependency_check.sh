@@ -736,7 +736,7 @@ dependency_check()
         check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
         check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
         check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
-        check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
+        # check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
         check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
         # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
         # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
