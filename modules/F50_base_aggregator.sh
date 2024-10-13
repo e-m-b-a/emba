@@ -652,9 +652,9 @@ output_cve_exploits() {
     fi
 
     if [[ -v VERSIONS_AGGREGATED[@] ]]; then
-      if [[ -f "${LOG_DIR}"/f21_cyclonedx_sbom.txt ]]; then
+      if [[ -f "${F15_LOG}" ]]; then
         print_output "[+] Identified a SBOM including ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details."
-        write_link "f21"
+        write_link "f15"
       else
         print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details.\\n"
         write_link "f20#softwareinventoryinitialoverview"
