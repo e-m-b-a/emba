@@ -171,6 +171,10 @@ version_detection_thread() {
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
+      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
+      lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+      lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
+
       lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}' || true)"
       lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}' || true)"
       lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}' || true)"
