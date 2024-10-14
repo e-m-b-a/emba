@@ -25,9 +25,6 @@ S08_package_mgmt_extractor()
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
 
-  node_js_package_lock_parser
-  exit
-
   if [[ ${THREADED} -eq 1 ]]; then
     debian_status_files_analysis &
     local lTMP_PID="$!"
