@@ -289,6 +289,13 @@ activate_pipenv "./external/emba_venv"
 if command -v docker-compose > /dev/null ; then
   echo -e "\n${ORANGE}""${BOLD}""Old docker-compose version found""${NC}"
   export DOCKER_COMPOSE=("docker-compose")
+  # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
+  if ! command -v docker > /dev/null; then
+    echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
+    if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
+      apt-get install docker-cli -y
+    fi
+  fi
 elif ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
   # OS debian is for Kali Linux
   OS="debian"
@@ -306,19 +313,11 @@ elif ! command -v docker > /dev/null || ! command -v docker compose > /dev/null 
   else
     # probably a kali linux
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
-    bookworkm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
   fi
   apt-get update -y
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   export DOCKER_COMPOSE=("docker" "compose")
-fi
-
-# if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
-if ! command -v docker > /dev/null; then
-  echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
-  if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
-    apt-get install docker-cli -y
-  fi
 fi
 
 # docker moved around v7 to a new API (API v2)
