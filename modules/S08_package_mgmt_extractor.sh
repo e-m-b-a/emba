@@ -25,6 +25,7 @@ S08_package_mgmt_extractor()
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
 
+  # shellcheck disable=SC2153
   check_for_s08_csv_log "${S08_CSV_LOG}"
 
   if [[ ${THREADED} -eq 1 ]]; then
