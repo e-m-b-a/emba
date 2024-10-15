@@ -17,18 +17,22 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
-# for the binary sbom we limit the detection to only known vulnerable components
-# set to 0 if all components should be tested
-export QUICK_SCAN=1
+
+# ensure a provided firmware directory gets not copied into the container
+# as we do not alter the firmware we can use the original one
+SBOM_MINIMAL=1
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
-# export QEMULATION=1
+export QEMULATION=0
 
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" "F50" )
+# If you just have a directory or some kind of zip file you can just enable P02 and P05
+# export SELECT_MODULES+=( "P02" "P05" )
+# Currently the complete pre-checking phase is enabled:
+export SELECT_MODULES+=( "S06" "S08" "S25" "S118" "F15" )
 
 # enable silent mode and status bar
-export DISABLE_STATUS_BAR=0
-export SILENT=1
+export DISABLE_STATUS_BAR=1
+export SILENT=0
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

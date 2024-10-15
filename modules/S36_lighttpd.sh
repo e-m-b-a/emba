@@ -67,6 +67,7 @@ lighttpd_binary_analysis() {
   local lVULNERABLE_FUNCTIONS_VAR=""
   local lVULNERABLE_FUNCTIONS_ARR=()
   local lLIGHT_BIN=""
+  local lCSV_RULE=""
 
   if [[ -f "${S09_CSV_LOG}" ]] && grep -q "lighttpd" "${S09_CSV_LOG}"; then
     # if we already have results from s09 we just use them
@@ -95,8 +96,8 @@ lighttpd_binary_analysis() {
         if [[ -n ${lVERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${lVERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lLIGHT_BIN}")${GREEN} (license: ${ORANGE}${lLIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}"
-          LIGHT_VERSIONS+=( "${CSV_RULE}" )
+          lCSV_RULE=$(get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}")
+          LIGHT_VERSIONS+=( "${lCSV_RULE}" )
           continue
         fi
       done

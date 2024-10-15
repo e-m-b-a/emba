@@ -638,7 +638,7 @@ dependency_check()
       # UEFI
       check_dep_tool "UEFI Firmware parser" "uefi-firmware-parser"
       check_dep_file "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
-      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/AMI_PFAT_Extract.py"
+      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/biosutilities/ami_pfat_extract.py"
       check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
 
       if function_exists F20_vul_aggregator; then
@@ -705,6 +705,9 @@ dependency_check()
       # yara
       check_dep_tool "yara"
 
+      # exiftool for windows binary analysis
+      check_dep_tool "exiftool"
+
       # ssdeep
       check_dep_tool "ssdeep"
 
@@ -733,7 +736,7 @@ dependency_check()
         check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
         check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
         check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
-        check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
+        # check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
         check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
         # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
         # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"

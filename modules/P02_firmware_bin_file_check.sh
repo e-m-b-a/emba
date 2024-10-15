@@ -126,6 +126,7 @@ set_p02_default_exports() {
   export UEFI_VERIFIED=0
   export DJI_PRAK_DETECTED=0
   export DJI_XV4_DETECTED=0
+  export WINDOWS_EXE=0
 }
 
 generate_entropy_graph() {
@@ -319,42 +320,43 @@ fw_bin_detector() {
   if [[ "${lFILE_BIN_OUT}" == *"Perl script text executable"* ]]; then
     print_output "[+] Identified Perl script - performing perl checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] Perl script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").pl" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").pl" || print_error "[-] Perl script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"PHP script,"* ]]; then
     print_output "[+] Identified PHP script - performing PHP checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] PHP script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").php" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").php" || print_error "[-] PHP script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Python script,"* ]]; then
     print_output "[+] Identified Python script - performing Python checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] Python script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").py" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").py" || print_error "[-] Python script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"shell script,"* ]]; then
     print_output "[+] Identified shell script - performing shell checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] Shell script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").sh" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").sh" || print_error "[-] Shell script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Android package (APK),"* ]]; then
     print_output "[+] Identified Android APK package - performing APK checks"
-    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] APK file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").apk" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").apk" || print_error "[-] APK file copy process failed"
     fi
   fi
-   if [[ "${lFILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"PE32+ executable"* ]]; then
-    print_output "[+] Identified Windows executable - we have no idea what we are doing"
+  if [[ "${lFILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"PE32+ executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"MSI Installer"* ]]; then
+    print_output "[+] Identified Windows executable"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] Windows executable copy process failed"
+    export WINDOWS_EXE=1
+    if ! [[ -f "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").exe" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/$(basename "${lCHECK_FILE}").exe" || print_error "[-] Windows executable copy process failed"
     fi
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.

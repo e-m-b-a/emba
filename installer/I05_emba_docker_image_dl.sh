@@ -20,7 +20,7 @@ I05_emba_docker_image_dl() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 0 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
-    print_tool_info "docker.io" 0 "docker"
+    print_tool_info "docker.io" 1
 
     echo -e "\\n""${ORANGE}""${BOLD}""embeddedanalyzer/emba docker image""${NC}"
     echo -e "Description: EMBA docker images used for firmware analysis."

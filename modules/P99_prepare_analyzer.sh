@@ -51,6 +51,12 @@ P99_prepare_analyzer() {
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
   fi
 
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    lNEG_LOG=0
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
+  fi
+
   print_output "[*] Quick check if it is a real Linux system"
   check_firmware
 

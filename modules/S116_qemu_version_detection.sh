@@ -111,14 +111,25 @@ version_detection_thread() {
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
   local BINARY_PATH=""
+  local BIN_NAME=""
+  local lBIN_ARCH="NA"
   local BINARY_PATHS=()
   local LOG_PATH_=""
+  local lCSV_RULE=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ ${STRICT} == "strict" ]]; then
     if [[ -f "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt ]]; then
       mapfile -t VERSIONS_DETECTED < <(grep -a -o -E "${VERSION_IDENTIFIER}" "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt | sort -u 2>/dev/null || true)
-      mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+      mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a -h "Emulating binary:" "${LOG_PATH_MODULE_S115}"/qemu_tmp_"${BINARY}".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+      for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
+        # BINARY_PATH is the final array which we are using further
+        BINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${BINARY_PATH_}" | sort -u | head)
+        BINARY_PATHS+=( "${BINARY_PATH_}" )
+      done
       TYPE="emulation/strict"
     fi
   else
@@ -132,9 +143,10 @@ version_detection_thread() {
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
         mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "${VERSION_DETECTED}" | cut -d: -f1 | sort -u || true)")
         for LOG_PATH_ in "${LOG_PATHS[@]}"; do
-          mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "${LOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+          mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${LOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
             # BINARY_PATH is the final array which we are using further
+            BINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${BINARY_PATH_}" | sort -u | head -1)
             BINARY_PATHS+=( "${BINARY_PATH_}" )
           done
         done
@@ -144,16 +156,29 @@ version_detection_thread() {
   fi
 
   for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
+    check_for_s08_csv_log "${S08_CSV_LOG}"
     LOG_PATH_="$(strip_color_codes "$(echo "${VERSION_DETECTED}" | cut -d: -f1 | sort -u || true)")"
     if [[ ${STRICT} != "strict" ]]; then
       VERSION_DETECTED="$(echo "${VERSION_DETECTED}" | cut -d: -f2- | sort -u)"
     fi
 
-    get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}"
+    lCSV_RULE=$(get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}")
+    lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
+    lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
 
     for BINARY_PATH in "${BINARY_PATHS[@]}"; do
       print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
-      write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+      write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${LIC}" "${TYPE}"
+      BIN_NAME=$(basename "${BINARY_PATH}")
+      lBIN_ARCH=$(file -b "${BINARY_PATH}")
+      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
+      lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+      lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
+
+      lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}' || true)"
+      lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}' || true)"
+      lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}' || true)"
+      write_log "user_mode_bin_analysis;${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
     done
   done
 }

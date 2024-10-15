@@ -28,7 +28,7 @@ S25_kernel_check()
   export KERNEL_VERSION=()
   export KERNEL_DESC=()
   export KERNEL_MODULES=()
-  local FOUND=0
+  local lFOUND=0
   export KMOD_BAD=0
 
   # This module waits for S24_kernel_bin_identifier
@@ -42,35 +42,38 @@ S25_kernel_check()
   if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
     write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
     print_output "Kernel version:"
+    local LINE=""
     for LINE in "${KERNEL_VERSION[@]}" ; do
       print_output "$(indent "${ORANGE}${LINE}${NC}")"
-      FOUND=1
+      lFOUND=1
     done
     if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
       print_ln
       print_output "Kernel details:"
       for LINE in "${KERNEL_DESC[@]}" ; do
         print_output "$(indent "${LINE}")"
-        FOUND=1
+        lFOUND=1
       done
     fi
-    get_kernel_vulns
-    check_modprobe
+    if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
+      get_kernel_vulns
+      check_modprobe
+    fi
   else
     print_output "[-] No kernel version identified"
   fi
 
-  if [[ "${KERNEL}" -eq 1 ]] && [[ -f "${KERNEL_CONFIG}" ]]; then
+  if [[ "${KERNEL}" -eq 1 ]] && [[ -f "${KERNEL_CONFIG}" ]] && [[ "${SBOM_MINIMAL}" -eq 0 ]]; then
     # we use check_kconfig from s24 module
     check_kconfig "${KERNEL_CONFIG}"
-    FOUND=1
+    lFOUND=1
   else
     print_output "[-] No check for kernel configuration"
   fi
 
   if [[ ${#KERNEL_MODULES[@]} -ne 0 ]] ; then
     analyze_kernel_module
-    FOUND=1
+    lFOUND=1
   fi
 
   if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
@@ -80,62 +83,68 @@ S25_kernel_check()
   fi
   write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:${KMOD_BAD}"
 
-  module_end_log "${FUNCNAME[0]}" "${FOUND}"
+  module_end_log "${FUNCNAME[0]}" "${lFOUND}"
 }
 
 populate_karrays() {
-  local KERNEL_VERSION_=()
-  local K_MODULE=""
-  local VER=""
-  local K_VER=""
-  local V=""
+  local lKERNEL_VERSION_ARR=()
+  local lK_MODULE=""
+  local lVER=""
+  local lK_VER=""
+  local lV=""
+  local lK_MOD_FILE=""
 
   mapfile -t KERNEL_MODULES < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
-  for K_MODULE in "${KERNEL_MODULES[@]}"; do
-    if [[ "${K_MODULE}" =~ .*\.o ]]; then
-      KERNEL_VERSION+=( "$(strings "${K_MODULE}" 2>/dev/null | grep "kernel_version=" | cut -d= -f2 || true)" )
+  for lK_MODULE in "${KERNEL_MODULES[@]}"; do
+    lK_MOD_FILE=$(file "${lK_MODULE}")
+    if [[ "${lK_MODULE}" =~ .*\.o ]]; then
+      KERNEL_VERSION+=( "$(strings "${lK_MODULE}" 2>/dev/null | grep "kernel_version=" | cut -d= -f2 || true)" )
       continue
     fi
-    KERNEL_VERSION+=( "$(modinfo "${K_MODULE}" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' || true)" )
-    KERNEL_DESC+=( "$(modinfo "${K_MODULE}" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' | sort -u || true)" )
+
+    if [[ ! "${lK_MOD_FILE}" == *"ELF"* ]]; then
+      continue
+    fi
+    KERNEL_VERSION+=( "$(modinfo "${lK_MODULE}" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' || true)" )
+    KERNEL_DESC+=( "$(modinfo "${lK_MODULE}" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' | sort -u || true)" )
   done
 
-  for VER in "${KERNEL_VERSION[@]}" ; do
-    demess_kv_version "${VER}"
+  for lVER in "${KERNEL_VERSION[@]}" ; do
+    demess_kv_version "${lVER}"
 
     # nosemgrep
     local IFS=" "
     IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
-    for V in "${KV_C_ARR[@]}" ; do
-      if [[ -z "${V:-}" ]]; then
+    for lV in "${KV_C_ARR[@]}" ; do
+      if [[ -z "${lV:-}" ]]; then
         # remove empty entries:
         continue
       fi
-      if ! [[ "${V}" =~ .*[0-9]\.[0-9].* ]]; then
+      if ! [[ "${lV}" =~ .*[0-9]\.[0-9].* ]]; then
         continue
       fi
-      KERNEL_VERSION_+=( "${V}" )
+      lKERNEL_VERSION_ARR+=( "${lV}" )
     done
   done
 
   # if we have found a kernel version in binary kernel:
   if [[ -f "${S24_CSV_LOG}" ]]; then
-    while IFS=";" read -r K_VER; do
-      K_VER="$(echo "${K_VER}" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
+    while IFS=";" read -r lK_VER; do
+      lK_VER="$(echo "${lK_VER}" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
 
-      demess_kv_version "${K_VER}"
+      demess_kv_version "${lK_VER}"
 
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
 
-      for V in "${KV_C_ARR[@]}" ; do
-        KERNEL_VERSION_+=( "${V}" )
+      for lV in "${KV_C_ARR[@]}" ; do
+        lKERNEL_VERSION_ARR+=( "${lV}" )
       done
     done < <(cut -d ";" -f1 "${S24_CSV_LOG}" | tail -n +2)
   fi
 
   # unique our results
-  eval "KERNEL_VERSION_=($(for i in "${KERNEL_VERSION_[@]}" ; do
+  eval "lKERNEL_VERSION_ARR=($(for i in "${lKERNEL_VERSION_ARR[@]}" ; do
     if [[ -z "${i}" ]]; then
       # remove empty entries:
       continue;
@@ -150,58 +159,58 @@ populate_karrays() {
   eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"${i}}\"" ; done | sort -u))"
 
   # if we have no kernel version identified -> we try to identify a possible identifier in the path:
-  if [[ "${#KERNEL_VERSION_[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
+  if [[ "${#lKERNEL_VERSION_ARR[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
     # remove the first part of the path:
-    local KERNEL_VERSION1=""
-    KERNEL_VERSION1=$(echo "${KERNEL_MODULES[0]}" | sed 's/.*\/lib\/modules\///')
-    KERNEL_VERSION_+=("${KERNEL_VERSION1}")
+    local lKERNEL_VERSION1=""
+    lKERNEL_VERSION1=$(echo "${KERNEL_MODULES[0]}" | sed 's/.*\/lib\/modules\///')
+    lKERNEL_VERSION_ARR+=("${lKERNEL_VERSION1}")
     # demess_kv_version removes the unneeded stuff after the version:
-    demess_kv_version "${KERNEL_VERSION_[@]}"
-    # now rewrite the temp KERNEL_VERSION_ array
-    IFS=" " read -r -a KERNEL_VERSION_ <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+    demess_kv_version "${lKERNEL_VERSION_ARR[@]}"
+    # now rewrite the temp lKERNEL_VERSION_ARR array
+    IFS=" " read -r -a lKERNEL_VERSION_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
   fi
 
-  KERNEL_VERSION=("${KERNEL_VERSION_[@]}")
+  KERNEL_VERSION=("${lKERNEL_VERSION_ARR[@]}")
 }
 
 demess_kv_version() {
-  local K_VERSION=("$@")
-  local KV=""
-  local VER=""
+  local lK_VERSION_ARR=("$@")
+  local lKV=""
+  local lVER=""
   export KV_ARR=()
 
   # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
-  for VER in "${K_VERSION[@]}" ; do
-    if ! [[ "${VER}" == *[0-9]* ]]; then
+  for lVER in "${lK_VERSION_ARR[@]}" ; do
+    if ! [[ "${lVER}" == *[0-9]* ]]; then
       continue
     fi
 
-    KV=$(echo "${VER}" | tr "-" " ")
-    KV=$(echo "${KV}" | tr "+" " ")
-    KV=$(echo "${KV}" | tr "_" " ")
-    KV=$(echo "${KV}" | tr "/" " ")
+    lKV=$(echo "${lVER}" | tr "-" " ")
+    lKV=$(echo "${lKV}" | tr "+" " ")
+    lKV=$(echo "${lKV}" | tr "_" " ")
+    lKV=$(echo "${lKV}" | tr "/" " ")
     # the first field is the real kernel version:
-    KV=$(echo "${KV}" | cut -d\  -f1)
+    lKV=$(echo "${lKV}" | cut -d\  -f1)
 
-    while echo "${KV}" | grep -q '[a-zA-Z]'; do
-      KV="${KV::-1}"
+    while echo "${lKV}" | grep -q '[a-zA-Z]'; do
+      lKV="${lKV::-1}"
     done
-    KV_ARR=("${KV_ARR[@]}" "${KV}")
+    KV_ARR=("${KV_ARR[@]}" "${lKV}")
   done
 }
 
 get_kernel_vulns() {
   sub_module_title "Kernel vulnerabilities"
 
-  local VER=""
-  local LES_ENTRY=""
-  local LES_CVE=""
-  local LES_CVE_ENTRIES=()
+  local lVER=""
+  local lLES_ENTRY=""
+  local lLES_CVE=""
+  local lLES_CVE_ENTRIES_ARR=()
 
   if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
     print_output "[+] Found linux kernel version/s:"
-    for VER in "${KERNEL_VERSION[@]}" ; do
-      print_output "$(indent "${ORANGE}${VER}${NC}")"
+    for lVER in "${KERNEL_VERSION[@]}" ; do
+      print_output "$(indent "${ORANGE}${lVER}${NC}")"
     done
     print_ln
 
@@ -209,25 +218,25 @@ get_kernel_vulns() {
       # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
       demess_kv_version "${KERNEL_VERSION[@]}"
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
-      for VER in "${KV_C_ARR[@]}" ; do
-        sub_module_title "Possible exploits via linux-exploit-suggester.sh for kernel version ${ORANGE}${VER}${NC}"
-        print_output "[*] Search possible exploits via linux-exploit-suggester.sh for kernel version ${ORANGE}${VER}${NC}"
+      for lVER in "${KV_C_ARR[@]}" ; do
+        sub_module_title "Possible exploits via linux-exploit-suggester.sh for kernel version ${ORANGE}${lVER}${NC}"
+        print_output "[*] Search possible exploits via linux-exploit-suggester.sh for kernel version ${ORANGE}${lVER}${NC}"
         print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
-        "${EXT_DIR}""/linux-exploit-suggester.sh" --skip-more-checks -f -d -k "${VER}" >> "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${VER}.txt"
-        tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${VER}.txt"
-        if [[ -f "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${VER}.txt" ]]; then
-          mapfile -t LES_CVE_ENTRIES < <(grep "[+]" "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${VER}.txt" | grep -E "CVE-[0-9]+")
-          for LES_ENTRY in "${LES_CVE_ENTRIES[@]}"; do
-            LES_ENTRY=$(strip_color_codes "${LES_ENTRY}")
-            LES_CVE=$(echo "${LES_ENTRY}" | awk '{print $2}' | tr -d '[' | tr -d ']')
-            local KNOWN_EXPLOITED=0
+        "${EXT_DIR}""/linux-exploit-suggester.sh" --skip-more-checks -f -d -k "${lVER}" >> "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${lVER}.txt"
+        tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${lVER}.txt"
+        if [[ -f "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${lVER}.txt" ]]; then
+          mapfile -t lLES_CVE_ENTRIES_ARR < <(grep "[+]" "${LOG_PATH_MODULE}""/linux_exploit_suggester_kernel_${lVER}.txt" | grep -E "CVE-[0-9]+")
+          for lLES_ENTRY in "${lLES_CVE_ENTRIES_ARR[@]}"; do
+            lLES_ENTRY=$(strip_color_codes "${lLES_ENTRY}")
+            lLES_CVE=$(echo "${lLES_ENTRY}" | awk '{print $2}' | tr -d '[' | tr -d ']')
+            local lKNOWN_EXPLOITED=0
             if [[ -f "${KNOWN_EXP_CSV}" ]]; then
-              if grep -q \""${LES_CVE}"\", "${KNOWN_EXP_CSV}"; then
-                print_output "[+] ${ORANGE}WARNING: ${GREEN}Vulnerability ${ORANGE}${LES_CVE}${GREEN} is a known exploited vulnerability.${NC}"
-                KNOWN_EXPLOITED=1
+              if grep -q \""${lLES_CVE}"\", "${KNOWN_EXP_CSV}"; then
+                print_output "[+] ${ORANGE}WARNING: ${GREEN}Vulnerability ${ORANGE}${lLES_CVE}${GREEN} is a known exploited vulnerability.${NC}"
+                lKNOWN_EXPLOITED=1
               fi
             fi
-            write_csv_log "linux_kernel" "${VER}" "${LES_CVE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "${KNOWN_EXPLOITED}"
+            write_csv_log ":linux:linux_kernel" "${lVER}" "${lLES_CVE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "${lKNOWN_EXPLOITED}"
           done
         fi
       done
@@ -244,25 +253,31 @@ analyze_kernel_module() {
   sub_module_title "Analyze kernel modules"
   write_anchor "kernel_modules"
 
+  local lKMODULE=""
+  local lWAIT_PIDS_S25_ARR=()
+  local lFILE_KMOD=""
+
   KMOD_BAD=0
-  local KMODULE=""
-  local WAIT_PIDS_S25=()
 
-  print_output "[*] Found ${ORANGE}${#KERNEL_MODULES[@]}${NC} kernel modules."
+  print_output "[*] Found ${ORANGE}${#KERNEL_MODULES[@]}${NC} potential kernel modules."
 
-  for KMODULE in "${KERNEL_MODULES[@]}" ; do
+  for lKMODULE in "${KERNEL_MODULES[@]}" ; do
+    lFILE_KMOD=$(file "${lKMODULE}")
+    if [[ "${lFILE_KMOD}" != *"ELF"* ]]; then
+      continue
+    fi
     # modinfos can run in parallel:
     if [[ "${THREADED}" -eq 1 ]]; then
-      module_analyzer "${KMODULE}" &
+      module_analyzer "${lKMODULE}" &
       local TMP_PID="$!"
       store_kill_pids "${TMP_PID}"
-      WAIT_PIDS_S25+=( "${TMP_PID}" )
+      lWAIT_PIDS_S25_ARR+=( "${TMP_PID}" )
     else
-      module_analyzer "${KMODULE}"
+      module_analyzer "${lKMODULE}"
     fi
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S25[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S25_ARR[@]}"
 
   # in threading we need to go via a temp file with the need to count it now:
   if [[ -f "${TMP_DIR}"/KMOD_BAD.tmp ]]; then
@@ -271,33 +286,88 @@ analyze_kernel_module() {
 }
 
 module_analyzer() {
-  local KMODULE="${1:-}"
-  local LINE=""
+  local lKMODULE="${1:-}"
 
-  if [[ "${KMODULE}" == *".ko" ]]; then
-    LINE=$(modinfo "${KMODULE}" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' || true)
-    local M_PATH=""
-    M_PATH="$( echo "${LINE}" | cut -d '|' -f 1 )"
-    local LICENSE=""
-    LICENSE="$( echo "${LINE}" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
+  if [[ "${lKMODULE}" == *".ko" ]]; then
+    local lLICENSE=""
+    local lK_VERSION=""
+    local lMD5_CHECKSUM="NA"
+    local lSHA256_CHECKSUM="NA"
+    local lSHA512_CHECKSUM="NA"
+    local lK_ARCH="NA"
+    local lK_AUTHOR="NA"
+    local lK_INTREE="NA"
+    local lK_DESC="NA"
 
-    if file "${M_PATH}" 2>/dev/null | grep -q 'not stripped'; then
-      if echo "${LINE}" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
+    lLICENSE=$(modinfo "${lKMODULE}" | grep "^license:" || true)
+    lLICENSE=${lLICENSE/license:\ }
+    lLICENSE=${lLICENSE//[[:space:]]}
+    [[ "${lLICENSE}" == "GPL" ]] && lLICENSE="GPL-2.0-only"
+    # intree - if the module is maintained in the kernel Git repository
+    lK_INTREE=$(modinfo "${lKMODULE}" | grep "^intree:" || true)
+    lK_INTREE=${lK_INTREE/vermagic:\ }
+    lK_INTREE=$(clean_package_details "${lK_INTREE}")
+    [[ "${lK_INTREE}" == "Y" ]] && lLICENSE="GPL-2.0-only"
+
+    lK_VERSION=$(modinfo "${lKMODULE}" | grep "^vermagic:" || true)
+    lK_VERSION=${lK_VERSION/vermagic:\ }
+    lK_VERSION=$(clean_package_details "${lK_VERSION}")
+    demess_kv_version "${lK_VERSION}"
+
+    lMOD_VERSION=$(modinfo "${lKMODULE}" | grep "^version:" || true)
+    lMOD_VERSION=${lMOD_VERSION/version:\ }
+    lMOD_VERSION=${lMOD_VERSION//[[:space:]]}
+
+    lAPP_NAME="$(basename "${lKMODULE}")"
+    lAPP_NAME=${lAPP_NAME,,}
+
+    lK_AUTHOR=$(modinfo "${lKMODULE}" | grep "^author:" || true)
+    lK_AUTHOR="${lK_AUTHOR//author:\ }"
+    lK_AUTHOR="$(echo "${lK_AUTHOR}" | tr '\n' '-')"
+    lK_AUTHOR=$(clean_package_details "${lK_AUTHOR}")
+
+    lK_DESC=$(modinfo "${lKMODULE}" | grep "^description:" || true)
+    lK_DESC=${lK_DESC/description:\ }
+    lK_DESC=$(clean_package_details "${lK_DESC}")
+
+    lMD5_CHECKSUM="$(md5sum "${lKMODULE}" | awk '{print $1}')"
+    lSHA256_CHECKSUM="$(sha256sum "${lKMODULE}" | awk '{print $1}')"
+    lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
+
+    lK_FILE_OUT=$(file -b "${lKMODULE}" 2>/dev/null)
+    lK_ARCH=$(echo "${lK_ARCH}" | cut -d ',' -f2-3)
+    lK_ARCH=${lK_ARCH//,\ /\ -\ }
+
+    if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then
+      if [[ "${lLICENSE}" == *"GPL"* || "${lLICENSE}" == *"BSD"* ]] ; then
         # kernel module is GPL/BSD license then not stripped is fine
-        print_output "[-] Found kernel module ""${NC}""$(print_path "${M_PATH}")""  ${ORANGE}""${LICENSE}""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
-      elif ! [[ ${LICENSE} =~ "License:" ]] ; then
-        print_output "[+] Found kernel module ""${NC}""$(print_path "${M_PATH}")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+        print_output "[*] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License ${lLICENSE}""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
+      elif ! [[ ${lLICENSE} =~ "License:" ]] ; then
+        print_output "[-] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
       else
         # kernel module is NOT GPL license then not stripped is bad!
-        print_output "[+] Found kernel module ""${NC}""$(print_path "${M_PATH}")""  ${ORANGE}""${LICENSE}""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+        print_output "[-] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License ${lLICENSE}""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
         echo "1" >> "${TMP_DIR}"/KMOD_BAD.tmp
       fi
     else
-      print_output "[-] Found kernel module ""${NC}""$(print_path "${M_PATH}")""  ${ORANGE}""${LICENSE}""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
+      print_output "[*] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License ${lLICENSE}""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
 
-  elif [[ "${KMODULE}" == *".o" ]]; then
-    print_output "[-] No support for .o kernel modules - ${ORANGE}${KMODULE}${NC}"
+    # we log to our sbom log with the kernel module details
+    # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
+    check_for_s08_csv_log "${S08_CSV_LOG}"
+
+    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
+
+    # ensure we do not log the kernel multiple times
+    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
+      lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}")
+      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+    fi
+
+  elif [[ "${lKMODULE}" == *".o" ]]; then
+    print_output "[-] No support for .o kernel modules - ${ORANGE}${lKMODULE}${NC}" "no_log"
   fi
 }
 
@@ -306,31 +376,30 @@ module_analyzer() {
 check_modprobe() {
   sub_module_title "Check modprobe.d directory and content"
 
-  local MODPROBE_D_DIRS=""
-  local MP_CHECK=0
-  local MP_F_CHECK=0
-  local MODPROBE_D_DIRS=()
-  local MPROBE_DIR=""
-  local MP_CONF=""
+  local lMODPROBE_D_DIRS_ARR=()
+  local lMPROBE_DIR=""
+  local lMP_CHECK=0
+  local lMP_F_CHECK=0
+  local lMP_CONF=""
 
-  readarray -t MODPROBE_D_DIRS < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for MPROBE_DIR in "${MODPROBE_D_DIRS[@]}"; do
-    if [[ -d "${MPROBE_DIR}" ]] ; then
-      MP_CHECK=1
-      print_output "[+] Found ""$(print_path "${MPROBE_DIR}")"
-      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "${MPROBE_DIR}" -xdev -iname '*.conf' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )"
-      for MP_CONF in "${MODPROBE_D_DIR_CONTENT[@]}"; do
-        if [[ -e "${MP_CONF}" ]] ; then
-          MP_F_CHECK=1
-          print_output "$(indent "$(orange "$(print_path "${MP_CONF}")")")"
+  readarray -t lMODPROBE_D_DIRS_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  for lMPROBE_DIR in "${lMODPROBE_D_DIRS_ARR[@]}"; do
+    if [[ -d "${lMPROBE_DIR}" ]] ; then
+      lMP_CHECK=1
+      print_output "[+] Found ""$(print_path "${lMPROBE_DIR}")"
+      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "${lMPROBE_DIR}" -xdev -iname '*.conf' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )"
+      for lMP_CONF in "${MODPROBE_D_DIR_CONTENT[@]}"; do
+        if [[ -e "${lMP_CONF}" ]] ; then
+          lMP_F_CHECK=1
+          print_output "$(indent "$(orange "$(print_path "${lMP_CONF}")")")"
         fi
       done
-      if [[ ${MP_F_CHECK} -eq 0 ]] ; then
+      if [[ ${lMP_F_CHECK} -eq 0 ]] ; then
         print_output "[-] No config files in modprobe.d directory found"
       fi
     fi
   done
-  if [[ ${MP_CHECK} -eq 0 ]] ; then
+  if [[ ${lMP_CHECK} -eq 0 ]] ; then
     print_output "[-] No modprobe.d directory found"
   fi
 }

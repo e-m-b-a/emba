@@ -95,7 +95,7 @@ add_link_tags() {
       lREF_LINK="$(sed "${lREF_LINK_NUMBER}""q;d" "${lLINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       local lURL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "${lREF_LINK}" | cut -d"#" -f1)" ]] ; then
-        if [[  ( ("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c") ) ]] ; then
+        if [[  ( ("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c") || ("${lREF_LINK: -5}" == ".json")) ]] ; then
           local lREF_ANCHOR=""
           if [[ ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) ) ]] ; then
             lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"

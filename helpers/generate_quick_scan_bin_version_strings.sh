@@ -26,17 +26,19 @@ if [[ -f "config/bin_version_strings_quick.cfg" ]]; then
 fi
 
 mapfile -t STRING_ENTRY_ARR < <(grep -v "^#" config/bin_version_strings.cfg)
-rm config/bin_version_strings_quick.cfg
+if [[ -f "config/bin_version_strings_quick.cfg" ]]; then
+  rm config/bin_version_strings_quick.cfg
+fi
 
 for STRING_ENTRY in "${STRING_ENTRY_ARR[@]}"; do
-  # extract the component for cpe search:
-  COMPONENT="$(echo "${STRING_ENTRY}" | cut -d ';' -f 5 | rev | cut -d '/' -f2 | rev | cut -d ':' -f1)"
+  # extract only the component name for cpe search:
+  COMPONENT="$(echo "${STRING_ENTRY}" | cut -d ';' -f 5 | rev | cut -d '/' -f2 | rev | cut -d ':' -f3)"
   STRICT_MODE="$(echo "${STRING_ENTRY}" | cut -d ';' -f 2)"
   [[ "${STRICT_MODE}" == "strict" ]] && continue
 
-  echo "[*] Testing ${COMPONENT} entry"
+  echo "[*] Testing SBOM entry ${COMPONENT//::}"
 
-  if [[ "$(grep -h "cpe.*:${COMPONENT}:" external/nvd-json-data-feeds/* -r | wc -l 2>/dev/null)" -gt 0 ]]; then
+  if [[ "$(grep -h "cpe.*${COMPONENT//::}:" external/nvd-json-data-feeds/* -r | wc -l 2>/dev/null)" -gt 0 ]]; then
     # we can add the entry to our quick scan profile
     echo "[*] Adding component entry for ${COMPONENT} to our quick scan profile"
     echo "${STRING_ENTRY}" >> config/bin_version_strings_quick.cfg

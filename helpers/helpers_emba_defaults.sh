@@ -152,7 +152,10 @@ set_defaults() {
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
   export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
+  export CPE_VERSION="2.3"
+}
 
+set_log_paths() {
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export P55_LOG="${LOG_DIR}/p55_unblob_extractor.txt"
@@ -215,6 +218,6 @@ set_defaults() {
   export F20_CSV_LOG="${CSV_DIR}/f20_vul_aggregator.csv"
   export F20_LOG_DIR="${F20_LOG/\.txt/\/}"
   export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
-  export F21_LOG="${LOG_DIR}/f21_cyclonedx_sbom.txt"
-  export F21_CSV_LOG="${CSV_DIR}/f21_cyclonedx_sbom.csv"
+  export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
+  export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
 }
