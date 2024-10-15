@@ -292,14 +292,14 @@ if command -v docker-compose > /dev/null ; then
 elif ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
   # OS debian is for Kali Linux
   OS="debian"
-  [[ "${UBUNTU}" -eq 1 ]] && OS="ubuntu"
+  [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
   # Add Docker's official GPG key:
   apt-get install -y ca-certificates curl gnupg
   install -m 0755 -d /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/${OS}/gpg -o /etc/apt/keyrings/docker.asc
   chmod a+r /etc/apt/keyrings/docker.asc
   # Add the repository to Apt sources:
-  if [[ "${UBUNTU}" -eq 1 ]]; then
+  if [[ "${UBUNTU_OS}" -eq 1 ]]; then
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
     # shellcheck source=/dev/null
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
