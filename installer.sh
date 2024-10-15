@@ -286,7 +286,33 @@ apt-get -y install python3-venv
 create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
-export DOCKER_COMPOSE=("docker-compose")
+if command -v docker-compose > /dev/null ; then
+  echo -e "\n${ORANGE}""${BOLD}""Old docker-compose version found""${NC}"
+  export DOCKER_COMPOSE=("docker-compose")
+elif ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
+  # OS debian is for Kali Linux
+  OS="debian"
+  [[ "${UBUNTU}" -eq 1 ]] && OS="ubuntu"
+  # Add Docker's official GPG key:
+  apt-get install -y ca-certificates curl gnupg
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/${OS}/gpg -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+  # Add the repository to Apt sources:
+  # shellcheck source=/dev/null
+  if [[ "${UBUNTU}" -eq 1 ]]; then
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  else
+    # probably a kali linux
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
+    bookworkm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  fi
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker compose-plugin
+  export DOCKER_COMPOSE=("docker" "compose")
+fi
+
 # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
 if ! command -v docker > /dev/null; then
   echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
