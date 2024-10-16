@@ -286,17 +286,7 @@ apt-get -y install python3-venv
 create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
-if command -v docker-compose > /dev/null ; then
-  echo -e "\n${ORANGE}""${BOLD}""Old docker-compose version found""${NC}"
-  export DOCKER_COMPOSE=("docker-compose")
-  # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
-  if ! command -v docker > /dev/null; then
-    echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
-    if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
-      apt-get install docker-cli -y
-    fi
-  fi
-elif ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
+if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
   # OS debian is for Kali Linux
   OS="debian"
   [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
@@ -318,6 +308,19 @@ elif ! command -v docker > /dev/null || ! command -v docker compose > /dev/null 
   apt-get update -y
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   export DOCKER_COMPOSE=("docker" "compose")
+elif command -v docker-compose > /dev/null ; then
+  echo -e "\n${ORANGE}""${BOLD}""WARNING: Old docker-compose installation found""${NC}"
+  echo -e "${ORANGE}""${BOLD}""It is recommend to remove the current installation and restart the EMBA installation afterwards!""${NC}"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  export DOCKER_COMPOSE=("docker-compose")
+  # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
+  if ! command -v docker > /dev/null; then
+    echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
+    if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
+      echo -e "\n${ORANGE}Info: No docker command available -> we install the docker-cli package now${NC}"
+      apt-get install docker-cli -y
+    fi
+  fi
 fi
 
 # docker moved around v7 to a new API (API v2)
