@@ -27,7 +27,8 @@ IP00_extractors(){
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
     print_git_info "dji-firmware-tools" "EMBA-support-repos/dji-firmware-tools" "Tools for extracting, modding and re-packaging firmwares of DJI multirotor drones."
-    print_pip_info "pycryptodome"
+    # print_pip_info "pycryptodome"
+    print_tool_info "python3-pycryptodome" 1
     # ubireader:
     # print_tool_info "python3-lzo" 1
     print_tool_info "liblzo2-dev" 1

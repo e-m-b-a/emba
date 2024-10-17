@@ -50,7 +50,7 @@ bmc_extractor() {
   "${EXT_DIR}"/smcbmc/smcbmc.py "${lBMC_FILE_PATH_}" "${lEXTRACTION_FILE_}" || print_error "[-] BMC decryption failed for ${lBMC_FILE_PATH_}"
 
   print_ln
-  if [[ -f "${lEXTRACTION_FILE_}" ]]; then
+  if [[ -s "${lEXTRACTION_FILE_}" ]]; then
     export FIRMWARE_PATH="${lEXTRACTION_FILE_}"
     print_output "[+] Extracted BMC encrypted firmware file to ${ORANGE}${FIRMWARE_PATH}${NC}"
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
