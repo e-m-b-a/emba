@@ -87,7 +87,7 @@ S18_capa_checker() {
         #  print_output "[*] 20 binaries already analysed - ending capa binary analysis now." "no_log"
         #  print_output "[*] For complete analysis enable FULL_TEST." "no_log"
         #  break 2
-        #fi
+        # fi
       else
         print_output "[-] Binary behavior testing with capa for $(print_path "${lBIN_TO_CHECK}") not possible ... unsupported architecture" "no_log"
       fi
