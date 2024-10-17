@@ -1085,7 +1085,7 @@ cve_extractor() {
   local BIN_LOG="${LOG_PATH_MODULE}/cve_details_${BINARY}_${VERSION}.log"
   write_log "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:" "${BIN_LOG}"
   local ANCHOR=""
-  ANCHOR=$(echo "${BINARY}_${VERSION}")
+  ANCHOR="${BINARY}_${VERSION}"
   ANCHOR="cve_${ANCHOR:0:20}"
   write_anchor "${ANCHOR}" "${BIN_LOG}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
