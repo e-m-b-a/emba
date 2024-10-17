@@ -40,6 +40,9 @@ IP99_binwalk_default() {
     print_tool_info "cabextract" 1
     print_tool_info "util-linux" 1
     print_tool_info "python3-matplotlib" 1
+    # sometimes the python pip installation is needed - probably this will be solved in the future
+    # probably it depends on the venv?!?
+    print_pip_info "matplotlib"
 
     # tools only available on Kali Linux:
     if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
@@ -91,6 +94,7 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip_install "setuptools"
+        pip_install "matplotlib"
 
         git clone https://github.com/EMBA-support-repos/binwalk_ospg.git external/binwalk
         cd external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )

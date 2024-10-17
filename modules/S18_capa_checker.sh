@@ -35,11 +35,11 @@ S18_capa_checker() {
     # we only need to wait if we are not using the full_scan profile
     module_wait "S13_weak_func_check"
   fi
-  if [[ -s "${S13_CSV_LOG}" ]]; then
-    local BINARIES=()
+  if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${S13_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    local BINARIES=()
+    mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   local lBINARY=""
@@ -82,12 +82,12 @@ S18_capa_checker() {
 
         # in normal operation we stop checking after the first 20 binaries
         # if FULL_TEST is activated we are testing all binaries -> this takes a long time
-        lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
-        if [[ "${lBINS_CHECKED_CNT/\ *}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-          print_output "[*] 20 binaries already analysed - ending capa binary analysis now." "no_log"
-          print_output "[*] For complete analysis enable FULL_TEST." "no_log"
-          break 2
-        fi
+        # lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
+        # if [[ "${lBINS_CHECKED_CNT/\ *}" -gt 40 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        #  print_output "[*] 20 binaries already analysed - ending capa binary analysis now." "no_log"
+        #  print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+        #  break 2
+        # fi
       else
         print_output "[-] Binary behavior testing with capa for $(print_path "${lBIN_TO_CHECK}") not possible ... unsupported architecture" "no_log"
       fi

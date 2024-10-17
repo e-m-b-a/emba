@@ -315,7 +315,9 @@ aggregate_versions() {
       print_output "[*] Software inventory aggregated:"
       for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
         # ensure our set anchor is based on the binary name and is limited to 20 characters:
-        local ANCHOR="${VERSION/:*/}"
+        local ANCHOR=""
+        ANCHOR=$(echo "${VERSION}" | cut -d ':' -f3-4)
+        ANCHOR="${ANCHOR//:/_}"
         ANCHOR="cve_${ANCHOR:0:20}"
         print_output "[+] Found Version details (${ORANGE}aggregated${GREEN}): ""${ORANGE}${VERSION}${NC}"
         write_link "f20#${ANCHOR}"
@@ -1082,7 +1084,10 @@ cve_extractor() {
 
   local BIN_LOG="${LOG_PATH_MODULE}/cve_details_${BINARY}_${VERSION}.log"
   write_log "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:" "${BIN_LOG}"
-  write_anchor "cve_${BINARY:0:20}" "${BIN_LOG}"
+  local ANCHOR=""
+  ANCHOR="${BINARY}_${VERSION}"
+  ANCHOR="cve_${ANCHOR:0:20}"
+  write_anchor "${ANCHOR}" "${BIN_LOG}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     write_log "" "${BIN_LOG}"
     grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" >> "${BIN_LOG}" || true
