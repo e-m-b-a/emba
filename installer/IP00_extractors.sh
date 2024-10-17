@@ -27,8 +27,10 @@ IP00_extractors(){
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
     print_git_info "dji-firmware-tools" "EMBA-support-repos/dji-firmware-tools" "Tools for extracting, modding and re-packaging firmwares of DJI multirotor drones."
-    # print_pip_info "pycryptodome"
     print_tool_info "python3-pycryptodome" 1
+    # sometimes the python pip installation is needed - probably this will be solved in the future
+    # probably it depends on the venv?!?
+    print_pip_info "pycryptodome"
     # ubireader:
     # print_tool_info "python3-lzo" 1
     print_tool_info "liblzo2-dev" 1
@@ -59,6 +61,7 @@ IP00_extractors(){
         pip_install "protobuf"
         pip_install "bsdiff4"
         pip_install "python-lzo>=1.14"
+        pip_install "pycryptodome"
 
         if ! [[ -d external/payload_dumper ]]; then
           git clone https://github.com/EMBA-support-repos/payload_dumper.git external/payload_dumper
