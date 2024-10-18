@@ -899,9 +899,16 @@ cve_extractor() {
 
 
   if ! [[ "${VERSION_orig}" == "CVE-"* ]]; then
-    # remove last : if it is there
-    VERSION=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
     BINARY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
+
+    # if we have a version identifier like ::binary:1.2.3: we need to remove the last ':' before processing it correctly
+    VERSION=$(echo "${BIN_VERSION_%:}" | cut -d':' -f4-5)
+    VERSION="${VERSION%:}"
+
+    BINARY=$(echo "${BIN_VERSION_%:}" | cut -d':' -f1-3)
+    BINARY="${BINARY%:}"
+    BINARY="${BINARY#:}"
+
     export AGG_LOG_FILE="${VERSION_PATH}".txt
   else
     export AGG_LOG_FILE="${VERSION_orig}".txt
