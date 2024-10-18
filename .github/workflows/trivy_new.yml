@@ -25,6 +25,16 @@ jobs:
     - name: Checkout EMBA
       uses: actions/checkout@v4
 
+    - name: Free Disk Space
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        swap-storage: true
+
     - name: Generate tarball from image
       run: |
         docker pull embeddedanalyzer/emba
