@@ -127,7 +127,7 @@ S04_windows_basic_analysis() {
   if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
     # if we already know that we have a windows binary to analyze we can check every file with the file command
     # to ensure we do not miss anything
-    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -l "PE32\|MSI")
+    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep "PE32\|MSI" | cut -d ':' -f1)
   else
     # if we just search through an unknwon environment we search for exe, dll and msi files
     mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.msi" \))
