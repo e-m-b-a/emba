@@ -401,7 +401,7 @@ windows_exifparser() {
   local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
-  if [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+  if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
     # if we already know that we have a windows binary to analyze we can check every file with the file command
     # to ensure we do not miss anything
     mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -l "PE32\|MSI")
