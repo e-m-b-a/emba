@@ -1,0 +1,38 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: trivy
+on:
+  schedule:
+    - cron: '0 0 * * *' # do it every day
+#  push:
+#    branches:
+#      - '**'        # matches every branch
+#  pull_request:
+#    branches:
+#      - '**'
+   # Allows you to run this workflow manually from the Actions tab
+   workflow_dispatch:
+
+jobs:
+  build:
+    # if: github.repository_owner == 'e-m-b-a'
+    name: Trivy EMBA image check
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout EMBA
+      uses: actions/checkout@v4
+
+    - name: Generate tarball from image
+      run: |
+        docker pull embeddedanalyzer/emba
+        docker save -o vuln-image.tar embeddedanalyzer/emba
+
+    - name: Run Trivy vulnerability scanner in tarball mode
+      uses: aquasecurity/trivy-action@0.20.0
+      with:
+        input: /github/workspace/vuln-image.tar
+        severity: 'CRITICAL,HIGH'
+
