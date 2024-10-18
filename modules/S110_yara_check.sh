@@ -18,9 +18,14 @@
 export THREAD_PRIO=0
 
 
-S110_yara_check()
-{
+S110_yara_check() {
   module_log_init "${FUNCNAME[0]}"
+
+  if [[ "${QUICK_SCAN:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   module_title "Check for code patterns with yara"
   pre_module_reporter "${FUNCNAME[0]}"
 

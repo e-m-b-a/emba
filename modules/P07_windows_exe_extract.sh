@@ -119,7 +119,7 @@ END_OF_DOCS
 P07_windows_exe_extract() {
   local lNEG_LOG=0
 
-  if [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+  if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Windows executable extraction module"
     pre_module_reporter "${FUNCNAME[0]}"
