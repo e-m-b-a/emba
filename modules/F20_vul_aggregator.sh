@@ -1093,7 +1093,7 @@ cve_extractor() {
   write_log "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:" "${BIN_LOG}"
   local ANCHOR=""
   local lBINARY_NAME="${BINARY/*:}"
-  ANCHOR="${BINARY_NAME}_${VERSION}"
+  ANCHOR="${lBINARY_NAME}_${VERSION}"
   ANCHOR="cve_${ANCHOR:0:20}"
   write_anchor "${ANCHOR}" "${BIN_LOG}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
