@@ -7,18 +7,18 @@ name: trivy
 on:
   schedule:
     - cron: '0 0 * * *' # do it every day
-  # push:
-  #  branches:
-  #    - '**'        # matches every branch
-  # pull_request:
-  #  branches:
+  push:
+    branches:
+      - '**'        # matches every branch
+  pull_request:
+    branches:
       - '**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   build:
-    if: github.repository_owner == 'e-m-b-a'
+    # if: github.repository_owner == 'e-m-b-a'
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -63,7 +63,7 @@ jobs:
             -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/emba/emba":"/github/workspace" d6f297:4714451b1eca4e41a4cc10f0a8a8c25a  \
             "-a image" "-b template" "-c @/contrib/sarif.tpl" "-d " "-e false" "-f os,library" "-h trivy-results.sarif" \
             "-i embeddedanalyzer/emba" \
-            "-j ." "-k /external/semgrep-rules,/external/routersploit,/external/arachni,/etc/ssl/private/,/external/jdk,/external/emba_venv/lib/python3.11/site-packages/cve_searchsploit/exploitdb,/external/dji-firmware-tools" \
+            "-j ." "-k /external/semgrep-rules,/external/routersploit,/external/arachni,/etc/ssl/private/,/external/jdk,/external/emba_venv/lib/python3.11/site-packages/cve_searchsploit/exploitdb,/external/dji-firmware-tools,/external/emba_venv/lib/python3.11/site-packages/binwalk*" \
             "-l " "-m " "-n 60m" "-o " "-p " "-q " "-r false" "-s " "-t " "-u "
 
       - name: Upload Trivy scan results to GitHub Security tab
