@@ -1020,6 +1020,7 @@ os_detector() {
         # version detected -> verified linux
         for SYSTEM_VER in "${SYSTEM_VERSION[@]}"; do
           SYSTEM_VER=$(strip_color_codes "${SYSTEM_VER}")
+          SYSTEM_VER=$(echo "${SYSTEM_VER}" | tr -d '\n')
           SYSTEM="${SYSTEM}"" / v${SYSTEM_VER}"
           VERIFIED=1
         done
@@ -1084,25 +1085,25 @@ os_kernel_module_detect() {
 }
 
 print_os() {
-  local SYSTEM="${1:-}"
+  local lSYSTEM="${1:-}"
+  lSYSTEM=$(echo "${lSYSTEM}" | tr -d '\n')
 
   if [[ ${VERIFIED} -eq 1 ]]; then
     if [[ "${VERIFIED_S03}" -eq 1 ]]; then
-      SYSTEM=$(echo "${SYSTEM}" | awk '{print $1}')
-      print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${SYSTEM}${NC}"
+      print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
       write_link "s03"
     else
-      print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${SYSTEM}${NC}"
+      print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
       write_link "s25"
     fi
-    write_csv_log "os_verified" "${SYSTEM}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    write_csv_log "os_verified" "${lSYSTEM}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   else
-    print_output "[+] Possible operating system detected (""${ORANGE}""unverified${GREEN}): ${ORANGE}${SYSTEM}${NC}"
+    print_output "[+] Possible operating system detected (""${ORANGE}""unverified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
     write_link "s03"
     if [[ "$(grep -c os_verified "${CSV_LOG}")" -lt 1 ]]; then
       write_csv_log "os_verified" "unknown" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     fi
-    write_csv_log "os_unverified" "${SYSTEM}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    write_csv_log "os_unverified" "${lSYSTEM}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
 }
 

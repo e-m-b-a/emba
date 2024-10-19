@@ -222,6 +222,7 @@ node_js_package_lock_parser() {
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
         lPURL_IDENTIFIER="pkg:npm/${lAPP_NAME}@${lAPP_VERS}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
         # Todo: checksum
 
@@ -353,6 +354,7 @@ deb_package_check() {
       else
         lPURL_IDENTIFIER="pkg:deb/debian-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       # Todo: Company Name, Copyright, Mime-Type
 
@@ -501,6 +503,7 @@ windows_exifparser() {
       else
         lPURL_IDENTIFIER="pkg:exe/windows-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_link "${lEXIF_LOG}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -603,6 +606,7 @@ python_poetry_lock_parser() {
         else
           lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
         fi
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
         # Todo: checksum
 
@@ -711,6 +715,7 @@ rust_cargo_lock_parser() {
         else
           lPURL_IDENTIFIER="pkg:cargo/${lAPP_NAME}@${lAPP_VERS}"
         fi
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
         # Todo: source
 
@@ -812,6 +817,7 @@ alpine_apk_package_check() {
       else
         lPURL_IDENTIFIER="pkg:apk/${lAPP_NAME}@${lAPP_VERS}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -921,6 +927,7 @@ ruby_gem_archive_check() {
       else
         lPURL_IDENTIFIER="pkg:gem/${lAPP_NAME}@${lAPP_VERS}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1027,6 +1034,7 @@ bsd_pkg_check() {
       else
         lPURL_IDENTIFIER="pkg:pkg/${lAPP_NAME}@${lAPP_VERS}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1131,6 +1139,7 @@ rpm_package_check() {
       else
         lPURL_IDENTIFIER="pkg:rpm/${lAPP_NAME}@${lAPP_VERS}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       write_log "[*] RPM archive details: ${ORANGE}${lRPM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1238,6 +1247,7 @@ python_requirements() {
         else
           lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
         fi
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
         # with internet we can query further details
         # └─$ curl -sH "accept: application/json" https://pypi.org/pypi/"${lAPP_NAME}"/json | jq '.info.author, .info.classifiers'
@@ -1336,6 +1346,7 @@ python_pip_packages() {
         else
           lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
         fi
+        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}"
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1365,6 +1376,7 @@ python_pip_packages() {
         else
           lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
         fi
+        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}"
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1418,6 +1430,7 @@ python_pip_packages() {
         else
           lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
         fi
+        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}"
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1447,6 +1460,7 @@ python_pip_packages() {
         else
           lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
         fi
+        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}"
 
         write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1556,6 +1570,7 @@ java_archives_check() {
       else
         lPURL_IDENTIFIER="pkg:java/${lAPP_NAME}@${lAPP_VERS}"
       fi
+      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
       write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1663,6 +1678,7 @@ debian_status_files_analysis() {
           else
             lPURL_IDENTIFIER="pkg:deb/debian-based/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
           fi
+          STRIPPED_VERSION="::${lPACKAGE}:${lVERSION}"
           lAPP_VENDOR="${lPACKAGE}"
           lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
 
@@ -1751,6 +1767,7 @@ openwrt_control_files_analysis() {
           else
             lPURL_IDENTIFIER="pkg:opkg/openwrt/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
           fi
+          STRIPPED_VERSION="::${lPACKAGE}:${lVERSION}"
 
           write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
           write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
@@ -1849,6 +1866,7 @@ rpm_package_mgmt_analysis() {
         else
           lPURL_IDENTIFIER="pkg:rpm/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
         fi
+        STRIPPED_VERSION="::${lPACKAGE}:${lVERSION}"
 
         write_log "[*] RPM package details: ${ORANGE}${lPACKAGE_NAME}${NC} - ${ORANGE}${lPACKAGE_VERSION:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE_NAME}" "${lPACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
