@@ -1,7 +1,7 @@
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:1.4.2h
+    image: embeddedanalyzer/emba:1.4.2i
     container_name: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
@@ -50,7 +50,7 @@ services:
         soft: 0
 
   emba_quest:
-    image: embeddedanalyzer/emba:1.4.2h
+    image: embeddedanalyzer/emba:1.4.2i
     container_name: emba_quest
     read_only: true
     tmpfs:
