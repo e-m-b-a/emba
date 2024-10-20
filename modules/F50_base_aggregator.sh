@@ -1020,8 +1020,7 @@ os_detector() {
         # version detected -> verified linux
         for SYSTEM_VER in "${SYSTEM_VERSION[@]}"; do
           SYSTEM_VER=$(strip_color_codes "${SYSTEM_VER}")
-          SYSTEM_VER=$(echo "${SYSTEM_VER}" | tr -d '\n')
-          SYSTEM="${SYSTEM}"" / v${SYSTEM_VER}"
+          SYSTEM+=" / v${SYSTEM_VER}"
           VERIFIED=1
         done
         if [[ ${VERIFIED} -eq 1 ]]; then
@@ -1086,7 +1085,7 @@ os_kernel_module_detect() {
 
 print_os() {
   local lSYSTEM="${1:-}"
-  lSYSTEM=$(echo "${lSYSTEM}" | tr -d '\n')
+  lSYSTEM=$(echo "${lSYSTEM}" | tr -dc '[:print:]')
 
   if [[ ${VERIFIED} -eq 1 ]]; then
     if [[ "${VERIFIED_S03}" -eq 1 ]]; then
