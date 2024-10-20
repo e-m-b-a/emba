@@ -1,6 +1,6 @@
-https://twitter.com/*
-*style/style.css
-*style/emba.svg
-*style/favicon.png
-*TIMELINK*
-*embarkBackUrl*
+https://twitter.com/.*
+.*style/style.css
+.*style/emba.svg
+.*style/favicon.png
+.*TIMELINK.*
+.*embarkBackUrl.*
