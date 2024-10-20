@@ -10222,6 +10222,7 @@ CVE-2024-2056;Artica Proxy 4.50 Loopback Service Disclosure;https://packetstorms
 CVE-2024-21338;Microsoft Windows 10.0.17763.5458 Privilege Escalation;https://packetstormsecurity.com/files/177869/Microsoft-Windows-10.0.17763.5458-Privilege-Escalation.html;unknown
 CVE-2024-21345;Exploiting The NT Kernel In 24H2;https://packetstormsecurity.com/files/178378/Exploiting-The-NT-Kernel-In-24H2.html;unknown
 CVE-2024-21345;Windows NtQueryInformationThread Double Fetch Arbitrary Write;https://packetstormsecurity.com/files/178376/Windows-NtQueryInformationThread-Double-Fetch-Arbitrary-Write.html;unknown
+CVE-2024-21455;msm 5.15 Arbitrary Kernel Address Access;https://packetstormsecurity.com/files/182180/msm-5.15-Arbitrary-Kernel-Address-Access.html;unknown
 CVE-2024-21733;Apache Tomcat 8.5.63 9.0.43 HTTP Response Smuggling;https://packetstormsecurity.com/files/176951/Apache-Tomcat-8.5.63-9.0.43-HTTP-Response-Smuggling.html;unknown
 CVE-2024-21762;Fortinet FortiOS Out Of Bounds Write;https://packetstormsecurity.com/files/177602/Fortinet-FortiOS-Out-Of-Bounds-Write.html;unknown
 CVE-2024-2188;TP Link Archer AX50 Cross Site Scripting;https://packetstormsecurity.com/files/181590/TP-Link-Archer-AX50-Cross-Site-Scripting.html;unknown
@@ -10418,6 +10419,7 @@ CVE-2024-34747;PowerVR DEVMEMXINT_RESERVATION ppsPMR Use After Free;https://pack
 CVE-2024-34748;PowerVR _DevmemXReservationPageAddress Wrapping Addition Error;https://packetstormsecurity.com/files/179770/PowerVR-_DevmemXReservationPageAddress-Wrapping-Addition-Error.html;unknown
 CVE-2024-34831;GibbonEdu Core 26.0.00 Cross Site Scripting;https://packetstormsecurity.com/files/181591/GibbonEdu-Core-26.0.00-Cross-Site-Scripting.html;unknown
 CVE-2024-34833;Payroll Management System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/179106/Payroll-Management-System-1.0-Remote-Code-Execution.html;remote
+CVE-2024-35133;IBM Security Verify Access 10.0.8 Open Redirection;https://packetstormsecurity.com/files/182287/IBM-Security-Verify-Access-10.0.8-Open-Redirection.html;unknown
 CVE-2024-35214;BlackBerry CylanceOPTICS Uninstall Password Bypass;https://packetstormsecurity.com/files/181909/BlackBerry-CylanceOPTICS-Uninstall-Password-Bypass.html;unknown
 CVE-2024-35244;Sharp Multi Function Printer 18 Vulnerabilities;https://packetstormsecurity.com/files/179363/Sharp-Multi-Function-Printer-18-Vulnerabilities.html;remote/local
 CVE-2024-35288;Nitro PDF Pro Local Privilege Escalation;https://packetstormsecurity.com/files/181954/Nitro-PDF-Pro-Local-Privilege-Escalation.html;unknown
