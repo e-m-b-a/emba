@@ -18,7 +18,6 @@ on:
 
 jobs:
   lychee-link-check:
-    # if: github.repository_owner == 'e-m-b-a'
     name: Link check
     runs-on: ubuntu-latest
     steps:
