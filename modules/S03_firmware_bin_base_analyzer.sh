@@ -186,7 +186,6 @@ binary_architecture_detection() {
 
   print_output "[*] Architecture detection running on ""${FILE_TO_CHECK}"
 
-
   # as Thumb is usually false positive we remove it from the results
   mapfile -t PRE_ARCH_Y < <(binwalk -Y "${FILE_TO_CHECK}" | grep "valid\ instructions" | grep -v "Thumb" | \
     awk '{print $3}' | sort -u || true)

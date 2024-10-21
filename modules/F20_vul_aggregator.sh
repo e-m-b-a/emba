@@ -899,9 +899,16 @@ cve_extractor() {
 
 
   if ! [[ "${VERSION_orig}" == "CVE-"* ]]; then
-    # remove last : if it is there
-    VERSION=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
     BINARY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
+
+    # if we have a version identifier like ::binary:1.2.3: we need to remove the last ':' before processing it correctly
+    VERSION=$(echo "${BIN_VERSION_%:}" | cut -d':' -f4-5)
+    VERSION="${VERSION%:}"
+
+    BINARY=$(echo "${BIN_VERSION_%:}" | cut -d':' -f1-3)
+    BINARY="${BINARY%:}"
+    BINARY="${BINARY#:}"
+
     export AGG_LOG_FILE="${VERSION_PATH}".txt
   else
     export AGG_LOG_FILE="${VERSION_orig}".txt
@@ -1085,7 +1092,8 @@ cve_extractor() {
   local BIN_LOG="${LOG_PATH_MODULE}/cve_details_${BINARY}_${VERSION}.log"
   write_log "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:" "${BIN_LOG}"
   local ANCHOR=""
-  ANCHOR="${BINARY}_${VERSION}"
+  local lBINARY_NAME="${BINARY/*:}"
+  ANCHOR="${lBINARY_NAME}_${VERSION}"
   ANCHOR="cve_${ANCHOR:0:20}"
   write_anchor "${ANCHOR}" "${BIN_LOG}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
@@ -1131,18 +1139,18 @@ cve_extractor() {
       write_log "BINARY;VERSION;Number of CVEs;Number of EXPLOITS" "${LOG_PATH_MODULE}"/F20_summary.csv
     fi
     if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+      printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lBINARY_NAME}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
       write_log "${BINARY};${VERSION};${CVEs};${EXPLOITS}" "${LOG_PATH_MODULE}"/F20_summary.csv
     else
-      printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+      printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lBINARY_NAME}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
       write_log "${BINARY};${VERSION};${CVEs};${EXPLOITS}" "${LOG_PATH_MODULE}"/F20_summary.csv
     fi
   elif [[ "${CVEs/\ */}" -eq 0 && "${EXPLOITS}" -eq 0 ]]; then
-    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs/\ */}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lBINARY_NAME}" "${VERSION}" "${CVEs/\ */}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
     write_log "${BINARY};${VERSION};${CVEs/\ */};${EXPLOITS}" "${LOG_PATH_MODULE}"/F20_summary.csv
   else
     # this should never happen ...
-    printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "${BINARY}" "${VERSION}" "${CVEs/\ */}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+    printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "${lBINARY_NAME}" "${VERSION}" "${CVEs/\ */}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
     write_log "${BINARY};${VERSION};${CVEs/\ */};${EXPLOITS}" "${LOG_PATH_MODULE}"/F20_summary.csv
   fi
 
@@ -1152,6 +1160,7 @@ cve_extractor() {
 
 cve_extractor_thread_actor() {
   local lBIN_BINARY="${1:-}"
+  local lBIN_BINARY_NAME="${lBIN_BINARY/*:}"
   local lBIN_VERSION="${2:-}"
   local CVE_OUTPUT="${3:-}"
 
@@ -1499,27 +1508,27 @@ cve_extractor_thread_actor() {
     if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
     if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
       "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY_NAME}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     else
-      printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY_NAME}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     fi
     ((HIGH_CVE_COUNTER+=1))
   elif (( $(echo "${CVSS_VALUE} > 3.9" | bc -l) )); then
     if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
     if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
       "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY_NAME}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     else
-      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY_NAME}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     fi
     ((MEDIUM_CVE_COUNTER+=1))
   else
     if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
     if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
       "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY_NAME}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     else
-      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_BINARY_NAME}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${lFIRST_EPSS}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     fi
     ((LOW_CVE_COUNTER+=1))
   fi

@@ -64,7 +64,11 @@ S06_distribution_identification()
           OUT1=$(echo "${OUT1}" | sort -u | tr '\n' ' ')
           OUT1=$(echo "${OUT1}" | tr -d '"')
           # print_output "identified mod: ${OUT1}"
-          lIDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          if [[ -n "${SED_COMMAND}" ]]; then
+            lIDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          else
+            lIDENTIFIER=$(echo "${OUT1}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          fi
           # print_output "[*] lIDENTIFIER: ${lIDENTIFIER}"
           lFILENAME=$(basename "${lFILE,,}")
 
