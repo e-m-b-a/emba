@@ -133,7 +133,7 @@ check_nvd_db() {
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]] ; then
-    LOCAL_HASH="$(head -c 8 "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
+    LOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
       echo -e "    CVE database version - ${GREEN}ok${NC}"
@@ -147,7 +147,7 @@ check_epss_db() {
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/EPSS-data ]] ; then
-    LOCAL_HASH="$(head -c 8 "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
+    LOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
       echo -e "    EPSS database version - ${GREEN}ok${NC}"
@@ -161,7 +161,8 @@ check_git_hash() {
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    LOCAL_HASH="$(git describe --always)"
+    LOCAL_HASH="$(head .git/refs/heads/master)"
+    # LOCAL_HASH="$(git describe --always)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
       echo -e "    EMBA github version - ${GREEN}ok${NC}"

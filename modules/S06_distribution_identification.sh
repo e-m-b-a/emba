@@ -48,9 +48,10 @@ S06_distribution_identification()
       lSEARCH_FILE="$(safe_echo "${CONFIG}" | cut -d\; -f2)"
       # echo "lSEARCH_FILE: $lSEARCH_FILE"
       # echo "FIRMWARE_PATH: $FIRMWARE_PATH"
-      if [[ "${lSEARCH_FILE}" == *"os_release"* ]] || [[ "${lSEARCH_FILE}" == *"lsb-release"* ]]; then
+      if [[ "${lSEARCH_FILE}" == *"os-release"* ]] || [[ "${lSEARCH_FILE}" == *"lsb-release"* ]]; then
         # lets check if we have already a valid debian entry -> if so, we can skip this test
         # this usually happens if we have already found an os_release or lsb-release file
+        # echo "Check for debian - os_release / lsb-release"
         if grep -qE "debian_linux:[0-9]+" "${S06_CSV_LOG}"; then
           print_output "[*] Already identified Debian Linux version -> skipping further tests now" "no_log"
           continue
