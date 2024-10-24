@@ -49,6 +49,12 @@ S24_kernel_bin_identifier()
     local K_FILE=""
     local K_VER_TMP=""
     local lSTRIPPED_VERS=""
+    local lPACKAGING_SYSTEM="linux_kernel"
+    local lAPP_LIC="GPL-2.0-only"
+    local lAPP_MAINT="kernel.org"
+    local lAPP_NAME=""
+    local lAPP_VERS=""
+    local lAPP_TYPE="operating-system"
 
     if file -b "${lFILE}" | grep -q "ASCII text"; then
       # reduce false positive rate
@@ -78,9 +84,14 @@ S24_kernel_bin_identifier()
 
       check_for_s08_csv_log "${S08_CSV_LOG}"
       lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/:linux:linux_kernel:\1/' || true)
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lSTRIPPED_VERS}:*:*:*:*:*:*"
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a${lSTRIPPED_VERS}:*:*:*:*:*:*"
       lPURL_IDENTIFIER=$(build_generic_purl ":${lSTRIPPED_VERS}")
       lK_VER="${lK_VER//[,;\/()\[\]\\#]}"
+      lAPP_MAINT=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f2)
+      lAPP_NAME=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f3)
+      lAPP_VERS=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f4-5)
+      # it could be that we have a version like 2.14b:* -> we remove the last field
+      lAPP_VERS="${lAPP_VERS/:\*}"
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
@@ -97,7 +108,28 @@ S24_kernel_bin_identifier()
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
             lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
             lK_ELF=${lK_ELF//,\ /\ -\ }
-            write_log "linux_kernel;${lFILE:-NA}.elf;${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
+
+            if command -v jo >/dev/null; then
+              # add source file path information to our properties array:
+              local lPATH_ARRAY_INIT_ARR=()
+              lPATH_ARRAY_INIT_ARR+=( "${lFILE}" "${lFILE}.elf" )
+
+              export PROPERTIES_PATH_JSON_ARR=()
+              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+              # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+              # final array with all hash values
+              export HASHES_ARR=()
+              build_sbom_json_hashes_arr "${lFILE}.elf"
+
+              # create component entry - this allows adding entries very flexible:
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_ELF:-NA}" "${lAPP_DESC:-NA}"
+
+              unset HASHES_ARR
+              unset PROPERTIES_PATH_JSON_ARR
+            fi
+
+            write_log "${lPACKAGING_SYSTEM};${lFILE:-NA}.elf;${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS:-NA};${lAPP_LIC:-unknown};${lAPP_MAINT:-NA};${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
           else
             print_ln
             print_output "[-] No Linux kernel elf file was created."
@@ -106,13 +138,18 @@ S24_kernel_bin_identifier()
         print_ln
       fi
 
-      lMD5_CHECKSUM="$(md5sum "${lFILE}" | awk '{print $1}')"
-      lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
-      lK_ELF=$(file -b "${lFILE}")
-      lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
-      lK_ELF=${lK_ELF//,\ /\ -\ }
-      write_log "linux_kernel;${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};GPL-2.0-only;kernel.org;${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
+      # if we have not elf file created and logged we now log the original kernel
+      # in case we have an elf file lFILE was already included in the SBOM
+      if [[ ! -f "${lFILE}".elf ]]; then
+        lMD5_CHECKSUM="$(md5sum "${lFILE}" | awk '{print $1}')"
+        lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
+        lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
+        lK_ELF=$(file -b "${lFILE}")
+        lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
+        lK_ELF=${lK_ELF//,\ /\ -\ }
+
+        write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};${lAPP_LIC:-unknown};${lAPP_MAINT:-NA};${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"
+      fi
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then

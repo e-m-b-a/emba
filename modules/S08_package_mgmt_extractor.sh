@@ -492,11 +492,7 @@ windows_exifparser() {
         fi
       fi
 
-      lMD5_CHECKSUM="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
-      lSHA256_CHECKSUM="$(sha256sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
-
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS:-*}:*:*:*:*:*:*"
 
       if [[ -n "${lOS_IDENTIFIED}" ]]; then
         lPURL_IDENTIFIER="pkg:exe/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
@@ -504,6 +500,27 @@ windows_exifparser() {
         lPURL_IDENTIFIER="pkg:exe/windows-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
       fi
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+
+      ### new SBOM json testgenerator
+      if command -v jo >/dev/null; then
+        # add EXE path information to our properties array:
+        local lPATH_ARRAY_INIT_ARR=()
+        lPATH_ARRAY_INIT_ARR+=( "${lEXE_ARCHIVE}" )
+
+        export PROPERTIES_PATH_JSON_ARR=()
+        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        export HASHES_ARR=()
+        build_sbom_json_hashes_arr "${lEXE_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+
+        unset HASHES_ARR
+        unset PROPERTIES_PATH_JSON_ARR
+      fi
 
       write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_link "${lEXIF_LOG}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1681,6 +1698,27 @@ debian_status_files_analysis() {
           lAPP_VENDOR="${lPACKAGE}"
           lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
           STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
+
+          ### new SBOM json testgenerator
+          if command -v jo >/dev/null; then
+            # add source file path information to our properties array:
+            local lPATH_ARRAY_INIT_ARR=()
+            lPATH_ARRAY_INIT_ARR+=( "${lFILE}" )
+
+            export PROPERTIES_PATH_JSON_ARR=()
+            build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+            # final array with all hash values
+            export HASHES_ARR=()
+            build_sbom_json_hashes_arr "${lFILE}"
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+
+            unset HASHES_ARR
+            unset PROPERTIES_PATH_JSON_ARR
+          fi
 
           write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
           write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"

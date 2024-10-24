@@ -26,6 +26,8 @@ IF50_aggregator_common() {
     print_tool_info "net-tools" 1
     print_tool_info "exploitdb" 1
     print_pip_info "cve-searchsploit"
+    # jo is used to build the sbom
+    print_tool_info "jo" 1
     echo -e "\\n""${ORANGE}""${BOLD}""cyclonedx""${NC}"
     echo -e "${ORANGE}""cyclonedx sbom converter will be installed.""${NC}"
 

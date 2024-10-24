@@ -229,7 +229,7 @@ extract_deb_helper() {
 
 extract_deb_extractor_helper() {
   local lDEB="${1:-}"
-  local lR_PATH="${1:-}"
+  local lR_PATH="${2:-}"
   local lDEB_NAME=""
 
   lDEB_NAME=$(basename "${lDEB}")
