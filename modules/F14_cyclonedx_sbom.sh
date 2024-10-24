@@ -77,9 +77,9 @@ F14_cyclonedx_sbom() {
     local lFW_COMPONENT_DATA_ARR=()
     lFW_COMPONENT_DATA_ARR+=( type="${lFW_TYPE}" )
     lFW_COMPONENT_DATA_ARR+=( bom-ref="$(uuidgen)" )
-    [[ -n "${FW_VENDOR}" ]] && lFW_COMPONENT_DATA_ARR+=( supplier=$(jo -n name="${FW_VENDOR}") )
+    [[ -n "${FW_VENDOR}" ]] && lFW_COMPONENT_DATA_ARR+=( "supplier=$(jo -n name="${FW_VENDOR}")" )
     lFW_COMPONENT_DATA_ARR+=( path="${lFW_PATH}" )
-    [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( hashes=$(jo -a "${HASHES_ARR[@]}") )
+    [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
     mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*.json")
@@ -95,15 +95,15 @@ F14_cyclonedx_sbom() {
       -s specVersion="${lSBOM_SPEC_VERS}" \
       serialNumber="${lSBOM_SERIAL_NR}" \
       version="${lSBOM_VER}" \
-      metadata=$(jo \
+      metadata="$(jo \
         timestamp="${lSBOM_TIMESTAMP}" \
-        tools=$(jo \
-          components=$(jo -a $(jo -n "${lTOOL_COMP_ARR[@]}"))) \
-        component=$(jo -n \
-          "${lFW_COMPONENT_DATA_ARR[@]}")) \
-      components=$(jo -a \
-        ${lCOMPONENTS_ARR[@]} \
-        ))
+        tools="$(jo \
+          components="$(jo -a "$(jo -n "${lTOOL_COMP_ARR[@]}")")")" \
+        component="$(jo -n \
+          "${lFW_COMPONENT_DATA_ARR[@]}")")" \
+      components="$(jo -a \
+        "${lCOMPONENTS_ARR[@]}" \
+        )")
 
     unset HASHES_ARR
 

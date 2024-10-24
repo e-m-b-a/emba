@@ -31,7 +31,7 @@ build_sbom_json_path_properties_arr() {
     lPATH_ELEMENT="${lPATH_ARRAY_INIT_ARR["${lPATH_ELEMENT_ID}"]}"
     local lPATH_ARRAY_TMP=()
     lPATH_ARRAY_TMP+=("name="EMBA:location:$((lPATH_ELEMENT_ID+1)):path"")
-    lPATH_ARRAY_TMP+=("value="${lPATH_ELEMENT}"")
+    lPATH_ARRAY_TMP+=("value=${lPATH_ELEMENT}")
     PROPERTIES_PATH_JSON_ARR+=( "$(jo "${lPATH_ARRAY_TMP[@]}")")
   done
   # lPROPERTIES_PATH_JSON=$(jo -p -a "${lPROPERTIES_PATH_ARR_TMP[@]}")
@@ -56,15 +56,15 @@ build_sbom_json_hashes_arr() {
   # temp array with only one set of hash values
   local lHASHES_ARRAY_INIT=("alg=MD5")
   lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
-  HASHES_ARR+=( $(jo "${lHASHES_ARRAY_INIT[@]}") )
+  HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
 
   lHASHES_ARRAY_INIT=("alg=SHA-256")
   lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
-  HASHES_ARR+=( $(jo "${lHASHES_ARRAY_INIT[@]}") )
+  HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
 
   lHASHES_ARRAY_INIT=("alg=SHA-512")
   lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
-  HASHES_ARR+=( $(jo "${lHASHES_ARRAY_INIT[@]}") )
+  HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
 
   #lhashes=$(jo -p -a "${HASHES_ARR[@]}")
 }
@@ -95,18 +95,18 @@ build_sbom_json_component_arr() {
 
   local lCOMPONENT_ARR=()
 
-  lCOMPONENT_ARR+=( "type="${lAPP_TYPE}"" )
-  lCOMPONENT_ARR+=( "name="${lAPP_NAME:-NA}"" )
-  lCOMPONENT_ARR+=( "version="${lAPP_VERS}"" )
-  lCOMPONENT_ARR+=( "author="${lAPP_MAINT}"" )
-  lCOMPONENT_ARR+=( "group="${lPACKAGING_SYSTEM}"" )
-  lCOMPONENT_ARR+=( "bom-ref="$(uuidgen)"" )
+  lCOMPONENT_ARR+=( "type=${lAPP_TYPE}" )
+  lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
+  lCOMPONENT_ARR+=( "version=${lAPP_VERS}" )
+  lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
+  lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
+  lCOMPONENT_ARR+=( "bom-ref=$(uuidgen)" )
   lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
-  lCOMPONENT_ARR+=( "cpe="${lCPE_IDENTIFIER}"" )
-  lCOMPONENT_ARR+=( "purl="${lPURL_IDENTIFIER}"" )
-  lCOMPONENT_ARR+=( properties=$(jo -a "${PROPERTIES_PATH_JSON_ARR[@]}") )
-  lCOMPONENT_ARR+=( hashes=$(jo -a "${HASHES_ARR[@]}") )
-  lCOMPONENT_ARR+=( "description="${lAPP_DESC//\ /%SPACE%}"" )
+  lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
+  lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
+  lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_PATH_JSON_ARR[@]}")" )
+  lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
+  lCOMPONENT_ARR+=( "description=${lAPP_DESC//\ /%SPACE%}" )
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
     mkdir "${SBOM_LOG_PATH}"

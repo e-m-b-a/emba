@@ -120,9 +120,12 @@ S06_distribution_identification()
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
             local lAPP_TYPE="operating-system"
             local lAPP_LIC=""
-            local lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
-            local lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-            local lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
+            local lAPP_MAINT=""
+            lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
+            local lAPP_NAME=""
+            lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+            local lAPP_VERS=""
+            lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
             # it could be that we have a version like 2.14b:* -> we remove the last field
             lAPP_VERS="${lAPP_VERS/:\*}"
             # we use the already (p99) identified architecture for the distri
