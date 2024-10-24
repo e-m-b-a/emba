@@ -24,7 +24,7 @@ export QUICK_SCAN=1
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 # export QEMULATION=1
 
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" "F50" )
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F14" "F15" "F50" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0

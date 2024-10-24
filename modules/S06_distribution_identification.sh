@@ -40,6 +40,7 @@ S06_distribution_identification()
   local lCPE_IDENTIFIER="NA"
   local lPURL_IDENTIFIER="NA"
   local lCSV_RULE=""
+  local lPACKAGING_SYSTEM="static_distri_analysis"
 
   write_csv_log "file" "type" "identifier" "csv_rule"
 
@@ -99,7 +100,7 @@ S06_distribution_identification()
             write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
-            write_log "static_distri_analysis;${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
+            write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
           # check if not zero and not only spaces
@@ -117,7 +118,38 @@ S06_distribution_identification()
             # lCSV_RULE has 5 fields and looks like the following: :dlink:device:version:*
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
-            write_log "static_distri_analysis;${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
+            local lAPP_TYPE="operating-system"
+            local lAPP_LIC=""
+            local lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
+            local lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+            local lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
+            # it could be that we have a version like 2.14b:* -> we remove the last field
+            lAPP_VERS="${lAPP_VERS/:\*}"
+            # we use the already (p99) identified architecture for the distri
+            local lAPP_ARCH="${ARCH:-NA}"
+
+            ### new SBOM json testgenerator
+            if command -v jo >/dev/null; then
+              # add source file path information to our properties array:
+              local lPATH_ARRAY_INIT_ARR=()
+              lPATH_ARRAY_INIT_ARR+=( "${lFILE}" )
+
+              export PROPERTIES_PATH_JSON_ARR=()
+              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+              # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+              # final array with all hash values
+              export HASHES_ARR=()
+              build_sbom_json_hashes_arr "${lFILE}"
+
+              # create component entry - this allows adding entries very flexible:
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+
+              unset HASHES_ARR
+              unset PROPERTIES_PATH_JSON_ARR
+            fi
+
+            write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${lAPP_LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
             lOUTPUT=1
           fi
         fi
