@@ -20,8 +20,9 @@
 
 F15_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "CycloneDX SBOM converter"
+  module_title "CycloneDX SBOM converter (DEPRECATED)"
   pre_module_reporter "${FUNCNAME[0]}"
+  print_output "[!] WARNING: This module is deprecated and will be replaced by F14"
 
   local lVERSION=""
   local lCHKSUM=""
