@@ -383,8 +383,8 @@ module_analyzer() {
     write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
 
     # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
-      local lPACKAGING_SYSTEM="linux_kernel"
+    if ! grep -q "linux_kernel;.*;:linux:linux_kernel:${KV_ARR[*]};" "${S08_CSV_LOG}";then
+      local lPACKAGING_SYSTEM="linux_kernel+module"
       local lK_AUTHOR="linux"
       local lLICENSE="GPL-2.0-only"
 
@@ -407,7 +407,7 @@ module_analyzer() {
         build_sbom_json_hashes_arr "${lKMODULE}"
 
         # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "linux_kernel:${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_ARCH:-NA}" "${lK_DESC:-NA}"
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_ARCH:-NA}" "${lK_DESC:-NA}"
 
         unset HASHES_ARR
         unset PROPERTIES_PATH_JSON_ARR

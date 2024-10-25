@@ -91,22 +91,28 @@ build_sbom_json_component_arr() {
   export SBOM_COMP_BOM_REF=""
   SBOM_COMP_BOM_REF="$(uuidgen)"
 
-  if [[ -n "${lAPP_MAINT}" ]] && [[ "${lAPP_MAINT}" == "NA" ]]; then
+  if [[ -n "${lAPP_MAINT}" ]] && ( [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]] ); then
     lAPP_MAINT=""
   fi
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
   fi
+  if [[ -n "${lCPE_IDENTIFIER}" ]] && [[ "${lCPE_IDENTIFIER}" == "NA" ]]; then
+    lCPE_IDENTIFIER=""
+  fi
+  if [[ -n "${lPURL_IDENTIFIER}" ]] && [[ "${lPURL_IDENTIFIER}" == "NA" ]]; then
+    lPURL_IDENTIFIER=""
+  fi
 
-  lAPP_DESC="EMBA SBOM-group: ${lPACKAGING_SYSTEM} - name: ${lAPP_NAME}"
+  local lAPP_DESC_NEW="EMBA SBOM-group: ${lPACKAGING_SYSTEM} - name: ${lAPP_NAME}"
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" != "NA" ]]; then
-    lAPP_DESC+=" - version: ${lAPP_VERS}"
+    lAPP_DESC_NEW+=" - version: ${lAPP_VERS}"
   fi
   if [[ -n "${lAPP_ARCH}" ]] && [[ "${lAPP_ARCH}" != "NA" ]]; then
-    lAPP_DESC+=" - architecture: ${lAPP_ARCH}"
+    lAPP_DESC_NEW+=" - architecture: ${lAPP_ARCH}"
   fi
   if [[ -n "${lAPP_DESC}" ]] && [[ "${lAPP_DESC}" != "NA" ]]; then
-    lAPP_DESC+=" - description: ${lAPP_DESC}"
+    lAPP_DESC_NEW+=" - description: ${lAPP_DESC}"
   fi
 
   local lCOMPONENT_ARR=()
@@ -122,13 +128,13 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_PATH_JSON_ARR[@]}")" )
   lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
-  lCOMPONENT_ARR+=( "description=${lAPP_DESC//\ /%SPACE%}" )
+  lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
     mkdir "${SBOM_LOG_PATH}"
   fi
 
-  jo -n -- -s "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
+  jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
 
   # we can unset it here again
   unset HASHES_ARR
