@@ -96,10 +96,16 @@ build_sbom_json_component_arr() {
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
   fi
+
+  lAPP_DESC="EMBA SBOM-group: ${lPACKAGING_SYSTEM} - name: ${lAPP_NAME}"
+  if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" != "NA" ]]; then
+    lAPP_DESC+=" - version: ${lAPP_VERS}"
+  fi
+  if [[ -n "${lAPP_ARCH}" ]] && [[ "${lAPP_ARCH}" != "NA" ]]; then
+    lAPP_DESC+=" - architecture: ${lAPP_ARCH}"
+  fi
   if [[ -n "${lAPP_DESC}" ]] && [[ "${lAPP_DESC}" != "NA" ]]; then
-    lAPP_DESC="EMBA SBOM-group: ${lPACKAGING_SYSTEM} - name: ${lAPP_NAME} - version: ${lAPP_VERS} - architecture: ${lAPP_ARCH} - description: ${lAPP_DESC}"
-  else
-    lAPP_DESC="EMBA SBOM-group: ${lPACKAGING_SYSTEM} - name: ${lAPP_NAME} - version: ${lAPP_VERS} - architecture: ${lAPP_ARCH}"
+    lAPP_DESC+=" - description: ${lAPP_DESC}"
   fi
 
   local lCOMPONENT_ARR=()
