@@ -57,7 +57,7 @@ P99_prepare_analyzer() {
     return
   fi
 
-  print_output "[*] Quick check if it is a real Linux system"
+  print_output "[*] Quick check for Linux operating-system"
   check_firmware
 
   prepare_file_arr "${FIRMWARE_PATH}"
@@ -84,6 +84,11 @@ P99_prepare_analyzer() {
     print_output "[*] Possible UEFI firmware detected"
     if [[ -f "${LOG_DIR}"/p02_firmware_bin_file_check.txt ]]; then
       write_link "p02"
+    fi
+  elif [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+    print_output "[*] Windows binaries detected"
+    if [[ -f "${LOG_DIR}"/p07_windows_exe_extract.txt ]]; then
+      write_link "p07"
     fi
   elif [[ "${RTOS}" -eq 1 ]]; then
     print_output "[*] Possible RTOS system detected"

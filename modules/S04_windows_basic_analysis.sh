@@ -23,7 +23,7 @@
 
 ==head2 S04_windows_basic_analysis Short description
 
-This module uses exiftool to show exif details of Windows binaries.
+This module uses exiftool and readpe to access pe details details of Windows binaries.
 
 ==head2 S04_windows_basic_analysis Detailed description
 
@@ -85,6 +85,10 @@ version and download link:
 
 ii  libimage-exiftool-perl     12.76+dfsg-1        all       library and program to read and write meta information in multimedia files
 
+* readpe installation on current Kali Linux:
+
+ii  readpe                     0.84-1              amd64     command-line tools to manipulate Windows PE files
+
 ==head2 S04_windows_basic_analysis Testfirmware
 
 Any Windows binary (exe) file should be fine.
@@ -122,6 +126,7 @@ S04_windows_basic_analysis() {
   local lNEG_LOG=0
   local lEXE_ARCHIVES_ARR=()
   local lEXE_ARCHIVE=""
+  local lEXE_NAME=""
 
   if [[ "${WINDOWS_EXE}" -eq 1 ]]; then
     # if we already know that we have a windows binary to analyze we can check every file with the file command
@@ -134,12 +139,32 @@ S04_windows_basic_analysis() {
 
   if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
-      exiftool "${lEXE_ARCHIVE}" 2>/dev/null > "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log"
+      lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
+
+      sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log"
+      print_output "[*] Extract exifdata from ${ORANGE}${lEXE_NAME}${NC}" "no_log"
+      exiftool "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log" || print_error "[-] Something happened on exiftool analysis for ${lEXE_ARCHIVE}"
+
+      sub_module_title "PEdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      print_output "[*] Extract pedata from ${ORANGE}${lEXE_NAME}${NC}" "no_log"
+      write_log "" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      write_log "[*] pescan for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      pescan -v "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log" || print_error "[-] Something happened on pescan analysis for ${lEXE_ARCHIVE}"
+      write_log "" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      write_log "[*] readpe for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      readpe "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log" || print_error "[-] Something happened on pedata analysis for ${lEXE_ARCHIVE}"
+
       if [[ -s "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log" ]]; then
         print_output "[*] Windows binary exifdata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log"
       else
         print_output "[-] No exif data for binary $(orange "$(print_path "${lEXE_ARCHIVE}")") available"
       fi
+      if [[ -s "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log" ]]; then
+        print_output "[*] Windows binary pedata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      else
+        print_output "[-] No pedata for binary $(orange "$(print_path "${lEXE_ARCHIVE}")") available"
+      fi
+
       lNEG_LOG=1
     done
   fi
