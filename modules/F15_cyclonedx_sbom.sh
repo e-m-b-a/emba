@@ -136,10 +136,6 @@ F15_cyclonedx_sbom() {
       print_output "$(indent "$(orange "-> Download SBOM as CSV${NC}")")" "" "${F15_CSV_LOG}"
       print_output "$(indent "$(orange "-> Download SBOM as EMBA CSV${NC}")")" "" "${S08_CSV_LOG}"
       print_ln
-      print_output "[+] Cyclonedx SBOM in json format:"
-      print_ln
-      tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/f15_cyclonedx_sbom_json.json
-      print_ln
       local lNEG_LOG=1
     fi
   fi
