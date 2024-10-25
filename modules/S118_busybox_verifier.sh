@@ -87,7 +87,7 @@ S118_busybox_verifier()
       if command -v jo >/dev/null; then
         # add source file path information to our properties array:
         local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lBB_BIN}" )
+        lPATH_ARRAY_INIT_ARR+=( "path:${lBB_BIN}" )
 
         build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
 

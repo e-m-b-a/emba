@@ -161,10 +161,10 @@ S09_firmware_base_version_check() {
             ### new SBOM json testgenerator
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
-              local lPATH_ARRAY_INIT_ARR=()
-              lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
@@ -221,22 +221,17 @@ S09_firmware_base_version_check() {
             ### new SBOM json testgenerator
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
-              local lPATH_ARRAY_INIT_ARR=()
-              lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-              export PROPERTIES_PATH_JSON_ARR=()
-              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              export HASHES_ARR=()
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-              unset HASHES_ARR
-              unset PROPERTIES_PATH_JSON_ARR
             fi
 
         write_log "static_bin_analysis;${BIN_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -270,22 +265,17 @@ S09_firmware_base_version_check() {
             ### new SBOM json testgenerator
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
-              local lPATH_ARRAY_INIT_ARR=()
-              lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-              export PROPERTIES_PATH_JSON_ARR=()
-              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              export HASHES_ARR=()
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-              unset HASHES_ARR
-              unset PROPERTIES_PATH_JSON_ARR
             fi
 
           write_log "static_bin_analysis;${EXTRACTOR_LOG:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -321,22 +311,17 @@ S09_firmware_base_version_check() {
           ### new SBOM json testgenerator
           if command -v jo >/dev/null; then
             # add source file path information to our properties array:
-            local lPATH_ARRAY_INIT_ARR=()
-            lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-            export PROPERTIES_PATH_JSON_ARR=()
-            build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            export HASHES_ARR=()
             build_sbom_json_hashes_arr "${BIN}"
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-            unset HASHES_ARR
-            unset PROPERTIES_PATH_JSON_ARR
           fi
 
           write_log "static_bin_analysis;${FIRMWARE_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${FIRMWARE_PATH}");${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -536,22 +521,17 @@ bin_string_checker() {
             ### new SBOM json testgenerator
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
-              local lPATH_ARRAY_INIT_ARR=()
-              lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-              export PROPERTIES_PATH_JSON_ARR=()
-              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              export HASHES_ARR=()
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-              unset HASHES_ARR
-              unset PROPERTIES_PATH_JSON_ARR
             fi
 
             write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -583,22 +563,17 @@ bin_string_checker() {
             ### new SBOM json testgenerator
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
-              local lPATH_ARRAY_INIT_ARR=()
-              lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-              export PROPERTIES_PATH_JSON_ARR=()
-              build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              export HASHES_ARR=()
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-              unset HASHES_ARR
-              unset PROPERTIES_PATH_JSON_ARR
             fi
 
             write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -637,22 +612,17 @@ bin_string_checker() {
           ### new SBOM json testgenerator
           if command -v jo >/dev/null; then
             # add source file path information to our properties array:
-            local lPATH_ARRAY_INIT_ARR=()
-            lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "path:${BIN}" )
 
-            export PROPERTIES_PATH_JSON_ARR=()
-            build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            export HASHES_ARR=()
             build_sbom_json_hashes_arr "${BIN}"
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-            unset HASHES_ARR
-            unset PROPERTIES_PATH_JSON_ARR
           fi
 
           write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"

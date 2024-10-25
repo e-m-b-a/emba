@@ -195,10 +195,10 @@ version_detection_thread() {
       ### new SBOM json testgenerator
       if command -v jo >/dev/null; then
         # add EXE path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${BINARY_PATH}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${BINARY_PATH}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values

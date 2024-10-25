@@ -228,10 +228,10 @@ node_js_package_lock_parser() {
           # add the node lock path information to our properties array:
           # Todo: in the future we should check for the package, package hashes and which files
           # are in the package
-          local lPATH_ARRAY_INIT_ARR=()
-          lPATH_ARRAY_INIT_ARR+=( "${lNODE_LCK_ARCHIVE}" )
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lNODE_LCK_ARCHIVE}" )
 
-          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # usuall build_json_hashes_arr sets HASHES_ARR globally and we unset it afterwards
           # as we have the hashes from the lock file we do it here
@@ -379,10 +379,10 @@ deb_package_check() {
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lDEB_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -538,10 +538,10 @@ windows_exifparser() {
       ### new SBOM json testgenerator
       if command -v jo >/dev/null; then
         # add EXE path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lEXE_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lEXE_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -658,10 +658,10 @@ python_poetry_lock_parser() {
 
         if command -v jo >/dev/null; then
           # add deb path information to our properties array:
-          local lPATH_ARRAY_INIT_ARR=()
-          lPATH_ARRAY_INIT_ARR+=( "${lPY_LCK_ARCHIVE}" )
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPY_LCK_ARCHIVE}" )
 
-          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
@@ -709,6 +709,7 @@ rust_cargo_lock_parser() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
+  local lAPP_SOURCE="NA"
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
   local lMD5_CHECKSUM="NA"
@@ -763,6 +764,12 @@ rust_cargo_lock_parser() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_SOURCE=$(echo "${lCARGO_ENTRY}" | cut -d\| -f3)
+        lAPP_SOURCE=${lAPP_SOURCE/source\ =\ }
+        lAPP_SOURCE=$(clean_package_details "${lAPP_SOURCE}")
+        lAPP_SOURCE=$(clean_package_versions "${lAPP_SOURCE}")
+        # lAPP_SOURCE should be added to the properties: name: EMBA:cargo:source
+
         lSHA256_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
         lSHA256_CHECKSUM=${lSHA256_CHECKSUM/checksum\ =\ }
         lSHA256_CHECKSUM=$(clean_package_details "${lSHA256_CHECKSUM}")
@@ -778,14 +785,13 @@ rust_cargo_lock_parser() {
         fi
         STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        # Todo: source
-
         if command -v jo >/dev/null; then
           # add deb path information to our properties array:
-          local lPATH_ARRAY_INIT_ARR=()
-          lPATH_ARRAY_INIT_ARR+=( "${lRST_ARCHIVE}" )
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lRST_ARCHIVE}" )
+          lPROP_ARRAY_INIT_ARR+=( "source:${lAPP_SOURCE}" )
 
-          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
@@ -901,10 +907,10 @@ alpine_apk_package_check() {
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lAPK_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lAPK_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -1026,10 +1032,10 @@ ruby_gem_archive_check() {
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lGEM_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lGEM_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -1148,10 +1154,10 @@ bsd_pkg_check() {
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lPKG_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -1268,10 +1274,10 @@ rpm_package_check() {
 
       if command -v jo >/dev/null; then
         # add rpm path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lRPM_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lRPM_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -1400,10 +1406,10 @@ python_requirements() {
           # add the python requirement path information to our properties array:
           # Todo: in the future we should check for the package, package hashes and which files
           # are in the package
-          local lPATH_ARRAY_INIT_ARR=()
-          lPATH_ARRAY_INIT_ARR+=( "${lPY_REQ_FILE}" )
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPY_REQ_FILE}" )
 
-          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
@@ -1482,61 +1488,95 @@ python_pip_packages() {
     for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "METADATA" -type f)
       for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
         if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
+          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
         else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+          lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPIP_DIST_META_PACKAGE}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "PKG-INFO" -type f)
       for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
         if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
+          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
         else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+          lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPIP_DIST_META_PACKAGE}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -1562,61 +1602,95 @@ python_pip_packages() {
     for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "METADATA" -type f)
       for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
         if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
+          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
         else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+          lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPIP_SITE_META_PACKAGE}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "PKG-INFO" -type f)
       for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
         if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
+          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
         else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+          lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPIP_SITE_META_PACKAGE}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -1729,10 +1803,10 @@ java_archives_check() {
         # add the python requirement path information to our properties array:
         # Todo: in the future we should check for the package, package hashes and which files
         # are in the package
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lJAVA_ARCHIVE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lJAVA_ARCHIVE}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
@@ -1855,10 +1929,10 @@ debian_status_files_analysis() {
           ### new SBOM json testgenerator
           if command -v jo >/dev/null; then
             # add source file path information to our properties array:
-            local lPATH_ARRAY_INIT_ARR=()
-            lPATH_ARRAY_INIT_ARR+=( "${lFILE}" )
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "path:${lFILE}" )
 
-            build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
@@ -1960,10 +2034,10 @@ openwrt_control_files_analysis() {
             # add the python requirement path information to our properties array:
             # Todo: in the future we should check for the package, package hashes and which files
             # are in the package
-            local lPATH_ARRAY_INIT_ARR=()
-            lPATH_ARRAY_INIT_ARR+=( "${lPACKAGE_FILE}" )
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "path:${lPACKAGE_FILE}" )
 
-            build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
@@ -2076,10 +2150,10 @@ rpm_package_mgmt_analysis() {
           # add the python requirement path information to our properties array:
           # Todo: in the future we should check for the package, package hashes and which files
           # are in the package
-          local lPATH_ARRAY_INIT_ARR=()
-          lPATH_ARRAY_INIT_ARR+=( "${lPACKAGE_FILE}" )
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "path:${lPACKAGE_FILE}" )
 
-          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values

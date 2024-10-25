@@ -19,22 +19,37 @@
 # first: build the properaties path array
 # This is used for the binary path and for paths extracted from a
 # package like deb or rpm
-# parameter: array with all the paths
-# returns global array PROPERTIES_PATH_JSON_ARR
-build_sbom_json_path_properties_arr() {
-  local lPATH_ARRAY_INIT_ARR=("$@")
+# parameter: array with all the properties in the form
+#   "path:the_path_to_log"
+#   "other_propertie:the_property_to_log"
+# returns global array PROPERTIES_JSON_ARR
+build_sbom_json_properties_arr() {
+  local lPROPERTIES_ARRAY_INIT_ARR=("$@")
 
-  local lPATH_ELEMENT_ID=""
-  local lPATH_ELEMENT=""
-  # PROPERTIES_PATH_JSON_ARR is used in the caller
-  export PROPERTIES_PATH_JSON_ARR=()
+  local lPROPERTIES_ELEMENT_ID=""
+  local lPROPERTIES_ELEMENT=""
+  # PROPERTIES_JSON_ARR is used in the caller
+  export PROPERTIES_JSON_ARR=()
+  local lPROPERTIES_ELEMENT_1=""
+  local lPROPERTIES_ELEMENT_2=""
+  local lINIT_ELEMENT=""
 
-  for lPATH_ELEMENT_ID in "${!lPATH_ARRAY_INIT_ARR[@]}"; do
-    lPATH_ELEMENT="${lPATH_ARRAY_INIT_ARR["${lPATH_ELEMENT_ID}"]}"
-    local lPATH_ARRAY_TMP=()
-    lPATH_ARRAY_TMP+=("name="EMBA:location:$((lPATH_ELEMENT_ID+1)):path"")
-    lPATH_ARRAY_TMP+=("value=${lPATH_ELEMENT}")
-    PROPERTIES_PATH_JSON_ARR+=( "$(jo "${lPATH_ARRAY_TMP[@]}")")
+  for lPROPERTIES_ELEMENT_ID in "${!lPROPERTIES_ARRAY_INIT_ARR[@]}"; do
+    lPROPERTIES_ELEMENT="${lPROPERTIES_ARRAY_INIT_ARR["${lPROPERTIES_ELEMENT_ID}"]}"
+    # lPROPERTIES_ELEMENT_1 -> path, source or something else
+    lPROPERTIES_ELEMENT_1=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f1)
+    # lPROPERTIES_ELEMENT_2 -> the real value
+    lPROPERTIES_ELEMENT_2=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f2-)
+
+    # default value
+    lINIT_ELEMENT="EMBA:sbom"
+    # dedicated rules -> path -> location
+    [[ "${lPROPERTIES_ELEMENT_1}" == "path" ]] && lINIT_ELEMENT="EMBA:sbom:location"
+
+    local lPROPERTIES_ARRAY_TMP=()
+    lPROPERTIES_ARRAY_TMP+=("name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
+    lPROPERTIES_ARRAY_TMP+=("value=${lPROPERTIES_ELEMENT_2}")
+    PROPERTIES_JSON_ARR+=( "$(jo "${lPROPERTIES_ARRAY_TMP[@]}")")
   done
   # lPROPERTIES_PATH_JSON=$(jo -p -a "${lPROPERTIES_PATH_ARR_TMP[@]}")
 }
@@ -126,7 +141,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
-  lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_PATH_JSON_ARR[@]}")" )
+  lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )
   lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
 

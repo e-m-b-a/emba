@@ -25,9 +25,13 @@ run_web_reporter_mod_name() {
     # usually we should only find one file:
     mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMOD_NAME}*.txt" | sort)
     for lLOG_FILE in "${lLOG_FILES_ARR[@]}"; do
-      lMOD_NAME=$(basename -s .txt "${lLOG_FILE}")
-      generate_report_file "${lLOG_FILE}"
-      sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
+      if [[ -f "${lLOG_FILE}" ]]; then
+        lMOD_NAME=$(basename -s .txt "${lLOG_FILE}")
+        generate_report_file "${lLOG_FILE}"
+        sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
+      else
+        print_error "[-] Some error occured during web report building for ${lLOG_FILE}"
+      fi
     done
   fi
 }

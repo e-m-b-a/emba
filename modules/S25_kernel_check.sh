@@ -367,10 +367,10 @@ module_analyzer() {
     if command -v jo >/dev/null; then
       local lPACKAGING_SYSTEM="kernel_module"
       # add source file path information to our properties array:
-      local lPATH_ARRAY_INIT_ARR=()
-      lPATH_ARRAY_INIT_ARR+=( "${lKMODULE}" )
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "path:${lKMODULE}" )
 
-      build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
@@ -395,22 +395,18 @@ module_analyzer() {
       if command -v jo >/dev/null; then
         local lPACKAGING_SYSTEM="linux_kernel"
         # add source file path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "${lKMODULE}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lKMODULE}" )
 
-        export PROPERTIES_PATH_JSON_ARR=()
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        export HASHES_ARR=()
         build_sbom_json_hashes_arr "${lKMODULE}"
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_ARCH:-NA}" "${lK_DESC:-NA}"
 
-        unset HASHES_ARR
-        unset PROPERTIES_PATH_JSON_ARR
       fi
 
       write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
