@@ -225,7 +225,7 @@ node_js_package_lock_parser() {
         STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
-          # add the python requirement path information to our properties array:
+          # add the node lock path information to our properties array:
           # Todo: in the future we should check for the package, package hashes and which files
           # are in the package
           local lPATH_ARRAY_INIT_ARR=()
@@ -233,10 +233,8 @@ node_js_package_lock_parser() {
 
           build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
 
-          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-          # final array with all hash values
-          # build_sbom_json_hashes_arr "${lNODE_LCK_ARCHIVE}"
-          # temp array with only one set of hash values
+          # usuall build_json_hashes_arr sets HASHES_ARR globally and we unset it afterwards
+          # as we have the hashes from the lock file we do it here
           export HASHES_ARR=()
           [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
           [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
@@ -658,6 +656,21 @@ python_poetry_lock_parser() {
 
         # Todo: checksum
 
+        if command -v jo >/dev/null; then
+          # add deb path information to our properties array:
+          local lPATH_ARRAY_INIT_ARR=()
+          lPATH_ARRAY_INIT_ARR+=( "${lPY_LCK_ARCHIVE}" )
+
+          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
         write_log "[*] Python poetry.lock archive details: ${ORANGE}${lPY_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
@@ -767,6 +780,25 @@ rust_cargo_lock_parser() {
 
         # Todo: source
 
+        if command -v jo >/dev/null; then
+          # add deb path information to our properties array:
+          local lPATH_ARRAY_INIT_ARR=()
+          lPATH_ARRAY_INIT_ARR+=( "${lRST_ARCHIVE}" )
+
+          build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          export HASHES_ARR=()
+          local lHASHES_ARRAY_INIT=("alg=SHA-256")
+          lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
+          HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+
         write_log "[*] Rust Cargo.lock archive details: ${ORANGE}${lRST_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lRST_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
@@ -866,6 +898,21 @@ alpine_apk_package_check() {
         lPURL_IDENTIFIER="pkg:apk/${lAPP_NAME}@${lAPP_VERS}"
       fi
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPATH_ARRAY_INIT_ARR=()
+        lPATH_ARRAY_INIT_ARR+=( "${lAPK_ARCHIVE}" )
+
+        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lAPK_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+      fi
 
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
@@ -977,6 +1024,21 @@ ruby_gem_archive_check() {
       fi
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPATH_ARRAY_INIT_ARR=()
+        lPATH_ARRAY_INIT_ARR+=( "${lGEM_ARCHIVE}" )
+
+        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lGEM_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
@@ -1083,6 +1145,21 @@ bsd_pkg_check() {
         lPURL_IDENTIFIER="pkg:pkg/${lAPP_NAME}@${lAPP_VERS}"
       fi
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPATH_ARRAY_INIT_ARR=()
+        lPATH_ARRAY_INIT_ARR+=( "${lPKG_ARCHIVE}" )
+
+        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lPKG_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
+      fi
 
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"

@@ -127,7 +127,7 @@ build_sbom_json_component_arr() {
     mkdir "${SBOM_LOG_PATH}"
   fi
 
-  jo -n "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${lMD5_CHECKSUM:-NA}.json"
+  jo -n -- -s "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
 
   # we can unset it here again
   unset HASHES_ARR
