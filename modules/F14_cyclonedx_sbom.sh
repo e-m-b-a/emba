@@ -43,7 +43,6 @@ F14_cyclonedx_sbom() {
     local lFW_PATH=""
 
     if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
-      export HASHES_ARR=()
       build_sbom_json_hashes_arr "${FIRMWARE_PATH_BAK}"
     fi
     if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
@@ -108,7 +107,7 @@ F14_cyclonedx_sbom() {
     unset HASHES_ARR
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
-    echo "${lSBOM_JSON//%SPACE%/\ }" > "${lSBOM_LOG_FILE}.json" 
+    echo "${lSBOM_JSON//%SPACE%/\ }" > "${lSBOM_LOG_FILE}.json"
 
     if [[ -f "${lSBOM_LOG_FILE}.json" ]]; then
       local lNEG_LOG=1

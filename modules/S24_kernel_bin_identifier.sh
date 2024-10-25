@@ -114,19 +114,14 @@ S24_kernel_bin_identifier()
               local lPATH_ARRAY_INIT_ARR=()
               lPATH_ARRAY_INIT_ARR+=( "${lFILE}" "${lFILE}.elf" )
 
-              export PROPERTIES_PATH_JSON_ARR=()
               build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              export HASHES_ARR=()
               build_sbom_json_hashes_arr "${lFILE}.elf"
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_ELF:-NA}" "${lAPP_DESC:-NA}"
-
-              unset HASHES_ARR
-              unset PROPERTIES_PATH_JSON_ARR
             fi
 
             write_log "${lPACKAGING_SYSTEM};${lFILE:-NA}.elf;${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}").elf;${lK_VER:-NA};${lSTRIPPED_VERS:-NA};${lAPP_LIC:-unknown};${lAPP_MAINT:-NA};${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux Kernel" "${S08_CSV_LOG}"

@@ -164,19 +164,14 @@ S09_firmware_base_version_check() {
               local lPATH_ARRAY_INIT_ARR=()
               lPATH_ARRAY_INIT_ARR+=( "${BIN}" )
 
-              export PROPERTIES_PATH_JSON_ARR=()
               build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              export HASHES_ARR=()
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-              unset HASHES_ARR
-              unset PROPERTIES_PATH_JSON_ARR
             fi
 
             write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"

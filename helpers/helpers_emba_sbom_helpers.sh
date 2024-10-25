@@ -26,6 +26,8 @@ build_sbom_json_path_properties_arr() {
 
   local lPATH_ELEMENT_ID=""
   local lPATH_ELEMENT=""
+  # PROPERTIES_PATH_JSON_ARR is used in the caller
+  export PROPERTIES_PATH_JSON_ARR=()
 
   for lPATH_ELEMENT_ID in "${!lPATH_ARRAY_INIT_ARR[@]}"; do
     lPATH_ELEMENT="${lPATH_ARRAY_INIT_ARR["${lPATH_ELEMENT_ID}"]}"
@@ -47,6 +49,8 @@ build_sbom_json_hashes_arr() {
   local lMD5_CHECKSUM=""
   local lSHA256_CHECKSUM=""
   local lSHA512_CHECKSUM=""
+  # HASHES_ARR is used in the caller
+  export HASHES_ARR=()
 
   # hashes of the source file that is currently tested:
   lMD5_CHECKSUM="$(md5sum "${lBINARY}" | awk '{print $1}')"
@@ -66,7 +70,7 @@ build_sbom_json_hashes_arr() {
   lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
   HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
 
-  #lhashes=$(jo -p -a "${HASHES_ARR[@]}")
+  # lhashes=$(jo -p -a "${HASHES_ARR[@]}")
 }
 
 # 3rd: build and store the component sbom as json
@@ -113,6 +117,10 @@ build_sbom_json_component_arr() {
   fi
 
   jo -n "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${lMD5_CHECKSUM:-NA}.json"
+
+  # we can unset it here again
+  unset HASHES_ARR
+  unset PROPERTIES_PATH_JSON_ARR
 }
 
 

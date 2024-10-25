@@ -198,19 +198,14 @@ version_detection_thread() {
         local lPATH_ARRAY_INIT_ARR=()
         lPATH_ARRAY_INIT_ARR+=( "${BINARY_PATH}" )
 
-        export PROPERTIES_PATH_JSON_ARR=()
         build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        export HASHES_ARR=()
         build_sbom_json_hashes_arr "${BINARY_PATH}"
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lBIN_ARCH:-NA}" "${lAPP_DESC:-NA}"
-
-        unset HASHES_ARR
-        unset PROPERTIES_PATH_JSON_ARR
       fi
 
       write_log "${lPACKAGING_SYSTEM};${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${lAPP_LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
