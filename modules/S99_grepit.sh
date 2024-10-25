@@ -37,6 +37,12 @@
 S99_grepit() {
 
   module_log_init "${FUNCNAME[0]}"
+
+  if [[ "${QUICK_SCAN:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   module_title "Intelligent grepit module"
   print_output "Running intelligent grepit module for identification of interesting spots within the firmware ..." "no_log"
 

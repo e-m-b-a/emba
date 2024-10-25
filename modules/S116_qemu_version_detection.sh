@@ -166,6 +166,9 @@ version_detection_thread() {
     lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
     lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
 
+    # ensure we have a unique array
+    eval "BINARY_PATHS=($(for i in "${BINARY_PATHS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+
     for BINARY_PATH in "${BINARY_PATHS[@]}"; do
       print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${LIC}" "${TYPE}"

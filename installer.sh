@@ -180,8 +180,8 @@ if ! grep -Eq "ID(_LIKE)?=(\")?(ubuntu)?( )?(debian)?" /etc/os-release 2>/dev/nu
   print_help
   exit 1
 elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
-  if grep -q "VERSION_ID=\"22.04\"" /etc/os-release 2>/dev/null ; then
-  # How to handle sub-versioning ? if grep -q -E "PRETTY_NAME=\"Ubuntu\ 22\.04(\.[0-9]+)?\ LTS\"" /etc/os-release 2>/dev/null ; then
+  if grep -q "VERSION_ID=\"22.04\"\|VERSION_ID=\"24.04\"" /etc/os-release 2>/dev/null ; then
+    # How to handle sub-versioning ? if grep -q -E "PRETTY_NAME=\"Ubuntu\ 22\.04(\.[0-9]+)?\ LTS\"" /etc/os-release 2>/dev/null ; then
     OTHER_OS=1
     UBUNTU_OS=1
   elif grep -q "PRETTY_NAME=\"Ubuntu 20.04 LTS\"" /etc/os-release 2>/dev/null ; then
@@ -286,12 +286,40 @@ apt-get -y install python3-venv
 create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
-export DOCKER_COMPOSE=("docker-compose")
-# if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
-if ! command -v docker > /dev/null; then
-  echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
-  if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
-    apt-get install docker-cli -y
+if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
+  # OS debian is for Kali Linux
+  OS="debian"
+  [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
+  # Add Docker's official GPG key:
+  apt-get install -y ca-certificates curl gnupg
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/${OS}/gpg -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+  # Add the repository to Apt sources:
+  if [[ "${UBUNTU_OS}" -eq 1 ]]; then
+    # shellcheck source=/dev/null
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
+    $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  else
+    # probably a kali linux
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
+    bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  fi
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  export DOCKER_COMPOSE=("docker" "compose")
+elif command -v docker-compose > /dev/null ; then
+  echo -e "\n${ORANGE}""${BOLD}""WARNING: Old docker-compose installation found""${NC}"
+  echo -e "${ORANGE}""${BOLD}""It is recommend to remove the current installation and restart the EMBA installation afterwards!""${NC}"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  export DOCKER_COMPOSE=("docker-compose")
+  # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
+  if ! command -v docker > /dev/null; then
+    echo -e "\n${ORANGE}WARNING: No docker command available -> we check for docker-cli package${NC}"
+    if [[ "$(apt-cache search docker-cli | wc -l)" -gt 0 ]]; then
+      echo -e "\n${ORANGE}Info: No docker command available -> we install the docker-cli package now${NC}"
+      apt-get install docker-cli -y
+    fi
   fi
 fi
 

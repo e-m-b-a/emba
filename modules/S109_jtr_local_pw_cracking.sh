@@ -17,9 +17,13 @@
 #               jtr runtime is 60 minutes
 
 
-S109_jtr_local_pw_cracking()
-{
+S109_jtr_local_pw_cracking() {
   module_log_init "${FUNCNAME[0]}"
+
+  if [[ "${QUICK_SCAN:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
 
   local PW_FILE="${CSV_DIR}"/s108_stacs_password_search.csv
   local PW_FILE_S107="${CSV_DIR}"/s107_deep_password_search.csv

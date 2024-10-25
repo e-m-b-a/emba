@@ -32,10 +32,10 @@ S17_cwe_checker()
     local lCWE_CNT_=0
     local lTESTED_BINS=0
 
-    # [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
     if [[ "${FULL_TEST}" -ne 1 ]]; then
-      # we only need to wait if we are not using the full_scan profile
+      # we need to wait in default mode for the results of S13 and S14
       module_wait "S13_weak_func_check"
+      module_wait "S14_weak_func_radare_check"
     fi
 
     cwe_check
@@ -87,11 +87,11 @@ cwe_check() {
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
-  if [[ -f "${S13_CSV_LOG}" ]]; then
-    local BINARIES=()
+  if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${S13_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    local BINARIES=()
+    mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   for lBINARY in "${BINARIES[@]}" ; do

@@ -48,6 +48,15 @@ S06_distribution_identification()
       lSEARCH_FILE="$(safe_echo "${CONFIG}" | cut -d\; -f2)"
       # echo "lSEARCH_FILE: $lSEARCH_FILE"
       # echo "FIRMWARE_PATH: $FIRMWARE_PATH"
+      if [[ "${lSEARCH_FILE}" == *"os-release"* ]] || [[ "${lSEARCH_FILE}" == *"lsb-release"* ]]; then
+        # lets check if we have already a valid debian entry -> if so, we can skip this test
+        # this usually happens if we have already found an os_release or lsb-release file
+        # echo "Check for debian - os_release / lsb-release"
+        if grep -qE "debian_linux:[0-9]+" "${S06_CSV_LOG}"; then
+          print_output "[*] Already identified Debian Linux version -> skipping further tests now" "no_log"
+          continue
+        fi
+      fi
       mapfile -t lFOUND_FILES_ARR < <(find "${FIRMWARE_PATH}" -xdev -iwholename "*${lSEARCH_FILE}" || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         # print_output "lFILE: ${lFILE}"
@@ -64,7 +73,11 @@ S06_distribution_identification()
           OUT1=$(echo "${OUT1}" | sort -u | tr '\n' ' ')
           OUT1=$(echo "${OUT1}" | tr -d '"')
           # print_output "identified mod: ${OUT1}"
-          lIDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          if [[ -n "${SED_COMMAND}" ]]; then
+            lIDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          else
+            lIDENTIFIER=$(echo "${OUT1}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          fi
           # print_output "[*] lIDENTIFIER: ${lIDENTIFIER}"
           lFILENAME=$(basename "${lFILE,,}")
 

@@ -20,7 +20,7 @@
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=1
-  export EMBA_VERSION="1.4.2"
+  export EMBA_VERSION="1.5.0"
 
   export CLEANED=0              # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
@@ -175,6 +175,7 @@ set_log_paths() {
   export S13_LOG="${LOG_DIR}/s13_weak_func_check.txt"
   export S13_CSV_LOG="${CSV_DIR}/s13_weak_func_check.csv"
   export S14_LOG="${LOG_DIR}/s14_weak_func_radare_check.txt"
+  export S14_CSV_LOG="${CSV_DIR}/s14_weak_func_radare_check.csv"
   export S16_LOG="${LOG_DIR}/s16_ghidra_decompile_checks.txt"
   export S17_LOG="${LOG_DIR}/s17_cwe_checker.txt"
   export S17_CSV_LOG="${CSV_DIR}/s17_apk_check.csv"

@@ -22,7 +22,7 @@ export PRE_THREAD_ENA=0
 P18_BMC_decryptor() {
   local lNEG_LOG=0
 
-  if [[ "${BMC_ENC_DETECTED}" -eq 1 ]]; then
+  if [[ "${BMC_ENC_DETECTED:-0}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "BMC encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -50,7 +50,7 @@ bmc_extractor() {
   "${EXT_DIR}"/smcbmc/smcbmc.py "${lBMC_FILE_PATH_}" "${lEXTRACTION_FILE_}" || print_error "[-] BMC decryption failed for ${lBMC_FILE_PATH_}"
 
   print_ln
-  if [[ -f "${lEXTRACTION_FILE_}" ]]; then
+  if [[ -s "${lEXTRACTION_FILE_}" ]]; then
     export FIRMWARE_PATH="${lEXTRACTION_FILE_}"
     print_output "[+] Extracted BMC encrypted firmware file to ${ORANGE}${FIRMWARE_PATH}${NC}"
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"

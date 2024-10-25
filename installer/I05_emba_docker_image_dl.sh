@@ -20,7 +20,7 @@ I05_emba_docker_image_dl() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 0 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
-    print_tool_info "docker.io" 1
+    # print_tool_info "docker.io" 1
 
     echo -e "\\n""${ORANGE}""${BOLD}""embeddedanalyzer/emba docker image""${NC}"
     echo -e "Description: EMBA docker images used for firmware analysis."
@@ -50,7 +50,8 @@ I05_emba_docker_image_dl() {
           echo -e "${ORANGE}""EMBA docker image will be downloaded.""${NC}"
           echo -e "${ORANGE}""CONTAINER VARIABLE SET TO ""${CONTAINER}""${NC}"
           docker pull "${CONTAINER}"
-          docker pull "${CONTAINER/:*}:latest"
+          # we do not need to download the latest docker image -> we can just tag it locally
+          docker tag "${CONTAINER}" "${CONTAINER/:*}:latest"
           sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
           export DOCKER_CLI_EXPERIMENTAL=disabled
           "${DOCKER_COMPOSE[@]}" up --no-start
