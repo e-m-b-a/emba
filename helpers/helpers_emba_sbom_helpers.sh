@@ -91,7 +91,7 @@ build_sbom_json_component_arr() {
   export SBOM_COMP_BOM_REF=""
   SBOM_COMP_BOM_REF="$(uuidgen)"
 
-  if [[ -n "${lAPP_MAINT}" ]] && ( [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]] ); then
+  if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
     lAPP_MAINT=""
   fi
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
