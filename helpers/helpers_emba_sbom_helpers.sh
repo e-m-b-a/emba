@@ -87,6 +87,8 @@ build_sbom_json_component_arr() {
   local lPURL_IDENTIFIER="${8:-}"
   local lAPP_ARCH="${9:-}"
   local lAPP_DESC="${10:-}"
+  # we need the bom-ref in the caller to include it in our EMBA csv log for further references
+  export SBOM_COMP_BOM_REF=$(uuidgen)
 
   if [[ -n "${lAPP_MAINT}" ]] && [[ "${lAPP_MAINT}" == "NA" ]]; then
     lAPP_MAINT=""
@@ -107,7 +109,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "version=${lAPP_VERS}" )
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
-  lCOMPONENT_ARR+=( "bom-ref=$(uuidgen)" )
+  lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
   lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )

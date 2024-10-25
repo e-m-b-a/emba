@@ -41,12 +41,11 @@ F14_cyclonedx_sbom() {
     lSBOM_TIMESTAMP=$(date -Iseconds)
     local lFW_TYPE=""
     local lFW_PATH=""
+    # local lEMBA_COMMAND=""
 
-    if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
-      build_sbom_json_hashes_arr "${FIRMWARE_PATH_BAK}"
-    fi
     if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
       lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log)
+      # lEMBA_COMMAND=$(sort -u "${TMP_DIR}"/emba_command.log)
     else
       lFW_PATH="${FIRMWARE_PATH_BAK}"
     fi
@@ -64,7 +63,9 @@ F14_cyclonedx_sbom() {
     # EMBA details for the SBOM
     local lSBOM_TOOL="EMBA"
     local lSBOM_TOOL_VERS=""
-    lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
+    if [[ -f "${CONFIG_DIR}"/VERSION.log ]]; then
+      lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
+    fi
     local lTOOL_COMP_ARR=()
     lTOOL_COMP_ARR+=( type="application" )
     lTOOL_COMP_ARR+=( author="EMBA community" )
@@ -78,6 +79,12 @@ F14_cyclonedx_sbom() {
     lFW_COMPONENT_DATA_ARR+=( bom-ref="$(uuidgen)" )
     [[ -n "${FW_VENDOR}" ]] && lFW_COMPONENT_DATA_ARR+=( "supplier=$(jo -n name="${FW_VENDOR}")" )
     lFW_COMPONENT_DATA_ARR+=( path="${lFW_PATH}" )
+
+    # generate hashes for the firmware itself:
+    if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
+      build_sbom_json_hashes_arr "${FIRMWARE_PATH_BAK}"
+    fi
+
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
@@ -111,7 +118,7 @@ F14_cyclonedx_sbom() {
 
     if [[ -f "${lSBOM_LOG_FILE}.json" ]]; then
       local lNEG_LOG=1
-      print_output "[*] Converting CSV SBOM to Cyclonedx SBOM ..." "no_log"
+      print_output "[*] Converting SBOM to further SBOM formats ..." "no_log"
       cyclonedx convert --output-format xml --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.xml.txt" || print_error "[-] Error while generating xml SBOM for SBOM"
       cyclonedx convert --output-format protobuf --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.proto.txt" || print_error "[-] Error while generating protobuf SBOM for SBOM"
       cyclonedx convert --output-format spdxjson --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.spdx.txt" || print_error "[-] Error while generating spdxjson SBOM for SBOM"

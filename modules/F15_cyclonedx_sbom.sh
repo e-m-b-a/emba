@@ -53,8 +53,8 @@ F15_cyclonedx_sbom() {
     print_output "[*] Collect available SBOM details ..." "no_log"
 
     # we build a csv that can be handled via cyclonedx
-    while IFS=";" read -r COL1 COL2 COL3 COL4 COL5 COL6 COL7 COL8 COL9 COL10 COL11 COL12; do
-      print_output "[*] Generating SBOM entry: ${COL1} - ${COL2} - ${COL3} - ${COL4} - ${COL5} - ${COL6} - ${COL7} - ${COL8} - ${COL9} - ${COL10} - ${COL11} - ${COL12}" "no_log"
+    while IFS=";" read -r COL1 COL2 COL3 COL4 COL5 COL6 COL7 COL8 COL9 COL10 COL11 COL12 COL13; do
+      print_output "[*] Generating SBOM entry: ${COL1} - ${COL2} - ${COL3} - ${COL4} - ${COL5} - ${COL6} - ${COL7} - ${COL8} - ${COL9} - ${COL10} - ${COL11} - ${COL12} - ${COL13}" "no_log"
       lTYPE="${COL1}"
       # we currently hard code it to application - Todo: we need to define further rules
       lTYPE=""
@@ -89,7 +89,8 @@ F15_cyclonedx_sbom() {
       lCPE="${lCPE//,/-}"
       # PURL - https://github.com/package-url/purl-spec/blob/master/README.rst
       lPURL="${COL11:-NA}"
-      lDESC="${COL12:-NA}"
+      # lREF="${COL12:-NA}"
+      lDESC="${COL13:-NA}"
       # local lBOM_REF="bom-ref-todo"
       # Todo: we need to define this more in detail (image, font, executable, ...)
       # Currently we mainly have exectuables
