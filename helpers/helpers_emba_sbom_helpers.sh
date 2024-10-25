@@ -88,7 +88,8 @@ build_sbom_json_component_arr() {
   local lAPP_ARCH="${9:-}"
   local lAPP_DESC="${10:-}"
   # we need the bom-ref in the caller to include it in our EMBA csv log for further references
-  export SBOM_COMP_BOM_REF=$(uuidgen)
+  export SBOM_COMP_BOM_REF=""
+  SBOM_COMP_BOM_REF="$(uuidgen)"
 
   if [[ -n "${lAPP_MAINT}" ]] && [[ "${lAPP_MAINT}" == "NA" ]]; then
     lAPP_MAINT=""
