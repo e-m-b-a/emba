@@ -134,7 +134,7 @@ build_sbom_json_component_arr() {
 
   lCOMPONENT_ARR+=( "type=${lAPP_TYPE}" )
   lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
-  lCOMPONENT_ARR+=( "version=${lAPP_VERS}" )
+  lCOMPONENT_ARR+=( "-s" "version=${lAPP_VERS}" )
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
