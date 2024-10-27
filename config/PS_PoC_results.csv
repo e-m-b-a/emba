@@ -10443,6 +10443,7 @@ CVE-2024-36599;AEGON LIFE 1.0 Cross Site Scripting;https://packetstormsecurity.c
 CVE-2024-36840;Boelter Blue System Management 1.3 SQL Injection;https://packetstormsecurity.com/files/178978/Boelter-Blue-System-Management-1.3-SQL-Injection.html;remote
 CVE-2024-37032;Ollama Remote Code Execution;https://packetstormsecurity.com/files/179218/Ollama-Remote-Code-Execution.html;remote
 CVE-2024-37084;Spring Cloud Data Flow Remote Code Execution;https://packetstormsecurity.com/files/181439/Spring-Cloud-Data-Flow-Remote-Code-Execution.html;remote
+CVE-2024-37383;Roundcube Webmail Cross Site Scripting;https://packetstormsecurity.com/files/182334/Roundcube-Webmail-Cross-Site-Scripting.html;unknown
 CVE-2024-37856;Lost And Found Information System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/179078/Lost-And-Found-Information-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-37857;Lost And Found Information System 1.0 SQL Injection;https://packetstormsecurity.com/files/179080/Lost-And-Found-Information-System-1.0-SQL-Injection.html;remote
 CVE-2024-37858;Lost And Found Information System 1.0 SQL Injection;https://packetstormsecurity.com/files/179079/Lost-And-Found-Information-System-1.0-SQL-Injection.html;remote
@@ -10501,9 +10502,16 @@ CVE-2024-4577;PHP Remote Code Execution;https://packetstormsecurity.com/files/17
 CVE-2024-45873;VegaBird Yaazhini 2.0.2 DLL Hijacking;https://packetstormsecurity.com/files/181912/VegaBird-Yaazhini-2.0.2-DLL-Hijacking.html;unknown
 CVE-2024-45874;VegaBird Vooki 5.2.9 DLL Hijacking;https://packetstormsecurity.com/files/181913/VegaBird-Vooki-5.2.9-DLL-Hijacking.html;unknown
 CVE-2024-46409;SeedDMS 6.0.28 Cross Site Scripting;https://packetstormsecurity.com/files/181974/SeedDMS-6.0.28-Cross-Site-Scripting.html;unknown
+CVE-2024-46538;pfSense 2.5.2 Cross Site Scripting;https://packetstormsecurity.com/files/182333/pfSense-2.5.2-Cross-Site-Scripting.html;unknown
 CVE-2024-47176;CUPS Arbitrary Command Execution;https://packetstormsecurity.com/files/181978/CUPS-Arbitrary-Command-Execution.html;remote
+CVE-2024-47674;Linux Dangling PFN Mapping Use After Free;https://packetstormsecurity.com/files/182298/Linux-Dangling-PFN-Mapping-Use-After-Free.html;unknown
+CVE-2024-47943;Rittal IoT Interface CMC III Processing Unit Signature Verification Session ID;https://packetstormsecurity.com/files/182293/Rittal-IoT-Interface-CMC-III-Processing-Unit-Signature-Verification-Session-ID.html;unknown
+CVE-2024-47944;Rittal IoT Interface CMC III Processing Unit Signature Verification Session ID;https://packetstormsecurity.com/files/182293/Rittal-IoT-Interface-CMC-III-Processing-Unit-Signature-Verification-Session-ID.html;unknown
+CVE-2024-47945;Rittal IoT Interface CMC III Processing Unit Signature Verification Session ID;https://packetstormsecurity.com/files/182293/Rittal-IoT-Interface-CMC-III-Processing-Unit-Signature-Verification-Session-ID.html;unknown
+CVE-2024-48605;Helakuru 1.1 DLL Hijacking;https://packetstormsecurity.com/files/182336/Helakuru-1.1-DLL-Hijacking.html;unknown
 CVE-2024-4883;Progress WhatsUp Gold WriteDatafile Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179405/Progress-WhatsUp-Gold-WriteDatafile-Unauthenticated-Remote-Code-Execution.html;remote
 CVE-2024-4885;Progress WhatsUp Gold GetFileWithoutZip Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179404/Progress-WhatsUp-Gold-GetFileWithoutZip-Unauthenticated-Remote-Code-Execution.html;remote
+CVE-2024-48914;Vendure Arbitrary File Read Denial Of Service;https://packetstormsecurity.com/files/182337/Vendure-Arbitrary-File-Read-Denial-Of-Service.html;local
 CVE-2024-4956;Nexus Repository Manager 3 Path Traversal;https://packetstormsecurity.com/files/181661/Nexus-Repository-Manager-3-Path-Traversal.html;unknown
 CVE-2024-4956;Nexus Repository Traversal Scanner;https://packetstormsecurity.com/files/181887/Nexus-Repository-Traversal-Scanner.html;unknown
 CVE-2024-5009;Progress WhatsUp Gold SetAdminPassword Privilege Escalation;https://packetstormsecurity.com/files/179403/Progress-WhatsUp-Gold-SetAdminPassword-Privilege-Escalation.html;local
@@ -10518,6 +10526,7 @@ CVE-2024-5672;Helmholz Industrial Router REX100 MBConnectline mbNET.mini 2.2.11 
 CVE-2024-5676;Paradox IP150 Internet Module 1.40.00 Cross Site Request Forgery;https://packetstormsecurity.com/files/179182/Paradox-IP150-Internet-Module-1.40.00-Cross-Site-Request-Forgery.html;unknown
 CVE-2024-5932;WordPress GiveWP Donation Fundraising Platform 3.14.1 File Deletion Command Execution;https://packetstormsecurity.com/files/180421/WordPress-GiveWP-Donation-Fundraising-Platform-3.14.1-File-Deletion-Command-Execution.html;remote
 CVE-2024-5947;Deep Sea Electronics DSE855 Remote Authentication Bypass;https://packetstormsecurity.com/files/179342/Deep-Sea-Electronics-DSE855-Remote-Authentication-Bypass.html;unknown
+CVE-2024-6049;Lawo AG vsm LTC Time Sync Path Traversal;https://packetstormsecurity.com/files/182347/Lawo-AG-vsm-LTC-Time-Sync-Path-Traversal.html;unknown
 CVE-2024-6205;WordPress PayPlus Payment Gateway SQL Injection;https://packetstormsecurity.com/files/179961/WordPress-PayPlus-Payment-Gateway-SQL-Injection.html;remote
 CVE-2024-6209;ABB Cylon Aspect 3.08.01 Arbitrary File Deletion;https://packetstormsecurity.com/files/181802/ABB-Cylon-Aspect-3.08.01-Arbitrary-File-Deletion.html;unknown
 CVE-2024-6298;ABB Cylon Aspect 3.08.01 Remote Code Execution;https://packetstormsecurity.com/files/181803/ABB-Cylon-Aspect-3.08.01-Remote-Code-Execution.html;remote
@@ -10549,4 +10558,5 @@ CVE-2024-8522;WordPress LMS 4.2.7 SQL Injection;https://packetstormsecurity.com/
 CVE-2024-8877;Netman 204 4.05 SQL Injection Unauthenticated Password Reset;https://packetstormsecurity.com/files/181794/Netman-204-4.05-SQL-Injection-Unauthenticated-Password-Reset.html;remote
 CVE-2024-8878;Netman 204 4.05 SQL Injection Unauthenticated Password Reset;https://packetstormsecurity.com/files/181794/Netman-204-4.05-SQL-Injection-Unauthenticated-Password-Reset.html;remote
 CVE-2024-9014;pgAdmin 8.11 Information Disclosure;https://packetstormsecurity.com/files/181851/pgAdmin-8.11-Information-Disclosure.html;unknown
+CVE-2024-9264;Grafana Remote Code Execution;https://packetstormsecurity.com/files/182335/Grafana-Remote-Code-Execution.html;remote
 CVE-2024-9473;Palo Alto Networks GlobalProtect Local Privilege Escalation;https://packetstormsecurity.com/files/182142/Palo-Alto-Networks-GlobalProtect-Local-Privilege-Escalation.html;local
