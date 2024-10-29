@@ -66,13 +66,15 @@ F15_cyclonedx_sbom() {
     # EMBA details for the SBOM
     local lSBOM_TOOL="EMBA"
     local lSBOM_TOOL_VERS=""
-    if [[ -f "${CONFIG_DIR}"/VERSION.log ]]; then
-      lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
-    fi
+    lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
+
     local lTOOL_COMP_ARR=()
     lTOOL_COMP_ARR+=( type="application" )
     lTOOL_COMP_ARR+=( author="EMBA community" )
     lTOOL_COMP_ARR+=( name="${lSBOM_TOOL}" )
+    if [[ -f "${INVOCATION_PATH}"/.git/refs/heads/master ]]; then
+      lSBOM_TOOL_VERS+="-$(cat "${INVOCATION_PATH}"/.git/refs/heads/master)"
+    fi
     lTOOL_COMP_ARR+=( version="${lSBOM_TOOL_VERS}" )
     lTOOL_COMP_ARR+=( description="EMBA firmware analyzer - https://github.com/e-m-b-a/emba" )
 
