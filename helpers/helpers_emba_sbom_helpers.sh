@@ -146,7 +146,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )
-  if [[ "${HASHES_ARR[@]}" ]]; then
+  if [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
     lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
   fi
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
@@ -168,8 +168,10 @@ build_sbom_json_component_arr() {
 
 check_for_duplicates() {
   local lAPP_NAME="${1:-}"
+  local lDUPLICATE_FILES=()
   # check if we already have a result in our sbom
-  mapfile -t lDUPLICATE_FILES < <(grep -i -l "${lAPP_NAME}" "${SBOM_LOG_PATH%\/}/"*)
+  # mapfile -t lDUPLICATE_FILES < <(grep -i -l "${lAPP_NAME}" "${SBOM_LOG_PATH%\/}/"*)
+  print_output "[-] Duplicate check for ${lAPP_NAME} not available" "no_log"
 }
 
 # translate known vendors from short variant to the long variant:
