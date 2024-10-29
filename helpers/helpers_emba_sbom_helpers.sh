@@ -168,7 +168,7 @@ build_sbom_json_component_arr() {
 
 check_for_duplicates() {
   local lAPP_NAME="${1:-}"
-  local lDUPLICATE_FILES=()
+  # local lDUPLICATE_FILES=()
   # check if we already have a result in our sbom
   # mapfile -t lDUPLICATE_FILES < <(grep -i -l "${lAPP_NAME}" "${SBOM_LOG_PATH%\/}/"*)
   print_output "[-] Duplicate check for ${lAPP_NAME} not available" "no_log"
