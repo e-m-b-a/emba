@@ -86,10 +86,10 @@ S118_busybox_verifier()
       ### new SBOM json testgenerator
       if command -v jo >/dev/null; then
         # add source file path information to our properties array:
-        local lPATH_ARRAY_INIT_ARR=()
-        lPATH_ARRAY_INIT_ARR+=( "path:${lBB_BIN}" )
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "path:${lBB_BIN}" )
 
-        build_sbom_json_path_properties_arr "${lPATH_ARRAY_INIT_ARR[@]}"
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values

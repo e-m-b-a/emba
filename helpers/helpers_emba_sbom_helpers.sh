@@ -109,6 +109,8 @@ build_sbom_json_component_arr() {
   if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
     lAPP_MAINT=""
   fi
+  [[ -n "${lAPP_MAINT}" ]] && lAPP_MAINT=$(translate_vendor "${lAPP_MAINT}")
+
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
   fi
@@ -138,22 +140,50 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
-  lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
+  if [[ -n "${lAPP_LIC}" ]] && [[ ! "${lAPP_LIC}" == "NA" ]]; then
+    lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
+  fi
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )
-  lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
+  if [[ "${HASHES_ARR[@]}" ]]; then
+    lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
+  fi
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
     mkdir "${SBOM_LOG_PATH}"
   fi
 
-  jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
+  # if ! check_for_duplicates "${lAPP_NAME}"; then
+    jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
+  # else
+  #   print_output "[-] Possible duplicate found for ${lAPP_NAME}" "no_log"
+  # fi
 
   # we can unset it here again
   unset HASHES_ARR
   unset PROPERTIES_PATH_JSON_ARR
 }
 
+check_for_duplicates() {
+  local lAPP_NAME="${1:-}"
+  # check if we already have a result in our sbom
+  mapfile -t lDUPLICATE_FILES < <(grep -i -l "${lAPP_NAME}" "${SBOM_LOG_PATH%\/}/"*)
+}
 
+# translate known vendors from short variant to the long variant:
+#   dlink -> D'Link
+#   kernel -> kernel.org
+translate_vendor() {
+  local lAPP_MAINT="${1:-}"
+  local lAPP_MAINT_NEW=""
+
+  if [[ -f "${CONFIG_DIR}"/vendor_list.cfg ]]; then
+    lAPP_MAINT_NEW="$(grep "^${lAPP_MAINT};" "${CONFIG_DIR}"/vendor_list.cfg | cut -d ';' -f2- || true)"
+    lAPP_MAINT_NEW="${lAPP_MAINT_NEW//\"}"
+  fi
+
+  [[ -z "${lAPP_MAINT_NEW}" ]] && lAPP_MAINT_NEW="${lAPP_MAINT}"
+  echo "${lAPP_MAINT_NEW}"
+}

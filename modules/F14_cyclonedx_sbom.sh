@@ -29,7 +29,7 @@ F14_cyclonedx_sbom() {
       rm "${CSV_DIR}"/f14_cyclonedx_sbom.json
     fi
 
-    local lSBOM_LOG_FILE="${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom"
+    local lSBOM_LOG_FILE="${SBOM_LOG_PATH%\/}/EMBA_cyclonedx_sbom"
     local lSBOM_JSON=""
     local lSBOM_SCHEMA="http://cyclonedx.org/schema/bom-1.5.schema.json"
     local lSBOM_FORMAT="CycloneDX"
@@ -42,6 +42,9 @@ F14_cyclonedx_sbom() {
     local lFW_TYPE=""
     local lFW_PATH=""
     # local lEMBA_COMMAND=""
+    local lCOMP_FILES_ARR=()
+    local lCOMP_FILE_ID=""
+    local lCOMP_FILE=""
 
     if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
       lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log)
@@ -88,14 +91,25 @@ F14_cyclonedx_sbom() {
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
-    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*.json")
-    local lCOMPONENTS_ARR=()
-    for lCOMP_FILE in "${lCOMP_FILES_ARR[@]}"; do
-      lCOMPONENTS_ARR+=( :"${lCOMP_FILE}" )
-    done
+    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*.json" | sort -u)
 
+    # as we could have so many components that everything goes b00m we need to build the
+    # components json now manually:
+    echo -n "[" > "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+    for lCOMP_FILE_ID in "${!lCOMP_FILES_ARR[@]}"; do
+      lCOMP_FILE="${lCOMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
+      cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+      if [[ $((lCOMP_FILE_ID+1)) -lt "${#lCOMP_FILES_ARR[@]}" ]]; then
+        echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+      fi
+    done
+    echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+    print_output "[*] building components json"
+    tr -d '\n' < "${SBOM_LOG_PATH}/sbom_components_tmp.json" > "${lSBOM_LOG_FILE}_components.json"
+
+    print_output "[*] building final SBOM json" "no_log"
     # final sbom build:
-    lSBOM_JSON=$(jo -p -- \
+    jo -p -- \
       \$schema="${lSBOM_SCHEMA}" \
       bomFormat="${lSBOM_FORMAT}" \
       -s specVersion="${lSBOM_SPEC_VERS}" \
@@ -107,14 +121,14 @@ F14_cyclonedx_sbom() {
           components="$(jo -a "$(jo -n "${lTOOL_COMP_ARR[@]}")")")" \
         component="$(jo -n \
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
-      components="$(jo -a \
-        "${lCOMPONENTS_ARR[@]}" \
-        )")
+      components=:"${lSBOM_LOG_FILE}_components.json" \
+      > "${lSBOM_LOG_FILE}.json"
 
-    unset HASHES_ARR
+    print_output "[*] finished building final SBOM json" "no_log"
 
+    print_output "[*] Post-processing final SBOM json"
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
-    echo "${lSBOM_JSON//%SPACE%/\ }" > "${lSBOM_LOG_FILE}.json"
+    sed -i 's/%SPACE%/\ /g' "${lSBOM_LOG_FILE}.json"
 
     if [[ -f "${lSBOM_LOG_FILE}.json" ]]; then
       local lNEG_LOG=1

@@ -236,12 +236,17 @@ node_js_package_lock_parser() {
           # usuall build_json_hashes_arr sets HASHES_ARR globally and we unset it afterwards
           # as we have the hashes from the lock file we do it here
           export HASHES_ARR=()
+          local lHASH_ALG="NA"
           [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
           [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
           [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lHASH_ALG="SHA-512"
-          local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
-          lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
-          HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+          if ! [[ "${lHASH_ALG}" == "NA" ]]; then
+            local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
+            lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
+            HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+          else
+            print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"
@@ -1375,7 +1380,7 @@ python_requirements() {
           lAPP_VERS='~='"${lAPP_VERS}"
         else
           lAPP_NAME=${lRES_ENTRY}
-          lAPP_VERS="NA"
+          lAPP_VERS=""
         fi
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
@@ -1930,13 +1935,13 @@ debian_status_files_analysis() {
           if command -v jo >/dev/null; then
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "path:${lFILE}" )
+            lPROP_ARRAY_INIT_ARR+=( "path:${lPACKAGE_FILE}" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            build_sbom_json_hashes_arr "${lFILE}"
+            build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_ARCH:-NA}" "${lAPP_DESC:-NA}"

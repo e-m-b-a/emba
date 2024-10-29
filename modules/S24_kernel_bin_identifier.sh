@@ -108,6 +108,7 @@ S24_kernel_bin_identifier()
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
             lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
             lK_ELF=${lK_ELF//,\ /\ -\ }
+            lK_ELF=${lK_ELF#\ }
 
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
