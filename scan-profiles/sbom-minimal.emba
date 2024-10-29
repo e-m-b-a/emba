@@ -28,7 +28,7 @@ export QEMULATION=0
 # If you just have a directory or some kind of zip file you can just enable P02 and P05
 # export SELECT_MODULES+=( "P02" "P05" )
 # Currently the complete pre-checking phase is enabled:
-export SELECT_MODULES+=( "S06" "S08" "S25" "S118" "F14" "F15" )
+export SELECT_MODULES+=( "S06" "S08" "S25" "S118" "F15" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=1
