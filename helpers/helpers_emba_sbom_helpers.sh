@@ -45,6 +45,7 @@ build_sbom_json_properties_arr() {
     lINIT_ELEMENT="EMBA:sbom"
     # dedicated rules -> path -> location
     [[ "${lPROPERTIES_ELEMENT_1}" == "path" ]] && lINIT_ELEMENT="EMBA:sbom:location"
+    [[ "${lPROPERTIES_ELEMENT_1}" == "source_path" ]] && lINIT_ELEMENT="EMBA:sbom:source_location"
 
     local lPROPERTIES_ARRAY_TMP=()
     lPROPERTIES_ARRAY_TMP+=("name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
@@ -100,8 +101,7 @@ build_sbom_json_component_arr() {
   local lAPP_LIC="${6:-}"
   local lCPE_IDENTIFIER="${7:-}"
   local lPURL_IDENTIFIER="${8:-}"
-  local lAPP_ARCH="${9:-}"
-  local lAPP_DESC="${10:-}"
+  local lAPP_DESC="${9:-}"
   # we need the bom-ref in the caller to include it in our EMBA csv log for further references
   export SBOM_COMP_BOM_REF=""
   SBOM_COMP_BOM_REF="$(uuidgen)"
@@ -124,9 +124,6 @@ build_sbom_json_component_arr() {
   local lAPP_DESC_NEW="EMBA SBOM-group: ${lPACKAGING_SYSTEM} - name: ${lAPP_NAME}"
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" != "NA" ]]; then
     lAPP_DESC_NEW+=" - version: ${lAPP_VERS}"
-  fi
-  if [[ -n "${lAPP_ARCH}" ]] && [[ "${lAPP_ARCH}" != "NA" ]]; then
-    lAPP_DESC_NEW+=" - architecture: ${lAPP_ARCH}"
   fi
   if [[ -n "${lAPP_DESC}" ]] && [[ "${lAPP_DESC}" != "NA" ]]; then
     lAPP_DESC_NEW+=" - description: ${lAPP_DESC}"
