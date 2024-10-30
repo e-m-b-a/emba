@@ -177,6 +177,7 @@ node_js_package_lock_parser() {
 
       while IFS=";" read -r lAPP_NAME lAPP_VERS lAPP_LIC lAPP_CHECKSUM lAPP_DEPS; do
         lAPP_NAME=$(echo "${lAPP_NAME}" | rev | cut -d '/' -f1 | rev)
+        [[ -z "${lAPP_NAME}" ]] && continue
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_LIC=$(clean_package_details "${lAPP_LIC}")

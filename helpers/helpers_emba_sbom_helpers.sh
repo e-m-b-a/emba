@@ -214,7 +214,7 @@ build_purl_identifier() {
   if [[ "${lOS_IDENTIFIED}" == "NA" ]]; then
     lOS_IDENTIFIED="generic"
   fi
-  lPURL_IDENTIFIER="pkg:${lPKG_TYPE}/${lOS_IDENTIFIED}/${lAPP_NAME}"
+  lPURL_IDENTIFIER="pkg:${lPKG_TYPE}/${lOS_IDENTIFIED/-*}/${lAPP_NAME}"
   if [[ -n "${lAPP_VERS}" ]]; then
     lPURL_IDENTIFIER+="@${lAPP_VERS}"
   fi
