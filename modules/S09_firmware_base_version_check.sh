@@ -114,6 +114,7 @@ S09_firmware_base_version_check() {
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
     fi
+    lOS_IDENTIFIED=$(distri_check)
 
     if [[ "${STRICT}" == *"strict"* ]]; then
       local STRICT_BINS=()
@@ -150,7 +151,6 @@ S09_firmware_base_version_check() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lOS_IDENTIFIED=$(distri_check)
             lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
             lBIN_ARCH=${lBIN_ARCH#\ }
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
@@ -217,7 +217,6 @@ S09_firmware_base_version_check() {
         lBIN_ARCH=${lBIN_ARCH#\ }
 
         lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-        lOS_IDENTIFIED=$(distri_check)
         lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
         lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
@@ -265,7 +264,6 @@ S09_firmware_base_version_check() {
           lSHA256_CHECKSUM="$(sha256sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lOS_IDENTIFIED=$(distri_check)
           lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
@@ -314,7 +312,6 @@ S09_firmware_base_version_check() {
           lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
           lBIN_ARCH=${lBIN_ARCH#\ }
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lOS_IDENTIFIED=$(distri_check)
           lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
@@ -408,11 +405,11 @@ build_generic_purl() {
 
   lBIN_VENDOR=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
   lBIN_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-  lPURL_IDENTIFIER="pkg:binary/${lBIN_VENDOR}/${lBIN_NAME}"
   if [[ -z "${lBIN_VENDOR}" ]]; then
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
+  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED}/${lBIN_NAME}"
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
 
   if [[ -n "${lBIN_VERS}" ]]; then
@@ -502,6 +499,7 @@ bin_string_checker() {
   if [[ ${RTOS} -eq 0 ]]; then
     local FILE_ARR=( "${BINARIES[@]}" )
   fi
+  lOS_IDENTIFIED=$(distri_check)
 
   for BIN in "${FILE_ARR[@]}"; do
     MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
@@ -553,7 +551,6 @@ bin_string_checker() {
             lBIN_ARCH=${lBIN_ARCH#\ }
 
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lOS_IDENTIFIED=$(distri_check)
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
@@ -597,7 +594,6 @@ bin_string_checker() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lOS_IDENTIFIED=$(distri_check)
             lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
             lBIN_ARCH=${lBIN_ARCH#\ }
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
@@ -650,7 +646,6 @@ bin_string_checker() {
           lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lOS_IDENTIFIED=$(distri_check)
           lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
           lBIN_ARCH=${lBIN_ARCH#\ }
           lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")

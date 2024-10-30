@@ -219,7 +219,7 @@ build_purl_identifier() {
     lPURL_IDENTIFIER+="@${lAPP_VERS}"
   fi
   if [[ -n "${lAPP_ARCH}" && "${lAPP_ARCH}" != "NA" ]]; then
-    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH}"
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH//\ /-}"
   fi
   if [[ "${lOS_IDENTIFIED}" != "generic" && "${lOS_IDENTIFIED}" != *"-based" ]]; then
     if [[ -n "${lAPP_ARCH}" ]]; then
