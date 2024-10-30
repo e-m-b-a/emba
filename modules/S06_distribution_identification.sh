@@ -41,6 +41,7 @@ S06_distribution_identification()
   local lPURL_IDENTIFIER="NA"
   local lCSV_RULE=""
   local lPACKAGING_SYSTEM="static_distri_analysis"
+  local lOS_IDENTIFIED=""
 
   write_csv_log "file" "type" "identifier" "csv_rule"
 
@@ -99,7 +100,8 @@ S06_distribution_identification()
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
             write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
-            lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
+            lOS_IDENTIFIED=$(distri_check)
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
             write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
           fi
 
@@ -117,7 +119,7 @@ S06_distribution_identification()
             fi
             # lCSV_RULE has 5 fields and looks like the following: :dlink:device:version:*
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
-            lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
+            lOS_IDENTIFIED=$(distri_check)
             local lAPP_TYPE="operating-system"
             local lAPP_LIC=""
             local lAPP_MAINT=""
@@ -130,6 +132,7 @@ S06_distribution_identification()
             lAPP_VERS="${lAPP_VERS/:\*}"
             # we use the already (p99) identified architecture for the distri
             local lAPP_ARCH="${ARCH:-NA}"
+            lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lAPP_ARCH:-NA}")
 
             ### new SBOM json testgenerator
             if command -v jo >/dev/null; then

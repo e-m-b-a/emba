@@ -74,10 +74,11 @@ S118_busybox_verifier()
       lSHA256_CHECKSUM="$(sha256sum "${lBB_BIN}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lBB_BIN}" | awk '{print $1}')"
       lCPE_IDENTIFIER=$(build_cpe_identifier "${lVERSION_IDENTIFIER}")
-      lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}")
+      lOS_IDENTIFIED=$(distri_check)
 
-      lBIN_ARCH=$(file -b "${lBB_BIN}" | cut -d ',' -f2-3)
-      lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+      lBIN_ARCH=$(file -b "${lBB_BIN}" | cut -d ',' -f2)
+      lBIN_ARCH=${lBIN_ARCH#\ }
+      lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
       lAPP_MAINT=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f2)
       lAPP_NAME=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f3)

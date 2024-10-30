@@ -341,8 +341,8 @@ module_analyzer() {
     lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
 
     lK_FILE_OUT=$(file -b "${lKMODULE}" 2>/dev/null)
-    lK_ARCH=$(echo "${lK_FILE_OUT}" | cut -d ',' -f2-3)
-    lK_ARCH=${lK_ARCH//,\ /\ -\ }
+    lK_ARCH=$(echo "${lK_FILE_OUT}" | cut -d ',' -f2)
+    lK_ARCH=${lK_ARCH#\ }
 
     if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then
       if [[ "${lLICENSE}" == *"GPL"* || "${lLICENSE}" == *"BSD"* ]] ; then
@@ -390,7 +390,8 @@ module_analyzer() {
       local lLICENSE="GPL-2.0-only"
 
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
-      lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}")
+      lOS_IDENTIFIED=$(distri_check)
+      lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
       ### new SBOM json testgenerator
       if command -v jo >/dev/null; then

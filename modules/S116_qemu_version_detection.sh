@@ -168,7 +168,7 @@ version_detection_thread() {
 
     lCSV_RULE=$(get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}")
     lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-    lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
+    lOS_IDENTIFIED=$(distri_check)
 
     # ensure we have a unique array
     eval "BINARY_PATHS=($(for i in "${BINARY_PATHS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
@@ -179,8 +179,9 @@ version_detection_thread() {
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
       lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-      lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+      lBIN_ARCH=${lBIN_ARCH#\ }
       lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
+      lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
       lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}' || true)"
       lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}' || true)"

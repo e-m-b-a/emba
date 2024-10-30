@@ -57,7 +57,7 @@ build_sbom_json_properties_arr() {
     lPROPERTIES_ARRAY_TMP+=("name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
     [[ "${lPROPERTIES_ELEMENT_2}" == "NA" ]] && continue
     lPROPERTIES_ARRAY_TMP+=("value=${lPROPERTIES_ELEMENT_2}")
-    PROPERTIES_JSON_ARR+=( "$(jo "${lPROPERTIES_ARRAY_TMP[@]}")")
+    PROPERTIES_JSON_ARR+=( "$(jo -n "${lPROPERTIES_ARRAY_TMP[@]}")")
   done
   # lPROPERTIES_PATH_JSON=$(jo -p -a "${lPROPERTIES_PATH_ARR_TMP[@]}")
 }
@@ -193,3 +193,69 @@ translate_vendor() {
   [[ -z "${lAPP_MAINT_NEW}" ]] && lAPP_MAINT_NEW="${lAPP_MAINT}"
   echo "${lAPP_MAINT_NEW}"
 }
+
+check_for_s08_csv_log() {
+  lS08_CSV_LOG="${1:-}"
+  if [[ ! -f "${lS08_CSV_LOG}" ]]; then
+    # using write_log as this always works
+    write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifier;PURL;SBOM comoponent reference;Description" "${lS08_CSV_LOG}"
+  fi
+}
+
+build_purl_identifier() {
+  local lOS_IDENTIFIED="${1:-}"
+  local lPKG_TYPE="${2:-}"
+  local lAPP_NAME="${3:-}"
+  local lAPP_VERS="${4:-}"
+  local lAPP_ARCH="${5:-}"
+
+  local lPURL_IDENTIFIER=""
+
+  if [[ "${lOS_IDENTIFIED}" == "NA" ]]; then
+    lOS_IDENTIFIED="generic"
+  fi
+  lPURL_IDENTIFIER="pkg:${lPKG_TYPE}/${lOS_IDENTIFIED}/${lAPP_NAME}"
+  if [[ -n "${lAPP_VERS}" ]]; then
+    lPURL_IDENTIFIER+="@${lAPP_VERS}"
+  fi
+  if [[ -n "${lAPP_ARCH}" && "${lAPP_ARCH}" != "NA" ]]; then
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH}"
+  fi
+  if [[ "${lOS_IDENTIFIED}" != "generic" && "${lOS_IDENTIFIED}" != *"-based" ]]; then
+    if [[ -n "${lAPP_ARCH}" ]]; then
+      lPURL_IDENTIFIER+="&"
+    else
+      lPURL_IDENTIFIER+="?"
+    fi
+    lPURL_IDENTIFIER+="distro=${lOS_IDENTIFIED}"
+  fi
+  echo "${lPURL_IDENTIFIER}"
+}
+
+distri_check() {
+  # quick check for distribution
+  local lOS_RELEASE_ARR=()
+  local lOS_RELEASE_FILE=""
+  local lOS_IDENTIFIED=""
+  local lOS_VERS_IDENTIFIED=""
+
+  # currently this is a weak check via /etc/os-release
+  # Todo: If this check failes we can use further tests like lsb-release or motd
+  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release")
+  for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
+    lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}")
+    lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}
+    lOS_VERS_IDENTIFIED=$(grep "^VERSION_ID=" "${lOS_RELEASE_FILE}")
+    lOS_VERS_IDENTIFIED=${lOS_VERS_IDENTIFIED//VERSION_ID=}
+    lOS_IDENTIFIED+="-${lOS_VERS_IDENTIFIED}"
+    lOS_IDENTIFIED=${lOS_IDENTIFIED//\"}
+    lOS_IDENTIFIED=${lOS_IDENTIFIED,,}
+    # if it looks like an os then we are happy for now :)
+    # for the future we can do some further checks if it is some debian for debs and some rpm based for rpm systems
+    if [[ "${lOS_IDENTIFIED}" =~ ^[a-z]+-[a-z]+$ ]]; then
+      break
+    fi
+  done
+  echo "${lOS_IDENTIFIED}"
+}
+

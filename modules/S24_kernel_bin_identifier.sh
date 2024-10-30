@@ -85,7 +85,7 @@ S24_kernel_bin_identifier()
       check_for_s08_csv_log "${S08_CSV_LOG}"
       lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/:linux:linux_kernel:\1/' || true)
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a${lSTRIPPED_VERS}:*:*:*:*:*:*"
-      lPURL_IDENTIFIER=$(build_generic_purl ":${lSTRIPPED_VERS}")
+      lOS_IDENTIFIED=$(distri_check)
       lK_VER="${lK_VER//[,;\/()\[\]\\#]}"
       lAPP_MAINT=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f2)
       lAPP_NAME=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f3)
@@ -106,9 +106,9 @@ S24_kernel_bin_identifier()
             lMD5_CHECKSUM="$(md5sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
-            lK_ELF=${lK_ELF//,\ /\ -\ }
+            lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2)
             lK_ELF=${lK_ELF#\ }
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lAPP_ELF:-NA}")
 
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:

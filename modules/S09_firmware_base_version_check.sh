@@ -150,10 +150,10 @@ S09_firmware_base_version_check() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-            lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lOS_IDENTIFIED=$(distri_check)
+            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
             lBIN_ARCH=${lBIN_ARCH#\ }
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -213,11 +213,12 @@ S09_firmware_base_version_check() {
         lSHA256_CHECKSUM="$(sha256sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${BIN_PATH}" | awk '{print $1}')"
         lBIN_ARCH=$(file -b "${BIN}")
-        lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-        lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+        lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
         lBIN_ARCH=${lBIN_ARCH#\ }
+
         lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-        lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+        lOS_IDENTIFIED=$(distri_check)
+        lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
         lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
         lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -264,7 +265,8 @@ S09_firmware_base_version_check() {
           lSHA256_CHECKSUM="$(sha256sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+          lOS_IDENTIFIED=$(distri_check)
+          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -309,11 +311,11 @@ S09_firmware_base_version_check() {
           lSHA256_CHECKSUM="$(sha256sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
-          lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-          lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+          lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
           lBIN_ARCH=${lBIN_ARCH#\ }
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+          lOS_IDENTIFIED=$(distri_check)
+          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -392,6 +394,13 @@ S09_firmware_base_version_check() {
 
 build_generic_purl() {
   local lCSV_RULE="${1:-}"
+  local lOS_IDENTIFIED="${2:-NA}"
+  local lAPP_ARCH="${3:-}"
+
+  if [[ "${lOS_IDENTIFIED}" == "NA" ]]; then
+    lOS_IDENTIFIED="generic"
+  fi
+
   local lBIN_VENDOR=""
   local lBIN_NAME=""
   local lBIN_VERS=""
@@ -399,12 +408,27 @@ build_generic_purl() {
 
   lBIN_VENDOR=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
   lBIN_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+  lPURL_IDENTIFIER="pkg:binary/${lBIN_VENDOR}/${lBIN_NAME}"
   if [[ -z "${lBIN_VENDOR}" ]]; then
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
-  lPURL_IDENTIFIER="pkg:generic/${lBIN_VENDOR}/${lBIN_NAME}@${lBIN_VERS}"
+
+  if [[ -n "${lBIN_VERS}" ]]; then
+    lPURL_IDENTIFIER+="@${lBIN_VERS}"
+  fi
+  if [[ -n "${lAPP_ARCH}" ]]; then
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH}"
+  fi
+  if [[ "${lOS_IDENTIFIED}" != "generic" ]]; then
+    if [[ -n "${lAPP_ARCH}" ]]; then
+      lPURL_IDENTIFIER+="&"
+    else
+      lPURL_IDENTIFIER+="?"
+    fi
+    lPURL_IDENTIFIER+="distro=${lOS_IDENTIFIED}"
+  fi
 
   echo "${lPURL_IDENTIFIER}"
 }
@@ -473,6 +497,7 @@ bin_string_checker() {
   local BIN_FILE=""
   local BIN=""
   local lPURL_IDENTIFIER="NA"
+  local lOS_IDENTIFIED=""
 
   if [[ ${RTOS} -eq 0 ]]; then
     local FILE_ARR=( "${BINARIES[@]}" )
@@ -523,11 +548,13 @@ bin_string_checker() {
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
-            lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2-3)
-            lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+
+            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
             lBIN_ARCH=${lBIN_ARCH#\ }
+
+            lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
+            lOS_IDENTIFIED=$(distri_check)
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -570,10 +597,10 @@ bin_string_checker() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2-3)
-            lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lOS_IDENTIFIED=$(distri_check)
+            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
             lBIN_ARCH=${lBIN_ARCH#\ }
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -623,10 +650,10 @@ bin_string_checker() {
           lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-          lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2-3)
-          lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+          lOS_IDENTIFIED=$(distri_check)
+          lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
           lBIN_ARCH=${lBIN_ARCH#\ }
+          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
