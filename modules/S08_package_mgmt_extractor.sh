@@ -2041,11 +2041,13 @@ openwrt_control_files_analysis() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_MAINT=${lAPP_MAINT#\ }
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
-        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_DESC=${lAPP_DESC#\ }
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
