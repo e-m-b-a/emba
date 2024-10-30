@@ -140,7 +140,7 @@ S06_distribution_identification()
                 lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
               fi
               lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lIDENTIFIER}" )
-              lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+              lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
 
               build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

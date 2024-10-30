@@ -1995,7 +1995,6 @@ openwrt_control_files_analysis() {
   sub_module_title "OpenWRT package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   local lPACKAGE_FILE=""
-  local lOPENWRT_PACKAGES_ARR=()
   local lPACKAGE_VERSION=""
   local lAPP_NAME=""
   local lAPP_VERS=""

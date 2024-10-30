@@ -43,6 +43,7 @@ build_sbom_json_properties_arr() {
     lPROPERTIES_ELEMENT_2=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f2-)
     # jo is looking for a file if our entry starts with : -> lets pseudo escape it for jo
     if [[ "${lPROPERTIES_ELEMENT_2:0:1}" == ":" ]]; then
+      # shellcheck disable=SC1003
       lPROPERTIES_ELEMENT_2='\'"${lPROPERTIES_ELEMENT_2}"
     fi
 
