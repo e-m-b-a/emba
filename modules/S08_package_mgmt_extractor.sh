@@ -230,6 +230,7 @@ node_js_package_lock_parser() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lNODE_LCK_ARCHIVE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -387,6 +388,7 @@ deb_package_check() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -547,6 +549,7 @@ windows_exifparser() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -667,6 +670,7 @@ python_poetry_lock_parser() {
           # add deb path information to our properties array:
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_LCK_ARCHIVE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -797,6 +801,7 @@ rust_cargo_lock_parser() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lRST_ARCHIVE}" )
           lPROP_ARRAY_INIT_ARR+=( "source:${lAPP_SOURCE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -916,6 +921,7 @@ alpine_apk_package_check() {
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1041,6 +1047,7 @@ ruby_gem_archive_check() {
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lGEM_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1163,6 +1170,7 @@ bsd_pkg_check() {
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1284,6 +1292,7 @@ rpm_package_check() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1416,6 +1425,7 @@ python_requirements() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1525,6 +1535,7 @@ python_pip_packages() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1572,6 +1583,7 @@ python_pip_packages() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1639,6 +1651,7 @@ python_pip_packages() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1686,6 +1699,7 @@ python_pip_packages() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1813,6 +1827,7 @@ java_archives_check() {
         # are in the package
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -1939,6 +1954,7 @@ debian_status_files_analysis() {
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -2018,47 +2034,61 @@ openwrt_control_files_analysis() {
         lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
-        mapfile -t lOPENWRT_PACKAGES_ARR < <(grep "^Package: \|^Version: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g')
-        for lPACKAGE_VERSION in "${lOPENWRT_PACKAGES_ARR[@]}" ; do
-          lAPP_NAME=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}' | tr -dc '[:print:]')
-          lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-          lAPP_VERS=${lPACKAGE_VERSION/*Version:\ /}
-          lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-          lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+        lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-          lAPP_VENDOR="${lAPP_NAME}"
-          lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+        lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-          if [[ -n "${lOS_IDENTIFIED}" ]]; then
-            # lOS_IDENTIFIED -> debian-12 -> debian
-            lPURL_IDENTIFIER="pkg:opkg/${lOS_IDENTIFIED/-*}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-          else
-            lPURL_IDENTIFIER="pkg:opkg/openwrt/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
+        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
+        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+
+        if [[ -n "${lOS_IDENTIFIED}" ]]; then
+          # lOS_IDENTIFIED -> debian-12 -> debian
+          lPURL_IDENTIFIER="pkg:opkg/${lOS_IDENTIFIED/-*}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
+        else
+          lPURL_IDENTIFIER="pkg:opkg/openwrt/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
+        fi
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
+
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          # if we have the list file also we can add all the paths provided by the package
+          if [[ -f "${lPACKAGE_FILE/\.control/\.list}" ]]; then
+            local lPKG_LIST_ENTRY=""
+            while IFS= read -r lPKG_LIST_ENTRY; do
+              lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+            done < "${lPACKAGE_FILE/control/list}"
           fi
-          STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
-          if command -v jo >/dev/null; then
-            # add the python requirement path information to our properties array:
-            # Todo: in the future we should check for the package, package hashes and which files
-            # are in the package
-            local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
 
-            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-            # final array with all hash values
-            build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
 
-            # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
-          fi
-
-          write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lAPP_NAME}${NC} - ${ORANGE}${lAPP_VERS}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
-          lPOS_RES=1
-        done
+        write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lAPP_NAME}${NC} - ${ORANGE}${lAPP_VERS}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        lPOS_RES=1
       fi
     done
 

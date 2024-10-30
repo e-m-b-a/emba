@@ -153,6 +153,7 @@ S09_firmware_base_version_check() {
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
             lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
             lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lBIN_ARCH=${lBIN_ARCH#\ }
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -174,7 +175,7 @@ S09_firmware_base_version_check() {
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
-              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
             fi
 
             write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -214,6 +215,7 @@ S09_firmware_base_version_check() {
         lBIN_ARCH=$(file -b "${BIN}")
         lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
         lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+        lBIN_ARCH=${lBIN_ARCH#\ }
         lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
         lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
 
@@ -237,7 +239,7 @@ S09_firmware_base_version_check() {
           build_sbom_json_hashes_arr "${BIN}"
 
           # create component entry - this allows adding entries very flexible:
-          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
         fi
 
         write_log "static_bin_analysis;${BIN_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -283,7 +285,7 @@ S09_firmware_base_version_check() {
             build_sbom_json_hashes_arr "${EXTRACTOR_LOG}"
 
             # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           fi
 
           write_log "static_bin_analysis;${EXTRACTOR_LOG:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -309,6 +311,7 @@ S09_firmware_base_version_check() {
           lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
           lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
           lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+          lBIN_ARCH=${lBIN_ARCH#\ }
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
           lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
 
@@ -332,7 +335,7 @@ S09_firmware_base_version_check() {
             build_sbom_json_hashes_arr "${BIN}"
 
             # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           fi
 
           write_log "static_bin_analysis;${FIRMWARE_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${FIRMWARE_PATH}");${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -524,6 +527,7 @@ bin_string_checker() {
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
             lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2-3)
             lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lBIN_ARCH=${lBIN_ARCH#\ }
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -545,7 +549,7 @@ bin_string_checker() {
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
-              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
             fi
 
             write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -569,6 +573,7 @@ bin_string_checker() {
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
             lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2-3)
             lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lBIN_ARCH=${lBIN_ARCH#\ }
 
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -590,7 +595,7 @@ bin_string_checker() {
               build_sbom_json_hashes_arr "${BIN}"
 
               # create component entry - this allows adding entries very flexible:
-              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
             fi
 
             write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
@@ -621,6 +626,7 @@ bin_string_checker() {
           lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
           lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2-3)
           lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+          lBIN_ARCH=${lBIN_ARCH#\ }
 
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
@@ -642,7 +648,7 @@ bin_string_checker() {
             build_sbom_json_hashes_arr "${BIN}"
 
             # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-unknown}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           fi
 
           write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"

@@ -17,8 +17,9 @@
 #
 
 # first: build the properaties path array
-# This is used for the binary path and for paths extracted from a
-# package like deb or rpm
+# This can be used for the binary path (souce_path) and for paths extracted from a
+# package like deb or rpm (path). Additionally, it is commonly used for the architecture
+# and further meta data like the version identifier
 # parameter: array with all the properties in the form
 #   "path:the_path_to_log"
 #   "other_propertie:the_property_to_log"
@@ -40,6 +41,10 @@ build_sbom_json_properties_arr() {
     lPROPERTIES_ELEMENT_1=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f1)
     # lPROPERTIES_ELEMENT_2 -> the real value
     lPROPERTIES_ELEMENT_2=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f2-)
+    # jo is looking for a file if our entry starts with : -> lets pseudo escape it for jo
+    if [[ "${lPROPERTIES_ELEMENT_2:0:1}" == ":" ]]; then
+      lPROPERTIES_ELEMENT_2='\'"${lPROPERTIES_ELEMENT_2}"
+    fi
 
     # default value
     lINIT_ELEMENT="EMBA:sbom"
@@ -49,6 +54,7 @@ build_sbom_json_properties_arr() {
 
     local lPROPERTIES_ARRAY_TMP=()
     lPROPERTIES_ARRAY_TMP+=("name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
+    [[ "${lPROPERTIES_ELEMENT_2}" == "NA" ]] && continue
     lPROPERTIES_ARRAY_TMP+=("value=${lPROPERTIES_ELEMENT_2}")
     PROPERTIES_JSON_ARR+=( "$(jo "${lPROPERTIES_ARRAY_TMP[@]}")")
   done
