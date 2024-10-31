@@ -364,7 +364,7 @@ deb_package_check() {
 
         # add package files to properties
         if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
-          mapfile -t lDEB_FILES_ARR < <(tar -tvf data.tar.xz | awk '{print $6}')
+          mapfile -t lDEB_FILES_ARR < <(tar -tvf "${TMP_DIR}/deb_package/data.tar.xz" | awk '{print $6}')
           for lDEB_FILE in "${lDEB_FILES_ARR[@]}"; do
             lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_FILE#\.}" )
           done
@@ -1046,7 +1046,7 @@ ruby_gem_archive_check() {
 
         # add package files to properties
         if [[ ! -f "${TMP_DIR}/gems/data.tar.xz" ]]; then
-          mapfile -t lGEM_FILES_ARR < <(tar -tvf data.tar.xz | awk '{print $6}')
+          mapfile -t lGEM_FILES_ARR < <(tar -tvf "${TMP_DIR}/gems/data.tar.xz" | awk '{print $6}' || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed")
           for lGEM_FILE in "${lGEM_FILES_ARR[@]}"; do
             lPROP_ARRAY_INIT_ARR+=( "path:${lGEM_FILE#\.}" )
           done

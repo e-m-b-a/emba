@@ -377,11 +377,10 @@ module_analyzer() {
       # final array with all hash values
       if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
         print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-        continue
+      else
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
       fi
-
-      # create component entry - this allows adding entries very flexible:
-      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
     fi
 
     write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
@@ -410,12 +409,10 @@ module_analyzer() {
         # final array with all hash values
         if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-          continue
+        else
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
         fi
-
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-
       fi
 
       write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
