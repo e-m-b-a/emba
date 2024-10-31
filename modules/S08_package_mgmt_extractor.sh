@@ -502,15 +502,12 @@ windows_exifparser() {
         fi
       fi
 
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS:-*}:*:*:*:*:*:*"
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR//\.exe}:${lAPP_NAME//\.exe}:${lAPP_VERS:-*}:*:*:*:*:*:*"
 
       if [[ -z "${lOS_IDENTIFIED}" ]]; then
         lOS_IDENTIFIED="windows-based"
       fi
 
-      if [[ -z "${lOS_IDENTIFIED}" ]]; then
-        lOS_IDENTIFIED="generic"
-      fi
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "exe" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
 
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
