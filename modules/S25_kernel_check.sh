@@ -298,6 +298,12 @@ module_analyzer() {
     local lK_AUTHOR="NA"
     local lK_INTREE="NA"
     local lK_DESC="NA"
+    local lCPE_IDENTIFIER=""
+    local lPURL_IDENTIFIER=""
+    local lMOD_VERSION=""
+    local lAPP_NAME=""
+    local lK_FILE_OUT=""
+    local lAPP_TYPE="operating-system"
 
     lLICENSE=$(modinfo "${lKMODULE}" | grep "^license:" || true)
     lLICENSE=${lLICENSE/license:\ }
@@ -335,8 +341,8 @@ module_analyzer() {
     lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
 
     lK_FILE_OUT=$(file -b "${lKMODULE}" 2>/dev/null)
-    lK_ARCH=$(echo "${lK_ARCH}" | cut -d ',' -f2-3)
-    lK_ARCH=${lK_ARCH//,\ /\ -\ }
+    lK_ARCH=$(echo "${lK_FILE_OUT}" | cut -d ',' -f2)
+    lK_ARCH=${lK_ARCH#\ }
 
     if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then
       if [[ "${lLICENSE}" == *"GPL"* || "${lLICENSE}" == *"BSD"* ]] ; then
@@ -357,13 +363,56 @@ module_analyzer() {
     # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
     check_for_s08_csv_log "${S08_CSV_LOG}"
 
-    write_log "kernel_module;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
+    ### new SBOM json testgenerator
+    if command -v jo >/dev/null; then
+      local lPACKAGING_SYSTEM="kernel_module"
+      # add source file path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      build_sbom_json_hashes_arr "${lKMODULE}"
+
+      # create component entry - this allows adding entries very flexible:
+      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+    fi
+
+    write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
 
     # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only" "${S08_CSV_LOG}";then
+    if ! grep -q "linux_kernel;.*;:linux:linux_kernel:${KV_ARR[*]};" "${S08_CSV_LOG}";then
+      local lPACKAGING_SYSTEM="linux_kernel+module"
+      local lK_AUTHOR="linux"
+      local lLICENSE="GPL-2.0-only"
+
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
-      lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}")
-      write_log "linux_kernel;${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+      lOS_IDENTIFIED=$(distri_check)
+      lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
+
+      ### new SBOM json testgenerator
+      if command -v jo >/dev/null; then
+        local lPACKAGING_SYSTEM="linux_kernel"
+        # add source file path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lKMODULE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+
+      fi
+
+      write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
   elif [[ "${lKMODULE}" == *".o" ]]; then

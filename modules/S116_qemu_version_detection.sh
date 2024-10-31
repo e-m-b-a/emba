@@ -86,8 +86,8 @@ version_detection_thread() {
   BINARY="$(echo "${VERSION_LINE}" | cut -d\; -f1)"
   local STRICT=""
   STRICT="$(echo "${VERSION_LINE}" | cut -d\; -f2)"
-  local LIC=""
-  LIC="$(echo "${VERSION_LINE}" | cut -d\; -f3)"
+  local lAPP_LIC=""
+  lAPP_LIC="$(echo "${VERSION_LINE}" | cut -d\; -f3)"
   local CSV_REGEX=""
   CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
 
@@ -119,6 +119,10 @@ version_detection_thread() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
+  local lAPP_MAINT=""
+  local lAPP_NAME=""
+  local lAPP_VERS=""
+  local lPACKAGING_SYSTEM="user_mode_bin_analysis"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ ${STRICT} == "strict" ]]; then
@@ -164,24 +168,49 @@ version_detection_thread() {
 
     lCSV_RULE=$(get_csv_rule "${VERSION_DETECTED}" "${CSV_REGEX}")
     lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-    lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}")
+    lOS_IDENTIFIED=$(distri_check)
 
     # ensure we have a unique array
     eval "BINARY_PATHS=($(for i in "${BINARY_PATHS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
     for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-      print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
-      write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${LIC}" "${TYPE}"
+      print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${lAPP_LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
+      write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
       lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-      lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+      lBIN_ARCH=${lBIN_ARCH#\ }
       lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
+      lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
       lMD5_CHECKSUM="$(md5sum "${BINARY_PATH}" | awk '{print $1}' || true)"
       lSHA256_CHECKSUM="$(sha256sum "${BINARY_PATH}" | awk '{print $1}' || true)"
       lSHA512_CHECKSUM="$(sha512sum "${BINARY_PATH}" | awk '{print $1}' || true)"
-      write_log "user_mode_bin_analysis;${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+
+      lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
+      lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+      lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
+      # it could be that we have a version like 2.14b:* -> we remove the last field
+      lAPP_VERS="${lAPP_VERS/:\*}"
+
+      ### new SBOM json testgenerator
+      if command -v jo >/dev/null; then
+        # add EXE path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${BINARY_PATH}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${BINARY_PATH}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
+      write_log "${lPACKAGING_SYSTEM};${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${lAPP_LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
     done
   done
 }

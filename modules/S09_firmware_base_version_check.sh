@@ -84,24 +84,27 @@ S09_firmware_base_version_check() {
 
     local STRICT=""
     export LIC=""
-    export BIN_NAME=""
+    local lAPP_NAME=""
+    local lAPP_VERS=""
+    local lAPP_MAINT=""
     local BIN_PATH=""
     export CSV_REGEX=""
 
     local lSHA512_CHECKSUM=""
     local lSHA256_CHECKSUM=""
     local lPURL_IDENTIFIER="NA"
+    local lPACKAGING_SYSTEM="static_bin_analysis"
 
     STRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
     LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
-    BIN_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
+    lAPP_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
     CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
 
     if [[ -f "${S09_CSV_LOG}" ]]; then
       # this should prevent double checking - if a version identifier was already successful we do not need to
       # test the other identifiers. In threaded mode this usually does not decrease testing speed.
-      if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${BIN_NAME}$")" -gt 0 ]]; then
-        print_output "[*] Already identified component for identifier ${BIN_NAME} - ${CSV_REGEX} ... skipping further tests" "no_log"
+      if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${lAPP_NAME}$")" -gt 0 ]]; then
+        print_output "[*] Already identified component for identifier ${lAPP_NAME} - ${CSV_REGEX} ... skipping further tests" "no_log"
         continue
       fi
     fi
@@ -111,6 +114,7 @@ S09_firmware_base_version_check() {
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
     fi
+    lOS_IDENTIFIED=$(distri_check)
 
     if [[ "${STRICT}" == *"strict"* ]]; then
       local STRICT_BINS=()
@@ -118,12 +122,12 @@ S09_firmware_base_version_check() {
       local lBIN_ARCH=""
 
       # strict mode
-      #   use the defined regex only on a binary called BIN_NAME (field 1)
+      #   use the defined regex only on a binary called lAPP_NAME (field 1)
       #   Warning: strict mode is deprecated and will be removed in the future.
 
       [[ "${RTOS}" -eq 1 ]] && continue
 
-      mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${BIN_NAME}" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
       # before moving on we need to ensure our strings files are generated:
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
@@ -131,27 +135,50 @@ S09_firmware_base_version_check() {
         lBIN_ARCH=$(file -b "${BIN}")
         if [[ "${lBIN_ARCH}" == *"ELF"* ]] ; then
           MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
-          BIN_NAME="$(basename "${BIN}")"
-          STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME}".txt
+          lAPP_NAME="$(basename "${BIN}")"
+          STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
           if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
             continue
           fi
           VERSION_FINDER=$(grep -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u || true)
           if [[ -n ${VERSION_FINDER} ]]; then
             print_ln "no_log"
-            print_output "[+] Version information found ${RED}${BIN_NAME} ${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - strict - deprecated${GREEN})."
+            print_output "[+] Version information found ${RED}${lAPP_NAME} ${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - strict - deprecated${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-            write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+            write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-            lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+            lBIN_ARCH=${lBIN_ARCH#\ }
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
-            write_log "static_bin_analysis;${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+            lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+            lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+            lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+            ### new SBOM json testgenerator
+            if command -v jo >/dev/null; then
+              # add source file path information to our properties array:
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+              lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+              lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+              lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+              # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+              # final array with all hash values
+              build_sbom_json_hashes_arr "${BIN}"
+
+              # create component entry - this allows adding entries very flexible:
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+            fi
+
+            write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${VERSION_FINDER:-NA};${CSV_RULE:-NA};${LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
             continue
           fi
         fi
@@ -167,10 +194,10 @@ S09_firmware_base_version_check() {
       #   use regex (VERSION_IDENTIFIER) via zgrep on these files
       #   use csv-regex to get the csv-search string for csv lookup
 
-      mapfile -t SPECIAL_FINDS < <(find "${FIRMWARE_PATH}" -xdev -type f -name "${BIN_NAME}" -exec zgrep -H "${VERSION_IDENTIFIER}" {} \; || true)
+      mapfile -t SPECIAL_FINDS < <(find "${FIRMWARE_PATH}" -xdev -type f -name "${lAPP_NAME}" -exec zgrep -H "${VERSION_IDENTIFIER}" {} \; || true)
       for SFILE in "${SPECIAL_FINDS[@]}"; do
         BIN_PATH=$(safe_echo "${SFILE}" | cut -d ":" -f1)
-        BIN_NAME="$(basename "$(safe_echo "${SFILE}" | cut -d ":" -f1)")"
+        lAPP_NAME="$(basename "$(safe_echo "${SFILE}" | cut -d ":" -f1)")"
         # CSV_REGEX=$(echo "${VERSION_LINE}" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
         CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
         CSV_REGEX="${CSV_REGEX/\"}"
@@ -179,19 +206,43 @@ S09_firmware_base_version_check() {
         CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
 
         print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN_PATH}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
-        write_csv_log "${BIN_PATH}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+        write_csv_log "${BIN_PATH}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
         check_for_s08_csv_log "${S08_CSV_LOG}"
 
         lMD5_CHECKSUM="$(md5sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${BIN_PATH}" | awk '{print $1}')"
         lBIN_ARCH=$(file -b "${BIN}")
-        lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-        lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
-        lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-        lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+        lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+        lBIN_ARCH=${lBIN_ARCH#\ }
 
-        write_log "static_bin_analysis;${BIN_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+        lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
+        lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
+
+        lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+        lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+        lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+        ### new SBOM json testgenerator
+        if command -v jo >/dev/null; then
+          # add source file path information to our properties array:
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+          lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+          lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${BIN}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "static_bin_analysis;${BIN_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
       done
       print_dot
 
@@ -206,16 +257,38 @@ S09_firmware_base_version_check() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in unblob logs (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-          write_csv_log "unblob logs" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+          write_csv_log "unblob logs" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
           lMD5_CHECKSUM="$(md5sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${EXTRACTOR_LOG}" | awk '{print $1}')"
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
-          write_log "static_bin_analysis;${EXTRACTOR_LOG:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+          lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+          lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+          lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+          ### new SBOM json testgenerator
+          if command -v jo >/dev/null; then
+            # add source file path information to our properties array:
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "source_path:${EXTRACTOR_LOG}" )
+            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+            # final array with all hash values
+            build_sbom_json_hashes_arr "${EXTRACTOR_LOG}"
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          fi
+
+          write_log "static_bin_analysis;${EXTRACTOR_LOG:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
           print_dot
         fi
       fi
@@ -229,19 +302,42 @@ S09_firmware_base_version_check() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in original firmware file (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-          write_csv_log "firmware" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+          write_csv_log "firmware" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
           lMD5_CHECKSUM="$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
-          lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-          lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+          lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+          lBIN_ARCH=${lBIN_ARCH#\ }
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
+          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
-          write_log "static_bin_analysis;${FIRMWARE_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${FIRMWARE_PATH}");${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+          lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+          lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+          lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+          ### new SBOM json testgenerator
+          if command -v jo >/dev/null; then
+            # add source file path information to our properties array:
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+            # final array with all hash values
+            build_sbom_json_hashes_arr "${BIN}"
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          fi
+
+          write_log "static_bin_analysis;${FIRMWARE_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${FIRMWARE_PATH}");${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
         fi
         print_dot
       fi
@@ -253,7 +349,7 @@ S09_firmware_base_version_check() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in original firmware file (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-          write_csv_log "firmware" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+          write_csv_log "firmware" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
         fi
       fi
 
@@ -295,6 +391,13 @@ S09_firmware_base_version_check() {
 
 build_generic_purl() {
   local lCSV_RULE="${1:-}"
+  local lOS_IDENTIFIED="${2:-NA}"
+  local lAPP_ARCH="${3:-}"
+
+  if [[ "${lOS_IDENTIFIED}" == "NA" ]]; then
+    lOS_IDENTIFIED="generic"
+  fi
+
   local lBIN_VENDOR=""
   local lBIN_NAME=""
   local lBIN_VERS=""
@@ -306,8 +409,23 @@ build_generic_purl() {
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
+  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED}/${lBIN_NAME}"
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
-  lPURL_IDENTIFIER="pkg:generic/${lBIN_VENDOR}/${lBIN_NAME}@${lBIN_VERS}"
+
+  if [[ -n "${lBIN_VERS}" ]]; then
+    lPURL_IDENTIFIER+="@${lBIN_VERS}"
+  fi
+  if [[ -n "${lAPP_ARCH}" ]]; then
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH}"
+  fi
+  if [[ "${lOS_IDENTIFIED}" != "generic" ]]; then
+    if [[ -n "${lAPP_ARCH}" ]]; then
+      lPURL_IDENTIFIER+="&"
+    else
+      lPURL_IDENTIFIER+="?"
+    fi
+    lPURL_IDENTIFIER+="distro=${lOS_IDENTIFIED}"
+  fi
 
   echo "${lPURL_IDENTIFIER}"
 }
@@ -366,6 +484,7 @@ bin_string_checker() {
   local VERSION_IDENTIFIERS_ARR=()
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
+  local lPACKAGING_SYSTEM="static_bin_analysis"
 
   # load VERSION_IDENTIFIER string into array for multi_grep handling
   # nosemgrep
@@ -375,10 +494,12 @@ bin_string_checker() {
   local BIN_FILE=""
   local BIN=""
   local lPURL_IDENTIFIER="NA"
+  local lOS_IDENTIFIED=""
 
   if [[ ${RTOS} -eq 0 ]]; then
     local FILE_ARR=( "${BINARIES[@]}" )
   fi
+  lOS_IDENTIFIED=$(distri_check)
 
   for BIN in "${FILE_ARR[@]}"; do
     MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
@@ -419,19 +540,43 @@ bin_string_checker() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-            write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+            write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
-            lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-            lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
-            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-            lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
 
-            write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
+            lBIN_ARCH=${lBIN_ARCH#\ }
+
+            lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
+
+            lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+            lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+            lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+            ### new SBOM json testgenerator
+            if command -v jo >/dev/null; then
+              # add source file path information to our properties array:
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+              lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+              lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+              lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+              # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+              # final array with all hash values
+              build_sbom_json_hashes_arr "${BIN}"
+
+              # create component entry - this allows adding entries very flexible:
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+            fi
+
+            write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
             # we test the next binary
             continue 2
           fi
@@ -442,19 +587,41 @@ bin_string_checker() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in kernel image ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-            write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+            write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
             lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-            lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
-            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-            lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
+            lBIN_ARCH=${lBIN_ARCH#\ }
+            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
-            write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+            lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+            lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+            lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+            ### new SBOM json testgenerator
+            if command -v jo >/dev/null; then
+              # add source file path information to our properties array:
+              local lPROP_ARRAY_INIT_ARR=()
+              lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+              lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+              lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+              lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+              build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+              # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+              # final array with all hash values
+              build_sbom_json_hashes_arr "${BIN}"
+
+              # create component entry - this allows adding entries very flexible:
+              build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+            fi
+
+            write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
             continue 2
           fi
         fi
@@ -472,19 +639,41 @@ bin_string_checker() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
-          write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+          write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
           lMD5_CHECKSUM="$(md5sum "${BIN}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}")
-          lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
-          lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
-          lBIN_ARCH=${lBIN_ARCH//,\ /\ -\ }
+          lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
+          lBIN_ARCH=${lBIN_ARCH#\ }
+          lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
-          write_log "static_bin_analysis;${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};DESC" "${S08_CSV_LOG}"
+          lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
+          lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
+          lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+
+          ### new SBOM json testgenerator
+          if command -v jo >/dev/null; then
+            # add source file path information to our properties array:
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
+            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+            # final array with all hash values
+            build_sbom_json_hashes_arr "${BIN}"
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          fi
+
+          write_log "${lPACKAGING_SYSTEM};${BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${VERSION_FINDER:-NA};${CSV_RULE};${LIC};maintainer unknown;${BIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
           # we test the next binary
           continue 2
         fi

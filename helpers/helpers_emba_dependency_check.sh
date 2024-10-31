@@ -601,6 +601,9 @@ dependency_check()
       # jtr
       check_dep_tool "john"
 
+      # jo - json builder
+      check_dep_tool "jo"
+
       # pixd
       check_dep_file "pixd visualizer" "${EXT_DIR}""/pixde"
 

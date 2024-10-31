@@ -24,103 +24,106 @@ S08_package_mgmt_extractor()
 
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
+  local lOS_IDENTIFIED=""
 
   # shellcheck disable=SC2153
   check_for_s08_csv_log "${S08_CSV_LOG}"
 
+  lOS_IDENTIFIED=$(distri_check)
+
   if [[ ${THREADED} -eq 1 ]]; then
-    debian_status_files_analysis &
+    debian_status_files_analysis "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    openwrt_control_files_analysis &
+    openwrt_control_files_analysis "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    rpm_package_mgmt_analysis &
+    rpm_package_mgmt_analysis "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    rpm_package_check &
+    rpm_package_check "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    deb_package_check &
+    deb_package_check "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    bsd_pkg_check &
+    bsd_pkg_check "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    python_pip_packages &
+    python_pip_packages "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    python_requirements &
+    python_requirements "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    python_poetry_lock_parser &
+    python_poetry_lock_parser "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    java_archives_check &
+    java_archives_check "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    ruby_gem_archive_check &
+    ruby_gem_archive_check "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    alpine_apk_package_check &
+    alpine_apk_package_check "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    windows_exifparser &
+    windows_exifparser "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    rust_cargo_lock_parser &
+    rust_cargo_lock_parser "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
-    node_js_package_lock_parser &
+    node_js_package_lock_parser "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
 
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
   else
-    debian_status_files_analysis
-    openwrt_control_files_analysis
-    rpm_package_mgmt_analysis
-    rpm_package_check
-    deb_package_check
-    bsd_pkg_check
-    python_pip_packages
-    python_requirements
-    python_poetry_lock_parser
-    java_archives_check
-    ruby_gem_archive_check
-    alpine_apk_package_check
-    windows_exifparser
-    rust_cargo_lock_parser
-    node_js_package_lock_parser
+    debian_status_files_analysis "${lOS_IDENTIFIED}"
+    openwrt_control_files_analysis "${lOS_IDENTIFIED}"
+    rpm_package_mgmt_analysis "${lOS_IDENTIFIED}"
+    rpm_package_check "${lOS_IDENTIFIED}"
+    deb_package_check "${lOS_IDENTIFIED}"
+    bsd_pkg_check "${lOS_IDENTIFIED}"
+    python_pip_packages "${lOS_IDENTIFIED}"
+    python_requirements "${lOS_IDENTIFIED}"
+    python_poetry_lock_parser "${lOS_IDENTIFIED}"
+    java_archives_check "${lOS_IDENTIFIED}"
+    ruby_gem_archive_check "${lOS_IDENTIFIED}"
+    alpine_apk_package_check "${lOS_IDENTIFIED}"
+    windows_exifparser "${lOS_IDENTIFIED}"
+    rust_cargo_lock_parser "${lOS_IDENTIFIED}"
+    node_js_package_lock_parser "${lOS_IDENTIFIED}"
   fi
 
   # shellcheck disable=SC2153
@@ -128,42 +131,8 @@ S08_package_mgmt_extractor()
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
-check_for_s08_csv_log() {
-  lS08_CSV_LOG="${1:-}"
-  if [[ ! -f "${lS08_CSV_LOG}" ]]; then
-    # using write_log as this always works
-    write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifier;PURL;Description" "${lS08_CSV_LOG}"
-  fi
-}
-
-distri_check() {
-  # check for distribution
-  local lOS_RELEASE_ARR=()
-  local lOS_RELEASE_FILE=""
-  local lOS_IDENTIFIED=""
-  local lOS_VERS_IDENTIFIED=""
-
-  # currently this is a weak check via /etc/os-release
-  # Todo: If this check failes we can use further tests like lsb-release or motd
-  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release")
-  for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
-    lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}")
-    lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}
-    lOS_VERS_IDENTIFIED=$(grep "^VERSION_ID=" "${lOS_RELEASE_FILE}")
-    lOS_VERS_IDENTIFIED=${lOS_VERS_IDENTIFIED//VERSION_ID=}
-    lOS_IDENTIFIED+="-${lOS_VERS_IDENTIFIED}"
-    lOS_IDENTIFIED=${lOS_IDENTIFIED//\"}
-    lOS_IDENTIFIED=${lOS_IDENTIFIED,,}
-    # if it looks like an os then we are happy for now :)
-    # for the future we can do some further checks if it is some debian for debs and some rpm based for rpm systems
-    if [[ "${lOS_IDENTIFIED}" =~ ^[a-z]+-[a-z]+$ ]]; then
-      break
-    fi
-  done
-  echo "${lOS_IDENTIFIED}"
-}
-
 node_js_package_lock_parser() {
+  local lOS_IDENTIFIED="${1:-}"
   local lPACKAGING_SYSTEM="node_js_lock"
 
   sub_module_title "Node.js package lock identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -173,8 +142,8 @@ node_js_package_lock_parser() {
   local lR_FILE=""
   local lAPP_LIC="NA"
   local lAPP_NAME="NA"
-  local lAPP_VERS="NA"
-  local lAPP_ARCH="NA"
+  local lAPP_VERS=""
+  local lAPP_ARCH=""
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
@@ -208,6 +177,7 @@ node_js_package_lock_parser() {
 
       while IFS=";" read -r lAPP_NAME lAPP_VERS lAPP_LIC lAPP_CHECKSUM lAPP_DEPS; do
         lAPP_NAME=$(echo "${lAPP_NAME}" | rev | cut -d '/' -f1 | rev)
+        [[ -z "${lAPP_NAME}" ]] && continue
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
@@ -221,13 +191,43 @@ node_js_package_lock_parser() {
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        lPURL_IDENTIFIER="pkg:npm/${lAPP_NAME}@${lAPP_VERS}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
+        fi
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "npm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
         STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        # Todo: checksum
+        if command -v jo >/dev/null; then
+          # add the node lock path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lNODE_LCK_ARCHIVE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # usuall build_json_hashes_arr sets HASHES_ARR globally and we unset it afterwards
+          # as we have the hashes from the lock file we do it here
+          export HASHES_ARR=()
+          local lHASH_ALG="NA"
+          [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
+          [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
+          [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lHASH_ALG="SHA-512"
+          if ! [[ "${lHASH_ALG}" == "NA" ]]; then
+            local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
+            lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
+            HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+          else
+            print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
+          fi
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
 
         write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lNODE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lNODE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${TMP_DIR}/node.lock.tmp"
       rm -f "${TMP_DIR}/node.lock.tmp"
@@ -263,6 +263,7 @@ deb_package_check() {
   # Installed-Size: 401
   # Depends: libc6 (>= 2.34)
   local lPACKAGING_SYSTEM="debian_deb"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Debian deb package parser" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -271,8 +272,8 @@ deb_package_check() {
   local lR_FILE=""
   local lAPP_LIC="NA"
   local lAPP_NAME="NA"
-  local lAPP_VERS="NA"
-  local lAPP_ARCH="NA"
+  local lAPP_VERS=""
+  local lAPP_ARCH=""
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
@@ -281,7 +282,6 @@ deb_package_check() {
   local lMD5_CHECKSUM=""
   local lSHA256_CHECKSUM=""
   local lSHA512_CHECKSUM=""
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
@@ -296,8 +296,6 @@ deb_package_check() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lDEB_ARCHIVE}")
@@ -349,17 +347,31 @@ deb_package_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:deb/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:deb/debian-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="debian-based"
       fi
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "deb" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-      # Todo: Company Name, Copyright, Mime-Type
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lDEB_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
 
       write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -r "${TMP_DIR}/deb_package/" || true
     done
@@ -382,6 +394,7 @@ deb_package_check() {
 
 windows_exifparser() {
   local lPACKAGING_SYSTEM="windows_exe"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Windows Exif parser" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -391,7 +404,7 @@ windows_exifparser() {
   local lAPP_LIC="NA"
   local lAPP_NAME="NA"
   local lAPP_VERS="NA"
-  local lAPP_ARCH="NA"
+  local lAPP_ARCH=""
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
@@ -400,7 +413,6 @@ windows_exifparser() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
@@ -423,14 +435,12 @@ windows_exifparser() {
     write_log "[*] Analyzing ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    lOS_IDENTIFIED=$(distri_check)
-
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file -b "${lEXE_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ ! "${lR_FILE}" == *"PE32+ executable"* ]]; then
         continue
       fi
-      lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
+      lEXE_NAME=$(basename -s .exe "${lEXE_ARCHIVE}")
       lEXIF_LOG="${LOG_PATH_MODULE}/windows_exe_exif_data_${lEXE_NAME}.txt"
 
       exiftool "${lEXE_ARCHIVE}" > "${lEXIF_LOG}" || true
@@ -492,22 +502,37 @@ windows_exifparser() {
         fi
       fi
 
-      lMD5_CHECKSUM="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
-      lSHA256_CHECKSUM="$(sha256sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR//\.exe}:${lAPP_NAME//\.exe}:${lAPP_VERS:-*}:*:*:*:*:*:*"
 
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
-
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:exe/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:exe/windows-based/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="windows-based"
       fi
+
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "exe" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+
+      ### new SBOM json testgenerator
+      if command -v jo >/dev/null; then
+        # add EXE path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
+        [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lEXE_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
 
       write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_link "${lEXIF_LOG}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -f "${TMP_DIR}/windows_exe_exif_data.txt"
     done
@@ -530,6 +555,7 @@ windows_exifparser() {
 
 python_poetry_lock_parser() {
   local lPACKAGING_SYSTEM="python_poetry_lock"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Python poetry lock identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -538,8 +564,8 @@ python_poetry_lock_parser() {
   local lR_FILE=""
   local lAPP_LIC="NA"
   local lAPP_NAME="NA"
-  local lAPP_VERS="NA"
-  local lAPP_ARCH="NA"
+  local lAPP_VERS=""
+  local lAPP_ARCH=""
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
@@ -548,7 +574,6 @@ python_poetry_lock_parser() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
@@ -563,8 +588,6 @@ python_poetry_lock_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lPY_LCK_ARCHIVE in "${lPY_LCK_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lPY_LCK_ARCHIVE}")
@@ -601,17 +624,33 @@ python_poetry_lock_parser() {
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
         STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         # Todo: checksum
 
+        if command -v jo >/dev/null; then
+          # add deb path information to our properties array:
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_LCK_ARCHIVE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
         write_log "[*] Python poetry.lock archive details: ${ORANGE}${lPY_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${TMP_DIR}/poetry.lock.tmp"
       rm -f "${TMP_DIR}/poetry.lock.tmp"
@@ -635,6 +674,7 @@ python_poetry_lock_parser() {
 
 rust_cargo_lock_parser() {
   local lPACKAGING_SYSTEM="rust_cargo_lock"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Rust cargo lock identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -643,17 +683,17 @@ rust_cargo_lock_parser() {
   local lR_FILE=""
   local lAPP_LIC="NA"
   local lAPP_NAME="NA"
-  local lAPP_VERS="NA"
-  local lAPP_ARCH="NA"
+  local lAPP_VERS=""
+  local lAPP_ARCH=""
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
+  local lAPP_SOURCE="NA"
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
@@ -668,8 +708,6 @@ rust_cargo_lock_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lRST_ARCHIVE in "${lRST_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lRST_ARCHIVE}")
@@ -702,6 +740,12 @@ rust_cargo_lock_parser() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_SOURCE=$(echo "${lCARGO_ENTRY}" | cut -d\| -f3)
+        lAPP_SOURCE=${lAPP_SOURCE/source\ =\ }
+        lAPP_SOURCE=$(clean_package_details "${lAPP_SOURCE}")
+        lAPP_SOURCE=$(clean_package_versions "${lAPP_SOURCE}")
+        # lAPP_SOURCE should be added to the properties: name: EMBA:cargo:source
+
         lSHA256_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
         lSHA256_CHECKSUM=${lSHA256_CHECKSUM/checksum\ =\ }
         lSHA256_CHECKSUM=$(clean_package_details "${lSHA256_CHECKSUM}")
@@ -710,17 +754,36 @@ rust_cargo_lock_parser() {
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:cargo/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:cargo/${lAPP_NAME}@${lAPP_VERS}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cargo" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
         STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        # Todo: source
+        if command -v jo >/dev/null; then
+          # add deb path information to our properties array:
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lRST_ARCHIVE}" )
+          lPROP_ARRAY_INIT_ARR+=( "source:${lAPP_SOURCE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          export HASHES_ARR=()
+          local lHASHES_ARRAY_INIT=("alg=SHA-256")
+          lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
+          HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
 
         write_log "[*] Rust Cargo.lock archive details: ${ORANGE}${lRST_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lRST_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lRST_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${TMP_DIR}/Cargo.lock.tmp"
     done
@@ -743,6 +806,7 @@ rust_cargo_lock_parser() {
 
 alpine_apk_package_check() {
   local lPACKAGING_SYSTEM="alpine_apk"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Alpine apk archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -761,7 +825,6 @@ alpine_apk_package_check() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
@@ -776,8 +839,6 @@ alpine_apk_package_check() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lAPK_ARCHIVE}")
@@ -812,15 +873,31 @@ alpine_apk_package_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:apk/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:apk/${lAPP_NAME}@${lAPP_VERS}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="generic"
       fi
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "apk" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lAPK_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -rf "${TMP_DIR}"/apk || true
     done
@@ -843,6 +920,7 @@ alpine_apk_package_check() {
 
 ruby_gem_archive_check() {
   local lPACKAGING_SYSTEM="ruby_gem"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Ruby gem archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -861,7 +939,6 @@ ruby_gem_archive_check() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
@@ -876,8 +953,6 @@ ruby_gem_archive_check() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lGEM_ARCHIVE}")
@@ -922,15 +997,31 @@ ruby_gem_archive_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:gem/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:gem/${lAPP_NAME}@${lAPP_VERS}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="generic"
       fi
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "gem" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lGEM_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lGEM_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -rf "${TMP_DIR}"/gems || true
     done
@@ -956,6 +1047,7 @@ bsd_pkg_check() {
   #     boost-libs-1.84.0.pkg: Zstandard compressed data (v0.8+), Dictionary ID: None
   # tar --zstd -x -f ./boost-libs-1.84.0.pkg +COMPACT_MANIFEST
   local lPACKAGING_SYSTEM="freebsd_pkg"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "FreeBSD pkg archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -974,7 +1066,6 @@ bsd_pkg_check() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
@@ -989,8 +1080,6 @@ bsd_pkg_check() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lPKG_ARCHIVE}")
@@ -1029,15 +1118,31 @@ bsd_pkg_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:pkg/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:pkg/${lAPP_NAME}@${lAPP_VERS}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="generic"
       fi
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pkg" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      if command -v jo >/dev/null; then
+        # add deb path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lPKG_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -f "${TMP_DIR}"/+COMPACT_MANIFEST || true
     done
@@ -1060,6 +1165,7 @@ bsd_pkg_check() {
 
 rpm_package_check() {
   local lPACKAGING_SYSTEM="rpm_package"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "RPM archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1078,7 +1184,6 @@ rpm_package_check() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
@@ -1093,8 +1198,6 @@ rpm_package_check() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lRPM_ARCHIVE}")
@@ -1134,15 +1237,32 @@ rpm_package_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:rpm/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:rpm/${lAPP_NAME}@${lAPP_VERS}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="rpm-based"
       fi
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "rpm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      if command -v jo >/dev/null; then
+        # add rpm path information to our properties array:
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lRPM_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
       write_log "[*] RPM archive details: ${ORANGE}${lRPM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
     done
 
@@ -1164,6 +1284,7 @@ rpm_package_check() {
 
 python_requirements() {
   local lPACKAGING_SYSTEM="python_requirements"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Python requirements identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1183,7 +1304,6 @@ python_requirements() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
@@ -1198,8 +1318,6 @@ python_requirements() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}" ; do
       lR_FILE=$(file "${lPY_REQ_FILE}")
@@ -1229,7 +1347,7 @@ python_requirements() {
           lAPP_VERS='~='"${lAPP_VERS}"
         else
           lAPP_NAME=${lRES_ENTRY}
-          lAPP_VERS="NA"
+          lAPP_VERS=""
         fi
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
@@ -1242,11 +1360,11 @@ python_requirements() {
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:pypi/${lAPP_NAME}@${lAPP_VERS}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+
         STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         # with internet we can query further details
@@ -1256,8 +1374,26 @@ python_requirements() {
         #   "Development Status :: 5 - Production/Stable",
         #   "License :: OSI Approved :: MIT License",
 
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPY_REQ_FILE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
         write_log "[*] Python requirement details: ${ORANGE}${lPY_REQ_FILE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done < "${lPY_REQ_FILE}"
     done
@@ -1280,6 +1416,7 @@ python_requirements() {
 
 python_pip_packages() {
   local lPACKAGING_SYSTEM="python_pip"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Python PIP package identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1301,7 +1438,6 @@ python_pip_packages() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   # pip packages are in site-packages or in dist-packages directories installed
@@ -1320,66 +1456,98 @@ python_pip_packages() {
     write_log "[*] Analyzing ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    lOS_IDENTIFIED=$(distri_check)
-
     for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "METADATA" -type f)
       for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "PKG-INFO" -type f)
       for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -1392,10 +1560,6 @@ python_pip_packages() {
   fi
 
   if [[ -v lPIP_PACKAGES_SITE_ARR[@] ]] ; then
-    if [[ ! -f "${S08_CSV_LOG}" ]]; then
-      write_csv_log "Packaging system" "package file" "SHA-512" "package" "original version" "stripped version" "license" "maintainer" "architecture" "Description"
-    fi
-
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_SITE_ARR[@]}${NC} PIP site-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1409,61 +1573,95 @@ python_pip_packages() {
     for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "METADATA" -type f)
       for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "PKG-INFO" -type f)
       for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
-        lPIP_PACKAGE_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_NAME=${lPIP_PACKAGE_NAME/*:\ }
-        lPIP_PACKAGE_NAME=$(clean_package_details "${lPIP_PACKAGE_NAME}")
+        lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lPIP_PACKAGE_VERSION=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lPIP_PACKAGE_VERSION=${lPIP_PACKAGE_VERSION/*:\ }
-        lPIP_PACKAGE_VERSION=$(clean_package_details "${lPIP_PACKAGE_VERSION}")
-        lPIP_PACKAGE_VERSION=$(clean_package_versions "${lPIP_PACKAGE_VERSION}")
+        lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
+        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
 
-        lAPP_VENDOR="${lPIP_PACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          lPURL_IDENTIFIER="pkg:pypi/${lOS_IDENTIFIED}/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}?distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:pypi/${lPIP_PACKAGE_NAME}@${lPIP_PACKAGE_VERSION}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="generic"
         fi
-        STRIPPED_VERSION="::${lPIP_PACKAGE_NAME}:${lPIP_PACKAGE_VERSION:-NA}"
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lPIP_PACKAGE_NAME}${NC} - Version ${ORANGE}${lPIP_PACKAGE_VERSION}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPIP_PACKAGE_NAME}" "${lPIP_PACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -1486,6 +1684,7 @@ python_pip_packages() {
 
 java_archives_check() {
   local lPACKAGING_SYSTEM="java_archive"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Java archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1507,7 +1706,6 @@ java_archives_check() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lJAVA_ARCHIVES_JAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.jar" -type f)
@@ -1524,8 +1722,6 @@ java_archives_check() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    lOS_IDENTIFIED=$(distri_check)
 
     for lJAVA_ARCHIVE in "${lJAVA_ARCHIVES_ARR[@]}" ; do
       lJ_FILE=$(file "${lJAVA_ARCHIVE}")
@@ -1565,15 +1761,32 @@ java_archives_check() {
       lAPP_VENDOR="${lAPP_NAME}"
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-      if [[ -n "${lOS_IDENTIFIED}" ]]; then
-        lPURL_IDENTIFIER="pkg:java/${lOS_IDENTIFIED}/${lAPP_NAME}@${lAPP_VERS}?distro=${lOS_IDENTIFIED}"
-      else
-        lPURL_IDENTIFIER="pkg:java/${lAPP_NAME}@${lAPP_VERS}"
+      if [[ -z "${lOS_IDENTIFIED}" ]]; then
+        lOS_IDENTIFIED="generic"
       fi
+      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "java" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      if command -v jo >/dev/null; then
+        # add the python requirement path information to our properties array:
+        # Todo: in the future we should check for the package, package hashes and which files
+        # are in the package
+        local lPROP_ARRAY_INIT_ARR=()
+        lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+        # final array with all hash values
+        build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}"
+
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      fi
+
       write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
     done
 
@@ -1595,6 +1808,7 @@ java_archives_check() {
 
 debian_status_files_analysis() {
   local lPACKAGING_SYSTEM="debian_pkg_mgmt"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Debian package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1615,7 +1829,6 @@ debian_status_files_analysis() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
@@ -1626,8 +1839,6 @@ debian_status_files_analysis() {
     for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
       write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
-
-    lOS_IDENTIFIED=$(distri_check)
 
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1672,18 +1883,33 @@ debian_status_files_analysis() {
             continue
           fi
 
-          if [[ -n "${lOS_IDENTIFIED}" ]]; then
-            # lOS_IDENTIFIED -> debian-12 -> debian
-            lPURL_IDENTIFIER="pkg:deb/${lOS_IDENTIFIED/-*}/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-          else
-            lPURL_IDENTIFIER="pkg:deb/debian-based/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
+          if [[ -z "${lOS_IDENTIFIED}" ]]; then
+            lOS_IDENTIFIED="debian-based"
           fi
+          lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "deb" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_ARCH:-NA}")
           lAPP_VENDOR="${lPACKAGE}"
           lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
           STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
 
+          ### new SBOM json testgenerator
+          if command -v jo >/dev/null; then
+            # add source file path information to our properties array:
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+            # final array with all hash values
+            build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          fi
+
           write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
           lPOS_RES=1
         done
       fi
@@ -1707,16 +1933,17 @@ debian_status_files_analysis() {
 
 openwrt_control_files_analysis() {
   local lPACKAGING_SYSTEM="OpenWRT"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "OpenWRT package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   local lPACKAGE_FILE=""
-  local lOPENWRT_PACKAGES_ARR=()
   local lPACKAGE_VERSION=""
-  local lPACKAGE=""
+  local lAPP_NAME=""
+  local lAPP_VERS=""
   local lVERSION=""
   local lAPP_LIC="NA"
-  local lAPP_ARCH="NA"
+  local lAPP_ARCH=""
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
@@ -1726,7 +1953,6 @@ openwrt_control_files_analysis() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
   local lPURL_IDENTIFIER="NA"
 
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
@@ -1742,37 +1968,66 @@ openwrt_control_files_analysis() {
     write_log "[*] Analyzing ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    lOS_IDENTIFIED=$(distri_check)
-
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
-        mapfile -t lOPENWRT_PACKAGES_ARR < <(grep "^Package: \|^Version: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g')
-        for lPACKAGE_VERSION in "${lOPENWRT_PACKAGES_ARR[@]}" ; do
-          lPACKAGE=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}' | tr -dc '[:print:]')
-          lPACKAGE=$(clean_package_details "${lPACKAGE}")
 
-          lVERSION=${lPACKAGE_VERSION/*Version:\ /}
-          lVERSION=$(clean_package_details "${lVERSION}")
-          lVERSION=$(clean_package_versions "${lVERSION}")
+        lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-          lAPP_VENDOR="${lPACKAGE}"
-          lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
+        lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-          if [[ -n "${lOS_IDENTIFIED}" ]]; then
-            # lOS_IDENTIFIED -> debian-12 -> debian
-            lPURL_IDENTIFIER="pkg:opkg/${lOS_IDENTIFIED/-*}/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-          else
-            lPURL_IDENTIFIER="pkg:opkg/openwrt/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
+        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_MAINT=${lAPP_MAINT#\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
+        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_DESC=${lAPP_DESC#\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="openwrt"
+        fi
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "opkg" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
+
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          # if we have the list file also we can add all the paths provided by the package
+          if [[ -f "${lPACKAGE_FILE/\.control/\.list}" ]]; then
+            local lPKG_LIST_ENTRY=""
+            while IFS= read -r lPKG_LIST_ENTRY; do
+              lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+            done < "${lPACKAGE_FILE/control/list}"
           fi
-          STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
 
-          write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-          write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
-          lPOS_RES=1
-        done
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lAPP_NAME}${NC} - ${ORANGE}${lAPP_VERS}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        lPOS_RES=1
       fi
     done
 
@@ -1794,6 +2049,7 @@ openwrt_control_files_analysis() {
 
 rpm_package_mgmt_analysis() {
   local lPACKAGING_SYSTEM="RPM_pkg_mgmt"
+  local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "RPM package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1806,9 +2062,9 @@ rpm_package_mgmt_analysis() {
   local lPACKAGE_FILE=""
   local lRPM_PACKAGES_ARR=()
   local lRPM_DIR=""
-  local lPACKAGE_VERSION=""
-  local lPACKAGE_NAME=""
   local lPACKAGE_AND_VERSION=""
+  local lAPP_NAME=""
+  local lAPP_VERS=""
   local lAPP_ARCH="NA"
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
@@ -1818,7 +2074,6 @@ rpm_package_mgmt_analysis() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
-  local lOS_IDENTIFIED="NA"
 
   mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 
@@ -1842,34 +2097,49 @@ rpm_package_mgmt_analysis() {
       mapfile -t lRPM_PACKAGES_ARR < <(rpm -qa --dbpath "${lRPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${lRPM_DIR}")
       for lPACKAGE_AND_VERSION in "${lRPM_PACKAGES_ARR[@]}" ; do
         write_log "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        lPACKAGE_VERSION=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
-        lPACKAGE_VERSION="${lPACKAGE_VERSION/*:\ }"
-        lPACKAGE_VERSION=$(clean_package_details "${lPACKAGE_VERSION}")
+        lAPP_VERS=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
+        lAPP_VERS="${lAPP_VERS/*:\ }"
+        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
 
-        lPACKAGE_NAME=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Name" || true)
-        lPACKAGE_NAME="${lPACKAGE_NAME/*:\ }"
-        lPACKAGE_NAME=$(clean_package_details "${lPACKAGE_NAME}")
+        lAPP_NAME=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Name" || true)
+        lAPP_NAME="${lAPP_NAME/*:\ }"
+        lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
         # just for output the details
         rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true
 
-        if [[ -z "${lPACKAGE_NAME}" ]]; then
+        if [[ -z "${lAPP_NAME}" ]]; then
           continue
         fi
 
-        lAPP_VENDOR="${lPACKAGE_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE_NAME}:${lPACKAGE_VERSION}:*:*:*:*:*:*"
+        lAPP_VENDOR="${lAPP_NAME}"
+        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-        if [[ -n "${lOS_IDENTIFIED}" ]]; then
-          # lOS_IDENTIFIED -> debian-12 -> debian
-          lPURL_IDENTIFIER="pkg:rpm/${lOS_IDENTIFIED/-*}/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}&distro=${lOS_IDENTIFIED}"
-        else
-          lPURL_IDENTIFIER="pkg:rpm/${lPACKAGE}@${lVERSION}?arch=${lAPP_ARCH}"
+        if [[ -z "${lOS_IDENTIFIED}" ]]; then
+          lOS_IDENTIFIED="rpm-based"
         fi
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "rpm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
         STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
 
-        write_log "[*] RPM package details: ${ORANGE}${lPACKAGE_NAME}${NC} - ${ORANGE}${lPACKAGE_VERSION:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE_NAME}" "${lPACKAGE_VERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${lAPP_DESC}"
+        if command -v jo >/dev/null; then
+          # add the python requirement path information to our properties array:
+          # Todo: in the future we should check for the package, package hashes and which files
+          # are in the package
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
+        write_log "[*] RPM package details: ${ORANGE}${lAPP_NAME}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
