@@ -220,12 +220,12 @@ node_js_package_lock_parser() {
             local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
             lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
             HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           else
             print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
           fi
-
-          # create component entry - this allows adding entries very flexible:
-          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
         fi
 
         write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1992,7 +1992,7 @@ debian_status_files_analysis() {
           lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
-          lVERSION=${lVERSION/ - Description:\ */}
+          lVERSION=${lVERSION/ - Depends:\ */}
           lVERSION=$(clean_package_details "${lVERSION}")
           lVERSION=$(clean_package_versions "${lVERSION}")
 
@@ -2031,9 +2031,11 @@ debian_status_files_analysis() {
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
-            for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
-              lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
-            done
+            if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+              for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+                lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+              done
+            fi
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -2151,6 +2153,13 @@ openwrt_control_files_analysis() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+            for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+              lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+            done
+          fi
+
           # if we have the list file also we can add all the paths provided by the package
           if [[ -f "${lPACKAGE_FILE/\.control/\.list}" ]]; then
             local lPKG_LIST_ENTRY=""
@@ -2165,9 +2174,6 @@ openwrt_control_files_analysis() {
               fi
             done < "${lPACKAGE_FILE/control/list}"
           fi
-          for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
-            lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
-          done
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
