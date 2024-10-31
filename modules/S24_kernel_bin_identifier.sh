@@ -97,6 +97,7 @@ S24_kernel_bin_identifier()
       lAPP_VERS=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f4-5)
       # it could be that we have a version like 2.14b:* -> we remove the last field
       lAPP_VERS="${lAPP_VERS/:\*}"
+      lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
@@ -113,7 +114,8 @@ S24_kernel_bin_identifier()
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
             lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2)
             lK_ELF=${lK_ELF#\ }
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lAPP_ELF:-NA}")
+            lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
+
 
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
