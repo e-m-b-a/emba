@@ -261,6 +261,9 @@ analyze_kernel_module() {
 
   print_output "[*] Found ${ORANGE}${#KERNEL_MODULES[@]}${NC} potential kernel modules."
 
+  local lOS_IDENTIFIED=""
+  lOS_IDENTIFIED=$(distri_check)
+
   for lKMODULE in "${KERNEL_MODULES[@]}" ; do
     lFILE_KMOD=$(file "${lKMODULE}")
     if [[ "${lFILE_KMOD}" != *"ELF"* ]]; then
@@ -268,12 +271,12 @@ analyze_kernel_module() {
     fi
     # modinfos can run in parallel:
     if [[ "${THREADED}" -eq 1 ]]; then
-      module_analyzer "${lKMODULE}" &
+      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
       local TMP_PID="$!"
       store_kill_pids "${TMP_PID}"
       lWAIT_PIDS_S25_ARR+=( "${TMP_PID}" )
     else
-      module_analyzer "${lKMODULE}"
+      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}"
     fi
   done
 
@@ -287,6 +290,7 @@ analyze_kernel_module() {
 
 module_analyzer() {
   local lKMODULE="${1:-}"
+  local lOS_IDENTIFIED="${2:-}"
 
   if [[ "${lKMODULE}" == *".ko" ]]; then
     local lLICENSE=""
@@ -392,7 +396,6 @@ module_analyzer() {
       local lLICENSE="GPL-2.0-only"
 
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
-      lOS_IDENTIFIED=$(distri_check)
       lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
       ### new SBOM json testgenerator

@@ -32,9 +32,14 @@ S24_kernel_bin_identifier()
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
-  prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+  # just in case it is not already populated:
+  if [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
+    prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+  fi
 
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
+  local lOS_IDENTIFIED=""
+  lOS_IDENTIFIED=$(distri_check)
 
   for lFILE in "${FILE_ARR_LIMITED[@]}" ; do
     local lK_ELF="NA"
@@ -60,6 +65,7 @@ S24_kernel_bin_identifier()
       # reduce false positive rate
       continue
     fi
+    print_output "[*] S24 - Testing ${lFILE}" "no_log"
     lK_VER=$(strings "${lFILE}" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" | sort -u | tr -dc '[:print:]' || true)
 
     if [[ "${lK_VER}" =~ Linux\ version\ .* ]]; then
@@ -85,7 +91,6 @@ S24_kernel_bin_identifier()
       check_for_s08_csv_log "${S08_CSV_LOG}"
       lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/:linux:linux_kernel:\1/' || true)
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a${lSTRIPPED_VERS}:*:*:*:*:*:*"
-      lOS_IDENTIFIED=$(distri_check)
       lK_VER="${lK_VER//[,;\/()\[\]\\#]}"
       lAPP_MAINT=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f2)
       lAPP_NAME=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f3)

@@ -182,7 +182,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
-    mkdir "${SBOM_LOG_PATH}"
+    mkdir "${SBOM_LOG_PATH}" || true
   fi
 
   # if ! check_for_duplicates "${lAPP_NAME}"; then
