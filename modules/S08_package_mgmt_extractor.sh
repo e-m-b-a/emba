@@ -283,6 +283,8 @@ deb_package_check() {
   local lSHA256_CHECKSUM=""
   local lSHA512_CHECKSUM=""
   local lPURL_IDENTIFIER="NA"
+  local lDEB_FILES_ARR=()
+  local lDEB_FILE=""
 
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
@@ -360,11 +362,22 @@ deb_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        # add package files to properties
+        if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
+          mapfile -t lDEB_FILES_ARR < <(tar -tvf data.tar.xz | awk '{print $6}')
+          for lDEB_FILE in "${lDEB_FILES_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_FILE#\.}" )
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lDEB_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lDEB_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -524,7 +537,10 @@ windows_exifparser() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lEXE_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -643,7 +659,10 @@ python_poetry_lock_parser() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}"
+          if ! build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -826,6 +845,8 @@ alpine_apk_package_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lAPK_FILES_ARR=()
+  local lAPK_FILE=""
 
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
 
@@ -886,11 +907,22 @@ alpine_apk_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        mapfile -t lAPK_FILES_ARR < <(find "${TMP_DIR}"/apk)
+        # add package files to properties
+        if [[ "${#lAPK_FILES_ARR[@]}" -gt 0 ]]; then
+          for lAPK_FILE in "${lAPK_FILES_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "path:${lAPK_FILE#*apk}" )
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lAPK_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lAPK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -940,6 +972,8 @@ ruby_gem_archive_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lGEM_FILES_ARR=()
+  local lGEM_FILE=""
 
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
 
@@ -1010,11 +1044,22 @@ ruby_gem_archive_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lGEM_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        # add package files to properties
+        if [[ ! -f "${TMP_DIR}/gems/data.tar.xz" ]]; then
+          mapfile -t lGEM_FILES_ARR < <(tar -tvf data.tar.xz | awk '{print $6}')
+          for lGEM_FILE in "${lGEM_FILES_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "path:${lGEM_FILE#\.}" )
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lGEM_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lGEM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1067,6 +1112,8 @@ bsd_pkg_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lPKG_FILES_ARR=()
+  local lPKG_FILE=""
 
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
 
@@ -1130,12 +1177,25 @@ bsd_pkg_check() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+        mkdir "${TMP_DIR}"/pkg_tmp
+        tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}"/pkg_tmp || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
+        mapfile -t lPKG_FILES_ARR < <(find "${TMP_DIR}"/pkg_tmp)
+        # add package files to properties
+        if [[ "${#lPKG_FILES_ARR[@]}" -gt 0 ]]; then
+          for lPKG_FILE in "${lPKG_FILES_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_FILE#*pkg_tmp}" )
+          done
+        fi
+        [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR}"/pkg_tmp
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lPKG_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lPKG_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1185,6 +1245,8 @@ rpm_package_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lRPM_FILES_ARR=()
+  local lRPM_FILE=""
 
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
 
@@ -1244,6 +1306,8 @@ rpm_package_check() {
 
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}")
+
       if command -v jo >/dev/null; then
         # add rpm path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
@@ -1251,11 +1315,21 @@ rpm_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        # add package files to properties
+        if [[ "${#lRPM_FILES_ARR[@]}" -gt 0 ]]; then
+          for lRPM_FILE in "${lRPM_FILES_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "path:${lRPM_FILE}" )
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lRPM_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lRPM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1386,7 +1460,10 @@ python_requirements() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPY_REQ_FILE}"
+          if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1493,7 +1570,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1540,7 +1620,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1607,7 +1690,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1654,7 +1740,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1779,7 +1868,10 @@ java_archives_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1846,6 +1938,7 @@ debian_status_files_analysis() {
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
           | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g')
+        # Todo: Depends: bind9-host | host, bind9-libs (= 1:9.18.1-1), libc6 (>= 2.4), libedit2 (>= 2.11-20080614-0), libidn2-0 (>= 2.0.0), libkrb5-3 (>= 1.6.dfsg.2), libprotobuf-c1 (>= 1.0.0)
         write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_log "[*] Found debian package details in ${ORANGE}${lPACKAGE_FILE}${NC}:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1902,7 +1995,10 @@ debian_status_files_analysis() {
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+            if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lPACKAGE:-NA}" "${lVERSION:-NA}"; then
+              print_output "[*] Already found results for ${lPACKAGE} / ${lVERSION}" "no_log"
+              continue
+            fi
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1947,6 +2043,8 @@ openwrt_control_files_analysis() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
+  local lAPP_DEPS_ARR=()
+  local lAPP_DEP=""
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
   local lOPENWRT_MGMT_CONTROL_ARR=()
@@ -1991,6 +2089,8 @@ openwrt_control_files_analysis() {
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
+        mapfile -t lAPP_DEPS_ARR < <(grep "^Depends: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' | tr ',' '\n' | sort -u | tr -d ' ' || true)
+
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
@@ -2014,12 +2114,18 @@ openwrt_control_files_analysis() {
               lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
             done < "${lPACKAGE_FILE/control/list}"
           fi
+          for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP}" )
+          done
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -2132,7 +2238,10 @@ rpm_package_mgmt_analysis() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"

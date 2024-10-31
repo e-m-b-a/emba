@@ -87,7 +87,7 @@ F15_cyclonedx_sbom() {
 
     # generate hashes for the firmware itself:
     if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
-      build_sbom_json_hashes_arr "${FIRMWARE_PATH_BAK}"
+      build_sbom_json_hashes_arr "${FIRMWARE_PATH_BAK}" "NA" "NA"
     fi
 
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )

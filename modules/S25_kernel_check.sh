@@ -375,7 +375,10 @@ module_analyzer() {
 
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
-      build_sbom_json_hashes_arr "${lKMODULE}"
+      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        continue
+      fi
 
       # create component entry - this allows adding entries very flexible:
       build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
@@ -405,7 +408,10 @@ module_analyzer() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lKMODULE}"
+        if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
