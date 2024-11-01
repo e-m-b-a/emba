@@ -1993,6 +1993,8 @@ debian_status_files_analysis() {
 
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
           lVERSION=${lVERSION/ - Depends:\ */}
+          # if we have not dependencies:
+          lVERSION=${lVERSION/ - Description:\ */}
           lVERSION=$(clean_package_details "${lVERSION}")
           lVERSION=$(clean_package_versions "${lVERSION}")
 
@@ -2003,7 +2005,7 @@ debian_status_files_analysis() {
 
           lAPP_DEPS=${lPACKAGE_VERSION/*Depends:\ /}
           lAPP_DEPS=${lAPP_DEPS/ - Description:\ */}
-          lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
+          # lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
           lAPP_DEPS=$(clean_package_versions "${lAPP_DEPS}")
           mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | tr ',' '\n' | sort -u)
 

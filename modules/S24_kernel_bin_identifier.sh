@@ -65,7 +65,6 @@ S24_kernel_bin_identifier()
       # reduce false positive rate
       continue
     fi
-    print_output "[*] S24 - Testing ${lFILE}" "no_log"
     lK_VER=$(strings "${lFILE}" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" | sort -u | tr -dc '[:print:]' || true)
 
     if [[ "${lK_VER}" =~ Linux\ version\ .* ]]; then

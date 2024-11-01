@@ -421,14 +421,14 @@ build_generic_purl() {
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
-  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED}/${lBIN_NAME}"
+  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED/-*}/${lBIN_NAME}"
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
 
   if [[ -n "${lBIN_VERS}" ]]; then
     lPURL_IDENTIFIER+="@${lBIN_VERS}"
   fi
   if [[ -n "${lAPP_ARCH}" ]]; then
-    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH}"
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH//\ /_}"
   fi
   if [[ "${lOS_IDENTIFIED}" != "generic" ]]; then
     if [[ -n "${lAPP_ARCH}" ]]; then
