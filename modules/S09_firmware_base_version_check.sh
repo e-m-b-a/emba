@@ -428,7 +428,7 @@ build_generic_purl() {
     lPURL_IDENTIFIER+="@${lBIN_VERS}"
   fi
   if [[ -n "${lAPP_ARCH}" ]]; then
-    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH//\ /_}"
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH//\ /-}"
   fi
   if [[ "${lOS_IDENTIFIED}" != "generic" ]]; then
     if [[ -n "${lAPP_ARCH}" ]]; then

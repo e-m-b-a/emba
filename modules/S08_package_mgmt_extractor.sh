@@ -2003,11 +2003,13 @@ debian_status_files_analysis() {
           lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
           lAPP_ARCH=$(clean_package_versions "${lAPP_ARCH}")
 
-          lAPP_DEPS=${lPACKAGE_VERSION/*Depends:\ /}
-          lAPP_DEPS=${lAPP_DEPS/ - Description:\ */}
-          # lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
-          lAPP_DEPS=$(clean_package_versions "${lAPP_DEPS}")
-          mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | tr ',' '\n' | sort -u)
+          if [[ "${lPACKAGE_VERSION}" == *"Depends:"* ]]; then
+            lAPP_DEPS=${lPACKAGE_VERSION/*Depends:\ /}
+            lAPP_DEPS=${lAPP_DEPS/ - Description:\ */}
+            # lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
+            lAPP_DEPS=$(clean_package_versions "${lAPP_DEPS}")
+            mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | tr ',' '\n' | sed 's/\.\ /\n/g' | sort -u)
+          fi
 
           lAPP_DESC=${lPACKAGE_VERSION/*Description:\ /}
           lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
