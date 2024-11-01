@@ -32,9 +32,14 @@ S24_kernel_bin_identifier()
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
-  prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+  # just in case it is not already populated:
+  if [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
+    prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+  fi
 
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
+  local lOS_IDENTIFIED=""
+  lOS_IDENTIFIED=$(distri_check)
 
   for lFILE in "${FILE_ARR_LIMITED[@]}" ; do
     local lK_ELF="NA"
@@ -85,13 +90,13 @@ S24_kernel_bin_identifier()
       check_for_s08_csv_log "${S08_CSV_LOG}"
       lSTRIPPED_VERS=$(echo "${lK_VER}" | sed -r 's/Linux\ version\ ([1-6](\.[0-9]+)+?).*/:linux:linux_kernel:\1/' || true)
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a${lSTRIPPED_VERS}:*:*:*:*:*:*"
-      lOS_IDENTIFIED=$(distri_check)
       lK_VER="${lK_VER//[,;\/()\[\]\\#]}"
       lAPP_MAINT=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f2)
       lAPP_NAME=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f3)
       lAPP_VERS=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f4-5)
       # it could be that we have a version like 2.14b:* -> we remove the last field
       lAPP_VERS="${lAPP_VERS/:\*}"
+      lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
@@ -108,7 +113,8 @@ S24_kernel_bin_identifier()
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
             lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2)
             lK_ELF=${lK_ELF#\ }
-            lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lAPP_ELF:-NA}")
+            lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
+
 
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
@@ -123,7 +129,10 @@ S24_kernel_bin_identifier()
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              build_sbom_json_hashes_arr "${lFILE}.elf"
+              if ! build_sbom_json_hashes_arr "${lFILE}.elf" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+                print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+                continue
+              fi
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"

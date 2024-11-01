@@ -25,6 +25,8 @@ S08_package_mgmt_extractor()
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
+  # we limit the maximal file log
+  export SBOM_MAX_FILE_LOG=200
 
   # shellcheck disable=SC2153
   check_for_s08_csv_log "${S08_CSV_LOG}"
@@ -156,7 +158,7 @@ node_js_package_lock_parser() {
 
   mapfile -t lNODE_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "package*json" -type f)
 
-  if [[ -v lNODE_LCK_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} Node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
@@ -218,12 +220,12 @@ node_js_package_lock_parser() {
             local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
             lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
             HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           else
             print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
           fi
-
-          # create component entry - this allows adding entries very flexible:
-          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
         fi
 
         write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -283,10 +285,13 @@ deb_package_check() {
   local lSHA256_CHECKSUM=""
   local lSHA512_CHECKSUM=""
   local lPURL_IDENTIFIER="NA"
+  local lDEB_FILES_ARR=()
+  local lDEB_FILE_ID=""
+  local lDEB_FILE=""
 
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
-  if [[ -v lDEB_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}" ; do
@@ -360,11 +365,28 @@ deb_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        # add package files to properties
+        if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
+          mapfile -t lDEB_FILES_ARR < <(tar -tvf "${TMP_DIR}/deb_package/data.tar.xz" | awk '{print $6}')
+          for lDEB_FILE_ID in "${!lDEB_FILES_ARR[@]}"; do
+            lDEB_FILE="${lDEB_FILES_ARR["${lDEB_FILE_ID}"]}"
+            lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_FILE#\.}" )
+            # we limit the logging of the package files to 500 files per package
+            if [[ "${lDEB_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              break
+            fi
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lDEB_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lDEB_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -424,7 +446,7 @@ windows_exifparser() {
     mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.msi" \))
   fi
 
-  if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
@@ -524,7 +546,10 @@ windows_exifparser() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lEXE_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -578,7 +603,7 @@ python_poetry_lock_parser() {
 
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
 
-  if [[ -v lPY_LCK_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lPY_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPY_LCK_ARCHIVE in "${lPY_LCK_ARCHIVES_ARR[@]}" ; do
@@ -591,7 +616,7 @@ python_poetry_lock_parser() {
 
     for lPY_LCK_ARCHIVE in "${lPY_LCK_ARCHIVES_ARR[@]}" ; do
       lR_FILE=$(file "${lPY_LCK_ARCHIVE}")
-      if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
+      if [[ ! "${lR_FILE}" == *"text"* ]]; then
         continue
       fi
 
@@ -643,7 +668,10 @@ python_poetry_lock_parser() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}"
+          if ! build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -698,7 +726,7 @@ rust_cargo_lock_parser() {
 
   mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
 
-  if [[ -v lRST_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lRST_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lRST_ARCHIVE in "${lRST_ARCHIVES_ARR[@]}" ; do
@@ -826,10 +854,12 @@ alpine_apk_package_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lAPK_FILES_ARR=()
+  local lAPK_FILE=""
 
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
 
-  if [[ -v lAPK_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}" ; do
@@ -886,11 +916,28 @@ alpine_apk_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        mapfile -t lAPK_FILES_ARR < <(find "${TMP_DIR}"/apk)
+        # add package files to properties
+        if [[ "${#lAPK_FILES_ARR[@]}" -gt 0 ]]; then
+          for lAPK_FILE_ID in "${!lAPK_FILES_ARR[@]}"; do
+            lAPK_FILE="${lAPK_FILES_ARR["${lAPK_FILE_ID}"]}"
+            lPROP_ARRAY_INIT_ARR+=( "path:${lAPK_FILE#*apk}" )
+            # we limit the logging of the package files to 500 files per package
+            if [[ "${lAPK_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              break
+            fi
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lAPK_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lAPK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -940,10 +987,12 @@ ruby_gem_archive_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lGEM_FILES_ARR=()
+  local lGEM_FILE=""
 
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
 
-  if [[ -v lGEM_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lGEM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}" ; do
@@ -1010,11 +1059,28 @@ ruby_gem_archive_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lGEM_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        # add package files to properties
+        if [[ ! -f "${TMP_DIR}/gems/data.tar.xz" ]]; then
+          mapfile -t lGEM_FILES_ARR < <(tar -tvf "${TMP_DIR}/gems/data.tar.gz" | awk '{print $6}' || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed")
+          for lGEM_FILE_ID in "${!lGEM_FILES_ARR[@]}"; do
+            lGEM_FILE="${lGEM_FILES_ARR["${lGEM_FILE_ID}"]}"
+            lPROP_ARRAY_INIT_ARR+=( "path:${lGEM_FILE#\.}" )
+            # we limit the logging of the package files to 500 files per package
+            if [[ "${lGEM_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              break
+            fi
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lGEM_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lGEM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1067,10 +1133,12 @@ bsd_pkg_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lPKG_FILES_ARR=()
+  local lPKG_FILE=""
 
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
 
-  if [[ -v lPKG_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}" ; do
@@ -1130,12 +1198,31 @@ bsd_pkg_check() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+        mkdir "${TMP_DIR}"/pkg_tmp
+        tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}"/pkg_tmp || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
+        mapfile -t lPKG_FILES_ARR < <(find "${TMP_DIR}"/pkg_tmp)
+        # add package files to properties
+        if [[ "${#lPKG_FILES_ARR[@]}" -gt 0 ]]; then
+          for lPKG_FILE_ID in "${!lPKG_FILES_ARR[@]}"; do
+            lPKG_FILE="${lPKG_FILES_ARR["${lPKG_FILE_ID}"]}"
+            lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_FILE#*pkg_tmp}" )
+            # we limit the logging of the package files to 500 files per package
+            if [[ "${lPKG_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              break
+            fi
+          done
+        fi
+        [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR}"/pkg_tmp
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lPKG_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lPKG_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1185,10 +1272,12 @@ rpm_package_check() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lRPM_FILES_ARR=()
+  local lRPM_FILE=""
 
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
 
-  if [[ -v lRPM_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
@@ -1244,6 +1333,8 @@ rpm_package_check() {
 
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null)
+
       if command -v jo >/dev/null; then
         # add rpm path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
@@ -1251,11 +1342,27 @@ rpm_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
+        # add package files to properties
+        if [[ "${#lRPM_FILES_ARR[@]}" -gt 0 ]]; then
+          for lRPM_FILE_ID in "${!lRPM_FILES_ARR[@]}"; do
+            lRPM_FILE="${lRPM_FILES_ARR["${lRPM_FILE_ID}"]}"
+            lPROP_ARRAY_INIT_ARR+=( "path:${lRPM_FILE}" )
+            # we limit the logging of the package files to 500 files per package
+            if [[ "${lRPM_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              break
+            fi
+          done
+        fi
+
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lRPM_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lRPM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1308,7 +1415,7 @@ python_requirements() {
 
   mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
 
-  if [[ -v lPY_REQUIREMENTS_ARR[@] ]] ; then
+  if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}" ; do
@@ -1386,7 +1493,10 @@ python_requirements() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPY_REQ_FILE}"
+          if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1445,7 +1555,7 @@ python_pip_packages() {
   mapfile -t lPIP_PACKAGES_SITE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "site-packages" -type d)
   mapfile -t lPIP_PACKAGES_DIST_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "dist-packages" -type d)
 
-  if [[ -v lPIP_PACKAGES_DIST_ARR[@] ]] ; then
+  if [[ "${#lPIP_PACKAGES_DIST_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
@@ -1493,7 +1603,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1540,7 +1653,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1559,7 +1675,7 @@ python_pip_packages() {
     write_log "[-] No PIP dist package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   fi
 
-  if [[ -v lPIP_PACKAGES_SITE_ARR[@] ]] ; then
+  if [[ "${#lPIP_PACKAGES_SITE_ARR[@]}" -gt 0 ]] ; then
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_SITE_ARR[@]}${NC} PIP site-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -1607,7 +1723,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1654,7 +1773,10 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}"
+          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1712,7 +1834,7 @@ java_archives_check() {
   mapfile -t lJAVA_ARCHIVES_WAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.war" -type f)
   lJAVA_ARCHIVES_ARR=( "${lJAVA_ARCHIVES_JAR_ARR[@]}" "${lJAVA_ARCHIVES_WAR_ARR[@]}" )
 
-  if [[ -v lJAVA_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lJAVA_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lJAVA_ARCHIVE in "${lJAVA_ARCHIVES_ARR[@]}" ; do
@@ -1779,7 +1901,10 @@ java_archives_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}"
+        if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1830,10 +1955,12 @@ debian_status_files_analysis() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lAPP_DEPS=""
+  local lAPP_DEPS_ARR=()
 
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
-  if [[ -v lDEBIAN_MGMT_STATUS_ARR[@] ]] ; then
+  if [[ "${#lDEBIAN_MGMT_STATUS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
@@ -1844,8 +1971,9 @@ debian_status_files_analysis() {
     write_log "[*] Analyzing ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
-        mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
-          | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g')
+        mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: \|^Depends: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
+          | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g' \
+          | sed -z 's/\nDepends: / - Depends: /g')
         write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_log "[*] Found debian package details in ${ORANGE}${lPACKAGE_FILE}${NC}:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
@@ -1864,6 +1992,8 @@ debian_status_files_analysis() {
           lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
           lVERSION=${lPACKAGE_VERSION/*Version:\ /}
+          lVERSION=${lVERSION/ - Depends:\ */}
+          # if we have not dependencies:
           lVERSION=${lVERSION/ - Description:\ */}
           lVERSION=$(clean_package_details "${lVERSION}")
           lVERSION=$(clean_package_versions "${lVERSION}")
@@ -1872,6 +2002,14 @@ debian_status_files_analysis() {
           lAPP_ARCH=${lAPP_ARCH/ - Version:\ */}
           lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
           lAPP_ARCH=$(clean_package_versions "${lAPP_ARCH}")
+
+          if [[ "${lPACKAGE_VERSION}" == *"Depends:"* ]]; then
+            lAPP_DEPS=${lPACKAGE_VERSION/*Depends:\ /}
+            lAPP_DEPS=${lAPP_DEPS/ - Description:\ */}
+            # lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
+            lAPP_DEPS=$(clean_package_versions "${lAPP_DEPS}")
+            mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | tr ',' '\n' | sed 's/\.\ /\n/g' | sort -u)
+          fi
 
           lAPP_DESC=${lPACKAGE_VERSION/*Description:\ /}
           lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
@@ -1897,12 +2035,20 @@ debian_status_files_analysis() {
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+            if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+              for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+                lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+              done
+            fi
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+            if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lPACKAGE:-NA}" "${lVERSION:-NA}"; then
+              print_output "[*] Already found results for ${lPACKAGE} / ${lVERSION}" "no_log"
+              continue
+            fi
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -1947,6 +2093,8 @@ openwrt_control_files_analysis() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
+  local lAPP_DEPS_ARR=()
+  local lAPP_DEP=""
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
   local lOPENWRT_MGMT_CONTROL_ARR=()
@@ -1957,7 +2105,7 @@ openwrt_control_files_analysis() {
 
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
 
-  if [[ -v lOPENWRT_MGMT_CONTROL_ARR[@] ]] ; then
+  if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
@@ -1991,6 +2139,8 @@ openwrt_control_files_analysis() {
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
+        mapfile -t lAPP_DEPS_ARR < <(grep "^Depends: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' | tr ',' '\n' | sort -u || true)
+
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
@@ -2007,11 +2157,25 @@ openwrt_control_files_analysis() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+            for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+              lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+            done
+          fi
+
           # if we have the list file also we can add all the paths provided by the package
           if [[ -f "${lPACKAGE_FILE/\.control/\.list}" ]]; then
             local lPKG_LIST_ENTRY=""
+            local lCNT=0
             while IFS= read -r lPKG_LIST_ENTRY; do
+              lCNT=$((lCNT+1))
               lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+              # we limit the logging of the package files to 500 files per package
+              if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+                lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+                break
+              fi
             done < "${lPACKAGE_FILE/control/list}"
           fi
 
@@ -2019,7 +2183,10 @@ openwrt_control_files_analysis() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -2077,7 +2244,7 @@ rpm_package_mgmt_analysis() {
 
   mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 
-  if [[ -v lRPM_PACKAGE_DBS_ARR[@] ]] ; then
+  if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
@@ -2132,7 +2299,10 @@ rpm_package_mgmt_analysis() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${lPACKAGE_FILE}"
+          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"

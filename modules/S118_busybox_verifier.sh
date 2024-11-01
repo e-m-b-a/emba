@@ -96,7 +96,10 @@ S118_busybox_verifier()
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lBB_BIN}"
+        if ! build_sbom_json_hashes_arr "${lBB_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          continue
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"

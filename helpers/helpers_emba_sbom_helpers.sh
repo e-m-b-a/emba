@@ -41,6 +41,9 @@ build_sbom_json_properties_arr() {
     lPROPERTIES_ELEMENT_1=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f1)
     # lPROPERTIES_ELEMENT_2 -> the real value
     lPROPERTIES_ELEMENT_2=$(echo "${lPROPERTIES_ELEMENT}" | cut -d ':' -f2-)
+    if [[ -z "${lPROPERTIES_ELEMENT_2}" ]]; then
+      continue
+    fi
     # jo is looking for a file if our entry starts with : -> lets pseudo escape it for jo
     if [[ "${lPROPERTIES_ELEMENT_2:0:1}" == ":" ]]; then
       # shellcheck disable=SC1003
@@ -68,12 +71,18 @@ build_sbom_json_properties_arr() {
 # returns global array HASHES_ARR
 build_sbom_json_hashes_arr() {
   local lBINARY="${1:-}"
+  local lAPP_NAME="${2:-}"
+  local lAPP_VERS="${3:-}"
 
+  # HASHES_ARR is used in the caller
+  export HASHES_ARR=()
   local lMD5_CHECKSUM=""
   local lSHA256_CHECKSUM=""
   local lSHA512_CHECKSUM=""
-  # HASHES_ARR is used in the caller
-  export HASHES_ARR=()
+  local lDUP_CHECK_FILE_ARR=()
+  local lDUP_CHECK_FILE=""
+  local lDUP_CHECK_NAME=""
+  local lDUP_CHECK_VERS=""
 
   # hashes of the source file that is currently tested:
   lMD5_CHECKSUM="$(md5sum "${lBINARY}" | awk '{print $1}')"
@@ -92,6 +101,26 @@ build_sbom_json_hashes_arr() {
   lHASHES_ARRAY_INIT=("alg=SHA-512")
   lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
   HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+
+  # check if we already have results which are duplicates and does not need to be logged
+  # we check all SBOM results for the same file hash and afterwards for name and version
+  # if all are matching this is duplicate and we do not need to log it
+  # we return 1 if we already found something and the caller needs to handle it
+  if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" ]]; then
+    if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"; then
+      # if we have found some sbom log file with the matching sha512 checksum, we then check if
+      # it is the same name and version. If so, we will skip it in the caller
+      mapfile -t lDUP_CHECK_FILE_ARR < <(grep -lr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}" || true)
+      for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
+        lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
+        lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")
+        if [[ "${lDUP_CHECK_NAME}" == "${lAPP_NAME}" ]] && [[ "${lDUP_CHECK_VERS}" == "${lAPP_VERS}" ]]; then
+          return 1
+        fi
+      done
+    fi
+  fi
+  return 0
 
   # lhashes=$(jo -p -a "${HASHES_ARR[@]}")
 }
@@ -156,7 +185,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
-    mkdir "${SBOM_LOG_PATH}"
+    mkdir "${SBOM_LOG_PATH}" || true
   fi
 
   # if ! check_for_duplicates "${lAPP_NAME}"; then

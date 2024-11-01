@@ -261,6 +261,9 @@ analyze_kernel_module() {
 
   print_output "[*] Found ${ORANGE}${#KERNEL_MODULES[@]}${NC} potential kernel modules."
 
+  local lOS_IDENTIFIED=""
+  lOS_IDENTIFIED=$(distri_check)
+
   for lKMODULE in "${KERNEL_MODULES[@]}" ; do
     lFILE_KMOD=$(file "${lKMODULE}")
     if [[ "${lFILE_KMOD}" != *"ELF"* ]]; then
@@ -268,12 +271,12 @@ analyze_kernel_module() {
     fi
     # modinfos can run in parallel:
     if [[ "${THREADED}" -eq 1 ]]; then
-      module_analyzer "${lKMODULE}" &
+      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
       local TMP_PID="$!"
       store_kill_pids "${TMP_PID}"
       lWAIT_PIDS_S25_ARR+=( "${TMP_PID}" )
     else
-      module_analyzer "${lKMODULE}"
+      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}"
     fi
   done
 
@@ -287,6 +290,7 @@ analyze_kernel_module() {
 
 module_analyzer() {
   local lKMODULE="${1:-}"
+  local lOS_IDENTIFIED="${2:-}"
 
   if [[ "${lKMODULE}" == *".ko" ]]; then
     local lLICENSE=""
@@ -375,10 +379,12 @@ module_analyzer() {
 
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
-      build_sbom_json_hashes_arr "${lKMODULE}"
-
-      # create component entry - this allows adding entries very flexible:
-      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+      else
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+      fi
     fi
 
     write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
@@ -390,7 +396,6 @@ module_analyzer() {
       local lLICENSE="GPL-2.0-only"
 
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
-      lOS_IDENTIFIED=$(distri_check)
       lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
       ### new SBOM json testgenerator
@@ -405,11 +410,12 @@ module_analyzer() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        build_sbom_json_hashes_arr "${lKMODULE}"
-
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-
+        if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        else
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+        fi
       fi
 
       write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"

@@ -172,7 +172,10 @@ S09_firmware_base_version_check() {
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              build_sbom_json_hashes_arr "${BIN}"
+              if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+                print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+                continue
+              fi
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -236,7 +239,10 @@ S09_firmware_base_version_check() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          build_sbom_json_hashes_arr "${BIN}"
+          if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
 
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -282,7 +288,10 @@ S09_firmware_base_version_check() {
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            build_sbom_json_hashes_arr "${EXTRACTOR_LOG}"
+            if ! build_sbom_json_hashes_arr "${EXTRACTOR_LOG}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+              continue
+            fi
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -322,7 +331,7 @@ S09_firmware_base_version_check() {
           if command -v jo >/dev/null; then
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_path:${FIRMWARE_PATH}" )
             lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
@@ -331,7 +340,10 @@ S09_firmware_base_version_check() {
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            build_sbom_json_hashes_arr "${BIN}"
+            if ! build_sbom_json_hashes_arr "${FIRMWARE_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+              continue
+            fi
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -409,14 +421,14 @@ build_generic_purl() {
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
-  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED}/${lBIN_NAME}"
+  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED/-*}/${lBIN_NAME}"
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
 
   if [[ -n "${lBIN_VERS}" ]]; then
     lPURL_IDENTIFIER+="@${lBIN_VERS}"
   fi
   if [[ -n "${lAPP_ARCH}" ]]; then
-    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH}"
+    lPURL_IDENTIFIER+="?arch=${lAPP_ARCH//\ /-}"
   fi
   if [[ "${lOS_IDENTIFIED}" != "generic" ]]; then
     if [[ -n "${lAPP_ARCH}" ]]; then
@@ -570,7 +582,10 @@ bin_string_checker() {
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              build_sbom_json_hashes_arr "${BIN}"
+              if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+                print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+                continue
+              fi
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -615,7 +630,10 @@ bin_string_checker() {
 
               # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
               # final array with all hash values
-              build_sbom_json_hashes_arr "${BIN}"
+              if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+                print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+                continue
+              fi
 
               # create component entry - this allows adding entries very flexible:
               build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
@@ -667,7 +685,10 @@ bin_string_checker() {
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            build_sbom_json_hashes_arr "${BIN}"
+            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+              continue
+            fi
 
             # create component entry - this allows adding entries very flexible:
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
