@@ -600,6 +600,9 @@ python_poetry_lock_parser() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
+  local lAPP_FILES_ARR=()
+  local lPOETRY_FILE_ENTRY=""
+
 
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
 
@@ -624,7 +627,20 @@ python_poetry_lock_parser() {
       lMD5_CHECKSUM="$(md5sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
 
-      sed ':a;N;$!ba;s/\"\n/\"|/g' "${lPY_LCK_ARCHIVE}" | grep name > "${TMP_DIR}/poetry.lock.tmp" || true
+      # source file:
+      # [[package]]
+      # name = "wheel"
+      # version = "0.43.0"
+      # description = "A built-package format for Python"
+      # optional = false
+      # python-versions = ">=3.8"
+      # files = [
+      #     {file = "wheel-0.43.0-py3-none-any.whl", hash = "sha256:55c570405f142630c6b9f72fe09d9b67cf1477fcf543ae5b8dcb1f5b7377da81"},
+      #     {file = "wheel-0.43.0.tar.gz", hash = "sha256:465ef92c69fa5c5da2d1cf8ac40559a8c940886afcef87dcf14b9470862f1d85"},
+      # ]
+      sed ':a;N;$!ba;s/\"\n/\"|/g' "${lPY_LCK_ARCHIVE}" | sed 's/.*files = //g' | sed ':a;N;$!ba;s/,\n/ -/g' | sed ':a;N;$!ba;s/\n\[\n/|/g' | grep "^name" > "${TMP_DIR}/poetry.lock.tmp" || true
+      # results in
+      # name = "zipp"|version = "3.17.0"|description = "Backport of pathlib-compatible object wrapper for zip files"|optional = false|    {file = "zipp-3.17.0-py3-none-any.whl", hash = "sha256:0e923e726174922dce09c53c59ad483ff7bbb8e572e00c7f7c46b88556409f31"} -    {file = "zipp-3.17.0.tar.gz", hash = "sha256:84e64a1c28cf7e91ed2078bb8cc8c259cb19b76942096c8d7b84947690cabaf0"} -]
 
       while read -r lPOETRY_ENTRY; do
         lAPP_NAME=${lPOETRY_ENTRY/|*}
@@ -646,6 +662,8 @@ python_poetry_lock_parser() {
         # lSHA512_CHECKSUM=${lSHA512_CHECKSUM/checksum\ =\ }
         # lSHA512_CHECKSUM=$(clean_package_versions "${lSHA512_CHECKSUM}")
 
+        mapfile -t lAPP_FILES_ARR < <(echo "${lPOETRY_ENTRY}" | cut -d\| -f5 | sed 's/ - /\n/g')
+
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
@@ -663,6 +681,17 @@ python_poetry_lock_parser() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_LCK_ARCHIVE}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+          local lCNT=0
+          for lPOETRY_FILE_ENTRY in "${lAPP_FILES_ARR}"; do
+            lPOETRY_FILE_ENTRY=$(echo "${lPOETRY_FILE_ENTRY}" | cut -d '"' -f2)
+            lPROP_ARRAY_INIT_ARR+=( "path:${lPOETRY_FILE_ENTRY}" )
+            # we limit the logging of the package files to 500 files per package
+            if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              break
+            fi
+          done
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
