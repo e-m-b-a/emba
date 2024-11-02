@@ -683,7 +683,7 @@ python_poetry_lock_parser() {
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
 
           local lCNT=0
-          for lPOETRY_FILE_ENTRY in "${lAPP_FILES_ARR}"; do
+          for lPOETRY_FILE_ENTRY in "${lAPP_FILES_ARR[@]}"; do
             lPOETRY_FILE_ENTRY=$(echo "${lPOETRY_FILE_ENTRY}" | cut -d '"' -f2)
             lPROP_ARRAY_INIT_ARR+=( "path:${lPOETRY_FILE_ENTRY}" )
             # we limit the logging of the package files to 500 files per package
