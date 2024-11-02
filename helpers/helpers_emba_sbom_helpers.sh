@@ -57,10 +57,10 @@ build_sbom_json_properties_arr() {
     [[ "${lPROPERTIES_ELEMENT_1}" == "source_path" ]] && lINIT_ELEMENT="EMBA:sbom:source_location"
 
     local lPROPERTIES_ARRAY_TMP=()
-    lPROPERTIES_ARRAY_TMP+=("name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
+    lPROPERTIES_ARRAY_TMP+=("-s" "name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
     [[ "${lPROPERTIES_ELEMENT_2}" == "NA" ]] && continue
-    lPROPERTIES_ARRAY_TMP+=("value=${lPROPERTIES_ELEMENT_2}")
-    PROPERTIES_JSON_ARR+=( "$(jo -n "${lPROPERTIES_ARRAY_TMP[@]}")")
+    lPROPERTIES_ARRAY_TMP+=("-s" "value=${lPROPERTIES_ELEMENT_2}")
+    PROPERTIES_JSON_ARR+=( "$(jo -n -- "${lPROPERTIES_ARRAY_TMP[@]}")")
   done
   # lPROPERTIES_PATH_JSON=$(jo -p -a "${lPROPERTIES_PATH_ARR_TMP[@]}")
 }
