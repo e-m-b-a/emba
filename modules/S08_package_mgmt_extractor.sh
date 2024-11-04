@@ -1607,6 +1607,21 @@ python_pip_packages() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
+        # Todo: from METADATA we also get "^Requires-Dist: "
+
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
@@ -1656,6 +1671,19 @@ python_pip_packages() {
         lAPP_VERS=${lAPP_VERS/*:\ }
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
@@ -1727,6 +1755,19 @@ python_pip_packages() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
@@ -1776,6 +1817,19 @@ python_pip_packages() {
         lAPP_VERS=${lAPP_VERS/*:\ }
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"

@@ -33,7 +33,7 @@ S107_deep_password_search()
     print_output "[+] Found the following password hash values:"
     write_csv_log "PW_PATH" "PW_HASH"
     while read -r PW_HASH; do
-      PW_PATH=$(echo "${PW_HASH}" | cut -d: -f1)
+      PW_PATH="${PW_HASH/:*}"
       mapfile -t PW_HASHES < <(strings "${PW_PATH}" | grep --color -a -E -f "${PW_HASH_CONFIG}")
       for PW_HASH in "${PW_HASHES[@]}"; do
         print_output "[+] PATH: ${ORANGE}$(print_path "${PW_PATH}")${GREEN}\t-\tHash: ${ORANGE}${PW_HASH}${GREEN}."

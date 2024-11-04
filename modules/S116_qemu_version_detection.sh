@@ -178,7 +178,7 @@ version_detection_thread() {
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
-      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
+      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
       lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
