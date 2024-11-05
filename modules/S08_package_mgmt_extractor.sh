@@ -128,9 +128,68 @@ S08_package_mgmt_extractor()
     node_js_package_lock_parser "${lOS_IDENTIFIED}"
   fi
 
+  build_dependency_tree
+
   # shellcheck disable=SC2153
   [[ -s "${S08_CSV_LOG}" ]] && NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+}
+
+build_dependency_tree() {
+  sub_module_title "SBOM dependency tree build" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+
+  local lSBOM_COMPONENT_FILES_ARR=()
+  local lSBOM_COMP=""
+  local lSBOM_COMP_DEPS_ARR=()
+  local lSBOM_COMP_NAME=""
+  local lSBOM_COMP_REF=""
+  local lSBOM_COMP_VERS=""
+  local lSBOM_COMP_SOURCE=""
+  local lSBOM_COMP_DEPS_ARR=()
+  local lSBOM_COMP_DEP=""
+  local lSBOM_DEP_SOURCE_FILES_ARR=()
+  local lSBOM_COMP_SOURCE_FILE=""
+  local lSBOM_COMP_SOURCE_REF=""
+
+  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f)
+  for lSBOM_COMP in "${lSBOM_COMPONENT_FILES_ARR[@]}"; do
+    print_output "[*] Source file: ${lSBOM_COMP}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+    lSBOM_COMP_DEPS_ARR=()
+
+    lSBOM_COMP_NAME=$(jq -r .name "${lSBOM_COMP}" || true)
+    lSBOM_COMP_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP}" || true)
+    lSBOM_COMP_VERS=$(jq -r .version "${lSBOM_COMP}" || true)
+    lSBOM_COMP_SOURCE=$(jq -r .group "${lSBOM_COMP}" || true)
+    print_output "[*] Component: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_VERS} / ${lSBOM_COMP_SOURCE} / ${lSBOM_COMP_REF}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+
+    # lets search for dependencies in every SBOM component file we have and store it in lSBOM_COMP_DEPS_ARR
+    mapfile -t lSBOM_COMP_DEPS_ARR < <(jq -rc '.properties[] | select(.name | endswith(":dependency")).value' "${lSBOM_COMP}" || true)
+
+    # now we check every dependency for the current component
+    for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_ARR[@]}"; do
+      lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
+
+      # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
+      mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
+
+      # if we have the dependency in our components we can log it via the UUID
+      # if we do not have the dependency installed and available via a UUID we log an indicator that this component is not available
+      if [[ "${#lSBOM_DEP_SOURCE_FILES_ARR[@]}" -gt 0 ]]; then
+        for lSBOM_COMP_SOURCE_FILE in "${lSBOM_DEP_SOURCE_FILES_ARR[@]}"; do
+          # get the  bom-ref from the dependency
+          lSBOM_COMP_SOURCE_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP_SOURCE_FILE}" || true)
+          print_output "[*] Component dependency found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / ${lSBOM_COMP_SOURCE_REF:-NA}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+          lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
+        done
+      else
+        print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No reference available" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+        lSBOM_COMP_DEPS_ARR+=("-s" "NO_VALID_REF-${lSBOM_COMP_DEP}")
+      fi
+    done
+    print_output "" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+
+    jo -p ref="${lSBOM_COMP_REF}" dependsOn=$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}") | tee -a "${SBOM_LOG_PATH}/SBOM_dependency_${lSBOM_COMP_REF}".json
+  done
 }
 
 node_js_package_lock_parser() {
@@ -2376,8 +2435,8 @@ rpm_package_mgmt_analysis() {
         lAPP_ARCH="${lAPP_ARCH/*:\ }"
         lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
 
-        mapfile -t lAPP_DEPS_ARR < <(rpm -qR --dbpath "${lRPM_DIR}" || true)
-        mapfile -t lAPP_FILES_ARR < <(rpm -ql --dbpath "${lRPM_DIR}" || true)
+        mapfile -t lAPP_DEPS_ARR < <(rpm -qR --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
+        mapfile -t lAPP_FILES_ARR < <(rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
 
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
@@ -2386,7 +2445,7 @@ rpm_package_mgmt_analysis() {
           lOS_IDENTIFIED="rpm-based"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "rpm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
