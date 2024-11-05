@@ -1362,7 +1362,7 @@ rpm_package_check() {
 
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null)
+      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null || true)
 
       if command -v jo >/dev/null; then
         # add rpm path information to our properties array:
@@ -2324,8 +2324,17 @@ rpm_package_mgmt_analysis() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
+  local lAPP_DEPS_ARR=()
+  local lAPP_DEP=""
+  local lAPP_FILE=""
+  local lAPP_FILE_ID=""
+  local lAPP_FILES_ARR=()
 
-  mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+  # this handles the Berkley database
+  mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+  # this handles the sqlite database
+  mapfile -t lRPM_PACKAGE_DBS_SQLITE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/rpmdb.sqlite" -type f)
+  lRPM_PACKAGE_DBS_ARR=( "${lRPM_PACKAGE_DBS_BRK_ARR[@]}" "${lRPM_PACKAGE_DBS_SQLITE_ARR[@]}" )
 
   if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -2355,12 +2364,20 @@ rpm_package_mgmt_analysis() {
         lAPP_NAME="${lAPP_NAME/*:\ }"
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        # just for output the details
-        rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true
-
         if [[ -z "${lAPP_NAME}" ]]; then
           continue
         fi
+
+        lAPP_LIC=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^License" || true)
+        lAPP_LIC="${lAPP_LIC/*:\ }"
+        lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+
+        lAPP_ARCH=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Architecture" || true)
+        lAPP_ARCH="${lAPP_ARCH/*:\ }"
+        lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+
+        mapfile -t lAPP_DEPS_ARR < <(rpm -qR --dbpath "${lRPM_DIR}" || true)
+        mapfile -t lAPP_FILES_ARR < <(rpm -ql --dbpath "${lRPM_DIR}" || true)
 
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
@@ -2377,6 +2394,26 @@ rpm_package_mgmt_analysis() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+
+          if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+            for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+              lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+            done
+          fi
+
+          # add package files to properties
+          if [[ "${#lAPP_FILES_ARR[@]}" -gt 0  ]]; then
+            for lAPP_FILE_ID in "${!lAPP_FILES_ARR[@]}"; do
+              lAPP_FILE="${lAPP_FILES_ARR["${lAPP_FILE_ID}"]}"
+              lPROP_ARRAY_INIT_ARR+=( "path:${lAPP_FILE#\.}" )
+              # we limit the logging of the package files to 500 files per package
+              if [[ "${lAPP_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+                lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+                break
+              fi
+            done
+          fi
+
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
