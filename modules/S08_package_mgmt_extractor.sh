@@ -251,6 +251,10 @@ node_js_package_lock_parser() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lNODE_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "package*json" -type f)
 
   if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -268,8 +272,8 @@ node_js_package_lock_parser() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lNODE_LCK_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -392,6 +396,10 @@ deb_package_check() {
   local lDEB_FILE_ID=""
   local lDEB_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
   if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -414,8 +422,8 @@ deb_package_check() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -549,6 +557,10 @@ windows_exifparser() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
     # if we already know that we have a windows binary to analyze we can check every file with the file command
     # to ensure we do not miss anything
@@ -578,8 +590,8 @@ windows_exifparser() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -724,6 +736,9 @@ python_poetry_lock_parser() {
   local lAPP_FILES_ARR=()
   local lPOETRY_FILE_ENTRY=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
 
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
 
@@ -747,8 +762,8 @@ python_poetry_lock_parser() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -882,6 +897,10 @@ rust_cargo_lock_parser() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
 
   if [[ "${#lRST_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -903,8 +922,8 @@ rust_cargo_lock_parser() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lRST_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lRST_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lRST_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
       # we start with the following file structure:
@@ -1022,6 +1041,10 @@ alpine_apk_package_check() {
   local lAPK_FILES_ARR=()
   local lAPK_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
 
   if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -1044,8 +1067,8 @@ alpine_apk_package_check() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lAPK_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lAPK_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -1163,6 +1186,10 @@ ruby_gem_archive_check() {
   local lGEM_FILES_ARR=()
   local lGEM_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
 
   if [[ "${#lGEM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -1185,8 +1212,8 @@ ruby_gem_archive_check() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lGEM_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lGEM_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -1317,6 +1344,10 @@ bsd_pkg_check() {
   local lPKG_FILES_ARR=()
   local lPKG_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
 
   if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -1339,8 +1370,8 @@ bsd_pkg_check() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lPKG_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lPKG_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -1464,6 +1495,10 @@ rpm_package_check() {
   local lRPM_FILES_ARR=()
   local lRPM_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
 
   if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -1486,8 +1521,8 @@ rpm_package_check() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lRPM_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lRPM_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -1610,6 +1645,10 @@ python_requirements() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
 
   if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]] ; then
@@ -1632,8 +1671,8 @@ python_requirements() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPY_REQ_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lPY_REQ_FILE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lPY_REQ_FILE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -2089,6 +2128,10 @@ java_archives_check() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lJAVA_ARCHIVES_JAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.jar" -type f)
   mapfile -t lJAVA_ARCHIVES_WAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.war" -type f)
   lJAVA_ARCHIVES_ARR=( "${lJAVA_ARCHIVES_JAR_ARR[@]}" "${lJAVA_ARCHIVES_WAR_ARR[@]}" )
@@ -2113,8 +2156,8 @@ java_archives_check() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lJAVA_ARCHIVE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lJAVA_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -2245,8 +2288,8 @@ debian_status_files_analysis() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -2383,6 +2426,10 @@ openwrt_control_files_analysis() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
 
   if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]] ; then
@@ -2400,8 +2447,8 @@ openwrt_control_files_analysis() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
@@ -2535,6 +2582,10 @@ rpm_package_mgmt_analysis() {
   local lAPP_FILE_ID=""
   local lAPP_FILES_ARR=()
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   # this handles the Berkley database
   mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
   # this handles the sqlite database
@@ -2555,8 +2606,8 @@ rpm_package_mgmt_analysis() {
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-          print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
-          continue
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
