@@ -136,10 +136,37 @@ S08_package_mgmt_extractor()
 }
 
 build_dependency_tree() {
-  sub_module_title "SBOM dependency tree build" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+  sub_module_title "SBOM dependency tree build" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
 
   local lSBOM_COMPONENT_FILES_ARR=()
   local lSBOM_COMP=""
+
+  local lWAIT_PIDS_S08_ARR=()
+
+  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f)
+
+  for lSBOM_COMP in "${lSBOM_COMPONENT_FILES_ARR[@]}"; do
+    [[ ! -f "${lSBOM_COMP}" ]] && continue
+    # to speed up the dep tree we are working threaded for every componentfile and write into dedicated json files
+    # "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json which we can put together in f15
+    create_comp_dep_tree_threader "${lSBOM_COMP}" &
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR[@]}"
+  done
+  wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
+
+  if [[ -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
+    print_output "[+] SBOM dependency results" "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  else
+    print_output "[*] No SBOM dependency results available"
+  fi
+}
+
+create_comp_dep_tree_threader() {
+  # lSBOM_COMP -> current sbom json file under analysis
+  local lSBOM_COMP="${1:-}"
+
   local lSBOM_COMP_DEPS_ARR=()
   local lSBOM_COMP_DEPS_FILES_ARR=()
   local lSBOM_COMP_NAME=""
@@ -151,48 +178,55 @@ build_dependency_tree() {
   local lSBOM_COMP_SOURCE_FILE=""
   local lSBOM_COMP_SOURCE_REF=""
 
-  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f)
-  for lSBOM_COMP in "${lSBOM_COMPONENT_FILES_ARR[@]}"; do
-    print_output "[*] Source file: ${lSBOM_COMP}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
-    lSBOM_COMP_DEPS_ARR=()
+  # extract needed metadata (VERS not really needed but nice to show)
+  lSBOM_COMP_NAME=$(jq -r .name "${lSBOM_COMP}" || true)
+  lSBOM_COMP_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP}" || true)
+  lSBOM_COMP_VERS=$(jq -r .version "${lSBOM_COMP}" || true)
+  # Source is only used to ensure we check only matching sources (eg. check debian packages against debian sources)
+  lSBOM_COMP_SOURCE=$(jq -r .group "${lSBOM_COMP}" || true)
 
-    lSBOM_COMP_NAME=$(jq -r .name "${lSBOM_COMP}" || true)
-    lSBOM_COMP_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP}" || true)
-    lSBOM_COMP_VERS=$(jq -r .version "${lSBOM_COMP}" || true)
-    lSBOM_COMP_SOURCE=$(jq -r .group "${lSBOM_COMP}" || true)
-    print_output "[*] Component: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_VERS} / ${lSBOM_COMP_SOURCE} / ${lSBOM_COMP_REF}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+  print_output "[*] Source file: ${lSBOM_COMP}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+  print_output "[*] Component: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_VERS} / ${lSBOM_COMP_SOURCE} / ${lSBOM_COMP_REF}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
 
-    # lets search for dependencies in every SBOM component file we have and store it in lSBOM_COMP_DEPS_ARR
-    mapfile -t lSBOM_COMP_DEPS_FILES_ARR < <(jq -rc '.properties[] | select(.name | endswith(":dependency")).value' "${lSBOM_COMP}" || true)
+  # lets search for dependencies in every SBOM component file we have and store it in lSBOM_COMP_DEPS_ARR
+  mapfile -t lSBOM_COMP_DEPS_FILES_ARR < <(jq -rc '.properties[] | select(.name | endswith(":dependency")).value' "${lSBOM_COMP}" || true)
+  if [[ "${#lSBOM_COMP_DEPS_FILES_ARR[@]}" -eq 0 ]]; then
+    return
+  fi
 
-    # now we check every dependency for the current component
-    for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
-      # lets extract the name of the dependency
-      lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
-      lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
+  [[ ! -d "${SBOM_LOG_PATH}/SBOM_deps" ]] && mkdir "${SBOM_LOG_PATH}/SBOM_deps"
 
-      # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
-      mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
+  # now we check every dependency for the current component
+  for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
+    # lets extract the name of the dependency
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
 
-      # if we have the dependency in our components we can log it via the UUID
-      # if we do not have the dependency installed and available via a UUID we log an indicator that this component is not available
-      if [[ "${#lSBOM_DEP_SOURCE_FILES_ARR[@]}" -gt 0 ]]; then
-        for lSBOM_COMP_SOURCE_FILE in "${lSBOM_DEP_SOURCE_FILES_ARR[@]}"; do
-          # get the  bom-ref from the dependency
-          lSBOM_COMP_SOURCE_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP_SOURCE_FILE}" || true)
-          print_output "[*] Component dependency found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / ${lSBOM_COMP_SOURCE_REF:-NA}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
-          lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
-        done
-      else
-        print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No reference available" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
-        lSBOM_COMP_DEPS_ARR+=("-s" "NO_VALID_REF-${lSBOM_COMP_DEP}")
-      fi
-    done
-    print_output "" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
+    # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
+    mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
 
-    jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" | tee -a "${SBOM_LOG_PATH}/SBOM_dependency_${lSBOM_COMP_REF}".json
+    # if we have the dependency in our components we can log it via the UUID
+    # if we do not have the dependency installed and available via a UUID we log an indicator that this component is not available
+    if [[ "${#lSBOM_DEP_SOURCE_FILES_ARR[@]}" -gt 0 ]]; then
+      for lSBOM_COMP_SOURCE_FILE in "${lSBOM_DEP_SOURCE_FILES_ARR[@]}"; do
+        # get the  bom-ref from the dependency
+        lSBOM_COMP_SOURCE_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP_SOURCE_FILE}" || true)
+        print_output "[*] Component dependency found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / ${lSBOM_COMP_SOURCE_REF:-NA}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+        lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
+      done
+    else
+      print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No reference available" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+      lSBOM_COMP_DEPS_ARR+=("-s" "NO_VALID_REF-${lSBOM_COMP_DEP}")
+    fi
   done
+  print_output "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+
+  cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >> "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  rm "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
+
+  jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" | tee -a "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
 }
+
 
 node_js_package_lock_parser() {
   local lOS_IDENTIFIED="${1:-}"
@@ -231,6 +265,14 @@ node_js_package_lock_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lNODE_LCK_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lR_FILE=$(file "${lNODE_LCK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"JSON text"* ]]; then
         continue
@@ -368,6 +410,15 @@ deb_package_check() {
       if [[ ! "${lR_FILE}" == *"Debian binary package"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       mkdir "${TMP_DIR}/deb_package/"
       ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/"
 
@@ -523,6 +574,15 @@ windows_exifparser() {
       if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ ! "${lR_FILE}" == *"PE32+ executable"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lEXE_NAME=$(basename -s .exe "${lEXE_ARCHIVE}")
       lEXIF_LOG="${LOG_PATH_MODULE}/windows_exe_exif_data_${lEXE_NAME}.txt"
 
@@ -684,6 +744,14 @@ python_poetry_lock_parser() {
         continue
       fi
 
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lSHA512_CHECKSUM="$(sha512sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
       lMD5_CHECKSUM="$(md5sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
@@ -832,6 +900,13 @@ rust_cargo_lock_parser() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lRST_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lRST_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
       # we start with the following file structure:
       # [[package]]
       # name = "windows-sys"
@@ -966,6 +1041,14 @@ alpine_apk_package_check() {
         continue
       fi
 
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lAPK_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       mkdir "${TMP_DIR}"/apk
       tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
 
@@ -1098,6 +1181,14 @@ ruby_gem_archive_check() {
       if [[ ! "${lR_FILE}" == *"POSIX tar archive"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lGEM_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       mkdir "${TMP_DIR}"/gems
       tar -x -f "${lGEM_ARCHIVE}" -C "${TMP_DIR}"/gems || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed"
@@ -1245,6 +1336,14 @@ bsd_pkg_check() {
         continue
       fi
 
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lPKG_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}" +COMPACT_MANIFEST || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
       if ! [[ -f "${TMP_DIR}"/+COMPACT_MANIFEST ]]; then
         continue
@@ -1384,6 +1483,14 @@ rpm_package_check() {
         continue
       fi
 
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lRPM_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
@@ -1521,6 +1628,14 @@ python_requirements() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPY_REQ_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lPY_REQ_FILE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       # read entry line by line
       while read -r lRES_ENTRY; do
@@ -1995,6 +2110,14 @@ java_archives_check() {
         continue
       fi
 
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lJAVA_ARCHIVE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
@@ -2102,6 +2225,10 @@ debian_status_files_analysis() {
   local lAPP_DEPS=""
   local lAPP_DEPS_ARR=()
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
   if [[ "${#lDEBIAN_MGMT_STATUS_ARR[@]}" -gt 0 ]] ; then
@@ -2114,6 +2241,15 @@ debian_status_files_analysis() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: \|^Depends: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
           | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g' \
@@ -2261,6 +2397,14 @@ openwrt_control_files_analysis() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
@@ -2408,6 +2552,14 @@ rpm_package_mgmt_analysis() {
     write_log "[*] Analyzing ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+          print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+          continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"

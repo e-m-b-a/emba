@@ -45,6 +45,9 @@ F15_cyclonedx_sbom() {
     local lCOMP_FILES_ARR=()
     local lCOMP_FILE_ID=""
     local lCOMP_FILE=""
+    local lDEP_FILE=""
+    local lDEP_FILE_ID=""
+    local lDEP_FILES_ARR=()
 
     if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
       lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log)
@@ -93,7 +96,7 @@ F15_cyclonedx_sbom() {
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
-    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*.json" | sort -u)
+    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" | sort -u)
 
     # as we could have so many components that everything goes b00m we need to build the
     # components json now manually:
@@ -108,8 +111,31 @@ F15_cyclonedx_sbom() {
     echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
     tr -d '\n' < "${SBOM_LOG_PATH}/sbom_components_tmp.json" > "${lSBOM_LOG_FILE}_components.json"
 
+    if [[ -d "${SBOM_LOG_PATH}/SBOM_deps/" ]]; then
+      # build the dependency array for final sbom build:
+      mapfile -t lDEP_FILES_ARR < <(find "${SBOM_LOG_PATH}/SBOM_deps/" -type f -name "SBOM_dependency_*.json" | sort -u)
+    fi
+
+    if [[ "${#lDEP_FILES_ARR[@]}" -gt 0 ]]; then
+      # as we could have so many components that everything goes b00m we need to build the
+      # components json now manually:
+      echo -n "[" > "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+      for lDEP_FILE_ID in "${!lDEP_FILES_ARR[@]}"; do
+        lDEP_FILE="${lDEP_FILES_ARR["${lDEP_FILE_ID}"]}"
+        cat "${lDEP_FILE}" >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+        if [[ $((lDEP_FILE_ID+1)) -lt "${#lDEP_FILES_ARR[@]}" ]]; then
+          echo -n "," >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+        fi
+      done
+      echo -n "]" >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+      tr -d '\n' < "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json" > "${lSBOM_LOG_FILE}_dependencies.json"
+    else
+      echo -n "[" > "${lSBOM_LOG_FILE}_dependencies.json"
+      echo -n "]" >> "${lSBOM_LOG_FILE}_dependencies.json"
+    fi
+
     # final sbom build:
-    jo -p -- \
+    jo -p -n -- \
       \$schema="${lSBOM_SCHEMA}" \
       bomFormat="${lSBOM_FORMAT}" \
       -s specVersion="${lSBOM_SPEC_VERS}" \
@@ -122,6 +148,7 @@ F15_cyclonedx_sbom() {
         component="$(jo -n \
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
+      dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
       > "${lSBOM_LOG_FILE}.json"
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(

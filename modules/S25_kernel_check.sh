@@ -421,7 +421,7 @@ module_analyzer() {
       write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
 
-  elif [[ "${lKMODULE}" == *".o" ]]; then
+  elif [[ "${lKMODULE}" == *".o" ]] && [[ "${SBOM_MINIMAL}" -ne 1 ]]; then
     print_output "[-] No support for .o kernel modules - ${ORANGE}${lKMODULE}${NC}" "no_log"
   fi
 }
