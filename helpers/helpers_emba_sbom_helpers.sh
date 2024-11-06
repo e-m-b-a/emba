@@ -142,6 +142,8 @@ build_sbom_json_component_arr() {
   export SBOM_COMP_BOM_REF=""
   SBOM_COMP_BOM_REF="$(uuidgen)"
 
+  local lAPP_LIC_ARR=()
+
   if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
     lAPP_MAINT=""
   fi
@@ -150,8 +152,10 @@ build_sbom_json_component_arr() {
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
   fi
-  if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" ]]; then
-    lAPP_LIC=""
+  if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" || "${lAPP_LIC}" == "null" ]]; then
+    lAPP_LIC_ARR=()
+  else
+    lAPP_LIC_ARR+=( "name=${lAPP_LIC}" )
   fi
   if [[ -n "${lCPE_IDENTIFIER}" ]] && [[ "${lCPE_IDENTIFIER}" == "NA" ]]; then
     lCPE_IDENTIFIER=""
@@ -176,8 +180,11 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
-  if [[ -n "${lAPP_LIC}" ]]; then
-    lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
+  if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
+    local lTMP_IDENTIFIER="${RANDOM}"
+    jo -p license=$(jo -n "${lAPP_LIC_ARR[@]}") > "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
+    lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
+    rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
   fi
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )

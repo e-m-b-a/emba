@@ -34,7 +34,7 @@ P02_firmware_bin_file_check() {
     export FIRMWARE_PATH="${LOG_DIR}"/firmware/
   fi
 
-  if [[ -f "${FIRMWARE_PATH}" ]]; then
+  if [[ -f "${FIRMWARE_PATH}" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     get_fw_file_details "${FIRMWARE_PATH}"
     generate_entropy_graph "${FIRMWARE_PATH}"
   fi
@@ -46,8 +46,10 @@ P02_firmware_bin_file_check() {
   print_output "[*] Details of the firmware file:"
   print_output "$(indent "${lFILE_LS_OUT}")"
   if [[ -f "${FIRMWARE_PATH}" ]]; then
-    print_fw_file_details "${FIRMWARE_PATH}"
-    generate_pixde "${FIRMWARE_PATH}"
+    if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
+      print_fw_file_details "${FIRMWARE_PATH}"
+      generate_pixde "${FIRMWARE_PATH}"
+    fi
     fw_bin_detector "${FIRMWARE_PATH}"
     backup_p02_vars
   fi

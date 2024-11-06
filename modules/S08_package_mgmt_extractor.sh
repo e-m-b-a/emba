@@ -136,6 +136,10 @@ S08_package_mgmt_extractor()
 }
 
 build_dependency_tree() {
+  if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
+    return
+  fi
+
   sub_module_title "SBOM dependency tree build" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
 
   local lSBOM_COMPONENT_FILES_ARR=()
@@ -332,7 +336,7 @@ node_js_package_lock_parser() {
             lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
             HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
           else
-            print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
+            print_output "[-] ${lPACKAGING_SYSTEM} - No valid hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
           fi
           # create component entry - this allows adding entries very flexible:
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
