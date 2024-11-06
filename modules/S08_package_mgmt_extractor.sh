@@ -177,6 +177,7 @@ create_comp_dep_tree_threader() {
   local lSBOM_DEP_SOURCE_FILES_ARR=()
   local lSBOM_COMP_SOURCE_FILE=""
   local lSBOM_COMP_SOURCE_REF=""
+  local lSBOM_INVALID_COM_REF=""
 
   # extract needed metadata (VERS not really needed but nice to show)
   lSBOM_COMP_NAME=$(jq -r .name "${lSBOM_COMP}" || true)
@@ -215,8 +216,10 @@ create_comp_dep_tree_threader() {
         lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
       done
     else
-      print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No reference available" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
-      lSBOM_COMP_DEPS_ARR+=("-s" "NO_VALID_REF-${lSBOM_COMP_DEP}")
+      print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No valid reference available" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+      # this is only used to have a unique identifier
+      lSBOM_INVALID_COM_REF="$(uuidgen)"
+      lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_INVALID_COM_REF}-NO_VALID_REF-${lSBOM_COMP_DEP}")
     fi
   done
   print_output "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
@@ -318,21 +321,21 @@ node_js_package_lock_parser() {
 
           # usuall build_json_hashes_arr sets HASHES_ARR globally and we unset it afterwards
           # as we have the hashes from the lock file we do it here
+          # WARNING: the hashes from the lock file are base64 encoded and do not work
           export HASHES_ARR=()
           local lHASH_ALG="NA"
-          [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
-          [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
-          [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lHASH_ALG="SHA-512"
+          # [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
+          # [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
+          # [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lHASH_ALG="SHA-512"
           if ! [[ "${lHASH_ALG}" == "NA" ]]; then
             local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
             lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
             HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
-
-            # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           else
             print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
           fi
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
         fi
 
         write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

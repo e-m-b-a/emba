@@ -83,10 +83,10 @@ F15_cyclonedx_sbom() {
 
     # Firmeware details for the SBOM
     local lFW_COMPONENT_DATA_ARR=()
+    lFW_COMPONENT_DATA_ARR+=( name="${lFW_PATH}" )
     lFW_COMPONENT_DATA_ARR+=( type="${lFW_TYPE}" )
     lFW_COMPONENT_DATA_ARR+=( bom-ref="$(uuidgen)" )
     [[ -n "${FW_VENDOR}" ]] && lFW_COMPONENT_DATA_ARR+=( "supplier=$(jo -n name="${FW_VENDOR}")" )
-    lFW_COMPONENT_DATA_ARR+=( path="${lFW_PATH}" )
 
     # generate hashes for the firmware itself:
     if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then

@@ -26,7 +26,7 @@ P61_binwalk_extractor() {
 
   # if we have a verified UEFI firmware we do not need to do anything here
   # if we have already found a linux (RTOS==0) we do not need to do anything here
-  if [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${RTOS}" -eq 0 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+  if [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${RTOS}" -eq 0 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${WINDOWS_EXE}" -eq 1 ]] || [[ "${DISABLE_DEEP}" -eq 1 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
