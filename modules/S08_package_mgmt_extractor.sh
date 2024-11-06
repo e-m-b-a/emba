@@ -141,11 +141,11 @@ build_dependency_tree() {
   local lSBOM_COMPONENT_FILES_ARR=()
   local lSBOM_COMP=""
   local lSBOM_COMP_DEPS_ARR=()
+  local lSBOM_COMP_DEPS_FILES_ARR=()
   local lSBOM_COMP_NAME=""
   local lSBOM_COMP_REF=""
   local lSBOM_COMP_VERS=""
   local lSBOM_COMP_SOURCE=""
-  local lSBOM_COMP_DEPS_ARR=()
   local lSBOM_COMP_DEP=""
   local lSBOM_DEP_SOURCE_FILES_ARR=()
   local lSBOM_COMP_SOURCE_FILE=""
@@ -163,11 +163,13 @@ build_dependency_tree() {
     print_output "[*] Component: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_VERS} / ${lSBOM_COMP_SOURCE} / ${lSBOM_COMP_REF}" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
 
     # lets search for dependencies in every SBOM component file we have and store it in lSBOM_COMP_DEPS_ARR
-    mapfile -t lSBOM_COMP_DEPS_ARR < <(jq -rc '.properties[] | select(.name | endswith(":dependency")).value' "${lSBOM_COMP}" || true)
+    mapfile -t lSBOM_COMP_DEPS_FILES_ARR < <(jq -rc '.properties[] | select(.name | endswith(":dependency")).value' "${lSBOM_COMP}" || true)
 
     # now we check every dependency for the current component
-    for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_ARR[@]}"; do
+    for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
+      # lets extract the name of the dependency
       lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
+      lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
 
       # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
       mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
@@ -188,7 +190,7 @@ build_dependency_tree() {
     done
     print_output "" "${LOG_PATH_MODULE}/SBOM_dependencies.txt"
 
-    jo -p ref="${lSBOM_COMP_REF}" dependsOn=$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}") | tee -a "${SBOM_LOG_PATH}/SBOM_dependency_${lSBOM_COMP_REF}".json
+    jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" | tee -a "${SBOM_LOG_PATH}/SBOM_dependency_${lSBOM_COMP_REF}".json
   done
 }
 
