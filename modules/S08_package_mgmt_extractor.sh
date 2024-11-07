@@ -191,7 +191,7 @@ create_comp_dep_tree_threader() {
   lSBOM_COMP_SOURCE=$(jq -r .group "${lSBOM_COMP}" || true)
 
   if [[ -z "${lSBOM_COMP_NAME}" || -z "${lSBOM_COMP_REF}" ]]; then
-    continue
+    return
   fi
 
   print_output "[*] Source file: ${lSBOM_COMP}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
@@ -203,7 +203,9 @@ create_comp_dep_tree_threader() {
     return
   fi
 
-  [[ ! -d "${SBOM_LOG_PATH}/SBOM_deps" ]] && mkdir "${SBOM_LOG_PATH}/SBOM_deps"
+  if [[ ! -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
+    mkdir "${SBOM_LOG_PATH}/SBOM_deps" || true
+  fi
 
   # now we check every dependency for the current component
   for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
