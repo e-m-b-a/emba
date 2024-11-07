@@ -152,7 +152,7 @@ build_sbom_json_component_arr() {
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
   fi
-  if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" || "${lAPP_LIC}" == "null" ]]; then
+  if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" || "${lAPP_LIC}" == "null" || "${lAPP_LIC}" == "unknown" ]]; then
     lAPP_LIC_ARR=()
   else
     lAPP_LIC_ARR+=( "name=${lAPP_LIC}" )

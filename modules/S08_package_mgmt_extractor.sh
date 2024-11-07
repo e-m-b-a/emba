@@ -190,6 +190,10 @@ create_comp_dep_tree_threader() {
   # Source is only used to ensure we check only matching sources (eg. check debian packages against debian sources)
   lSBOM_COMP_SOURCE=$(jq -r .group "${lSBOM_COMP}" || true)
 
+  if [[ -z "${lSBOM_COMP_NAME}" || -z "${lSBOM_COMP_REF}" ]]; then
+    continue
+  fi
+
   print_output "[*] Source file: ${lSBOM_COMP}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
   print_output "[*] Component: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_VERS} / ${lSBOM_COMP_SOURCE} / ${lSBOM_COMP_REF}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
 
@@ -208,7 +212,7 @@ create_comp_dep_tree_threader() {
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
 
     # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
-    mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
+    mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}\"" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
 
     # if we have the dependency in our components we can log it via the UUID
     # if we do not have the dependency installed and available via a UUID we log an indicator that this component is not available
@@ -217,7 +221,9 @@ create_comp_dep_tree_threader() {
         # get the  bom-ref from the dependency
         lSBOM_COMP_SOURCE_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP_SOURCE_FILE}" || true)
         print_output "[*] Component dependency found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / ${lSBOM_COMP_SOURCE_REF:-NA}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
-        lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
+        if ! [[ "${lSBOM_COMP_DEPS_ARR[*]}" == *"${lSBOM_COMP_SOURCE_REF}"* ]]; then
+          lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
+        fi
       done
     else
       print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No valid reference available" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
