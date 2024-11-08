@@ -115,7 +115,6 @@ S24_kernel_bin_identifier()
             lK_ELF=${lK_ELF#\ }
             lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
 
-
             if command -v jo >/dev/null; then
               # add source file path information to our properties array:
               local lPROP_ARRAY_INIT_ARR=()
@@ -154,8 +153,30 @@ S24_kernel_bin_identifier()
         lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
         lK_ELF=$(file -b "${lFILE}")
-        lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2-3)
-        lK_ELF=${lK_ELF//,\ /\ -\ }
+        lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2)
+        lK_ELF=${lK_ELF#\ }
+
+        if command -v jo >/dev/null; then
+          # add source file path information to our properties array:
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
+          lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ELF}" )
+          lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lK_VER}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERS}" )
+
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
+          fi
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+        fi
+
 
         write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};${lAPP_LIC:-NA};${lAPP_MAINT:-NA};${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Linux Kernel" "${S08_CSV_LOG}"
       fi

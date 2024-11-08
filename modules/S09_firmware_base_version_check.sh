@@ -595,7 +595,7 @@ bin_string_checker() {
             # we test the next binary
             continue 2
           fi
-        elif [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* ]] ; then
+        elif [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *"Linux\ kernel"* ]] ; then
           VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${VERSION_FINDER} ]]; then

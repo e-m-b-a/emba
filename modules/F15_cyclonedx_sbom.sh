@@ -157,26 +157,26 @@ F15_cyclonedx_sbom() {
     if [[ -f "${lSBOM_LOG_FILE}.json" ]]; then
       local lNEG_LOG=1
       print_output "[*] Converting SBOM to further SBOM formats ..." "no_log"
-      cyclonedx convert --output-format xml --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.xml.txt" || print_error "[-] Error while generating xml SBOM for SBOM"
-      cyclonedx convert --output-format protobuf --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.proto.txt" || print_error "[-] Error while generating protobuf SBOM for SBOM"
-      cyclonedx convert --output-format spdxjson --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.spdx.txt" || print_error "[-] Error while generating spdxjson SBOM for SBOM"
+      cyclonedx convert --output-format xml --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.xml" || print_error "[-] Error while generating xml SBOM for SBOM"
+      cyclonedx convert --output-format protobuf --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.proto" || print_error "[-] Error while generating protobuf SBOM for SBOM"
+      cyclonedx convert --output-format spdxjson --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.spdx" || print_error "[-] Error while generating spdxjson SBOM for SBOM"
 
       print_output "[+] Cyclonedx SBOM in json and CSV format created:"
       print_output "$(indent "$(orange "-> Download SBOM as JSON${NC}")")" "" "${lSBOM_LOG_FILE}.json"
-      if [[ -f "${lSBOM_LOG_FILE}.xml.txt" ]]; then
-        print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${lSBOM_LOG_FILE}.xml.txt"
+      if [[ -f "${lSBOM_LOG_FILE}.xml" ]]; then
+        print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${lSBOM_LOG_FILE}.xml"
       fi
-      if [[ -f "${lSBOM_LOG_FILE}.spdx.txt" ]]; then
-        print_output "$(indent "$(orange "-> Download SBOM as SPDX JSON${NC}")")" "" "${lSBOM_LOG_FILE}.spdx.txt"
+      if [[ -f "${lSBOM_LOG_FILE}.spdx" ]]; then
+        print_output "$(indent "$(orange "-> Download SBOM as SPDX JSON${NC}")")" "" "${lSBOM_LOG_FILE}.spdx"
       fi
-      if [[ -f "${lSBOM_LOG_FILE}.proto.txt" ]]; then
-        print_output "$(indent "$(orange "-> Download SBOM as PROTOBUF${NC}")")" "" "${lSBOM_LOG_FILE}.proto.txt"
+      if [[ -f "${lSBOM_LOG_FILE}.proto" ]]; then
+        print_output "$(indent "$(orange "-> Download SBOM as PROTOBUF${NC}")")" "" "${lSBOM_LOG_FILE}.proto"
       fi
       if [[ -f "${S08_CSV_LOG}" ]]; then
         print_output "$(indent "$(orange "-> Download SBOM as EMBA CSV${NC}")")" "" "${S08_CSV_LOG}"
       fi
       print_ln
-      print_output "[+] Cyclonedx SBOM in json format:"
+      print_output "[+] Cyclonedx SBOM in json format:" "" "${lSBOM_LOG_FILE}.json"
       print_ln
       tee -a "${LOG_FILE}" < "${lSBOM_LOG_FILE}.json"
       print_ln

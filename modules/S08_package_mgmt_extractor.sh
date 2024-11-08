@@ -25,107 +25,26 @@ S08_package_mgmt_extractor()
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
-  # we limit the maximal file log
-  export SBOM_MAX_FILE_LOG=200
 
   # shellcheck disable=SC2153
   check_for_s08_csv_log "${S08_CSV_LOG}"
 
   lOS_IDENTIFIED=$(distri_check)
 
+  local lS08_MODULE=""
+
   if [[ ${THREADED} -eq 1 ]]; then
-    debian_status_files_analysis "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    openwrt_control_files_analysis "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    rpm_package_mgmt_analysis "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    rpm_package_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    deb_package_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    bsd_pkg_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    python_pip_packages "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    python_requirements "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    python_poetry_lock_parser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    java_archives_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    ruby_gem_archive_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    alpine_apk_package_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    windows_exifparser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    rust_cargo_lock_parser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    node_js_package_lock_parser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
+    for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
+      "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+    done
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
   else
-    debian_status_files_analysis "${lOS_IDENTIFIED}"
-    openwrt_control_files_analysis "${lOS_IDENTIFIED}"
-    rpm_package_mgmt_analysis "${lOS_IDENTIFIED}"
-    rpm_package_check "${lOS_IDENTIFIED}"
-    deb_package_check "${lOS_IDENTIFIED}"
-    bsd_pkg_check "${lOS_IDENTIFIED}"
-    python_pip_packages "${lOS_IDENTIFIED}"
-    python_requirements "${lOS_IDENTIFIED}"
-    python_poetry_lock_parser "${lOS_IDENTIFIED}"
-    java_archives_check "${lOS_IDENTIFIED}"
-    ruby_gem_archive_check "${lOS_IDENTIFIED}"
-    alpine_apk_package_check "${lOS_IDENTIFIED}"
-    windows_exifparser "${lOS_IDENTIFIED}"
-    rust_cargo_lock_parser "${lOS_IDENTIFIED}"
-    node_js_package_lock_parser "${lOS_IDENTIFIED}"
+    for lS08_MODULE in "${lS08_MODULES_ARR[@]}"; do
+      "${lS08_MODULE}" "${lOS_IDENTIFIED}"
+    done
   fi
 
   build_dependency_tree
@@ -2286,6 +2205,7 @@ debian_status_files_analysis() {
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
+  local lPACKAGE_DIR=""
 
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
@@ -2307,6 +2227,7 @@ debian_status_files_analysis() {
         continue
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPACKAGE_DIR="$(dirname "${lPACKAGE_FILE}")"
 
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: \|^Depends: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
@@ -2377,6 +2298,23 @@ debian_status_files_analysis() {
               for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
                 lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
               done
+            fi
+
+            # if we have the list file also we can add all the paths provided by the package
+            if [[ -f "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list" ]]; then
+              local lPKG_LIST_ENTRY=""
+              local lCNT=0
+              while IFS= read -r lPKG_LIST_ENTRY; do
+                # exclude the root directory entry as this will confuse people
+                [[ "${lPKG_LIST_ENTRY}" == "/." ]] && continue
+                lCNT=$((lCNT+1))
+                lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+                # we limit the logging of the package files to 500 files per package
+                if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+                  lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+                  break
+                fi
+              done < "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list"
             fi
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
