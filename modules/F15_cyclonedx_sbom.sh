@@ -67,7 +67,7 @@ F15_cyclonedx_sbom() {
     fi
 
     # EMBA details for the SBOM
-    local lSBOM_TOOL="EMBA"
+    local lSBOM_TOOL="EMBA Binary analysis environment"
     local lSBOM_TOOL_VERS=""
     lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
 
