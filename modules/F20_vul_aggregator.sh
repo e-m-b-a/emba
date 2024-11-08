@@ -71,8 +71,9 @@ F20_vul_aggregator() {
       get_kernel_verified "${S26_LOGS_ARR[@]}"
     fi
 
-    get_uefi_details "${S02_CSV_LOG}"
     get_sbom_package_details "${S08_CSV_LOG}"
+
+    get_uefi_details "${S02_CSV_LOG}"
     get_systemmode_emulator "${L15_CSV_LOG}"
     get_systemmode_webchecks "${L25_CSV_LOG}"
     get_msf_verified "${L35_CSV_LOG}"

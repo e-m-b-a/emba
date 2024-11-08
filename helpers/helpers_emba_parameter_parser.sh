@@ -148,6 +148,9 @@ emba_parameter_parsing() {
         export MAX_MODS=""
         MAX_MODS="$(escape_echo "${OPTARG}")"
         ;;
+      q)
+        export DISABLE_DEEP=1
+        ;;
       Q)
         export FULL_EMULATION=1
         ;;
