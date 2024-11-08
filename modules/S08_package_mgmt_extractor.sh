@@ -42,7 +42,7 @@ S08_package_mgmt_extractor()
     done
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
   else
-    for lS08_MODULE in "${lS08_MODULES_ARR[@]}"; do
+    for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
       "${lS08_MODULE}" "${lOS_IDENTIFIED}"
     done
   fi

@@ -123,6 +123,13 @@ add_link_tags() {
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
           lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${BACK_LINK}" | cut -d"." -f1 )/res/$(basename "${lREF_LINK}")@g" || true)""Download SBOM ASDF""${LINK_END}"
           echo "lHTML_LINK: ${lHTML_LINK}"
+          echo "lLINK_FILE: ${lLINK_FILE}"
+          echo "lREF_LINK: ${lREF_LINK}"
+          echo "basename lREF_LINK: $(basename ${lREF_LINK})"
+          echo "SED area of ${lLINK_FILE}:"
+          grep "Download SBOM as" "${lLINK_FILE}"
+          echo "try the SED command of ${lLINK_FILE}:"
+          sed "s@.*Download SBOM as.*$(basename "${lREF_LINK}").*@${lHTML_LINK}${P_END}@" "${lLINK_FILE}"
           sed -i "s@.*Download SBOM as.*$(basename "${lREF_LINK}").*@${lHTML_LINK}${P_END}@" "${lLINK_FILE}"
         elif [[ "${lREF_LINK: -7}" == ".tar.gz" ]] ; then
           local lRES_PATH=""

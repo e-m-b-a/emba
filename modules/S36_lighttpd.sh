@@ -71,8 +71,9 @@ lighttpd_binary_analysis() {
 
   local lOS_IDENTIFIED=""
   local lBIN_ARCH=""
-  local lBIN_MAINT=""
-  local lBIN_VERS=""
+  local lAPP_NAME=""
+  local lAPP_MAINT=""
+  local lAPP_VERS=""
   local lPURL_IDENTIFIER=""
   local lCPE_IDENTIFIER=""
   local lPACKAGING_SYSTEM="static_lighttpd_analysis"
@@ -142,7 +143,7 @@ lighttpd_binary_analysis() {
             build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           fi
           check_for_s08_csv_log "${S08_CSV_LOG}"
-          write_log "${lPACKAGING_SYSTEM};${lLIGHT_BIN:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIER:-NA};${lCSV_RULE:-NA};${lLIC:-NA};${lAPP_MAINT:-NA};${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
+          write_log "${lPACKAGING_SYSTEM};${lLIGHT_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIER:-NA};${lCSV_RULE:-NA};${lLIC:-NA};${lAPP_MAINT:-NA};${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
           continue
         fi
       done
