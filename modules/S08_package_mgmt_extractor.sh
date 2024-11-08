@@ -1428,6 +1428,8 @@ rpm_package_check() {
   local lPURL_IDENTIFIER="NA"
   local lRPM_FILES_ARR=()
   local lRPM_FILE=""
+  local lRPM_DEP_ARR=()
+  local lRPM_DEP=""
 
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
@@ -1500,6 +1502,7 @@ rpm_package_check() {
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
       mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null || true)
+      mapfile -t lRPM_DEPS_ARR < <(rpm -qR "${lRPM_ARCHIVE}" 2>/dev/null || true)
 
       if command -v jo >/dev/null; then
         # add rpm path information to our properties array:
@@ -1507,6 +1510,13 @@ rpm_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        # add dependencies to properties
+        if [[ "${#lRPM_DEPS_ARR[@]}" -gt 0 ]]; then
+          for lRPM_DEP in "${lRPM_DEP_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "dependency:${lRPM_DEP}" )
+          done
+        fi
 
         # add package files to properties
         if [[ "${#lRPM_FILES_ARR[@]}" -gt 0 ]]; then
