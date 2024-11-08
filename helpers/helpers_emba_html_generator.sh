@@ -116,7 +116,7 @@ add_link_tags() {
             lLINE_NUMBER_INFO_PREV=$(( lLINE_NUMBER_INFO_PREV - 1 ))
           done
           LINK_COMMAND_ARR+=( "${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
-        elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -4}" == ".spdx" ]]; then
+        elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -5}" == ".spdx" ]]; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
           local lRES_PATH=""
           lRES_PATH="${ABS_HTML_PATH}""/""$(echo "${BACK_LINK}" | cut -d"." -f1 )""/res"
