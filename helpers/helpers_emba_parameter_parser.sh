@@ -18,7 +18,7 @@
 
 
 emba_parameter_parsing() {
-  while getopts a:bBA:cC:d:De:Ef:Fghik:l:m:N:o:p:P:QrsStT:UVX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:d:De:Ef:Fghik:l:m:N:o:p:P:qQrsStT:UVX:yY:WzZ: OPT ; do
     case "${OPT}" in
       a)
         check_alnum "${OPTARG}"
