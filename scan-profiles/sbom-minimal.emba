@@ -23,8 +23,8 @@ export HTML=1
 SBOM_MINIMAL=1
 
 # if no deep extraction is needed it can be disabled here - sometimes useful for
-# non Linux stuff like sources or Windows exe
-DISABLE_DEEP=0
+# non Linux stuff like sources or Windows exe (could be also configured via -q parameter)
+# DISABLE_DEEP=0
 SBOM_MAX_FILE_LOG=100
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM

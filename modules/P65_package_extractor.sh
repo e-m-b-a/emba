@@ -24,6 +24,11 @@ P65_package_extractor() {
   module_title "Package extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  if [[ "${DISABLE_DEEP:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   local lDISK_SPACE_CRIT=0
   local lNEG_LOG=0
   export FILES_PRE_PACKAGE=0
