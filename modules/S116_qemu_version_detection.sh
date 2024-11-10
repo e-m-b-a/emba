@@ -204,7 +204,7 @@ version_detection_thread() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${BINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${BINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi

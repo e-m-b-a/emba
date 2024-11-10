@@ -169,20 +169,22 @@ fw_bin_detector() {
   lHEX_FIRST_LINE=$(hexdump -C "${lCHECK_FILE}" | head -1 || true)
   lAVM_CHECK=$(strings "${lCHECK_FILE}" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   lBMC_CHECK=$(strings "${lCHECK_FILE}" | grep -c "libipmi.so" || true)
-  lDJI_PRAK_ENC_CHECK=$(strings "${lCHECK_FILE}" | grep -c "PRAK\|RREK\|IAEK\|PUEK" || true)
-  lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
-  # we are running binwalk on the file to analyze the output afterwards:
-  "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${TMP_DIR}"/p02_binwalk_output.txt
-  if [[ -f "${TMP_DIR}"/p02_binwalk_output.txt ]]; then
-    lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${TMP_DIR}"/p02_binwalk_output.txt || true)
-  else
-    lQNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${lCHECK_FILE}")
-  fi
+  if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
+    lDJI_PRAK_ENC_CHECK=$(strings "${lCHECK_FILE}" | grep -c "PRAK\|RREK\|IAEK\|PUEK" || true)
+    lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
+    # we are running binwalk on the file to analyze the output afterwards:
+    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${TMP_DIR}"/p02_binwalk_output.txt
+    if [[ -f "${TMP_DIR}"/p02_binwalk_output.txt ]]; then
+      lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    else
+      lQNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${lCHECK_FILE}")
+    fi
 
-  # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
-  # further checks will follow in P35
-  lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/p02_binwalk_output.txt || true)
-  lUEFI_CHECK=$(( "${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${lCHECK_FILE}" || true)" ))
+    # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
+    # further checks will follow in P35
+    lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    lUEFI_CHECK=$(( "${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${lCHECK_FILE}" || true)" ))
+  fi
 
   if [[ -f "${KERNEL_CONFIG}" ]] && [[ "${KERNEL}" -eq 1 ]]; then
     # we set the FIRMWARE_PATH to the kernel config path if we have only -k parameter

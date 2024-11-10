@@ -96,7 +96,7 @@ S118_busybox_verifier()
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lBB_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lBB_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -124,7 +124,7 @@ S118_busybox_verifier()
     local lBB_APPLET=""
     local lSUMMARY=""
 
-    if tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -v "BusyBox VERSION" | grep -q "${lBB_VERSION}"; then
+    if [[ -f "${S118_CSV_LOG}" ]] && tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -v "BusyBox VERSION" | grep -q "${lBB_VERSION}"; then
       # we already tested this version and ensure we do not duplicate this check
       continue
     fi
