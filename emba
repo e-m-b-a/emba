@@ -656,7 +656,7 @@ main() {
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:d:De:Ef:Fghijk:l:m:N:o:p:P:QrsStT:UX:yY:WzZ: OPT ; do
+    while getopts a:A:BcC:d:De:Ef:Fghijk:l:m:N:o:p:P:qQrsStT:UX:yY:WzZ: OPT ; do
       case ${OPT} in
         D|f|i|l|o)
           ;;

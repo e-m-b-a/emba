@@ -153,6 +153,29 @@ set_defaults() {
   export QUEST_CONTAINER=""
   export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
   export CPE_VERSION="2.3"
+
+  # we limit the maximal file log of our SBOM -> change this in the scanning profile
+  export SBOM_MAX_FILE_LOG=200
+
+  # we can enable/disable the s08 submodules with the following array configuration
+  # -> just comment the submodule that should not be used
+  # usually this should be done via a scan-profile
+  export S08_MODULES_ARR=()
+  S08_MODULES_ARR=( "debian_status_files_analysis" )
+  S08_MODULES_ARR+=( "openwrt_control_files_analysis" )
+  S08_MODULES_ARR+=( "rpm_package_mgmt_analysis" )
+  S08_MODULES_ARR+=( "rpm_package_check" )
+  S08_MODULES_ARR+=( "deb_package_check" )
+  S08_MODULES_ARR+=( "bsd_pkg_check" )
+  S08_MODULES_ARR+=( "python_pip_packages" )
+  S08_MODULES_ARR+=( "python_requirements" )
+  S08_MODULES_ARR+=( "python_poetry_lock_parser" )
+  S08_MODULES_ARR+=( "java_archives_check" )
+  S08_MODULES_ARR+=( "ruby_gem_archive_check" )
+  S08_MODULES_ARR+=( "alpine_apk_package_check" )
+  S08_MODULES_ARR+=( "windows_exifparser" )
+  S08_MODULES_ARR+=( "rust_cargo_lock_parser" )
+  S08_MODULES_ARR+=( "node_js_package_lock_parser" )
 }
 
 set_log_paths() {

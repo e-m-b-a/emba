@@ -686,6 +686,7 @@ print_help()
   echo -e "${CYAN}""-c""${NC}""                Enable extended binary analysis"
   echo -e "${CYAN}""-E""${NC}""                Enables automated qemu user emulation tests (WARNING this module could harm your host!)"
   echo -e "${CYAN}""-Q""${NC}""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+  echo -e "${CYAN}""-q""${NC}""                Disables the deep-extractor module"
   echo -e "${CYAN}""-a [MIPS]""${NC}""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (usually not needed)"
   echo -e "${CYAN}""-A [MIPS]""${NC}""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check - usually not needed)"
   echo -e "${CYAN}""-e [./path]""${NC}""       Exclude paths from testing (multiple usage possible - usually not needed)"

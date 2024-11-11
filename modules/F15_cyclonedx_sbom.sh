@@ -45,6 +45,9 @@ F15_cyclonedx_sbom() {
     local lCOMP_FILES_ARR=()
     local lCOMP_FILE_ID=""
     local lCOMP_FILE=""
+    local lDEP_FILE=""
+    local lDEP_FILE_ID=""
+    local lDEP_FILES_ARR=()
 
     if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
       lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log)
@@ -64,7 +67,7 @@ F15_cyclonedx_sbom() {
     fi
 
     # EMBA details for the SBOM
-    local lSBOM_TOOL="EMBA"
+    local lSBOM_TOOL="EMBA Binary analysis environment"
     local lSBOM_TOOL_VERS=""
     lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
 
@@ -80,10 +83,10 @@ F15_cyclonedx_sbom() {
 
     # Firmeware details for the SBOM
     local lFW_COMPONENT_DATA_ARR=()
+    lFW_COMPONENT_DATA_ARR+=( name="${lFW_PATH}" )
     lFW_COMPONENT_DATA_ARR+=( type="${lFW_TYPE}" )
     lFW_COMPONENT_DATA_ARR+=( bom-ref="$(uuidgen)" )
     [[ -n "${FW_VENDOR}" ]] && lFW_COMPONENT_DATA_ARR+=( "supplier=$(jo -n name="${FW_VENDOR}")" )
-    lFW_COMPONENT_DATA_ARR+=( path="${lFW_PATH}" )
 
     # generate hashes for the firmware itself:
     if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
@@ -93,7 +96,7 @@ F15_cyclonedx_sbom() {
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
-    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*.json" | sort -u)
+    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" | sort -u)
 
     # as we could have so many components that everything goes b00m we need to build the
     # components json now manually:
@@ -108,8 +111,31 @@ F15_cyclonedx_sbom() {
     echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
     tr -d '\n' < "${SBOM_LOG_PATH}/sbom_components_tmp.json" > "${lSBOM_LOG_FILE}_components.json"
 
+    if [[ -d "${SBOM_LOG_PATH}/SBOM_deps/" ]]; then
+      # build the dependency array for final sbom build:
+      mapfile -t lDEP_FILES_ARR < <(find "${SBOM_LOG_PATH}/SBOM_deps/" -type f -name "SBOM_dependency_*.json" | sort -u)
+    fi
+
+    if [[ "${#lDEP_FILES_ARR[@]}" -gt 0 ]]; then
+      # as we could have so many components that everything goes b00m we need to build the
+      # components json now manually:
+      echo -n "[" > "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+      for lDEP_FILE_ID in "${!lDEP_FILES_ARR[@]}"; do
+        lDEP_FILE="${lDEP_FILES_ARR["${lDEP_FILE_ID}"]}"
+        cat "${lDEP_FILE}" >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+        if [[ $((lDEP_FILE_ID+1)) -lt "${#lDEP_FILES_ARR[@]}" ]]; then
+          echo -n "," >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+        fi
+      done
+      echo -n "]" >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+      tr -d '\n' < "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json" > "${lSBOM_LOG_FILE}_dependencies.json"
+    else
+      echo -n "[" > "${lSBOM_LOG_FILE}_dependencies.json"
+      echo -n "]" >> "${lSBOM_LOG_FILE}_dependencies.json"
+    fi
+
     # final sbom build:
-    jo -p -- \
+    jo -p -n -- \
       \$schema="${lSBOM_SCHEMA}" \
       bomFormat="${lSBOM_FORMAT}" \
       -s specVersion="${lSBOM_SPEC_VERS}" \
@@ -122,6 +148,7 @@ F15_cyclonedx_sbom() {
         component="$(jo -n \
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
+      dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
       > "${lSBOM_LOG_FILE}.json"
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
@@ -130,26 +157,26 @@ F15_cyclonedx_sbom() {
     if [[ -f "${lSBOM_LOG_FILE}.json" ]]; then
       local lNEG_LOG=1
       print_output "[*] Converting SBOM to further SBOM formats ..." "no_log"
-      cyclonedx convert --output-format xml --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.xml.txt" || print_error "[-] Error while generating xml SBOM for SBOM"
-      cyclonedx convert --output-format protobuf --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.proto.txt" || print_error "[-] Error while generating protobuf SBOM for SBOM"
-      cyclonedx convert --output-format spdxjson --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.spdx.txt" || print_error "[-] Error while generating spdxjson SBOM for SBOM"
+      cyclonedx convert --output-format xml --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.xml" || print_error "[-] Error while generating xml SBOM for SBOM"
+      cyclonedx convert --output-format protobuf --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.proto" || print_error "[-] Error while generating protobuf SBOM for SBOM"
+      cyclonedx convert --output-format spdxjson --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.spdx" || print_error "[-] Error while generating spdxjson SBOM for SBOM"
 
       print_output "[+] Cyclonedx SBOM in json and CSV format created:"
       print_output "$(indent "$(orange "-> Download SBOM as JSON${NC}")")" "" "${lSBOM_LOG_FILE}.json"
-      if [[ -f "${lSBOM_LOG_FILE}.xml.txt" ]]; then
-        print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${lSBOM_LOG_FILE}.xml.txt"
+      if [[ -f "${lSBOM_LOG_FILE}.xml" ]]; then
+        print_output "$(indent "$(orange "-> Download SBOM as XML${NC}")")" "" "${lSBOM_LOG_FILE}.xml"
       fi
-      if [[ -f "${lSBOM_LOG_FILE}.spdx.txt" ]]; then
-        print_output "$(indent "$(orange "-> Download SBOM as SPDX JSON${NC}")")" "" "${lSBOM_LOG_FILE}.spdx.txt"
+      if [[ -f "${lSBOM_LOG_FILE}.spdx" ]]; then
+        print_output "$(indent "$(orange "-> Download SBOM as SPDX JSON${NC}")")" "" "${lSBOM_LOG_FILE}.spdx"
       fi
-      if [[ -f "${lSBOM_LOG_FILE}.proto.txt" ]]; then
-        print_output "$(indent "$(orange "-> Download SBOM as PROTOBUF${NC}")")" "" "${lSBOM_LOG_FILE}.proto.txt"
+      if [[ -f "${lSBOM_LOG_FILE}.proto" ]]; then
+        print_output "$(indent "$(orange "-> Download SBOM as PROTOBUF${NC}")")" "" "${lSBOM_LOG_FILE}.proto"
       fi
       if [[ -f "${S08_CSV_LOG}" ]]; then
         print_output "$(indent "$(orange "-> Download SBOM as EMBA CSV${NC}")")" "" "${S08_CSV_LOG}"
       fi
       print_ln
-      print_output "[+] Cyclonedx SBOM in json format:"
+      print_output "[+] Cyclonedx SBOM in json format:" "" "${lSBOM_LOG_FILE}.json"
       print_ln
       tee -a "${LOG_FILE}" < "${lSBOM_LOG_FILE}.json"
       print_ln

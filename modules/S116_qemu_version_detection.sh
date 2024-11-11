@@ -178,7 +178,7 @@ version_detection_thread() {
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
       lBIN_ARCH=$(file -b "${BINARY_PATH}")
-      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2-3)
+      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
       lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
@@ -204,7 +204,7 @@ version_detection_thread() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${BINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${BINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi

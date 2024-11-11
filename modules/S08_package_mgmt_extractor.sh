@@ -25,113 +25,142 @@ S08_package_mgmt_extractor()
   local NEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
-  # we limit the maximal file log
-  export SBOM_MAX_FILE_LOG=200
 
   # shellcheck disable=SC2153
   check_for_s08_csv_log "${S08_CSV_LOG}"
 
   lOS_IDENTIFIED=$(distri_check)
 
+  local lS08_MODULE=""
+
   if [[ ${THREADED} -eq 1 ]]; then
-    debian_status_files_analysis "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    openwrt_control_files_analysis "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    rpm_package_mgmt_analysis "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    rpm_package_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    deb_package_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    bsd_pkg_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    python_pip_packages "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    python_requirements "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    python_poetry_lock_parser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    java_archives_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    ruby_gem_archive_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    alpine_apk_package_check "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    windows_exifparser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    rust_cargo_lock_parser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
-    node_js_package_lock_parser "${lOS_IDENTIFIED}" &
-    local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-
+    for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
+      "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+    done
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
   else
-    debian_status_files_analysis "${lOS_IDENTIFIED}"
-    openwrt_control_files_analysis "${lOS_IDENTIFIED}"
-    rpm_package_mgmt_analysis "${lOS_IDENTIFIED}"
-    rpm_package_check "${lOS_IDENTIFIED}"
-    deb_package_check "${lOS_IDENTIFIED}"
-    bsd_pkg_check "${lOS_IDENTIFIED}"
-    python_pip_packages "${lOS_IDENTIFIED}"
-    python_requirements "${lOS_IDENTIFIED}"
-    python_poetry_lock_parser "${lOS_IDENTIFIED}"
-    java_archives_check "${lOS_IDENTIFIED}"
-    ruby_gem_archive_check "${lOS_IDENTIFIED}"
-    alpine_apk_package_check "${lOS_IDENTIFIED}"
-    windows_exifparser "${lOS_IDENTIFIED}"
-    rust_cargo_lock_parser "${lOS_IDENTIFIED}"
-    node_js_package_lock_parser "${lOS_IDENTIFIED}"
+    for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
+      "${lS08_MODULE}" "${lOS_IDENTIFIED}"
+    done
   fi
+
+  build_dependency_tree
 
   # shellcheck disable=SC2153
   [[ -s "${S08_CSV_LOG}" ]] && NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
+
+build_dependency_tree() {
+  if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
+    return
+  fi
+
+  sub_module_title "SBOM dependency tree build" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+
+  local lSBOM_COMPONENT_FILES_ARR=()
+  local lSBOM_COMP=""
+
+  local lWAIT_PIDS_S08_ARR=()
+
+  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f)
+
+  for lSBOM_COMP in "${lSBOM_COMPONENT_FILES_ARR[@]}"; do
+    [[ ! -f "${lSBOM_COMP}" ]] && continue
+    # to speed up the dep tree we are working threaded for every componentfile and write into dedicated json files
+    # "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json which we can put together in f15
+    create_comp_dep_tree_threader "${lSBOM_COMP}" &
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR[@]}"
+  done
+  wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
+
+  if [[ -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
+    print_output "[+] SBOM dependency results" "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  else
+    print_output "[*] No SBOM dependency results available"
+  fi
+}
+
+create_comp_dep_tree_threader() {
+  # lSBOM_COMP -> current sbom json file under analysis
+  local lSBOM_COMP="${1:-}"
+
+  local lSBOM_COMP_DEPS_ARR=()
+  local lSBOM_COMP_DEPS_FILES_ARR=()
+  local lSBOM_COMP_NAME=""
+  local lSBOM_COMP_REF=""
+  local lSBOM_COMP_VERS=""
+  local lSBOM_COMP_SOURCE=""
+  local lSBOM_COMP_DEP=""
+  local lSBOM_DEP_SOURCE_FILES_ARR=()
+  local lSBOM_COMP_SOURCE_FILE=""
+  local lSBOM_COMP_SOURCE_REF=""
+  local lSBOM_INVALID_COM_REF=""
+
+  # extract needed metadata (VERS not really needed but nice to show)
+  lSBOM_COMP_NAME=$(jq -r .name "${lSBOM_COMP}" || true)
+  lSBOM_COMP_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP}" || true)
+  lSBOM_COMP_VERS=$(jq -r .version "${lSBOM_COMP}" || true)
+  # Source is only used to ensure we check only matching sources (eg. check debian packages against debian sources)
+  lSBOM_COMP_SOURCE=$(jq -r .group "${lSBOM_COMP}" || true)
+
+  if [[ -z "${lSBOM_COMP_NAME}" || -z "${lSBOM_COMP_REF}" ]]; then
+    return
+  fi
+
+  print_output "[*] Source file: ${lSBOM_COMP}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+  print_output "[*] Component: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_VERS} / ${lSBOM_COMP_SOURCE} / ${lSBOM_COMP_REF}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+
+  # lets search for dependencies in every SBOM component file we have and store it in lSBOM_COMP_DEPS_ARR
+  mapfile -t lSBOM_COMP_DEPS_FILES_ARR < <(jq -rc '.properties[] | select(.name | endswith(":dependency")).value' "${lSBOM_COMP}" || true)
+  if [[ "${#lSBOM_COMP_DEPS_FILES_ARR[@]}" -eq 0 ]]; then
+    return
+  fi
+
+  if [[ ! -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
+    mkdir "${SBOM_LOG_PATH}/SBOM_deps" || true
+  fi
+
+  # now we check every dependency for the current component
+  for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
+    # lets extract the name of the dependency
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
+
+    # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
+    mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}\"" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
+
+    # if we have the dependency in our components we can log it via the UUID
+    # if we do not have the dependency installed and available via a UUID we log an indicator that this component is not available
+    if [[ "${#lSBOM_DEP_SOURCE_FILES_ARR[@]}" -gt 0 ]]; then
+      for lSBOM_COMP_SOURCE_FILE in "${lSBOM_DEP_SOURCE_FILES_ARR[@]}"; do
+        # get the  bom-ref from the dependency
+        lSBOM_COMP_SOURCE_REF=$(jq -r '."bom-ref"' "${lSBOM_COMP_SOURCE_FILE}" || true)
+        print_output "[*] Component dependency found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / ${lSBOM_COMP_SOURCE_REF:-NA}" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+        if ! [[ "${lSBOM_COMP_DEPS_ARR[*]}" == *"${lSBOM_COMP_SOURCE_REF}"* ]]; then
+          lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_COMP_SOURCE_REF}")
+        fi
+      done
+    else
+      print_output "[*] Component dependency without reference found: ${lSBOM_COMP_NAME} / ${lSBOM_COMP_REF} -> ${lSBOM_COMP_DEP} / No valid reference available" "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt"
+      # this is only used to have a unique identifier
+      lSBOM_INVALID_COM_REF="$(uuidgen)"
+      lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_INVALID_COM_REF}-NO_VALID_REF-${lSBOM_COMP_DEP}")
+    fi
+  done
+  print_output "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+
+  cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >> "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  rm "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
+
+  jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" | tee -a "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
+}
+
 
 node_js_package_lock_parser() {
   local lOS_IDENTIFIED="${1:-}"
@@ -156,6 +185,10 @@ node_js_package_lock_parser() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lNODE_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "package*json" -type f)
 
   if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -170,6 +203,14 @@ node_js_package_lock_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lNODE_LCK_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lR_FILE=$(file "${lNODE_LCK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"JSON text"* ]]; then
         continue
@@ -211,21 +252,21 @@ node_js_package_lock_parser() {
 
           # usuall build_json_hashes_arr sets HASHES_ARR globally and we unset it afterwards
           # as we have the hashes from the lock file we do it here
+          # WARNING: the hashes from the lock file are base64 encoded and do not work
           export HASHES_ARR=()
           local lHASH_ALG="NA"
-          [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
-          [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
-          [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lHASH_ALG="SHA-512"
+          # [[ "${lAPP_CHECKSUM}" == "md5-"* ]] && lHASH_ALG="MD5"
+          # [[ "${lAPP_CHECKSUM}" == "sha256-"* ]] && lHASH_ALG="SHA-256"
+          # [[ "${lAPP_CHECKSUM}" == "sha512-"* ]] && lHASH_ALG="SHA-512"
           if ! [[ "${lHASH_ALG}" == "NA" ]]; then
             local lHASHES_ARRAY_INIT=("alg=${lHASH_ALG}")
             lHASHES_ARRAY_INIT+=("content=${lAPP_CHECKSUM/*-}")
             HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
-
-            # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
           else
-            print_output "[-] ${lPACKAGING_SYSTEM} - No hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
+            print_output "[-] ${lPACKAGING_SYSTEM} - No valid hashes detected for ${lAPP_NAME} - ${lAPP_VERS} - ${lAPP_LIC} - ${lAPP_CHECKSUM} - ${lAPP_DEPS}" "no_log"
           fi
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
         fi
 
         write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -289,6 +330,10 @@ deb_package_check() {
   local lDEB_FILE_ID=""
   local lDEB_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
   if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -307,6 +352,15 @@ deb_package_check() {
       if [[ ! "${lR_FILE}" == *"Debian binary package"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       mkdir "${TMP_DIR}/deb_package/"
       ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/"
 
@@ -383,7 +437,7 @@ deb_package_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lDEB_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lDEB_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -437,6 +491,10 @@ windows_exifparser() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
     # if we already know that we have a windows binary to analyze we can check every file with the file command
     # to ensure we do not miss anything
@@ -462,6 +520,15 @@ windows_exifparser() {
       if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ ! "${lR_FILE}" == *"PE32+ executable"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lEXE_NAME=$(basename -s .exe "${lEXE_ARCHIVE}")
       lEXIF_LOG="${LOG_PATH_MODULE}/windows_exe_exif_data_${lEXE_NAME}.txt"
 
@@ -546,7 +613,7 @@ windows_exifparser() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -603,6 +670,9 @@ python_poetry_lock_parser() {
   local lAPP_FILES_ARR=()
   local lPOETRY_FILE_ENTRY=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
 
   mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
 
@@ -622,6 +692,14 @@ python_poetry_lock_parser() {
       if [[ ! "${lR_FILE}" == *"text"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       lSHA512_CHECKSUM="$(sha512sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
       lMD5_CHECKSUM="$(md5sum "${lPY_LCK_ARCHIVE}" | awk '{print $1}')"
@@ -697,7 +775,7 @@ python_poetry_lock_parser() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPY_LCK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -753,6 +831,10 @@ rust_cargo_lock_parser() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lRST_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "Cargo.lock" -type f)
 
   if [[ "${#lRST_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -771,6 +853,13 @@ rust_cargo_lock_parser() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lRST_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lRST_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
       # we start with the following file structure:
       # [[package]]
       # name = "windows-sys"
@@ -886,6 +975,10 @@ alpine_apk_package_check() {
   local lAPK_FILES_ARR=()
   local lAPK_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
 
   if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -904,6 +997,14 @@ alpine_apk_package_check() {
       if [[ ! "${lR_FILE}" == *"gzip compressed data"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lAPK_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lAPK_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       mkdir "${TMP_DIR}"/apk
       tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
@@ -963,7 +1064,7 @@ alpine_apk_package_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lAPK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lAPK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -1019,6 +1120,10 @@ ruby_gem_archive_check() {
   local lGEM_FILES_ARR=()
   local lGEM_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lGEM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.gem" -type f)
 
   if [[ "${#lGEM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -1037,6 +1142,14 @@ ruby_gem_archive_check() {
       if [[ ! "${lR_FILE}" == *"POSIX tar archive"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lGEM_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       mkdir "${TMP_DIR}"/gems
       tar -x -f "${lGEM_ARCHIVE}" -C "${TMP_DIR}"/gems || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed"
@@ -1106,7 +1219,7 @@ ruby_gem_archive_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lGEM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lGEM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -1165,6 +1278,10 @@ bsd_pkg_check() {
   local lPKG_FILES_ARR=()
   local lPKG_FILE=""
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
 
   if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
@@ -1183,6 +1300,14 @@ bsd_pkg_check() {
       if [[ ! "${lR_FILE}" == *"Zstandard"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lPKG_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}" +COMPACT_MANIFEST || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
       if ! [[ -f "${TMP_DIR}"/+COMPACT_MANIFEST ]]; then
@@ -1248,7 +1373,7 @@ bsd_pkg_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lPKG_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lPKG_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -1303,6 +1428,12 @@ rpm_package_check() {
   local lPURL_IDENTIFIER="NA"
   local lRPM_FILES_ARR=()
   local lRPM_FILE=""
+  local lRPM_DEP_ARR=()
+  local lRPM_DEP=""
+
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
 
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
 
@@ -1322,6 +1453,14 @@ rpm_package_check() {
       if [[ ! "${lR_FILE}" == *"RPM"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lRPM_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
@@ -1362,7 +1501,8 @@ rpm_package_check() {
 
       STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null)
+      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null || true)
+      mapfile -t lRPM_DEPS_ARR < <(rpm -qR "${lRPM_ARCHIVE}" 2>/dev/null || true)
 
       if command -v jo >/dev/null; then
         # add rpm path information to our properties array:
@@ -1370,6 +1510,13 @@ rpm_package_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+
+        # add dependencies to properties
+        if [[ "${#lRPM_DEPS_ARR[@]}" -gt 0 ]]; then
+          for lRPM_DEP in "${lRPM_DEP_ARR[@]}"; do
+            lPROP_ARRAY_INIT_ARR+=( "dependency:${lRPM_DEP}" )
+          done
+        fi
 
         # add package files to properties
         if [[ "${#lRPM_FILES_ARR[@]}" -gt 0 ]]; then
@@ -1388,7 +1535,7 @@ rpm_package_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lRPM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lRPM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -1442,6 +1589,10 @@ python_requirements() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
 
   if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]] ; then
@@ -1460,6 +1611,14 @@ python_requirements() {
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPY_REQ_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lPY_REQ_FILE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       # read entry line by line
       while read -r lRES_ENTRY; do
@@ -1522,7 +1681,7 @@ python_requirements() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -1607,6 +1766,21 @@ python_pip_packages() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
+        # Todo: from METADATA we also get "^Requires-Dist: "
+
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
@@ -1632,7 +1806,7 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -1657,6 +1831,19 @@ python_pip_packages() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
         lMD5_CHECKSUM="$(md5sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_DIST_META_PACKAGE}" | awk '{print $1}')"
@@ -1682,7 +1869,7 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPIP_DIST_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -1727,6 +1914,19 @@ python_pip_packages() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
@@ -1752,7 +1952,7 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -1777,6 +1977,19 @@ python_pip_packages() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=${lAPP_LIC/*:\ }
+
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+        lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
+
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+
         lMD5_CHECKSUM="$(md5sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPIP_SITE_META_PACKAGE}" | awk '{print $1}')"
@@ -1802,7 +2015,7 @@ python_pip_packages() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPIP_SITE_META_PACKAGE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -1859,6 +2072,10 @@ java_archives_check() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lJAVA_ARCHIVES_JAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.jar" -type f)
   mapfile -t lJAVA_ARCHIVES_WAR_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.war" -type f)
   lJAVA_ARCHIVES_ARR=( "${lJAVA_ARCHIVES_JAR_ARR[@]}" "${lJAVA_ARCHIVES_WAR_ARR[@]}" )
@@ -1879,6 +2096,14 @@ java_archives_check() {
       if [[ ! "${lJ_FILE}" == *"Java archive data"* && ! "${lJ_FILE}" == *"Zip archive"* ]]; then
         continue
       fi
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lJAVA_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
       lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
@@ -1930,7 +2155,7 @@ java_archives_check() {
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -1987,6 +2212,11 @@ debian_status_files_analysis() {
   local lAPP_DEPS=""
   local lAPP_DEPS_ARR=()
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+  local lPACKAGE_DIR=""
+
   mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
   if [[ "${#lDEBIAN_MGMT_STATUS_ARR[@]}" -gt 0 ]] ; then
@@ -1999,6 +2229,16 @@ debian_status_files_analysis() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lDEBIAN_MGMT_STATUS_ARR[@]}" ; do
+
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPACKAGE_DIR="$(dirname "${lPACKAGE_FILE}")"
+
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: \|^Depends: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
           | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g' \
@@ -2070,11 +2310,28 @@ debian_status_files_analysis() {
               done
             fi
 
+            # if we have the list file also we can add all the paths provided by the package
+            if [[ -f "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list" ]]; then
+              local lPKG_LIST_ENTRY=""
+              local lCNT=0
+              while IFS= read -r lPKG_LIST_ENTRY; do
+                # exclude the root directory entry as this will confuse people
+                [[ "${lPKG_LIST_ENTRY}" == "/." ]] && continue
+                lCNT=$((lCNT+1))
+                lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+                # we limit the logging of the package files to 500 files per package
+                if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+                  lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+                  break
+                fi
+              done < "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list"
+            fi
+
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lPACKAGE:-NA}" "${lVERSION:-NA}"; then
+            if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
               print_output "[*] Already found results for ${lPACKAGE} / ${lVERSION}" "no_log"
               continue
             fi
@@ -2132,6 +2389,10 @@ openwrt_control_files_analysis() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
 
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
 
   if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]] ; then
@@ -2146,6 +2407,14 @@ openwrt_control_files_analysis() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
@@ -2212,7 +2481,7 @@ openwrt_control_files_analysis() {
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -2270,8 +2539,21 @@ rpm_package_mgmt_analysis() {
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
+  local lAPP_DEPS_ARR=()
+  local lAPP_DEP=""
+  local lAPP_FILE=""
+  local lAPP_FILE_ID=""
+  local lAPP_FILES_ARR=()
 
-  mapfile -t lRPM_PACKAGE_DBS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
+  # this handles the Berkley database
+  mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+  # this handles the sqlite database
+  mapfile -t lRPM_PACKAGE_DBS_SQLITE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/rpmdb.sqlite" -type f)
+  lRPM_PACKAGE_DBS_ARR=( "${lRPM_PACKAGE_DBS_BRK_ARR[@]}" "${lRPM_PACKAGE_DBS_SQLITE_ARR[@]}" )
 
   if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -2284,6 +2566,14 @@ rpm_package_mgmt_analysis() {
     write_log "[*] Analyzing ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
       lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
@@ -2301,12 +2591,20 @@ rpm_package_mgmt_analysis() {
         lAPP_NAME="${lAPP_NAME/*:\ }"
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        # just for output the details
-        rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true
-
         if [[ -z "${lAPP_NAME}" ]]; then
           continue
         fi
+
+        lAPP_LIC=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^License" || true)
+        lAPP_LIC="${lAPP_LIC/*:\ }"
+        lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
+
+        lAPP_ARCH=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Architecture" || true)
+        lAPP_ARCH="${lAPP_ARCH/*:\ }"
+        lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+
+        mapfile -t lAPP_DEPS_ARR < <(rpm -qR --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
+        mapfile -t lAPP_FILES_ARR < <(rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
 
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
@@ -2315,7 +2613,7 @@ rpm_package_mgmt_analysis() {
           lOS_IDENTIFIED="rpm-based"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "rpm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
+        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
@@ -2324,11 +2622,30 @@ rpm_package_mgmt_analysis() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
 
+          if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+            for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+              lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+            done
+          fi
+
+          # add package files to properties
+          if [[ "${#lAPP_FILES_ARR[@]}" -gt 0  ]]; then
+            for lAPP_FILE_ID in "${!lAPP_FILES_ARR[@]}"; do
+              lAPP_FILE="${lAPP_FILES_ARR["${lAPP_FILE_ID}"]}"
+              lPROP_ARRAY_INIT_ARR+=( "path:${lAPP_FILE#\.}" )
+              # we limit the logging of the package files to 500 files per package
+              if [[ "${lAPP_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+                lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+                break
+              fi
+            done
+          fi
+
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi

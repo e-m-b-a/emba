@@ -73,6 +73,7 @@ build_sbom_json_hashes_arr() {
   local lBINARY="${1:-}"
   local lAPP_NAME="${2:-}"
   local lAPP_VERS="${3:-}"
+  local lPACKAGING_SYSTEM="${4:-NA}"
 
   # HASHES_ARR is used in the caller
   export HASHES_ARR=()
@@ -107,6 +108,7 @@ build_sbom_json_hashes_arr() {
   # if all are matching this is duplicate and we do not need to log it
   # we return 1 if we already found something and the caller needs to handle it
   if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" ]]; then
+    # first check is for same hash, same name, same version:
     if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"; then
       # if we have found some sbom log file with the matching sha512 checksum, we then check if
       # it is the same name and version. If so, we will skip it in the caller
@@ -119,6 +121,23 @@ build_sbom_json_hashes_arr() {
         fi
       done
     fi
+
+    # 2nd test is now for same name and same version but other hash
+    # this results in the need to merge the new path of the binary into the already available component json
+    mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "${lPACKAGING_SYSTEM:-*}_${lAPP_NAME}_*" || true)
+    for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
+      write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
+      lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
+      lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")
+      if [[ "${lDUP_CHECK_NAME}" == "${lAPP_NAME}" ]] && [[ "${lDUP_CHECK_VERS}" == "${lAPP_VERS}" ]]; then
+        write_log "[+] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
+        lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
+        jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
+        mv "${lDUP_CHECK_FILE/\.json/\.tmp}" "${lDUP_CHECK_FILE}"
+        jq . "${lDUP_CHECK_FILE}" | tee -a "${SBOM_LOG_PATH}"/duplicates.txt
+        return 1
+      fi
+    done
   fi
   return 0
 
@@ -142,6 +161,8 @@ build_sbom_json_component_arr() {
   export SBOM_COMP_BOM_REF=""
   SBOM_COMP_BOM_REF="$(uuidgen)"
 
+  local lAPP_LIC_ARR=()
+
   if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
     lAPP_MAINT=""
   fi
@@ -149,6 +170,11 @@ build_sbom_json_component_arr() {
 
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
+  fi
+  if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" || "${lAPP_LIC}" == "null" || "${lAPP_LIC}" == "unknown" ]]; then
+    lAPP_LIC_ARR=()
+  else
+    lAPP_LIC_ARR+=( "name=${lAPP_LIC}" )
   fi
   if [[ -n "${lCPE_IDENTIFIER}" ]] && [[ "${lCPE_IDENTIFIER}" == "NA" ]]; then
     lCPE_IDENTIFIER=""
@@ -173,8 +199,12 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
-  if [[ -n "${lAPP_LIC}" ]] && [[ ! "${lAPP_LIC}" == "NA" ]]; then
-    lCOMPONENT_ARR+=( "license=$(jo name="${lAPP_LIC}")" )
+  if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
+    local lTMP_IDENTIFIER="${RANDOM}"
+    # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
+    jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" > "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
+    lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
+    rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
   fi
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
@@ -188,23 +218,11 @@ build_sbom_json_component_arr() {
     mkdir "${SBOM_LOG_PATH}" || true
   fi
 
-  # if ! check_for_duplicates "${lAPP_NAME}"; then
-    jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
-  # else
-  #   print_output "[-] Possible duplicate found for ${lAPP_NAME}" "no_log"
-  # fi
+  jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
 
   # we can unset it here again
   unset HASHES_ARR
   unset PROPERTIES_PATH_JSON_ARR
-}
-
-check_for_duplicates() {
-  local lAPP_NAME="${1:-}"
-  # local lDUPLICATE_FILES=()
-  # check if we already have a result in our sbom
-  # mapfile -t lDUPLICATE_FILES < <(grep -i -l "${lAPP_NAME}" "${SBOM_LOG_PATH%\/}/"*)
-  print_output "[-] Duplicate check for ${lAPP_NAME} not available" "no_log"
 }
 
 # translate known vendors from short variant to the long variant:

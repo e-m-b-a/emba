@@ -69,6 +69,17 @@ lighttpd_binary_analysis() {
   local lLIGHT_BIN=""
   local lCSV_RULE=""
 
+  local lOS_IDENTIFIED=""
+  local lBIN_ARCH=""
+  local lAPP_NAME=""
+  local lAPP_MAINT=""
+  local lAPP_VERS=""
+  local lPURL_IDENTIFIER=""
+  local lCPE_IDENTIFIER=""
+  local lPACKAGING_SYSTEM="static_lighttpd_analysis"
+
+  lOS_IDENTIFIED=$(distri_check)
+
   if [[ -f "${S09_CSV_LOG}" ]] && grep -q "lighttpd" "${S09_CSV_LOG}"; then
     # if we already have results from s09 we just use them
     mapfile -t LIGHT_VERSIONS < <(grep "lighttpd" "${S09_CSV_LOG}" | cut -d\; -f4 | sort -u || true)
@@ -98,6 +109,41 @@ lighttpd_binary_analysis() {
           print_output "[+] Version information found ${RED}${lVERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lLIGHT_BIN}")${GREEN} (license: ${ORANGE}${lLIC}${GREEN}) (${ORANGE}static${GREEN})."
           lCSV_RULE=$(get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}")
           LIGHT_VERSIONS+=( "${lCSV_RULE}" )
+
+          lMD5_CHECKSUM="$(md5sum "${lLIGHT_BIN}" | awk '{print $1}')"
+          lSHA256_CHECKSUM="$(sha256sum "${lLIGHT_BIN}" | awk '{print $1}')"
+          lSHA512_CHECKSUM="$(sha512sum "${lLIGHT_BIN}" | awk '{print $1}')"
+
+          lBIN_ARCH=$(file -b "${lLIGHT_BIN}" | cut -d ',' -f2)
+          lBIN_ARCH=${lBIN_ARCH#\ }
+          lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
+          lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
+          lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
+          lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+          lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
+
+          if command -v jo >/dev/null; then
+            # add source file path information to our properties array:
+            local lPROP_ARRAY_INIT_ARR=()
+            lPROP_ARRAY_INIT_ARR+=( "source_path:${lLIGHT_BIN}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
+            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
+
+            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+            # final array with all hash values
+            if ! build_sbom_json_hashes_arr "${lLIGHT_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+              continue
+            fi
+
+            # create component entry - this allows adding entries very flexible:
+            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          fi
+          check_for_s08_csv_log "${S08_CSV_LOG}"
+          write_log "${lPACKAGING_SYSTEM};${lLIGHT_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIER:-NA};${lCSV_RULE:-NA};${lLIC:-NA};${lAPP_MAINT:-NA};${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
           continue
         fi
       done

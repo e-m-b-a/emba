@@ -494,22 +494,54 @@ dependency_check()
     fi
   fi
 
-  print_ln "no_log"
-  print_output "[*] Necessary utils on system:" "no_log"
 
   #######################################################################################
-  # Docker for EMBA with docker
+  # Docker for EMBA with docker and notification environment
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 1 ]] && [[ "${ONLY_DEP}" -ne 2 ]]; then
+    print_ln "no_log"
+    print_output "[*] Necessary utils on system:" "no_log"
+
     check_dep_tool "docker"
     check_dep_tool "inotifywait"
     check_dep_tool "notify-send"
   fi
 
   #######################################################################################
-  # Check system tools
+  # Set needed paths and exports inside our container
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 0 ]] ; then
+    if command -v binwalk > /dev/null ; then
+      export BINWALK_BIN=()
+      local lBINWALK_VER=""
+      BINWALK_BIN=("$(which binwalk)")
+    fi
+    # cyclonedx - converting csv sbom to json sbom
+    if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
+      export PATH=${PATH}:/home/linuxbrew/.linuxbrew/bin/
+    fi
+    if [[ -d "/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/" ]]; then
+      # check this - currently cyclone is installed in this dir in our docker image:
+      export PATH=${PATH}:/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/
+    fi
+    export OBJDUMP="${EXT_DIR}""/objdump"
+
+    if [[ -d "${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC" ]]; then
+      export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
+    elif [[ -d "${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC" ]]; then
+      export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC"
+    fi
+  fi
+
+  #######################################################################################
+  # Check system tools
+  #######################################################################################
+  # disable the complete docker checks for now -> we will redesign this mechanism soon
+  # For now we need to manually enable it via setting "-eq 0" in the following line
+  if [[ "${USE_DOCKER}" -eq 9 ]] ; then
+    print_ln "no_log"
+    print_output "[*] Necessary utils on system:" "no_log"
+
     local lSYSTEM_TOOLS_ARR=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" \
       "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" \
       "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" \
@@ -645,19 +677,17 @@ dependency_check()
       check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/biosutilities/ami_pfat_extract.py"
       check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
 
-      if function_exists F20_vul_aggregator; then
-        # ensure this check is not running as github action:
-        # "${CONFIG_DIR}"/gh_action is created from the installer
-        if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
-          check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
-        fi
-        # CVE searchsploit
-        check_dep_tool "CVE Searchsploit" "cve_searchsploit"
-
-        check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
-        check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
-        check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
+      # ensure this check is not running as github action:
+      # "${CONFIG_DIR}"/gh_action is created from the installer
+      if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
+        check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
       fi
+      # CVE searchsploit
+      check_dep_tool "CVE Searchsploit" "cve_searchsploit"
+
+      check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
+      check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
+      check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
 
       # checksec
       check_dep_file "checksec script" "${EXT_DIR}""/checksec"
@@ -688,16 +718,13 @@ dependency_check()
       # linux-exploit-suggester.sh script
       check_dep_file "linux-exploit-suggester.sh script" "${EXT_DIR}""/linux-exploit-suggester.sh"
 
-      if function_exists S13_weak_func_check; then
-        # objdump
-        export OBJDUMP="${EXT_DIR}""/objdump"
-        check_dep_file "objdump disassembler" "${OBJDUMP}"
-      fi
+      # objdump
+      export OBJDUMP="${EXT_DIR}""/objdump"
+      check_dep_file "objdump disassembler" "${OBJDUMP}"
 
-      if function_exists S14_weak_func_radare_check; then
-        # radare2
-        check_dep_tool "radare2" "r2"
-      fi
+      # radare2
+      check_dep_tool "radare2" "r2"
+
       check_dep_file "Identify capabilities in executable files" "${EXT_DIR}/capa"
 
       # bandit python security tester

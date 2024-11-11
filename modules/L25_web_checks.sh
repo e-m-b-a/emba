@@ -219,7 +219,7 @@ check_for_basic_auth_init() {
       export CURL_CREDS=(-u "${CREDS}")
     fi
   else
-      print_output "[*] No basic auth found in Nmap logs"
+    print_output "[*] No basic auth found in Nmap logs"
   fi
 }
 

@@ -95,7 +95,7 @@ add_link_tags() {
       lREF_LINK="$(sed "${lREF_LINK_NUMBER}""q;d" "${lLINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       local lURL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "${lREF_LINK}" | cut -d"#" -f1)" ]] ; then
-        if [[  ( ("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c") || ("${lREF_LINK: -5}" == ".json")) ]] ; then
+        if [[  ( ("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c") ) ]] ; then
           local lREF_ANCHOR=""
           if [[ ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) ) ]] ; then
             lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
@@ -115,6 +115,17 @@ add_link_tags() {
           while [[ ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${P_START}${SPAN_END}${P_END}") || ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${BR}" ) ]] ; do
             lLINE_NUMBER_INFO_PREV=$(( lLINE_NUMBER_INFO_PREV - 1 ))
           done
+          LINK_COMMAND_ARR+=( "${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
+        elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -5}" == ".spdx" ]]; then
+          lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
+          local lRES_PATH=""
+          lRES_PATH="${ABS_HTML_PATH}""/""$(echo "${BACK_LINK}" | cut -d"." -f1 )""/res"
+          if [[ ! -d "${lRES_PATH}" ]] ; then mkdir -p "${lRES_PATH}" > /dev/null || true ; fi
+          cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
+
+          lLINE_NUMBER_INFO_PREV="$(( lREF_LINK_NUMBER - 1 ))"
+          lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@./$(echo "${BACK_LINK}" | cut -d"." -f1 )/res/$(basename "${lREF_LINK}")@g" || true)"
+
           LINK_COMMAND_ARR+=( "${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
         elif [[ "${lREF_LINK: -7}" == ".tar.gz" ]] ; then
           local lRES_PATH=""
