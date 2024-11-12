@@ -43,6 +43,13 @@ S09_firmware_base_version_check() {
   local VERSIONS_DETECTED=""
   local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
 
+  local lPKG_CNT=0
+  local lFILE_ARR_TMP=()
+  local lFILE=""
+  local lTMP_CNT=0
+  local BIN=""
+  local lRPM_DIR=""
+
   if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
     # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
     local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
@@ -51,12 +58,87 @@ S09_firmware_base_version_check() {
     print_output "[*] Quick scan enabled - ${V_CNT/\ *} version identifiers loaded"
   fi
 
-  print_output "[*] Generate strings overview for further analysis ..." "no_log"
-  local BIN=""
-  # if we have a linux we only need to check our BINARIES array
-  if [[ ${RTOS} -eq 0 ]]; then
-    local FILE_ARR=( "${BINARIES[@]}" )
+  # in sbom mode we probably have not populated our arrays
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    # prepare_file_arr "${LOG_DIR}/firmware"
+    print_output "[*] Prepare file array ..." "no_log"
+    readarray -t FILE_ARR < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   fi
+  for lFILE in "${FILE_ARR[@]}"; do
+    if file -b "${lFILE}"| grep -q ELF; then 
+      # print_output "$(indent "$(orange "${lFILE}")")"
+      echo "${lFILE}" >> "${LOG_PATH_MODULE}"/init_bins.txt
+    fi
+  done
+
+  printf "%s\n" "${FILE_ARR[@]}" > "${LOG_PATH_MODULE}"/firmware_binaries.txt
+
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    print_output "[*] Checking for common package manager environments to optimize static version detection"
+    # Debian:
+    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -exec cat {} \; | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
+    # OpenWRT
+    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -exec cat {} \; | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+    # Todo: rpm
+    # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
+    lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
+    # get all packages in array and run through them to extract all paths
+    # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
+
+    if [[ -f "${LOG_PATH_MODULE}"/debian_known_files.txt ]]; then
+      cat "${LOG_PATH_MODULE}"/debian_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
+    if [[ -f "${LOG_PATH_MODULE}"/openwrt_known_files.txt ]]; then
+      cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
+    if [[ -f "${LOG_PATH_MODULE}"/rpm_known_files.txt ]]; then
+      cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
+
+    if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
+      sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+      sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+      mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
+
+    if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
+      print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against file array ${ORANGE}${#FILE_ARR[@]}${NC}"
+      for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
+        (grep -E "${lPKG_FILE}$" "${LOG_PATH_MODULE}/firmware_binaries.txt" >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+      done
+
+      print_output "[*] Waiting for grepping jobs" "no_log"
+      wait $(jobs -p)
+      print_output "[*] file diffing" "no_log"
+
+      cat "${LOG_PATH_MODULE}"/known_system_pkg_files.txt | sort -u >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true 
+      cat "${LOG_PATH_MODULE}"/firmware_binaries.txt | sort -u >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true 
+
+      # we have now all our filesystem bins in "${LOG_PATH_MODULE}/firmware_binaries.txt"
+      # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
+      # now we just need to do a diff on them and we should have only the non matching files
+      comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
+      mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
+
+      if [[ "${#lFILE_ARR_TMP[@]}" -lt "${#FILE_ARR[@]}" ]]; then
+        print_output "[*] Identified ${ORANGE}${#FILE_ARR[@]}${NC} binaries before package manager matching"
+        print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager"
+        FILE_ARR=()
+        for lFILE in "${lFILE_ARR_TMP[@]}"; do
+          if file -b "${lFILE}"| grep -q ELF; then 
+            # print_output "$(indent "$(orange "${lFILE}")")"
+            FILE_ARR+=( "${lFILE}" )
+            echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
+          fi
+        done
+        print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} binaries which are not handled by the package manager"
+      else
+        print_output "[*] No package manager updates for static analysis"
+      fi
+    fi
+  fi
+
+  print_output "[*] Generate strings overview for static version analysis ..."
   mkdir "${LOG_PATH_MODULE}"/strings_bins/
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
     mkdir "${LOG_PATH_MODULE}"/strings_bins || true
@@ -68,6 +150,10 @@ S09_firmware_base_version_check() {
     WAIT_PIDS_S09_1+=( "${TMP_PID}" )
     max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S09_1[@]}"
   done
+
+  print_output "[*] Waiting for strings generator" "no_log"
+  wait_for_pid "${WAIT_PIDS_S09[@]}"
+  print_output "[*] Proceeding with version detection for ${#FILE_ARR[@]} firmware files"
 
   while read -r VERSION_LINE; do
     if safe_echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
@@ -401,6 +487,17 @@ S09_firmware_base_version_check() {
   module_end_log "${FUNCNAME[0]}" "${VERSIONS_DETECTED}"
 }
 
+check_pkg_files_filesystem() {
+  local lPKG_FILE="${1:-}"
+  local lFS_FILES="${2:-}"
+
+  # if our file from the filesystem is in the package managers array we do not need to test it here
+  if grep -E -q "${lPKG_FILE}$" "${lFS_FILES}"; then
+    # print_output "[+] Adding ${ORANGE}${lFILE}${GREEN} to testing array ..." "no_log"
+    grep -E "${lPKG_FILE}$" "${lFS_FILES}" >> "${LOG_PATH_MODULE}"/known_system_files.txt
+  fi
+}
+
 build_generic_purl() {
   local lCSV_RULE="${1:-}"
   local lOS_IDENTIFIED="${2:-NA}"
@@ -479,7 +576,8 @@ generate_strings() {
   # if we do not talk about a RTOS it is a Linux and we test ELF files
   if [[ ${RTOS} -eq 0 ]]; then
     BIN_FILE=$(file -b "${BIN}" || true)
-    if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
+    if [[ "${BIN_FILE}" != *uImage* && "${BIN_FILE}" != *Kernel\ Image* && "${BIN_FILE}" != *ELF* ]] ; then
+      print_output "[-] Not generating strings - RTOS: ${RTOS} / ${BIN_FILE}"
       return
     fi
   fi
@@ -488,7 +586,7 @@ generate_strings() {
   BIN_NAME_REAL="$(basename "${BIN}")"
   STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
   if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
-    strings "${BIN}" > "${STRINGS_OUTPUT}" || true
+    strings "${BIN}" | uniq > "${STRINGS_OUTPUT}" || true
   fi
 }
 
@@ -508,16 +606,20 @@ bin_string_checker() {
   local lPURL_IDENTIFIER="NA"
   local lOS_IDENTIFIED=""
 
-  if [[ ${RTOS} -eq 0 ]]; then
+  # check this - I think we do not really need this anymore
+  if [[ ${RTOS} -eq 0 && "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     local FILE_ARR=( "${BINARIES[@]}" )
   fi
+  # print_output "[*] Testing ${#FILE_ARR[@]} binaries against identifier ${VERSION_IDENTIFIER}"
   lOS_IDENTIFIED=$(distri_check)
 
   for BIN in "${FILE_ARR[@]}"; do
+    # print_output "[*] Testing ${BIN} for versions"
     MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
     BIN_NAME_REAL="$(basename "${BIN}")"
     STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
     if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
+      print_output "[-] Warning: Strings for bin ${BIN} not found"
       continue
     fi
 

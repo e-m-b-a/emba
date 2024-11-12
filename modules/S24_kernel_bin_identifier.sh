@@ -34,8 +34,10 @@ S24_kernel_bin_identifier()
 
   # just in case it is not already populated:
   if [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
-    prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+    print_output "[*] Prepare s24 file array"
+    prepare_file_arr_limited "${LOG_DIR}"/firmware
   fi
+  print_output "[*] Testing ${#FILE_ARR_LIMITED[@]} files for linux kernel data"
 
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
   local lOS_IDENTIFIED=""

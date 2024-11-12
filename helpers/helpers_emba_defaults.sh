@@ -31,6 +31,7 @@ set_defaults() {
   export BINARY_EXTENDED=0
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
+  export DEEP_EXT_DEPTH=4
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
   export FORCE=0

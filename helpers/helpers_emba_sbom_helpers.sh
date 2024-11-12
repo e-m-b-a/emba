@@ -122,7 +122,7 @@ build_sbom_json_hashes_arr() {
       done
     fi
 
-    # 2nd test is now for same name and same version but other hash
+    # 2nd test is now for same name and same version but other hash (new file with the same name/version detected)
     # this results in the need to merge the new path of the binary into the already available component json
     mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "${lPACKAGING_SYSTEM:-*}_${lAPP_NAME}_*" || true)
     for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
@@ -197,6 +197,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
   lCOMPONENT_ARR+=( "-s" "version=${lAPP_VERS}" )
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
+  lCOMPONENT_ARR+=( "supplier=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
   if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then

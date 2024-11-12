@@ -536,9 +536,7 @@ dependency_check()
   #######################################################################################
   # Check system tools
   #######################################################################################
-  # disable the complete docker checks for now -> we will redesign this mechanism soon
-  # For now we need to manually enable it via setting "-eq 0" in the following line
-  if [[ "${USE_DOCKER}" -eq 9 ]] ; then
+  if [[ "${USE_DOCKER}" -eq 0 ]] ; then
     print_ln "no_log"
     print_output "[*] Necessary utils on system:" "no_log"
 

@@ -536,9 +536,6 @@ check_firmware() {
 
 detect_root_dir_helper() {
   local lSEARCH_PATH="${1:-}"
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    return
-  fi
 
   print_output "[*] Root directory auto detection for ${ORANGE}${lSEARCH_PATH}${NC} (could take some time)\\n"
   export ROOT_PATH=()

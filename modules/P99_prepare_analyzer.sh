@@ -51,14 +51,14 @@ P99_prepare_analyzer() {
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
   fi
 
+  print_output "[*] Quick check for Linux operating-system"
+  check_firmware
+
   if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
     lNEG_LOG=0
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
     return
   fi
-
-  print_output "[*] Quick check for Linux operating-system"
-  check_firmware
 
   prepare_file_arr "${FIRMWARE_PATH}"
   prepare_binary_arr "${FIRMWARE_PATH}"
