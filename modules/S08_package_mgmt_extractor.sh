@@ -59,7 +59,7 @@ build_dependency_tree() {
     return
   fi
 
-  sub_module_title "SBOM dependency tree build" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  sub_module_title "SBOM dependency tree builder"
 
   local lSBOM_COMPONENT_FILES_ARR=()
   local lSBOM_COMP=""
@@ -153,12 +153,12 @@ create_comp_dep_tree_threader() {
       lSBOM_COMP_DEPS_ARR+=("-s" "${lSBOM_INVALID_COM_REF}-NO_VALID_REF-${lSBOM_COMP_DEP}")
     fi
   done
-  print_output "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  write_log "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
 
   cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >> "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
   rm "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
 
-  jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" | tee -a "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
+  jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" >> "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
 }
 
 

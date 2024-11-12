@@ -43,12 +43,9 @@ S09_firmware_base_version_check() {
   local VERSIONS_DETECTED=""
   local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
 
-  local lPKG_CNT=0
   local lFILE_ARR_TMP=()
   local lFILE=""
-  local lTMP_CNT=0
   local BIN=""
-  local lRPM_DIR=""
 
   if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
     # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
@@ -65,7 +62,7 @@ S09_firmware_base_version_check() {
     readarray -t FILE_ARR < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   fi
   for lFILE in "${FILE_ARR[@]}"; do
-    if file -b "${lFILE}"| grep -q ELF; then 
+    if file -b "${lFILE}"| grep -q ELF; then
       # print_output "$(indent "$(orange "${lFILE}")")"
       echo "${lFILE}" >> "${LOG_PATH_MODULE}"/init_bins.txt
     fi
@@ -81,7 +78,7 @@ S09_firmware_base_version_check() {
     find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -exec cat {} \; | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
-    lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
+    # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
     # get all packages in array and run through them to extract all paths
     # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
 
@@ -108,11 +105,12 @@ S09_firmware_base_version_check() {
       done
 
       print_output "[*] Waiting for grepping jobs" "no_log"
+      # shellcheck disable=SC2046
       wait $(jobs -p)
       print_output "[*] file diffing" "no_log"
 
-      cat "${LOG_PATH_MODULE}"/known_system_pkg_files.txt | sort -u >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true 
-      cat "${LOG_PATH_MODULE}"/firmware_binaries.txt | sort -u >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true 
+      sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
+      sort -u "${LOG_PATH_MODULE}"/firmware_binaries.txt >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
 
       # we have now all our filesystem bins in "${LOG_PATH_MODULE}/firmware_binaries.txt"
       # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
@@ -125,7 +123,7 @@ S09_firmware_base_version_check() {
         print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager"
         FILE_ARR=()
         for lFILE in "${lFILE_ARR_TMP[@]}"; do
-          if file -b "${lFILE}"| grep -q ELF; then 
+          if file -b "${lFILE}"| grep -q ELF; then
             # print_output "$(indent "$(orange "${lFILE}")")"
             FILE_ARR+=( "${lFILE}" )
             echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
@@ -152,8 +150,8 @@ S09_firmware_base_version_check() {
   done
 
   print_output "[*] Waiting for strings generator" "no_log"
-  wait_for_pid "${WAIT_PIDS_S09[@]}"
-  print_output "[*] Proceeding with version detection for ${#FILE_ARR[@]} firmware files"
+  wait_for_pid "${WAIT_PIDS_S09_1[@]}"
+  print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} firmware files"
 
   while read -r VERSION_LINE; do
     if safe_echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
@@ -567,26 +565,30 @@ build_cpe_identifier() {
 }
 
 generate_strings() {
-  local BIN="${1:-}"
-  local BIN_FILE=""
-  local MD5_SUM=""
-  local BIN_NAME_REAL=""
-  local STRINGS_OUTPUT=""
+  local lBIN="${1:-}"
+  local lBIN_FILE=""
+  local lMD5_SUM=""
+  local lBIN_NAME_REAL=""
+  local lSTRINGS_OUTPUT=""
 
+  lBIN_FILE=$(file -b "${lBIN}" || true)
   # if we do not talk about a RTOS it is a Linux and we test ELF files
   if [[ ${RTOS} -eq 0 ]]; then
-    BIN_FILE=$(file -b "${BIN}" || true)
-    if [[ "${BIN_FILE}" != *uImage* && "${BIN_FILE}" != *Kernel\ Image* && "${BIN_FILE}" != *ELF* ]] ; then
-      print_output "[-] Not generating strings - RTOS: ${RTOS} / ${BIN_FILE}"
+    lBIN_FILE=$(file -b "${lBIN}" || true)
+    if [[ "${lBIN_FILE}" != *uImage* && "${lBIN_FILE}" != *Kernel\ Image* && "${lBIN_FILE}" != *ELF* ]] ; then
+      print_output "[-] Not generating strings - RTOS: ${RTOS} / ${lBIN_FILE}"
       return
     fi
   fi
+  if [[ "${lBIN_FILE}" == *"ASCII text"* ]]; then
+    return
+  fi
 
-  MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
-  BIN_NAME_REAL="$(basename "${BIN}")"
-  STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
-  if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
-    strings "${BIN}" | uniq > "${STRINGS_OUTPUT}" || true
+  lMD5_SUM="$(md5sum "${lBIN}" | awk '{print $1}')"
+  lBIN_NAME_REAL="$(basename "${lBIN}")"
+  lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
+  if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
+    strings "${lBIN}" | uniq > "${lSTRINGS_OUTPUT}" || true
   fi
 }
 

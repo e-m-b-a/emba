@@ -126,15 +126,15 @@ build_sbom_json_hashes_arr() {
     # this results in the need to merge the new path of the binary into the already available component json
     mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "${lPACKAGING_SYSTEM:-*}_${lAPP_NAME}_*" || true)
     for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
-      write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
+      # write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
       lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
       lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")
       if [[ "${lDUP_CHECK_NAME}" == "${lAPP_NAME}" ]] && [[ "${lDUP_CHECK_VERS}" == "${lAPP_VERS}" ]]; then
-        write_log "[+] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
+        # write_log "[+] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
         jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
         mv "${lDUP_CHECK_FILE/\.json/\.tmp}" "${lDUP_CHECK_FILE}"
-        jq . "${lDUP_CHECK_FILE}" | tee -a "${SBOM_LOG_PATH}"/duplicates.txt
+        # jq . "${lDUP_CHECK_FILE}" >> "${SBOM_LOG_PATH}"/duplicates.txt
         return 1
       fi
     done
@@ -197,7 +197,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
   lCOMPONENT_ARR+=( "-s" "version=${lAPP_VERS}" )
   lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
-  lCOMPONENT_ARR+=( "supplier=${lAPP_MAINT}" )
+  # lCOMPONENT_ARR+=( "supplier=${lAPP_MAINT}" )
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
   if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
