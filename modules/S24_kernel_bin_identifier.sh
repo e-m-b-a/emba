@@ -62,7 +62,7 @@ S24_kernel_bin_identifier()
     local lAPP_VERS=""
     local lAPP_TYPE="operating-system"
 
-    if file -b "${lFILE}" | grep -q "ASCII text"; then
+    if file -b "${lFILE}" | grep -q "ASCII text\|Unicode text"; then
       # reduce false positive rate
       continue
     fi

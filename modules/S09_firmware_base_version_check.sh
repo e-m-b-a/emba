@@ -580,7 +580,7 @@ generate_strings() {
       return
     fi
   fi
-  if [[ "${lBIN_FILE}" == *"ASCII text"* ]]; then
+  if [[ "${lBIN_FILE}" == *"ASCII text"* || "${lBIN_FILE}" == *"Unicode text"* ]]; then
     return
   fi
 
