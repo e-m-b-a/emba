@@ -107,9 +107,9 @@ run_modules()
     local MODULES_LOCAL=()
     local MODULES_EMBA=()
 
-    mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
     fi
     MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
     export MODULES_EXPORTED+=("${MODULES[@]}")
@@ -193,7 +193,7 @@ run_modules()
       local MOD_FIN=0
       if [[ "${SELECT_NUM}" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
         local MODULE=""
-        MODULE=$(find "${MOD_DIR}" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+        MODULE=$(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
         # we need the whole module name including path in our array for later checks on it
         export MODULES_EXPORTED+=("${MODULE}")
         if ( file "${MODULE}" | grep -q "shell script" ) && ! [[ "${MODULE}" =~ \ |\' ]] ; then
@@ -241,9 +241,9 @@ run_modules()
         local MODULES=()
         local MODULES_LOCAL=()
         local MODULES_EMBA=()
-        mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+        mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
         if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
         fi
         MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
 
