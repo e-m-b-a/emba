@@ -619,6 +619,11 @@ bin_string_checker() {
     # print_output "[*] Testing ${BIN} for versions"
     MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
     BIN_NAME_REAL="$(basename "${BIN}")"
+    local BIN_FILE=""
+    BIN_FILE=$(file -b "${BIN}" || true)
+    if [[ "${BIN_FILE}" == *"ASCII text"* || "${BIN_FILE}" == *"Unicode text"* ]]; then
+      continue
+    fi
     STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
     if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
       print_output "[-] Warning: Strings for bin ${BIN} not found"
@@ -629,7 +634,6 @@ bin_string_checker() {
     for (( j=0; j<${#VERSION_IDENTIFIERS_ARR[@]}; j++ )); do
       local VERSION_IDENTIFIER="${VERSION_IDENTIFIERS_ARR["${j}"]}"
       local VERSION_FINDER=""
-      local BIN_FILE=""
       [[ -z "${VERSION_IDENTIFIER}" ]] && continue
       # this is a workaround to handle the new multi_grep
       if [[ "${VERSION_IDENTIFIER: 0:1}" == '"' ]]; then
@@ -637,7 +641,6 @@ bin_string_checker() {
         VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
       fi
       if [[ ${RTOS} -eq 0 ]]; then
-        BIN_FILE=$(file -b "${BIN}" || true)
         # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
         if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
           continue 2

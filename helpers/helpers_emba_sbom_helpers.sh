@@ -133,7 +133,7 @@ build_sbom_json_hashes_arr() {
         # write_log "[+] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
         jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
-        mv "${lDUP_CHECK_FILE/\.json/\.tmp}" "${lDUP_CHECK_FILE}"
+        mv "${lDUP_CHECK_FILE/\.json/\.tmp}" "${lDUP_CHECK_FILE}" || true
         # jq . "${lDUP_CHECK_FILE}" >> "${SBOM_LOG_PATH}"/duplicates.txt
         return 1
       fi
