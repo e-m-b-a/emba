@@ -130,8 +130,8 @@ create_comp_dep_tree_threader() {
     return
   fi
 
-  if [[ ! -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
-    mkdir "${SBOM_LOG_PATH}/SBOM_deps" || true
+  if [[ ! -d "${SBOM_LOG_PATH%\/}/SBOM_deps" ]]; then
+    mkdir "${SBOM_LOG_PATH%\/}/SBOM_deps" 2>/dev/null || true
   fi
 
   # now we check every dependency for the current component
