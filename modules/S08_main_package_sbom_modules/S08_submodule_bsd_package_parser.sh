@@ -111,13 +111,13 @@ S08_submodule_bsd_package_parser() {
       fi
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pkg" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
 
-      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+      local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
         mkdir "${TMP_DIR}"/pkg_tmp
         tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}"/pkg_tmp || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
         mapfile -t lPKG_FILES_ARR < <(find "${TMP_DIR}"/pkg_tmp)
@@ -149,7 +149,7 @@ S08_submodule_bsd_package_parser() {
       fi
 
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -f "${TMP_DIR}"/+COMPACT_MANIFEST || true
     done

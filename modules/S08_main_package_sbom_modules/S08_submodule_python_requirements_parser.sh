@@ -152,7 +152,7 @@ python_requirements_threader() {
   fi
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
 
-  STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+  local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         # with internet we can query further details
         # └─$ curl -sH "accept: application/json" https://pypi.org/pypi/"${lAPP_NAME}"/json | jq '.info.author, .info.classifiers'
@@ -167,7 +167,7 @@ python_requirements_threader() {
     # are in the package
     local lPROP_ARRAY_INIT_ARR=()
     lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
     build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -183,5 +183,5 @@ python_requirements_threader() {
   fi
 
   write_log "[*] Python requirement details: ${ORANGE}${lPY_REQ_FILE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-  write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+  write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
 }

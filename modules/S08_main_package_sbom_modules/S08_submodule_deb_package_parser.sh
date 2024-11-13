@@ -133,14 +133,14 @@ S08_submodule_deb_package_parser() {
         lOS_IDENTIFIED="debian-based"
       fi
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "deb" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+      local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
         # add package files to properties
         if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
@@ -170,7 +170,7 @@ S08_submodule_deb_package_parser() {
       fi
 
       write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -r "${TMP_DIR}/deb_package/" || true
     done

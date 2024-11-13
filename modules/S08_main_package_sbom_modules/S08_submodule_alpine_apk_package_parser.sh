@@ -104,13 +104,13 @@ S08_submodule_alpine_apk_package_parser() {
       fi
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "apk" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
 
-      STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+      local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
       if command -v jo >/dev/null; then
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
         mapfile -t lAPK_FILES_ARR < <(find "${TMP_DIR}"/apk)
         # add package files to properties
@@ -140,7 +140,7 @@ S08_submodule_alpine_apk_package_parser() {
       fi
 
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -rf "${TMP_DIR}"/apk || true
     done

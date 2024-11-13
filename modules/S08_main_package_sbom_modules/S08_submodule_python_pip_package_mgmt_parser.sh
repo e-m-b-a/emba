@@ -96,7 +96,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           lOS_IDENTIFIED="generic"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+        local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
@@ -104,7 +104,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -120,7 +120,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         fi
 
         write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
@@ -159,7 +159,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           lOS_IDENTIFIED="generic"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+        local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
@@ -167,7 +167,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -183,7 +183,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         fi
 
         write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_DIST_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_DIST_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done
@@ -242,7 +242,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           lOS_IDENTIFIED="generic"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+        local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
@@ -250,7 +250,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -266,7 +266,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         fi
 
         write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
 
@@ -305,7 +305,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           lOS_IDENTIFIED="generic"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "pypi" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+        local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
@@ -313,7 +313,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -329,7 +329,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         fi
 
         write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done

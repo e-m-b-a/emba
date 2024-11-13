@@ -97,7 +97,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
           lOS_IDENTIFIED="openwrt"
         fi
         lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "opkg" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-        STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
+        local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS}"
 
         if command -v jo >/dev/null; then
           # add the python requirement path information to our properties array:
@@ -105,7 +105,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
           # are in the package
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
           if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
             for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
@@ -142,7 +142,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
         fi
 
         write_log "[*] OpenWRT package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lAPP_NAME}${NC} - ${ORANGE}${lAPP_VERS}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       fi
     done

@@ -157,14 +157,14 @@ debian_status_files_analysis_threader() {
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "deb" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_ARCH:-NA}")
   lAPP_VENDOR="${lPACKAGE}"
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
-  STRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
+  local lSTRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
 
   ### new SBOM json testgenerator
   if command -v jo >/dev/null; then
     # add source file path information to our properties array:
     local lPROP_ARRAY_INIT_ARR=()
     lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
     if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
       for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
         lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
@@ -202,5 +202,5 @@ debian_status_files_analysis_threader() {
   fi
 
   write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-  write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+  write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
 }

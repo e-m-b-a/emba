@@ -125,7 +125,7 @@ node_js_package_lock_threader() {
     lOS_IDENTIFIED="generic"
   fi
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "npm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-  STRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+  local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
   if command -v jo >/dev/null; then
     # add the node lock path information to our properties array:
@@ -133,7 +133,7 @@ node_js_package_lock_threader() {
     # are in the package
     local lPROP_ARRAY_INIT_ARR=()
     lPROP_ARRAY_INIT_ARR+=( "source_path:${lNODE_LCK_ARCHIVE}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${STRIPPED_VERSION}" )
+    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
     build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -149,6 +149,6 @@ node_js_package_lock_threader() {
   fi
 
   write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-  write_csv_log "${lPACKAGING_SYSTEM}" "${lNODE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${STRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC:-NA}"
+  write_csv_log "${lPACKAGING_SYSTEM}" "${lNODE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC:-NA}"
 }
 
