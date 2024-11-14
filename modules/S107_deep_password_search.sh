@@ -27,7 +27,7 @@ S107_deep_password_search()
   local PW_HASHES=()
   local PW_HASH=""
 
-  find "${FIRMWARE_PATH}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'grep --color -n -a -E -H -f "${PW_HASH_CONFIG}" %' > "${TMP_DIR}"/pw_hashes.txt
+  find "${FIRMWARE_PATH}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'grep --color -n -a -E -H -f '"${PW_HASH_CONFIG}"' %' > "${TMP_DIR}"/pw_hashes.txt
 
   if [[ $(wc -l "${TMP_DIR}"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
     print_output "[+] Found the following password hash values:"

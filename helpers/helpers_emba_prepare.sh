@@ -58,6 +58,7 @@ log_folder() {
     fi
 
     # we check the found sha512 hash with the firmware to test:
+    # shellcheck disable=SC2153
     if [[ -f "${CSV_DIR}"/p02_firmware_bin_file_check.csv ]] && [[ -f "${FIRMWARE_PATH}" ]] && grep -q "SHA512" "${CSV_DIR}"/p02_firmware_bin_file_check.csv; then
       lSTORED_SHA512=$(grep "SHA512" "${CSV_DIR}"/p02_firmware_bin_file_check.csv | cut -d\; -f2 | sort -u)
       lFW_SHA512=$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')
