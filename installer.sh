@@ -280,6 +280,9 @@ if [[ ${LIST_DEP} -eq 0 ]] ; then
   apt-get -y update
 fi
 
+# To using ubi and nandsim with modprobe, the linux-modules-extra package must be installed. (Ubuntu 22.04)
+apt install linux-modules-extra-$(uname -r)
+
 # setup the python virtual environment in external directory
 # external is also setup in the docker image
 apt-get -y install python3-venv
