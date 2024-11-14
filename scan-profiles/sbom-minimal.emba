@@ -18,14 +18,17 @@ export THREADED=1
 export SHORT_PATH=1
 export HTML=1
 
-# ensure a provided firmware directory gets not copied into the container
-# as we do not alter the firmware we can use the original one
+# multiple sbom only optimisations
 SBOM_MINIMAL=1
 
 # if no deep extraction is needed it can be disabled here - sometimes useful for
 # non Linux stuff like sources or Windows exe (could be also configured via -q parameter)
-# DISABLE_DEEP=0
-SBOM_MAX_FILE_LOG=100
+# DISABLE_DEEP=1
+
+# DEEP_EXT_DEPTH -> max rounds of deep extractor 1 to 4
+DEEP_EXT_DEPTH=1
+# change this to something smaller to not report all the files
+SBOM_MAX_FILE_LOG=300
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=0
@@ -33,30 +36,36 @@ export QEMULATION=0
 # If you just have a directory or some kind of zip file you can just enable P02 and P05
 # export SELECT_MODULES+=( "P02" "P05" )
 # Currently the complete pre-checking phase is enabled:
-export SELECT_MODULES+=( "S06" "S08" "S25" "S118" "F15" )
+export SELECT_MODULES+=( "S06" "S08" "S25" "F15" )
 
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
 # that should not be used
 export S08_MODULES_ARR=()
-S08_MODULES_ARR=( "debian_status_files_analysis" )
-S08_MODULES_ARR+=( "openwrt_control_files_analysis" )
-S08_MODULES_ARR+=( "rpm_package_mgmt_analysis" )
-S08_MODULES_ARR+=( "rpm_package_check" )
-S08_MODULES_ARR+=( "deb_package_check" )
-S08_MODULES_ARR+=( "bsd_pkg_check" )
-S08_MODULES_ARR+=( "python_pip_packages" )
-S08_MODULES_ARR+=( "python_requirements" )
-S08_MODULES_ARR+=( "python_poetry_lock_parser" )
-S08_MODULES_ARR+=( "java_archives_check" )
-S08_MODULES_ARR+=( "ruby_gem_archive_check" )
-S08_MODULES_ARR+=( "alpine_apk_package_check" )
-S08_MODULES_ARR+=( "windows_exifparser" )
-S08_MODULES_ARR+=( "rust_cargo_lock_parser" )
-S08_MODULES_ARR+=( "node_js_package_lock_parser" )
+S08_MODULES_ARR=( "S08_submodule_debian_pkg_mgmt_parser" )
+S08_MODULES_ARR+=( "S08_submodule_deb_package_parser" )
+S08_MODULES_ARR+=( "S08_submodule_openwrt_pkg_mgmt_parser" )
+S08_MODULES_ARR+=( "S08_submodule_rpm_pkg_mgmt_parser" )
+S08_MODULES_ARR+=( "S08_submodule_rpm_package_parser" )
+S08_MODULES_ARR+=( "S08_submodule_bsd_package_parser" )
+S08_MODULES_ARR+=( "S08_submodule_python_pip_package_mgmt_parser" )
+S08_MODULES_ARR+=( "S08_submodule_python_requirements_parser" )
+S08_MODULES_ARR+=( "S08_submodule_python_poetry_lock_parser" )
+S08_MODULES_ARR+=( "S08_submodule_java_archives_parser" )
+S08_MODULES_ARR+=( "S08_submodule_ruby_gem_archive_parser" )
+S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
+S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
+S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
+S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
 
 # enable silent mode and status bar
-export DISABLE_STATUS_BAR=1
-export SILENT=0
+export DISABLE_STATUS_BAR=0
+export SILENT=1
+
+# No notifications via the desktop notification system
+export DISABLE_NOTIFICATIONS=1
+
+# No need for status dots
+export DISABLE_DOTS=1
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

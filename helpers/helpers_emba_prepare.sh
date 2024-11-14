@@ -482,7 +482,8 @@ prepare_file_arr_limited() {
   readarray -t FILE_ARR_LIMITED < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
     -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
-    -o -iname "*.js" -o -iname "*.info" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3-)
+    -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" \) \
+    -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3-)
 }
 
 set_etc_paths()
@@ -536,9 +537,6 @@ check_firmware() {
 
 detect_root_dir_helper() {
   local lSEARCH_PATH="${1:-}"
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    return
-  fi
 
   print_output "[*] Root directory auto detection for ${ORANGE}${lSEARCH_PATH}${NC} (could take some time)\\n"
   export ROOT_PATH=()
@@ -551,39 +549,74 @@ detect_root_dir_helper() {
   local lINTERPRETER_ESCAPED=""
   local lCNT=0
 
-  mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
+  if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file -b {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
 
-  if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
-    for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
-      # now we have a result like this "/lib/ld-uClibc.so.0"
-      # lets escape it
-      lINTERPRETER_ESCAPED=$(echo "${lINTERPRETER_PATH}" | sed -e 's/\//\\\//g')
-      mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
-      for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
-        # remove the interpreter path from the full path:
-        lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
-        # common false positive:
-        if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
-          [[ "${lR_PATH}" =~ \/lib\/$ ]] && continue
-          ROOT_PATH+=( "${lR_PATH}" )
-          lMECHANISM="binary interpreter"
-        fi
+    if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
+      for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
+        # now we have a result like this "/lib/ld-uClibc.so.0"
+        # lets escape it
+        lINTERPRETER_ESCAPED=$(echo "${lINTERPRETER_PATH}" | sed -e 's/\//\\\//g')
+        mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
+        for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
+          # remove the interpreter path from the full path:
+          lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+          # common false positive:
+          if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
+            [[ "${lR_PATH}" =~ \/lib\/$ ]] && continue
+            ROOT_PATH+=( "${lR_PATH}" )
+            lMECHANISM="binary interpreter"
+          fi
+        done
       done
+    fi
+
+    # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
+    for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+      if [[ -d "${lR_PATH}" ]]; then
+        ROOT_PATH+=( "${lR_PATH}" )
+        if [[ -z "${lMECHANISM}" ]]; then
+          lMECHANISM="dir names"
+        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
+          lMECHANISM="${lMECHANISM} / dir names"
+        fi
+      fi
+    done
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
+    for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+      if [[ -d "${lR_PATH}" ]]; then
+        ROOT_PATH+=( "${lR_PATH}" )
+        if [[ -z "${lMECHANISM}" ]]; then
+          lMECHANISM="busybox"
+        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "busybox"; then
+          lMECHANISM="${lMECHANISM} / busybox"
+        fi
+      fi
+    done
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
+    for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+      if [[ -d "${lR_PATH}" ]]; then
+        ROOT_PATH+=( "${lR_PATH}" )
+        if [[ -z "${lMECHANISM}" ]]; then
+          lMECHANISM="shell"
+        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+          lMECHANISM="${lMECHANISM} / shell"
+        fi
+      fi
+    done
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
+    for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+      if [[ -d "${lR_PATH}" ]]; then
+        ROOT_PATH+=( "${lR_PATH}" )
+        if [[ -z "${lMECHANISM}" ]]; then
+          lMECHANISM="shell"
+        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+          lMECHANISM="${lMECHANISM} / shell"
+        fi
+      fi
     done
   fi
-
-  # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
-  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
-  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    if [[ -d "${lR_PATH}" ]]; then
-      ROOT_PATH+=( "${lR_PATH}" )
-      if [[ -z "${lMECHANISM}" ]]; then
-        lMECHANISM="dir names"
-      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
-        lMECHANISM="${lMECHANISM} / dir names"
-      fi
-    fi
-  done
 
   mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
   for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
@@ -599,42 +632,6 @@ detect_root_dir_helper() {
         lMECHANISM="dir names"
       elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
         lMECHANISM="${lMECHANISM} / dir names"
-      fi
-    fi
-  done
-
-  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
-  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    if [[ -d "${lR_PATH}" ]]; then
-      ROOT_PATH+=( "${lR_PATH}" )
-      if [[ -z "${lMECHANISM}" ]]; then
-        lMECHANISM="busybox"
-      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "busybox"; then
-        lMECHANISM="${lMECHANISM} / busybox"
-      fi
-    fi
-  done
-
-  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
-  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    if [[ -d "${lR_PATH}" ]]; then
-      ROOT_PATH+=( "${lR_PATH}" )
-      if [[ -z "${lMECHANISM}" ]]; then
-        lMECHANISM="shell"
-      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
-        lMECHANISM="${lMECHANISM} / shell"
-      fi
-    fi
-  done
-
-  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
-  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    if [[ -d "${lR_PATH}" ]]; then
-      ROOT_PATH+=( "${lR_PATH}" )
-      if [[ -z "${lMECHANISM}" ]]; then
-        lMECHANISM="shell"
-      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
-        lMECHANISM="${lMECHANISM} / shell"
       fi
     fi
   done

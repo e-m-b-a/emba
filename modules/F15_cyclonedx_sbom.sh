@@ -103,9 +103,13 @@ F15_cyclonedx_sbom() {
     echo -n "[" > "${SBOM_LOG_PATH}/sbom_components_tmp.json"
     for lCOMP_FILE_ID in "${!lCOMP_FILES_ARR[@]}"; do
       lCOMP_FILE="${lCOMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
-      cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
-      if [[ $((lCOMP_FILE_ID+1)) -lt "${#lCOMP_FILES_ARR[@]}" ]]; then
-        echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+      if [[ -s "${lCOMP_FILE}" ]]; then
+        cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+        if [[ $((lCOMP_FILE_ID+1)) -lt "${#lCOMP_FILES_ARR[@]}" ]]; then
+          echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+        fi
+      else
+        print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to decode"
       fi
     done
     echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"

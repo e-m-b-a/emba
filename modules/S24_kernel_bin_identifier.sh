@@ -33,9 +33,10 @@ S24_kernel_bin_identifier()
   export KCFG_MD5_ARR=()
 
   # just in case it is not already populated:
-  if [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
-    prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]] || [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
+    prepare_file_arr_limited "${LOG_DIR}"/firmware
   fi
+  print_output "[*] Testing ${ORANGE}${#FILE_ARR_LIMITED[@]}${NC} files for linux kernel"
 
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
   local lOS_IDENTIFIED=""
@@ -61,7 +62,7 @@ S24_kernel_bin_identifier()
     local lAPP_VERS=""
     local lAPP_TYPE="operating-system"
 
-    if file -b "${lFILE}" | grep -q "ASCII text"; then
+    if file -b "${lFILE}" | grep -q "ASCII text\|Unicode text"; then
       # reduce false positive rate
       continue
     fi
@@ -73,6 +74,7 @@ S24_kernel_bin_identifier()
       print_ln
       print_output "$(indent "$(orange "${lK_VER}")")"
       print_ln
+      lNEG_LOG=1
 
       # not perfect, but not too bad for now:
       mapfile -t lK_INITS_ARR < <(strings "${lFILE}" 2>/dev/null | grep -E "init=\/" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | tr -d '"' | sort -u || true)
@@ -177,7 +179,6 @@ S24_kernel_bin_identifier()
           build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
         fi
 
-
         write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:$(basename "${lFILE}");${lK_VER:-NA};${lSTRIPPED_VERS:-NA};${lAPP_LIC:-NA};${lAPP_MAINT:-NA};${lK_ELF:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Linux Kernel" "${S08_CSV_LOG}"
       fi
 
@@ -233,7 +234,6 @@ S24_kernel_bin_identifier()
             write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "NA" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
           fi
         done
-        lNEG_LOG=1
       fi
     # ASCII kernel config files:
     elif file -b "${lFILE}" | grep -q "ASCII"; then
@@ -244,7 +244,6 @@ S24_kernel_bin_identifier()
           print_ln
           print_output "[+] Found kernel configuration file: ${ORANGE}${lFILE}${NC}"
           check_kconfig "${lFILE}"
-          lNEG_LOG=1
           KCFG_MD5_ARR+=("${lCFG_MD5}")
         fi
       fi
