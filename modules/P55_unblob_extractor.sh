@@ -119,7 +119,7 @@ unblobber() {
   local lOUTPUT_DIR_UNBLOB="${2:-}"
   local lVERBOSE="${3:-1}"
   local lUNBLOB_BIN="unblob"
-  local lTIMEOUT="60m"
+  local lTIMEOUT="120m"
 
   # unblob should be checked in the dependency checker
 
