@@ -487,7 +487,7 @@ prepare_file_arr_limited() {
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
     -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
     -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" \) \
-    -print0|xargs -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
+    -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3-)
     # -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3-)
 }
 

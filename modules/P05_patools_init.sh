@@ -20,7 +20,8 @@ export PRE_THREAD_ENA=0
 P05_patools_init() {
   local lNEG_LOG=0
 
-  if [[ "${PATOOLS_INIT:-0}" -eq 1 ]]; then
+  # WARNING: Patool module is deprecated and will be replaced with unblob
+  if [[ "${PATOOLS_INIT:-0}" -eq 5 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Initial extractor of different archive types via patools"
     pre_module_reporter "${FUNCNAME[0]}"

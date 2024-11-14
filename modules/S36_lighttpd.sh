@@ -122,26 +122,25 @@ lighttpd_binary_analysis() {
           lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
 
-          if command -v jo >/dev/null; then
-            # add source file path information to our properties array:
-            local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "source_path:${lLIGHT_BIN}" )
-            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
-            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
+          # add source file path information to our properties array:
+          local lPROP_ARRAY_INIT_ARR=()
+          lPROP_ARRAY_INIT_ARR+=( "source_path:${lLIGHT_BIN}" )
+          lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+          lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
+          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
 
-            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-            # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${lLIGHT_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
-              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-              continue
-            fi
-
-            # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+          # final array with all hash values
+          if ! build_sbom_json_hashes_arr "${lLIGHT_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
+            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+            continue
           fi
+
+          # create component entry - this allows adding entries very flexible:
+          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+
           check_for_s08_csv_log "${S08_CSV_LOG}"
           write_log "${lPACKAGING_SYSTEM};${lLIGHT_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIER:-NA};${lCSV_RULE:-NA};${lLIC:-NA};${lAPP_MAINT:-NA};${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
           continue

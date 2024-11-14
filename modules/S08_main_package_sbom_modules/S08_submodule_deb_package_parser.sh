@@ -135,39 +135,37 @@ S08_submodule_deb_package_parser() {
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "deb" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
       local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-      if command -v jo >/dev/null; then
-        # add deb path information to our properties array:
-        local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
-        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      # add deb path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
-        # add package files to properties
-        if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
-          mapfile -t lDEB_FILES_ARR < <(tar -tvf "${TMP_DIR}/deb_package/data.tar.xz" | awk '{print $6}')
-          for lDEB_FILE_ID in "${!lDEB_FILES_ARR[@]}"; do
-            lDEB_FILE="${lDEB_FILES_ARR["${lDEB_FILE_ID}"]}"
-            lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_FILE#\.}" )
-            # we limit the logging of the package files to 500 files per package
-            if [[ "${lDEB_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
-              break
-            fi
-          done
-        fi
-
-        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-        # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lDEB_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-          continue
-        fi
-
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      # add package files to properties
+      if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
+        mapfile -t lDEB_FILES_ARR < <(tar -tvf "${TMP_DIR}/deb_package/data.tar.xz" | awk '{print $6}')
+        for lDEB_FILE_ID in "${!lDEB_FILES_ARR[@]}"; do
+          lDEB_FILE="${lDEB_FILES_ARR["${lDEB_FILE_ID}"]}"
+          lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_FILE#\.}" )
+          # we limit the logging of the package files to 500 files per package
+          if [[ "${lDEB_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+            lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+            break
+          fi
+        done
       fi
+
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lDEB_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        continue
+      fi
+
+      # create component entry - this allows adding entries very flexible:
+      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
       write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"

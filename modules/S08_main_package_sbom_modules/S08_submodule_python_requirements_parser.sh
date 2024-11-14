@@ -161,26 +161,24 @@ python_requirements_threader() {
         #   "Development Status :: 5 - Production/Stable",
         #   "License :: OSI Approved :: MIT License",
 
-  if command -v jo >/dev/null; then
-    # add the python requirement path information to our properties array:
-    # Todo: in the future we should check for the package, package hashes and which files
-    # are in the package
-    local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  # add the python requirement path information to our properties array:
+  # Todo: in the future we should check for the package, package hashes and which files
+  # are in the package
+  local lPROP_ARRAY_INIT_ARR=()
+  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
+  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
 
-    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+  build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-      print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-      return
-    fi
-
-    # create component entry - this allows adding entries very flexible:
-    build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+  # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+  # final array with all hash values
+  if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    return
   fi
+
+  # create component entry - this allows adding entries very flexible:
+  build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
   write_log "[*] Python requirement details: ${ORANGE}${lPY_REQ_FILE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_REQ_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
