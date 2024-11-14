@@ -56,26 +56,27 @@ S09_firmware_base_version_check() {
   fi
 
   # in sbom mode we probably have not populated our arrays
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    # prepare_file_arr "${LOG_DIR}/firmware"
-    print_output "[*] Prepare file array ..." "no_log"
-    readarray -t FILE_ARR < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]] || [[ "${#FILE_ARR[@]}" -eq 0 ]]; then
+    prepare_file_arr_limited "${LOG_DIR}/firmware"
+    # print_output "[*] Prepare file array ..." "no_log"
+    # readarray -t FILE_ARR < <(find "${LOG_DIR}/firmware" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+    FILE_ARR=( "${FILE_ARR_LIMITED[@]}" )
   fi
-  for lFILE in "${FILE_ARR[@]}"; do
-    if file -b "${lFILE}"| grep -q ELF; then
-      # print_output "$(indent "$(orange "${lFILE}")")"
-      echo "${lFILE}" >> "${LOG_PATH_MODULE}"/init_bins.txt
-    fi
-  done
+#  for lFILE in "${FILE_ARR[@]}"; do
+#    if file -b "${lFILE}"| grep -q -v "text"; then
+#      # print_output "$(indent "$(orange "${lFILE}")")"
+#      echo "${lFILE}" >> "${LOG_PATH_MODULE}"/init_bins.txt
+#    fi
+#  done
 
   printf "%s\n" "${FILE_ARR[@]}" > "${LOG_PATH_MODULE}"/firmware_binaries.txt
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
     print_output "[*] Checking for common package manager environments to optimize static version detection"
     # Debian:
-    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -exec cat {} \; | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -0 -P 16 -I % sh -c 'cat %' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
     # OpenWRT
-    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -exec cat {} \; | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -0 -P 16 -I % sh -c 'cat %' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
@@ -123,7 +124,7 @@ S09_firmware_base_version_check() {
         print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager"
         FILE_ARR=()
         for lFILE in "${lFILE_ARR_TMP[@]}"; do
-          if file -b "${lFILE}"| grep -q ELF; then
+          if file -b "${lFILE}"| grep -q -v "text"; then
             # print_output "$(indent "$(orange "${lFILE}")")"
             FILE_ARR+=( "${lFILE}" )
             echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
@@ -211,7 +212,7 @@ S09_firmware_base_version_check() {
 
       [[ "${RTOS}" -eq 1 ]] && continue
 
-      mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3)
       # before moving on we need to ensure our strings files are generated:
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
@@ -281,7 +282,7 @@ S09_firmware_base_version_check() {
       #   use regex (VERSION_IDENTIFIER) via zgrep on these files
       #   use csv-regex to get the csv-search string for csv lookup
 
-      mapfile -t SPECIAL_FINDS < <(find "${FIRMWARE_PATH}" -xdev -type f -name "${lAPP_NAME}" -exec zgrep -H "${VERSION_IDENTIFIER}" {} \; || true)
+      mapfile -t SPECIAL_FINDS < <(find "${FIRMWARE_PATH}" -xdev -type f -name "${lAPP_NAME}" -print0|xargs -0 -P 16 -I % sh -c 'zgrep -H "${VERSION_IDENTIFIER}" %' || true)
       for SFILE in "${SPECIAL_FINDS[@]}"; do
         BIN_PATH=$(safe_echo "${SFILE}" | cut -d ":" -f1)
         lAPP_NAME="$(basename "$(safe_echo "${SFILE}" | cut -d ":" -f1)")"
@@ -580,7 +581,7 @@ generate_strings() {
       return
     fi
   fi
-  if [[ "${lBIN_FILE}" == *"ASCII text"* || "${lBIN_FILE}" == *"Unicode text"* ]]; then
+  if [[ "${lBIN_FILE}" == *"text"* ]]; then
     return
   fi
 
@@ -621,12 +622,12 @@ bin_string_checker() {
     BIN_NAME_REAL="$(basename "${BIN}")"
     local BIN_FILE=""
     BIN_FILE=$(file -b "${BIN}" || true)
-    if [[ "${BIN_FILE}" == *"ASCII text"* || "${BIN_FILE}" == *"Unicode text"* ]]; then
+    if [[ "${BIN_FILE}" == *"text"* ]]; then
       continue
     fi
     STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
     if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
-      print_output "[-] Warning: Strings for bin ${BIN} not found"
+      # print_output "[-] Warning: Strings for bin ${BIN} not found"
       continue
     fi
 
