@@ -136,7 +136,7 @@ S08_submodule_deb_package_parser() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-      mapfile -t lAPP_DEPS_ARR < <(grep "Depends: " "${TMP_DIR}/deb_package/control" | sed 's/Depends: //' | tr ',' '\n' | sed 's/\.\ /\n/g' | sort -u)
+      mapfile -t lAPP_DEPS_ARR < <(grep "Depends: " "${TMP_DIR}/deb_package/control" | sed 's/Depends: //' | tr ',' '\n' | sed 's/\.\ /\n/g' | sort -u || true)
 
       lMD5_CHECKSUM="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lDEB_ARCHIVE}" | awk '{print $1}')"

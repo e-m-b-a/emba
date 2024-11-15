@@ -132,7 +132,7 @@ user_zero() {
   print_output "[*] Searching accounts with UID 0"
   local lCHECK=0
   local lAUTH_ISSUES=0
-  local lPASSWD_FILE_PATHS=()
+  local lPASSWD_FILE_PATHS_ARR=()
   local lPASSWD_FILE=""
   mapfile -t lPASSWD_FILE_PATHS_ARR < <(mod_path "/ETC_PATHS/passwd")
 
