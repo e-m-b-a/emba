@@ -135,19 +135,30 @@ build_sbom_json_hashes_arr() {
       # 1.2.3-deb-123abc and from the binary level we have only 1.2.3
       # To handle these cases we check against the version ^1.2.3*
       if [[ "${lDUP_CHECK_NAME}" == "${lAPP_NAME}" ]] && [[ "${lAPP_VERS}" =~ ^"${lDUP_CHECK_VERS}".* ]]; then
-        # write_log "[+] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
-        print_output "[+] Duplicate detected - merge needed for ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}"
+        # write_log "[*] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
+        print_output "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}"
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
         jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
-        lCONFIDENCE_LEVEL_JSON=$(jq '.properties[] | select(.name | endswith(":confidence")).value' "${lDUP_CHECK_FILE}" || true)
+
+        # with the following check we find out if we have the same version or some extended version
+        # on the 2nd case we also add this different version to the properties
+        if [[ "${lAPP_VERS}" != "${lDUP_CHECK_VERS}" ]]; then
+          print_output "[*] Version difference detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}"
+          jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS+1))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/\.tmp}" > "${lDUP_CHECK_FILE/\.json/\.tmp1}"
+          mv "${lDUP_CHECK_FILE/\.json/\.tmp1}" "${lDUP_CHECK_FILE/\.json/\.tmp}" 2>/dev/null || true
+        fi
+
+        # extract the confidence level from the json and compare it to our current level:
+        lCONFIDENCE_LEVEL_JSON=$(jq -r '.properties[] | select(.name | endswith(":confidence")).value' "${lDUP_CHECK_FILE}" || true)
         if [[ "${lCONFIDENCE_LEVEL}" != "NA" ]] && [[ "${lCONFIDENCE_LEVEL_JSON:-NA}" != "NA" ]]; then
-          if [[ "${lCONFIDENCE_LEVEL}" -gt "$(get_confidence_value "${lCONFIDENCE_LEVEL_JSON:-NA}")" ]]; then
-            # if our current level is higher as the level from the json we adjust it now
+          print_output "[*] lCONFIDENCE_LEVEL: ${lCONFIDENCE_LEVEL} / lCONFIDENCE_LEVEL_JSON: $(get_confidence_value ${lCONFIDENCE_LEVEL_JSON})"
+          if [[ "${lCONFIDENCE_LEVEL:-0}" -gt "$(get_confidence_value "${lCONFIDENCE_LEVEL_JSON:-undef}")" ]]; then
+            # if our current level is higher as the level from the json we need to adjust it now
             print_output "[*] Duplicate handling - Confidence level needs to be adjusted for ${lDUP_CHECK_FILE} -> from ${lCONFIDENCE_LEVEL_JSON:-NA} -> to $(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"
+            # Todo: adjust json
           fi
         fi
         mv "${lDUP_CHECK_FILE/\.json/\.tmp}" "${lDUP_CHECK_FILE}" 2>/dev/null || true
-        # jq . "${lDUP_CHECK_FILE}" >> "${SBOM_LOG_PATH}"/duplicates.txt
         return 1
       fi
     done
@@ -318,5 +329,43 @@ distri_check() {
     fi
   done
   echo "${lOS_IDENTIFIED}"
+}
+
+get_confidence_string() {
+  local lCONFIDENCE_LEVEL="${1:-3}"
+  # 1 -> very-low
+  # 2 -> low
+  # 3 -> medium
+  # 4 -> high
+  if [[ "${lCONFIDENCE_LEVEL}" -eq 1 ]]; then
+    echo "very-low"
+  elif [[ "${lCONFIDENCE_LEVEL}" -eq 2 ]]; then
+    echo "low"
+  elif [[ "${lCONFIDENCE_LEVEL}" -eq 3 ]]; then
+    echo "medium"
+  elif [[ "${lCONFIDENCE_LEVEL}" -eq 4 ]]; then
+    echo "high"
+  else
+    echo "NA"
+  fi
+}
+
+get_confidence_value() {
+  local lCONFIDENCE_LEVEL="${1:-NA}"
+  # 1 -> very-low
+  # 2 -> low
+  # 3 -> medium
+  # 4 -> high
+  if [[ "${lCONFIDENCE_LEVEL}" == "very-low" ]]; then
+    echo "1"
+  elif [[ "${lCONFIDENCE_LEVEL}" == "low" ]]; then
+    echo "2"
+  elif [[ "${lCONFIDENCE_LEVEL}" == "medium" ]]; then
+    echo "3"
+  elif [[ "${lCONFIDENCE_LEVEL}" == "high" ]]; then
+    echo "4"
+  else
+    echo "99"
+  fi
 }
 

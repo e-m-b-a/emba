@@ -243,6 +243,8 @@ S09_firmware_base_version_check() {
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+            lAPP_VERS="${lAPP_VERS//\ }"
+
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
@@ -309,6 +311,7 @@ S09_firmware_base_version_check() {
         lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
         lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
         lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+        lAPP_VERS="${lAPP_VERS//\ }"
 
         # add source file path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
@@ -358,6 +361,7 @@ S09_firmware_base_version_check() {
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+          lAPP_VERS="${lAPP_VERS//\ }"
 
           # add source file path information to our properties array:
           local lPROP_ARRAY_INIT_ARR=()
@@ -408,6 +412,7 @@ S09_firmware_base_version_check() {
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+          lAPP_VERS="${lAPP_VERS//\ }"
 
           local lCONFIDENCE_LEVEL=2
 
@@ -666,6 +671,7 @@ bin_string_checker() {
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+            lAPP_VERS="${lAPP_VERS//\ }"
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
@@ -724,6 +730,7 @@ bin_string_checker() {
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+            lAPP_VERS="${lAPP_VERS//\ }"
 
             local lCONFIDENCE_LEVEL=1
 
@@ -780,6 +787,7 @@ bin_string_checker() {
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
+          lAPP_VERS="${lAPP_VERS//\ }"
 
           local lCONFIDENCE_LEVEL=1
 
@@ -812,44 +820,6 @@ bin_string_checker() {
       continue 2
     done
   done
-}
-
-get_confidence_string() {
-  local lCONFIDENCE_LEVEL="${1:-3}"
-  # 1 -> very-low
-  # 2 -> low
-  # 3 -> medium
-  # 4 -> high
-  if [[ "${lCONFIDENCE_LEVEL}" -eq 1 ]]; then
-    echo "very-low"
-  elif [[ "${lCONFIDENCE_LEVEL}" -eq 2 ]]; then
-    echo "low"
-  elif [[ "${lCONFIDENCE_LEVEL}" -eq 3 ]]; then
-    echo "medium"
-  elif [[ "${lCONFIDENCE_LEVEL}" -eq 4 ]]; then
-    echo "high"
-  else
-    echo "NA"
-  fi
-}
-
-get_confidence_value() {
-  local lCONFIDENCE_LEVEL="${1:-NA}"
-  # 1 -> very-low
-  # 2 -> low
-  # 3 -> medium
-  # 4 -> high
-  if [[ "${lCONFIDENCE_LEVEL}" == "very-low" ]]; then
-    echo "1"
-  elif [[ "${lCONFIDENCE_LEVEL}" == "low" ]]; then
-    echo "2"
-  elif [[ "${lCONFIDENCE_LEVEL}" == "medium" ]]; then
-    echo "3"
-  elif [[ "${lCONFIDENCE_LEVEL}" == "high" ]]; then
-    echo "4"
-  else
-    echo "NA"
-  fi
 }
 
 recover_wait_pids() {
