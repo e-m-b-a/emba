@@ -47,6 +47,13 @@ S09_firmware_base_version_check() {
   local lFILE=""
   local BIN=""
 
+  # set default confidence level
+  # 1 -> very-low
+  # 2 -> low
+  # 3 -> medium
+  # 4 -> high
+  local lCONFIDENCE_LEVEL=3
+
   if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
     # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
     local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
@@ -244,13 +251,13 @@ S09_firmware_base_version_check() {
             lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
               print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
               continue
             fi
@@ -310,13 +317,13 @@ S09_firmware_base_version_check() {
         lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
         lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
           print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
           continue
         fi
@@ -354,16 +361,17 @@ S09_firmware_base_version_check() {
 
           # add source file path information to our properties array:
           local lPROP_ARRAY_INIT_ARR=()
+          local lCONFIDENCE_LEVEL=2
           lPROP_ARRAY_INIT_ARR+=( "source_path:${EXTRACTOR_LOG}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${EXTRACTOR_LOG}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${EXTRACTOR_LOG}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -401,6 +409,8 @@ S09_firmware_base_version_check() {
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
 
+          local lCONFIDENCE_LEVEL=2
+
           # add source file path information to our properties array:
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${FIRMWARE_PATH}" )
@@ -408,13 +418,13 @@ S09_firmware_base_version_check() {
           lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${FIRMWARE_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${FIRMWARE_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -614,6 +624,7 @@ bin_string_checker() {
       # print_output "[-] Warning: Strings for bin ${BIN} not found"
       continue
     fi
+    local lCONFIDENCE_LEVEL=3
 
     # print_output "[*] Testing $BIN" "no_log"
     for (( j=0; j<${#VERSION_IDENTIFIERS_ARR[@]}; j++ )); do
@@ -663,13 +674,13 @@ bin_string_checker() {
             lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
               print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
               continue
             fi
@@ -714,6 +725,8 @@ bin_string_checker() {
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
 
+            local lCONFIDENCE_LEVEL=1
+
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
@@ -721,13 +734,13 @@ bin_string_checker() {
             lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:very-low" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
             # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+            if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
               print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
               continue
             fi
@@ -768,6 +781,8 @@ bin_string_checker() {
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
 
+          local lCONFIDENCE_LEVEL=1
+
           # add source file path information to our properties array:
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
@@ -775,13 +790,13 @@ bin_string_checker() {
           lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
           # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
           # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+          if ! build_sbom_json_hashes_arr "${BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
             print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
             continue
           fi
@@ -797,6 +812,44 @@ bin_string_checker() {
       continue 2
     done
   done
+}
+
+get_confidence_string() {
+  local lCONFIDENCE_LEVEL="${1:-3}"
+  # 1 -> very-low
+  # 2 -> low
+  # 3 -> medium
+  # 4 -> high
+  if [[ "${lCONFIDENCE_LEVEL}" -eq 1 ]]; then
+    echo "very-low"
+  elif [[ "${lCONFIDENCE_LEVEL}" -eq 2 ]]; then
+    echo "low"
+  elif [[ "${lCONFIDENCE_LEVEL}" -eq 3 ]]; then
+    echo "medium"
+  elif [[ "${lCONFIDENCE_LEVEL}" -eq 4 ]]; then
+    echo "high"
+  else
+    echo "NA"
+  fi
+}
+
+get_confidence_value() {
+  local lCONFIDENCE_LEVEL="${1:-NA}"
+  # 1 -> very-low
+  # 2 -> low
+  # 3 -> medium
+  # 4 -> high
+  if [[ "${lCONFIDENCE_LEVEL}" == "very-low" ]]; then
+    echo "1"
+  elif [[ "${lCONFIDENCE_LEVEL}" == "low" ]]; then
+    echo "2"
+  elif [[ "${lCONFIDENCE_LEVEL}" == "medium" ]]; then
+    echo "3"
+  elif [[ "${lCONFIDENCE_LEVEL}" == "high" ]]; then
+    echo "4"
+  else
+    echo "NA"
+  fi
 }
 
 recover_wait_pids() {

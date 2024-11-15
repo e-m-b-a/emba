@@ -28,7 +28,7 @@ S08_submodule_deb_package_parser() {
   # Maintainer: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
   # Installed-Size: 401
   # Depends: libc6 (>= 2.34)
-  local lPACKAGING_SYSTEM="debian_deb"
+  local lPACKAGING_SYSTEM="debian_pkg_mgmt"
   local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "Debian deb package parser" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -39,6 +39,7 @@ S08_submodule_deb_package_parser() {
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
+  local lPOS_RES=0
 
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
 
