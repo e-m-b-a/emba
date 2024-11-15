@@ -145,7 +145,7 @@ S09_firmware_base_version_check() {
 
   print_output "[*] Waiting for strings generator" "no_log"
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
-  print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} firmware files"
+  print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} binary files"
 
   while read -r VERSION_LINE; do
     if safe_echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
@@ -160,7 +160,7 @@ S09_firmware_base_version_check() {
 
     print_dot
 
-    local STRICT=""
+    local lSTRICT=""
     export LIC=""
     local lAPP_NAME=""
     local lAPP_VERS=""
@@ -173,7 +173,7 @@ S09_firmware_base_version_check() {
     local lPURL_IDENTIFIER="NA"
     local lPACKAGING_SYSTEM="static_bin_analysis"
 
-    STRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
+    lSTRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
     LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
     lAPP_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
     CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
@@ -194,7 +194,7 @@ S09_firmware_base_version_check() {
     fi
     lOS_IDENTIFIED=$(distri_check)
 
-    if [[ "${STRICT}" == *"strict"* ]]; then
+    if [[ "${lSTRICT}" == *"strict"* ]]; then
       local STRICT_BINS=()
       local BIN=""
       local lBIN_ARCH=""
@@ -265,7 +265,7 @@ S09_firmware_base_version_check() {
       done
       print_dot
 
-    elif [[ "${STRICT}" == "zgrep" ]]; then
+    elif [[ "${lSTRICT}" == "zgrep" ]]; then
       local SPECIAL_FINDS=()
       local SFILE=""
 
@@ -442,12 +442,12 @@ S09_firmware_base_version_check() {
       if [[ "${THREADED}" -eq 1 ]]; then
         # this will burn the CPU but in most cases the time of testing is cut into half
         # TODO: change to local vars via parameters - this is ugly as hell!
-        bin_string_checker &
+        bin_string_checker "${lSTRICT}" &
         local TMP_PID="$!"
         store_kill_pids "${TMP_PID}"
         WAIT_PIDS_S09+=( "${TMP_PID}" )
       else
-        bin_string_checker
+        bin_string_checker "${lSTRICT}"
       fi
 
       print_dot
@@ -561,14 +561,6 @@ generate_strings() {
   local lSTRINGS_OUTPUT=""
 
   lBIN_FILE=$(file -b "${lBIN}" || true)
-  # if we do not talk about a RTOS it is a Linux and we test ELF files
-  if [[ ${RTOS} -eq 0 ]]; then
-    lBIN_FILE=$(file -b "${lBIN}" || true)
-    if [[ "${lBIN_FILE}" != *uImage* && "${lBIN_FILE}" != *Kernel\ Image* && "${lBIN_FILE}" != *ELF* ]] ; then
-      # print_output "[-] Not generating strings for ${BIN} - RTOS: ${RTOS} / ${lBIN_FILE}"
-      return
-    fi
-  fi
   if [[ "${lBIN_FILE}" == *"text"* ]]; then
     return
   fi
@@ -583,6 +575,7 @@ generate_strings() {
 }
 
 bin_string_checker() {
+  local lSTRICT="${1:-}"
   local VERSION_IDENTIFIERS_ARR=()
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
@@ -689,6 +682,10 @@ bin_string_checker() {
             continue 2
           fi
         else
+          if [[ "${lSTRICT}" == "multi_grep" ]]; then
+            # we do not test multi_grep on other things then ELF files!
+            continue
+          fi
           # this is for all other "non-text" stuff -> this gets a very low confidence rating
           # the false positive rate is higher
           VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)

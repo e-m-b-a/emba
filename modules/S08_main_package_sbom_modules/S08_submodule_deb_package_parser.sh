@@ -52,6 +52,9 @@ S08_submodule_deb_package_parser() {
   local lDEB_FILES_ARR=()
   local lDEB_FILE_ID=""
   local lDEB_FILE=""
+  local lAPP_DEPS_ARR=()
+  local lDEB_DEP_ID=""
+  local lAPP_DEP=""
 
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
@@ -89,12 +92,19 @@ S08_submodule_deb_package_parser() {
       fi
       ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/" || print_error "[-] Extraction error for debian archive ${lDEB_ARCHIVE}"
 
-      if [[ ! -f "${TMP_DIR}/deb_package/control.tar.xz" ]]; then
-        write_log "[-] No debian control.tar.xz found for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        continue
+      if [[ -f "${TMP_DIR}/deb_package/control.tar.zst" ]]; then
+        zstd -d < "${TMP_DIR}/deb_package/control.tar.zst" | xz > "${TMP_DIR}/deb_package/control.tar.xz" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
+      fi
+      if [[ -f "${TMP_DIR}/deb_package/data.tar.zst" ]]; then
+        zstd -d < "${TMP_DIR}/deb_package/data.tar.zst" | xz > "${TMP_DIR}/deb_package/data.tar.xz" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
       fi
 
-      tar xf "${TMP_DIR}/deb_package/control.tar.xz" -C "${TMP_DIR}/deb_package/" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
+      if [[ -f "${TMP_DIR}/deb_package/control.tar.xz" ]]; then
+        tar xf "${TMP_DIR}/deb_package/control.tar.xz" -C "${TMP_DIR}/deb_package/" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
+      else
+        write_log "[-] No debian control.tar.xz/zs found for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        continue
+      fi
 
       if [[ ! -f "${TMP_DIR}/deb_package/control" ]]; then
         write_log "[-] No debian control extracted for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -126,6 +136,8 @@ S08_submodule_deb_package_parser() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
+      mapfile -t lAPP_DEPS_ARR < <(grep "Depends: " "${TMP_DIR}/deb_package/control" | sed 's/Depends: //' | tr ',' '\n' | sed 's/\.\ /\n/g' | sort -u)
+
       lMD5_CHECKSUM="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
@@ -146,8 +158,14 @@ S08_submodule_deb_package_parser() {
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
+      # Add dependencies to properties
+      for lDEB_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
+        lAPP_DEP="${lAPP_DEPS_ARR["${lDEB_DEP_ID}"]}"
+        lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+      done
+
       # add package files to properties
-      if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
+      if [[ -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then
         mapfile -t lDEB_FILES_ARR < <(tar -tvf "${TMP_DIR}/deb_package/data.tar.xz" | awk '{print $6}')
         for lDEB_FILE_ID in "${!lDEB_FILES_ARR[@]}"; do
           lDEB_FILE="${lDEB_FILES_ARR["${lDEB_FILE_ID}"]}"
