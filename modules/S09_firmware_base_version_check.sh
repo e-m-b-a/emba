@@ -210,8 +210,8 @@ S09_firmware_base_version_check() {
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
         # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-        lBIN_ARCH=$(file -b "${BIN}")
-        if [[ "${lBIN_ARCH}" == *"ELF"* ]] ; then
+        lBIN_FILE=$(file -b "${BIN}")
+        if [[ "${lBIN_FILE}" == *"ELF"* ]] ; then
           MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
           lAPP_NAME="$(basename "${BIN}")"
           STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
@@ -229,7 +229,7 @@ S09_firmware_base_version_check() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
-            lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+            lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
             lBIN_ARCH=${lBIN_ARCH#\ }
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
 
@@ -241,8 +241,10 @@ S09_firmware_base_version_check() {
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
             lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -290,8 +292,8 @@ S09_firmware_base_version_check() {
         lMD5_CHECKSUM="$(md5sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${BIN_PATH}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${BIN_PATH}" | awk '{print $1}')"
-        lBIN_ARCH=$(file -b "${BIN}")
-        lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+        lBIN_FILE=$(file -b "${BIN}")
+        lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
         lBIN_ARCH=${lBIN_ARCH#\ }
 
         lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
@@ -305,8 +307,10 @@ S09_firmware_base_version_check() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
         lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
         lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -353,6 +357,7 @@ S09_firmware_base_version_check() {
           lPROP_ARRAY_INIT_ARR+=( "source_path:${EXTRACTOR_LOG}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -386,8 +391,8 @@ S09_firmware_base_version_check() {
           lMD5_CHECKSUM="$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA256_CHECKSUM="$(sha256sum "${FIRMWARE_PATH}" | awk '{print $1}')"
           lSHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')"
-          lBIN_ARCH=$(file -b "${FIRMWARE_PATH}")
-          lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+          lBIN_FILE=$(file -b "${FIRMWARE_PATH}")
+          lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
           lBIN_ARCH=${lBIN_ARCH#\ }
           lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
           lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
@@ -400,8 +405,10 @@ S09_firmware_base_version_check() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${FIRMWARE_PATH}" )
           lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+          lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -626,12 +633,7 @@ bin_string_checker() {
         VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
       fi
       if [[ ${RTOS} -eq 0 ]]; then
-        # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
-        if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
-          continue 2
-        fi
-
-        if [[ "${BIN_FILE}" == *ELF* ]] ; then
+        if [[ "${BIN_FILE}" == *ELF* || "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *"Linux\ kernel"* ]] ; then
           # print_output "[*] Testing $BIN with version identifier ${VERSION_IDENTIFIER}" "no_log"
           VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
 
@@ -651,8 +653,8 @@ bin_string_checker() {
             lSHA256_CHECKSUM="$(sha256sum "${BIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${BIN}" | awk '{print $1}')"
 
-            lBIN_ARCH=$(echo "${BIN_FILE}" | cut -d ',' -f2)
-            lBIN_ARCH=${lBIN_ARCH#\ }
+            lBIN_FILE=$(echo "${BIN_FILE}" | cut -d ',' -f2)
+            lBIN_ARCH=${lBIN_FILE#\ }
 
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
@@ -665,8 +667,10 @@ bin_string_checker() {
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
             lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -684,12 +688,19 @@ bin_string_checker() {
             # we test the next binary
             continue 2
           fi
-        elif [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *"Linux\ kernel"* ]] ; then
+        else
+          # this is for all other "non-text" stuff -> this gets a very low confidence rating
+          # the false positive rate is higher
           VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${VERSION_FINDER} ]]; then
+            if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then
+              # we found the first identifier and now we need to check the other identifiers also
+              print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in file ${ORANGE}${BIN}${GREEN}" "no_log"
+              continue
+            fi
             print_ln "no_log"
-            print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in kernel image ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
+            print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in file ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
             write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
@@ -710,8 +721,10 @@ bin_string_checker() {
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
             lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:very-low" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -762,8 +775,10 @@ bin_string_checker() {
           local lPROP_ARRAY_INIT_ARR=()
           lPROP_ARRAY_INIT_ARR+=( "source_path:${BIN}" )
           lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+          lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${VERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

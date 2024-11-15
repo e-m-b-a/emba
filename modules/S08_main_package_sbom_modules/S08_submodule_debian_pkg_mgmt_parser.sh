@@ -163,6 +163,7 @@ debian_status_files_analysis_threader() {
   local lPROP_ARRAY_INIT_ARR=()
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
   if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
     for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
       lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )

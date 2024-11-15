@@ -84,17 +84,21 @@ S08_submodule_deb_package_parser() {
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
-      mkdir "${TMP_DIR}/deb_package/"
-      ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/"
+      if ! [[ -d "${TMP_DIR}/deb_package/" ]]; then
+        mkdir "${TMP_DIR}/deb_package/" || true
+      fi
+      ar x "${lDEB_ARCHIVE}" --output "${TMP_DIR}/deb_package/" || print_error "[-] Extraction error for debian archive ${lDEB_ARCHIVE}"
 
       if [[ ! -f "${TMP_DIR}/deb_package/control.tar.xz" ]]; then
         write_log "[-] No debian control.tar.xz found for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        continue
       fi
 
-      tar xf "${TMP_DIR}/deb_package/control.tar.xz" -C "${TMP_DIR}/deb_package/"
+      tar xf "${TMP_DIR}/deb_package/control.tar.xz" -C "${TMP_DIR}/deb_package/" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
 
       if [[ ! -f "${TMP_DIR}/deb_package/control" ]]; then
         write_log "[-] No debian control extracted for ${lDEB_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        continue
       fi
 
       lAPP_NAME=$(grep "Package: " "${TMP_DIR}/deb_package/control" || true)
@@ -140,6 +144,7 @@ S08_submodule_deb_package_parser() {
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       # add package files to properties
       if [[ ! -f "${TMP_DIR}/deb_package/data.tar.xz" ]]; then

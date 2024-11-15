@@ -117,7 +117,10 @@ S08_submodule_bsd_package_parser() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-      mkdir "${TMP_DIR}"/pkg_tmp
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      if ! [[ -d "${TMP_DIR}"/pkg_tmp ]]; then
+        mkdir "${TMP_DIR}"/pkg_tmp || true
+      fi
       tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}"/pkg_tmp || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
       mapfile -t lPKG_FILES_ARR < <(find "${TMP_DIR}"/pkg_tmp)
       # add package files to properties

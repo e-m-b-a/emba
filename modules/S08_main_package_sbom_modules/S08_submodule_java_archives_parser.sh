@@ -119,6 +119,7 @@ S08_submodule_java_archives_parser() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

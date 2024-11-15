@@ -121,6 +121,7 @@ S08_submodule_rpm_pkg_mgmt_parser() {
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       # add dependencies to properties
       if [[ "${#lRPM_DEPS_ARR[@]}" -gt 0 ]]; then

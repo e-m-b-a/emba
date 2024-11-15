@@ -133,6 +133,7 @@ node_js_package_lock_threader() {
   local lPROP_ARRAY_INIT_ARR=()
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lNODE_LCK_ARCHIVE}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

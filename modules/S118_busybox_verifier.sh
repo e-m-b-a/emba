@@ -36,6 +36,7 @@ S118_busybox_verifier()
   local lAPP_LIC="GPL-2.0-only"
   local lAPP_MAINT=""
   local lAPP_VERS=""
+  local lBIN_FILE=""
   local lBIN_ARCH=""
   local lPACKAGING_SYSTEM="static_busybox_analysis"
   local lCPE_IDENTIFIER=""
@@ -76,7 +77,8 @@ S118_busybox_verifier()
       lCPE_IDENTIFIER=$(build_cpe_identifier "${lVERSION_IDENTIFIER}")
       lOS_IDENTIFIED=$(distri_check)
 
-      lBIN_ARCH=$(file -b "${lBB_BIN}" | cut -d ',' -f2)
+      lBIN_FILE=$(file -b "${lBB_BIN}")
+      lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
@@ -88,7 +90,9 @@ S118_busybox_verifier()
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lBB_BIN}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lVERSION_IDENTIFIER}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

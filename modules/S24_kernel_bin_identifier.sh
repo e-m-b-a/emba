@@ -113,17 +113,19 @@ S24_kernel_bin_identifier()
             lMD5_CHECKSUM="$(md5sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2)
-            lK_ELF=${lK_ELF#\ }
+            lK_ARCH=$(echo "${lK_ELF}" | cut -d ',' -f2)
+            lK_ARCH=${lK_ARCH#\ }
             lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
             lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
             lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}.elf" )
-            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ELF}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+            lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_ELF}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lK_VER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERS}" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -153,15 +155,17 @@ S24_kernel_bin_identifier()
         lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
         lK_ELF=$(file -b "${lFILE}")
-        lK_ELF=$(echo "${lK_ELF}" | cut -d ',' -f2)
-        lK_ELF=${lK_ELF#\ }
+        lK_ARCH=$(echo "${lK_ELF}" | cut -d ',' -f2)
+        lK_ARCH=${lK_ARCH#\ }
 
         # add source file path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
-        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ELF}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+        lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_ELF}" )
         lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lK_VER}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERS}" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:low" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

@@ -372,6 +372,8 @@ module_analyzer() {
     local lPROP_ARRAY_INIT_ARR=()
     lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
     lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+    lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+    lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
     build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -400,6 +402,8 @@ module_analyzer() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

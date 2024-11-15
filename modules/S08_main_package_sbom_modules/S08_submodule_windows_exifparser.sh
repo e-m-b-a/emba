@@ -192,6 +192,7 @@ windows_exifparser_threader() {
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
   [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

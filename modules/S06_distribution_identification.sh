@@ -142,6 +142,7 @@ S06_distribution_identification()
             fi
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lIDENTIFIER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -247,6 +248,14 @@ get_csv_rule_distri() {
   #   MikroTik routerOS V2.4 (c) 1999-2001       http://mikrotik.com/
   lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER}" | sed -r 's/.*mikrotik\ routeros\ v([0-9]\.[0-9]+).*/:mikrotik:routeros:\1/')"
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER// /:}"
+
+  # ensure we have filled all the fields
+  lRES="${lVERSION_IDENTIFIER//[^:]}"
+  while [[ "${#lRES}" -lt 3 ]]; do
+    lVERSION_IDENTIFIER=":${lVERSION_IDENTIFIER}"
+    lRES="${lVERSION_IDENTIFIER//[^:]}"
+  done
+
   lCSV_RULE="$(safe_echo "${lVERSION_IDENTIFIER}" | tr -dc '[:print:]')"
   echo "${lCSV_RULE}"
 }

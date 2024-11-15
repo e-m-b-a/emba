@@ -72,7 +72,9 @@ S08_submodule_alpine_apk_package_parser() {
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
-      mkdir "${TMP_DIR}"/apk
+      if ! [[ -d "${TMP_DIR}"/apk ]]; then
+        mkdir "${TMP_DIR}"/apk || true
+      fi
       tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
 
       if ! [[ -f "${TMP_DIR}"/apk/.PKGINFO ]]; then
@@ -110,6 +112,7 @@ S08_submodule_alpine_apk_package_parser() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       mapfile -t lAPK_FILES_ARR < <(find "${TMP_DIR}"/apk)
       # add package files to properties

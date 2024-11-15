@@ -113,6 +113,7 @@ version_detection_thread() {
   local BINARY_PATH=""
   local BIN_NAME=""
   local lBIN_ARCH="NA"
+  local lBIN_FILE="NA"
   local BINARY_PATHS=()
   local LOG_PATH_=""
   local lCSV_RULE=""
@@ -177,8 +178,8 @@ version_detection_thread() {
       print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${lAPP_LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
-      lBIN_ARCH=$(file -b "${BINARY_PATH}")
-      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+      lBIN_FILE=$(file -b "${BINARY_PATH}")
+      lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
       lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
@@ -197,6 +198,8 @@ version_detection_thread() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${BINARY_PATH}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

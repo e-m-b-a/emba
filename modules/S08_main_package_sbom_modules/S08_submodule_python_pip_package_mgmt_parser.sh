@@ -104,6 +104,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -165,6 +166,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -246,6 +248,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -307,6 +310,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
