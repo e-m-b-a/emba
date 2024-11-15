@@ -95,7 +95,7 @@ S115_usermode_emulator() {
 
       local DIR=""
       DIR=$(pwd)
-      mapfile -t BIN_EMU_TMP < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -print0|xargs -0 -P 16 -I % sh -c 'file % 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${DIR}" || exit)
+      mapfile -t BIN_EMU_TMP < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -print0|xargs -r -0 -P 16 -I % sh -c 'file % 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${DIR}" || exit)
       # we re-create the BIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in MD5_DONE_INT (for all root dirs) we test every bin only once
       BIN_EMU_ARR=()
@@ -708,7 +708,7 @@ check_disk_space_emu() {
   local CRITICAL_FILES=()
   local KILLER=""
 
-  mapfile -t CRITICAL_FILES < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${KILL_SIZE}" -print0|xargs -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1 | cut -d_ -f2' || true)
+  mapfile -t CRITICAL_FILES < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${KILL_SIZE}" -print0|xargs -r -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1 | cut -d_ -f2' || true)
   for KILLER in "${CRITICAL_FILES[@]}"; do
     if pgrep -f "${EMULATOR}.*${KILLER}" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"

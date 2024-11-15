@@ -198,7 +198,7 @@ version_detection_thread() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${BINARY_PATH}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

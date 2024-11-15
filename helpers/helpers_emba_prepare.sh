@@ -419,12 +419,12 @@ prepare_file_arr() {
   print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
 
   export FILE_ARR=()
-  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
+  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
+    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
     FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "${lFIRMWARE_PATH}" )
   fi
@@ -454,7 +454,7 @@ prepare_binary_arr() {
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; -exec grep "ELF\|PE32" | cut -d: -f1 || true)
-  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' || true)
+  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' || true)
   if [[ -v lBINARIES_TMP_ARR[@] ]]; then
     for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
       if [[ -f "${lBINARY}" ]]; then
@@ -487,7 +487,7 @@ prepare_file_arr_limited() {
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
     -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
     -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" \) \
-    -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3-)
+    -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3-)
     # -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3-)
 }
 
@@ -556,7 +556,7 @@ detect_root_dir_helper() {
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
     # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file -b {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
-    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$//' | sort -u 2>/dev/null || true)
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//"' | sort -u 2>/dev/null || true)
 
     if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
@@ -601,7 +601,7 @@ detect_root_dir_helper() {
       fi
     done
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -print0|xargs -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E s/\/.?bin\/bash//' || true)
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/bash//"' || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )
@@ -612,7 +612,7 @@ detect_root_dir_helper() {
         fi
       fi
     done
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E s/\/.?bin\/sh//' || true)
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/sh//"' || true)
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then

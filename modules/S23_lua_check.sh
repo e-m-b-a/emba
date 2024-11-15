@@ -28,7 +28,7 @@ S23_lua_check()
   local WAIT_PIDS_S23=()
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnerabilities detected" "common linux file"
-  mapfile -t S23_LUA_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t S23_LUA_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
 
   sub_module_title "LUA linter checks module"
 
@@ -75,7 +75,7 @@ s23_luaseccheck() {
 
   sub_module_title "LUA Security checks module"
 
-  mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -0 -P 16 -I % sh -c 'grep -H cgilua\. % 2>/dev/null | cut -d ':' -f1' | sort -u)
+  mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. % 2>/dev/null | cut -d ':' -f1' | sort -u)
 
   for QUERY_FILE in "${LUA_CGI_FILES[@]}"; do
     local ISSUES_FILE=0

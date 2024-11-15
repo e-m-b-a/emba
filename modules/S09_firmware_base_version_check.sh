@@ -68,9 +68,9 @@ S09_firmware_base_version_check() {
   if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
     print_output "[*] Checking for common package manager environments to optimize static version detection"
     # Debian:
-    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -0 -P 16 -I % sh -c 'cat %' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat %' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
     # OpenWRT
-    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -0 -P 16 -I % sh -c 'cat %' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat %' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
@@ -205,7 +205,7 @@ S09_firmware_base_version_check() {
 
       [[ "${RTOS}" -eq 1 ]] && continue
 
-      mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3)
+      mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3)
       # before moving on we need to ensure our strings files are generated:
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
@@ -274,7 +274,7 @@ S09_firmware_base_version_check() {
       #   use regex (VERSION_IDENTIFIER) via zgrep on these files
       #   use csv-regex to get the csv-search string for csv lookup
 
-      mapfile -t SPECIAL_FINDS < <(find "${FIRMWARE_PATH}" -xdev -type f -name "${lAPP_NAME}" -print0|xargs -0 -P 16 -I % sh -c 'zgrep -H '"${VERSION_IDENTIFIER}"' %' || true)
+      mapfile -t SPECIAL_FINDS < <(find "${FIRMWARE_PATH}" -xdev -type f -name "${lAPP_NAME}" -print0|xargs -r -0 -P 16 -I % sh -c 'zgrep -H '"${VERSION_IDENTIFIER}"' %' || true)
       for SFILE in "${SPECIAL_FINDS[@]}"; do
         BIN_PATH=$(safe_echo "${SFILE}" | cut -d ":" -f1)
         lAPP_NAME="$(basename "$(safe_echo "${SFILE}" | cut -d ":" -f1)")"

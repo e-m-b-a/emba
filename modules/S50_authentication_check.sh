@@ -92,7 +92,7 @@ search_shadow() {
   local lHASH=""
   local lCHECK=0
 
-  mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*"  -print0|xargs -0 -P 16 -I % sh -c 'file % | grep "ASCII text" | cut -d: -f1' || true)
+  mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*"  -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ASCII text" | cut -d: -f1' || true)
   for lSHADOW_FILE in "${lSHADOW_FILE_PATHS_ARR[@]}"; do
     if [[ -f "${lSHADOW_FILE}" ]] ; then
       mapfile -t lHASHES_ARR < <(grep -E '\$[1-6][ay]?\$' "${lSHADOW_FILE}" || true)

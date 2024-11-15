@@ -71,9 +71,9 @@ P61_binwalk_extractor() {
 
   if [[ -d "${OUTPUT_DIR_BINWALK}" ]]; then
     lFILES_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type f | wc -l )
-    lUNIQUE_FILES_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+    lUNIQUE_FILES_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
     lDIRS_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type d | wc -l )
-    lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'file %' | grep -c "ELF" || true)
+    lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep -c "ELF" || true)
   fi
 
   if [[ "${lBINS_BW}" -gt 0 ]] || [[ "${lFILES_EXT_BW}" -gt 0 ]]; then

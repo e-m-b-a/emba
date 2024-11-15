@@ -94,10 +94,13 @@ populate_karrays() {
   local lV=""
   local lK_MOD_FILE=""
 
-  mapfile -t KERNEL_MODULES < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f  -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t KERNEL_MODULES < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
 
   for lK_MODULE in "${KERNEL_MODULES[@]}"; do
-    lK_MOD_FILE=$(file "${lK_MODULE}")
+    lK_MOD_FILE=$(file -b "${lK_MODULE}")
+
+    # What is the old .o kernel modules showing in the file output?
+    # Linux v2.4.x and before is using .o kernel modules
     if [[ "${lK_MODULE}" =~ .*\.o ]]; then
       KERNEL_VERSION+=( "$(strings "${lK_MODULE}" 2>/dev/null | grep "kernel_version=" | cut -d= -f2 || true)" )
       continue
@@ -435,12 +438,12 @@ check_modprobe() {
   local lMP_F_CHECK=0
   local lMP_CONF=""
 
-  readarray -t lMODPROBE_D_DIRS_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*'  -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lMODPROBE_D_DIRS_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*'  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
   for lMPROBE_DIR in "${lMODPROBE_D_DIRS_ARR[@]}"; do
     if [[ -d "${lMPROBE_DIR}" ]] ; then
       lMP_CHECK=1
       print_output "[+] Found ""$(print_path "${lMPROBE_DIR}")"
-      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "${lMPROBE_DIR}" -xdev -iname '*.conf'  -print0|xargs -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )"
+      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "${lMPROBE_DIR}" -xdev -iname '*.conf'  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )"
       for lMP_CONF in "${MODPROBE_D_DIR_CONTENT[@]}"; do
         if [[ -e "${lMP_CONF}" ]] ; then
           lMP_F_CHECK=1
