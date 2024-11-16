@@ -159,6 +159,7 @@ deep_extractor() {
 deeper_extractor_helper() {
   local lFILE_TMP=""
   local lFILE_MD5=""
+  local lFILE_DETAILS=""
   local lBIN_PID=""
   local lWAIT_PIDS_P60=()
   local lFREE_SPACE=""
@@ -166,6 +167,10 @@ deeper_extractor_helper() {
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
 
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
+    lFILE_DETAILS=$(file -b "${lFILE_TMP}")
+    if [[ "${lFILE_DETAILS}" == *"text"* ]]; then
+      continue
+    fi
 
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
     # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
@@ -174,7 +179,7 @@ deeper_extractor_helper() {
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
 
     print_output "[*] Details of file: ${ORANGE}${lFILE_TMP}${NC}"
-    print_output "$(indent "$(orange "$(file "${lFILE_TMP}")")")"
+    print_output "$(indent "$(orange "${lFILE_DETAILS}")")"
     print_output "$(indent "$(orange "$(md5sum "${lFILE_TMP}")")")"
 
     # do a quick check if EMBA should handle the file or we give it to unblob:
