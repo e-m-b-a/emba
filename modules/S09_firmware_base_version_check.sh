@@ -230,6 +230,7 @@ S09_firmware_base_version_check() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${lAPP_NAME} ${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - strict - deprecated${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+            CSV_RULE="${CSV_RULE//\ }"
             write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
@@ -243,8 +244,6 @@ S09_firmware_base_version_check() {
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-            lAPP_VERS="${lAPP_VERS//\ }"
-
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
@@ -293,6 +292,7 @@ S09_firmware_base_version_check() {
         CSV_REGEX="${CSV_REGEX%\"}"
         VERSION_FINDER=$(safe_echo "${SFILE}" | cut -d ":" -f2-3 | tr -dc '[:print:]')
         CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+        CSV_RULE="${CSV_RULE//\ }"
 
         print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN_PATH}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
         write_csv_log "${BIN_PATH}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
@@ -311,7 +311,6 @@ S09_firmware_base_version_check() {
         lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
         lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
         lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-        lAPP_VERS="${lAPP_VERS//\ }"
 
         # add source file path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
@@ -349,6 +348,7 @@ S09_firmware_base_version_check() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in unblob logs (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+          CSV_RULE="${CSV_RULE//\ }"
           write_csv_log "unblob logs" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
@@ -361,7 +361,6 @@ S09_firmware_base_version_check() {
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-          lAPP_VERS="${lAPP_VERS//\ }"
 
           # add source file path information to our properties array:
           local lPROP_ARRAY_INIT_ARR=()
@@ -397,6 +396,7 @@ S09_firmware_base_version_check() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in original firmware file (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+          CSV_RULE="${CSV_RULE//\ }"
           write_csv_log "firmware" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
@@ -412,7 +412,6 @@ S09_firmware_base_version_check() {
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-          lAPP_VERS="${lAPP_VERS//\ }"
 
           local lCONFIDENCE_LEVEL=2
 
@@ -655,6 +654,7 @@ bin_string_checker() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+            CSV_RULE="${CSV_RULE//\ }"
             write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
@@ -671,7 +671,6 @@ bin_string_checker() {
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-            lAPP_VERS="${lAPP_VERS//\ }"
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
@@ -716,6 +715,7 @@ bin_string_checker() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in file ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
             CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+            CSV_RULE="${CSV_RULE//\ }"
             write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
@@ -730,7 +730,6 @@ bin_string_checker() {
             lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
             lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
             lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-            lAPP_VERS="${lAPP_VERS//\ }"
 
             local lCONFIDENCE_LEVEL=1
 
@@ -773,6 +772,7 @@ bin_string_checker() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           CSV_RULE=$(get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}")
+          CSV_RULE="${CSV_RULE//\ }"
           write_csv_log "${BIN}" "${lAPP_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
@@ -787,7 +787,6 @@ bin_string_checker() {
           lAPP_MAINT=$(echo "${CSV_RULE}" | cut -d ':' -f2)
           lAPP_NAME=$(echo "${CSV_RULE}" | cut -d ':' -f3)
           lAPP_VERS=$(echo "${CSV_RULE}" | cut -d ':' -f4-5)
-          lAPP_VERS="${lAPP_VERS//\ }"
 
           local lCONFIDENCE_LEVEL=1
 
