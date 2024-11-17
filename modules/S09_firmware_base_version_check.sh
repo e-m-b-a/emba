@@ -575,7 +575,7 @@ generate_strings() {
   local lSTRINGS_OUTPUT=""
 
   lBIN_FILE=$(file -b "${lBIN}" || true)
-  if [[ "${lBIN_FILE}" == *"text"* ]]; then
+  if [[ "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* ]]; then
     return
   fi
 
@@ -620,7 +620,7 @@ bin_string_checker() {
     BIN_NAME_REAL="$(basename "${BIN}")"
     local BIN_FILE=""
     BIN_FILE=$(file -b "${BIN}" || true)
-    if [[ "${BIN_FILE}" == *"text"* ]]; then
+    if [[ "${BIN_FILE}" == *"text"* || "${BIN_FILE}" == *" archive "* || "${BIN_FILE}" == *" compressed "* ]]; then
       continue
     fi
     STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${BIN_NAME_REAL}".txt
