@@ -27,7 +27,7 @@ ID1_ubuntu_os() {
     print_tool_info "dbus-x11" 1
     # To using ubi and nandsim with modprobe, the linux-modules-extra package must be installed. (Ubuntu 22.04)
     print_tool_info "linux-modules-extra-$(uname -r)" 1
-    
+
     # is not available in Ubuntu 24.04 -> need to check on this:
     # print_tool_info "libnotify-cil-dev" 1
 
