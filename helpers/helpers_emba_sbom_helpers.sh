@@ -136,14 +136,14 @@ build_sbom_json_hashes_arr() {
       # To handle these cases we check against the version ^1.2.3*
       if [[ "${lDUP_CHECK_NAME}" == "${lAPP_NAME}" ]] && { [[ "${lAPP_VERS}" =~ ^"${lDUP_CHECK_VERS}".* ]] || [[ "${lDUP_CHECK_VERS}" =~ ^"${lAPP_VERS}".* ]]; }; then
         # write_log "[*] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
-        print_output "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}"
+        write_log "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
         jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
 
         # with the following check we find out if we have the same version or some extended version
         # on the 2nd case we also add this different version to the properties
         if [[ "${lAPP_VERS}" != "${lDUP_CHECK_VERS}" ]]; then
-          print_output "[*] Version difference detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}"
+          write_log "[*] Version difference detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
           jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS+2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/\.tmp}" > "${lDUP_CHECK_FILE/\.json/\.tmp1}"
           mv "${lDUP_CHECK_FILE/\.json/\.tmp1}" "${lDUP_CHECK_FILE/\.json/\.tmp}" 2>/dev/null || true
         fi
@@ -151,10 +151,10 @@ build_sbom_json_hashes_arr() {
         # extract the confidence level from the json and compare it to our current level:
         lCONFIDENCE_LEVEL_JSON=$(jq -r '.properties[] | select(.name | endswith(":confidence")).value' "${lDUP_CHECK_FILE}" || true)
         if [[ "${lCONFIDENCE_LEVEL}" != "NA" ]] && [[ "${lCONFIDENCE_LEVEL_JSON:-NA}" != "NA" ]]; then
-          print_output "[*] lCONFIDENCE_LEVEL: ${lCONFIDENCE_LEVEL} / lCONFIDENCE_LEVEL_JSON: $(get_confidence_value "${lCONFIDENCE_LEVEL_JSON}")"
+          write_log "[*] lCONFIDENCE_LEVEL: ${lCONFIDENCE_LEVEL} / lCONFIDENCE_LEVEL_JSON: $(get_confidence_value "${lCONFIDENCE_LEVEL_JSON}")" "${SBOM_LOG_PATH}"/duplicates.txt
           if [[ "${lCONFIDENCE_LEVEL:-0}" -gt "$(get_confidence_value "${lCONFIDENCE_LEVEL_JSON:-undef}")" ]]; then
             # if our current level is higher as the level from the json we need to adjust it now
-            print_output "[*] Duplicate handling - Confidence level needs to be adjusted for ${lDUP_CHECK_FILE} -> from ${lCONFIDENCE_LEVEL_JSON:-NA} -> to $(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"
+            write_log "[*] Duplicate handling - Confidence level needs to be adjusted for ${lDUP_CHECK_FILE} -> from ${lCONFIDENCE_LEVEL_JSON:-NA} -> to $(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")" "${SBOM_LOG_PATH}"/duplicates.txt
             # very dirty :-D
             jq . "${lDUP_CHECK_FILE/\.json/\.tmp}" | sed 's/"value": "'"${lCONFIDENCE_LEVEL_JSON:-NA}"'"/"value": "'"$(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"'"/' > "${lDUP_CHECK_FILE/\.json/\.tmp1}" || true
             mv "${lDUP_CHECK_FILE/\.json/\.tmp1}" "${lDUP_CHECK_FILE/\.json/\.tmp}" 2>/dev/null || true
