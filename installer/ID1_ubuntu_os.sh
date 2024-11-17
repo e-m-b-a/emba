@@ -25,6 +25,10 @@ ID1_ubuntu_os() {
     print_tool_info "notification-daemon" 1
     print_tool_info "dbus" 1
     print_tool_info "dbus-x11" 1
+    
+    # To using ubi and nandsim with modprobe, the linux-modules-extra package must be installed. (Ubuntu 22.04)
+    apt install linux-modules-extra-$(uname -r)
+    
     # is not available in Ubuntu 24.04 -> need to check on this:
     # print_tool_info "libnotify-cil-dev" 1
 
