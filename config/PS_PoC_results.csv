@@ -8414,6 +8414,7 @@ CVE-2021-21220;Chrome V8 JIT XOR Arbitrary Code Execution;https://packetstormsec
 CVE-2021-21276;POLR URL 2.3.0 Shortener Admin Takeover;https://packetstormsecurity.com/files/171743/POLR-URL-2.3.0-Shortener-Admin-Takeover.html;unknown
 CVE-2021-21327;GLPI 9.5.3 Unsafe Reflection;https://packetstormsecurity.com/files/161680/GLPI-9.5.3-Unsafe-Reflection.html;unknown
 CVE-2021-21337;Products.PluggableAuthService 2.6.0 Open Redirect;https://packetstormsecurity.com/files/162911/Products.PluggableAuthService-2.6.0-Open-Redirect.html;unknown
+CVE-2021-21425;GravCMS 1.10.7 Arbitrary YAML Write Update;https://packetstormsecurity.com/files/182664/GravCMS-1.10.7-Arbitrary-YAML-Write-Update.html;remote
 CVE-2021-21465;SAP Application Server ABAP ABAP Platform Code Injection SQL Injection Missing Authorization;https://packetstormsecurity.com/files/167229/SAP-Application-Server-ABAP-ABAP-Platform-Code-Injection-SQL-Injection-Missing-Authorization.html;unknown
 CVE-2021-21466;SAP Application Server ABAP ABAP Platform Code Injection SQL Injection Missing Authorization;https://packetstormsecurity.com/files/167229/SAP-Application-Server-ABAP-ABAP-Platform-Code-Injection-SQL-Injection-Missing-Authorization.html;unknown
 CVE-2021-21468;SAP Application Server ABAP ABAP Platform Code Injection SQL Injection Missing Authorization;https://packetstormsecurity.com/files/167229/SAP-Application-Server-ABAP-ABAP-Platform-Code-Injection-SQL-Injection-Missing-Authorization.html;unknown
@@ -10478,6 +10479,10 @@ CVE-2024-38094;Microsoft SharePoint Remote Code Execution;https://packetstormsec
 CVE-2024-38200;Microsoft Office NTLMv2 Disclosure;https://packetstormsecurity.com/files/181971/Microsoft-Office-NTLMv2-Disclosure.html;unknown
 CVE-2024-38457;XenForo 2.2.15 Cross Site Request Forgery;https://packetstormsecurity.com/files/179585/XenForo-2.2.15-Cross-Site-Request-Forgery.html;unknown
 CVE-2024-38458;Xenforo 2.2.15 Remote Code Execution;https://packetstormsecurity.com/files/179586/Xenforo-2.2.15-Remote-Code-Execution.html;remote
+CVE-2024-38876;Siemens Energy Omnivise T3000 8.2 SP3 Privilege Escalation File Download;https://packetstormsecurity.com/files/182667/Siemens-Energy-Omnivise-T3000-8.2-SP3-Privilege-Escalation-File-Download.html;local
+CVE-2024-38877;Siemens Energy Omnivise T3000 8.2 SP3 Privilege Escalation File Download;https://packetstormsecurity.com/files/182667/Siemens-Energy-Omnivise-T3000-8.2-SP3-Privilege-Escalation-File-Download.html;local
+CVE-2024-38878;Siemens Energy Omnivise T3000 8.2 SP3 Privilege Escalation File Download;https://packetstormsecurity.com/files/182667/Siemens-Energy-Omnivise-T3000-8.2-SP3-Privilege-Escalation-File-Download.html;local
+CVE-2024-38879;Siemens Energy Omnivise T3000 8.2 SP3 Privilege Escalation File Download;https://packetstormsecurity.com/files/182667/Siemens-Energy-Omnivise-T3000-8.2-SP3-Privilege-Escalation-File-Download.html;local
 CVE-2024-39123;Calibre Web 0.6.21 Cross Site Scripting;https://packetstormsecurity.com/files/180376/Calibre-Web-0.6.21-Cross-Site-Scripting.html;unknown
 CVE-2024-39143;ResidenceCMS 2.10.1 Cross Site Scripting;https://packetstormsecurity.com/files/179401/ResidenceCMS-2.10.1-Cross-Site-Scripting.html;unknown
 CVE-2024-39248;SimpCMS 0.1 Cross Site Scripting;https://packetstormsecurity.com/files/179219/SimpCMS-0.1-Cross-Site-Scripting.html;unknown
@@ -10520,6 +10525,7 @@ CVE-2024-45178;C MOR Video Surveillance 5.2401 Path Traversal;https://packetstor
 CVE-2024-45179;C MOR Video Surveillance 5.2401 6.00PL01 Command Injection;https://packetstormsecurity.com/files/181385/C-MOR-Video-Surveillance-5.2401-6.00PL01-Command-Injection.html;unknown
 CVE-2024-45409;Ruby SAML GitLab Authentication Bypass;https://packetstormsecurity.com/files/182032/Ruby-SAML-GitLab-Authentication-Bypass.html;unknown
 CVE-2024-45622;ASIS 3.2.0 SQL Injection;https://packetstormsecurity.com/files/181355/ASIS-3.2.0-SQL-Injection.html;remote
+CVE-2024-4577;PHP CGI Argument Injection Remote Code Execution;https://packetstormsecurity.com/files/182663/PHP-CGI-Argument-Injection-Remote-Code-Execution.html;remote
 CVE-2024-4577;PHP Remote Code Execution;https://packetstormsecurity.com/files/179085/PHP-Remote-Code-Execution.html;remote
 CVE-2024-45873;VegaBird Yaazhini 2.0.2 DLL Hijacking;https://packetstormsecurity.com/files/181912/VegaBird-Yaazhini-2.0.2-DLL-Hijacking.html;unknown
 CVE-2024-45874;VegaBird Vooki 5.2.9 DLL Hijacking;https://packetstormsecurity.com/files/181913/VegaBird-Vooki-5.2.9-DLL-Hijacking.html;unknown
@@ -10539,6 +10545,12 @@ CVE-2024-4956;Nexus Repository Manager 3 Path Traversal;https://packetstormsecur
 CVE-2024-4956;Nexus Repository Traversal Scanner;https://packetstormsecurity.com/files/181887/Nexus-Repository-Traversal-Scanner.html;unknown
 CVE-2024-5009;Progress WhatsUp Gold SetAdminPassword Privilege Escalation;https://packetstormsecurity.com/files/179403/Progress-WhatsUp-Gold-SetAdminPassword-Privilege-Escalation.html;local
 CVE-2024-50483;WordPress Meetup 0.1 Authentication Bypass;https://packetstormsecurity.com/files/182540/WordPress-Meetup-0.1-Authentication-Bypass.html;unknown
+CVE-2024-50588;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
+CVE-2024-50589;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
+CVE-2024-50590;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
+CVE-2024-50591;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
+CVE-2024-50592;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
+CVE-2024-50593;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
 CVE-2024-51378;CyberPanel Command Injection;https://packetstormsecurity.com/files/182426/CyberPanel-Command-Injection.html;unknown
 CVE-2024-51567;CyberPanel upgrademysqlstatus Arbitrary Command Execution;https://packetstormsecurity.com/files/182539/CyberPanel-upgrademysqlstatus-Arbitrary-Command-Execution.html;remote
 CVE-2024-5230;FleetCart 4.1.1 Information Disclosure;https://packetstormsecurity.com/files/178770/FleetCart-4.1.1-Information-Disclosure.html;unknown
