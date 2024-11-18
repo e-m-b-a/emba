@@ -187,26 +187,24 @@ windows_exifparser_threader() {
 
   local lSTRIPPED_VERSION="::${lAPP_NAME//\.exe}:${lAPP_VERS:-NA}"
 
-  ### new SBOM json testgenerator
-  if command -v jo >/dev/null; then
-    # add EXE path information to our properties array:
-    local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
-    [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  # add EXE path information to our properties array:
+  local lPROP_ARRAY_INIT_ARR=()
+  lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
+  [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
-    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+  build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-      print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-      return
-    fi
-
-    # create component entry - this allows adding entries very flexible:
-    build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+  # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+  # final array with all hash values
+  if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    return
   fi
+
+  # create component entry - this allows adding entries very flexible:
+  build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
   write_log "[*] Windows EXE details: ${ORANGE}${lEXE_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_link "${lEXIF_LOG}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

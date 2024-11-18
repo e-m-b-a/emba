@@ -113,26 +113,25 @@ S08_submodule_java_archives_parser() {
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "java" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
       local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-      if command -v jo >/dev/null; then
-        # add the python requirement path information to our properties array:
-        # Todo: in the future we should check for the package, package hashes and which files
-        # are in the package
-        local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      # add the python requirement path information to our properties array:
+      # Todo: in the future we should check for the package, package hashes and which files
+      # are in the package
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
-        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-        # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-          continue
-        fi
-
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        continue
       fi
+
+      # create component entry - this allows adding entries very flexible:
+      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
       write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"

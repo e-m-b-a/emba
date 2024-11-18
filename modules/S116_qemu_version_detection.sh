@@ -113,6 +113,7 @@ version_detection_thread() {
   local BINARY_PATH=""
   local BIN_NAME=""
   local lBIN_ARCH="NA"
+  local lBIN_FILE="NA"
   local BINARY_PATHS=()
   local LOG_PATH_=""
   local lCSV_RULE=""
@@ -177,8 +178,8 @@ version_detection_thread() {
       print_output "[+] Version information found ${RED}""${VERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${BINARY_PATH}${GREEN} (license: ${ORANGE}${lAPP_LIC}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${LOG_PATH_}"
       write_csv_log "${BINARY_PATH}" "${BINARY}" "${VERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${TYPE}"
       BIN_NAME=$(basename "${BINARY_PATH}")
-      lBIN_ARCH=$(file -b "${BINARY_PATH}")
-      lBIN_ARCH=$(echo "${lBIN_ARCH}" | cut -d ',' -f2)
+      lBIN_FILE=$(file -b "${BINARY_PATH}")
+      lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lBIN_ARCH=$(clean_package_details "${lBIN_ARCH}")
       lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
@@ -193,25 +194,24 @@ version_detection_thread() {
       # it could be that we have a version like 2.14b:* -> we remove the last field
       lAPP_VERS="${lAPP_VERS/:\*}"
 
-      ### new SBOM json testgenerator
-      if command -v jo >/dev/null; then
-        # add EXE path information to our properties array:
-        local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${BINARY_PATH}" )
-        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+      # add EXE path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${BINARY_PATH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
-        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-        # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${BINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-          continue
-        fi
-
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${BINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        continue
       fi
+
+      # create component entry - this allows adding entries very flexible:
+      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
       write_log "${lPACKAGING_SYSTEM};${BINARY_PATH:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${BIN_NAME,,};${VERSION_DETECTED:-NA};${lCSV_RULE:-NA};${lAPP_LIC:-NA};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
     done

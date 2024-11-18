@@ -94,10 +94,13 @@ populate_karrays() {
   local lV=""
   local lK_MOD_FILE=""
 
-  mapfile -t KERNEL_MODULES < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t KERNEL_MODULES < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
 
   for lK_MODULE in "${KERNEL_MODULES[@]}"; do
-    lK_MOD_FILE=$(file "${lK_MODULE}")
+    lK_MOD_FILE=$(file -b "${lK_MODULE}")
+
+    # What is the old .o kernel modules showing in the file output?
+    # Linux v2.4.x and before is using .o kernel modules
     if [[ "${lK_MODULE}" =~ .*\.o ]]; then
       KERNEL_VERSION+=( "$(strings "${lK_MODULE}" 2>/dev/null | grep "kernel_version=" | cut -d= -f2 || true)" )
       continue
@@ -367,24 +370,23 @@ module_analyzer() {
     # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
     check_for_s08_csv_log "${S08_CSV_LOG}"
 
-    ### new SBOM json testgenerator
-    if command -v jo >/dev/null; then
-      local lPACKAGING_SYSTEM="kernel_module"
-      # add source file path information to our properties array:
-      local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+    local lPACKAGING_SYSTEM="kernel_module"
+    # add source file path information to our properties array:
+    local lPROP_ARRAY_INIT_ARR=()
+    lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
+    lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+    lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+    lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
-      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-      # final array with all hash values
-      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-      else
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-      fi
+    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+    # final array with all hash values
+    if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+      print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    else
+      # create component entry - this allows adding entries very flexible:
+      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
     fi
 
     write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
@@ -398,24 +400,23 @@ module_analyzer() {
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
       lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
-      ### new SBOM json testgenerator
-      if command -v jo >/dev/null; then
-        local lPACKAGING_SYSTEM="linux_kernel"
-        # add source file path information to our properties array:
-        local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
-        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+      local lPACKAGING_SYSTEM="linux_kernel"
+      # add source file path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
-        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-        # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-        else
-          # create component entry - this allows adding entries very flexible:
-          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-        fi
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+      else
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
       fi
 
       write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
@@ -437,12 +438,12 @@ check_modprobe() {
   local lMP_F_CHECK=0
   local lMP_CONF=""
 
-  readarray -t lMODPROBE_D_DIRS_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lMODPROBE_D_DIRS_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*'  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
   for lMPROBE_DIR in "${lMODPROBE_D_DIRS_ARR[@]}"; do
     if [[ -d "${lMPROBE_DIR}" ]] ; then
       lMP_CHECK=1
       print_output "[+] Found ""$(print_path "${lMPROBE_DIR}")"
-      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "${lMPROBE_DIR}" -xdev -iname '*.conf' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )"
+      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "${lMPROBE_DIR}" -xdev -iname '*.conf'  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )"
       for lMP_CONF in "${MODPROBE_D_DIR_CONTENT[@]}"; do
         if [[ -e "${lMP_CONF}" ]] ; then
           lMP_F_CHECK=1

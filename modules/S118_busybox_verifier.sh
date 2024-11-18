@@ -36,6 +36,7 @@ S118_busybox_verifier()
   local lAPP_LIC="GPL-2.0-only"
   local lAPP_MAINT=""
   local lAPP_VERS=""
+  local lBIN_FILE=""
   local lBIN_ARCH=""
   local lPACKAGING_SYSTEM="static_busybox_analysis"
   local lCPE_IDENTIFIER=""
@@ -76,7 +77,8 @@ S118_busybox_verifier()
       lCPE_IDENTIFIER=$(build_cpe_identifier "${lVERSION_IDENTIFIER}")
       lOS_IDENTIFIED=$(distri_check)
 
-      lBIN_ARCH=$(file -b "${lBB_BIN}" | cut -d ',' -f2)
+      lBIN_FILE=$(file -b "${lBB_BIN}")
+      lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
 
@@ -84,26 +86,25 @@ S118_busybox_verifier()
       lAPP_NAME=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f3)
       lAPP_VERS=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f4-5)
 
-      ### new SBOM json testgenerator
-      if command -v jo >/dev/null; then
-        # add source file path information to our properties array:
-        local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lBB_BIN}" )
-        lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lVERSION_IDENTIFIER}" )
+      # add source file path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lBB_BIN}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lVERSION_IDENTIFIER}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
-        build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-        # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-        # final array with all hash values
-        if ! build_sbom_json_hashes_arr "${lBB_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-          continue
-        fi
-
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lBB_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        continue
       fi
+
+      # create component entry - this allows adding entries very flexible:
+      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
       write_log "static_busybox_analysis;${lBB_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${lBB_BIN}");NA;${lVERSION_IDENTIFIER:-NA};GPL-2.0-only;maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
       print_output "[*] Found busybox binary - ${lBB_BIN} - ${lVERSION_IDENTIFIER:-NA} - GPL-2.0-only" "no_log"
@@ -206,7 +207,7 @@ get_busybox_applets_stat() {
 
   # quite often we only have the firmware path without the filesytem area: /bin/busybox
   # This results in another search for our binary
-  mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -exec file {} \; | grep "ELF" | cut -d: -f1 | sort -u || true)
+  mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1' | sort -u || true)
   for lBB_BIN_ in "${lBB_BINS_ARR[@]}"; do
     print_output "[*] Extract applet data for BusyBox version ${ORANGE}${lBB_VERSION_}${NC} from binary ${ORANGE}${lBB_BIN_}${NC}"
     mapfile -t lBB_DETECTED_APPLETS_ARR < <(grep -oUaP "\x00\x5b(\x5b)?\x00.*\x00\x00" "${lBB_BIN_}" | strings | sort -u || true)

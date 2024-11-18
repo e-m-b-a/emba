@@ -159,47 +159,45 @@ debian_status_files_analysis_threader() {
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lPACKAGE}:${lVERSION}:*:*:*:*:*:*"
   local lSTRIPPED_VERSION="::${lPACKAGE}:${lVERSION:-NA}"
 
-  ### new SBOM json testgenerator
-  if command -v jo >/dev/null; then
-    # add source file path information to our properties array:
-    local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-    if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
-      for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
-        lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
-      done
-    fi
-
-    # if we have the list file also we can add all the paths provided by the package
-    if [[ -f "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list" ]]; then
-      local lPKG_LIST_ENTRY=""
-      local lCNT=0
-      while IFS= read -r lPKG_LIST_ENTRY; do
-        # exclude the root directory entry as this will confuse people
-        [[ "${lPKG_LIST_ENTRY}" == "/." ]] && continue
-        lCNT=$((lCNT+1))
-        lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
-        # we limit the logging of the package files to 500 files per package
-        if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-          lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
-          break
-        fi
-      done < "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list"
-    fi
-
-    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-      print_output "[*] Already found results for ${lPACKAGE} / ${lVERSION}" "no_log"
-      return
-    fi
-
-    # create component entry - this allows adding entries very flexible:
-    build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+  # add source file path information to our properties array:
+  local lPROP_ARRAY_INIT_ARR=()
+  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+    for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+      lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+    done
   fi
+
+  # if we have the list file also we can add all the paths provided by the package
+  if [[ -f "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list" ]]; then
+    local lPKG_LIST_ENTRY=""
+    local lCNT=0
+    while IFS= read -r lPKG_LIST_ENTRY; do
+      # exclude the root directory entry as this will confuse people
+      [[ "${lPKG_LIST_ENTRY}" == "/." ]] && continue
+      lCNT=$((lCNT+1))
+      lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+      # we limit the logging of the package files to 500 files per package
+      if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+        lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+        break
+      fi
+    done < "${lPACKAGE_DIR%\/}/info/${lPACKAGE}.list"
+  fi
+
+  build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+  # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+  # final array with all hash values
+  if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+    print_output "[*] Already found results for ${lPACKAGE} / ${lVERSION}" "no_log"
+    return
+  fi
+
+  # create component entry - this allows adding entries very flexible:
+  build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
   write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lPACKAGE}" "${lVERSION}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"

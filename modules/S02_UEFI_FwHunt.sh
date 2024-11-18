@@ -97,7 +97,7 @@ fwhunter_logging() {
   local FWHUNTER_BINARY_MATCH=""
   local FWHUNTER_BINARLY_IDs=()
 
-  mapfile -t FWHUNTER_RESULTS < <(find "${LOG_PATH_MODULE}" -type f -exec grep -H "Scanner result.*FwHunt rule has been triggered" {} \;)
+  mapfile -t FWHUNTER_RESULTS < <(find "${LOG_PATH_MODULE}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" %')
   if ! [[ "${#FWHUNTER_RESULTS[@]}" -gt 0 ]]; then
     return
   fi
