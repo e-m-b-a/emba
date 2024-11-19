@@ -189,6 +189,15 @@ run_modules()
       SELECT_MODULES+=("S24")
     fi
 
+    # manual selection of pre-checking modules not supported. EMBA is doing this for you!
+    if [[ "${SELECT_MODULES[*]}" =~ [pP][0-9] ]]; then
+      print_ln "no_log"
+      print_output "[!] ERROR: Manual pre-checking module selection not supported" "no_log"
+      print_output "[!] Hint: Remove -m p[0-9]+ parameter" "no_log"
+      print_ln "no_log"
+      exit 1
+    fi
+
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
       local MOD_FIN=0
       if [[ "${SELECT_NUM}" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
