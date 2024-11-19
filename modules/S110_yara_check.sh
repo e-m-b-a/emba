@@ -34,6 +34,7 @@ S110_yara_check() {
   local lYRULE=""
   local lMATCH_FILE=""
   local lMATCH_FILE_NAME=""
+  # shellcheck disable=SC2153
   local lMAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
   local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"*80/100 ))
   local lYARA_OUT_LINE=""

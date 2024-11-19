@@ -532,7 +532,6 @@ cve_db_lookup_version() {
   print_output "[*] Testing: cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" "no_log"
   # "criteria": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
 
-  local lCVE_VER_SOURCES_ARR_tmp=""
   # we are looking for cpe:2.3:[aoh]:BINARY_NAME:BINARY_VERSION:.* and for cpe:2.3:[aoh]:BINARY_NAME:*:.*
   # with this we are also able to further process just BINARY_NAME with further version details which are not in the cpe identifier
   print_output "[*] Testing against NVD dir ${NVD_DIR}" "no_log"
