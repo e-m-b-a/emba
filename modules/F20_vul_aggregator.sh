@@ -438,6 +438,15 @@ generate_cve_details_versions() {
   local VERSIONS_AGGREGATED=("$@")
   local BIN_VERSION=""
 
+  # prepare a smaller subset of cve sources
+  # we write only the binary names to a file and use this file later on for grep
+  cut -d\; -f6 "${S08_CSV_LOG}" | tail -n +2 | cut -d : -f3 | grep -v NA | sort -u | sed 's/^/cpe.*/' > "${LOG_PATH_MODULE}"/cpe_search_grep.tmp || true
+  # next step is to search for possible CVE source files and copy it to a temp directory. This temp directory will
+  # be used for searching the real CVEs later on
+  mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+  cp $(grep -r -l -f "${LOG_PATH_MODULE}"/cpe_search_grep.tmp "${NVD_DIR}" | uniq) "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+  export NVD_DIR="${LOG_PATH_MODULE}"/cpe_search_tmp_dir
+
   for BIN_VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # BIN_VERSION is something like "binary:1.2.3"
     if [[ "${THREADED}" -eq 1 ]]; then

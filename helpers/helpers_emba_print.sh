@@ -664,7 +664,8 @@ print_help()
   echo -e "${CYAN}""-m [MODULE_NO.]""${NC}""   Test only with set modules [e.g. -m p05 -m s10 ... or -m p to run all p modules]"
   echo -e "                                    (multiple usage possible, case insensitive)"
   echo -e "${CYAN}""-p [PROFILE]""${NC}""      EMBA starts with a pre-defined profile (stored in ./scan-profiles)"
-  echo -e "${CYAN}""-t""${NC}""                Activate multi threading (destroys regular console output)"
+  # Threading is now only available via profile parameter. In default mode EMBA is running in threading mode
+#  echo -e "${CYAN}""-t""${NC}""                Activate multi threading (destroys regular console output)"
   echo -e "${CYAN}""-P""${NC}""                Overwrite auto MAX_MODS (maximum modules in parallel) configuration"
   echo -e "${CYAN}""-T""${NC}""                Overwrite auto MAX_MOD_THREADS (maximum threads per module) configuration"
   echo -e "\\nDeveloper options"
