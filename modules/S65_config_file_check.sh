@@ -22,32 +22,31 @@ S65_config_file_check()
   module_title "Search/scan config files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local NEG_LOG=0
-  export FSTAB_ARR=()
+  local lNEG_LOG=0
   export CONF_FILES_ARR=()
 
   scan_config
   check_fstab
 
   if [[ "${#CONF_FILES_ARR[@]}" -gt 0 ]] || [[ -v FSTAB_USER_FILES[@] ]] || [[ -v FSTAB_USER_FILES[@] ]]; then
-    NEG_LOG=1
+    lNEG_LOG=1
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
 scan_config()
 {
   sub_module_title "Search for config file"
-  local LINE=""
+  local lCONFIG_FILE=""
 
   readarray -t CONF_FILES_ARR < <(config_find "${CONFIG_DIR}""/config_files.cfg")
 
   if [[ "${CONF_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#CONF_FILES_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
-    for LINE in "${CONF_FILES_ARR[@]}" ; do
-      print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
+    for lCONFIG_FILE in "${CONF_FILES_ARR[@]}" ; do
+      print_output "$(indent "$(orange "$(print_path "${lCONFIG_FILE}")")")"
     done
   else
     print_output "[-] No configuration files found"
@@ -57,20 +56,21 @@ scan_config()
 check_fstab()
 {
   sub_module_title "Scan fstab"
-  local LINE=""
+  local lFSTAB_ARR=()
+  local lFSTAB_FILE=""
 
-  # IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
-  mapfile -t FSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
+  # IFS=" " read -r -a lFSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
+  mapfile -t lFSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
-  if [[ ${#FSTAB_ARR[@]} -gt 0 ]] ; then
-    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "username" % 2>/dev/null' || true)")
-    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "password" % 2>/dev/null' || true)")
+  if [[ ${#lFSTAB_ARR[@]} -gt 0 ]] ; then
+    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "username" % 2>/dev/null' || true)")
+    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "password" % 2>/dev/null' || true)")
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
-    for LINE in "${FSTAB_USER_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
+    for lFSTAB_FILE in "${FSTAB_USER_FILES[@]}"; do
+      print_output "$(indent "$(print_path "${lFSTAB_FILE}")")"
     done
     print_ln "no_log"
   else
@@ -79,8 +79,8 @@ check_fstab()
 
   if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
-    for LINE in "${FSTAB_PASS_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
+    for lFSTAB_FILE in "${FSTAB_PASS_FILES[@]}"; do
+      print_output "$(indent "$(print_path "${lFSTAB_FILE}")")"
     done
     print_ln "no_log"
   else

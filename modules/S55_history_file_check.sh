@@ -22,24 +22,24 @@ S55_history_file_check()
   module_title "Search history files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local HIST_FILES=()
-  local LINE=""
+  local lHIST_FILES_ARR=()
+  local lHIST_FILE=""
 
-  mapfile -t HIST_FILES < <(config_find "${CONFIG_DIR}""/history_files.cfg")
+  mapfile -t lHIST_FILES_ARR < <(config_find "${CONFIG_DIR}""/history_files.cfg")
 
-  if [[ "${HIST_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ "${#HIST_FILES[@]}" -ne 0 ]] ; then
+  if [[ "${lHIST_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#lHIST_FILES_ARR[@]}" -ne 0 ]] ; then
       print_output "[+] Found history files:"
-      for LINE in "${HIST_FILES[@]}" ; do
-        print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
+      for lHIST_FILE in "${lHIST_FILES_ARR[@]}" ; do
+        print_output "$(indent "$(orange "$(print_path "${lHIST_FILE}")")")"
       done
   else
     print_output "[-] No history files found"
   fi
 
   write_log ""
-  write_log "[*] Statistics:${#HIST_FILES[@]}"
+  write_log "[*] Statistics:${#lHIST_FILES_ARR[@]}"
 
-  module_end_log "${FUNCNAME[0]}" "${#HIST_FILES[@]}"
+  module_end_log "${FUNCNAME[0]}" "${#lHIST_FILES_ARR[@]}"
 }
 

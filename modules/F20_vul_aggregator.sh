@@ -96,6 +96,8 @@ F20_vul_aggregator() {
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
 
+  rm -rf "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+
   module_end_log "${FUNCNAME[0]}" "${FOUND_CVE}"
 }
 
@@ -438,13 +440,8 @@ generate_cve_details_versions() {
   local VERSIONS_AGGREGATED=("$@")
   local BIN_VERSION=""
 
-  # prepare a smaller subset of cve sources
-  # we write only the binary names to a file and use this file later on for grep
-  cut -d\; -f6 "${S08_CSV_LOG}" | tail -n +2 | cut -d : -f3 | grep -v NA | sort -u | sed 's/^/cpe.*/' > "${LOG_PATH_MODULE}"/cpe_search_grep.tmp || true
-  # next step is to search for possible CVE source files and copy it to a temp directory. This temp directory will
-  # be used for searching the real CVEs later on
-  mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
-  cp $(grep -r -l -f "${LOG_PATH_MODULE}"/cpe_search_grep.tmp "${NVD_DIR}" | uniq) "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+  # need to wait for finishing the copy process from initial loading in get_sbom_package_details
+  wait_for_pid "${WAIT_PIDS_CVE_COPY[@]}"
   export NVD_DIR="${LOG_PATH_MODULE}"/cpe_search_tmp_dir
 
   for BIN_VERSION in "${VERSIONS_AGGREGATED[@]}"; do
@@ -536,14 +533,12 @@ cve_db_lookup_version() {
   # "criteria": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
 
   local lCVE_VER_SOURCES_ARR_tmp=""
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r -E "cpe:${CPE_VERSION}:.*${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
+  # we are looking for cpe:2.3:[aoh]:BINARY_NAME:BINARY_VERSION:.* and for cpe:2.3:[aoh]:BINARY_NAME:*:.*
+  # with this we are also able to further process just BINARY_NAME with further version details which are not in the cpe identifier
+  print_output "[*] Testing against NVD dir ${NVD_DIR}" "no_log"
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r -E -e "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" -e "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
   print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_VERSION_SEARCH}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
   print_output "[*] Testing: cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "no_log"
-  # "criteria": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
-  mapfile -t lCVE_VER_SOURCES_ARR_tmp < <(grep -l -r -E "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
-  print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_NAME_SEARCH}${NC} resulted in ${ORANGE}${#lCVE_VER_SOURCES_ARR_tmp[@]}${NC} possible vulnerabilities" "no_log"
-
-  CVE_VER_SOURCES_ARR+=( "${lCVE_VER_SOURCES_ARR_tmp[@]}" )
 
   print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_VERSION_SEARCH} / ${lCPE_BIN_NAME_SEARCH}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
@@ -1612,4 +1607,16 @@ get_sbom_package_details() {
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
     readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' || true)
   fi
+
+  # prepare a smaller subset of cve sources
+  # we write only the binary names to a file and use this file later on for grep
+  # in the file we have entries like "cpe:2.3:.*binary_name"
+  cut -d\; -f6 "${S08_CSV_LOG}" | tail -n +2 | cut -d : -f3 | grep -v NA | uniq | sed 's/^/cpe:2.3:.*/' > "${LOG_PATH_MODULE}"/cpe_search_grep.tmp || true
+  # next step is to search for possible CVE source files and copy it to a temp directory. This temp directory will
+  # be used for searching the real CVEs later on
+  mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+  (grep -r -l -f "${LOG_PATH_MODULE}"/cpe_search_grep.tmp "${NVD_DIR}" | xargs cp -f -t "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true)&
+  local lTMP_PID="$!"
+  store_kill_pids "${lTMP_PID}"
+  export WAIT_PIDS_CVE_COPY=( "${lTMP_PID}" )
 }
