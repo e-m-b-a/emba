@@ -126,12 +126,12 @@ search_ssh_files()
       if [[ -f "${lSSH_FILE}" ]] ; then
         print_output "$(indent "$(orange "$(print_path "${lSSH_FILE}")")")" "" "${lSSH_FILE}"
         if [[ -f "${EXT_DIR}"/sshdcc ]]; then
-          local PRINTER=0
+          local lPRINTER=0
           if [[ "$(basename "${lSSH_FILE}")" == "sshd_config"  ]]; then
             print_output "[*] Testing sshd configuration file with sshdcc"
             readarray lSSHD_ISSUES_ARR < <("${EXT_DIR}"/sshdcc -ns -nc -f "${lSSH_FILE}" || true)
             for lS_ISSUE in "${lSSHD_ISSUES_ARR[@]}"; do
-              if [[ "${lS_ISSUE}" == *RESULTS* || "${PRINTER}" -eq 1 ]]; then
+              if [[ "${lS_ISSUE}" == *RESULTS* || "${lPRINTER}" -eq 1 ]]; then
                 # print finding title as EMBA finding:
                 if [[ "${lS_ISSUE}" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
                   print_output "[+] ${lS_ISSUE}"
@@ -142,7 +142,7 @@ search_ssh_files()
                   # with indent the output looks weird:
                   # print_output "$(indent "$(orange "${lS_ISSUE}")")"
                 fi
-                PRINTER=1
+                lPRINTER=1
               fi
             done
           elif [[ "$(basename "${lSSH_FILE}")" == *"authorized_key"*  ]]; then
@@ -174,8 +174,8 @@ check_squid() {
   done
   [[ ${SQUID_VUL_CNT} -eq 0 ]] && print_output "[-] No possible squid executable found"
 
-  local SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
-  mapfile -t lSQUID_PATHS_ARR < <(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")
+  local lSQUID_DAEMON_CONFIG_LOCS_ARR=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
+  mapfile -t lSQUID_PATHS_ARR < <(mod_path_array "${lSQUID_DAEMON_CONFIG_LOCS_ARR[@]}")
   if [[ "${lSQUID_PATHS_ARR[0]-}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
   elif [[ "${#lSQUID_PATHS_ARR[@]}" -ne 0 ]] ; then
