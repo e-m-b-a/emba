@@ -252,6 +252,7 @@ update_box_modules() {
   local MODULES_LOCAL=()
   local MODULES_EMBA=()
   local MODULE_FILE=""
+  local lMODULE_NAME=""
   local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
@@ -266,18 +267,19 @@ update_box_modules() {
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]]; then
         # if system emulation is not enabled, we do not count the L modules
-        if [[ "$(basename "${MODULE_FILE}")" =~ ^L[0-9]* ]] && [[ "${FULL_EMULATION}" -ne 1 ]]; then
+        lMODULE_NAME="$(basename "${MODULE_FILE}")"
+        if [[ "${lMODULE_NAME}" =~ ^L[0-9]* ]] && [[ "${FULL_EMULATION}" -ne 1 ]]; then
           continue
         fi
         # if diffing is not enabled, we do not count the diffing modules
-        if [[ "$(basename "${MODULE_FILE}")" =~ ^D[0-9]* ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
+        if [[ "${lMODULE_NAME}" =~ ^D[0-9]* ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
           continue
         fi
         # we do not count the quest modules
-        if [[ "$(basename "${MODULE_FILE}")" =~ ^Q[0-9]* ]]; then
+        if [[ "${lMODULE_NAME}" =~ ^Q[0-9]* ]]; then
           continue
         fi
-        if [[ "${MODULE_BLACKLIST[*]}" == *"$(basename -s .sh "${MODULE_FILE}")"* ]]; then
+        if [[ "${MODULE_BLACKLIST[*]}" == *"${lMODULE_NAME%\.sh}"* ]]; then
           continue
         fi
         (( COUNT_MODULES+=1 ))
