@@ -153,7 +153,8 @@ generate_entropy_graph() {
 
 fw_bin_detector() {
   local lCHECK_FILE="${1:-}"
-  local lCHECK_FILE_NAME=$(basename "${lCHECK_FILE}")
+  local lCHECK_FILE_NAME=""
+  lCHECK_FILE_NAME="$(basename "${lCHECK_FILE}")"
   local lFILE_BIN_OUT=""
   local lHEX_FIRST_LINE=""
   local lQNAP_ENC_CHECK=""
@@ -328,35 +329,35 @@ fw_bin_detector() {
   if [[ "${lFILE_BIN_OUT}" == *"Perl script text executable"* ]]; then
     print_output "[+] Identified Perl script - performing perl checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".pl" ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".pl" || print_error "[-] Perl script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.pl" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.pl" || print_error "[-] Perl script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"PHP script,"* ]]; then
     print_output "[+] Identified PHP script - performing PHP checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".php" ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".php" || print_error "[-] PHP script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.php" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.php" || print_error "[-] PHP script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Python script,"* ]]; then
     print_output "[+] Identified Python script - performing Python checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".py" ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".py" || print_error "[-] Python script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.py" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.py" || print_error "[-] Python script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"shell script,"* ]]; then
     print_output "[+] Identified shell script - performing shell checks"
     export DISABLE_DEEP=1
-    if ! [[ -f "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".sh" ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".sh" || print_error "[-] Shell script file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.sh" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.sh" || print_error "[-] Shell script file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Android package (APK),"* ]]; then
     print_output "[+] Identified Android APK package - performing APK checks"
-    if ! [[ -f "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".apk" ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".apk" || print_error "[-] APK file copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.apk" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.apk" || print_error "[-] APK file copy process failed"
       export DISABLE_DEEP=1
     fi
   fi
@@ -364,8 +365,8 @@ fw_bin_detector() {
     print_output "[+] Identified Windows executable"
     export DISABLE_DEEP=1
     export WINDOWS_EXE=1
-    if ! [[ -f "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".exe" ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/"${lCHECK_FILE_NAME}".exe" || print_error "[-] Windows executable copy process failed"
+    if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" ]]; then
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" || print_error "[-] Windows executable copy process failed"
     fi
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
