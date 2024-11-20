@@ -22,117 +22,117 @@ S21_python_check()
   module_title "Check python scripts for security issues"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local S21_PY_VULNS=0
-  local S21_PY_SCRIPTS=0
-  local PY_SCRIPT=""
+  local lS21_PY_VULNS=0
+  local lS21_PY_SCRIPTS=0
+  local lPY_SCRIPT=""
   local lNAME=""
-  local PYTHON_SCRIPTS=()
-  local S21_VULN_TYPES=()
-  local VTYPE=""
-  local WAIT_PIDS_S21=()
+  local lPYTHON_SCRIPTS_ARR=()
+  local lS21_VULN_TYPES_ARR=()
+  local lVTYPE=""
+  local lWAIT_PIDS_S21_ARR=()
 
   if [[ ${PYTHON_CHECK} -eq 1 ]] ; then
     write_csv_log "Script path" "Python issues detected" "common linux file"
-    mapfile -t PYTHON_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-    for PY_SCRIPT in "${PYTHON_SCRIPTS[@]}" ; do
-      if ( file "${PY_SCRIPT}" | grep -q "Python script.*executable" ) ; then
+    mapfile -t lPYTHON_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+    for lPY_SCRIPT in "${lPYTHON_SCRIPTS_ARR[@]}" ; do
+      if ( file "${lPY_SCRIPT}" | grep -q "Python script.*executable" ) ; then
         if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
           # if we have the base linux config file we only test non known Linux binaries
           # with this we do not waste too much time on open source Linux stuff
-          lNAME=$(basename "${PY_SCRIPT}" 2> /dev/null)
+          lNAME=$(basename "${lPY_SCRIPT}" 2> /dev/null)
           if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
             continue
           fi
         fi
-        ((S21_PY_SCRIPTS+=1))
+        ((lS21_PY_SCRIPTS+=1))
         if [[ "${THREADED}" -eq 1 ]]; then
-          s21_script_bandit "${PY_SCRIPT}" &
-          local TMP_PID="$!"
-          store_kill_pids "${TMP_PID}"
-          WAIT_PIDS_S21+=( "${TMP_PID}" )
-          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S21[@]}"
+          s21_script_bandit "${lPY_SCRIPT}" &
+          local lTMP_PID="$!"
+          store_kill_pids "${lTMP_PID}"
+          lWAIT_PIDS_S21_ARR+=( "${lTMP_PID}" )
+          max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S21_ARR[@]}"
           continue
         else
-          s21_script_bandit "${PY_SCRIPT}"
+          s21_script_bandit "${lPY_SCRIPT}"
         fi
       fi
     done
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S21[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S21_ARR[@]}"
 
     if [[ -f "${TMP_DIR}"/S21_VULNS.tmp ]]; then
-      S21_PY_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S21_VULNS.tmp)
+      lS21_PY_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S21_VULNS.tmp)
     fi
 
-    if [[ "${S21_PY_VULNS}" -gt 0 ]]; then
+    if [[ "${lS21_PY_VULNS}" -gt 0 ]]; then
       print_ln
-      print_output "[+] Found ""${ORANGE}""${S21_PY_VULNS}"" possible issues""${GREEN}"" in ""${ORANGE}""${S21_PY_SCRIPTS}""${GREEN}"" python files:""${NC}""\\n"
+      print_output "[+] Found ""${ORANGE}""${lS21_PY_VULNS}"" possible issues""${GREEN}"" in ""${ORANGE}""${lS21_PY_SCRIPTS}""${GREEN}"" python files:""${NC}""\\n"
     fi
 
     write_log ""
-    write_log "[*] Statistics:${S21_PY_VULNS}:${S21_PY_SCRIPTS}"
+    write_log "[*] Statistics:${lS21_PY_VULNS}:${lS21_PY_SCRIPTS}"
 
     # we just print one issue per issue type:
-    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "${LOG_PATH_MODULE}"/bandit_* 2>/dev/null | grep Issue | cut -d: -f3- | tr -d '[' | tr ']' ':' | sort -u || true)
-    for VTYPE in "${S21_VULN_TYPES[@]}" ; do
-      print_output "$(indent "${NC}""[""${GREEN}""+""${NC}""]""${GREEN}"" ""${VTYPE}""${GREEN}")"
+    mapfile -t lS21_VULN_TYPES_ARR < <(grep "[A-Z][0-9][0-9][0-9]" "${LOG_PATH_MODULE}"/bandit_* 2>/dev/null | grep Issue | cut -d: -f3- | tr -d '[' | tr ']' ':' | sort -u || true)
+    for lVTYPE in "${lS21_VULN_TYPES_ARR[@]}" ; do
+      print_output "$(indent "${NC}""[""${GREEN}""+""${NC}""]""${GREEN}"" ""${lVTYPE}""${GREEN}")"
     done
   else
     print_output "[-] Python check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "${S21_PY_VULNS}"
+  module_end_log "${FUNCNAME[0]}" "${lS21_PY_VULNS}"
 }
 
 s21_script_bandit() {
-  local PY_SCRIPT_="${1:-}"
-  local NAME=""
-  local PY_LOG=""
-  local VULNS=""
-  local GPT_PRIO_=2
-  local GPT_ANCHOR_=""
+  local lPY_SCRIPT_="${1:-}"
+  local lSCRIPT_NAME=""
+  local lPY_LOG=""
+  local lVULNS=""
+  local lGPT_PRIO_=2
+  local lGPT_ANCHOR_=""
 
-  NAME=$(basename "${PY_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
-  PY_LOG="${LOG_PATH_MODULE}""/bandit_""${NAME}"".txt"
-  bandit -r "${PY_SCRIPT_}" > "${PY_LOG}" 2> /dev/null || true
+  lSCRIPT_NAME=$(basename "${lPY_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
+  lPY_LOG="${LOG_PATH_MODULE}""/bandit_""${lSCRIPT_NAME}"".txt"
+  bandit -r "${lPY_SCRIPT_}" > "${lPY_LOG}" 2> /dev/null || true
 
-  VULNS=$(grep -c ">> Issue: " "${PY_LOG}" 2> /dev/null || true)
-  if [[ "${VULNS}" -ne 0 ]] ; then
+  lVULNS=$(grep -c ">> Issue: " "${lPY_LOG}" 2> /dev/null || true)
+  if [[ "${lVULNS}" -ne 0 ]] ; then
     # check if this is common linux file:
-    local COMMON_FILES_FOUND=""
-    local CFF=""
+    local lCOMMON_FILES_FOUND=""
+    local lCFF=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
-      COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
-      CFF="no"
-      if grep -q "^${NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-        COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
-        CFF="yes"
+      lCOMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
+      lCFF="no"
+      if grep -q "^${lSCRIPT_NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        lCOMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
+        lCFF="yes"
       fi
     else
-      COMMON_FILES_FOUND=""
-      CFF="NA"
+      lCOMMON_FILES_FOUND=""
+      lCFF="NA"
     fi
-    if [[ "${VULNS}" -gt 20 ]] ; then
-      print_output "[+] Found ""${RED}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${PY_SCRIPT_}")" ""  "${PY_LOG}"
-      GPT_PRIO_=3
+    if [[ "${lVULNS}" -gt 20 ]] ; then
+      print_output "[+] Found ""${RED}""${lVULNS}"" issues""${GREEN}"" in script ""${lCOMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${lPY_SCRIPT_}")" ""  "${lPY_LOG}"
+      lGPT_PRIO_=3
     else
-      print_output "[+] Found ""${ORANGE}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${PY_SCRIPT_}")" "" "${PY_LOG}"
+      print_output "[+] Found ""${ORANGE}""${lVULNS}"" issues""${GREEN}"" in script ""${lCOMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${lPY_SCRIPT_}")" "" "${lPY_LOG}"
     fi
 
-    write_csv_log "$(print_path "${PY_SCRIPT_}")" "${VULNS}" "${CFF}" "NA"
+    write_csv_log "$(print_path "${lPY_SCRIPT_}")" "${lVULNS}" "${lCFF}" "NA"
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
-      GPT_ANCHOR_="$(openssl rand -hex 8)"
+      lGPT_ANCHOR_="$(openssl rand -hex 8)"
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
         # if we have the base linux config file we are checking it:
-        if ! grep -E -q "^$(basename "${PY_SCRIPT_}")$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          GPT_PRIO_=$((GPT_PRIO_+1))
+        if ! grep -E -q "^$(basename "${lPY_SCRIPT_}")$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+          lGPT_PRIO_=$((lGPT_PRIO_+1))
         fi
       fi
-      # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${PY_LOG}" "" ""
+      # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+      write_csv_gpt_tmp "$(cut_path "${lPY_SCRIPT_}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lPY_LOG}" "" ""
       # add ChatGPT link to output file
-      printf '%s\n\n' "" >> "${PY_LOG}"
-      write_anchor_gpt "${GPT_ANCHOR_}" "${PY_LOG}"
+      printf '%s\n\n' "" >> "${lPY_LOG}"
+      write_anchor_gpt "${lGPT_ANCHOR_}" "${lPY_LOG}"
     fi
-    echo "${VULNS}" >> "${TMP_DIR}"/S21_VULNS.tmp
+    echo "${lVULNS}" >> "${TMP_DIR}"/S21_VULNS.tmp
   fi
 }
