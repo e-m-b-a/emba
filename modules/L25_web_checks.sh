@@ -448,7 +448,7 @@ web_access_crawler() {
           print_output "[+] Found possible vulnerability ${ORANGE}${lVULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${lWEB_NAME}${NC}." "" "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log
           write_csv_log "${lWEB_NAME}" "semgrep" "php" "${lVULN_NAME}" "${lVULN_FILE}"
         done
-      done  < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log"
+      done < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log"
     fi
 
     if [[ -f "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" ]] && [[ -f "${S23_LOG}" ]]; then
@@ -465,7 +465,7 @@ web_access_crawler() {
           print_output "[+] Found possible vulnerability in lua analysis for ${ORANGE}${lWEB_NAME}${NC}." "${S23_LOG}"
           write_csv_log "${lWEB_NAME}" "lua check" "lua" "${lVULN_NAME}" "${lWEB_PATH}"
         done
-      done  < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log"
+      done < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log"
     fi
 
     # todo: Python, further PHP analysis

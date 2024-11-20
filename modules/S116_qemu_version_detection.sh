@@ -44,9 +44,6 @@ S116_qemu_version_detection() {
       write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
 
       while read -r lVERSION_LINE; do
-        if echo "${lVERSION_LINE}" | grep -v -q "^[^#*/;]"; then
-          continue
-        fi
         if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
           # this should prevent double checking - if a version identifier was already successful we do not need to
           # test the other identifiers. In threaded mode this usually does not decrease testing speed
@@ -66,7 +63,7 @@ S116_qemu_version_detection() {
         else
           version_detection_thread "${lVERSION_LINE}"
         fi
-      done < "${lVERSION_IDENTIFIER_CFG}"
+      done < <(grep -v "multi_grep" "${lVERSION_IDENTIFIER_CFG}" | grep "^[^#*/;]")
       print_ln "no_log"
 
       [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
@@ -173,9 +170,9 @@ version_detection_thread() {
     lOS_IDENTIFIED=$(distri_check)
 
     # ensure we have a unique array
-    eval "lBINARY_PATHS_ARR=($(for i in "${lBINARY_PATHS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+    eval "lBINARY_PATHS_FINAL_ARR=($(for i in "${lBINARY_PATHS_FINAL_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
-    for lBINARY_PATH in "${lBINARY_PATHS_ARR[@]}"; do
+    for lBINARY_PATH in "${lBINARY_PATHS_FINAL_ARR[@]}"; do
       print_output "[+] Version information found ${RED}""${lVERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN} (license: ${ORANGE}${lAPP_LIC}${GREEN}) (${ORANGE}${lTYPE}${GREEN})." "" "${lLOG_PATH_}"
       write_csv_log "${lBINARY_PATH}" "${lBINARY}" "${lVERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${lTYPE}"
       lBIN_NAME=$(basename "${lBINARY_PATH}")

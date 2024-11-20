@@ -152,7 +152,7 @@ ipk_extractor() {
       for lR_PATH in "${ROOT_PATH[@]}"; do
         while read -r IPK; do
           lIPK_NAME=$(basename "${IPK}")
-          if [[ $(file "${IPK}") == *"gzip"* ]]; then
+          if [[ $(file -b "${IPK}") == *"gzip"* ]]; then
             print_output "[*] Extracting ${ORANGE}${lIPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
             tar zxpf "${IPK}" --directory "${LOG_DIR}"/ipk_tmp || true
           else

@@ -156,16 +156,6 @@ S09_firmware_base_version_check() {
   print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} binary files"
 
   while read -r VERSION_LINE; do
-    if safe_echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
-      continue
-    fi
-    if safe_echo "${VERSION_LINE}" | grep -q ";no_static;"; then
-      continue
-    fi
-    if safe_echo "${VERSION_LINE}" | grep -q ";live;"; then
-      continue
-    fi
-
     print_dot
 
     local lSTRICT=""
@@ -479,7 +469,7 @@ S09_firmware_base_version_check() {
       fi
     fi
 
-  done  < "${lVERSION_IDENTIFIER_CFG}"
+  done < <(grep -v ";no_static;\|;live;" "${lVERSION_IDENTIFIER_CFG}" | grep "^[^#*/;]")
 
   print_dot
 
