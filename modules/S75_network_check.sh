@@ -37,25 +37,25 @@ check_resolv()
 {
   sub_module_title "Search resolv.conf"
 
-  local CHECK=0
-  local RES_CONF_PATHS=()
-  local RES_INFO_P=""
-  local DNS_INFO=""
+  local lCHECK=0
+  local lRES_CONF_PATHS_ARR=()
+  local lRES_INFO_P=""
+  local lDNS_INFO=""
 
-  mapfile -t RES_CONF_PATHS < <(mod_path "/ETC_PATHS/resolv.conf")
-  for RES_INFO_P in "${RES_CONF_PATHS[@]}"; do
-    if [[ -e "${RES_INFO_P}" ]] ; then
-      CHECK=1
-      print_output "[+] DNS config ""$(print_path "${RES_INFO_P}")"
+  mapfile -t lRES_CONF_PATHS_ARR < <(mod_path "/ETC_PATHS/resolv.conf")
+  for lRES_INFO_P in "${lRES_CONF_PATHS_ARR[@]}"; do
+    if [[ -e "${lRES_INFO_P}" ]] ; then
+      lCHECK=1
+      print_output "[+] DNS config ""$(print_path "${lRES_INFO_P}")"
 
-      DNS_INFO=$(grep "nameserver" "${RES_INFO_P}" 2>/dev/null || true)
-      if [[ "${DNS_INFO}" ]] ; then
-        print_output "$(indent "${DNS_INFO}")"
+      lDNS_INFO=$(grep "nameserver" "${lRES_INFO_P}" 2>/dev/null || true)
+      if [[ "${lDNS_INFO}" ]] ; then
+        print_output "$(indent "${lDNS_INFO}")"
         ((NET_CFG_FOUND+=1))
       fi
     fi
   done
-  if [[ ${CHECK} -eq 0 ]]; then
+  if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No or empty network configuration found"
   fi
 }
@@ -64,19 +64,19 @@ check_iptables()
 {
   sub_module_title "Search iptables.conf"
 
-  local CHECK=0
-  local IPT_CONF_PATHS=()
-  local IPT_INFO_P=""
+  local lCHECK=0
+  local lIPT_CONF_PATHS_ARR=()
+  local lIPT_INFO_P=""
 
-  mapfile -t IPT_CONF_PATHS < <(mod_path "/ETC_PATHS/iptables")
-  for IPT_INFO_P in "${IPT_CONF_PATHS[@]}"; do
-    if [[ -e "${IPT_INFO_P}" ]] ; then
-      CHECK=1
-      print_output "[+] iptables config ""$(print_path "${IPT_INFO_P}")"
+  mapfile -t lIPT_CONF_PATHS_ARR < <(mod_path "/ETC_PATHS/iptables")
+  for lIPT_INFO_P in "${lIPT_CONF_PATHS_ARR[@]}"; do
+    if [[ -e "${lIPT_INFO_P}" ]] ; then
+      lCHECK=1
+      print_output "[+] iptables config ""$(print_path "${lIPT_INFO_P}")"
       ((NET_CFG_FOUND+=1))
     fi
   done
-  if [[ ${CHECK} -eq 0 ]]; then
+  if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No iptables configuration found"
   fi
 }
@@ -86,28 +86,28 @@ check_snmp()
 {
   sub_module_title "Check SNMP configuration"
 
-  local CHECK=0
-  local SNMP_CONF_PATHS=()
-  local SNMP_CONF_P=""
-  local FIND=()
-  local I=""
+  local lCHECK=0
+  local lSNMP_CONF_PATHS_ARR=()
+  local lSNMP_CONF_P=""
+  local lFIND_ARR=()
+  local lI=""
 
-  mapfile -t SNMP_CONF_PATHS < <(mod_path "/ETC_PATHS/snmp/snmpd.conf")
-  for SNMP_CONF_P in "${SNMP_CONF_PATHS[@]}"; do
-    if [[ -e "${SNMP_CONF_P}" ]] ; then
-      CHECK=1
-      print_output "[+] SNMP config ""$(print_path "${SNMP_CONF_P}")"
-      mapfile -t FIND < <(awk '/^com2sec/ { print $4 }' "${SNMP_CONF_P}")
-      if [[ "${#FIND[@]}" -ne 0 ]] ; then
+  mapfile -t lSNMP_CONF_PATHS_ARR < <(mod_path "/ETC_PATHS/snmp/snmpd.conf")
+  for lSNMP_CONF_P in "${lSNMP_CONF_PATHS_ARR[@]}"; do
+    if [[ -e "${lSNMP_CONF_P}" ]] ; then
+      lCHECK=1
+      print_output "[+] SNMP config ""$(print_path "${lSNMP_CONF_P}")"
+      mapfile -t lFIND_ARR < <(awk '/^com2sec/ { print $4 }' "${lSNMP_CONF_P}")
+      if [[ "${#lFIND_ARR[@]}" -ne 0 ]] ; then
         print_output "[*] com2sec line/s:"
-        for I in "${FIND[@]}"; do
-          print_output "$(indent "$(orange "${I}")")"
+        for lI in "${lFIND_ARR[@]}"; do
+          print_output "$(indent "$(orange "${lI}")")"
           ((NET_CFG_FOUND+=1))
         done
       fi
     fi
   done
-  if [[ ${CHECK} -eq 0 ]]; then
+  if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No SNMP configuration found"
   fi
 }
@@ -116,16 +116,16 @@ check_network_configs()
 {
   sub_module_title "Check for other network configurations"
 
-  local NETWORK_CONFS=()
-  local LINE=""
+  local lNETWORK_CONFS_ARR=()
+  local lNW_CONF=""
 
-  readarray -t NETWORK_CONFS < <(printf '%s' "$(config_find "${CONFIG_DIR}""/network_conf_files.cfg")")
+  readarray -t lNETWORK_CONFS_ARR < <(printf '%s' "$(config_find "${CONFIG_DIR}""/network_conf_files.cfg")")
 
-  if [[ "${NETWORK_CONFS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#NETWORK_CONFS[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#NETWORK_CONFS[@]}"" possible network configs:"
-    for LINE in "${NETWORK_CONFS[@]}" ; do
-      print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
+  if [[ "${lNETWORK_CONFS_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ ${#lNETWORK_CONFS_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lNETWORK_CONFS_ARR[@]}"" possible network configs:"
+    for lNW_CONF in "${lNETWORK_CONFS_ARR[@]}" ; do
+      print_output "$(indent "$(orange "$(print_path "${lNW_CONF}")")")"
       ((NET_CFG_FOUND+=1))
     done
   else

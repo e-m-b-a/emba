@@ -52,7 +52,7 @@ L10_system_emulation() {
     export HOSTNETDEV_ARR=()
     local lEMULATION_ENTRY=""
     export BINARY_DIR="${EXT_DIR}/EMBA_Live_bins"
-    # FIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
+    # lFIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
     LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
     local lR_PATH_CNT=1
     local lIP_ADDRESS=""
@@ -772,26 +772,26 @@ main_emulation() {
       elif [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "None" ]] || \
         [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "default" ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
         print_output "[!] Possible init issue ... switching init from ${KINIT}"
-        local PORTS_1st=0
-        local COUNTING_1st=0
+        local lPORTS_1st=0
+        local lCOUNTING_1st=0
         mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log
-        COUNTING_1st=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | awk '{print $1}')
-        PORTS_1st=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | sort -u | wc -l | awk '{print $1}' || true)
+        lCOUNTING_1st=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | awk '{print $1}')
+        lPORTS_1st=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | sort -u | wc -l | awk '{print $1}' || true)
         switch_inits "${KINIT}"
 
         # re-identify the network via other init configuration
         identify_networking_emulation "${IMAGE_NAME}" "${lARCH_END}" "${lINIT_FILE}"
         get_networking_details_emulation "${IMAGE_NAME}"
 
-        local PORTS_2nd=0
-        local COUNTING_2nd=0
+        local lPORTS_2nd=0
+        local lCOUNTING_2nd=0
         local lF_STARTUP=0
         if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
           # now we need to check if something is better now or we should switch back to the original init
           lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
           lF_STARTUP=$(( "${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" ))
-          COUNTING_2nd=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $1}')
-          PORTS_2nd=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
+          lCOUNTING_2nd=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $1}')
+          lPORTS_2nd=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
           # IPS_INT_VLAN is always at least 1 for the default configuration
         fi
 
@@ -801,11 +801,11 @@ main_emulation() {
             # on a Kernel panic we always switch back
             print_output "[!] Identified Kernel panic ... switching init back from ${KINIT}"
             switch_inits "${KINIT}"
-          elif [[ "${PORTS_1st}" -gt "${PORTS_2nd}" ]]; then
+          elif [[ "${lPORTS_1st}" -gt "${lPORTS_2nd}" ]]; then
             print_output "[!] Network services issue ... switching init back from ${KINIT}"
             switch_inits "${KINIT}"
           # we only switch back if the first check has more output generated
-          elif [[ "${COUNTING_1st}" -gt "${COUNTING_2nd}" ]] && [[ "${PORTS_1st}" -ge "${PORTS_2nd}" ]]; then
+          elif [[ "${lCOUNTING_1st}" -gt "${lCOUNTING_2nd}" ]] && [[ "${lPORTS_1st}" -ge "${lPORTS_2nd}" ]]; then
             print_output "[!] Network services issue and log file size ... switching init back from ${KINIT}"
             switch_inits "${KINIT}"
           fi
@@ -1436,8 +1436,8 @@ get_networking_details_emulation() {
     local l_NW_ENTRY_PRIO=1
     local lADJUST_PRIO=0  # adjust priority
 
-    local TCP_PORT=""
-    local UDP_PORT=""
+    local lTCP_PORT=""
+    local lUDP_PORT=""
     local lMISSING_FILES_TMP=()
     local lSERVICE_NAME=""
 
@@ -1481,18 +1481,18 @@ get_networking_details_emulation() {
       for lPORT in "${lPORTS_ARR[@]}"; do
         lSERVICE_NAME=$(strip_color_codes "$(echo "${lPORT}" | sed -e 's/.*\((.*)\).*/\1/g' | tr -d "(" | tr -d ")")")
         lSERVICE_NAME=$(echo "${lSERVICE_NAME}" | tr -dc '[:print:]')
-        TCP_PORT=$(strip_color_codes "$(echo "${lPORT}" | grep "SOCK_STREAM" | sed 's/.*SOCK_STREAM,\ //' | sort -u | cut -d: -f2)" || true)
-        TCP_PORT=$(echo "${TCP_PORT}" | tr -dc '[:print:]')
-        UDP_PORT=$(strip_color_codes "$(echo "${lPORT}" | grep "SOCK_DGRAM" | sed 's/.*SOCK_DGRAM,\ //' | sort -u | cut -d: -f2)" || true)
-        UDP_PORT=$(echo "${UDP_PORT}" | tr -dc '[:print:]')
+        lTCP_PORT=$(strip_color_codes "$(echo "${lPORT}" | grep "SOCK_STREAM" | sed 's/.*SOCK_STREAM,\ //' | sort -u | cut -d: -f2)" || true)
+        lTCP_PORT=$(echo "${lTCP_PORT}" | tr -dc '[:print:]')
+        lUDP_PORT=$(strip_color_codes "$(echo "${lPORT}" | grep "SOCK_DGRAM" | sed 's/.*SOCK_DGRAM,\ //' | sort -u | cut -d: -f2)" || true)
+        lUDP_PORT=$(echo "${lUDP_PORT}" | tr -dc '[:print:]')
 
-        if [[ "${TCP_PORT}" =~ [0-9]+ ]]; then
-          print_output "[*] Detected TCP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${TCP_PORT}${NC}"
-          TCP_SERVICES_STARTUP+=( "${TCP_PORT}" )
+        if [[ "${lTCP_PORT}" =~ [0-9]+ ]]; then
+          print_output "[*] Detected TCP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${lTCP_PORT}${NC}"
+          TCP_SERVICES_STARTUP+=( "${lTCP_PORT}" )
         fi
-        if [[ "${UDP_PORT}" =~ [0-9]+ ]]; then
-          print_output "[*] Detected UDP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${UDP_PORT}${NC}"
-          UDP_SERVICES_STARTUP+=( "${UDP_PORT}" )
+        if [[ "${lUDP_PORT}" =~ [0-9]+ ]]; then
+          print_output "[*] Detected UDP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${lUDP_PORT}${NC}"
+          UDP_SERVICES_STARTUP+=( "${lUDP_PORT}" )
         fi
 
         SERVICES_STARTUP+=( "${lSERVICE_NAME}" )
@@ -2773,19 +2773,20 @@ add_partition_emulation() {
   while (! "${lFOUND}"); do
     sleep 1
     ((lCNT+=1))
-    local LOSETUP_OUT=()
-    mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE" || true)
-    for LINE in "${LOSETUP_OUT[@]}"; do
-      lIMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
+    local lLOSETUP_OUT_ARR=()
+    mapfile -t lLOSETUP_OUT_ARR < <(losetup | grep -v "BACK-FILE" || true)
+    local lLINE=""
+    for lLINE in "${lLOSETUP_OUT_ARR[@]}"; do
+      lIMAGE_PATH=$(echo "${lLINE}" | awk '{print $6}')
       if [[ "${lIMAGE_PATH}" == "${1}" ]]; then
-        lDEV_PATH=$(echo "${LINE}" | awk '{print $1}')
+        lDEV_PATH=$(echo "${lLINE}" | awk '{print $1}')
         if [[ "$(dirname "${lDEV_PATH}")" == "/dev/loop" ]]; then
           # if we have the new naming like /dev/loop/0 -> dirname results in /dev/loop
           lDEV_NR=$(echo "${lDEV_PATH}" | rev | cut -d '/' -f1 | rev)
           lDEV_PATH="/dev/loop${lDEV_NR}p1"
         else
           # old naming like /dev/loop0 -> dirname results in /dev/
-          lDEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
+          lDEV_PATH=$(echo "${lLINE}" | awk '{print $1}')p1
         fi
         if [[ -b "${lDEV_PATH}" ]]; then
           lFOUND=true
@@ -2857,8 +2858,8 @@ set_network_config() {
 
 write_results() {
   if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/fw_name.log ]]; then
-    local FIRMWARE_PATH_orig=""
-    FIRMWARE_PATH_orig="$(cat "${TMP_DIR}"/fw_name.log)"
+    local lFIRMWARE_PATH_orig=""
+    lFIRMWARE_PATH_orig="$(cat "${TMP_DIR}"/fw_name.log)"
   fi
 
   local lARCHIVE_PATH="${1:-}"
@@ -2881,7 +2882,7 @@ write_results() {
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" > "${L10_SYS_EMU_RESULTS}"
   fi
-  echo "${FIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${L10_SYS_EMU_RESULTS}"
+  echo "${lFIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 

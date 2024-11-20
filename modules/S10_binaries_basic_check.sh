@@ -23,41 +23,41 @@ S10_binaries_basic_check()
   module_title "Check binaries for critical functions"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local COUNTER=0
-  local BIN_COUNT=0
-  local VULNERABLE_FUNCTIONS=""
-  local BINARY=""
-  local VUL_FUNC_RESULT=()
-  local VUL_FUNC=""
+  local lCOUNTER=0
+  local lBIN_COUNT=0
+  local lVULNERABLE_FUNCTIONS=""
+  local lBINARY=""
+  local lVUL_FUNC_RESULT_ARR=()
+  local lVUL_FUNC=""
 
-  VULNERABLE_FUNCTIONS="$(config_list "${CONFIG_DIR}""/functions.cfg")"
+  lVULNERABLE_FUNCTIONS="$(config_list "${CONFIG_DIR}""/functions.cfg")"
 
   # nosemgrep
   local IFS=" "
-  IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "${VULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ -e /g')"
+  IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ -e /g')"
 
-  if [[ "${VULNERABLE_FUNCTIONS}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "${VULNERABLE_FUNCTIONS}" ]] ; then
-    print_output "[*] Interesting functions: ""$( echo -e "${VULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-    for BINARY in "${BINARIES[@]}" ; do
-      if ( file "${BINARY}" | grep -q "ELF" ) ; then
-        BIN_COUNT=$((BIN_COUNT+1))
-        mapfile -t VUL_FUNC_RESULT < <(readelf -s --use-dynamic "${BINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
-        if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
+  if [[ "${lVULNERABLE_FUNCTIONS}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ -n "${lVULNERABLE_FUNCTIONS}" ]] ; then
+    print_output "[*] Interesting functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
+    for lBINARY in "${BINARIES[@]}" ; do
+      if ( file "${lBINARY}" | grep -q "ELF" ) ; then
+        lBIN_COUNT=$((lBIN_COUNT+1))
+        mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -s --use-dynamic "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
+        if [[ "${#lVUL_FUNC_RESULT_ARR[@]}" -ne 0 ]] ; then
           print_ln
-          print_output "[+] Interesting function in ""$(print_path "${BINARY}")"" found:"
-          for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
+          print_output "[+] Interesting function in ""$(print_path "${lBINARY}")"" found:"
+          for lVUL_FUNC in "${lVUL_FUNC_RESULT_ARR[@]}" ; do
             # shellcheck disable=SC2001
-            VUL_FUNC="$(echo "${VUL_FUNC}" | sed -e 's/[[:space:]]\+/\t/g')"
-            print_output "$(indent "${VUL_FUNC}")"
+            lVUL_FUNC="$(echo "${lVUL_FUNC}" | sed -e 's/[[:space:]]\+/\t/g')"
+            print_output "$(indent "${lVUL_FUNC}")"
           done
-          COUNTER=$((COUNTER+1))
+          lCOUNTER=$((lCOUNTER+1))
         fi
       fi
     done
     print_ln
-    print_output "[*] Found ""${ORANGE}${COUNTER}${NC}"" binaries with interesting functions in ""${ORANGE}${BIN_COUNT}${NC}"" files (vulnerable functions: ""$( echo -e "${VULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )"")"
+    print_output "[*] Found ""${ORANGE}${lCOUNTER}${NC}"" binaries with interesting functions in ""${ORANGE}${lBIN_COUNT}${NC}"" files (vulnerable functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${COUNTER}"
+  module_end_log "${FUNCNAME[0]}" "${lCOUNTER}"
 }

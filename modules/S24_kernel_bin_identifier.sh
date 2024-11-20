@@ -47,13 +47,13 @@ S24_kernel_bin_identifier()
     local lKCONFIG_EXTRACTED="NA"
     local lK_VER_CLEAN="NA"
     local lK_INIT="NA"
-    local CFG_CNT=0
-    local K_SYMBOLS=0
-    local K_ARCH="NA"
-    local K_ARCH_END="NA"
-    local K_CON_DET=""
-    local K_FILE=""
-    local K_VER_TMP=""
+    local lCFG_CNT=0
+    local lK_SYMBOLS=0
+    local lK_ARCH="NA"
+    local lK_ARCH_END="NA"
+    local lK_CON_DET=""
+    local lK_FILE=""
+    local lK_VER_TMP=""
     local lSTRIPPED_VERS=""
     local lPACKAGING_SYSTEM="linux_kernel"
     local lAPP_LIC="GPL-2.0-only"
@@ -188,50 +188,50 @@ S24_kernel_bin_identifier()
         extract_kconfig "${lFILE}"
         enable_strict_mode "${STRICT_MODE}" 0
 
-        K_VER_TMP="${lK_VER/Linux version /}"
-        demess_kv_version "${K_VER_TMP}"
+        lK_VER_TMP="${lK_VER/Linux version /}"
+        demess_kv_version "${lK_VER_TMP}"
         # -> KV_ARR
 
         if [[ "${lK_ELF}" == *"ELF "* ]]; then
           lK_ELF="$(echo "${lK_ELF}" | cut -d: -f1)"
-          K_SYMBOLS="$(readelf -s "${lK_ELF}" | grep -c "FUNC\|OBJECT" || true)"
-          K_FILE="$(file -b "${lK_ELF}")"
+          lK_SYMBOLS="$(readelf -s "${lK_ELF}" | grep -c "FUNC\|OBJECT" || true)"
+          lK_FILE="$(file -b "${lK_ELF}")"
 
-          [[ "${K_FILE}" == *"LSB"* ]] && K_ARCH_END="EL"
-          [[ "${K_FILE}" == *"MSB"* ]] && K_ARCH_END="EB"
+          [[ "${lK_FILE}" == *"LSB"* ]] && lK_ARCH_END="EL"
+          [[ "${lK_FILE}" == *"MSB"* ]] && lK_ARCH_END="EB"
 
-          [[ "${K_FILE}" == *"MIPS"* ]] && K_ARCH="MIPS"
-          [[ "${K_FILE}" == *"ARM"* ]] && K_ARCH="ARM"
-          [[ "${K_FILE}" == *"80386"* ]] && K_ARCH="x86"
-          [[ "${K_FILE}" == *"x86-64"* ]] && K_ARCH="x64"
-          [[ "${K_FILE}" == *"PowerPC"* ]] && K_ARCH="PPC"
-          [[ "${K_FILE}" == *"UCB RISC-V"* ]] && K_ARCH="RISCV"
-          [[ "${K_FILE}" == *"QUALCOMM DSP6"* ]] && K_ARCH="QCOM_DSP6"
+          [[ "${lK_FILE}" == *"MIPS"* ]] && lK_ARCH="MIPS"
+          [[ "${lK_FILE}" == *"ARM"* ]] && lK_ARCH="ARM"
+          [[ "${lK_FILE}" == *"80386"* ]] && lK_ARCH="x86"
+          [[ "${lK_FILE}" == *"x86-64"* ]] && lK_ARCH="x64"
+          [[ "${lK_FILE}" == *"PowerPC"* ]] && lK_ARCH="PPC"
+          [[ "${lK_FILE}" == *"UCB RISC-V"* ]] && lK_ARCH="RISCV"
+          [[ "${lK_FILE}" == *"QUALCOMM DSP6"* ]] && lK_ARCH="QCOM_DSP6"
         else
           # fallback
-          K_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
-          [[ "${K_ARCH: -2}" == "le" ]] && K_ARCH_END="EL"
-          [[ "${K_ARCH: -2}" == "be" ]] && K_ARCH_END="EB"
+          lK_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
+          [[ "${lK_ARCH: -2}" == "le" ]] && lK_ARCH_END="EL"
+          [[ "${lK_ARCH: -2}" == "be" ]] && lK_ARCH_END="EB"
         fi
 
         # double check we really have a Kernel config extracted
         if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
-          CFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
-          print_output "[+] Extracted kernel configuration (${ORANGE}${CFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE}")${NC}" "" "${lKCONFIG_EXTRACTED}"
-          check_kconfig "${lKCONFIG_EXTRACTED}" "${K_ARCH}"
+          lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+          print_output "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE}")${NC}" "" "${lKCONFIG_EXTRACTED}"
+          check_kconfig "${lKCONFIG_EXTRACTED}" "${lK_ARCH}"
         fi
 
         # we should only get one element back, but as array
         for lK_VER_CLEAN in "${KV_ARR[@]}"; do
           if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
             for lK_INIT in "${lK_INITS_ARR[@]}"; do
-              if [[ "${CFG_CNT}" -lt 50 ]]; then
+              if [[ "${lCFG_CNT}" -lt 50 ]]; then
                 lKCONFIG_EXTRACTED="NA"
               fi
-              write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+              write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
             done
           else
-            write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "NA" "${lKCONFIG_EXTRACTED}" "${K_SYMBOLS}" "${K_ARCH}" "${K_ARCH_END}"
+            write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE}" "${lK_ELF}" "NA" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
           fi
         done
       fi
@@ -239,8 +239,8 @@ S24_kernel_bin_identifier()
     elif file -b "${lFILE}" | grep -q "ASCII"; then
       lCFG_MD5=$(md5sum "${lFILE}" | awk '{print $1}')
       if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
-        K_CON_DET=$(strings "${lFILE}" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
-        if [[ "${K_CON_DET}" =~ \ Kernel\ Configuration ]]; then
+        lK_CON_DET=$(strings "${lFILE}" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
+        if [[ "${lK_CON_DET}" =~ \ Kernel\ Configuration ]]; then
           print_ln
           print_output "[+] Found kernel configuration file: ${ORANGE}${lFILE}${NC}"
           check_kconfig "${lFILE}"
@@ -314,18 +314,18 @@ extract_kconfig() {
 
 dump_config() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
-  local IMG_="${1:-}"
+  local lIMG_="${1:-}"
   local lCFG_MD5=""
 
-  if ! [[ -f "${IMG_}" ]]; then
-    print_output "[-] No kernel file to analyze here - ${ORANGE}${IMG_}${NC}"
+  if ! [[ -f "${lIMG_}" ]]; then
+    print_output "[-] No kernel file to analyze here - ${ORANGE}${lIMG_}${NC}"
     return
   fi
 
-  if POS=$(tr "${CF1}\n${CF2}" "\n${CF2}=" < "${IMG_}" | grep -abo "^${CF2}"); then
+  if POS=$(tr "${CF1}\n${CF2}" "\n${CF2}=" < "${lIMG_}" | grep -abo "^${CF2}"); then
     POS=${POS%%:*}
 
-    tail -c+"$((POS + 8))" "${IMG_}" | zcat > "${TMP1}" 2> /dev/null
+    tail -c+"$((POS + 8))" "${lIMG_}" | zcat > "${TMP1}" 2> /dev/null
 
     if [[ $? != 1 ]]; then  # exit status must be 0 or 2 (trailing garbage warning)
       [[ "${STRICT_MODE}" -eq 1 ]] && set +e
@@ -336,7 +336,7 @@ dump_config() {
 
       lCFG_MD5=$(md5sum "${TMP1}" | awk '{print $1}')
       if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
-        KCONFIG_EXTRACTED="${LOG_PATH_MODULE}/kernel_config_extracted_$(basename "${IMG_}").log"
+        KCONFIG_EXTRACTED="${LOG_PATH_MODULE}/kernel_config_extracted_$(basename "${lIMG_}").log"
         cp "${TMP1}" "${KCONFIG_EXTRACTED}"
         KCFG_MD5_ARR+=("${lCFG_MD5}")
         # return value of 4 means we are done and we are going back to the main function of this module for the next file

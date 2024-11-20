@@ -95,9 +95,9 @@ add_partition_emulation() {
   while (! "${lFOUND}"); do
     sleep 1
     ((lCNT+=1))
-    local LOSETUP_OUT=()
-    mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE")
-    for LINE in "${LOSETUP_OUT[@]}"; do
+    local lLOSETUP_OUT_ARR=()
+    mapfile -t lLOSETUP_OUT_ARR < <(losetup | grep -v "BACK-FILE")
+    for LINE in "${lLOSETUP_OUT_ARR[@]}"; do
       lIMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
       if [[ "${lIMAGE_PATH}" == "${1}" ]]; then
         lDEV_PATH=$(echo "${LINE}" | awk '{print $1}')

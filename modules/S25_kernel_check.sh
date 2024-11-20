@@ -42,16 +42,16 @@ S25_kernel_check()
   if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
     write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
     print_output "Kernel version:"
-    local LINE=""
-    for LINE in "${KERNEL_VERSION[@]}" ; do
-      print_output "$(indent "${ORANGE}${LINE}${NC}")"
+    local lENTRY=""
+    for lENTRY in "${KERNEL_VERSION[@]}" ; do
+      print_output "$(indent "${ORANGE}${lENTRY}${NC}")"
       lFOUND=1
     done
     if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
       print_ln
       print_output "Kernel details:"
-      for LINE in "${KERNEL_DESC[@]}" ; do
-        print_output "$(indent "${LINE}")"
+      for lENTRY in "${KERNEL_DESC[@]}" ; do
+        print_output "$(indent "${lENTRY}")"
         lFOUND=1
       done
     fi
@@ -77,8 +77,9 @@ S25_kernel_check()
   fi
 
   if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
-    for K_VERS in "${KERNEL_VERSION[@]}" ; do
-      write_log "[*] Statistics:${K_VERS}"
+    local lK_VERS=""
+    for lK_VERS in "${KERNEL_VERSION[@]}" ; do
+      write_log "[*] Statistics:${lK_VERS}"
     done
   fi
   write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:${KMOD_BAD}"
@@ -275,9 +276,9 @@ analyze_kernel_module() {
     # modinfos can run in parallel:
     if [[ "${THREADED}" -eq 1 ]]; then
       module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
-      local TMP_PID="$!"
-      store_kill_pids "${TMP_PID}"
-      lWAIT_PIDS_S25_ARR+=( "${TMP_PID}" )
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
     else
       module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}"
     fi
