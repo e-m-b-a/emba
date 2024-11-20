@@ -48,12 +48,12 @@ S99_grepit() {
 
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local WAIT_PIDS_S99=()
-  local GREPIT_MODULES=()
-  local GREPIT_RESULTS=0
+  local lWAIT_PIDS_S99_ARR=()
+  local lGREPIT_MODULES_ARR=()
+  local lGREPIT_RESULTS=0
 
-  local MAX_MOD_THREADS=1
-  local MEM_LIMIT=$(( "${TOTAL_MEMORY}"/3 ))
+  local lMAX_MOD_THREADS=1
+  local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"/3 ))
 
 
   # grepit options:
@@ -66,123 +66,124 @@ S99_grepit() {
   export GREP_COLORS=ne
   # sometimes we have so many results. We need to limit it a bit
   # -m is limit per file and in this case per grep search per file
-  local LIMIT_GREP=(-m 100)
+  local lLIMIT_GREP=(-m 100)
   # Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
-  local GREP_ARGUMENTS=(-a -n -A 1 -B 3 -rP)
+  local lGREP_ARGUMENTS=(-a -n -A 1 -B 3 -rP)
   # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
-  local COLOR_ARGUMENTS=("--color=always")
-  export STANDARD_GREP_ARGUMENTS=("${GREP_ARGUMENTS[@]}" "${COLOR_ARGUMENTS[@]}" "${LIMIT_GREP[@]}")
+  local lCOLOR_ARGUMENTS=("--color=always")
+  export STANDARD_GREP_ARGUMENTS=("${lGREP_ARGUMENTS[@]}" "${lCOLOR_ARGUMENTS[@]}" "${lLIMIT_GREP[@]}")
   export ENABLE_LEAST_LIKELY=0
 
-  mapfile -t GREPIT_MODULES < <(grep -E "^grepit_module.*\(\) " "${MOD_DIR}"/"${FUNCNAME[0]}".sh | sed -e 's/()\ .*//g' | sort -u)
-  print_output "[*] Loaded ${ORANGE}${#GREPIT_MODULES[@]}${NC} grepit modules\n"
+  mapfile -t lGREPIT_MODULES_ARR < <(grep -E "^grepit_module.*\(\) " "${MOD_DIR}"/"${FUNCNAME[0]}".sh | sed -e 's/()\ .*//g' | sort -u)
+  print_output "[*] Loaded ${ORANGE}${#lGREPIT_MODULES_ARR[@]}${NC} grepit modules\n"
 
   write_csv_log "Grepit test" "Number of results" "Used args for grep" "Regex used" "Grepit comment"
 
   if [[ ${THREADED} -eq 1 ]]; then
-    for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do
+    for GREPIT_MODULE in "${lGREPIT_MODULES_ARR[@]}"; do
       "${GREPIT_MODULE}" &
-      local TMP_PID="$!"
-      WAIT_PIDS_S99+=( "${TMP_PID}" )
-      store_kill_pids "${TMP_PID}"
-      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S99[@]}"
+      local lTMP_PID="$!"
+      lWAIT_PIDS_S99_ARR+=( "${lTMP_PID}" )
+      store_kill_pids "${lTMP_PID}"
+      max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S99_ARR[@]}"
     done
   else
-    for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do
+    for GREPIT_MODULE in "${lGREPIT_MODULES_ARR[@]}"; do
       "${GREPIT_MODULE}"
     done
   fi
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S99[@]}"
+  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S99_ARR[@]}"
 
   grepit_reporter
 
-  GREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc || true)
+  lGREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc || true)
   print_output "\n"
-  print_output "[*] Found ${ORANGE}${GREPIT_RESULTS}${NC} results via grepit."
+  print_output "[*] Found ${ORANGE}${lGREPIT_RESULTS}${NC} results via grepit."
 
-  module_end_log "${FUNCNAME[0]}" "${GREPIT_RESULTS}"
+  module_end_log "${FUNCNAME[0]}" "${lGREPIT_RESULTS}"
 }
 
 grepit_reporter() {
-  local CSV_LOG=""
-  CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
-  CSV_LOG="${CSV_DIR}""/""${CSV_LOG}"
-  local GREPIT_RESULTS_DETAILS=()
-  local RESULT=""
-  local CURRENT_TEST=""
-  local LINES_OF_OUTPUT=""
-  local COMMENT=""
-  local OUTFILE=""
+  local lCSV_LOG=""
+  lCSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
+  lCSV_LOG="${CSV_DIR}""/""${lCSV_LOG}"
+  local lGREPIT_RESULTS_DETAILS_ARR=()
+  local lRESULT=""
+  local lCURRENT_TEST=""
+  local lLINES_OF_OUTPUT=""
+  local lCOMMENT=""
+  local lOUTFILE=""
 
-  if [[ -f "${CSV_LOG}" ]]; then
-    readarray -t GREPIT_RESULTS_DETAILS < <(cut -d\; -f1,2,5 "${CSV_LOG}" | grep -v "Grepit test" | grep -v "^$" | sort -u)
-    for RESULT in "${GREPIT_RESULTS_DETAILS[@]}"; do
-      CURRENT_TEST=$(echo "${RESULT}" | cut -d\; -f1)
-      LINES_OF_OUTPUT=$(echo "${RESULT}" | cut -d\; -f2)
-      COMMENT=$(echo "${RESULT}" | cut -d\; -f3)
-      OUTFILE="${CURRENT_TEST}".txt
+  if [[ -f "${lCSV_LOG}" ]]; then
+    readarray -t lGREPIT_RESULTS_DETAILS_ARR < <(cut -d\; -f1,2,5 "${lCSV_LOG}" | grep -v "Grepit test" | grep -v "^$" | sort -u)
+    for lRESULT in "${lGREPIT_RESULTS_DETAILS_ARR[@]}"; do
+      lCURRENT_TEST=$(echo "${lRESULT}" | cut -d\; -f1)
+      lLINES_OF_OUTPUT=$(echo "${lRESULT}" | cut -d\; -f2)
+      lCOMMENT=$(echo "${lRESULT}" | cut -d\; -f3)
+      lOUTFILE="${lCURRENT_TEST}".txt
 
-      print_output "[*] ${ORANGE}${LINES_OF_OUTPUT}${NC} results of grepit module ${ORANGE}${CURRENT_TEST}${NC} (${ORANGE}${COMMENT}${NC})." "" "${LOG_PATH_MODULE}/${OUTFILE}"
+      print_output "[*] ${ORANGE}${lLINES_OF_OUTPUT}${NC} results of grepit module ${ORANGE}${lCURRENT_TEST}${NC} (${ORANGE}${lCOMMENT}${NC})." "" "${LOG_PATH_MODULE}/${lOUTFILE}"
     done
   fi
 }
 
 grepit_search() {
-  local LINES_OF_OUTPUT=0
-  local GREP_COMMAND="grep"
-  local LOG_DETAILS=1
-  local COMMENT="${1:-NA}"
-  local EXAMPLE="${2:-NA}"
-  local FALSE_POSITIVES_EXAMPLE="${3:-NA}"
-  local SEARCH_REGEX="${4}"
-  local OUTFILE="${5:-MISSING_LOG_DIR.txt}"
+  local lLINES_OF_OUTPUT=0
+  local lGREP_COMMAND="grep"
+  local lLOG_DETAILS=1
+  local lCOMMENT="${1:-NA}"
+  local lEXAMPLE="${2:-NA}"
+  local lFALSE_POSITIVES_EXAMPLE="${3:-NA}"
+  local lSEARCH_REGEX="${4}"
+  local lOUTFILE="${5:-MISSING_LOG_DIR.txt}"
+  local lCURRENT_TEST=""
   if [[ -v 6 ]]; then
-    local ARGS_FOR_GREP=("${6}") # usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
+    local lARGS_FOR_GREP_ARR=("${6}") # usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
   else
-    local ARGS_FOR_GREP=()
+    local lARGS_FOR_GREP_ARR=()
   fi
 
-  if [[ "${ENABLE_LEAST_LIKELY}" -eq 0 ]] && [[ "${OUTFILE}" == 9_* ]]; then
-    print_output "[-] Skipping searching for ${OUTFILE} with regex ${SEARCH_REGEX}. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
+  if [[ "${ENABLE_LEAST_LIKELY}" -eq 0 ]] && [[ "${lOUTFILE}" == 9_* ]]; then
+    print_output "[-] Skipping searching for ${lOUTFILE} with regex ${lSEARCH_REGEX}. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
   else
-    write_log "[*] Searching (args for grep: ${ORANGE}${ARGS_FOR_GREP[*]}${NC}) for ${ORANGE}${SEARCH_REGEX}${NC}." "${LOG_PATH_MODULE}/${OUTFILE}"
+    write_log "[*] Searching (args for grep: ${ORANGE}${lARGS_FOR_GREP_ARR[*]}${NC}) for ${ORANGE}${lSEARCH_REGEX}${NC}." "${LOG_PATH_MODULE}/${lOUTFILE}"
 
-    if [[ "${LOG_DETAILS}" -eq 1 ]]; then
-      write_log "[*] Grepit state info - comment: ${ORANGE}${COMMENT}${NC}" "${LOG_PATH_MODULE}/${OUTFILE}"
-      write_log "[*] Grepit state info - Filename ${ORANGE}${OUTFILE}${NC}" "${LOG_PATH_MODULE}/${OUTFILE}"
-      write_log "[*] Grepit state info - Example: ${ORANGE}${EXAMPLE}${NC}" "${LOG_PATH_MODULE}/${OUTFILE}"
-      write_log "[*] Grepit state info - False positive example: ${ORANGE}${FALSE_POSITIVES_EXAMPLE}${NC}" "${LOG_PATH_MODULE}/${OUTFILE}"
-      write_log "[*] Grepit state info - Grep args: ${ORANGE}${ARGS_FOR_GREP[*]}${NC}" "${LOG_PATH_MODULE}/${OUTFILE}"
-      write_log "[*] Grepit state info - Search regex: ${ORANGE}${SEARCH_REGEX}${NC}" "${LOG_PATH_MODULE}/${OUTFILE}"
-      write_log "" "${LOG_PATH_MODULE}/${OUTFILE}"
+    if [[ "${lLOG_DETAILS}" -eq 1 ]]; then
+      write_log "[*] Grepit state info - comment: ${ORANGE}${lCOMMENT}${NC}" "${LOG_PATH_MODULE}/${lOUTFILE}"
+      write_log "[*] Grepit state info - Filename ${ORANGE}${lOUTFILE}${NC}" "${LOG_PATH_MODULE}/${lOUTFILE}"
+      write_log "[*] Grepit state info - Example: ${ORANGE}${lEXAMPLE}${NC}" "${LOG_PATH_MODULE}/${lOUTFILE}"
+      write_log "[*] Grepit state info - False positive example: ${ORANGE}${lFALSE_POSITIVES_EXAMPLE}${NC}" "${LOG_PATH_MODULE}/${lOUTFILE}"
+      write_log "[*] Grepit state info - Grep args: ${ORANGE}${lARGS_FOR_GREP_ARR[*]}${NC}" "${LOG_PATH_MODULE}/${lOUTFILE}"
+      write_log "[*] Grepit state info - Search regex: ${ORANGE}${lSEARCH_REGEX}${NC}" "${LOG_PATH_MODULE}/${lOUTFILE}"
+      write_log "" "${LOG_PATH_MODULE}/${lOUTFILE}"
     fi
 
-    ulimit -Sv "${MEM_LIMIT}"
-    "${GREP_COMMAND}" "${ARGS_FOR_GREP[@]}" "${STANDARD_GREP_ARGUMENTS[@]}" -- "${SEARCH_REGEX}" "${FIRMWARE_PATH}" |& safe_logging "${LOG_PATH_MODULE}/${OUTFILE}" 0 || true
+    ulimit -Sv "${lMEM_LIMIT}"
+    "${lGREP_COMMAND}" "${lARGS_FOR_GREP_ARR[@]}" "${STANDARD_GREP_ARGUMENTS[@]}" -- "${lSEARCH_REGEX}" "${FIRMWARE_PATH}" |& safe_logging "${LOG_PATH_MODULE}/${lOUTFILE}" 0 || true
     ulimit -Sv unlimited
 
-    if [[ "${LOG_DETAILS}" -eq 1 ]]; then
-      if [[ -f "${LOG_PATH_MODULE}/${OUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${OUTFILE}" 2>/dev/null) -gt 7 ]]; then
-        rm "${LOG_PATH_MODULE}/${OUTFILE}" 2>/dev/null
+    if [[ "${lLOG_DETAILS}" -eq 1 ]]; then
+      if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null) -gt 7 ]]; then
+        rm "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
       fi
     else
-      if [[ -f "${LOG_PATH_MODULE}/${OUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${OUTFILE}" 2>/dev/null) -gt 0 ]]; then
-        rm "${LOG_PATH_MODULE}/${OUTFILE}" 2>/dev/null
+      if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null) -gt 0 ]]; then
+        rm "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
       fi
     fi
-    if [[ -f "${LOG_PATH_MODULE}/${OUTFILE}" ]]; then
-      if [[ "${LOG_DETAILS}" -eq 1 ]]; then
-        LINES_OF_OUTPUT=$(( "$(wc -l "${LOG_PATH_MODULE}/${OUTFILE}" | awk '{print $1}')" -8 ))
+    if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]]; then
+      if [[ "${lLOG_DETAILS}" -eq 1 ]]; then
+        lLINES_OF_OUTPUT=$(( "$(wc -l "${LOG_PATH_MODULE}/${lOUTFILE}" | awk '{print $1}')" -8 ))
       else
-        LINES_OF_OUTPUT=$(( "$(wc -l "${LOG_PATH_MODULE}/${OUTFILE}" | awk '{print $1}')" -1 ))
+        lLINES_OF_OUTPUT=$(( "$(wc -l "${LOG_PATH_MODULE}/${lOUTFILE}" | awk '{print $1}')" -1 ))
       fi
-      CURRENT_TEST=$(basename -s .txt "${OUTFILE}")
+      lCURRENT_TEST=$(basename -s .txt "${lOUTFILE}")
       # this is the output to the terminal. For the final report we wait till all tests are finished and then we
       # parse the csv output file and sort it according the test priority - 1-9, where 1 is more interesting
       # (low false positive rate, certainty of "vulnerability") and 9 is only "you might want to have a look when you are desperately looking for vulns")
-      print_output "[*] ${ORANGE}${LINES_OF_OUTPUT}${NC} results of grepit module ${ORANGE}${CURRENT_TEST}${NC}." "no_log"
-      write_csv_log "${CURRENT_TEST}" "${LINES_OF_OUTPUT}" "${ARGS_FOR_GREP[*]}" "${SEARCH_REGEX}" "${COMMENT}"
+      print_output "[*] ${ORANGE}${lLINES_OF_OUTPUT}${NC} results of grepit module ${ORANGE}${lCURRENT_TEST}${NC}." "no_log"
+      write_csv_log "${lCURRENT_TEST}" "${lLINES_OF_OUTPUT}" "${lARGS_FOR_GREP_ARR[*]}" "${lSEARCH_REGEX}" "${lCOMMENT}"
     fi
   fi
 }

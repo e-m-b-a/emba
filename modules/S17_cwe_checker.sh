@@ -148,7 +148,7 @@ cwe_check() {
   [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S17[@]}"
 }
 
-cwe_checker_threaded () {
+cwe_checker_threaded() {
   local lBINARY="${1:-}"
   local lCWE_OUT=()
   local lCWE_LINE=""
@@ -162,7 +162,7 @@ cwe_checker_threaded () {
   local lNAME=""
   lNAME=$(basename "${lBINARY}")
 
-  local OLD_LOG_FILE="${LOG_FILE}"
+  local lOLD_LOG_FILE="${LOG_FILE}"
   local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${lNAME}"".txt"
   lBINARY=$(readlink -f "${lBINARY}")
 
@@ -198,10 +198,10 @@ cwe_checker_threaded () {
   print_ln
 
   if [[ -f "${LOG_FILE}" ]]; then
-    cat "${LOG_FILE}" >> "${OLD_LOG_FILE}"
+    cat "${LOG_FILE}" >> "${lOLD_LOG_FILE}"
     rm "${LOG_FILE}" 2> /dev/null
   fi
-  LOG_FILE="${OLD_LOG_FILE}"
+  LOG_FILE="${lOLD_LOG_FILE}"
 }
 
 final_cwe_log() {
