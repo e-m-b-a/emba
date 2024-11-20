@@ -115,6 +115,7 @@ version_detection_thread() {
   local lBIN_ARCH="NA"
   local lBIN_FILE="NA"
   local lBINARY_PATHS_ARR=()
+  local lBINARY_PATHS_FINAL_ARR=()
   local lLOG_PATH_=""
   local lCSV_RULE=""
   local lMD5_CHECKSUM="NA"
@@ -133,7 +134,7 @@ version_detection_thread() {
       for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
         # lBINARY_PATH is the final array which we are using further
         lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head)
-        lBINARY_PATHS_ARR+=( "${lBINARY_PATH_}" )
+        lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
       done
       lTYPE="emulation/strict"
     fi
@@ -152,7 +153,7 @@ version_detection_thread() {
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
             # BINARY_PATH is the final array which we are using further
             lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
-            lBINARY_PATHS_ARR+=( "${lBINARY_PATH_}" )
+            lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
           done
         done
       done

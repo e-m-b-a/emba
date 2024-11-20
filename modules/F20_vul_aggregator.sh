@@ -1601,21 +1601,22 @@ get_uefi_details() {
 get_sbom_package_details() {
   local S08_LOG="${1:-}"
   export VERSIONS_S08_PACKAGE_DETAILS=()
+  export WAIT_PIDS_CVE_COPY=()
 
   if [[ -f "${S08_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S08_LOG}")."
     readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f6 "${S08_LOG}" | tail -n +2 | sort -u | grep -v "NA" | tr ';' ':' | tr ' ' '_' || true)
-  fi
 
-  # prepare a smaller subset of cve sources
-  # we write only the binary names to a file and use this file later on for grep
-  # in the file we have entries like "cpe:2.3:.*binary_name"
-  cut -d\; -f6 "${S08_CSV_LOG}" | tail -n +2 | cut -d : -f3 | grep -v NA | uniq | sed 's/^/cpe:2.3:.*/' > "${LOG_PATH_MODULE}"/cpe_search_grep.tmp || true
-  # next step is to search for possible CVE source files and copy it to a temp directory. This temp directory will
-  # be used for searching the real CVEs later on
-  mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
-  (grep -r -l -f "${LOG_PATH_MODULE}"/cpe_search_grep.tmp "${NVD_DIR}" | xargs cp -f -t "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true)&
-  local lTMP_PID="$!"
-  store_kill_pids "${lTMP_PID}"
-  export WAIT_PIDS_CVE_COPY=( "${lTMP_PID}" )
+    # prepare a smaller subset of cve sources
+    # we write only the binary names to a file and use this file later on for grep
+    # in the file we have entries like "cpe:2.3:.*binary_name"
+    cut -d\; -f6 "${S08_CSV_LOG}" | tail -n +2 | cut -d : -f3 | grep -v NA | uniq | sed 's/^/cpe:2.3:.*/' > "${LOG_PATH_MODULE}"/cpe_search_grep.tmp || true
+    # next step is to search for possible CVE source files and copy it to a temp directory. This temp directory will
+    # be used for searching the real CVEs later on
+    mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+    (grep -r -l -f "${LOG_PATH_MODULE}"/cpe_search_grep.tmp "${NVD_DIR}" | xargs cp -f -t "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true)&
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    WAIT_PIDS_CVE_COPY=( "${lTMP_PID}" )
+  fi
 }
