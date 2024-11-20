@@ -58,11 +58,11 @@ S14_weak_func_radare_check()
 
     for BINARY in "${BINARIES[@]}" ; do
       # we run throught the bins and check if the bin was already analysed via objdump:
-      if [[ "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"$(basename "${BINARY}")".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
+      NAME=$(basename "${BINARY}" 2> /dev/null)
+      if [[ "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${NAME}".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
         continue
       fi
       if ( file "${BINARY}" | grep -q ELF ) ; then
-        NAME=$(basename "${BINARY}" 2> /dev/null)
 
         if ( file "${BINARY}" | grep -q "x86-64" ) ; then
           if [[ "${THREADED}" -eq 1 ]]; then
@@ -606,7 +606,7 @@ radare_output_function_details()
   local NW_CSV=""
 
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
-    SEARCH_TERM=$(basename "${BINARY_}")
+    SEARCH_TERM="${NAME}"
     if grep -q "^${SEARCH_TERM}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
       write_log "[+] File $(print_path "${BINARY_}") found in default Linux file dictionary" "${LOG_PATH_MODULE}/common_linux_files.txt"

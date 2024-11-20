@@ -142,26 +142,26 @@ S04_windows_basic_analysis() {
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
       lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
 
-      sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log"
+      sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"
       print_output "[*] Extract exifdata from ${ORANGE}${lEXE_NAME}${NC}" "no_log"
-      exiftool "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log" || print_error "[-] Something happened on exiftool analysis for ${lEXE_ARCHIVE}"
+      exiftool "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log" || print_error "[-] Something happened on exiftool analysis for ${lEXE_ARCHIVE}"
 
-      sub_module_title "PEdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      sub_module_title "PEdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
       print_output "[*] Extract pedata from ${ORANGE}${lEXE_NAME}${NC}" "no_log"
-      write_log "" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
-      write_log "[*] pescan for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
-      pescan -v "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log" || print_error "[-] Something happened on pescan analysis for ${lEXE_ARCHIVE}"
-      write_log "" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
-      write_log "[*] readpe for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
-      readpe "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log" || print_error "[-] Something happened on pedata analysis for ${lEXE_ARCHIVE}"
+      write_log "" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
+      write_log "[*] pescan for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
+      pescan -v "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" || print_error "[-] Something happened on pescan analysis for ${lEXE_ARCHIVE}"
+      write_log "" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
+      write_log "[*] readpe for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
+      readpe "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" || print_error "[-] Something happened on pedata analysis for ${lEXE_ARCHIVE}"
 
-      if [[ -s "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log" ]]; then
-        print_output "[*] Windows binary exifdata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/exifdata_$(basename "${lEXE_ARCHIVE}").log"
+      if [[ -s "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log" ]]; then
+        print_output "[*] Windows binary exifdata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"
       else
         print_output "[-] No exif data for binary $(orange "$(print_path "${lEXE_ARCHIVE}")") available"
       fi
-      if [[ -s "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log" ]]; then
-        print_output "[*] Windows binary pedata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/readpe_$(basename "${lEXE_ARCHIVE}").log"
+      if [[ -s "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" ]]; then
+        print_output "[*] Windows binary pedata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
       else
         print_output "[-] No pedata for binary $(orange "$(print_path "${lEXE_ARCHIVE}")") available"
       fi

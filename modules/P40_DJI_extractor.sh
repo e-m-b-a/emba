@@ -140,7 +140,7 @@ dji_imah_firmware_extractor() {
 
     # extract the encryption key from file:
     # for header details see table 2 from https://arxiv.org/ftp/arxiv/papers/2312/2312.16818.pdf
-    print_output "[*] Extract key identifier from firmware file ${ORANGE}$(basename "${lDJI_FILE}")${NC}"
+    print_output "[*] Extract key identifier from firmware file ${ORANGE}${lFNAME}${NC}"
     print_ln
     dd if="${lDJI_FILE}" of="${TMP_DIR}"/dji_enc_key.tmp skip=44 count=4 bs=1
     if [[ -f "${TMP_DIR}"/dji_enc_key.tmp ]] && [[ -s "${TMP_DIR}"/dji_enc_key.tmp ]]; then
