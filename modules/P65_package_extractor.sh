@@ -100,6 +100,7 @@ apk_extractor() {
   local lAPK_NAME=""
   local lFILES_AFTER_APK=0
   local lR_PATH=""
+  local lAPK=""
 
   print_output "[*] Identify apk archives and extracting it to the root directories ..."
   extract_apk_helper &
@@ -112,11 +113,11 @@ apk_extractor() {
     if [[ "${lAPK_ARCHIVES}" -gt 0 ]]; then
       print_output "[*] Found ${ORANGE}${lAPK_ARCHIVES}${NC} APK archives - extracting them to the root directories ..."
       for lR_PATH in "${ROOT_PATH[@]}"; do
-        while read -r APK; do
-          lAPK_NAME=$(basename "${APK}")
+        while read -r lAPK; do
+          lAPK_NAME=$(basename "${lAPK}")
           print_output "[*] Extracting ${ORANGE}${lAPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
-          # tar xpf "${APK}" --directory "${lR_PATH}" || true
-          unzip -o -d "${lR_PATH}" "${APK}" || true
+          # tar xpf "${lAPK}" --directory "${lR_PATH}" || true
+          unzip -o -d "${lR_PATH}" "${lAPK}" || true
         done < "${TMP_DIR}"/apk_db.txt
       done
 
@@ -132,9 +133,9 @@ apk_extractor() {
 
 ipk_extractor() {
   sub_module_title "IPK archive extraction mode"
-  local IPK_ARCHIVES=0
-  local IPK_NAME=""
-  local FILES_AFTER_IPK=0
+  local lIPK_ARCHIVES=0
+  local lIPK_NAME=""
+  local lFILES_AFTER_IPK=0
   local lR_PATH=""
 
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
@@ -144,18 +145,18 @@ ipk_extractor() {
   WAIT_PIDS_ARR=( )
 
   if [[ -f "${TMP_DIR}"/ipk_db.txt ]] ; then
-    IPK_ARCHIVES=$(wc -l "${TMP_DIR}"/ipk_db.txt | awk '{print $1}')
-    if [[ "${IPK_ARCHIVES}" -gt 0 ]]; then
-      print_output "[*] Found ${ORANGE}${IPK_ARCHIVES}${NC} IPK archives - extracting them to the root directories ..."
+    lIPK_ARCHIVES=$(wc -l "${TMP_DIR}"/ipk_db.txt | awk '{print $1}')
+    if [[ "${lIPK_ARCHIVES}" -gt 0 ]]; then
+      print_output "[*] Found ${ORANGE}${lIPK_ARCHIVES}${NC} IPK archives - extracting them to the root directories ..."
       mkdir "${LOG_DIR}"/ipk_tmp
       for lR_PATH in "${ROOT_PATH[@]}"; do
         while read -r IPK; do
-          IPK_NAME=$(basename "${IPK}")
+          lIPK_NAME=$(basename "${IPK}")
           if [[ $(file "${IPK}") == *"gzip"* ]]; then
-            print_output "[*] Extracting ${ORANGE}${IPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
+            print_output "[*] Extracting ${ORANGE}${lIPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
             tar zxpf "${IPK}" --directory "${LOG_DIR}"/ipk_tmp || true
           else
-            print_output "[-] Is ${ORANGE}${IPK_NAME}${NC} a valid ipk (tgz) archive?"
+            print_output "[-] Is ${ORANGE}${lIPK_NAME}${NC} a valid ipk (tgz) archive?"
           fi
           if [[ -f "${LOG_DIR}"/ipk_tmp/data.tar.gz ]]; then
             tar xzf "${LOG_DIR}"/ipk_tmp/data.tar.gz --directory "${lR_PATH}" || true
@@ -166,9 +167,9 @@ ipk_extractor() {
         done < "${TMP_DIR}"/ipk_db.txt
       done
 
-      FILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+      lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
       print_ln "no_log"
-      print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${FILES_AFTER_IPK}${NC} files extracted."
+      print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_IPK}${NC} files extracted."
       if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
         rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
       fi

@@ -21,32 +21,32 @@ S107_deep_password_search()
   module_title "Deep analysis of files for password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local PW_HASH_CONFIG="${CONFIG_DIR}"/password_regex.cfg
-  local PW_COUNTER=0
-  local PW_PATH=""
-  local PW_HASHES=()
-  local PW_HASH=""
+  local lPW_HASH_CONFIG="${CONFIG_DIR}"/password_regex.cfg
+  local lPW_COUNTER=0
+  local lPW_PATH=""
+  local lPW_HASHES_ARR=()
+  local lPW_HASH=""
 
-  find "${FIRMWARE_PATH}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep --color -n -a -E -H -f '"${PW_HASH_CONFIG}"' % || true' > "${TMP_DIR}"/pw_hashes.txt
+  find "${FIRMWARE_PATH}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep --color -n -a -E -H -f '"${lPW_HASH_CONFIG}"' % || true' > "${TMP_DIR}"/pw_hashes.txt
 
   if [[ $(wc -l "${TMP_DIR}"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
     print_output "[+] Found the following password hash values:"
     write_csv_log "PW_PATH" "PW_HASH"
-    while read -r PW_HASH; do
-      PW_PATH="${PW_HASH/:*}"
-      mapfile -t PW_HASHES < <(strings "${PW_PATH}" | grep --color -a -E -f "${PW_HASH_CONFIG}")
-      for PW_HASH in "${PW_HASHES[@]}"; do
-        print_output "[+] PATH: ${ORANGE}$(print_path "${PW_PATH}")${GREEN}\t-\tHash: ${ORANGE}${PW_HASH}${GREEN}."
-        write_csv_log "NA" "${PW_PATH}" "${PW_HASH}"
-        ((PW_COUNTER+=1))
+    while read -r lPW_HASH; do
+      lPW_PATH="${lPW_HASH/:*}"
+      mapfile -t lPW_HASHES_ARR < <(strings "${lPW_PATH}" | grep --color -a -E -f "${lPW_HASH_CONFIG}")
+      for lPW_HASH in "${lPW_HASHES_ARR[@]}"; do
+        print_output "[+] PATH: ${ORANGE}$(print_path "${lPW_PATH}")${GREEN}\t-\tHash: ${ORANGE}${lPW_HASH}${GREEN}."
+        write_csv_log "NA" "${lPW_PATH}" "${lPW_HASH}"
+        ((lPW_COUNTER+=1))
       done
     done < "${TMP_DIR}"/pw_hashes.txt
 
     print_ln
-    print_output "[*] Found ${ORANGE}${PW_COUNTER}${NC} password hashes."
+    print_output "[*] Found ${ORANGE}${lPW_COUNTER}${NC} password hashes."
   fi
   write_log ""
-  write_log "[*] Statistics:${PW_COUNTER}"
+  write_log "[*] Statistics:${lPW_COUNTER}"
 
-  module_end_log "${FUNCNAME[0]}" "${PW_COUNTER}"
+  module_end_log "${FUNCNAME[0]}" "${lPW_COUNTER}"
 }

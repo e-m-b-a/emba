@@ -16,7 +16,7 @@
 # Description:  Stop and cleanup emulation environment
 
 L99_cleanup() {
-  local MODULE_END=0
+  local lMODULE_END=0
 
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -26,7 +26,7 @@ L99_cleanup() {
     # as we are running from the run.sh startup script the network is also reconfigured
     stopping_emulation_process "${IMAGE_NAME}"
 
-    module_end_log "${FUNCNAME[0]}" "${MODULE_END}"
+    module_end_log "${FUNCNAME[0]}" "${lMODULE_END}"
   fi
 }
 

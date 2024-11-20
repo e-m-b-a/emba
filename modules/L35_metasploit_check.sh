@@ -19,7 +19,7 @@
 
 L35_metasploit_check() {
 
-  local MODULE_END=0
+  local lMODULE_END=0
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     if ! command -v msfconsole > /dev/null; then
       print_output "[-] Metasploit not available - Not performing Metasploit checks"
@@ -42,84 +42,84 @@ L35_metasploit_check() {
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing Metasploit checks"
-          module_end_log "${FUNCNAME[0]}" "${MODULE_END}"
+          module_end_log "${FUNCNAME[0]}" "${lMODULE_END}"
           return
         fi
       fi
 
       check_live_metasploit
-      MODULE_END=1
+      lMODULE_END=1
     else
       print_output "[!] No IP address found"
     fi
     write_log ""
-    module_end_log "${FUNCNAME[0]}" "${MODULE_END}"
+    module_end_log "${FUNCNAME[0]}" "${lMODULE_END}"
   fi
 }
 
 check_live_metasploit() {
   sub_module_title "Metasploit tests for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
-  local PORTS=""
-  local PORTS_ARR=()
-  local MSF_VULN=""
-  local MSF_VULNS_VERIFIED=()
-  local MSF_CVEs=()
-  local MSF_MODULE=""
-  local ARCH_END=""
-  local D_END=""
+  local lPORTS=""
+  local lPORTS_ARR=()
+  local lMSF_VULN=""
+  local lMSF_VULNS_VERIFIED_ARR=()
+  local lMSF_CVEs_ARR=()
+  local lMSF_MODULE=""
+  local lARCH_END=""
+  local lD_END=""
 
   if [[ -v ARCHIVE_PATH ]]; then
-    mapfile -t PORTS_ARR < <(find "${ARCHIVE_PATH}" -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+    mapfile -t lPORTS_ARR < <(find "${ARCHIVE_PATH}" -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
   else
     print_output "[-] Warning: No ARCHIVE_PATH found"
-    mapfile -t PORTS_ARR < <(find "${LOG_DIR}"/l10_system_emulation/ -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+    mapfile -t lPORTS_ARR < <(find "${LOG_DIR}"/l10_system_emulation/ -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
   fi
-  if [[ "${#PORTS_ARR[@]}" -eq 0 ]]; then
+  if [[ "${#lPORTS_ARR[@]}" -eq 0 ]]; then
     print_output "[-] No open ports identified ..."
     return
   fi
 
-  printf -v PORTS "%s " "${PORTS_ARR[@]}"
-  PORTS=${PORTS//\ /,}
-  PORTS="${PORTS%,}"
-  print_output "[*] Testing system with IP address ${ORANGE}${IP_ADDRESS_}${NC} and ports ${ORANGE}${PORTS}${NC}."
+  printf -v lPORTS "%s " "${lPORTS_ARR[@]}"
+  lPORTS=${lPORTS//\ /,}
+  lPORTS="${lPORTS%,}"
+  print_output "[*] Testing system with IP address ${ORANGE}${IP_ADDRESS_}${NC} and ports ${ORANGE}${lPORTS}${NC}."
 
   # metasploit tries to parse env variables and our environment is wasted!
   export PORT=""
-  # D_END="$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
-  D_END="${D_END,,}"
-  if [[ "${D_END}" == "el" ]]; then D_END="le"; fi
-  if [[ "${D_END}" == "eb" ]]; then D_END="be"; fi
-  # ARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
-  ARCH_END="${ARCH,,}""${D_END,,}"
+  # lD_END="$(echo "${lD_END}" | tr '[:upper:]' '[:lower:]')"
+  lD_END="${lD_END,,}"
+  if [[ "${lD_END}" == "el" ]]; then lD_END="le"; fi
+  if [[ "${lD_END}" == "eb" ]]; then lD_END="be"; fi
+  # lARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${lD_END}" | tr '[:upper:]' '[:lower:]')"
+  lARCH_END="${ARCH,,}""${lD_END,,}"
 
-  timeout --preserve-status --signal SIGINT -k 60 2000 msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${PORTS}" "${ARCH_END}"| tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true
+  timeout --preserve-status --signal SIGINT -k 60 2000 msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${lPORTS}" "${lARCH_END}"| tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true
 
   if [[ -f "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt ]] && [[ $(grep -a -i -c "Vulnerability identified for module" "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt) -gt 0 ]]; then
     write_csv_log "Source" "Module" "CVE" "ARCH_END" "IP_ADDRESS" "PORTS"
     print_ln
     print_output "[+] Metasploit results for verification" "" "${LOG_PATH_MODULE}/metasploit-check-${IP_ADDRESS_}.txt"
-    mapfile -t MSF_VULNS_VERIFIED < <(grep -a -i "Vulnerability identified for module" "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true)
-    for MSF_VULN in "${MSF_VULNS_VERIFIED[@]}"; do
-      local MSF_CVE=""
-      MSF_MODULE="$(echo "${MSF_VULN}" | sed 's/.*module\ //' | sed 's/\ -\ .*//')"
-      mapfile -t MSF_CVEs < <(grep "${MSF_MODULE}" "${MSF_DB_PATH}" | cut -d: -f2 || true)
-      printf -v MSF_CVE "%s " "${MSF_CVEs[@]}"
-      MSF_CVE="${MSF_CVE%\ }"
-      if [[ -n "${MSF_CVE}" ]]; then
-        print_output "[+] Vulnerability verified: ${ORANGE}${MSF_MODULE}${GREEN} / ${ORANGE}${MSF_CVE}${GREEN}."
-        write_link "https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits/${MSF_MODULE}.rb"
+    mapfile -t lMSF_VULNS_VERIFIED_ARR < <(grep -a -i "Vulnerability identified for module" "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true)
+    for lMSF_VULN in "${lMSF_VULNS_VERIFIED_ARR[@]}"; do
+      local lMSF_CVE=""
+      lMSF_MODULE="$(echo "${lMSF_VULN}" | sed 's/.*module\ //' | sed 's/\ -\ .*//')"
+      mapfile -t lMSF_CVEs_ARR < <(grep "${lMSF_MODULE}" "${MSF_DB_PATH}" | cut -d: -f2 || true)
+      printf -v lMSF_CVE "%s " "${lMSF_CVEs_ARR[@]}"
+      lMSF_CVE="${lMSF_CVE%\ }"
+      if [[ -n "${lMSF_CVE}" ]]; then
+        print_output "[+] Vulnerability verified: ${ORANGE}${lMSF_MODULE}${GREEN} / ${ORANGE}${lMSF_CVE}${GREEN}."
+        write_link "https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits/${lMSF_MODULE}.rb"
         # we write our csv entry later for every CVE entry
       else
-        print_output "[+] Vulnerability verified: ${ORANGE}${MSF_MODULE}${GREEN}."
-        write_link "https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits/${MSF_MODULE}.rb"
-        MSF_CVE="NA"
+        print_output "[+] Vulnerability verified: ${ORANGE}${lMSF_MODULE}${GREEN}."
+        write_link "https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits/${lMSF_MODULE}.rb"
+        lMSF_CVE="NA"
         # if we have no CVE entry we can directly write our csv entry:
-        write_csv_log "Metasploit framework" "${MSF_MODULE}" "${MSF_CVE}" "${ARCH_END}" "${IP_ADDRESS_}" "${PORTS}"
+        write_csv_log "Metasploit framework" "${lMSF_MODULE}" "${lMSF_CVE}" "${lARCH_END}" "${IP_ADDRESS_}" "${lPORTS}"
       fi
-      for MSF_CVE in "${MSF_CVEs[@]}"; do
+      for lMSF_CVE in "${lMSF_CVEs_ARR[@]}"; do
         # per CVE one csv entry:
-        write_csv_log "Metasploit framework" "${MSF_MODULE}" "${MSF_CVE}" "${ARCH_END}" "${IP_ADDRESS_}" "${PORTS}"
+        write_csv_log "Metasploit framework" "${lMSF_MODULE}" "${lMSF_CVE}" "${lARCH_END}" "${IP_ADDRESS_}" "${lPORTS}"
       done
     done
 

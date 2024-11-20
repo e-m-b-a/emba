@@ -25,25 +25,25 @@ S109_jtr_local_pw_cracking() {
     return
   fi
 
-  local PW_FILE="${CSV_DIR}"/s108_stacs_password_search.csv
-  local PW_FILE_S107="${CSV_DIR}"/s107_deep_password_search.csv
-  local NEG_LOG=0
-  local HASHES_S107=()
-  local HASHES_S108=()
-  local HASHES=()
-  local HASH=""
-  local HASH_SOURCE=""
-  local CRACKED_HASHES=()
-  local JTR_FINAL_STAT=""
-  local CRACKED_HASH=""
-  local CRACKED=0
-  local JTR_TIMEOUT="3600"
+  local lPW_FILE="${CSV_DIR}"/s108_stacs_password_search.csv
+  local lPW_FILE_S107="${CSV_DIR}"/s107_deep_password_search.csv
+  local lNEG_LOG=0
+  local lHASHES_S107_ARR=()
+  local lHASHES_S108_ARR=()
+  local lHASHES_ARR=()
+  local lHASH=""
+  local lHASH_SOURCE=""
+  local lCRACKED_HASHES_ARR=()
+  local lJTR_FINAL_STAT=""
+  local lCRACKED_HASH=""
+  local lCRACKED=0
+  local lJTR_TIMEOUT="3600"
   # optional wordlist for JTR - if no wordlist is there JTR runs in default mode
-  local JTR_WORDLIST="${CONFIG_DIR}/jtr_wordlist.txt"
-  local HASH_DESCRIPTION=""
-  local JTR_FORMATS=()
-  local JTR_FORMAT=""
-  local PID=""
+  local lJTR_WORDLIST="${CONFIG_DIR}/jtr_wordlist.txt"
+  local lHASH_DESCRIPTION=""
+  local lJTR_FORMATS_ARR=()
+  local lJTR_FORMAT=""
+  local lPID=""
 
   # This module waits for S108_stacs_password_search and S107_deep_password_search
   # check emba.log for S108_stacs_password_search starting
@@ -53,40 +53,40 @@ S109_jtr_local_pw_cracking() {
   module_title "Cracking identified password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  if [[ -f "${PW_FILE_S107}" ]]; then
-    mapfile -t HASHES_S107 < <(cut -d\; -f1,2,3 "${PW_FILE_S107}" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
+  if [[ -f "${lPW_FILE_S107}" ]]; then
+    mapfile -t lHASHES_S107_ARR < <(cut -d\; -f1,2,3 "${lPW_FILE_S107}" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
   fi
 
-  if [[ -f "${PW_FILE}" ]]; then
-    mapfile -t HASHES_S108 < <(cut -d\; -f1,2,3 "${PW_FILE}" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
+  if [[ -f "${lPW_FILE}" ]]; then
+    mapfile -t lHASHES_S108_ARR < <(cut -d\; -f1,2,3 "${lPW_FILE}" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
 
-    HASHES=("${HASHES_S107[@]}" "${HASHES_S108[@]}")
+    lHASHES_ARR=("${lHASHES_S107_ARR[@]}" "${lHASHES_S108_ARR[@]}")
 
-    for HASH in "${HASHES[@]}"; do
-      HASH_DESCRIPTION=$(basename "$(echo "${HASH}" | cut -d\; -f1)")
-      HASH_SOURCE=$(basename "$(echo "${HASH}" | cut -d\; -f2)")
-      HASH=$(echo "${HASH}" | cut -d\; -f3 | tr -d \")
+    for lHASH in "${lHASHES_ARR[@]}"; do
+      lHASH_DESCRIPTION=$(basename "$(echo "${lHASH}" | cut -d\; -f1)")
+      lHASH_SOURCE=$(basename "$(echo "${lHASH}" | cut -d\; -f2)")
+      lHASH=$(echo "${lHASH}" | cut -d\; -f3 | tr -d \")
 
-      [[ "${HASH}" == *"BEGIN"*"KEY"* ]] && continue
-      [[ "${HASH_DESCRIPTION}" == *"private key found"* ]] && continue
+      [[ "${lHASH}" == *"BEGIN"*"KEY"* ]] && continue
+      [[ "${lHASH_DESCRIPTION}" == *"private key found"* ]] && continue
 
-      if echo "${HASH}" | cut -d: -f1-3 | grep -q "::[0-9]"; then
+      if echo "${lHASH}" | cut -d: -f1-3 | grep -q "::[0-9]"; then
         # nosemgrep
         # removing entries: root::0:0:99999:7:::
         continue
       fi
 
-      if [[ "${HASH}" == "\$"*"\$"* ]]; then
-        print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
+      if [[ "${lHASH}" == "\$"*"\$"* ]]; then
+        print_output "[*] Found password data ${ORANGE}${lHASH}${NC} for further processing in ${ORANGE}${lHASH_SOURCE}${NC}"
         # put ontop if linux-hash
         if [[ ! -s "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
-          echo "${HASH}" > "${LOG_PATH_MODULE}"/jtr_hashes.txt
+          echo "${lHASH}" > "${LOG_PATH_MODULE}"/jtr_hashes.txt
         else
-          sed -i "1s#^#${HASH}\n#" "${LOG_PATH_MODULE}"/jtr_hashes.txt
+          sed -i "1s#^#${lHASH}\n#" "${LOG_PATH_MODULE}"/jtr_hashes.txt
         fi
       else
-        print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
-        echo "${HASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
+        print_output "[*] Found password data ${ORANGE}${lHASH}${NC} for further processing in ${ORANGE}${lHASH_SOURCE}${NC}"
+        echo "${lHASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
       fi
     done
 
@@ -96,22 +96,22 @@ S109_jtr_local_pw_cracking() {
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
-      print_output "[*] Starting jtr with a runtime of ${ORANGE}${JTR_TIMEOUT}${NC} on the following data:"
+      print_output "[*] Starting jtr with a runtime of ${ORANGE}${lJTR_TIMEOUT}${NC} on the following data:"
       tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/jtr_hashes.txt
       print_ln
-      if [[ -f "${JTR_WORDLIST}" ]]; then
-        print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${JTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${JTR_WORDLIST}" | awk '{print $1}')${NC} entries."
-        john --progress-every=120 --wordlist="${JTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt |& safe_logging "${LOG_FILE}" 0 || true &
-        PID="$!"
+      if [[ -f "${lJTR_WORDLIST}" ]]; then
+        print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${lJTR_WORDLIST}" | awk '{print $1}')${NC} entries."
+        john --progress-every=120 --wordlist="${lJTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt |& safe_logging "${LOG_FILE}" 0 || true &
+        lPID="$!"
       else
         john --progress-every=120 "${LOG_PATH_MODULE}"/jtr_hashes.txt |& safe_logging "${LOG_FILE}" 0 || true &
-        PID="$!"
+        lPID="$!"
       fi
       sleep 5
 
-      local COUNT=0
-      while [[ "${COUNT}" -le "${JTR_TIMEOUT}" ]];do
-        ((COUNT+=1))
+      local lCOUNT=0
+      while [[ "${lCOUNT}" -le "${lJTR_TIMEOUT}" ]];do
+        ((lCOUNT+=1))
         if ! pgrep john > /dev/null; then
           # if no john process is running it means we are finished with cracking passwords
           # and we can exit the while loop for waiting
@@ -119,40 +119,40 @@ S109_jtr_local_pw_cracking() {
         fi
         sleep 1
       done
-      kill "${PID}" || true
+      kill "${lPID}" || true
       if pgrep john > /dev/null; then
         pkill -f "john" > /dev/null
       fi
 
       # lets check our log if we can find further hashes
-      mapfile -t JTR_FORMATS < <(grep "option to force loading hashes of that type instead" "${LOG_FILE}" || true)
+      mapfile -t lJTR_FORMATS_ARR < <(grep "option to force loading hashes of that type instead" "${LOG_FILE}" || true)
 
       # if we have further hashes we are processing these now
-      if [[ "${#JTR_FORMATS[@]}" -gt 0 ]] && [[ "${COUNT}" -lt "${JTR_TIMEOUT}" ]] ; then
+      if [[ "${#lJTR_FORMATS_ARR[@]}" -gt 0 ]] && [[ "${lCOUNT}" -lt "${lJTR_TIMEOUT}" ]] ; then
         print_ln
         print_output "[*] Further password hashes detected:"
-        for JTR_FORMAT in "${JTR_FORMATS[@]}"; do
-          JTR_FORMAT="$(echo "${JTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
-          print_output "$(indent "$(orange "Detected hash type: ${JTR_FORMAT}")")"
+        for lJTR_FORMAT in "${lJTR_FORMATS_ARR[@]}"; do
+          lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
+          print_output "$(indent "$(orange "Detected hash type: ${lJTR_FORMAT}")")"
         done
 
-        for JTR_FORMAT in "${JTR_FORMATS[@]}"; do
+        for lJTR_FORMAT in "${lJTR_FORMATS_ARR[@]}"; do
           print_ln
-          JTR_FORMAT="$(echo "${JTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
-          print_output "[*] Testing password hash types ${ORANGE}${JTR_FORMAT}${NC}"
-          if [[ -f "${JTR_WORDLIST}" ]]; then
-            print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${JTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${JTR_WORDLIST}" | awk '{print $1}')${NC} entries."
-            find "${JTR_WORDLIST}" | tee -a "${LOG_FILE}"
-            john --format="${JTR_FORMAT}" --progress-every=120 --wordlist="${JTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
-            PID="$!"
+          lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
+          print_output "[*] Testing password hash types ${ORANGE}${lJTR_FORMAT}${NC}"
+          if [[ -f "${lJTR_WORDLIST}" ]]; then
+            print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${lJTR_WORDLIST}" | awk '{print $1}')${NC} entries."
+            find "${lJTR_WORDLIST}" | tee -a "${LOG_FILE}"
+            john --format="${lJTR_FORMAT}" --progress-every=120 --wordlist="${lJTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
+            lPID="$!"
           else
-            john --format="${JTR_FORMAT}" --progress-every=120 "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
-            PID="$!"
+            john --format="${lJTR_FORMAT}" --progress-every=120 "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
+            lPID="$!"
           fi
           sleep 5
 
-          while [[ "${COUNT}" -le "${JTR_TIMEOUT}" ]];do
-            ((COUNT+=1))
+          while [[ "${lCOUNT}" -le "${lJTR_TIMEOUT}" ]];do
+            ((lCOUNT+=1))
             if ! pgrep john > /dev/null; then
               # if no john process is running it means we are finished with cracking passwords
               # and we can exit the while loop for waiting
@@ -160,33 +160,33 @@ S109_jtr_local_pw_cracking() {
             fi
             sleep 1
           done
-          kill "${PID}" || true
+          kill "${lPID}" || true
           if pgrep john > /dev/null; then
             pkill -f "john" > /dev/null
           fi
         done
       fi
       print_ln
-      NEG_LOG=1
+      lNEG_LOG=1
 
-      mapfile -t CRACKED_HASHES < <(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$" || true)
-      JTR_FINAL_STAT=$(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
-      CRACKED=$(echo "${JTR_FINAL_STAT}" | awk '{print $1}')
-      if [[ -n "${JTR_FINAL_STAT}" ]]; then
+      mapfile -t lCRACKED_HASHES_ARR < <(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$" || true)
+      lJTR_FINAL_STAT=$(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
+      lCRACKED=$(echo "${lJTR_FINAL_STAT}" | awk '{print $1}')
+      if [[ -n "${lJTR_FINAL_STAT}" ]]; then
         print_ln
-        print_output "[*] John the ripper final status: ${ORANGE}${JTR_FINAL_STAT}${NC}"
-        NEG_LOG=1
+        print_output "[*] John the ripper final status: ${ORANGE}${lJTR_FINAL_STAT}${NC}"
+        lNEG_LOG=1
       fi
     fi
 
-    if [[ "${CRACKED}" -gt 0 ]]; then
-      for CRACKED_HASH in "${CRACKED_HASHES[@]}"; do
-        print_output "[+] Password hash cracked: ${ORANGE}${CRACKED_HASH}${NC}"
-        NEG_LOG=1
+    if [[ "${lCRACKED}" -gt 0 ]]; then
+      for lCRACKED_HASH in "${lCRACKED_HASHES_ARR[@]}"; do
+        print_output "[+] Password hash cracked: ${ORANGE}${lCRACKED_HASH}${NC}"
+        lNEG_LOG=1
       done
     fi
   fi
 
-  write_log "[*] Statistics:${CRACKED}"
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  write_log "[*] Statistics:${lCRACKED}"
+  module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
