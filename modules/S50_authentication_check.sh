@@ -364,35 +364,35 @@ check_owner_perm_sudo_config() {
 
   if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for lFILE in "${SUDOERS_FILES_ARR[@]}"; do
-      local SUDOERS_D="${lFILE}"".d"
-      if [[ -d "${SUDOERS_D}" ]] ; then
-        print_output "[*] Checking drop-in directory (""$(print_path "${SUDOERS_D}")"")"
+      local lSUDOERS_D="${lFILE}"".d"
+      if [[ -d "${lSUDOERS_D}" ]] ; then
+        print_output "[*] Checking drop-in directory (""$(print_path "${lSUDOERS_D}")"")"
         local lFIND=""
         local lFIND2=""
         local lFIND3=""
         local lFIND4=""
 
-        lFIND="$(permission_clean "${SUDOERS_D}")"
-        lFIND2="$(owner_clean "${SUDOERS_D}")"":""$(group_clean "${SUDOERS_D}")"
+        lFIND="$(permission_clean "${lSUDOERS_D}")"
+        lFIND2="$(owner_clean "${lSUDOERS_D}")"":""$(group_clean "${lSUDOERS_D}")"
 
-        print_output "[*] ""$(print_path "${SUDOERS_D}")"": Found permissions: ${lFIND} and owner UID GID: ${lFIND2}"
+        print_output "[*] ""$(print_path "${lSUDOERS_D}")"": Found permissions: ${lFIND} and owner UID GID: ${lFIND2}"
 
         case "${lFIND}" in
         drwx[r-][w-][x-]---)
-          print_output "[-] ""$(print_path "${SUDOERS_D}")"" permissions OK"
+          print_output "[-] ""$(print_path "${lSUDOERS_D}")"" permissions OK"
           if [[ "${lFIND2}" = "0:0" ]] ; then
-            print_output "[-] ""$(print_path "${SUDOERS_D}")"" ownership OK"
+            print_output "[-] ""$(print_path "${lSUDOERS_D}")"" ownership OK"
           else
-            print_output "[+] ""$(print_path "${SUDOERS_D}")"" ownership unsafe"
+            print_output "[+] ""$(print_path "${lSUDOERS_D}")"" ownership unsafe"
             ((lAUTH_ISSUES+=1))
           fi
           ;;
         *)
-          print_output "[+] ""$(print_path "${SUDOERS_D}")"" permissions possibly unsafe"
+          print_output "[+] ""$(print_path "${lSUDOERS_D}")"" permissions possibly unsafe"
           if [[ "${lFIND2}" = "0:0" ]] ; then
-            print_output "[-] ""$(print_path "${SUDOERS_D}")"" ownership OK"
+            print_output "[-] ""$(print_path "${lSUDOERS_D}")"" ownership OK"
           else
-            print_output "[+] ""$(print_path "${SUDOERS_D}")"" ownership unsafe"
+            print_output "[+] ""$(print_path "${lSUDOERS_D}")"" ownership unsafe"
             ((lAUTH_ISSUES+=1))
           fi
           ;;
@@ -532,8 +532,8 @@ scan_pam_conf() {
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
         print_output "[+] Found one or more configuration lines"
-        local LINE=${lFIND//[[:space:]]/}
-        print_output "$(indent "$(orange "${LINE}")")"
+        local lLINE=${lFIND//[[:space:]]/}
+        print_output "$(indent "$(orange "${lLINE}")")"
         ((lAUTH_ISSUES+=1))
       fi
     fi
@@ -593,27 +593,27 @@ search_pam_files() {
 
   local lCHECK=0
   local lAUTH_ISSUES=0
-  local PAM_FILES=()
-  local PAM_FILE=""
-  local FIND_FILE=""
-  readarray -t PAM_FILES < <(config_find "${CONFIG_DIR}""/pam_files.cfg")
+  local lPAM_FILES_ARR=()
+  local lPAM_FILE=""
+  local lFIND_FILE=""
+  readarray -t lPAM_FILES_ARR < <(config_find "${CONFIG_DIR}""/pam_files.cfg")
 
-  if [[ "${PAM_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#PAM_FILES[@]} -ne 0 ]] ; then
-    print_output "[*] Found ""${ORANGE}${#PAM_FILES[@]}${NC}"" possible interesting areas for PAM:"
-    for PAM_FILE in "${PAM_FILES[@]}" ; do
-      if [[ -f "${PAM_FILE}" ]] ; then
+  if [[ "${lPAM_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ ${#lPAM_FILES_ARR[@]} -ne 0 ]] ; then
+    print_output "[*] Found ""${ORANGE}${#lPAM_FILES_ARR[@]}${NC}"" possible interesting areas for PAM:"
+    for lPAM_FILE in "${lPAM_FILES_ARR[@]}" ; do
+      if [[ -f "${lPAM_FILE}" ]] ; then
         lCHECK=1
-        print_output "$(indent "$(orange "$(print_path "${PAM_FILE}")")")"
+        print_output "$(indent "$(orange "$(print_path "${lPAM_FILE}")")")"
         ((lAUTH_ISSUES+=1))
       fi
-      if [[ -d "${PAM_FILE}" ]] && [[ ! -L "${PAM_FILE}" ]] ; then
-        print_output "$(indent "$(print_path "${PAM_FILE}")")"
+      if [[ -d "${lPAM_FILE}" ]] && [[ ! -L "${lPAM_FILE}" ]] ; then
+        print_output "$(indent "$(print_path "${lPAM_FILE}")")"
         local lFIND=""
-        mapfile -t lFIND < <(find "${PAM_FILE}" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
-        for FIND_FILE in "${lFIND[@]}"; do
+        mapfile -t lFIND < <(find "${lPAM_FILE}" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
+        for lFIND_FILE in "${lFIND[@]}"; do
           lCHECK=1
-          print_output "$(indent "$(orange "${FIND_FILE}")")"
+          print_output "$(indent "$(orange "${lFIND_FILE}")")"
         done
         ((lAUTH_ISSUES+=1))
       fi
