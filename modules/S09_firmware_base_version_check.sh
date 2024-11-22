@@ -566,6 +566,10 @@ generate_strings() {
   local lBIN_NAME_REAL=""
   local lSTRINGS_OUTPUT=""
 
+  if ! [[ -f "${lBIN}" ]]; then
+    return
+  fi
+
   lBIN_FILE=$(file -b "${lBIN}" || true)
   if [[ "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* ]]; then
     return

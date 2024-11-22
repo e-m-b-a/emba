@@ -419,12 +419,12 @@ prepare_file_arr() {
   print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
 
   export FILE_ARR=()
-  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
     FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "${lFIRMWARE_PATH}" )
   fi
@@ -454,7 +454,7 @@ prepare_binary_arr() {
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; -exec grep "ELF\|PE32" | cut -d: -f1 || true)
-  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' || true)
+  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' 2>/dev/null || true)
   if [[ -v lBINARIES_TMP_ARR[@] ]]; then
     for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
       if [[ -f "${lBINARY}" ]]; then
