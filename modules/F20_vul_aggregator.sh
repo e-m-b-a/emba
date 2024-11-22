@@ -443,8 +443,10 @@ generate_cve_details_versions() {
   local lBIN_VERSION=""
 
   # need to wait for finishing the copy process from initial loading in get_sbom_package_details
+  print_output "[*] Probably we need to wait a bit for pre-processing the NVD data ..." "no_log"
   wait_for_pid "${WAIT_PIDS_CVE_COPY_ARR[@]}"
   export NVD_DIR="${LOG_PATH_MODULE}"/cpe_search_tmp_dir
+  print_output "[*] Moving on with CVE queries ..." "no_log"
 
   for lBIN_VERSION in "${lVERSIONS_AGGREGATED_ARR[@]}"; do
     # lBIN_VERSION is something like "binary:1.2.3"
@@ -1508,13 +1510,13 @@ cve_extractor_thread_actor() {
   fi
 
   if [[ ${lLOW_CVE_COUNTER} -gt 0 ]]; then
-    write_log "${lLOW_CVE_COUNTER}" "${TMP_DIR}"/lLOW_CVE_COUNTER.tmp
+    write_log "${lLOW_CVE_COUNTER}" "${TMP_DIR}"/LOW_CVE_COUNTER.tmp
   fi
   if [[ ${lMEDIUM_CVE_COUNTER} -gt 0 ]]; then
-    write_log "${lMEDIUM_CVE_COUNTER}" "${TMP_DIR}"/lMEDIUM_CVE_COUNTER.tmp
+    write_log "${lMEDIUM_CVE_COUNTER}" "${TMP_DIR}"/MEDIUM_CVE_COUNTER.tmp
   fi
   if [[ ${lHIGH_CVE_COUNTER} -gt 0 ]]; then
-    write_log "${lHIGH_CVE_COUNTER}" "${TMP_DIR}"/lHIGH_CVE_COUNTER.tmp
+    write_log "${lHIGH_CVE_COUNTER}" "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp
   fi
 
   write_csv_log "${lBIN_BINARY}" "${lBIN_VERSION}" "${lCVE_VALUE}" "${lCVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${lLOCAL}" "${lREMOTE}" "${lDOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${lKERNEL_VERIFIED}" "${lFIRST_EPSS:-NA}" "${lFIRST_PERC:-NA}"

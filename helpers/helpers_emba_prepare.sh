@@ -419,12 +419,12 @@ prepare_file_arr() {
   print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
 
   export FILE_ARR=()
-  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
+  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' | sort -u -k1,1 | cut -d\  -f3- )
+    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
     FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "${lFIRMWARE_PATH}" )
   fi
@@ -555,7 +555,7 @@ detect_root_dir_helper() {
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
     # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file -b {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
-    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//"' | sort -u 2>/dev/null || true)
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//"' 2>/dev/null | sort -u || true)
 
     if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do

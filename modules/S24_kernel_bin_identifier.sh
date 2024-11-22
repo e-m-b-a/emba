@@ -105,7 +105,7 @@ S24_kernel_bin_identifier()
         print_ln
         "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE}" "${lFILE}".elf 2>/dev/null | tee -a "${LOG_FILE}" || true
         if [[ -f "${lFILE}".elf ]]; then
-          lK_ELF=$(file -b "${lFILE}".elf)
+          lK_ELF=$(file "${lFILE}".elf)
 
           if [[ "${lK_ELF}" == *"ELF "* ]]; then
             print_ln
@@ -154,7 +154,7 @@ S24_kernel_bin_identifier()
         lMD5_CHECKSUM="$(md5sum "${lFILE}" | awk '{print $1}')"
         lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
-        lK_ELF=$(file -b "${lFILE}")
+        lK_ELF=$(file "${lFILE}")
         lK_ARCH=$(echo "${lK_ELF}" | cut -d ',' -f2)
         lK_ARCH=${lK_ARCH#\ }
 
