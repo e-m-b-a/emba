@@ -43,6 +43,7 @@ S08_main_package_sbom() {
 
   if [[ ${THREADED} -eq 1 ]]; then
     for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
+      # print_output "[*] SBOM - starting ${lS08_MODULE}"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -74,7 +75,7 @@ build_dependency_tree() {
 
   local lWAIT_PIDS_S08_ARR=()
 
-  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f)
+  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json")
 
   for lSBOM_COMP in "${lSBOM_COMPONENT_FILES_ARR[@]}"; do
     [[ ! -f "${lSBOM_COMP}" ]] && continue

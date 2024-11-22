@@ -73,7 +73,7 @@ s23_luaseccheck() {
 
   sub_module_title "LUA Security checks module"
 
-  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. % 2>/dev/null | cut -d : -f1 || true' | sort -u || true)
+  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. % 2>/dev/null || true | cut -d : -f1' | sort -u || true)
 
   for lQUERY_FILE in "${LUA_CGI_FILES_ARR[@]}"; do
     local lISSUES_FILE=0

@@ -20,7 +20,7 @@ S08_submodule_rpm_pkg_mgmt_parser() {
   local lPACKAGING_SYSTEM="rpm_package"
   local lOS_IDENTIFIED="${1:-}"
 
-  sub_module_title "RPM archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  sub_module_title "RPM package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   local lRPM_ARCHIVES_ARR=()
   local lRPM_ARCHIVE=""
