@@ -111,7 +111,7 @@ check_live_nmap_basic() {
         # just to ensure there is some kind of version information in our entry
         if [[ "$(echo "${lNMAP_CPE}" | tr ':' '\n' | wc -l)" -lt 4 ]]; then
           # if the length does not match we can drop these results
-          print_output "[-] WARNING: Identifier ${lBIN_VERSION} is probably incorrect and will be removed" "no_log"
+          print_output "[-] WARNING: Identifier ${lNMAP_CPE} is probably incorrect and will be removed" "no_log"
           continue
         fi
         if [[ "${lNMAP_CPE}" =~ :.*[0-9].* ]]; then
