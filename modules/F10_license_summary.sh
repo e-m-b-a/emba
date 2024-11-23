@@ -53,6 +53,7 @@ F10_license_summary() {
       # middle field
       lVERSION="${lENTRY#*;}"
       lVERSION="${lVERSION/;*}"
+      lVERSION="${lVERSION/*:}"
       # last field
       lLICENSE="${lENTRY##*;}"
 
@@ -75,6 +76,7 @@ F10_license_summary() {
       # middle field
       lVERSION="${lENTRY#*;}"
       lVERSION="${lVERSION/;*}"
+      lVERSION="${lVERSION/*:}"
       # last field
       lLICENSE="${lENTRY##*;}"
 
