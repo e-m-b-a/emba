@@ -787,7 +787,7 @@ print_filesystem_fixes() {
 
 s115_cleanup() {
   print_ln
-  sub_module_title "Cleanup phase"
+  sub_module_title "Cleanup phase" "no_log"
   local lEMULATOR="${1:-}"
   local lCHECK_MOUNTS_ARR=()
   local lMOUNT=""
@@ -800,27 +800,27 @@ s115_cleanup() {
 
   # if no emulation at all was possible the $lEMULATOR variable is not defined
   if [[ -n "${lEMULATOR}" ]]; then
-    print_output "[*] Terminating qemu processes - check it with ps"
+    print_output "[*] Terminating qemu processes - check it with ps" "no_log"
     pkill -9 -f .*qemu-.*-sta.* >/dev/null || true
   fi
 
   lCJOBS=$(pgrep -f qemu- || true)
   if [[ -n "${lCJOBS}" ]] ; then
-    print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
+    print_output "[*] More emulation jobs are running ... we kill it with fire\\n" "no_log"
     pkill -9 -f .*"${lEMULATOR}".* >/dev/null || true
   fi
   kill -9 "${PID_killer}" >/dev/null || true
 
-  print_output "[*] Cleaning the emulation environment\\n"
+  print_output "[*] Cleaning the emulation environment\\n" "no_log"
   find "${EMULATION_PATH_BASE}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
   find "${EMULATION_PATH_BASE}" -xdev -iname "*.core" -exec rm {} \; 2>/dev/null || true
 
-  print_ln
-  print_output "[*] Umounting proc, sys and run"
+  print_ln "no_log"
+  print_output "[*] Umounting proc, sys and run" "no_log"
   mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "${EMULATION_PATH_BASE}" || true)
   if [[ -v lCHECK_MOUNTS_ARR[@] ]]; then
     for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
-      print_output "[*] Unmounting ${lMOUNT}"
+      print_output "[*] Unmounting ${lMOUNT}" "no_log"
       lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
       umount -l "${lMOUNT}" || true
     done
@@ -831,7 +831,7 @@ s115_cleanup() {
   # shellcheck disable=SC2126
   lILLEGAL_INSTRUCTIONS_CNT=$(grep -l "Illegal instruction" "${LOG_PATH_MODULE}""/"qemu_tmp* | wc -l || true)
   if [[ "${lILLEGAL_INSTRUCTIONS_CNT}" -gt 0 ]]; then
-    print_output "[*] Found ${ORANGE}${lILLEGAL_INSTRUCTIONS_CNT}${NC}binaries not emulated - Illegal instructions"
+    print_output "[*] Found ${ORANGE}${lILLEGAL_INSTRUCTIONS_CNT}${NC}binaries not emulated - Illegal instructions" "no_log"
   fi
   if [[ "${#lLOG_FILES_ARR[@]}" -gt 0 ]] ; then
     sub_module_title "Reporting phase"
@@ -853,7 +853,7 @@ s115_cleanup() {
   fi
   # if we created a backup for emulation - lets delete it now
   if [[ -d "${LOG_PATH_MODULE}/firmware" ]]; then
-    print_output "[*] Remove firmware copy from emulation directory.\\n\\n"
+    print_output "[*] Remove firmware copy from emulation directory." "no_log"
     rm -r "${LOG_PATH_MODULE}"/firmware || true
   fi
 }
