@@ -113,7 +113,8 @@ S24_kernel_bin_identifier()
             lMD5_CHECKSUM="$(md5sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA256_CHECKSUM="$(sha256sum "${lFILE}.elf" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lFILE}.elf" | awk '{print $1}')"
-            lK_ARCH=$(echo "${lK_ELF}" | cut -d ',' -f2)
+            lK_ARCH=$(echo "${lK_ELF}" | cut -d ':' -f2)
+            lK_ARCH=$(echo "${lK_ARCH}" | cut -d ',' -f2)
             lK_ARCH=${lK_ARCH#\ }
             lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
 
@@ -155,7 +156,8 @@ S24_kernel_bin_identifier()
         lSHA256_CHECKSUM="$(sha256sum "${lFILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lFILE}" | awk '{print $1}')"
         lK_ELF=$(file "${lFILE}")
-        lK_ARCH=$(echo "${lK_ELF}" | cut -d ',' -f2)
+        lK_ARCH=$(echo "${lK_ELF}" | cut -d ':' -f2)
+        lK_ARCH=$(echo "${lK_ARCH}" | cut -d ',' -f2)
         lK_ARCH=${lK_ARCH#\ }
 
         # add source file path information to our properties array:

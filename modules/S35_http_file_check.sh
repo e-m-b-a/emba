@@ -41,7 +41,7 @@ web_file_search()
   local lWEB_FILE=""
 
   mapfile -t lWEB_STUFF_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
-    -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' \
+    -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' \
     | sort -u -k1,1 | cut -d\  -f3)
 
   if [[ -v lWEB_STUFF_ARR[@] ]] ; then
@@ -88,11 +88,11 @@ webserver_check()
   local lHTTPD_FILE_ARR=()
   local lLINE=""
 
-  readarray -t lAPACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lNGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lLIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lCHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lHTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lNGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lLIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lCHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lHTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
 
   if [[ ${#lAPACHE_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found Apache related files:"
@@ -156,7 +156,7 @@ php_check()
   local lPHP_INI_ARR=()
   local lPHP_INI_ENTRY=""
 
-  readarray -t lPHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lPHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
 
   if [[ ${#lPHP_INI_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found php.ini:"

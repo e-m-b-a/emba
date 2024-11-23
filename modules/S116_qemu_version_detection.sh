@@ -149,9 +149,9 @@ version_detection_thread() {
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${lLOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
             # BINARY_PATH is the final array which we are using further
-            print_output "[*] S116 - Testing for ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}"
+            print_output "[*] S116 - Testing for ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}" "no_log"
             lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
-            print_output "[*] S116 - Testing for new ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}"
+            print_output "[*] S116 - Testing for new ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}" "no_log"
             lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
           done
         done
