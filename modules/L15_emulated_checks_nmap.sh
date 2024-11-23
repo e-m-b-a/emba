@@ -109,7 +109,7 @@ check_live_nmap_basic() {
         # remove h/o/b from start -> we need to start with :
         lNMAP_CPE=${lNMAP_CPE#[hob]}
         # just to ensure there is some kind of version information in our entry
-        if [[ "$(echo "${lBIN_VERSION}" | tr ':' '\n' | wc -l)" -lt 4 ]]; then
+        if [[ "$(echo "${lNMAP_CPE}" | tr ':' '\n' | wc -l)" -lt 4 ]]; then
           # if the length does not match we can drop these results
           print_output "[-] WARNING: Identifier ${lBIN_VERSION} is probably incorrect and will be removed" "no_log"
           continue
