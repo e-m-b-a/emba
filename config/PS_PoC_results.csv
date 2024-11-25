@@ -10215,6 +10215,7 @@ CVE-2023-7027;WordPress POST SMTP Mailer 2.8.7 Authorization Bypass Cross Site S
 CVE-2023-7028;GitLab CE EE Password Reset;https://packetstormsecurity.com/files/177587/GitLab-CE-EE-Password-Reset.html;unknown
 CVE-2023-7137;Client Details System 1.0 SQL Injection;https://packetstormsecurity.com/files/177565/Client-Details-System-1.0-SQL-Injection.html;remote
 CVE-2023-7270;SoftMaker Office FreeOffice Local Privilege Escalation;https://packetstormsecurity.com/files/179360/SoftMaker-Office-FreeOffice-Local-Privilege-Escalation.html;local
+CVE-2024-0012;Palo Alto PAN OS Authentication Bypass Remote Command Execution;https://packetstormsecurity.com/files/182699/Palo-Alto-PAN-OS-Authentication-Bypass-Remote-Command-Execution.html;remote
 CVE-2024-0204;GoAnywhere MFT Authentication Bypass;https://packetstormsecurity.com/files/176683/GoAnywhere-MFT-Authentication-Bypass.html;unknown
 CVE-2024-0264;Clinic Queuing System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/178519/Clinic-Queuing-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-0265;Clinic Queuing System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/178519/Clinic-Queuing-System-1.0-Remote-Code-Execution.html;remote
@@ -10224,8 +10225,13 @@ CVE-2024-0510;HaoKeKeJi YiQiNiu Server Side Request Forgery;https://packetstorms
 CVE-2024-06070;Checkmk Agent 2.0.0 2.1.0 2.2.0 Local Privilege Escalation;https://packetstormsecurity.com/files/177606/Checkmk-Agent-2.0.0-2.1.0-2.2.0-Local-Privilege-Escalation.html;local
 CVE-2024-0671;Arm Mali 5th Gen Dangling ATE;https://packetstormsecurity.com/files/178539/Arm-Mali-5th-Gen-Dangling-ATE.html;unknown
 CVE-2024-0811;Chrome chrome.pageCapture.saveAsMHTML Extension API Blocked Origin Bypass;https://packetstormsecurity.com/files/177172/Chrome-chrome.pageCapture.saveAsMHTML-Extension-API-Blocked-Origin-Bypass.html;unknown
+CVE-2024-10224;needrestart Local Privilege Escalation;https://packetstormsecurity.com/files/182765/needrestart-Local-Privilege-Escalation.html;local
 CVE-2024-1065;Arm Mali r45p0 Broken State Use After Free;https://packetstormsecurity.com/files/178644/Arm-Mali-r45p0-Broken-State-Use-After-Free.html;unknown
 CVE-2024-1086;Linux nf_tables Local Privilege Escalation;https://packetstormsecurity.com/files/177862/Linux-nf_tables-Local-Privilege-Escalation.html;local
+CVE-2024-10924;WordPress Really Simple Security Authentication Bypass;https://packetstormsecurity.com/files/182700/WordPress-Really-Simple-Security-Authentication-Bypass.html;unknown
+CVE-2024-11003;needrestart Local Privilege Escalation;https://packetstormsecurity.com/files/182765/needrestart-Local-Privilege-Escalation.html;local
+CVE-2024-11303;Korenix JetPort 5601 1.2 Path Traversal;https://packetstormsecurity.com/files/182760/Korenix-JetPort-5601-1.2-Path-Traversal.html;unknown
+CVE-2024-11304;SEH utnserver Pro 20.1.22 Cross Site Scripting;https://packetstormsecurity.com/files/182759/SEH-utnserver-Pro-20.1.22-Cross-Site-Scripting.html;unknown
 CVE-2024-1346;LaborOfficeFree 19.10 MySQL Root Password Calculator;https://packetstormsecurity.com/files/177087/LaborOfficeFree-19.10-MySQL-Root-Password-Calculator.html;unknown
 CVE-2024-1481;FreeIPA 4.10.1 Denial Of Service Information Disclosure;https://packetstormsecurity.com/files/177249/FreeIPA-4.10.1-Denial-Of-Service-Information-Disclosure.html;DoS
 CVE-2024-1580;dav1d Integer Overflow Out Of Bounds Write;https://packetstormsecurity.com/files/177632/dav1d-Integer-Overflow-Out-Of-Bounds-Write.html;unknown
@@ -10541,8 +10547,13 @@ CVE-2024-48605;Helakuru 1.1 DLL Hijacking;https://packetstormsecurity.com/files/
 CVE-2024-4883;Progress WhatsUp Gold WriteDatafile Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179405/Progress-WhatsUp-Gold-WriteDatafile-Unauthenticated-Remote-Code-Execution.html;remote
 CVE-2024-4885;Progress WhatsUp Gold GetFileWithoutZip Unauthenticated Remote Code Execution;https://packetstormsecurity.com/files/179404/Progress-WhatsUp-Gold-GetFileWithoutZip-Unauthenticated-Remote-Code-Execution.html;remote
 CVE-2024-48914;Vendure Arbitrary File Read Denial Of Service;https://packetstormsecurity.com/files/182337/Vendure-Arbitrary-File-Read-Denial-Of-Service.html;local
+CVE-2024-48990;needrestart Local Privilege Escalation;https://packetstormsecurity.com/files/182765/needrestart-Local-Privilege-Escalation.html;local
+CVE-2024-48991;needrestart Local Privilege Escalation;https://packetstormsecurity.com/files/182765/needrestart-Local-Privilege-Escalation.html;local
+CVE-2024-48992;needrestart Local Privilege Escalation;https://packetstormsecurity.com/files/182765/needrestart-Local-Privilege-Escalation.html;local
 CVE-2024-4956;Nexus Repository Manager 3 Path Traversal;https://packetstormsecurity.com/files/181661/Nexus-Repository-Manager-3-Path-Traversal.html;unknown
 CVE-2024-4956;Nexus Repository Traversal Scanner;https://packetstormsecurity.com/files/181887/Nexus-Repository-Traversal-Scanner.html;unknown
+CVE-2024-50066;Linux 6.6 Race Condition;https://packetstormsecurity.com/files/182761/Linux-6.6-Race-Condition.html;unknown
+CVE-2024-50066;PowerVR psProcessHandleBase Reuse;https://packetstormsecurity.com/files/182762/PowerVR-psProcessHandleBase-Reuse.html;unknown
 CVE-2024-5009;Progress WhatsUp Gold SetAdminPassword Privilege Escalation;https://packetstormsecurity.com/files/179403/Progress-WhatsUp-Gold-SetAdminPassword-Privilege-Escalation.html;local
 CVE-2024-50483;WordPress Meetup 0.1 Authentication Bypass;https://packetstormsecurity.com/files/182540/WordPress-Meetup-0.1-Authentication-Bypass.html;unknown
 CVE-2024-50588;HASOMED Elefant Elefant Software Updater Data Exposure Privilege Escalation;https://packetstormsecurity.com/files/182564/HASOMED-Elefant-Elefant-Software-Updater-Data-Exposure-Privilege-Escalation.html;local
@@ -10599,3 +10610,4 @@ CVE-2024-8878;Netman 204 4.05 SQL Injection Unauthenticated Password Reset;https
 CVE-2024-9014;pgAdmin 8.11 Information Disclosure;https://packetstormsecurity.com/files/181851/pgAdmin-8.11-Information-Disclosure.html;unknown
 CVE-2024-9264;Grafana Remote Code Execution;https://packetstormsecurity.com/files/182335/Grafana-Remote-Code-Execution.html;remote
 CVE-2024-9473;Palo Alto Networks GlobalProtect Local Privilege Escalation;https://packetstormsecurity.com/files/182142/Palo-Alto-Networks-GlobalProtect-Local-Privilege-Escalation.html;local
+CVE-2024-9474;Palo Alto PAN OS Authentication Bypass Remote Command Execution;https://packetstormsecurity.com/files/182699/Palo-Alto-PAN-OS-Authentication-Bypass-Remote-Command-Execution.html;remote
