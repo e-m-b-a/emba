@@ -36,14 +36,14 @@ S16_ghidra_decompile_checks()
     return
   fi
 
-  local BINARY=""
-  local BIN_TO_CHECK=""
+  local lBINARY=""
+  local lBIN_TO_CHECK=""
   local lTMP_PID=""
-  local VULN_COUNTER=0
-  local WAIT_PIDS_S16=()
-  local BIN_TO_CHECK_ARR=()
+  local lVULN_COUNTER=0
+  local lWAIT_PIDS_S16_ARR=()
+  local lBIN_TO_CHECK_ARR=()
   local lNAME=""
-  local BINS_CHECKED_ARR=()
+  local lBINS_CHECKED_ARR=()
 
   if [[ "${FULL_TEST}" -ne 1 ]]; then
     # we need to wait in default mode for the results of S13 and S14
@@ -58,40 +58,40 @@ S16_ghidra_decompile_checks()
     mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
-  for BINARY in "${BINARIES[@]}"; do
-    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${BINARY}")" | sort -u || true)
-    for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
+  for lBINARY in "${BINARIES[@]}"; do
+    mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
+    for lBIN_TO_CHECK in "${lBIN_TO_CHECK_ARR[@]}"; do
       if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
         # if we have the base linux config file we only test non known Linux binaries
         # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${BIN_TO_CHECK}" 2> /dev/null)
+        lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
         if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           continue 2
         fi
       fi
 
-      if ( file "${BIN_TO_CHECK}" | grep -q ELF ) ; then
+      if ( file "${lBIN_TO_CHECK}" | grep -q ELF ) ; then
         # ensure we have not tested this binary entry
-        local BIN_MD5=""
-        BIN_MD5="$(md5sum "${BIN_TO_CHECK}" | awk '{print $1}')"
-        if [[ "${BINS_CHECKED_ARR[*]}" == *"${BIN_MD5}"* ]]; then
-          # print_output "[*] ${ORANGE}${BIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+        local lBIN_MD5=""
+        lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
+        if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
+          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
           continue
         fi
-        # print_output "[*] Testing ${BIN_TO_CHECK} with ghidra/semgrep"
-        BINS_CHECKED_ARR+=( "${BIN_MD5}" )
+        # print_output "[*] Testing ${lBIN_TO_CHECK} with ghidra/semgrep"
+        lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
         if [[ "${THREADED}" -eq 1 ]]; then
-          ghidra_analyzer "${BIN_TO_CHECK}" &
+          ghidra_analyzer "${lBIN_TO_CHECK}" &
           lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
-          WAIT_PIDS_S16+=( "${lTMP_PID}" )
-          max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" "${WAIT_PIDS_S16[@]}"
+          lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
+          max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" "${lWAIT_PIDS_S16_ARR[@]}"
         else
-          ghidra_analyzer "${BIN_TO_CHECK}"
+          ghidra_analyzer "${lBIN_TO_CHECK}"
         fi
 
         # we stop checking after the first 20 binaries
-        if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
           print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
           print_output "[*] For complete analysis enable FULL_TEST." "no_log"
           break 2
@@ -100,7 +100,7 @@ S16_ghidra_decompile_checks()
     done
   done
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S16[@]}"
+  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
   # cleanup - remove the rest without issues now
   rm -r /tmp/haruspex_* 2>/dev/null || true
@@ -108,12 +108,12 @@ S16_ghidra_decompile_checks()
   if [[ "$(find "${LOG_PATH_MODULE}" -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
     # shellcheck disable=SC2126
-    VULN_COUNTER=$(wc -l "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 | awk '{print $1}' || true)
+    lVULN_COUNTER=$(wc -l "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 | awk '{print $1}' || true)
   fi
-  if [[ "${VULN_COUNTER}" -gt 0 ]]; then
+  if [[ "${lVULN_COUNTER}" -gt 0 ]]; then
     print_ln
     sub_module_title "Results - Ghidra decompiled code analysis via Semgrep"
-    print_output "[+] Found ""${ORANGE}""${VULN_COUNTER}""${GREEN}"" possible vulnerabilities (${ORANGE}via semgrep on Ghidra decompiled code${GREEN}) in ""${ORANGE}""${#BINS_CHECKED_ARR[@]}""${GREEN}"" tested binaries:""${NC}"
+    print_output "[+] Found ""${ORANGE}""${lVULN_COUNTER}""${GREEN}"" possible vulnerabilities (${ORANGE}via semgrep on Ghidra decompiled code${GREEN}) in ""${ORANGE}""${#lBINS_CHECKED_ARR[@]}""${GREEN}"" tested binaries:""${NC}"
     local lVULN_CAT_CNT=0
     local lVULN_CATS_ARR=()
     local lVULN_CATEGORY=""
@@ -126,8 +126,8 @@ S16_ghidra_decompile_checks()
     print_bar
   fi
 
-  write_log "[*] Statistics:${VULN_COUNTER}:${#BINS_CHECKED_ARR[@]}"
-  module_end_log "${FUNCNAME[0]}" "${VULN_COUNTER}"
+  write_log "[*] Statistics:${lVULN_COUNTER}:${#lBINS_CHECKED_ARR[@]}"
+  module_end_log "${FUNCNAME[0]}" "${lVULN_COUNTER}"
 }
 
 ghidra_analyzer() {
@@ -243,7 +243,7 @@ ghidra_analyzer() {
       wait_for_pid "${lWAIT_PIDS_S16_1[@]}"
       s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}" &
       local lTMP_PID="$!"
-      WAIT_PIDS_S16+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
     else
       s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}"
     fi
@@ -320,7 +320,7 @@ s16_semgrep_logger() {
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${lCODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
 
-        # BINARY;source function;semgrep rule;code line nr; code line
+        # lBINARY;source function;semgrep rule;code line nr; code line
         write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${lCODE_LINE/\;}" "${lMESSAGE/\;}"
       fi
       write_log "\\n-----------------------------------------------------------------\\n" "${lSEMGREPLOG_TMP}"

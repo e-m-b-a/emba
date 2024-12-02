@@ -26,10 +26,10 @@ S06_distribution_identification()
   local lOUTPUT=0
   local lPATTERN=""
   local lIDENTIFIER=""
-  local OUT1=""
-  local SED_COMMAND=""
-  local FILE_QUOTED=""
-  local CONFIG=""
+  local lOUT1=""
+  local lSED_COMMAND=""
+  local lFILE_QUOTED=""
+  local lCONFIG=""
   local lFILE=""
   local lSEARCH_FILE=""
   local lFOUND_FILES_ARR=()
@@ -45,9 +45,9 @@ S06_distribution_identification()
 
   write_csv_log "file" "type" "identifier" "csv_rule"
 
-  while read -r CONFIG; do
-    if safe_echo "${CONFIG}" | grep -q "^[^#*/;]"; then
-      lSEARCH_FILE="$(safe_echo "${CONFIG}" | cut -d\; -f2)"
+  while read -r lCONFIG; do
+    if safe_echo "${lCONFIG}" | grep -q "^[^#*/;]"; then
+      lSEARCH_FILE="$(safe_echo "${lCONFIG}" | cut -d\; -f2)"
       # echo "lSEARCH_FILE: $lSEARCH_FILE"
       # echo "FIRMWARE_PATH: $FIRMWARE_PATH"
       if [[ "${lSEARCH_FILE}" == *"os-release"* ]] || [[ "${lSEARCH_FILE}" == *"lsb-release"* ]]; then
@@ -63,22 +63,22 @@ S06_distribution_identification()
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
-          lPATTERN="$(safe_echo "${CONFIG}" | cut -d\; -f3)"
-          # do not use safe_echo for SED_COMMAND
-          SED_COMMAND="$(echo "${CONFIG}" | cut -d\; -f4)"
-          FILE_QUOTED=$(escape_echo "${lFILE}")
-          OUT1="$(eval "${lPATTERN}" "${FILE_QUOTED}" || true)"
+          lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
+          # do not use safe_echo for lSED_COMMAND
+          lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
+          lFILE_QUOTED=$(escape_echo "${lFILE}")
+          lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
           # print_output "lPATTERN: ${lPATTERN}"
-          # print_output "SED command: ${SED_COMMAND}"
-          # print_output "FILE: ${FILE_QUOTED}"
-          # print_output "identified before: ${OUT1}"
-          OUT1=$(echo "${OUT1}" | sort -u | tr '\n' ' ')
-          OUT1=$(echo "${OUT1}" | tr -d '"')
-          # print_output "identified mod: ${OUT1}"
-          if [[ -n "${SED_COMMAND}" ]]; then
-            lIDENTIFIER=$(echo "${OUT1}" | eval "${SED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+          # print_output "SED command: ${lSED_COMMAND}"
+          # print_output "FILE: ${lFILE_QUOTED}"
+          # print_output "identified before: ${lOUT1}"
+          lOUT1=$(echo "${lOUT1}" | sort -u | tr '\n' ' ')
+          lOUT1=$(echo "${lOUT1}" | tr -d '"')
+          # print_output "identified mod: ${lOUT1}"
+          if [[ -n "${lSED_COMMAND}" ]]; then
+            lIDENTIFIER=$(echo "${lOUT1}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
           else
-            lIDENTIFIER=$(echo "${OUT1}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+            lIDENTIFIER=$(echo "${lOUT1}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
           fi
           # print_output "[*] lIDENTIFIER: ${lIDENTIFIER}"
           lFILENAME=$(basename "${lFILE,,}")

@@ -84,9 +84,9 @@ D10_firmware_diffing() {
     lNEG_LOG=1
     if [[ "${THREADED}" -eq 1 ]]; then
       analyse_fw_files "${lFW_FILE1}" &
-      local TMP_PID="$!"
-      store_kill_pids "${TMP_PID}"
-      lWAIT_PIDS_D10_ARR+=( "${TMP_PID}" )
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_D10_ARR+=( "${lTMP_PID}" )
       max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_D10_ARR[@]}"
     else
       # echo "Testing ${lFW_FILE1}"
@@ -97,9 +97,9 @@ D10_firmware_diffing() {
   for lFW_FILE2 in "${lFW_FILES2_ARR[@]}"; do
     if [[ "${THREADED}" -eq 1 ]]; then
       check_for_new_files "${lFW_FILE2}" &
-      local TMP_PID="$!"
-      store_kill_pids "${TMP_PID}"
-      lWAIT_PIDS_D10_ARR+=( "${TMP_PID}" )
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_D10_ARR+=( "${lTMP_PID}" )
       max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_D10_ARR[@]}"
     else
       check_for_new_files "${lFW_FILE2}"

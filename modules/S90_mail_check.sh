@@ -22,41 +22,41 @@ S90_mail_check()
   module_title "Search Mail files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local FINDING=0
+  local lFINDING=0
 
-  local MAILS_PATH=()
-  local ELEM=""
-  local MAILS=""
+  local lMAILS_PATH_ARR=()
+  local lELEM=""
+  local lMAILS=""
 
-  mapfile -t MAILS_PATH < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail")
-  for ELEM in "${MAILS_PATH[@]}" ; do
-    if [[ -e "${ELEM}" ]] ; then
-      # MAILS="$(ls -la "${ELEM}" 2>/dev/null)"
-      MAILS="$(find "${ELEM}" -xdev -ls 2>/dev/null)"
-      if [[ -n "${MAILS}" ]] ; then
-        print_output "[+] Content of ""$(print_path "${ELEM}")"":"
-        print_output "$(indent "$(orange "${MAILS}")")"
-        ((FINDING+=1))
+  mapfile -t lMAILS_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail")
+  for lELEM in "${lMAILS_PATH_ARR[@]}" ; do
+    if [[ -e "${lELEM}" ]] ; then
+      # lMAILS="$(ls -la "${lELEM}" 2>/dev/null)"
+      lMAILS="$(find "${lELEM}" -xdev -ls 2>/dev/null)"
+      if [[ -n "${lMAILS}" ]] ; then
+        print_output "[+] Content of ""$(print_path "${lELEM}")"":"
+        print_output "$(indent "$(orange "${lMAILS}")")"
+        ((lFINDING+=1))
       fi
     fi
   done
 
-  local MAILS_PATH_ROOT=()
-  local ELEM=""
-  local MAILS_ROOT=""
+  local lMAILS_PATH_ROOT=()
+  local lELEM=""
+  local lMAILS_ROOT=""
 
-  mapfile -t MAILS_PATH_ROOT < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail/root")
-  for ELEM in "${MAILS_PATH_ROOT[@]}" ; do
-    if [[ -e "${ELEM}" ]] ; then
-      MAILS_ROOT="$(head "${ELEM}" 2>/dev/null)"
-      if [[ -n "${MAILS_ROOT}" ]] ; then
-        print_output "[+] Content of ""$(print_path "${ELEM}")"":"
-        print_output "$(indent "$(orange "${MAILS_ROOT}")")"
-        ((FINDING+=1))
+  mapfile -t lMAILS_PATH_ROOT < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail/root")
+  for lELEM in "${lMAILS_PATH_ROOT[@]}" ; do
+    if [[ -e "${lELEM}" ]] ; then
+      lMAILS_ROOT="$(head "${lELEM}" 2>/dev/null)"
+      if [[ -n "${lMAILS_ROOT}" ]] ; then
+        print_output "[+] Content of ""$(print_path "${lELEM}")"":"
+        print_output "$(indent "$(orange "${lMAILS_ROOT}")")"
+        ((lFINDING+=1))
       fi
     fi
   done
 
-  module_end_log "${FUNCNAME[0]}" "${FINDING}"
+  module_end_log "${FUNCNAME[0]}" "${lFINDING}"
 }
 

@@ -164,9 +164,9 @@ emba_parameter_parsing() {
       S)
         export STRICT_MODE=1
         ;;
-      t)
-        export THREADED=1
-        ;;
+#      t)
+#        export THREADED=1
+#        ;;
       T)
         check_int "${OPTARG}"
         export MAX_MOD_THREADS=""

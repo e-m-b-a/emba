@@ -26,8 +26,8 @@ L23_vnc_checks() {
     if [[ "${IN_DOCKER}" -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
-    local VNC_PORT_ARR=()
-    local VNC_PORT=""
+    local lVNC_PORT_ARR=()
+    local lVNC_PORT=""
     export VNC_UP=0
 
     if [[ -v IP_ADDRESS_ ]]; then
@@ -39,10 +39,10 @@ L23_vnc_checks() {
         fi
       fi
       if [[ "$(grep -c "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap 2>/dev/null | cut -d ':' -f2 | awk '{s+=$1} END {print s}')" -gt 0 ]]; then
-        mapfile -t VNC_PORT_ARR < <(grep -h "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u || true)
-        for VNC_PORT in "${VNC_PORT_ARR[@]}"; do
-          check_basic_vnc "${VNC_PORT}"
-          check_msf_vnc "${VNC_PORT}"
+        mapfile -t lVNC_PORT_ARR < <(grep -h "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u || true)
+        for lVNC_PORT in "${lVNC_PORT_ARR[@]}"; do
+          check_basic_vnc "${lVNC_PORT}"
+          check_msf_vnc "${lVNC_PORT}"
         done
       else
         print_output "[!] No network interface found"
@@ -58,11 +58,11 @@ L23_vnc_checks() {
 }
 
 check_basic_vnc() {
-  local VNC_PORT="${1:-}"
+  local lVNC_PORT="${1:-}"
 
-  sub_module_title "Nmap VNC enumeration for emulated system ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC}"
+  sub_module_title "Nmap VNC enumeration for emulated system ${ORANGE}${IP_ADDRESS_} / ${lVNC_PORT}${NC}"
 
-  nmap -sV --script=*vnc* -p "${VNC_PORT}" "${IP_ADDRESS_}" >> "${LOG_PATH_MODULE}"/vnc_basic-check.txt || true
+  nmap -sV --script=*vnc* -p "${lVNC_PORT}" "${IP_ADDRESS_}" >> "${LOG_PATH_MODULE}"/vnc_basic-check.txt || true
 
   if [[ -f "${LOG_PATH_MODULE}"/vnc_basic-check.txt ]]; then
     if [[ "$(grep -c "vnc" "${LOG_PATH_MODULE}"/vnc_basic-check.txt)" -gt 0 ]]; then
@@ -75,13 +75,13 @@ check_basic_vnc() {
   fi
 
   print_ln
-  print_output "[*] VNC basic enumeration for ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC} finished"
+  print_output "[*] VNC basic enumeration for ${ORANGE}${IP_ADDRESS_} / ${lVNC_PORT}${NC} finished"
 }
 
 check_msf_vnc() {
-  local VNC_PORT="${1:-}"
+  local lVNC_PORT="${1:-}"
 
-  sub_module_title "Metasploit VNC enumeration for emulated system ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC}"
+  sub_module_title "Metasploit VNC enumeration for emulated system ${ORANGE}${IP_ADDRESS_} / ${lVNC_PORT}${NC}"
 
   if ! [[ -f "${HELP_DIR}""/l23_vnc_msf_check.rc" ]]; then
     print_output "[-] Metasploit VNC resource script not available - Not performing Metasploit checks"
@@ -92,7 +92,7 @@ check_msf_vnc() {
   # auxiliary/scanner/http/thinvnc_traversal
   # auxiliary/scanner/vnc/vnc_none_auth
 
-  timeout --preserve-status --signal SIGINT 600 msfconsole -q -n -r "${HELP_DIR}"/l23_vnc_msf_check.rc "${IP_ADDRESS_}" "${VNC_PORT}" | tee -a "${LOG_PATH_MODULE}"/metasploit-vnc-check-"${IP_ADDRESS_}".txt || true
+  timeout --preserve-status --signal SIGINT 600 msfconsole -q -n -r "${HELP_DIR}"/l23_vnc_msf_check.rc "${IP_ADDRESS_}" "${lVNC_PORT}" | tee -a "${LOG_PATH_MODULE}"/metasploit-vnc-check-"${IP_ADDRESS_}".txt || true
 
-  print_output "[*] VNC Metasploit enumeration for ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC} finished"
+  print_output "[*] VNC Metasploit enumeration for ${ORANGE}${IP_ADDRESS_} / ${lVNC_PORT}${NC} finished"
 }

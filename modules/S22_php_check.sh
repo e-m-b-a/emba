@@ -24,7 +24,7 @@ S22_php_check()
   module_title "PHP vulnerability checks"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local PHP_SCRIPTS=()
+  local lPHP_SCRIPTS_ARR=()
   export S22_PHP_VULNS=0
   export S22_PHP_SCRIPTS=0
   export S22_PHP_INI_ISSUES=0
@@ -33,14 +33,14 @@ S22_php_check()
   export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
-    mapfile -t PHP_SCRIPTS < <( find "${FIRMWARE_PATH}" -xdev -type f -iname "*.php" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-    s22_vuln_check_caller "${PHP_SCRIPTS[@]}"
+    mapfile -t lPHP_SCRIPTS_ARR < <( find "${FIRMWARE_PATH}" -xdev -type f -iname "*.php" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+    s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
-    s22_vuln_check_semgrep "${PHP_SCRIPTS[@]}"
+    s22_vuln_check_semgrep "${lPHP_SCRIPTS_ARR[@]}"
 
     s22_check_php_ini
 
-    s22_phpinfo_check "${PHP_SCRIPTS[@]}"
+    s22_phpinfo_check "${lPHP_SCRIPTS_ARR[@]}"
 
     write_log ""
     write_log "[*] Statistics:${S22_PHP_VULNS}:${S22_PHP_SCRIPTS}:${S22_PHP_INI_ISSUES}:${S22_PHP_INI_CONFIGS}"
@@ -53,17 +53,17 @@ S22_php_check()
 
 s22_phpinfo_check() {
   sub_module_title "PHPinfo file detection"
-  local PHP_SCRIPTS=("$@")
-  local PHPINFO=""
+  local lPHP_SCRIPTS_ARR=("$@")
+  local lPHPINFO=""
 
-  for PHPINFO in "${PHP_SCRIPTS[@]}" ; do
-    if grep -E "extension_loaded\('ionCube Loader" "${PHPINFO}"; then
-      print_output "[-] Warning: ionCube protected PHP file detected ${ORANGE}${PHPINFO}${NC}"
+  for lPHPINFO in "${lPHP_SCRIPTS_ARR[@]}" ; do
+    if grep -E "extension_loaded\('ionCube Loader" "${lPHPINFO}"; then
+      print_output "[-] Warning: ionCube protected PHP file detected ${ORANGE}${lPHPINFO}${NC}"
       continue
     fi
-    if grep -q "phpinfo()" "${PHPINFO}"; then
-      print_output "[+] Found php file with debugging information: ${ORANGE}${PHPINFO}${NC}"
-      grep -A 2 -B 2 "phpinfo()" "${PHPINFO}" | tee -a "${LOG_FILE}"
+    if grep -q "phpinfo()" "${lPHPINFO}"; then
+      print_output "[+] Found php file with debugging information: ${ORANGE}${lPHPINFO}${NC}"
+      grep -A 2 -B 2 "phpinfo()" "${lPHPINFO}" | tee -a "${LOG_FILE}"
       ((S22_PHPINFO_ISSUES+=1))
     fi
   done
@@ -75,103 +75,103 @@ s22_phpinfo_check() {
 
 s22_vuln_check_semgrep() {
   sub_module_title "PHP script vulnerabilities - semgrep"
-  local PHP_SEMGREP_LOG="${LOG_PATH_MODULE}"/semgrep_php_results_xml.log
-  local S22_SEMGREP_VULNS=0
-  local SEMG_SOURCES_ARR=()
-  local S22_SEMGREP_SCRIPTS=""
-  local SEMG_SOURCE_NOTE=""
+  local lPHP_SEMGREP_LOG="${LOG_PATH_MODULE}"/semgrep_php_results_xml.log
+  local lS22_SEMGREP_VULNS=0
+  local lSEMG_SOURCES_ARR=()
+  local lS22_SEMGREP_SCRIPTS=""
+  local lSEMG_SOURCE_NOTE=""
 
   # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
   # but this output is not very beautiful to show in the report.
-  semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ > "${PHP_SEMGREP_LOG}" 2>&1 || true
+  semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ > "${lPHP_SEMGREP_LOG}" 2>&1 || true
 
-  if [[ -f "${PHP_SEMGREP_LOG}" ]]; then
-    S22_SEMGREP_ISSUES=$(grep -c "testcase name" "${PHP_SEMGREP_LOG}" || true)
-    S22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "${PHP_SEMGREP_LOG}" || true)
-    S22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "${PHP_SEMGREP_LOG}" | awk '{print $2}' || true)
+  if [[ -f "${lPHP_SEMGREP_LOG}" ]]; then
+    S22_SEMGREP_ISSUES=$(grep -c "testcase name" "${lPHP_SEMGREP_LOG}" || true)
+    lS22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "${lPHP_SEMGREP_LOG}" || true)
+    lS22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "${lPHP_SEMGREP_LOG}" | awk '{print $2}' || true)
 
-    if [[ "${S22_SEMGREP_VULNS}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${S22_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${S22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${PHP_SEMGREP_LOG}"
+    if [[ "${lS22_SEMGREP_VULNS}" -gt 0 ]]; then
+      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${lS22_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${lS22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${lPHP_SEMGREP_LOG}"
     elif [[ "${S22_SEMGREP_ISSUES}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" in ""${ORANGE}""${S22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${PHP_SEMGREP_LOG}"
+      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" in ""${ORANGE}""${lS22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${lPHP_SEMGREP_LOG}"
     else
       print_output "[-] No PHP issues found with semgrep"
     fi
     # highlight security findings in semgrep log:
-    sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "${PHP_SEMGREP_LOG}"
+    sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "${lPHP_SEMGREP_LOG}"
 
-    mapfile -t SEMG_SOURCES_ARR < <(grep -E -o "name=.* file=.*\" line=\"[0-9]+" "${PHP_SEMGREP_LOG}" | sort -u || true)
+    mapfile -t lSEMG_SOURCES_ARR < <(grep -E -o "name=.* file=.*\" line=\"[0-9]+" "${lPHP_SEMGREP_LOG}" | sort -u || true)
 
-    for SEMG_SOURCE_NOTE in "${SEMG_SOURCES_ARR[@]}"; do
-      local SEMG_ISSUE_NAME=""
-      local SEMG_SOURCE_FILE=""
-      local SEMG_SOURCE_FILE_NAME=""
-      local SEMG_LINE_NR=""
-      local GPT_PRIO_=4
-      local GPT_ANCHOR_=""
+    for lSEMG_SOURCE_NOTE in "${lSEMG_SOURCES_ARR[@]}"; do
+      local lSEMG_ISSUE_NAME=""
+      local lSEMG_SOURCE_FILE=""
+      local lSEMG_SOURCE_FILE_NAME=""
+      local lSEMG_LINE_NR=""
+      local lGPT_PRIO_=4
+      local lGPT_ANCHOR_=""
 
       ! [[ -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
 
-      SEMG_ISSUE_NAME=$(echo "${SEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
-      SEMG_ISSUE_NAME="$(echo "${SEMG_ISSUE_NAME}" | sed 's/name=\"//' | tr -d '"')"
+      lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
+      lSEMG_ISSUE_NAME="$(echo "${lSEMG_ISSUE_NAME}" | sed 's/name=\"//' | tr -d '"')"
 
-      SEMG_SOURCE_FILE=$(echo "${SEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
-      SEMG_SOURCE_FILE="$(echo "${SEMG_SOURCE_FILE}" | sed 's/file=\"//' | tr -d '"')"
-      SEMG_SOURCE_FILE_NAME=$(basename "${SEMG_SOURCE_FILE}")
+      lSEMG_SOURCE_FILE=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
+      lSEMG_SOURCE_FILE="$(echo "${lSEMG_SOURCE_FILE}" | sed 's/file=\"//' | tr -d '"')"
+      lSEMG_SOURCE_FILE_NAME=$(basename "${lSEMG_SOURCE_FILE}")
 
-      [[ -f "${SEMG_SOURCE_FILE}" && ! -f "${LOG_PATH_MODULE}"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log ]] && cp "${SEMG_SOURCE_FILE}" "${LOG_PATH_MODULE}"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
+      [[ -f "${lSEMG_SOURCE_FILE}" && ! -f "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log ]] && cp "${lSEMG_SOURCE_FILE}" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log
 
-      SEMG_LINE_NR=$(echo "${SEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
-      SEMG_LINE_NR="$(echo "${SEMG_LINE_NR}" | sed 's/line=\"//' | tr -d '"')"
+      lSEMG_LINE_NR=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
+      lSEMG_LINE_NR="$(echo "${lSEMG_LINE_NR}" | sed 's/line=\"//' | tr -d '"')"
 
-      sed -i -r "${SEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
-      print_output "[+] Found possible PHP vulnerability ${ORANGE}${SEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${SEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+      sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log
+      print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
 
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
-        GPT_ANCHOR_="$(openssl rand -hex 8)"
+        lGPT_ANCHOR_="$(openssl rand -hex 8)"
         if [[ -f "${BASE_LINUX_FILES}" ]]; then
           # if we have the base linux config file we are checking it:
-          if ! grep -E -q "^${SEMG_SOURCE_FILE_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-            GPT_PRIO_=$((GPT_PRIO_+1))
+          if ! grep -E -q "^${lSEMG_SOURCE_FILE_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+            lGPT_PRIO_=$((lGPT_PRIO_+1))
           fi
         fi
-        # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-        write_csv_gpt_tmp "$(cut_path "${SEMG_SOURCE_FILE}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION} And I think there might be something in line ${SEMG_LINE_NR}" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log" "" ""
+        # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+        write_csv_gpt_tmp "$(cut_path "${lSEMG_SOURCE_FILE}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION} And I think there might be something in line ${lSEMG_LINE_NR}" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log" "" ""
         # add ChatGPT link
-        printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
-        write_anchor_gpt "${GPT_ANCHOR_}" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+        printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
+        write_anchor_gpt "${lGPT_ANCHOR_}" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
       fi
     done
   fi
   write_log ""
-  write_log "[*] Statistics1:${S22_SEMGREP_ISSUES}:${S22_SEMGREP_SCRIPTS}"
+  write_log "[*] Statistics1:${S22_SEMGREP_ISSUES}:${lS22_SEMGREP_SCRIPTS}"
 }
 
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities (progpilot)"
   write_csv_log "Script path" "PHP issues detected" "common linux file"
-  local PHP_SCRIPTS=("$@")
-  local VULNS=0
-  local PHP_SCRIPT=""
-  local WAIT_PIDS_S22=()
+  local lPHP_SCRIPTS_ARR=("$@")
+  local lVULNS=0
+  local lPHP_SCRIPT=""
+  local lWAIT_PIDS_S22_ARR=()
 
-  for PHP_SCRIPT in "${PHP_SCRIPTS[@]}" ; do
-    if ( file "${PHP_SCRIPT}" | grep -q "PHP script" ) ; then
+  for lPHP_SCRIPT in "${lPHP_SCRIPTS_ARR[@]}" ; do
+    if ( file "${lPHP_SCRIPT}" | grep -q "PHP script" ) ; then
       ((S22_PHP_SCRIPTS+=1))
       if [[ "${THREADED}" -eq 1 ]]; then
-        s22_vuln_check "${PHP_SCRIPT}" &
-        local TMP_PID="$!"
-        store_kill_pids "${TMP_PID}"
-        WAIT_PIDS_S22+=( "${TMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S22[@]}"
+        s22_vuln_check "${lPHP_SCRIPT}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_S22_ARR+=( "${lTMP_PID}" )
+        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S22_ARR[@]}"
         continue
       else
-        s22_vuln_check "${PHP_SCRIPT}"
+        s22_vuln_check "${lPHP_SCRIPT}"
       fi
     fi
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S22[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S22_ARR[@]}"
 
   if [[ -f "${TMP_DIR}"/S22_VULNS.tmp ]]; then
     S22_PHP_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S22_VULNS.tmp)
@@ -185,120 +185,120 @@ s22_vuln_check_caller() {
 }
 
 s22_vuln_check() {
-  local PHP_SCRIPT_="${1:-}"
+  local lPHP_SCRIPT_="${1:-}"
 
-  if ! [[ -f "${PHP_SCRIPT_}" ]]; then
+  if ! [[ -f "${lPHP_SCRIPT_}" ]]; then
     print_output "[-] No PHP script for analysis provided"
     return
   fi
 
-  local NAME=""
-  local VULNS=0
-  local TOTAL_MEMORY=0
+  local lPHP_SCRIPT_NAME=""
+  local lVULNS=0
+  local lTOTAL_MEMORY=0
 
-  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
-  local MEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
+  lTOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+  local lMEM_LIMIT=$(( "${lTOTAL_MEMORY}"/2 ))
 
-  NAME=$(basename "${PHP_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
-  local PHP_LOG="${LOG_PATH_MODULE}""/php_vuln_""${NAME}""-${RANDOM}.txt"
+  lPHP_SCRIPT_NAME=$(basename "${lPHP_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
+  local lPHP_LOG="${LOG_PATH_MODULE}""/php_vuln_""${lPHP_SCRIPT_NAME}""-${RANDOM}.txt"
 
-  ulimit -Sv "${MEM_LIMIT}"
-  "${EXT_DIR}"/progpilot "${PHP_SCRIPT_}" >> "${PHP_LOG}" 2>&1 || true
+  ulimit -Sv "${lMEM_LIMIT}"
+  "${EXT_DIR}"/progpilot "${lPHP_SCRIPT_}" >> "${lPHP_LOG}" 2>&1 || true
   ulimit -Sv unlimited
 
-  VULNS=$(grep -c "vuln_name" "${PHP_LOG}" 2> /dev/null || true)
-  local GPT_PRIO_=4
-  local GPT_ANCHOR_=""
-  if [[ "${VULNS}" -gt 0 ]] ; then
+  lVULNS=$(grep -c "vuln_name" "${lPHP_LOG}" 2> /dev/null || true)
+  local lGPT_PRIO_=4
+  local lGPT_ANCHOR_=""
+  if [[ "${lVULNS}" -gt 0 ]] ; then
     # check if this is common linux file:
-    local COMMON_FILES_FOUND=""
-    local CFF=""
+    local lCOMMON_FILES_FOUND=""
+    local lCFF=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
-      COMMON_FILES_FOUND=" (""${RED}""common linux file: no""${GREEN}"")"
-      CFF="no"
-      if grep -q "^${NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-        COMMON_FILES_FOUND=" (""${CYAN}""common linux file: yes""${GREEN}"")"
-        CFF="yes"
-        GPT_PRIO_=1
+      lCOMMON_FILES_FOUND=" (""${RED}""common linux file: no""${GREEN}"")"
+      lCFF="no"
+      if grep -q "^${lPHP_SCRIPT_NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        lCOMMON_FILES_FOUND=" (""${CYAN}""common linux file: yes""${GREEN}"")"
+        lCFF="yes"
+        lGPT_PRIO_=1
       fi
     else
-      COMMON_FILES_FOUND=""
-      CFF="NA"
+      lCOMMON_FILES_FOUND=""
+      lCFF="NA"
     fi
-    print_output "[+] Found ""${ORANGE}""${VULNS}"" vulnerabilities""${GREEN}"" in php file"": ""${ORANGE}""$(print_path "${PHP_SCRIPT_}")""${GREEN}""${COMMON_FILES_FOUND}""${NC}" "" "${PHP_LOG}"
-    write_csv_log "$(print_path "${PHP_SCRIPT_}")" "${VULNS}" "${CFF}" "NA"
+    print_output "[+] Found ""${ORANGE}""${lVULNS}"" vulnerabilities""${GREEN}"" in php file"": ""${ORANGE}""$(print_path "${lPHP_SCRIPT_}")""${GREEN}""${lCOMMON_FILES_FOUND}""${NC}" "" "${lPHP_LOG}"
+    write_csv_log "$(print_path "${lPHP_SCRIPT_}")" "${lVULNS}" "${lCFF}" "NA"
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
-      GPT_ANCHOR_="$(openssl rand -hex 8)"
-      # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-$GPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-      write_csv_gpt_tmp "$(cut_path "${PHP_SCRIPT_}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${TMP_DIR}/S22_VULNS.tmp" "" ""
+      lGPT_ANCHOR_="$(openssl rand -hex 8)"
+      # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+      write_csv_gpt_tmp "$(cut_path "${lPHP_SCRIPT_}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${TMP_DIR}/S22_VULNS.tmp" "" ""
       # add ChatGPT link
       printf '%s\n\n' "" >> "${TMP_DIR}"/S22_VULNS.tmp
-      write_anchor_gpt "${GPT_ANCHOR_}" "${TMP_DIR}"/S22_VULNS.tmp
+      write_anchor_gpt "${lGPT_ANCHOR_}" "${TMP_DIR}"/S22_VULNS.tmp
     fi
-    echo "${VULNS}" >> "${TMP_DIR}"/S22_VULNS.tmp
+    echo "${lVULNS}" >> "${TMP_DIR}"/S22_VULNS.tmp
   else
-    # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
-    rm "${PHP_LOG}" 2>/dev/null || true
+    # print_output "[*] Warning: No VULNS detected in $lPHP_LOG" "no_log"
+    rm "${lPHP_LOG}" 2>/dev/null || true
   fi
 }
 
 s22_check_php_ini() {
   sub_module_title "PHP configuration checks (php.ini)"
-  local PHP_INI_FAILURE=0
-  local PHP_INI_LIMIT_EXCEEDED=0
-  local PHP_INI_WARNINGS=0
-  local PHP_INI_FILE=()
-  local PHP_FILE=""
-  local INISCAN_RESULT=()
-  local LINE=""
-  local PHP_INISCAN_PATH="${EXT_DIR}""/iniscan/vendor/bin/iniscan"
+  local lPHP_INI_FAILURE=0
+  local lPHP_INI_LIMIT_EXCEEDED=0
+  local lPHP_INI_WARNINGS=0
+  local lPHP_INI_FILES_ARR=()
+  local lPHP_FILE=""
+  local lINISCAN_RESULT_ARR=()
+  local lINI_RESULT_LINE=""
+  local lPHP_INISCAN_PATH="${EXT_DIR}""/iniscan/vendor/bin/iniscan"
 
-  mapfile -t PHP_INI_FILE < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  if [[ "${#PHP_INI_FILE[@]}" -eq 0 ]]; then
+  mapfile -t lPHP_INI_FILES_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  if [[ "${#lPHP_INI_FILES_ARR[@]}" -eq 0 ]]; then
     print_output "[-] No PHP.ini issues found"
     return
   fi
 
   disable_strict_mode "${STRICT_MODE}"
-  for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
-    # print_output "[*] iniscan check of ""$(print_path "${PHP_FILE}")"
-    mapfile -t INISCAN_RESULT < <( "${PHP_INISCAN_PATH}" scan --path="${PHP_FILE}" || true)
-    for LINE in "${INISCAN_RESULT[@]}" ; do
-      local LIMIT_CHECK=""
+  for lPHP_FILE in "${lPHP_INI_FILES_ARR[@]}" ;  do
+    # print_output "[*] iniscan check of ""$(print_path "${lPHP_FILE}")"
+    mapfile -t lINISCAN_RESULT_ARR < <( "${lPHP_INISCAN_PATH}" scan --path="${lPHP_FILE}" || true)
+    for lINI_RESULT_LINE in "${lINISCAN_RESULT_ARR[@]}" ; do
+      local lLIMIT_CHECK=""
       # nosemgrep
       local IFS='|'
-      IFS='|' read -ra LINE_ARR <<< "${LINE}"
+      IFS='|' read -ra LINE_ARR <<< "${lINI_RESULT_LINE}"
       # TODO: STRICT mode not working here:
       add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-      LIMIT_CHECK="$?"
-      if [[ "${LIMIT_CHECK}" -eq 1 ]]; then
-        print_output "$(magenta "${LINE}")"
-        PHP_INI_LIMIT_EXCEEDED=$(( PHP_INI_LIMIT_EXCEEDED+1 ))
-      elif ( echo "${LINE}" | grep -q "FAIL" ) && ( echo "${LINE}" | grep -q "ERROR" ) ; then
-        print_output "$(red "${LINE}")"
-      elif ( echo "${LINE}" | grep -q "FAIL" ) && ( echo "${LINE}" | grep -q "WARNING" )  ; then
-        print_output "$(orange "${LINE}")"
-      elif ( echo "${LINE}" | grep -q "FAIL" ) && ( echo "${LINE}" | grep -q "INFO" ) ; then
-        print_output "$(blue "${LINE}")"
-      elif ( echo "${LINE}" | grep -q "PASS" ) ; then
+      lLIMIT_CHECK="$?"
+      if [[ "${lLIMIT_CHECK}" -eq 1 ]]; then
+        print_output "$(magenta "${lINI_RESULT_LINE}")"
+        lPHP_INI_LIMIT_EXCEEDED=$(( lPHP_INI_LIMIT_EXCEEDED+1 ))
+      elif ( echo "${lINI_RESULT_LINE}" | grep -q "FAIL" ) && ( echo "${lINI_RESULT_LINE}" | grep -q "ERROR" ) ; then
+        print_output "$(red "${lINI_RESULT_LINE}")"
+      elif ( echo "${lINI_RESULT_LINE}" | grep -q "FAIL" ) && ( echo "${lINI_RESULT_LINE}" | grep -q "WARNING" )  ; then
+        print_output "$(orange "${lINI_RESULT_LINE}")"
+      elif ( echo "${lINI_RESULT_LINE}" | grep -q "FAIL" ) && ( echo "${lINI_RESULT_LINE}" | grep -q "INFO" ) ; then
+        print_output "$(blue "${lINI_RESULT_LINE}")"
+      elif ( echo "${lINI_RESULT_LINE}" | grep -q "PASS" ) ; then
         continue
       else
-        if ( echo "${LINE}" | grep -q "failure" ) && ( echo "${LINE}" | grep -q "warning" ) ; then
-          IFS=' ' read -ra LINE_ARR <<< "${LINE}"
-          PHP_INI_FAILURE=${LINE_ARR[0]}
-          PHP_INI_WARNINGS=${LINE_ARR[3]}
-          (( S22_PHP_INI_ISSUES="${S22_PHP_INI_ISSUES}"+"${PHP_INI_LIMIT_EXCEEDED}"+"${PHP_INI_FAILURE}"+"${PHP_INI_WARNINGS}" ))
+        if ( echo "${lINI_RESULT_LINE}" | grep -q "failure" ) && ( echo "${lINI_RESULT_LINE}" | grep -q "warning" ) ; then
+          IFS=' ' read -ra LINE_ARR <<< "${lINI_RESULT_LINE}"
+          lPHP_INI_FAILURE=${LINE_ARR[0]}
+          lPHP_INI_WARNINGS=${LINE_ARR[3]}
+          (( S22_PHP_INI_ISSUES="${S22_PHP_INI_ISSUES}"+"${lPHP_INI_LIMIT_EXCEEDED}"+"${lPHP_INI_FAILURE}"+"${lPHP_INI_WARNINGS}" ))
           S22_PHP_INI_CONFIGS=$(( S22_PHP_INI_CONFIGS+1 ))
-        elif ( echo "${LINE}" | grep -q "passing" ) ; then
-          IFS=' ' read -ra LINE_ARR <<< "${LINE}"
+        elif ( echo "${lINI_RESULT_LINE}" | grep -q "passing" ) ; then
+          IFS=' ' read -ra LINE_ARR <<< "${lINI_RESULT_LINE}"
           # semgrep does not like the following line of code:
-          LINE_ARR[0]=$(( "${LINE_ARR[0]}" - "${PHP_INI_LIMIT_EXCEEDED}" ))
+          LINE_ARR[0]=$(( "${LINE_ARR[0]}" - "${lPHP_INI_LIMIT_EXCEEDED}" ))
         fi
       fi
     done
     if [[ "${S22_PHP_INI_ISSUES}" -gt 0 ]]; then
       print_ln
-      print_output "[+] Found ""${ORANGE}""${S22_PHP_INI_ISSUES}""${GREEN}"" PHP configuration issues in php config file :""${ORANGE}"" ""$(print_path "${PHP_FILE}")"
+      print_output "[+] Found ""${ORANGE}""${S22_PHP_INI_ISSUES}""${GREEN}"" PHP configuration issues in php config file :""${ORANGE}"" ""$(print_path "${lPHP_FILE}")"
       print_ln
     else
       print_output "[-] No PHP.ini issues found"
@@ -308,18 +308,20 @@ s22_check_php_ini() {
 }
 
 add_recommendations() {
-   local VALUE="${1:-}"
-   local KEY="${2:-}"
+   local lVALUE="${1:-}"
+   local lKEY="${2:-}"
 
-   if [[ ${VALUE} == *"M"* ]]; then
-      LIMIT="${VALUE//M/}"
+   local lLIMIT=""
+
+   if [[ ${lVALUE} == *"M"* ]]; then
+      lLIMIT="${lVALUE//M/}"
    fi
 
-   if [[ ${KEY} == *"memory_limit"* ]] && [[ $(( LIMIT)) -gt 50 ]]; then
+   if [[ ${lKEY} == *"memory_limit"* ]] && [[ $(( lLIMIT)) -gt 50 ]]; then
      return 1
-   elif [[ ${KEY} == *"post_max_size"* ]] && [[ $(( LIMIT)) -gt 20 ]]; then
+   elif [[ ${lKEY} == *"post_max_size"* ]] && [[ $(( lLIMIT)) -gt 20 ]]; then
      return 1
-   elif [[ ${KEY} == *"max_execution_time"* ]] && [[ $(( LIMIT )) -gt 60 ]]; then
+   elif [[ ${lKEY} == *"max_execution_time"* ]] && [[ $(( lLIMIT )) -gt 60 ]]; then
      return 1
    else
      return 0

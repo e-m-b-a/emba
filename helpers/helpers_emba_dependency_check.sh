@@ -449,6 +449,9 @@ dependency_check()
     fi
   fi
 
+  if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
+    check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+  fi
   # Python virtual environment in external directory
   check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
 

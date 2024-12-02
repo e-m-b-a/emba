@@ -90,7 +90,7 @@ set_defaults() {
   export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
 
   export SHORT_PATH=0           # short paths in cli output
-  export THREADED=0             # 0 -> single thread
+  export THREADED=1             # 0 -> single thread
                                 # 1 -> multi threaded
   export YARA=0                 # default: disable yara tests
   export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary

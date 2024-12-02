@@ -106,8 +106,15 @@ check_live_nmap_basic() {
         fi
         lNMAP_CPE=${lNMAP_CPE/ /}
         lNMAP_CPE=${lNMAP_CPE//cpe:\/}
+        # remove h/o/b from start -> we need to start with :
+        lNMAP_CPE=${lNMAP_CPE#[hob]}
         # just to ensure there is some kind of version information in our entry
-        if [[ "${lNMAP_CPE}" =~ .*[0-9].* ]]; then
+        if [[ "$(echo "${lNMAP_CPE}" | tr ':' '\n' | wc -l)" -lt 4 ]]; then
+          # if the length does not match we can drop these results
+          print_output "[-] WARNING: Identifier ${lNMAP_CPE} is probably incorrect and will be removed" "no_log"
+          continue
+        fi
+        if [[ "${lNMAP_CPE}" =~ :.*[0-9].* ]]; then
           print_output "[*] CPE details detected: ${ORANGE}${lNMAP_CPE}${NC}"
           write_csv_log "---" "NA" "NA" "${lNMAP_CPE}" "NA" "${lTYPE}"
         fi

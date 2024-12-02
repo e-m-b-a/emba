@@ -60,7 +60,7 @@ foscam_enc_extractor() {
 
   mapfile lFOSCAM_KEYS_ARR < <(grep -v "ID" "${lKEY_FILE}" | cut -d\; -f2 | tr -d \')
   for l_FOSCAM_KEY in "${lFOSCAM_KEYS_ARR[@]}"; do
-    local FOSCAM_DECRYTED=0
+    local lFOSCAM_DECRYTED=0
     print_output "[*] Testing FOSCAM decryption key ${ORANGE}${l_FOSCAM_KEY}${NC}."
     # shellcheck disable=SC2086
     openssl enc -d -aes-128-cbc -md md5 -k ${l_FOSCAM_KEY} -in "${lFOSCAM_ENC_PATH_}" > "${lEXTRACTION_FILE_}" || true
@@ -76,7 +76,7 @@ foscam_enc_extractor() {
         print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
         write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
         write_csv_log "Foscam decryptor" "${lFOSCAM_ENC_PATH_}" "${lEXTRACTION_FILE_}" "1" "NA" "NA"
-        FOSCAM_DECRYTED=1
+        lFOSCAM_DECRYTED=1
         if [[ -z "${FW_VENDOR:-}" ]]; then
           export FW_VENDOR="Foscam"
         fi
@@ -88,7 +88,7 @@ foscam_enc_extractor() {
     fi
   done
 
-  if [[ "${FOSCAM_DECRYTED}" -ne 1 ]]; then
+  if [[ "${lFOSCAM_DECRYTED}" -ne 1 ]]; then
     print_output "[-] Decryption of Foscam firmware file failed"
   fi
 }

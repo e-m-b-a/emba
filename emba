@@ -770,7 +770,7 @@ main() {
         if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
           cat "${LOG_DIR}"/f50_base_aggregator.txt
         fi
-        D_RETURN=0
+        D_RETURN=$(docker inspect "${MAIN_CONTAINER_}" --format='{{.State.ExitCode}}')
       fi
     fi
     enable_strict_mode "${STRICT_MODE}" 0

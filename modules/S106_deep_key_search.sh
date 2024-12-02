@@ -23,13 +23,15 @@ S106_deep_key_search()
   module_title "Deep analysis of files for interesting key material"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local PATTERNS=""
-  PATTERNS="$(config_list "${CONFIG_DIR}""/deep_key_search.cfg" "")"
+  local lPATTERN=""
+  local lPATTERNS=""
+  lPATTERNS="$(config_list "${CONFIG_DIR}""/deep_key_search.cfg" "")"
 
-  readarray -t PATTERN_LIST < <(printf '%s' "${PATTERNS}")
+  export PATTERN_LIST_ARR=()
+  readarray -t PATTERN_LIST_ARR < <(printf '%s' "${lPATTERNS}")
 
-  for PATTERN in "${PATTERN_LIST[@]}";do
-    print_output "[*] Pattern: ${PATTERN}"
+  for lPATTERN in "${PATTERN_LIST_ARR[@]}";do
+    print_output "[*] Pattern: ${lPATTERN}"
   done
 
   export SORTED_OCC_LIST=()
@@ -41,68 +43,68 @@ S106_deep_key_search()
 }
 
 deep_key_search() {
-  local GREP_PATTERN_COMMAND=()
-  local PATTERN=""
-  local MATCH_FILES=()
-  local MATCH_FILE=""
-  local FILE_NAME=""
-  local F_COUNT=0
+  local lGREP_PATTERN_COMMAND_ARR=()
+  local lPATTERN=""
+  local lMATCH_FILES_ARR=()
+  local lMATCH_FILE=""
+  local lFILE_NAME=""
+  local lF_COUNT=0
 
-  for PATTERN in "${PATTERN_LIST[@]}" ; do
-    GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""${PATTERN}"".{0,15}" )
+  for lPATTERN in "${PATTERN_LIST_ARR[@]}" ; do
+    lGREP_PATTERN_COMMAND_ARR=( "${lGREP_PATTERN_COMMAND_ARR[@]}" "-e" ".{0,15}""${lPATTERN}"".{0,15}" )
   done
   print_ln
-  readarray -t MATCH_FILES < <(grep -E -l -r "${GREP_PATTERN_COMMAND[@]}" -D skip "${LOG_DIR}"/firmware 2>/dev/null || true)
-  if [[ ${#MATCH_FILES[@]} -gt 0 ]] ; then
-    for MATCH_FILE in "${MATCH_FILES[@]}" ; do
-      if ! [[ -f "${MATCH_FILE}" ]]; then
+  readarray -t lMATCH_FILES_ARR < <(grep -E -l -r "${lGREP_PATTERN_COMMAND_ARR[@]}" -D skip "${LOG_DIR}"/firmware 2>/dev/null || true)
+  if [[ ${#lMATCH_FILES_ARR[@]} -gt 0 ]] ; then
+    for lMATCH_FILE in "${lMATCH_FILES_ARR[@]}" ; do
+      if ! [[ -f "${lMATCH_FILE}" ]]; then
         continue
       fi
 
-      FILE_NAME=$(basename "${MATCH_FILE}")
+      lFILE_NAME=$(basename "${lMATCH_FILE}")
       # we just write the FILE_PATH in the beginning to the file (e.g., the log file is not available -> we create it)
-      if ! [[ -f "${LOG_PATH_MODULE}"/deep_key_search_"${FILE_NAME}".txt ]]; then
-        write_log "[*] FILE_PATH: $(print_path "${MATCH_FILE}")" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
-        write_log "" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
+      if ! [[ -f "${LOG_PATH_MODULE}"/deep_key_search_"${lFILE_NAME}".txt ]]; then
+        write_log "[*] FILE_PATH: $(print_path "${lMATCH_FILE}")" "${LOG_PATH_MODULE}/deep_key_search_${lFILE_NAME}.txt"
+        write_log "" "${LOG_PATH_MODULE}/deep_key_search_${lFILE_NAME}.txt"
       fi
-      grep -A 2 --no-group-separator -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "${MATCH_FILE}" 2>/dev/null | tr -d '\0' >> "${LOG_PATH_MODULE}"/deep_key_search_"${FILE_NAME}".txt || true
-      print_output "[+] $(print_path "${MATCH_FILE}")"
-      write_link "${LOG_PATH_MODULE}""/deep_key_search_""${FILE_NAME}"".txt"
-      local D_S_FINDINGS=""
-      for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c "${PATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_"${FILE_NAME}"".txt" || true)
-        if [[ ${F_COUNT} -gt 0 ]] ; then
-          D_S_FINDINGS="${D_S_FINDINGS}""    ""${F_COUNT}""\t:\t""${PATTERN}""\n"
+      grep -A 2 --no-group-separator -E -n -a -h "${lGREP_PATTERN_COMMAND_ARR[@]}" -D skip "${lMATCH_FILE}" 2>/dev/null | tr -d '\0' >> "${LOG_PATH_MODULE}"/deep_key_search_"${lFILE_NAME}".txt || true
+      print_output "[+] $(print_path "${lMATCH_FILE}")"
+      write_link "${LOG_PATH_MODULE}""/deep_key_search_""${lFILE_NAME}"".txt"
+      local lD_S_FINDINGS=""
+      for lPATTERN in "${PATTERN_LIST_ARR[@]}" ; do
+        lF_COUNT=$(grep -c "${lPATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_"${lFILE_NAME}"".txt" || true)
+        if [[ ${lF_COUNT} -gt 0 ]] ; then
+          lD_S_FINDINGS="${lD_S_FINDINGS}""    ""${lF_COUNT}""\t:\t""${lPATTERN}""\n"
         fi
       done
-      print_output "${D_S_FINDINGS}"
-      write_log "" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
-      write_log "[*] Deep search results:" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
-      write_log "${D_S_FINDINGS}" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
+      print_output "${lD_S_FINDINGS}"
+      write_log "" "${LOG_PATH_MODULE}/deep_key_search_${lFILE_NAME}.txt"
+      write_log "[*] Deep search results:" "${LOG_PATH_MODULE}/deep_key_search_${lFILE_NAME}.txt"
+      write_log "${lD_S_FINDINGS}" "${LOG_PATH_MODULE}/deep_key_search_${lFILE_NAME}.txt"
     done
   fi
 }
 
 deep_key_reporter() {
-  local OCC_LIST=()
-  local OCC=""
-  local P_COUNT=0
+  local lOCC_ARR=()
+  local lOCC_ENTRY=""
+  local lP_COUNT=0
 
-  for PATTERN in "${PATTERN_LIST[@]}" ; do
-    P_COUNT=$(grep -c "${PATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
-    if [[ "${P_COUNT}" -gt 0 ]]; then
-      OCC_LIST=( "${OCC_LIST[@]}" "${P_COUNT}"": ""${PATTERN}" )
+  for lPATTERN in "${PATTERN_LIST_ARR[@]}" ; do
+    lP_COUNT=$(grep -c "${lPATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
+    if [[ "${lP_COUNT}" -gt 0 ]]; then
+      lOCC_ARR=( "${lOCC_ARR[@]}" "${lP_COUNT}"": ""${lPATTERN}" )
     fi
   done
 
-  if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
-    if [[ "${#OCC_LIST[@]}" -gt 0 ]] ; then
+  if [[ "${#PATTERN_LIST_ARR[@]}" -gt 0 ]] ; then
+    if [[ "${#lOCC_ARR[@]}" -gt 0 ]] ; then
       print_ln
       print_output "[*] Occurences of pattern:"
-      SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
+      SORTED_OCC_LIST=("$(printf '%s\n' "${lOCC_ARR[@]}" | sort -r --version-sort)")
       if [[ "${#SORTED_OCC_LIST[@]}" -gt 0 ]]; then
-        for OCC in "${SORTED_OCC_LIST[@]}"; do
-          print_output "$( indent "$(orange "${OCC}" )")""\n"
+        for lOCC_ENTRY in "${SORTED_OCC_LIST[@]}"; do
+          print_output "$( indent "$(orange "${lOCC_ENTRY}" )")""\n"
         done
       fi
     fi

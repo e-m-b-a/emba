@@ -104,17 +104,17 @@ template_module() {
 
   # Setup variables
 
-  local TESTVAR1=""
-  local TESTVAR2=""
+  local lTESTVAR1=""
+  local lTESTVAR2=""
 
-  print_output "[*] TESTVAR1: ${TESTVAR1}"
-  print_output "[*] TESTVAR2: ${TESTVAR2}"
+  print_output "[*] TESTVAR1: ${lTESTVAR1}"
+  print_output "[*] TESTVAR2: ${lTESTVAR2}"
 
   # Prints everything to CLI, more information in function print_examples
   print_output "[*] Empty module output"
 
   # Call a submodule inside of module with a parameter
-  sub_module "${TESTVAR1}"
+  sub_module "${lTESTVAR1}"
 
   # How to use print_output
   print_examples
@@ -140,12 +140,12 @@ template_module() {
 }
 
 sub_module() {
-  # setup local TESTVAR1_ in function
-  local TESTVAR1_="${1:-}"
+  # setup local lTESTVAR1_ in function
+  local lTESTVAR1_="${1:-}"
   # Create submodules inside of a module for better structure
   sub_module_title "Submodule example"
 
-  print_output "[*] local TESTVAR1_: ${TESTVAR1_}"
+  print_output "[*] local TESTVAR1_: ${lTESTVAR1_}"
 
   # Analyze stuff ...
 }
@@ -221,46 +221,47 @@ path_handling() {
   # Before using a path in your module!
   # Option 1: Search with find and loop trough results / don't use mod_path!
   # Insert "${EXCL_FIND[@]}" in your search-command to automatically remove excluded paths
-  local CHECK=0
-  readarray -t TEST < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for TEST_E in "${TEST[@]}"; do
+  local lCHECK=0
+  local lTEST_ARR=()
+  readarray -t lTEST_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  local lTEST_E=""
+  for lTEST_E in "${lTEST_ARR[@]}"; do
     if [[ -f "${MP_DIR}" ]] ; then
-      CHECK=1
-      print_output "[+] Found ""$(print_path "${TEST_E}")"
+      lCHECK=1
+      print_output "[+] Found ""$(print_path "${lTEST_E}")"
     fi
   done
-  if [[ ${CHECK} -eq 0 ]] ; then
+  if [[ ${lCHECK} -eq 0 ]] ; then
     print_output "[-] No modprobe.d directory found"
   fi
 
   # Using static single path (mod_path -> returns array of paths, especially if etc is in this path: all other found etc
   # locations will be added there
   # Add placeholder "ETC_PATHS" instead of path "etc"
-  CHECK=0
-  local TEST_PATHS=()
-  local TEST_E=""
-  mapfile -t TEST_PATHS < <(mod_path "/ETC_PATHS/xy.cfg")
+  lCHECK=0
+  local lTEST_PATHS_ARR=()
+  mapfile -t lTEST_PATHS_ARR < <(mod_path "/ETC_PATHS/xy.cfg")
 
-  for TEST_E in "${TEST_PATHS[@]}" ; do
-    if [[ -f "${TEST_E}" ]] ; then
-      CHECK=1
-      print_output "[+] Found xy config: ""$(print_path "${TEST_E}")"
+  for lTEST_E in "${lTEST_PATHS_ARR[@]}" ; do
+    if [[ -f "${lTEST_E}" ]] ; then
+      lCHECK=1
+      print_output "[+] Found xy config: ""$(print_path "${lTEST_E}")"
     fi
   done
-  if [[ ${CHECK} -eq 0 ]] ; then
+  if [[ ${lCHECK} -eq 0 ]] ; then
     print_output "[-] No xy configuration file found"
   fi
 
   # Using multiple paths as array:
-  local TEST_PATHS_ARR=()
-  mapfile -t TEST_PATHS_ARR < <(mod_path_array "$(config_list "${CONFIG_DIR}""/test_files.cfg" "")")
+  local lTEST_PATHS_ARR=()
+  mapfile -t lTEST_PATHS_ARR < <(mod_path_array "$(config_list "${CONFIG_DIR}""/test_files.cfg" "")")
 
-  if [[ "${TEST_PATHS_ARR[0]}" == "C_N_F" ]] ; then
+  if [[ "${lTEST_PATHS_ARR[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ "${#TEST_PATHS_ARR[@]}" -ne 0 ]] ; then
-    for TEST_E in "${TEST_PATHS_ARR[@]}"; do
-      if [[ -f "${TEST_E}" ]] ; then
-        print_output "[+] Found: ""$(print_path "${TEST_E}")"
+  elif [[ "${#lTEST_PATHS_ARR[@]}" -ne 0 ]] ; then
+    for lTEST_E in "${lTEST_PATHS_ARR[@]}"; do
+      if [[ -f "${lTEST_E}" ]] ; then
+        print_output "[+] Found: ""$(print_path "${lTEST_E}")"
       fi
     done
   else
@@ -269,11 +270,11 @@ path_handling() {
 }
 
 iterate_binary() {
-  # BINARIES is an array, which is project wide available and contains all paths of binary files
-  local BIN_FILE=""
+  # BINARIES is a global array, which is project wide available and contains all paths of binary files
+  local lBIN_FILE=""
 
-  for BIN_FILE in "${BINARIES[@]}"; do
-    print_output "${BIN_FILE}"
+  for lBIN_FILE in "${BINARIES[@]}"; do
+    print_output "${lBIN_FILE}"
   done
 }
 
@@ -299,57 +300,55 @@ webreport_functions() {
 
 load_from_config() {
   # config_grep.cfg contains grep statements, these will be all used for grepping "${FILE_PATH}"
-  local OUTPUT=""
-  local OUTPUT_LINES=()
-  mapfile -t OUTPUT_LINES < <(config_grep "${CONFIG_DIR}""/config_grep.cfg" "${FILE_PATH}")
+  local lOUTPUT=""
+  local lOUTPUT_LINES_ARR=()
+  mapfile -t lOUTPUT_LINES_ARR < <(config_grep "${CONFIG_DIR}""/config_grep.cfg" "${FILE_PATH}")
 
-  if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then
+  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ "${#OUTPUT_LINES[@]}" -ne 0 ]] ; then
+  elif [[ "${#lOUTPUT_LINES_ARR[@]}" -ne 0 ]] ; then
     # count of results
-    print_output "[+] Found ""${#OUTPUT_LINES[@]}"" files:"
+    print_output "[+] Found ""${#lOUTPUT_LINES_ARR[@]}"" files:"
 
-    for OUTPUT in "${OUTPUT_LINES[@]}"; do
-      if [[ -f "${OUTPUT}" ]] ; then
-        print_output "$(print_path "${OUTPUT}")"
+    for lOUTPUT in "${lOUTPUT_LINES_ARR[@]}"; do
+      if [[ -f "${lOUTPUT}" ]] ; then
+        print_output "$(print_path "${lOUTPUT}")"
       fi
     done
   else
     print_output "[-] Nothing found"
   fi
-
 
   # config_list.cfg contains text, you get an array
-  local OUTPUT_LINES=()
-  mapfile -t OUTPUT_LINES < <(config_list "${CONFIG_DIR}""/config_list.cfg")
+  local lOUTPUT_LINES_ARR=()
+  mapfile -t lOUTPUT_LINES_ARR < <(config_list "${CONFIG_DIR}""/config_list.cfg")
 
-  if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then
+  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ "${#OUTPUT_LINES[@]}" -ne 0 ]] ; then
+  elif [[ "${#lOUTPUT_LINES_ARR[@]}" -ne 0 ]] ; then
     # count of results
-    print_output "[+] Found ""${#OUTPUT_LINES[@]}"" files:"
+    print_output "[+] Found ""${#lOUTPUT_LINES_ARR[@]}"" files:"
 
-    for OUTPUT in "${OUTPUT_LINES[@]}"; do
-      if [[ -f "${OUTPUT}" ]] ; then
-        print_output "$(print_path "${OUTPUT}")"
+    for lOUTPUT in "${lOUTPUT_LINES_ARR[@]}"; do
+      if [[ -f "${lOUTPUT}" ]] ; then
+        print_output "$(print_path "${lOUTPUT}")"
       fi
     done
   else
     print_output "[-] Nothing found"
   fi
 
-
   # Find files with search parameters (wildcard * is allowed)
-  local OUTPUT_LINES=()
-  local LINE=""
-  readarray -t OUTPUT_LINES < <(printf '%s' "$(config_find "${CONFIG_DIR}""/config_find.cfg")")
+  local lOUTPUT_LINES_ARR=()
+  local lLINE=""
+  readarray -t lOUTPUT_LINES_ARR < <(printf '%s' "$(config_find "${CONFIG_DIR}""/config_find.cfg")")
 
-  if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#OUTPUT_LINES[@]} -ne 0 ]] ; then
-    print_output "[+] Found ""${#OUTPUT_LINES[@]}"" files:"
-    for LINE in "${OUTPUT_LINES[@]}" ; do
-      if [[ -f "${LINE}" ]] ; then
-        print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
+  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ ${#lOUTPUT_LINES_ARR[@]} -ne 0 ]] ; then
+    print_output "[+] Found ""${#lOUTPUT_LINES_ARR[@]}"" files:"
+    for lLINE in "${lOUTPUT_LINES_ARR[@]}" ; do
+      if [[ -f "${lLINE}" ]] ; then
+        print_output "$(indent "$(orange "$(print_path "${lLINE}")")")"
       fi
     done
   else

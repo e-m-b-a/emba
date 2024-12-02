@@ -637,8 +637,8 @@ output_cve_exploits() {
   local DATA=0
   local BINARY_=""
 
-  if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
-    if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]] && [[ -f "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" ]]; then
+  if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED_ARR[@] ]]; then
+    if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED_ARR[@] ]] && [[ -f "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#softwareinventoryinitialoverview"
 
@@ -651,15 +651,15 @@ output_cve_exploits() {
       print_ln
     fi
 
-    if [[ -v VERSIONS_AGGREGATED[@] ]]; then
+    if [[ -v VERSIONS_AGGREGATED_ARR[@] ]]; then
       if [[ -f "${F15_LOG}" ]]; then
-        print_output "[+] Identified a SBOM including ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details."
+        print_output "[+] Identified a SBOM including ""${ORANGE}""${#VERSIONS_AGGREGATED_ARR[@]}""${GREEN}"" software components with version details."
         write_link "f15"
       else
-        print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details.\\n"
+        print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED_ARR[@]}""${GREEN}"" software components with version details.\\n"
         write_link "f20#softwareinventoryinitialoverview"
       fi
-      write_csv_log "versions_identified" "${#VERSIONS_AGGREGATED[@]}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "versions_identified" "${#VERSIONS_AGGREGATED_ARR[@]}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       DATA=1
     fi
     if [[ "${S30_VUL_COUNTER:-0}" -gt 0 ]]; then

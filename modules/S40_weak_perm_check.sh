@@ -22,93 +22,99 @@ S40_weak_perm_check() {
   module_title "Search files with weak permissions"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
-  local WEAK_PERM_COUNTER=0
-  local LINE=""
-  local SETUID_NAME=""
-  local GTFO_LINK=""
-  local ETC_ARR=""
-  ETC_ARR=("$(mod_path "/ETC_PATHS")")
+  local lSETUID_FILES_ARR=()
+  local lSETGID_FILES_ARR=()
+  local lWORLD_WRITE_FILES_ARR=()
+  local lWEAK_SHADOW_FILES_ARR=()
+  local lWEAK_RC_FILES_ARR=()
+  local lWEAK_INIT_FILES_ARR=()
 
-  readarray -t SETUID_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
-  readarray -t SETGID_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -2000 -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
-  readarray -t WORLD_WRITE_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -perm -o+w -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
-  readarray -t WEAK_SHADOW_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev -type f -iname "shadow*" -perm -600 -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+  local lWEAK_PERM_COUNTER=0
+  local lLINE=""
+  local lSETUID_NAME=""
+  local lGTFO_LINK=""
+  local lETC_ARR=""
+  lETC_ARR=("$(mod_path "/ETC_PATHS")")
 
-  ETC_ARR=("$(mod_path "/ETC_PATHS/rc.d")")
+  readarray -t lSETUID_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+  readarray -t lSETGID_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -2000 -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+  readarray -t lWORLD_WRITE_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -perm -o+w -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+  readarray -t lWEAK_SHADOW_FILES_ARR < <(find "${lETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev -type f -iname "shadow*" -perm -600 -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+
+  lETC_ARR=("$(mod_path "/ETC_PATHS/rc.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
-  readarray -t WEAK_RC_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
-  ETC_ARR=("$(mod_path "/ETC_PATHS/init.d")")
+  readarray -t lWEAK_RC_FILES_ARR < <(find "${lETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+  lETC_ARR=("$(mod_path "/ETC_PATHS/init.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
-  readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
+  readarray -t lWEAK_INIT_FILES_ARR < <(find "${lETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)
 
-  if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#SETUID_FILES[@]}"" setuid files:"
-    for LINE in "${SETUID_FILES[@]}" ; do
-      SETUID_NAME=$(basename "${LINE}")
-      GTFO_LINK=$(grep "/${SETUID_NAME}/" "${GTFO_CFG}" || true)
-      if [[ "${GTFO_LINK}" == "https://"* ]]; then
-        print_output "$(indent "${GREEN}$(print_path "${LINE}")${NC}")"
-        write_link "${GTFO_LINK}"
+  if [[ ${#lSETUID_FILES_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lSETUID_FILES_ARR[@]}"" setuid files:"
+    for lLINE in "${lSETUID_FILES_ARR[@]}" ; do
+      lSETUID_NAME=$(basename "${lLINE}")
+      lGTFO_LINK=$(grep "/${lSETUID_NAME}/" "${GTFO_CFG}" || true)
+      if [[ "${lGTFO_LINK}" == "https://"* ]]; then
+        print_output "$(indent "${GREEN}$(print_path "${lLINE}")${NC}")"
+        write_link "${lGTFO_LINK}"
       else
-        print_output "$(indent "$(print_path "${LINE}")")"
+        print_output "$(indent "$(print_path "${lLINE}")")"
       fi
-      ((WEAK_PERM_COUNTER+=1))
+      ((lWEAK_PERM_COUNTER+=1))
     done
     print_ln "no_log"
   else
     print_output "[-] No setuid files found"
   fi
 
-  if [[ ${#SETGID_FILES[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#SETGID_FILES[@]}"" setgid files:"
-    for LINE in "${SETGID_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      ((WEAK_PERM_COUNTER+=1))
+  if [[ ${#lSETGID_FILES_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lSETGID_FILES_ARR[@]}"" setgid files:"
+    for lLINE in "${lSETGID_FILES_ARR[@]}"; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      ((lWEAK_PERM_COUNTER+=1))
     done
     print_ln "no_log"
   else
     print_output "[-] No setgid files found"
   fi
 
-  if [[ ${#WORLD_WRITE_FILES[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#WORLD_WRITE_FILES[@]}"" world writeable files:"
-    for LINE in "${WORLD_WRITE_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      ((WEAK_PERM_COUNTER+=1))
+  if [[ ${#lWORLD_WRITE_FILES_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lWORLD_WRITE_FILES_ARR[@]}"" world writeable files:"
+    for lLINE in "${lWORLD_WRITE_FILES_ARR[@]}"; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      ((lWEAK_PERM_COUNTER+=1))
     done
     print_ln "no_log"
   else
     print_output "[-] No world writable files found"
   fi
 
-  if [[ ${#WEAK_SHADOW_FILES[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#WEAK_SHADOW_FILES[@]}"" weak shadow files:"
-    for LINE in "${WEAK_SHADOW_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      ((WEAK_PERM_COUNTER+=1))
+  if [[ ${#lWEAK_SHADOW_FILES_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lWEAK_SHADOW_FILES_ARR[@]}"" weak shadow files:"
+    for lLINE in "${lWEAK_SHADOW_FILES_ARR[@]}"; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      ((lWEAK_PERM_COUNTER+=1))
     done
     print_ln "no_log"
   else
     print_output "[-] No shadow files found"
   fi
 
-  if [[ ${#WEAK_RC_FILES[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#WEAK_RC_FILES[@]}"" rc.d files not belonging to root:"
-    for LINE in "${WEAK_RC_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      ((WEAK_PERM_COUNTER+=1))
+  if [[ ${#lWEAK_RC_FILES_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lWEAK_RC_FILES_ARR[@]}"" rc.d files not belonging to root:"
+    for lLINE in "${lWEAK_RC_FILES_ARR[@]}"; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      ((lWEAK_PERM_COUNTER+=1))
     done
     print_ln "no_log"
   else
     print_output "[-] No rc.d files with weak permissions found"
   fi
 
-  if [[ ${#WEAK_INIT_FILES[@]} -gt 0 ]] ; then
-    print_output "[+] Found ""${#WEAK_INIT_FILES[@]}"" init.d files not belonging to root:"
-    for LINE in "${WEAK_INIT_FILES[@]}"; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      ((WEAK_PERM_COUNTER+=1))
+  if [[ ${#lWEAK_INIT_FILES_ARR[@]} -gt 0 ]] ; then
+    print_output "[+] Found ""${#lWEAK_INIT_FILES_ARR[@]}"" init.d files not belonging to root:"
+    for lLINE in "${lWEAK_INIT_FILES_ARR[@]}"; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      ((lWEAK_PERM_COUNTER+=1))
     done
     print_ln "no_log"
   else
@@ -116,7 +122,7 @@ S40_weak_perm_check() {
   fi
 
   write_log ""
-  write_log "[*] Statistics:${WEAK_PERM_COUNTER}"
+  write_log "[*] Statistics:${lWEAK_PERM_COUNTER}"
 
-  module_end_log "${FUNCNAME[0]}" "${WEAK_PERM_COUNTER}"
+  module_end_log "${FUNCNAME[0]}" "${lWEAK_PERM_COUNTER}"
 }

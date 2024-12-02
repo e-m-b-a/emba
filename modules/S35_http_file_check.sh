@@ -37,18 +37,18 @@ web_file_search()
 {
   sub_module_title "Search web served files"
 
-  local WEB_STUFF=()
-  local WEB_FILE=""
+  local lWEB_STUFF_ARR=()
+  local lWEB_FILE=""
 
-  mapfile -t WEB_STUFF < <(find "${FIRMWARE_PATH}" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
-    -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' \
+  mapfile -t lWEB_STUFF_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
+    -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' \
     | sort -u -k1,1 | cut -d\  -f3)
 
-  if [[ -v WEB_STUFF[@] ]] ; then
+  if [[ -v lWEB_STUFF_ARR[@] ]] ; then
     print_output "[+] Found web related files:"
-    for WEB_FILE in "${WEB_STUFF[@]}" ; do
-      print_output "$(indent "$(print_path "${WEB_FILE}")")"
-      write_csv_log "Web served files" "$(basename "${WEB_FILE}")" "${WEB_FILE}"
+    for lWEB_FILE in "${lWEB_STUFF_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lWEB_FILE}")")"
+      write_csv_log "Web served files" "$(basename "${lWEB_FILE}")" "${lWEB_FILE}"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -60,16 +60,16 @@ http_file_search()
 {
   sub_module_title "Search http files"
 
-  local HTTP_STUFF=()
-  local HTTP_FILE=""
-  mapfile -t HTTP_STUFF < <(config_find "${CONFIG_DIR}""/http_files.cfg")
+  local lHTTP_STUFF_ARR=()
+  local lHTTP_FILE=""
+  mapfile -t lHTTP_STUFF_ARR < <(config_find "${CONFIG_DIR}""/http_files.cfg")
 
-  if [[ "${HTTP_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ "${#HTTP_STUFF[@]}" -ne 0 ]] ; then
+  if [[ "${lHTTP_STUFF_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#lHTTP_STUFF_ARR[@]}" -ne 0 ]] ; then
     print_output "[+] Found http related files:"
-    for HTTP_FILE in "${HTTP_STUFF[@]}" ; do
-      print_output "$(indent "$(print_path "${HTTP_FILE}")")"
-      write_csv_log "HTTP server files" "$(basename "${HTTP_FILE}")" "${HTTP_FILE}"
+    for lHTTP_FILE in "${lHTTP_STUFF_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lHTTP_FILE}")")"
+      write_csv_log "HTTP server files" "$(basename "${lHTTP_FILE}")" "${lHTTP_FILE}"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -81,68 +81,68 @@ webserver_check()
 {
   sub_module_title "Check for apache or nginx related files"
 
-  local APACHE_FILE_ARR=()
-  local NGINX_FILE_ARR=()
-  local LIGHTTP_FILE_ARR=()
-  local CHEROKEE_FILE_ARR=()
-  local HTTPD_FILE_ARR=()
-  local LINE=""
+  local lAPACHE_FILE_ARR=()
+  local lNGINX_FILE_ARR=()
+  local lLIGHTTP_FILE_ARR=()
+  local lCHEROKEE_FILE_ARR=()
+  local lHTTPD_FILE_ARR=()
+  local lLINE=""
 
-  readarray -t APACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t NGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t LIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t CHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t HTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lNGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lLIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lCHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lHTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
 
-  if [[ ${#APACHE_FILE_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lAPACHE_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found Apache related files:"
-    for LINE in "${APACHE_FILE_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      write_csv_log "Apache web server file" "$(basename "${LINE}")" "${LINE}"
+    for lLINE in "${lAPACHE_FILE_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "Apache web server file" "$(basename "${lLINE}")" "${lLINE}"
       ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No Apache related files found"
   fi
 
-  if [[ ${#NGINX_FILE_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lNGINX_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found nginx related files:"
-    for LINE in "${NGINX_FILE_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      write_csv_log "Nginx web server file" "$(basename "${LINE}")" "${LINE}"
+    for lLINE in "${lNGINX_FILE_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "Nginx web server file" "$(basename "${lLINE}")" "${lLINE}"
       ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No nginx related files found"
   fi
 
-  if [[ ${#LIGHTTP_FILE_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lLIGHTTP_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found Lighttpd related files:"
-    for LINE in "${LIGHTTP_FILE_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      write_csv_log "Lighttpd web server file" "$(basename "${LINE}")" "${LINE}"
+    for lLINE in "${lLIGHTTP_FILE_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "Lighttpd web server file" "$(basename "${lLINE}")" "${lLINE}"
       ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No Lighttpd related files found"
   fi
 
-  if [[ ${#CHEROKEE_FILE_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lCHEROKEE_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found Cherokee related files:"
-    for LINE in "${CHEROKEE_FILE_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      write_csv_log "Cherokee web server file" "$(basename "${LINE}")" "${LINE}"
+    for lLINE in "${lCHEROKEE_FILE_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "Cherokee web server file" "$(basename "${lLINE}")" "${lLINE}"
       ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No Cherokee related files found"
   fi
 
-  if [[ ${#HTTPD_FILE_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lHTTPD_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found HTTPd related files:"
-    for LINE in "${HTTPD_FILE_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${LINE}")")"
-      write_csv_log "HTTPd web server file" "$(basename "${LINE}")" "${LINE}"
+    for lLINE in "${lHTTPD_FILE_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "HTTPd web server file" "$(basename "${lLINE}")" "${lLINE}"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -153,16 +153,16 @@ webserver_check()
 php_check()
 {
   sub_module_title "Check for php.ini"
-  local PHP_INI_ARR=()
-  local PHP_INI_ENTRY=""
+  local lPHP_INI_ARR=()
+  local lPHP_INI_ENTRY=""
 
-  readarray -t PHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lPHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
 
-  if [[ ${#PHP_INI_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lPHP_INI_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found php.ini:"
-    for PHP_INI_ENTRY in "${PHP_INI_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${PHP_INI_ENTRY}")")"
-      write_csv_log "php.ini file" "$(basename "${PHP_INI_ENTRY}")" "${PHP_INI_ENTRY}"
+    for lPHP_INI_ENTRY in "${lPHP_INI_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "${lPHP_INI_ENTRY}")")"
+      write_csv_log "php.ini file" "$(basename "${lPHP_INI_ENTRY}")" "${lPHP_INI_ENTRY}"
       ((HTTP_COUNTER+=1))
     done
   else

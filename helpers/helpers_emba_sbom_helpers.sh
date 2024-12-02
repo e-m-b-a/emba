@@ -243,7 +243,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
-    mkdir "${SBOM_LOG_PATH}" || true
+    mkdir "${SBOM_LOG_PATH}" 2>/dev/null || true
   fi
 
   jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"

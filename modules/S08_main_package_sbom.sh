@@ -21,7 +21,7 @@ S08_main_package_sbom() {
   module_title "EMBA central package SBOM environment"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local NEG_LOG=0
+  local lNEG_LOG=0
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
   local lS08_SUBMODULE_PATH="${MOD_DIR}/S08_main_package_sbom_modules"
@@ -43,6 +43,7 @@ S08_main_package_sbom() {
 
   if [[ ${THREADED} -eq 1 ]]; then
     for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
+      # print_output "[*] SBOM - starting ${lS08_MODULE}"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -58,8 +59,8 @@ S08_main_package_sbom() {
   build_dependency_tree
 
   # shellcheck disable=SC2153
-  [[ -s "${S08_CSV_LOG}" ]] && NEG_LOG=1
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  [[ -s "${S08_CSV_LOG}" ]] && lNEG_LOG=1
+  module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
 build_dependency_tree() {
@@ -74,7 +75,7 @@ build_dependency_tree() {
 
   local lWAIT_PIDS_S08_ARR=()
 
-  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f)
+  mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json")
 
   for lSBOM_COMP in "${lSBOM_COMPONENT_FILES_ARR[@]}"; do
     [[ ! -f "${lSBOM_COMP}" ]] && continue
@@ -189,21 +190,21 @@ clean_package_details() {
 
 clean_package_versions() {
   local lVERSION="${1:-}"
-  local STRIPPED_VERSION=""
+  local lSTRIPPED_VERSION=""
 
   # usually we get a version like 1.2.3-4 or 1.2.3-0kali1bla or 1.2.3-unknown
   # this is a quick approach to clean this version identifier
   # there is a lot of room for future improvement
-  STRIPPED_VERSION=$(safe_echo "${lVERSION}" | sed -r 's/-[0-9]+$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-unknown$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+kali[0-9]+.*$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+ubuntu[0-9]+.*$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+build[0-9]+$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+\.[0-9]+$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/:[0-9]:/:/g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | sed -r 's/^[0-9]://g')
-  STRIPPED_VERSION=$(safe_echo "${STRIPPED_VERSION}" | tr -dc '[:print:]')
-  STRIPPED_VERSION=${STRIPPED_VERSION//,/\.}
-  echo "${STRIPPED_VERSION}"
+  lSTRIPPED_VERSION=$(safe_echo "${lVERSION}" | sed -r 's/-[0-9]+$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-unknown$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+kali[0-9]+.*$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+ubuntu[0-9]+.*$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+build[0-9]+$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+\.[0-9]+$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/:[0-9]:/:/g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/^[0-9]://g')
+  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | tr -dc '[:print:]')
+  lSTRIPPED_VERSION=${lSTRIPPED_VERSION//,/\.}
+  echo "${lSTRIPPED_VERSION}"
 }
