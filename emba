@@ -19,70 +19,68 @@
 # Description:  Main script for load all necessary files and call main function of modules
 
 INVOCATION_PATH="."
-MODULE_COUNT=0
-
 
 import_helper()
 {
-  local HELPERS=()
-  local HELPER_COUNT=0
-  local HELPER_FILE=""
-  mapfile -d '' HELPERS < <(find "${HELP_DIR}" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
-  for HELPER_FILE in "${HELPERS[@]}" ; do
-    if ( file "${HELPER_FILE}" | grep -q "shell script" ) && ! [[ "${HELPER_FILE}" =~ \ |\' ]] ; then
+  local lHELPERS_ARR=()
+  local lHELPER_CNT=0
+  local lHELPER_FILE=""
+  mapfile -d '' lHELPERS_ARR < <(find "${HELP_DIR}" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
+  for lHELPER_FILE in "${lHELPERS_ARR[@]}" ; do
+    if ( file "${lHELPER_FILE}" | grep -q "shell script" ) && ! [[ "${lHELPER_FILE}" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
-      source "${HELPER_FILE}"
-      (( HELPER_COUNT+=1 ))
+      source "${lHELPER_FILE}"
+      (( lHELPER_CNT+=1 ))
     fi
   done
-  print_output "==> ""${GREEN}""Imported ""${HELPER_COUNT}"" helper files""${NC}" "no_log"
+  print_output "==> ""${GREEN}""Imported ""${lHELPER_CNT}"" helper files""${NC}" "no_log"
 }
 
 import_module()
 {
-  local MODULES=()
-  local MODULES_LOCAL=()
-  local MODULES_EMBA=()
-  local MODULE_COUNT=0
-  local MODULE_FILE=""
+  local lMODULES_ARR=()
+  local lMODULES_LOCAL_ARR=()
+  local lMODULES_EMBA_ARR=()
+  local lMODULE_COUNT=0
+  local lMODULE_FILE=""
   # to ensure we are only auto load modules from the modules main directory we set maxdepth
   # with this in place we can create sub directories per module. For using/loading stuff from
   # these sub directories the modules are responsible!
-  mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -maxdepth 1 -name "*.sh" | sort -V 2> /dev/null)
+  mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "*.sh" | sort -V 2> /dev/null)
   if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
+    mapfile -t lMODULES_LOCAL_ARR < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
   fi
-  MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
-  for MODULE_FILE in "${MODULES[@]}" ; do
-    if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
+  lMODULES_ARR=( "${lMODULES_EMBA_ARR[@]}" "${lMODULES_LOCAL_ARR[@]}" )
+  for lMODULE_FILE in "${lMODULES_ARR[@]}" ; do
+    if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
-      source "${MODULE_FILE}"
-      (( MODULE_COUNT+=1 ))
+      source "${lMODULE_FILE}"
+      (( lMODULE_COUNT+=1 ))
     fi
   done
-  print_output "==> ""${GREEN}""Imported ""${MODULE_COUNT}"" module/s""${NC}" "no_log"
+  print_output "==> ""${GREEN}""Imported ""${lMODULE_COUNT}"" module/s""${NC}" "no_log"
 }
 
 sort_modules()
 {
-  local SORTED_MODULES=()
-  local MODULE_FILE=""
-  for MODULE_FILE in "${MODULES[@]}" ; do
-    if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
+  local lSORTED_MODULES_ARR=()
+  local lMODULE_FILE=""
+  for lMODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
       THREAD_PRIO=0
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
-      source "${MODULE_FILE}"
+      source "${lMODULE_FILE}"
       if [[ ${THREAD_PRIO} -eq 1 ]] ; then
-        SORTED_MODULES=( "${MODULE_FILE}" "${SORTED_MODULES[@]}" )
+        lSORTED_MODULES_ARR=( "${lMODULE_FILE}" "${lSORTED_MODULES_ARR[@]}" )
       else
-        SORTED_MODULES=( "${SORTED_MODULES[@]}" "${MODULE_FILE}" )
+        lSORTED_MODULES_ARR=( "${lSORTED_MODULES_ARR[@]}" "${lMODULE_FILE}" )
       fi
     fi
   done
-  MODULES=( "${SORTED_MODULES[@]}" )
+  MODULES=( "${lSORTED_MODULES_ARR[@]}" )
 }
 
 # $1: module group letter [P, S, L, F, Q]
@@ -94,31 +92,31 @@ run_modules()
   printf -v THREADING_SET '%d\n' "${2}" 2>/dev/null
   THREADING_MOD_GROUP="${THREADING_SET}"
 
-  local SELECT_PRE_MODULES_COUNT=0
+  local lSELECT_PRE_MODULES_COUNT=0
 
   for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
     if [[ "${SELECT_NUM}" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
-      (( SELECT_PRE_MODULES_COUNT+=1 ))
+      (( lSELECT_PRE_MODULES_COUNT+=1 ))
     fi
   done
 
-  if [[ "${#SELECT_MODULES[@]}" -eq 0 ]] || [[ "${SELECT_PRE_MODULES_COUNT}" -eq 0 ]]; then
-    local MODULES=()
-    local MODULES_LOCAL=()
-    local MODULES_EMBA=()
+  if [[ "${#SELECT_MODULES[@]}" -eq 0 ]] || [[ "${lSELECT_PRE_MODULES_COUNT}" -eq 0 ]]; then
+    export MODULES_ARR=()
+    local lMODULES_LOCAL_ARR=()
+    local lMODULES_EMBA_ARR=()
 
-    mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+      mapfile -t lMODULES_LOCAL_ARR < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
     fi
-    MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
-    export MODULES_EXPORTED+=("${MODULES[@]}")
+    MODULES_ARR=( "${lMODULES_EMBA_ARR[@]}" "${lMODULES_LOCAL_ARR[@]}" )
+    export MODULES_EXPORTED+=("${MODULES_ARR[@]}")
     if [[ ${THREADING_SET} -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
-    for MODULE_FILE in "${MODULES[@]}" ; do
+    for lMODULE_FILE in "${MODULES_ARR[@]}" ; do
       # check if "${MODULE_NAME}" is in blacklist from config directory and skip it
-      MODULE_NAME=$(basename -s .sh "${MODULE_FILE}")
+      MODULE_NAME=$(basename -s .sh "${lMODULE_FILE}")
       if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
         print_output "[*] $(print_date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
         continue
@@ -127,28 +125,28 @@ run_modules()
         print_output "[*] $(print_date) - ${MODULE_NAME} not executed - skip pre-checkers is set " "main"
         continue
       fi
-      local MOD_FIN=0
-      if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
+      local lMOD_FIN=0
+      if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
           # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
           # export PRE_THREAD_ENA=1/0
           # shellcheck source=/dev/null
-          source "${MODULE_FILE}"
+          source "${lMODULE_FILE}"
           if [[ "${PRE_THREAD_ENA}" -eq 0 ]] ; then
             THREADING_SET=0
           fi
         fi
-        MODULE_BN=$(basename "${MODULE_FILE}")
+        MODULE_BN=$(basename "${lMODULE_FILE}")
         MODULE_MAIN=${MODULE_BN%.*}
         # module_start_log "${MODULE_MAIN}"
         if [[ "${RESTART}" -eq 1 ]]; then
           if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
             if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
               print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
-              MOD_FIN=0
+              lMOD_FIN=0
             else
               print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
-              MOD_FIN=1
+              lMOD_FIN=1
               if [[ ${HTML} -eq 1 ]] ; then
                 # we need to build the web reporter links for skipping modules
                 mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MODULE_MAIN}*.txt" | sort)
@@ -165,7 +163,7 @@ run_modules()
             fi
           fi
         fi
-        if [[ "${MOD_FIN}" -eq 0 ]]; then
+        if [[ "${lMOD_FIN}" -eq 0 ]]; then
           if [[ ${THREADING_SET} -eq 1 ]]; then
             "${MODULE_MAIN}" &
             MOD_PID="$!"
@@ -199,7 +197,7 @@ run_modules()
     fi
 
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-      local MOD_FIN=0
+      local lMOD_FIN=0
       if [[ "${SELECT_NUM}" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
         local MODULE=""
         MODULE=$(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
@@ -213,10 +211,10 @@ run_modules()
             if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
               if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
                 print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
-                MOD_FIN=0
+                lMOD_FIN=0
               else
                 print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
-                MOD_FIN=1
+                lMOD_FIN=1
                 if [[ ${HTML} -eq 1 ]] ; then
                   # we need to build the web reporter links for skipping modules
                   mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MODULE_MAIN}*.txt" | sort)
@@ -233,7 +231,7 @@ run_modules()
               fi
             fi
           fi
-          if [[ "${MOD_FIN}" -eq 0 ]]; then
+          if [[ "${lMOD_FIN}" -eq 0 ]]; then
             if [[ ${THREADING_SET} -eq 1 ]]; then
               "${MODULE_MAIN}" &
               MOD_PID="$!"
@@ -247,47 +245,47 @@ run_modules()
           reset_module_count
         fi
       elif [[ "${SELECT_NUM}" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
-        local MODULES=()
-        local MODULES_LOCAL=()
-        local MODULES_EMBA=()
-        mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+        export MODULES_ARR=()
+        local lMODULES_LOCAL_ARR=()
+        local lMODULES_EMBA_ARR=()
+        mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
         if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+          mapfile -t lMODULES_LOCAL_ARR < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
         fi
-        MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
+        MODULES_ARR=( "${lMODULES_EMBA_ARR[@]}" "${lMODULES_LOCAL_ARR[@]}" )
 
         [[ ${THREADING_SET} -eq 1 ]] && sort_modules
 
-        for MODULE_FILE in "${MODULES[@]}" ; do
+        for lMODULE_FILE in "${MODULES_ARR[@]}" ; do
           # check if "${MODULE_NAME}" is in blacklist from config directory and skip it
-          MODULE_NAME=$(basename -s .sh "${MODULE_FILE}")
+          MODULE_NAME=$(basename -s .sh "${lMODULE_FILE}")
           if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
             print_output "[*] $(print_date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
             continue
           fi
-          local MOD_FIN=0
-          if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
+          local lMOD_FIN=0
+          if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
             if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
               # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
               # export PRE_THREAD_ENA=1/0
               # shellcheck source=/dev/null
-              source "${MODULE_FILE}"
+              source "${lMODULE_FILE}"
               if [[ "${PRE_THREAD_ENA}" -eq 0 ]] ; then
                 THREADING_SET=0
               fi
             fi
 
-            MODULE_BN=$(basename "${MODULE_FILE}")
+            MODULE_BN=$(basename "${lMODULE_FILE}")
             MODULE_MAIN=${MODULE_BN%.*}
             # module_start_log "${MODULE_MAIN}"
             if [[ "${RESTART}" -eq 1 ]]; then
               if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
                 if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
                   print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
-                  MOD_FIN=0
+                  lMOD_FIN=0
                 else
                   print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
-                  MOD_FIN=1
+                  lMOD_FIN=1
                   if [[ ${HTML} -eq 1 ]] ; then
                     # we need to build the web reporter links for skipping modules
                     mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MODULE_MAIN}*.txt" | sort)
@@ -304,7 +302,7 @@ run_modules()
                 fi
               fi
             fi
-            if [[ "${MOD_FIN}" -eq 0 ]]; then
+            if [[ "${lMOD_FIN}" -eq 0 ]]; then
               if [[ ${THREADING_SET} -eq 1 ]]; then
                 "${MODULE_MAIN}" &
                 MOD_PID="$!"
@@ -688,14 +686,14 @@ main() {
     print_output "[*] $(print_date) - EMBA sets up the docker environment.\\n" "no_log"
 
     # try it 10 times before exit
-    local CNT_DOCK=0
-    for CNT_DOCK in {1..10}; do
+    local lCNT_DOCK=0
+    for lCNT_DOCK in {1..10}; do
       if ! docker images | grep -qE "embeddedanalyzer/emba[[:space:]]"; then
         sleep 1
       else
         break
       fi
-      if [[ "${CNT_DOCK}" -ge 10 ]]; then
+      if [[ "${lCNT_DOCK}" -ge 10 ]]; then
         print_output "[-] $(print_date) - EMBA docker environment not ready!" "no_log"
         exit 1
       fi
@@ -735,10 +733,10 @@ main() {
       print_ln "no_log"
       welcome
       # default EMBA analysis mode:
-      local QUEST_CONTAINER_=""
-      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      export QUEST_CONTAINER="${QUEST_CONTAINER_}"
-      print_output "[+] $(print_date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
+      local lQUEST_CONTAINER_=""
+      lQUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
+      print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
 
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then
@@ -748,19 +746,19 @@ main() {
       else
         # EMBA container starts in the background
         print_output "[*] $(print_date) - EMBA main container starting and detaching.\\n" "no_log"
-        local MAIN_CONTAINER_=""
-        MAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-        export MAIN_CONTAINER="${MAIN_CONTAINER_}"
+        local lMAIN_CONTAINER_=""
+        lMAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        export MAIN_CONTAINER="${lMAIN_CONTAINER_}"
 
-        print_output "[+] $(print_date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
+        print_output "[+] $(print_date) - EMBA main container ${lMAIN_CONTAINER_} started and detached." "no_log"
         print_ln "no_log"
         # the following write_log is used as the status bar shows the main emba.log and with a print_output we get double output
-        write_log "[*] $(print_date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
-        if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
-          write_log "[*] $(print_date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
+        write_log "[*] $(print_date) - EMBA main container ${lMAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${lMAIN_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
+        if [[ "$( docker container inspect -f '{{.State.Status}}' "${lQUEST_CONTAINER_}" )" == "running" ]]; then
+          write_log "[*] $(print_date) - EMBA quest container ${lQUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${lQUEST_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
         fi
 
-        while [[ "$( docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER_}" )" == "running" ]]; do
+        while [[ "$( docker container inspect -f '{{.State.Status}}' "${lMAIN_CONTAINER_}" )" == "running" ]]; do
           sleep 1
         done
         remove_status_bar
@@ -770,7 +768,7 @@ main() {
         if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
           cat "${LOG_DIR}"/f50_base_aggregator.txt
         fi
-        D_RETURN=$(docker inspect "${MAIN_CONTAINER_}" --format='{{.State.ExitCode}}')
+        D_RETURN=$(docker inspect "${lMAIN_CONTAINER_}" --format='{{.State.ExitCode}}')
       fi
     fi
     enable_strict_mode "${STRICT_MODE}" 0
@@ -822,7 +820,7 @@ main() {
       run_modules "Q" "${THREADED}" "0" &
       export Q_MOD_PID="$!"
     elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${QUEST_CONTAINER_} failed the dependancy check" "main"
+      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${lQUEST_CONTAINER_} failed the dependancy check" "main"
     fi
   fi
 
