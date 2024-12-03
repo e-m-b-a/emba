@@ -56,8 +56,8 @@ module_log_init()
 {
   export LOG_FILE_NAME="${1:-}"
   local lFILE_NAME=""
-  local lMODULE_NUMBER=""
-  lMODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
+  # local lMODULE_NUMBER=""
+  # lMODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
   lFILE_NAME=$(echo "${LOG_FILE_NAME}" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
   LOG_FILE="${LOG_DIR}""/""${lFILE_NAME}"".txt"
   LOG_FILE_NAME="${lFILE_NAME}"".txt"
