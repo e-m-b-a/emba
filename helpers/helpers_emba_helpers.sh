@@ -37,18 +37,18 @@ run_web_reporter_mod_name() {
 }
 
 wait_for_pid() {
-  local WAIT_PIDS=("$@")
-  local PID=""
+  local lWAIT_PIDS_ARR=("$@")
+  local lPID=""
 
-  # print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
-  for PID in "${WAIT_PIDS[@]}"; do
-    # print_output "[*] wait pid protection: $PID"
+  # print_output "[*] wait pid protection: ${#lWAIT_PIDS_ARR[@]}"
+  for lPID in "${lWAIT_PIDS_ARR[@]}"; do
+    # print_output "[*] wait pid protection: $lPID"
     print_dot
-    if ! [[ -e /proc/"${PID}" ]]; then
+    if ! [[ -e /proc/"${lPID}" ]]; then
       continue
     fi
-    while [[ -e /proc/"${PID}" ]]; do
-      # print_output "[*] wait pid protection - running pid: $PID"
+    while [[ -e /proc/"${lPID}" ]]; do
+      # print_output "[*] wait pid protection - running pid: $lPID"
       print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 && -n "${QRUNTIME}" ]]; then
@@ -60,22 +60,22 @@ wait_for_pid() {
 
 max_pids_protection() {
   if [[ -n "${1:-}" ]]; then
-    local MAX_PIDS_="${1:-}"
+    local lMAX_PIDS_="${1:-}"
     shift
   else
-    local MAX_PIDS_="${MAX_MODS:1}"
+    local lMAX_PIDS_="${MAX_MODS:1}"
   fi
-  local WAIT_PIDS=("$@")
-  local PID=""
+  local lWAIT_PIDS_ARR=("$@")
+  local lPID=""
 
-  while [[ ${#WAIT_PIDS[@]} -gt "${MAX_PIDS_}" ]]; do
-    local TEMP_PIDS=()
+  while [[ ${#lWAIT_PIDS_ARR[@]} -gt "${lMAX_PIDS_}" ]]; do
+    local lTEMP_PIDS_ARR=()
     # check for really running PIDs and re-create the array
-    for PID in "${WAIT_PIDS[@]}"; do
-      # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
-      if [[ -e /proc/"${PID}" ]]; then
-        if ! grep -q "State:.*zombie.*" "/proc/${PID}/status" 2>/dev/null; then
-          TEMP_PIDS+=( "${PID}" )
+    for lPID in "${lWAIT_PIDS_ARR[@]}"; do
+      # print_output "[*] max pid protection: ${#lWAIT_PIDS_ARR[@]}"
+      if [[ -e /proc/"${lPID}" ]]; then
+        if ! grep -q "State:.*zombie.*" "/proc/${lPID}/status" 2>/dev/null; then
+          lTEMP_PIDS_ARR+=( "${lPID}" )
         fi
       fi
     done
@@ -84,11 +84,11 @@ max_pids_protection() {
       killall -9 --quiet --older-than "${QRUNTIME}" -r .*qemu.*sta.* || true
     fi
 
-    # print_output "[!] really running pids: ${#TEMP_PIDS[@]}"
+    # print_output "[!] really running pids: ${#lTEMP_PIDS_ARR[@]}"
 
     # recreate the arry with the current running PIDS
-    WAIT_PIDS=()
-    WAIT_PIDS=("${TEMP_PIDS[@]}")
+    lWAIT_PIDS_ARR=()
+    lWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
     print_dot
   done
 }
@@ -242,8 +242,8 @@ cleaner() {
 
 emba_updater() {
   print_output "[*] EMBA update starting ..." "no_log"
-  local HOME_DIR=""
-  HOME_DIR=$(pwd)
+  local lHOME_DIR=""
+  lHOME_DIR=$(pwd)
 
   if [[ -d ./.git ]]; then
     git pull origin master
@@ -261,7 +261,7 @@ emba_updater() {
     else
       print_output "[-] WARNING: Can't update EPSS database" "no_log"
     fi
-    cd "${HOME_DIR}" || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
+    cd "${lHOME_DIR}" || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
   else
     print_output "[-] WARNING: Can't update EPSS database" "no_log"
   fi
@@ -274,7 +274,7 @@ emba_updater() {
     else
       print_output "[-] WARNING: Can't update CVE database" "no_log"
     fi
-    cd "${HOME_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
+    cd "${lHOME_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
   else
     print_output "[-] WARNING: Can't update CVE database" "no_log"
   fi
@@ -322,18 +322,18 @@ restore_permissions() {
 }
 
 backup_var() {
-  local VAR_NAME="${1:-}"
-  local VAR_VALUE="${2:-}"
-  local BACKUP_FILE="${LOG_DIR}""/backup_vars.log"
+  local lVAR_NAME="${1:-}"
+  local lVAR_VALUE="${2:-}"
+  local lBACKUP_FILE="${LOG_DIR}""/backup_vars.log"
 
-  echo "export ${VAR_NAME}=\"${VAR_VALUE}\"" >> "${BACKUP_FILE}"
+  echo "export ${lVAR_NAME}=\"${lVAR_VALUE}\"" >> "${lBACKUP_FILE}"
 }
 
 module_wait() {
-  local MODULE_TO_WAIT="${1:-}"
+  local lMODULE_TO_WAIT="${1:-}"
   # if the module we should wait is not in our module array we return without waiting
-  if ! [[ " ${MODULES_EXPORTED[*]} " == *"${MODULE_TO_WAIT}"* ]]; then
-    print_output "[-] $(print_date) - ${MODULE_TO_WAIT} not in module array - this will result in unexpected behavior" "main"
+  if ! [[ " ${MODULES_EXPORTED[*]} " == *"${lMODULE_TO_WAIT}"* ]]; then
+    print_output "[-] $(print_date) - ${lMODULE_TO_WAIT} not in module array - this will result in unexpected behavior" "main"
     return
   fi
 
@@ -341,14 +341,14 @@ module_wait() {
     sleep 1
   done
 
-  while [[ $(grep -i -c "${MODULE_TO_WAIT} finished" "${MAIN_LOG}" || true) -ne 1 ]]; do
-    if grep -q "${MODULE_TO_WAIT} not executed - blacklist triggered" "${MAIN_LOG}"; then
-      print_output "[-] $(print_date) - ${MODULE_TO_WAIT} blacklisted - not waiting" "main"
+  while [[ $(grep -i -c "${lMODULE_TO_WAIT} finished" "${MAIN_LOG}" || true) -ne 1 ]]; do
+    if grep -q "${lMODULE_TO_WAIT} not executed - blacklist triggered" "${MAIN_LOG}"; then
+      print_output "[-] $(print_date) - ${lMODULE_TO_WAIT} blacklisted - not waiting" "main"
       # if our module which we are waiting is on the blacklist we can just return
       return
     fi
     if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
-      if grep -q "${MODULE_TO_WAIT}" "${LOG_DIR}"/emba_error.log; then
+      if grep -q "${lMODULE_TO_WAIT}" "${LOG_DIR}"/emba_error.log; then
         print_output "[-] $(print_date) - WARNING: Module to wait for is probably crashed and will never end. Check the EMBA error log ${LOG_DIR}/emba_error.log" "main"
         cat "${LOG_DIR}"/emba_error.log >> "${MAIN_LOG}"
         return
@@ -359,15 +359,15 @@ module_wait() {
 }
 
 store_kill_pids() {
-  local PID="${1:-}"
+  local lPID="${1:-}"
   ! [[ -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
-  [[ "${IN_DOCKER}" -eq 0 ]] && echo "${PID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS.log
-  [[ "${IN_DOCKER}" -eq 1 ]] && echo "${PID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
+  [[ "${IN_DOCKER}" -eq 0 ]] && echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS.log
+  [[ "${IN_DOCKER}" -eq 1 ]] && echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
   return 0
 }
 
 disk_space_monitor() {
-  local DDISK="${LOG_DIR}"
+  local lDDISK="${LOG_DIR}"
   local lFREE_SPACE=""
 
   while ! [[ -f "${MAIN_LOG}" ]]; do
@@ -376,7 +376,7 @@ disk_space_monitor() {
 
   while true; do
     # print_output "[*] Disk space monitoring active" "no_log"
-    lFREE_SPACE=$(df --output=avail "${DDISK}" | awk 'NR==2')
+    lFREE_SPACE=$(df --output=avail "${lDDISK}" | awk 'NR==2')
     if [[ "${lFREE_SPACE}" -lt 10000000 ]]; then
       print_ln "no_log"
       print_output "[!] WARNING: EMBA is running out of disk space!" "main"
@@ -409,7 +409,7 @@ safe_logging() {
   # printf "%b" 'end from bar\n' |& safe_logging ./test.log 1
   local lLOG_FILE_="${1:-}"
   local lALT_OUT_="${2:-}"
-  local lINPUT_
+  local lINPUT_=""
 
   ## Force UTF-8 charset
   while read -r lINPUT_; do

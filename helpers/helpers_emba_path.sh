@@ -20,10 +20,10 @@
 #                 binary array via ${BINARIES[@]}
 
 check_path_valid() {
-  local C_PATH="${1:-}"
+  local lC_PATH="${1:-}"
 
-  if [[ -n "${C_PATH}" ]] && { [[ "${C_PATH:0:1}" != "/" ]] && [[ "${C_PATH:0:2}" != "./" ]] && [[ "${C_PATH:0:3}" != "../" ]] ; } ; then
-    print_output "[!] ""${C_PATH}"" is not a valid path in the context of emba" "no_log"
+  if [[ -n "${lC_PATH}" ]] && { [[ "${lC_PATH:0:1}" != "/" ]] && [[ "${lC_PATH:0:2}" != "./" ]] && [[ "${lC_PATH:0:3}" != "../" ]] ; } ; then
+    print_output "[!] ""${lC_PATH}"" is not a valid path in the context of emba" "no_log"
     print_output "    Try it again with \"/\", \"./\" or \"../\" at the beginning of the path.\\n" "no_log"
     print_output "${RED}""Terminate emba""${NC}\\n" "no_log"
     exit 1
@@ -43,38 +43,38 @@ print_path() {
 }
 
 cut_path() {
-  local C_PATH=""
-  C_PATH="$(abs_path "${1:-}")"
+  local lC_PATH=""
+  lC_PATH="$(abs_path "${1:-}")"
 
   if [[ ${SHORT_PATH} -eq 1 ]] ;  then
-    local SHORT=""
-    local FIRST=""
-    local PREFIX_PRE_CHECK=""
-    local R_PATH=""
-    SHORT="${C_PATH#"$(dirname "$(abs_path "${LOG_DIR}")")"}"
-    PREFIX_PRE_CHECK="."
-    FIRST="${SHORT:0:1}"
-    if [[ "${FIRST}" == "/" ]] ;  then
-      local PATH_="${PREFIX_PRE_CHECK}""${SHORT}"
+    local lSHORT=""
+    local lFIRST=""
+    local lPREFIX_PRE_CHECK=""
+    local lR_PATH=""
+    lSHORT="${lC_PATH#"$(dirname "$(abs_path "${LOG_DIR}")")"}"
+    lPREFIX_PRE_CHECK="."
+    lFIRST="${lSHORT:0:1}"
+    if [[ "${lFIRST}" == "/" ]] ;  then
+      local lPATH="${lPREFIX_PRE_CHECK}""${lSHORT}"
     else
-      local PATH_="${PREFIX_PRE_CHECK}""/""${SHORT}"
+      local lPATH="${lPREFIX_PRE_CHECK}""/""${lSHORT}"
     fi
     if [[ "${#ROOT_PATH[@]}" -eq 1 && "${HTML}" -eq 1 ]]; then
       # strip detected root directory from complete path
       # currently only one detected root directory supported
       # ./log/firmware/firmware_binwalk_emba/_firmware.extracted/_rootfs.squashfs.extracted/squashfs-root/usr/bin/curl
       # -> /usr/bin/curl
-      R_PATH="$(realpath "${ROOT_PATH[0]}")"
-      echo -e "${C_PATH}" | sed "s#${R_PATH}#\/#" | sed 's/^.//'
+      lR_PATH="$(realpath "${ROOT_PATH[0]}")"
+      echo -e "${lC_PATH}" | sed "s|${lR_PATH}|\/|" | sed 's/^.//'
     else
-      echo -e "${PATH_}"
+      echo -e "${lPATH}"
     fi
   else
-    local FIRST="${C_PATH:0:2}"
-    if [[ "${FIRST}" == "//" ]] ;  then
-      echo -e "${C_PATH:1}"
+    local lFIRST="${lC_PATH:0:2}"
+    if [[ "${lFIRST}" == "//" ]] ;  then
+      echo -e "${lC_PATH:1}"
     else
-      echo -e "${C_PATH}"
+      echo -e "${lC_PATH}"
     fi
   fi
 }
@@ -113,93 +113,94 @@ set_etc_path() {
 }
 
 set_excluded_path() {
-  local RET_PATHS=""
-  local LINE=""
+  local lRET_PATHS=""
+  local lEXCLUDE_ENTRY=""
 
   if [[ -v EXCLUDE[@] ]] ;  then
-    for LINE in "${EXCLUDE[@]}"; do
-      if [[ -n ${LINE} ]] ; then
-        RET_PATHS="${RET_PATHS}""$(abs_path "${LINE}")""\n"
+    for lEXCLUDE_ENTRY in "${EXCLUDE[@]}"; do
+      if [[ -n ${lEXCLUDE_ENTRY} ]] ; then
+        lRET_PATHS="${lRET_PATHS}""$(abs_path "${lEXCLUDE_ENTRY}")""\n"
       fi
     done
   fi
-  echo -e "${RET_PATHS:-}"
+  echo -e "${lRET_PATHS:-}"
 }
 
 get_excluded_find() {
-  local RET=""
-  local RET_LEN=""
-  local LINE=""
+  local lRETURN_ENTRY=""
+  local lRETURN_LENGTH=""
+  local lENTRY=""
 
   if [[ ${#1} -gt 0 ]] ;  then
-    RET=' -not ( '
-    for LINE in $1; do
-      RET="${RET}"'-path '"${LINE}"' -prune -o '
+    lRETURN_ENTRY=' -not ( '
+    for lENTRY in $1; do
+      lRETURN_ENTRY="${lRETURN_ENTRY}"'-path '"${lENTRY}"' -prune -o '
     done
-    RET_LEN=${#RET}
-    RET="${RET::RET_LEN-3}"') '
+    lRETURN_LENGTH=${#lRETURN_ENTRY}
+    lRETURN_ENTRY="${lRETURN_ENTRY::lRETURN_LENGTH-3}"') '
   fi
-  echo "${RET:-}"
+  echo "${lRETURN_ENTRY:-}"
 }
 
 rm_proc_binary() {
-  local BIN_ARR=()
-  local COUNT=0
-  BIN_ARR=("$@")
+  local lBIN_ARR=()
+  local lBIN_REMOVE_COUNT=0
+  lBIN_ARR=("$@")
 
-  for I in "${!BIN_ARR[@]}"; do
-    if [[ "${BIN_ARR[I]}" == "${FIRMWARE_PATH}""/proc/"* ]]; then
-      unset 'BIN_ARR[I]'
-      ((COUNT += 1))
+  for I in "${!lBIN_ARR[@]}"; do
+    if [[ "${lBIN_ARR[I]}" == "${FIRMWARE_PATH}""/proc/"* ]]; then
+      unset 'lBIN_ARR[I]'
+      ((lBIN_REMOVE_COUNT += 1))
     fi
   done
-  local NEW_ARRAY=()
-  for I in "${!BIN_ARR[@]}"; do
-    NEW_ARRAY+=("${BIN_ARR[I]}")
+  local lTMP_ARRAY=()
+  local lBIN_INDEX=0
+  for lBIN_INDEX in "${!lBIN_ARR[@]}"; do
+    lTMP_ARRAY+=("${lBIN_ARR[lBIN_INDEX]}")
   done
-  if [[ ${COUNT} -gt 0 ]] ;  then
+  if [[ ${lBIN_REMOVE_COUNT} -gt 0 ]] ;  then
     print_ln "no_log"
-    print_output "[!] ""${COUNT}"" executable/s removed (./proc/*)" "no_log"
+    print_output "[!] ""${lBIN_REMOVE_COUNT}"" executable/s removed (./proc/*)" "no_log"
   fi
   export BINARIES=()
-  BINARIES=("${NEW_ARRAY[@]}")
-  unset NEW_ARRAY
+  BINARIES=("${lTMP_ARRAY[@]}")
+  unset lTMP_ARRAY
 }
 
 mod_path() {
-  local RET_PATHS=()
-  local ETC_PATH_I=""
-  local NEW_ETC_PATH=""
-  local EXCL_P=""
+  local lRET_PATHS_ARR=()
+  local lETC_PATH_I=""
+  local lNEW_ETC_PATH=""
+  local lEXCL_P=""
 
   if [[ "${1}" == "/ETC_PATHS"* ]] ; then
-    for ETC_PATH_I in "${ETC_PATHS[@]}"; do
-      NEW_ETC_PATH="$(echo -e "${1}" | sed -e 's!/ETC_PATHS!'"${ETC_PATH_I}"'!g')"
-      RET_PATHS=("${RET_PATHS[@]}" "${NEW_ETC_PATH}")
+    for lETC_PATH_I in "${ETC_PATHS[@]}"; do
+      lNEW_ETC_PATH="$(echo -e "${1}" | sed -e 's!/ETC_PATHS!'"${lETC_PATH_I}"'!g')"
+      lRET_PATHS_ARR=("${lRET_PATHS_ARR[@]}" "${lNEW_ETC_PATH}")
     done
   else
-    readarray -t RET_PATHS <<< "${1}"
+    readarray -t lRET_PATHS_ARR <<< "${1}"
   fi
 
-  for EXCL_P in "${EXCLUDE_PATHS[@]}"; do
-    for I in "${!RET_PATHS[@]}"; do
-      if [[ "${RET_PATHS[I]}" == "${EXCL_P}"* ]] && [[ -n "${EXCL_P}" ]] ; then
-        unset 'RET_PATHS[I]'
+  for lEXCL_P in "${EXCLUDE_PATHS[@]}"; do
+    for I in "${!lRET_PATHS_ARR[@]}"; do
+      if [[ "${lRET_PATHS_ARR[I]}" == "${lEXCL_P}"* ]] && [[ -n "${lEXCL_P}" ]] ; then
+        unset 'lRET_PATHS_ARR[I]'
       fi
     done
   done
 
-  echo "${RET_PATHS[@]}"
+  echo "${lRET_PATHS_ARR[@]}"
 }
 
 mod_path_array() {
-  local RET_PATHS=()
-  local M_PATH=""
+  local lRET_PATHS_ARR=()
+  local lM_PATH=""
 
-  for M_PATH in ${1}; do
-    RET_PATHS=("${RET_PATHS[@]}" "$(mod_path "${M_PATH}")")
+  for lM_PATH in ${1}; do
+    lRET_PATHS_ARR=("${lRET_PATHS_ARR[@]}" "$(mod_path "${lM_PATH}")")
   done
-  echo "${RET_PATHS[@]}"
+  echo "${lRET_PATHS_ARR[@]}"
 }
 
 create_log_dir() {
@@ -236,14 +237,14 @@ create_grep_log() {
 config_list() {
   if [[ -f "${1:-}" ]] ;  then
     if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-      local STRING_LIST=()
-      readarray -t STRING_LIST <"${1:-}"
-      local LIST=""
-      local STRING=""
-      for STRING in "${STRING_LIST[@]}"; do
-        LIST="${LIST}""${STRING}""\n"
+      local lSTRING_ARR=()
+      readarray -t lSTRING_ARR <"${1:-}"
+      local lLIST=""
+      local lSTRING_ENTRY=""
+      for lSTRING_ENTRY in "${lSTRING_ARR[@]}"; do
+        lLIST="${lLIST}""${lSTRING_ENTRY}""\n"
       done
-      echo -e "${LIST}" | sed -z '$ s/\n$//' | sort -u
+      echo -e "${lLIST}" | sed -z '$ s/\n$//' | sort -u
     fi
   else
     echo "C_N_F"
@@ -253,31 +254,31 @@ config_list() {
 config_find() {
   # $1 -> config file
 
-  local FIND_RESULTS=()
-  local LINE=""
+  local lFIND_RESULTS_ARR=()
+  local lFOUND_ENTRY=""
 
   if [[ -f "${1:-}" ]] ; then
     if [[ "$( wc -l "${1:-}" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
-      local FIND_COMMAND=()
-      local FIND_O=()
-      IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "${1:-}" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
-      mapfile -t FIND_O < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")
-      for LINE in "${FIND_O[@]}"; do
-        if [[ -L "${LINE}" ]] ; then
-          local REAL_PATH=""
-          REAL_PATH="$(realpath "${LINE}" 2>/dev/null || true)"
-          if [[ -f  "${REAL_PATH}" ]] ; then
-            FIND_RESULTS+=( "${REAL_PATH}" )
+      local lFIND_COMMAND_ARR=()
+      local lFIND_O_ARR=()
+      IFS=" " read -r -a lFIND_COMMAND_ARR <<<"$(sed 's/^/-o -iwholename /g' "${1:-}" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
+      mapfile -t lFIND_O_ARR < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" "${lFIND_COMMAND_ARR[@]}")
+      for lFOUND_ENTRY in "${lFIND_O_ARR[@]}"; do
+        if [[ -L "${lFOUND_ENTRY}" ]] ; then
+          local lREAL_PATH=""
+          lREAL_PATH="$(realpath "${lFOUND_ENTRY}" 2>/dev/null || true)"
+          if [[ -f  "${lREAL_PATH}" ]] ; then
+            lFIND_RESULTS_ARR+=( "${lREAL_PATH}" )
           fi
         else
-          FIND_RESULTS+=( "${LINE}" )
+          lFIND_RESULTS_ARR+=( "${lFOUND_ENTRY}" )
         fi
       done
 
-      eval "FIND_RESULTS=($(for i in "${FIND_RESULTS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-      # Todo: we should remove this and use the FIND_RESULTS array in the modules
-      for LINE in "${FIND_RESULTS[@]}"; do
-        echo -e "${LINE}"
+      eval "lFIND_RESULTS_ARR=($(for i in "${lFIND_RESULTS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+      # Todo: we should remove this and use the lFIND_RESULTS_ARR array in the modules
+      for lFOUND_ENTRY in "${lFIND_RESULTS_ARR[@]}"; do
+        echo -e "${lFOUND_ENTRY}"
       done
     fi
   else
@@ -286,19 +287,19 @@ config_find() {
 }
 
 config_grep() {
-  local GREP_FILE=()
-  mapfile -t GREP_FILE < <(mod_path "${2}")
+  local lGREP_FILE_ARR=()
+  mapfile -t lGREP_FILE_ARR < <(mod_path "${2}")
 
   if [[ -f "${1:-}" ]] ;  then
     if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-      local GREP_COMMAND=()
-      local GREP_O=()
-      local G_LOC=""
-      IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-Eo /g' "${1}" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
-      for G_LOC in "${GREP_FILE[@]}"; do
-        GREP_O=("${GREP_O[@]}" "$(strings "${G_LOC}" | grep -a -D skip "${GREP_COMMAND[@]}" 2>/dev/null)")
+      local lGREP_COMMAND_ARR=()
+      local lGREP_O_ARR=()
+      local lG_LOC=""
+      IFS=" " read -r -a lGREP_COMMAND_ARR <<<"$(sed 's/^/-Eo /g' "${1}" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
+      for lG_LOC in "${lGREP_FILE_ARR[@]}"; do
+        lGREP_O_ARR=("${lGREP_O_ARR[@]}" "$(strings "${lG_LOC}" | grep -a -D skip "${lGREP_COMMAND_ARR[@]}" 2>/dev/null)")
       done
-      echo "${GREP_O[@]}"
+      echo "${lGREP_O_ARR[@]}"
     fi
   else
     echo "C_N_F"
@@ -308,10 +309,11 @@ config_grep() {
 config_grep_string() {
   if [[ -f "${1:-}" ]] ;  then
     if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-      local GREP_COMMAND=()
-      IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-e /g' "${1:-}" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
-      GREP_O=("${GREP_O[@]}" "$(echo "${2}"| grep -a -D skip "${GREP_COMMAND[@]}" 2>/dev/null)")
-      echo "${GREP_O[@]}"
+      local lGREP_COMMAND_ARR=()
+      local lGREP_O_ARR=()
+      IFS=" " read -r -a lGREP_COMMAND_ARR <<<"$(sed 's/^/-e /g' "${1:-}" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
+      lGREP_O_ARR=("${lGREP_O_ARR[@]}" "$(echo "${2}"| grep -a -D skip "${lGREP_COMMAND_ARR[@]}" 2>/dev/null)")
+      echo "${lGREP_O_ARR[@]}"
     fi
   else
     echo "C_N_F"
