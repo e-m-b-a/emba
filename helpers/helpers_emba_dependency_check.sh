@@ -121,8 +121,8 @@ version_extended() # $1-a $2-op $3-$b
 }
 
 check_emba_version() {
-  local LATEST_EMBA_VERSION="${1:-}"
-  if [[ "${LATEST_EMBA_VERSION}" == "${EMBA_VERSION}" ]]; then
+  local lLATEST_EMBA_VERSION="${1:-}"
+  if [[ "${lLATEST_EMBA_VERSION}" == "${EMBA_VERSION}" ]]; then
     echo -e "    EMBA release version - ${GREEN}ok${NC}"
   else
     echo -e "    EMBA release version - ${ORANGE}Updates available${NC}"
@@ -130,12 +130,12 @@ check_emba_version() {
 }
 
 check_nvd_db() {
-  local REMOTE_HASH="${1:-}"
-  local LOCAL_HASH=""
+  local lREMOTE_HASH="${1:-}"
+  local lLOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]] ; then
-    LOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
+    lLOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
 
-    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+    if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    CVE database version - ${GREEN}ok${NC}"
     else
       echo -e "    CVE database version - ${ORANGE}Updates available${NC}"
@@ -144,12 +144,12 @@ check_nvd_db() {
 }
 
 check_epss_db() {
-  local REMOTE_HASH="${1:-}"
-  local LOCAL_HASH=""
+  local lREMOTE_HASH="${1:-}"
+  local lLOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/EPSS-data ]] ; then
-    LOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
+    lLOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
 
-    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+    if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    EPSS database version - ${GREEN}ok${NC}"
     else
       echo -e "    EPSS database version - ${ORANGE}Updates available${NC}"
@@ -158,13 +158,13 @@ check_epss_db() {
 }
 
 check_git_hash() {
-  local REMOTE_HASH="${1:-}"
-  local LOCAL_HASH=""
+  local lREMOTE_HASH="${1:-}"
+  local lLOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    LOCAL_HASH="$(head .git/refs/heads/master)"
-    # LOCAL_HASH="$(git describe --always)"
+    lLOCAL_HASH="$(head .git/refs/heads/master)"
+    # lLOCAL_HASH="$(git describe --always)"
 
-    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+    if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    EMBA github version - ${GREEN}ok${NC}"
     else
       echo -e "    EMBA github version - ${ORANGE}Updates available${NC}"
@@ -173,12 +173,12 @@ check_git_hash() {
 }
 
 check_docker_image() {
-  local REMOTE_DOCKER_HASH="${1:-}"
-  local LOCAL_DOCKER_HASH=""
-  LOCAL_DOCKER_HASH="$(docker inspect --format='{{.RepoDigests}}' embeddedanalyzer/emba:latest | tr -d ']' || true)"
-  LOCAL_DOCKER_HASH=${LOCAL_DOCKER_HASH/*:}
+  local lREMOTE_DOCKER_HASH="${1:-}"
+  local lLOCAL_DOCKER_HASH=""
+  lLOCAL_DOCKER_HASH="$(docker inspect --format='{{.RepoDigests}}' embeddedanalyzer/emba:latest | tr -d ']' || true)"
+  lLOCAL_DOCKER_HASH=${lLOCAL_DOCKER_HASH/*:}
 
-  if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
+  if [[ "${lLOCAL_DOCKER_HASH}" == "${lREMOTE_DOCKER_HASH}" ]]; then
     echo -e "    Docker image version - ${GREEN}ok${NC}"
   else
     echo -e "    Docker image version - ${ORANGE}Updates available${NC}"
@@ -291,14 +291,14 @@ dependency_check()
       fi
     fi
     if [[ "${IN_DOCKER}" -eq 0 ]]; then
-      local ONLINE_CHECK_FILE="${EXT_DIR}""/onlinechecker/EMBA_VERSION.txt"
+      local lONLINE_CHECK_FILE="${EXT_DIR}""/onlinechecker/EMBA_VERSION.txt"
     else
       # in our containers we have mounted our current EMBA dir to /emba, this includes the host ./external with the onlinechecker
-      local ONLINE_CHECK_FILE="/emba/external/onlinechecker/EMBA_VERSION.txt"
+      local lONLINE_CHECK_FILE="/emba/external/onlinechecker/EMBA_VERSION.txt"
     fi
 
     # as we first check the onlinechecker/EMBA_VERSION.txt file we know if we are online or not:
-    if ! [[ -f "${ONLINE_CHECK_FILE}" ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
+    if ! [[ -f "${lONLINE_CHECK_FILE}" ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
       # if we have no EMBA_VERSION identified, we do not need to check our GPT key now -> there is no internet
       print_output "$(indent "${ORANGE}As there is no Internet connection available, no GPT checks performed.${NC}")" "no_log"
     elif [[ -z "${OPENAI_API_KEY}" ]]; then
@@ -309,22 +309,22 @@ dependency_check()
         DEP_ERROR=1
       fi
     else
-      local RETRIES_=0
+      local lRETRIES_=0
       # on the host we try it only 10 times:
-      local MAX_RETRIES=10
+      local lMAX_RETRIES=10
       if [[ "${IN_DOCKER}" -eq 1 ]]; then
         # within the Quest container we can keep trying it as it does not matter if the container starts up later
-        MAX_RETRIES=200
+        lMAX_RETRIES=200
       fi
-      local SLEEPTIME=30
+      local lSLEEPTIME=30
       while true; do
-        local HTTP_CODE_=400
+        local lHTTP_CODE_=400
         print_output "    OpenAI-API key  - \\c" "no_log"
-        HTTP_CODE_=$(curl -sS https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+        lHTTP_CODE_=$(curl -sS https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
                 -H "Authorization: Bearer ${OPENAI_API_KEY}" \
                 -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json 2>/dev/null)
 
-        if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
+        if [[ "${lHTTP_CODE_}" -eq 200 ]] ; then
           echo -e "${GREEN}""ok""${NC}"
           rm /tmp/chatgpt-test.json
           break
@@ -335,12 +335,12 @@ dependency_check()
               # Please try again in 20s
               echo -e "${RED}""not ok (rate limit issues)""${NC}"
               if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in " ; then
-                # print_output "GPT API test #${RETRIES_} - \\c" "no_log"
-                sleep "${SLEEPTIME}"s
+                # print_output "GPT API test #${lRETRIES_} - \\c" "no_log"
+                sleep "${lSLEEPTIME}"s
                 # sleeptime gets adjusted on every failure
-                SLEEPTIME=$((SLEEPTIME+5))
-                ((RETRIES_+=1))
-                [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
+                lSLEEPTIME=$((lSLEEPTIME+5))
+                ((lRETRIES_+=1))
+                [[ "${lRETRIES_}" -lt "${lMAX_RETRIES}" ]] && continue
               fi
             fi
             if jq '.error.code' /tmp/chatgpt-test.json | grep -q "insufficient_quota" ; then
@@ -850,44 +850,46 @@ dependency_check()
 }
 
 architecture_dep_check() {
+  local lARCH_STR="unknown"
+
   print_ln "no_log"
-  local ARCH_STR="unknown"
+
   if [[ "${ARCH}" == "MIPS" ]] ; then
-    ARCH_STR="mips"
+    lARCH_STR="mips"
   elif [[ "${ARCH}" == "MIPS64R2" ]] ; then
-    ARCH_STR="mips64r2"
+    lARCH_STR="mips64r2"
   elif [[ "${ARCH}" == "MIPS64_III" ]] ; then
-    ARCH_STR="mips64_III"
+    lARCH_STR="mips64_III"
   elif [[ "${ARCH}" == "MIPS64N32" ]] ; then
-    ARCH_STR="mips64n32"
+    lARCH_STR="mips64n32"
   elif [[ "${ARCH}" == "MIPS64v1" ]] ; then
-    ARCH_STR="mips64v1"
+    lARCH_STR="mips64v1"
   elif [[ "${ARCH}" == "ARM" ]] ; then
-    ARCH_STR="arm"
+    lARCH_STR="arm"
   elif [[ "${ARCH}" == "ARM64" ]] ; then
-    ARCH_STR="aarch64"
+    lARCH_STR="aarch64"
   elif [[ "${ARCH}" == "x86" ]] ; then
-    ARCH_STR="i386"
+    lARCH_STR="i386"
   elif [[ "${ARCH}" == "x64" ]] ; then
-    # ARCH_STR="i386:x86-64"
-    ARCH_STR="x86-64"
+    # lARCH_STR="i386:x86-64"
+    lARCH_STR="x86-64"
   elif [[ "${ARCH}" == "x86-64" ]] ; then
-    ARCH_STR="x86-64"
+    lARCH_STR="x86-64"
   elif [[ "${ARCH}" == "PPC" ]] ; then
-    # ARCH_STR="powerpc:common"
-    ARCH_STR="powerpc"
+    # lARCH_STR="powerpc:common"
+    lARCH_STR="powerpc"
   elif [[ "${ARCH}" == "PPC64" ]] ; then
-    ARCH_STR="powerpc64"
+    lARCH_STR="powerpc64"
   elif [[ "${ARCH}" == "NIOS2" ]] ; then
-    ARCH_STR="nios2"
+    lARCH_STR="nios2"
   elif [[ "${ARCH}" == "RISCV" ]] ; then
-    ARCH_STR="riscv"
+    lARCH_STR="riscv"
   elif [[ "${ARCH}" == "QCOM_DSP6" ]] ; then
-    ARCH_STR="qcom_dsp6"
+    lARCH_STR="qcom_dsp6"
   else
-    ARCH_STR="unknown"
+    lARCH_STR="unknown"
   fi
-  if [[ "${ARCH_STR}" == "unknown" ]] ; then
+  if [[ "${lARCH_STR}" == "unknown" ]] ; then
     print_output "[-] WARNING: No valid architecture detected\\n" "no_log"
   else
     print_output "[+] ""${ARCH}"" is a valid architecture\\n" "no_log"

@@ -47,60 +47,60 @@ draw_box() {
 }
 
 draw_arrows() {
-  local ARROW_L="${1:-0}"
-  local ARROWS=""
+  local lARROW_L="${1:-0}"
+  local lARROWS=""
   local lLINES=""
   [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
-  ARROWS+="\e[$((lLINES - 3));${ARROW_L}f \033[1m>\033[0m"
-  ARROWS+="\e[$((lLINES - 2));${ARROW_L}f \033[1m>\033[0m"
-  ARROWS+="\e[$((lLINES - 1));${ARROW_L}f \033[1m>\033[0m"
-  echo -e "${ARROWS}"
+  lARROWS+="\e[$((lLINES - 3));${lARROW_L}f \033[1m>\033[0m"
+  lARROWS+="\e[$((lLINES - 2));${lARROW_L}f \033[1m>\033[0m"
+  lARROWS+="\e[$((lLINES - 1));${lARROW_L}f \033[1m>\033[0m"
+  echo -e "${lARROWS}"
 }
 
 # Helper first box "SYSTEM LOAD"
 # we have three lines per box and here we build the string for each line ($2=line)
 # Because we have to draw a colored bar, we need the percentage of the cpu load ($1)
 system_load_util_str() {
-  local PERCENTAGE="${1:-0}"
-  local UTIL_TYPE_NO="${2:-0}"
-  local UTIL_TYPES=('CPU  ' 'MEM  ' 'DISK ')
-  local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
-  local UTIL_BAR_COLOR=""
-  local UTIL_BAR_BLANK=""
-  local UTIL_PERCENTAGE=$(("${PERCENTAGE}"/(100/12)))
+  local lPERCENTAGE="${1:-0}"
+  local lUTIL_TYPE_NO="${2:-0}"
+  local lUTIL_TYPES=('CPU  ' 'MEM  ' 'DISK ')
+  local lUTIL_STR="${lUTIL_TYPES[${lUTIL_TYPE_NO}]}"
+  local lUTIL_BAR_COLOR=""
+  local lUTIL_BAR_BLANK=""
+  local lUTIL_PERCENTAGE=$(("${lPERCENTAGE}"/(100/12)))
 
-  local A=0
-  local BAR_COUNT=0
-  for ((A=1; A<=UTIL_PERCENTAGE; A++)) ; do
-    UTIL_BAR_COLOR+="■"
-    BAR_COUNT=$((BAR_COUNT + 1))
+  local lA=0
+  local lBAR_COUNT=0
+  for ((lA=1; lA<=lUTIL_PERCENTAGE; lA++)) ; do
+    lUTIL_BAR_COLOR+="■"
+    lBAR_COUNT=$((lBAR_COUNT + 1))
   done
 
-  local B=0
-  local B_LEN=$((12-BAR_COUNT))
-  for ((B=1; B<=B_LEN; B++)) ; do
-    UTIL_BAR_BLANK+="■"
+  local lB=0
+  local lB_LEN=$((12-lBAR_COUNT))
+  for ((lB=1; lB<=lB_LEN; lB++)) ; do
+    lUTIL_BAR_BLANK+="■"
   done
 
-  if [[ ${BAR_COUNT} -gt 8 ]] ; then
-    UTIL_BAR_COLOR="\033[31m${UTIL_BAR_COLOR}\033[0m"
-  elif [[ ${BAR_COUNT} -gt 4 ]] ; then
-    UTIL_BAR_COLOR="\033[33m${UTIL_BAR_COLOR}\033[0m"
+  if [[ ${lBAR_COUNT} -gt 8 ]] ; then
+    lUTIL_BAR_COLOR="\033[31m${lUTIL_BAR_COLOR}\033[0m"
+  elif [[ ${lBAR_COUNT} -gt 4 ]] ; then
+    lUTIL_BAR_COLOR="\033[33m${lUTIL_BAR_COLOR}\033[0m"
   else
-    UTIL_BAR_COLOR="\033[32m${UTIL_BAR_COLOR}\033[0m"
+    lUTIL_BAR_COLOR="\033[32m${lUTIL_BAR_COLOR}\033[0m"
   fi
 
-  PERCENTAGE+=""
-  if [[ ${#PERCENTAGE} -gt 2 ]] ; then
-    PERCENTAGE="${PERCENTAGE}%"
-  elif [[ ${#PERCENTAGE} -gt 1 ]] ; then
-    PERCENTAGE=" ${PERCENTAGE}%"
+  lPERCENTAGE+=""
+  if [[ ${#lPERCENTAGE} -gt 2 ]] ; then
+    lPERCENTAGE="${lPERCENTAGE}%"
+  elif [[ ${#lPERCENTAGE} -gt 1 ]] ; then
+    lPERCENTAGE=" ${lPERCENTAGE}%"
   else
-    PERCENTAGE="  ${PERCENTAGE}%"
+    lPERCENTAGE="  ${lPERCENTAGE}%"
   fi
 
-  echo -e "${UTIL_STR}${UTIL_BAR_COLOR}${UTIL_BAR_BLANK} ${PERCENTAGE}"
+  echo -e "${lUTIL_STR}${lUTIL_BAR_COLOR}${lUTIL_BAR_BLANK} ${lPERCENTAGE}"
 }
 
 # Update first box "SYSTEM LOAD"
@@ -112,36 +112,36 @@ update_box_system_load() {
   local lLINES=""
 
   update_cpu() {
-    local CPU_LOG_STR_=""
-    CPU_LOG_STR_="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
+    local lCPU_LOG_STR=""
+    lCPU_LOG_STR="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      sed -i "2s/.*/${CPU_LOG_STR_}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+      sed -i "2s/.*/${lCPU_LOG_STR}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
     fi
   }
 
   update_cpu
 
-  local BOX_SIZE=0
+  local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
-  while [[ "${BOX_SIZE}" -gt 0 ]]; do
+  while [[ "${lBOX_SIZE}" -gt 0 ]]; do
     [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" || true)
-    local MEM_PERCENTAGE_STR=""
-    MEM_PERCENTAGE_STR="$(system_load_util_str "$(LANG=en free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
-    local DISK_PERCENTAGE_STR=""
-    DISK_PERCENTAGE_STR="$(system_load_util_str "$(df "${LOG_DIR}" | tail -1 | awk '{print substr($5, 1, length($5)-1)}')" 2)"
-    local ACTUAL_CPU=0
+    local lMEM_PERCENTAGE_STR=""
+    lMEM_PERCENTAGE_STR="$(system_load_util_str "$(LANG=en free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
+    local lDISK_PERCENTAGE_STR=""
+    lDISK_PERCENTAGE_STR="$(system_load_util_str "$(df "${LOG_DIR}" | tail -1 | awk '{print substr($5, 1, length($5)-1)}')" 2)"
+    local lACTUAL_CPU=0
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      ACTUAL_CPU="$(sed '2q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lACTUAL_CPU="$(sed '2q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     else
-      ACTUAL_CPU=0
+      lACTUAL_CPU=0
     fi
-    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( lLINES - 3 ))" "${ACTUAL_CPU}" "$(( lLINES - 2 ))" "${MEM_PERCENTAGE_STR}" "$(( lLINES - 1 ))" "${DISK_PERCENTAGE_STR}" || true
+    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( lLINES - 3 ))" "${lACTUAL_CPU}" "$(( lLINES - 2 ))" "${lMEM_PERCENTAGE_STR}" "$(( lLINES - 1 ))" "${lDISK_PERCENTAGE_STR}" || true
     update_cpu &
     sleep .2
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -152,19 +152,19 @@ update_box_system_load() {
 # Helper second box "STATUS"
 # we have three lines per box and here we build the string for each line ($1=line)
 status_util_str() {
-  local UTIL_TYPE_NO="${1:-0}"
-  local UTIL_TYPES=('RUN' 'LOG_DIR' 'PROCESSES')
-  local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
-  local UTIL_VALUE="${2:-}"
-  local UTIL_BAR_BLANK=""
+  local lUTIL_TYPE_NO="${1:-0}"
+  local lUTIL_TYPES=('RUN' 'LOG_DIR' 'PROCESSES')
+  local lUTIL_STR="${lUTIL_TYPES[${lUTIL_TYPE_NO}]}"
+  local lUTIL_VALUE="${2:-}"
+  local lUTIL_BAR_BLANK=""
 
-  local UTIL_LEN=$((22-"${#UTIL_STR}"-"${#UTIL_VALUE}"))
-  local U=0
-  for ((U=1; U<=UTIL_LEN; U++)) ; do
-    UTIL_BAR_BLANK+=" "
+  local lUTIL_LEN=$((22-"${#lUTIL_STR}"-"${#lUTIL_VALUE}"))
+  local lU=0
+  for ((lU=1; lU<=lUTIL_LEN; lU++)) ; do
+    lUTIL_BAR_BLANK+=" "
   done
 
-  echo -e "${UTIL_STR}${UTIL_BAR_BLANK}${UTIL_VALUE}"
+  echo -e "${lUTIL_STR}${lUTIL_BAR_BLANK}${lUTIL_VALUE}"
 }
 
 # Update second box "STATUS"
@@ -172,48 +172,48 @@ status_util_str() {
 update_box_status() {
   shopt -s checkwinsize
 
-  local DATE_STR=""
+  local lDATE_STR=""
   local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    DATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lDATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
-  if [[ "${DATE_STR}" == "" ]] ; then
-    DATE_STR="$(date +%s)"
+  if [[ "${lDATE_STR}" == "" ]] ; then
+    lDATE_STR="$(date +%s)"
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      sed -i "3s/^$/${DATE_STR}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+      sed -i "3s/^$/${lDATE_STR}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
     fi
   fi
 
-  local LOG_DIR_SIZE=""
-  local RUN_EMBA_PROCESSES=0
-  local RUN_EMBA_PROCESSES_QUEST=0
+  local lLOG_DIR_SIZE=""
+  local lRUN_EMBA_PROCESSES=0
+  local lRUN_EMBA_PROCESSES_QUEST=0
 
-  local BOX_SIZE=0
+  local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
-  while [[ "${BOX_SIZE}" -gt 0 ]]; do
+  while [[ "${lBOX_SIZE}" -gt 0 ]]; do
     [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
-    local RUNTIME=0
-    # RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
-    RUNTIME=$(show_runtime 1)
-    LOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
+    local lRUNTIME=0
+    # lRUNTIME="$(date -d@"$(( "$(date +%s)" - "${lDATE_STR}" ))" -u +%H:%M:%S)"
+    lRUNTIME=$(show_runtime 1)
+    lLOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
     # if we are running in a docker environment, we can count the processes withing our containers:
     if [[ -n "${MAIN_CONTAINER}" ]]; then
-      RUN_EMBA_PROCESSES="$(docker exec "${MAIN_CONTAINER}" ps 2>/dev/null | wc -l || true)"
-      RUN_EMBA_PROCESSES_QUEST="$(docker exec "${QUEST_CONTAINER}" ps 2>/dev/null | wc -l || true)"
-      RUN_EMBA_PROCESSES=$((RUN_EMBA_PROCESSES + RUN_EMBA_PROCESSES_QUEST))
+      lRUN_EMBA_PROCESSES="$(docker exec "${MAIN_CONTAINER}" ps 2>/dev/null | wc -l || true)"
+      lRUN_EMBA_PROCESSES_QUEST="$(docker exec "${QUEST_CONTAINER}" ps 2>/dev/null | wc -l || true)"
+      lRUN_EMBA_PROCESSES=$((lRUN_EMBA_PROCESSES + lRUN_EMBA_PROCESSES_QUEST))
     else
       # this is a dirty solution if we have not MAIN_CONTAINER set
       # this happens in dev mode or in non silent mode -> but in both modes
       # the status bar is not supported
-      RUN_EMBA_PROCESSES="$(ps -C emba | wc -l || true)"
+      lRUN_EMBA_PROCESSES="$(ps -C emba | wc -l || true)"
     fi
-    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( lLINES - 3 ))" "$(status_util_str 0 "${RUNTIME}")" "$(( lLINES - 2 ))" "$(status_util_str 1 "${LOG_DIR_SIZE}")" "$(( lLINES - 1 ))" "$(status_util_str 2 "${RUN_EMBA_PROCESSES}")" || true
+    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( lLINES - 3 ))" "$(status_util_str 0 "${lRUNTIME}")" "$(( lLINES - 2 ))" "$(status_util_str 1 "${lLOG_DIR_SIZE}")" "$(( lLINES - 1 ))" "$(status_util_str 2 "${lRUN_EMBA_PROCESSES}")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -225,49 +225,49 @@ update_box_status() {
 # we have three lines per box and here we build the string for each line ($1=line)
 # we also need to show a value: $2
 module_util_str() {
-  local UTIL_TYPE_NO="${1:-0}"
-  local UTIL_TYPES=('RUNNING' 'LAST FINISHED' 'PROGRESS')
-  local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
-  local UTIL_VALUE="${2:-}"
-  local UTIL_BAR_BLANK=""
+  local lUTIL_TYPE_NO="${1:-0}"
+  local lUTIL_TYPES=('RUNNING' 'LAST FINISHED' 'PROGRESS')
+  local lUTIL_STR="${lUTIL_TYPES[${lUTIL_TYPE_NO}]}"
+  local lUTIL_VALUE="${2:-}"
+  local lUTIL_BAR_BLANK=""
 
-  local UTIL_LEN=$((22-"${#UTIL_STR}"-"${#UTIL_VALUE}"))
-  local U=0
-  for ((U=1; U<=UTIL_LEN; U++)) ; do
-    UTIL_BAR_BLANK+=" "
+  local lUTIL_LEN=$((22-"${#lUTIL_STR}"-"${#lUTIL_VALUE}"))
+  local lU=0
+  for ((lU=1; lU<=lUTIL_LEN; lU++)) ; do
+    lUTIL_BAR_BLANK+=" "
   done
 
-  echo -e "${UTIL_STR}${UTIL_BAR_BLANK}${UTIL_VALUE}"
+  echo -e "${lUTIL_STR}${lUTIL_BAR_BLANK}${lUTIL_VALUE}"
 }
 
 # Update third box "MODULES"
 update_box_modules() {
   shopt -s checkwinsize
 
-  local STARTED_MODULE_STR=""
-  local FINISHED_MODULE_STR=""
-  local LAST_FINISHED_MODULE_STR=""
-  local COUNT_MODULES=0
-  local MODULES=()
-  local MODULES_LOCAL=()
-  local MODULES_EMBA=()
-  local MODULE_FILE=""
+  local lSTARTED_MODULE_STR=""
+  local lFINISHED_MODULE_STR=""
+  local lLAST_FINISHED_MODULE_STR=""
+  local lCOUNT_MODULES=0
+  local lMODULES_ARR=()
+  local lMODULES_LOCAL_ARR=()
+  local lMODULES_EMBA_ARR=()
+  local lMODULE_FILE=""
   local lMODULE_NAME=""
   local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    COUNT_MODULES="$(sed '4q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lCOUNT_MODULES="$(sed '4q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
-  if [[ ${COUNT_MODULES} -eq 0 || "${COUNT_MODULES}" == "" ]] ; then
-    mapfile -t MODULES_EMBA < <(find "${MOD_DIR}" -maxdepth 1 -name "*.sh" 2> /dev/null)
+  if [[ ${lCOUNT_MODULES} -eq 0 || "${lCOUNT_MODULES}" == "" ]] ; then
+    mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "*.sh" 2> /dev/null)
     if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2> /dev/null)
+      mapfile -t lMODULES_LOCAL_ARR < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2> /dev/null)
     fi
-    MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
-    for MODULE_FILE in "${MODULES[@]}" ; do
-      if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]]; then
+    lMODULES_ARR=( "${lMODULES_EMBA_ARR[@]}" "${lMODULES_LOCAL_ARR[@]}" )
+    for lMODULE_FILE in "${lMODULES_ARR[@]}" ; do
+      if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]]; then
         # if system emulation is not enabled, we do not count the L modules
-        lMODULE_NAME="$(basename "${MODULE_FILE}")"
+        lMODULE_NAME="$(basename "${lMODULE_FILE}")"
         if [[ "${lMODULE_NAME}" =~ ^L[0-9]* ]] && [[ "${FULL_EMULATION}" -ne 1 ]]; then
           continue
         fi
@@ -282,27 +282,27 @@ update_box_modules() {
         if [[ "${MODULE_BLACKLIST[*]}" == *"${lMODULE_NAME%\.sh}"* ]]; then
           continue
         fi
-        (( COUNT_MODULES+=1 ))
+        (( lCOUNT_MODULES+=1 ))
       fi
     done
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      sed -i "4s/^$/${COUNT_MODULES}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+      sed -i "4s/^$/${lCOUNT_MODULES}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
     fi
   fi
 
-  local BOX_SIZE=0
+  local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
-  while [[ "${BOX_SIZE}" -gt 0 ]]; do
+  while [[ "${lBOX_SIZE}" -gt 0 ]]; do
     [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
-    STARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
-    FINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
-    LAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
-    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( lLINES - 3 ))" "$(module_util_str 0 "$((STARTED_MODULE_STR - FINISHED_MODULE_STR))")" "$(( lLINES - 2 ))" "$(module_util_str 1 "${LAST_FINISHED_MODULE_STR}")" "$(( lLINES - 1 ))" "$(module_util_str 2 "${FINISHED_MODULE_STR}/${COUNT_MODULES}")" || true
+    lSTARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
+    lFINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
+    lLAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
+    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( lLINES - 3 ))" "$(module_util_str 0 "$((lSTARTED_MODULE_STR - lFINISHED_MODULE_STR))")" "$(( lLINES - 2 ))" "$(module_util_str 1 "${lLAST_FINISHED_MODULE_STR}")" "$(( lLINES - 1 ))" "$(module_util_str 2 "${lFINISHED_MODULE_STR}/${lCOUNT_MODULES}")" || true
     sleep 1
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -314,60 +314,60 @@ update_box_modules() {
 # we have three lines per box and here we build the string for each line ($1=line)
 # we also need to show a value: $2
 status_2_util_str() {
-  local UTIL_TYPE_NO="${1:-0}"
-  local UTIL_TYPES=('PHASE' 'MODE' '')
-  local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
-  local UTIL_VALUE="${2:-}"
-  local UTIL_BAR_BLANK=""
+  local lUTIL_TYPE_NO="${1:-0}"
+  local lUTIL_TYPES=('PHASE' 'MODE' '')
+  local lUTIL_STR="${lUTIL_TYPES[${lUTIL_TYPE_NO}]}"
+  local lUTIL_VALUE="${2:-}"
+  local lUTIL_BAR_BLANK=""
 
-  local UTIL_LEN=$((22-"${#UTIL_STR}"-"${#UTIL_VALUE}"))
-  local U=0
-  for ((U=1; U<=UTIL_LEN; U++)) ; do
-    UTIL_BAR_BLANK+=" "
+  local lUTIL_LEN=$((22-"${#lUTIL_STR}"-"${#lUTIL_VALUE}"))
+  local lU=0
+  for ((lU=1; lU<=lUTIL_LEN; lU++)) ; do
+    lUTIL_BAR_BLANK+=" "
   done
 
-  echo -e "${UTIL_STR}${UTIL_BAR_BLANK}${UTIL_VALUE}"
+  echo -e "${lUTIL_STR}${lUTIL_BAR_BLANK}${lUTIL_VALUE}"
 }
 
 # Update fourth box "STATUS 2"
 update_box_status_2() {
   shopt -s checkwinsize
 
-  local PHASE_STR=""
-  local MODE_STR=""
+  local lPHASE_STR=""
+  local lMODE_STR=""
   local lLINES=""
 
   if [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ; then
-    MODE_STR+="DEV/"
+    lMODE_STR+="DEV/"
   elif [[ ${STRICT_MODE} -eq 1 ]] ; then
-    MODE_STR+="STRICT"
+    lMODE_STR+="STRICT"
   else
-    MODE_STR+="DEFAULT"
+    lMODE_STR+="DEFAULT"
   fi
 
-  local ERROR_STR=0
-  local BOX_SIZE=0
+  local lERROR_STR=0
+  local lBOX_SIZE=0
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
 
-  while [[ "${BOX_SIZE}" -gt 0 ]]; do
+  while [[ "${lBOX_SIZE}" -gt 0 ]]; do
     [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" || true)
 
-    PHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
-    [[ "${PHASE_STR}" == "Pre" ]] && PHASE_STR="Extraction"
-    [[ "${PHASE_STR}" == "Testing" ]] && PHASE_STR="Analysis"
-    [[ "${PHASE_STR}" == "System" ]] && PHASE_STR="Emulation"
+    lPHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
+    [[ "${lPHASE_STR}" == "Pre" ]] && lPHASE_STR="Extraction"
+    [[ "${lPHASE_STR}" == "Testing" ]] && lPHASE_STR="Analysis"
+    [[ "${lPHASE_STR}" == "System" ]] && lPHASE_STR="Emulation"
 
-    ERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2> /dev/null || true )"
-    if [[ "${ERROR_STR}" == "/0" || "${ERROR_STR}" == "/" ]] ; then
-      ERROR_STR=""
+    lERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2> /dev/null || true )"
+    if [[ "${lERROR_STR}" == "/0" || "${lERROR_STR}" == "/" ]] ; then
+      lERROR_STR=""
     fi
-    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( lLINES - 3 ))" "$(status_2_util_str 0 "${PHASE_STR}")" "$(( lLINES - 2 ))" "$(status_2_util_str 1 "${MODE_STR}${ERROR_STR}")" "$(( lLINES - 1 ))" "$(status_2_util_str 2 "")" || true
+    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( lLINES - 3 ))" "$(status_2_util_str 0 "${lPHASE_STR}")" "$(( lLINES - 2 ))" "$(status_2_util_str 1 "${lMODE_STR}${lERROR_STR}")" "$(( lLINES - 1 ))" "$(status_2_util_str 2 "")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
     if check_emba_ended; then
       exit

@@ -55,12 +55,12 @@ welcome()
 module_log_init()
 {
   export LOG_FILE_NAME="${1:-}"
-  local FILE_NAME=""
-  local MODULE_NUMBER=""
-  MODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
-  FILE_NAME=$(echo "${LOG_FILE_NAME}" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
-  LOG_FILE="${LOG_DIR}""/""${FILE_NAME}"".txt"
-  LOG_FILE_NAME="${FILE_NAME}"".txt"
+  local lFILE_NAME=""
+  # local lMODULE_NUMBER=""
+  # lMODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
+  lFILE_NAME=$(echo "${LOG_FILE_NAME}" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
+  LOG_FILE="${LOG_DIR}""/""${lFILE_NAME}"".txt"
+  LOG_FILE_NAME="${lFILE_NAME}"".txt"
 
   if [[ -f "${LOG_FILE}" ]]; then
     print_output "[*] Found old module log file ${ORANGE}${LOG_FILE}${NC}... creating a backup" "no_log"
@@ -69,10 +69,10 @@ module_log_init()
     mv "${LOG_FILE}" "${OLD_LOG_FILE}" || true
   fi
 
-  module_start_log "${FILE_NAME^}"
+  module_start_log "${lFILE_NAME^}"
 
   if [[ "${DISABLE_NOTIFICATIONS}" -eq 0 ]]; then
-    write_notification "Module ${FILE_NAME} started"
+    write_notification "Module ${lFILE_NAME} started"
   fi
 }
 
@@ -82,22 +82,22 @@ module_log_init()
 #                no_log is also valid to just print to cli
 module_title()
 {
-  local MODULE_TITLE="${1:-}"
-  local LOG_FILE_TO_LOG="${2:-}"
+  local lMODULE_TITLE="${1:-}"
+  local lLOG_FILE_TO_LOG="${2:-}"
 
-  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
-    LOG_FILE_TO_LOG="${LOG_FILE}"
+  if [[ "${lLOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${lLOG_FILE_TO_LOG}" ]]; then
+    lLOG_FILE_TO_LOG="${LOG_FILE}"
   fi
 
-  local MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""${MODULE_TITLE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
-  echo -e "\\n\\n""${MODULE_TITLE_FORMAT}" || true
+  local lMODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""${lMODULE_TITLE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+  echo -e "\\n\\n""${lMODULE_TITLE_FORMAT}" || true
 
-  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
-    echo -e "$(format_log "${MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  if [[ "${lLOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
+    echo -e "$(format_log "${lMODULE_TITLE_FORMAT}")" | tee -a "${lLOG_FILE_TO_LOG}" >/dev/null || true
   fi
 
   if [[ ${LOG_GREP} -eq 1 ]] ; then
-    write_grep_log "${MODULE_TITLE}" "MODULE_TITLE"
+    write_grep_log "${lMODULE_TITLE}" "MODULE_TITLE"
   fi
   SUB_MODULE_COUNT=0
 }
@@ -106,24 +106,24 @@ module_title()
 # $2: (optional) log file to log -> this is typically used in combination with write_log to write another log file
 sub_module_title()
 {
-  local SUB_MODULE_TITLE="${1:-}"
-  local LOG_FILE_TO_LOG="${2:-}"
+  local lSUB_MODULE_TITLE="${1:-}"
+  local lLOG_FILE_TO_LOG="${2:-}"
   # if $2 is not set, we are going to log to the original LOG_FILE
-  if [[ -z "${LOG_FILE_TO_LOG:-}" ]]; then
-    LOG_FILE_TO_LOG="${LOG_FILE}"
+  if [[ -z "${lLOG_FILE_TO_LOG:-}" ]]; then
+    lLOG_FILE_TO_LOG="${LOG_FILE}"
   fi
 
-  local SUB_MODULE_TITLE_FORMAT=""
+  local lSUB_MODULE_TITLE_FORMAT=""
 
-  SUB_MODULE_TITLE_FORMAT="\\n\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${SUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
-  echo -e "${SUB_MODULE_TITLE_FORMAT}" || true
-  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
-    echo -e "$(format_log "${SUB_MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  lSUB_MODULE_TITLE_FORMAT="\\n\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${lSUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
+  echo -e "${lSUB_MODULE_TITLE_FORMAT}" || true
+  if [[ "${lLOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
+    echo -e "$(format_log "${lSUB_MODULE_TITLE_FORMAT}")" | tee -a "${lLOG_FILE_TO_LOG}" >/dev/null || true
   fi
 
   if [[ ${LOG_GREP} -eq 1 ]] ; then
     SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
-    write_grep_log "${SUB_MODULE_TITLE}" "SUB_MODULE_TITLE"
+    write_grep_log "${lSUB_MODULE_TITLE}" "SUB_MODULE_TITLE"
   fi
 }
 
@@ -147,141 +147,141 @@ print_error() {
 }
 
 print_output() {
-  local OUTPUT="${1:-\n}"
-  local LOG_SETTING="${2:-}"
-  if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then
-    local LOG_FILE_MOD="${2:-}"
+  local lOUTPUT="${1:-\n}"
+  local lLOG_SETTING="${2:-}"
+  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_FILE_MOD:-}" ]]; then
+    local lLOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
-  local REF_LINK="${3:-}"
-  local TYPE_CHECK=""
-  TYPE_CHECK="$( echo "${OUTPUT}" | cut -c1-3 )"
+  local lREF_LINK="${3:-}"
+  local lTYPE_CHECK=""
+  lTYPE_CHECK="$( echo "${lOUTPUT}" | cut -c1-3 )"
 
-  if [[ "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]" ]] ; then
-    local COLOR_OUTPUT_STRING=""
-    COLOR_OUTPUT_STRING="$(color_output "${OUTPUT}")"
-    safe_echo "${COLOR_OUTPUT_STRING}"
-    if [[ "${LOG_SETTING}" == "main" ]] ; then
-      safe_echo "$(format_log "${COLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
-    elif [[ "${LOG_SETTING}" != "no_log" ]] ; then
-      if [[ -z "${REF_LINK:-}" ]] ; then
-        safe_echo "$(format_log "${COLOR_OUTPUT_STRING}")" "${LOG_FILE}"
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${COLOR_OUTPUT_STRING}")" "${LOG_FILE_MOD}"
+  if [[ "${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]" ]] ; then
+    local lCOLOR_OUTPUT_STRING=""
+    lCOLOR_OUTPUT_STRING="$(color_output "${lOUTPUT}")"
+    safe_echo "${lCOLOR_OUTPUT_STRING}"
+    if [[ "${lLOG_SETTING}" == "main" ]] ; then
+      safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
+    elif [[ "${lLOG_SETTING}" != "no_log" ]] ; then
+      if [[ -z "${lREF_LINK:-}" ]] ; then
+        safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${LOG_FILE}"
+        if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${lLOG_FILE_MOD}"
         fi
       else
-        safe_echo "$(format_log "${COLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${REF_LINK}" 1)" "${LOG_FILE}"
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${COLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${REF_LINK}" 1)" "${LOG_FILE_MOD}"
+        safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
   else
-    safe_echo "${OUTPUT}"
-    if [[ "${LOG_SETTING}" == "main" ]] ; then
-      safe_echo "$(format_log "${OUTPUT}")" "${MAIN_LOG}"
-    elif [[ "${LOG_SETTING}" != "no_log" ]] ; then
-      if [[ -z "${REF_LINK}" ]] ; then
-        safe_echo "$(format_log "${OUTPUT}")" "${LOG_FILE:-}"
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${OUTPUT}")" "${LOG_FILE_MOD}"
+    safe_echo "${lOUTPUT}"
+    if [[ "${lLOG_SETTING}" == "main" ]] ; then
+      safe_echo "$(format_log "${lOUTPUT}")" "${MAIN_LOG}"
+    elif [[ "${lLOG_SETTING}" != "no_log" ]] ; then
+      if [[ -z "${lREF_LINK}" ]] ; then
+        safe_echo "$(format_log "${lOUTPUT}")" "${LOG_FILE:-}"
+        if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "${lOUTPUT}")" "${lLOG_FILE_MOD}"
         fi
       else
-        safe_echo "$(format_log "${OUTPUT}")""\\r\\n""$(format_log "[REF] ""${REF_LINK}" 1)" "${LOG_FILE}"
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${OUTPUT}")""\\r\\n""$(format_log "[REF] ""${REF_LINK}" 1)" "${LOG_FILE_MOD}"
+        safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
   fi
-  if [[ "${LOG_SETTING}" != "no_log" ]]; then
-    write_grep_log "${OUTPUT}"
+  if [[ "${lLOG_SETTING}" != "no_log" ]]; then
+    write_grep_log "${lOUTPUT}"
   fi
 }
 
 # echo unknown data in a consistent way:
 safe_echo() {
-  local STRING_TO_ECHO="${1:-}"
+  local lSTRING_TO_ECHO="${1:-}"
 
   # %b  ARGUMENT  as a string with '\' escapes interpreted, except that octal escapes are of the form \0 or
   if [[ -v 2 ]]; then
-    local LOG_TO_FILE="${2:-}"
-    printf -- "%b" "${STRING_TO_ECHO}\r\n" | tee -a "${LOG_TO_FILE}" >/dev/null || true
+    local lLOG_TO_FILE="${2:-}"
+    printf -- "%b" "${lSTRING_TO_ECHO}\r\n" | tee -a "${lLOG_TO_FILE}" >/dev/null || true
   else
-    printf -- "%b" "${STRING_TO_ECHO}\r\n" || true
+    printf -- "%b" "${lSTRING_TO_ECHO}\r\n" || true
   fi
 }
 
 # This should be used for using untrusted data as input for other commands:
 escape_echo() {
-  local STRING_TO_ECHO="${1:-}"
+  local lSTRING_TO_ECHO="${1:-}"
 
   # %q  ARGUMENT is printed in a format that can be reused as shell input, escaping non-printable characters with the proposed POSIX $'' syntax.
   if [[ -v 2 ]]; then
-    local LOG_TO_FILE="${2:-}"
-    printf -- "%q" "${STRING_TO_ECHO}" | tee -a "${LOG_TO_FILE}" >/dev/null || true
+    local lLOG_TO_FILE="${2:-}"
+    printf -- "%q" "${lSTRING_TO_ECHO}" | tee -a "${lLOG_TO_FILE}" >/dev/null || true
   else
-    printf -- "%q" "${STRING_TO_ECHO}" || true
+    printf -- "%q" "${lSTRING_TO_ECHO}" || true
   fi
 }
 
 check_int() {
-  local INT_TO_CHECK="${1:-}"
-  [[ -z "${INPUT_TO_CHECK}" ]] && return
-  if [[ -n "${INT_TO_CHECK//[0-9]/}" ]]; then
+  local lINT_TO_CHECK="${1:-}"
+  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  if [[ -n "${lINT_TO_CHECK//[0-9]/}" ]]; then
     print_output "[-] Invalid input detected - integers only" "no_log"
     exit 1
   fi
 }
 
 check_alnum() {
-  local INPUT_TO_CHECK="${1:-}"
-  [[ -z "${INPUT_TO_CHECK}" ]] && return
-  if ! [[ "${INPUT_TO_CHECK}" =~ ^[[:alnum:]]+$ ]]; then
+  local lINPUT_TO_CHECK="${1:-}"
+  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  if ! [[ "${lINPUT_TO_CHECK}" =~ ^[[:alnum:]]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only" "no_log"
     exit 1
   fi
 }
 
 check_vendor() {
-  local INPUT_TO_CHECK="${1:-}"
-  [[ -z "${INPUT_TO_CHECK}" ]] && return
-  if ! [[ "${INPUT_TO_CHECK}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+  local lINPUT_TO_CHECK="${1:-}"
+  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  if ! [[ "${lINPUT_TO_CHECK}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only" "no_log"
     exit 1
   fi
 }
 
 check_notes() {
-  local INPUT_TO_CHECK="${1:-}"
-  [[ -z "${INPUT_TO_CHECK}" ]] && return
-  if ! [[ "${INPUT_TO_CHECK}" =~ ^[[:alnum:][:blank:][:punct:]]+$ ]]; then
+  local lINPUT_TO_CHECK="${1:-}"
+  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  if ! [[ "${lINPUT_TO_CHECK}" =~ ^[[:alnum:][:blank:][:punct:]]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only allowed in notes" "no_log"
     exit 1
   fi
 }
 
 check_path_input() {
-  local INPUT_TO_CHECK="${1:-}"
-  [[ -z "${INPUT_TO_CHECK}" ]] && return
-  if ! [[ "${INPUT_TO_CHECK}" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
+  local lINPUT_TO_CHECK="${1:-}"
+  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  if ! [[ "${lINPUT_TO_CHECK}" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
     print_output "[-] Invalid input detected - paths aka ~/abc/def123/ASDF only" "no_log"
     exit 1
   fi
 }
 
 check_version() {
-  local INPUT_TO_CHECK="${1:-}"
-  [[ -z "${INPUT_TO_CHECK}" ]] && return
-  if ! [[ "${INPUT_TO_CHECK}" =~ ^[a-zA-Z0-9./_:\+'-']+$ ]]; then
+  local lINPUT_TO_CHECK="${1:-}"
+  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  if ! [[ "${lINPUT_TO_CHECK}" =~ ^[a-zA-Z0-9./_:\+'-']+$ ]]; then
     print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
     exit 1
   fi
 }
 
 print_ln() {
-  local LOG_SETTING="${1:-}"
-  print_output "" "${LOG_SETTING}"
+  local lLOG_SETTING="${1:-}"
+  print_output "" "${lLOG_SETTING}"
 }
 
 print_dot() {
@@ -290,29 +290,29 @@ print_dot() {
 }
 
 write_log() {
-  local TEXT_ARR=()
-  readarray TEXT_ARR <<< "${1}"
-  local LOG_FILE_ALT="${2:-}"
-  local GREP_LOG_WRITE="${3:-}"
-  if [[ "${LOG_FILE_ALT}" == "" ]] ; then
-    local W_LOG_FILE="${LOG_FILE}"
+  local lTEXT_ARR=()
+  readarray lTEXT_ARR <<< "${1}"
+  local lLOG_FILE_ALT="${2:-}"
+  local lGREP_LOG_WRITE="${3:-}"
+  if [[ "${lLOG_FILE_ALT}" == "" ]] ; then
+    local lW_LOG_FILE="${LOG_FILE}"
   else
-    local W_LOG_FILE="${LOG_FILE_ALT}"
+    local lW_LOG_FILE="${lLOG_FILE_ALT}"
   fi
-  local E=""
+  local lENTRY=""
 
-  for E in "${TEXT_ARR[@]}" ; do
-    local TYPE_CHECK=""
-    TYPE_CHECK="$( echo "${E}" | cut -c1-3 )"
-    if [[ ( "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]") && ("${E}" != "[*] Statistic"* ) ]] ; then
-      local COLOR_OUTPUT_STRING=""
-      COLOR_OUTPUT_STRING="$(color_output "${E}")"
-      echo -e "$(format_log "${COLOR_OUTPUT_STRING}")" | tee -a "${W_LOG_FILE}" >/dev/null || true
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    local lTYPE_CHECK=""
+    lTYPE_CHECK="$( echo "${lENTRY}" | cut -c1-3 )"
+    if [[ ( "${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]") && ("${lENTRY}" != "[*] Statistic"* ) ]] ; then
+      local lCOLOR_OUTPUT_STRING=""
+      lCOLOR_OUTPUT_STRING="$(color_output "${lENTRY}")"
+      echo -e "$(format_log "${lCOLOR_OUTPUT_STRING}")" | tee -a "${lW_LOG_FILE}" >/dev/null || true
     else
-      echo -e "$(format_log "${E}")" | tee -a "${W_LOG_FILE}" >/dev/null || true
+      echo -e "$(format_log "${lENTRY}")" | tee -a "${lW_LOG_FILE}" >/dev/null || true
     fi
   done
-  if [[ "${GREP_LOG_WRITE}" == "g" ]] ; then
+  if [[ "${lGREP_LOG_WRITE}" == "g" ]] ; then
     write_grep_log "${1:-}"
   fi
 }
@@ -324,12 +324,12 @@ write_csv_log() {
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  local CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
-  CSV_LOG="${CSV_DIR}""/""${CSV_LOG}"
+  local lCSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
+  lCSV_LOG="${CSV_DIR}""/""${lCSV_LOG}"
 
   # shellcheck disable=SC2005
-  echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${CSV_LOG}" || true
-  # printf '\n' >> "${CSV_LOG}" || true
+  echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${lCSV_LOG}" || true
+  # printf '\n' >> "${lCSV_LOG}" || true
 }
 
 # write_pid_log is a functions used for debugging
@@ -340,7 +340,7 @@ write_csv_log() {
 # with this you can trace the PIDs. Additionally it is sometimes
 # useful to enable PID output in wait_for_pid from helpers_emba_helpers.sh
 write_pid_log() {
-  local LOG_MESSAGE="${1:-}"
+  local lLOG_MESSAGE="${1:-}"
   if [[ "${PID_LOGGING}" -eq 0 ]]; then
     return
   fi
@@ -350,52 +350,53 @@ write_pid_log() {
   fi
 
   # shellcheck disable=SC2153
-  echo "${LOG_MESSAGE}" >> "${TMP_DIR}"/"${PID_LOG_FILE}" || true
+  echo "${lLOG_MESSAGE}" >> "${TMP_DIR}"/"${PID_LOG_FILE}" || true
 }
 
 write_grep_log()
 {
-  local OLD_MESSAGE_TYPE=""
+  local lOLD_MESSAGE_TYPE=""
 
   if [[ ${LOG_GREP:-0} -eq 1 ]] ; then
     readarray -t OUTPUT_ARR <<< "${1}"
-    local MESSAGE_TYPE_PAR="${2:-}"
-    for E in "${OUTPUT_ARR[@]}" ; do
-      if [[ -n "${E//[[:blank:]]/}" ]] && [[ "${E}" != "\\n" ]] && [[ -n "${E}" ]] ; then
-        if [[ -n "${MESSAGE_TYPE_PAR}" ]] ; then
-          MESSAGE_TYPE="${MESSAGE_TYPE_PAR}"
-          OLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
+    local lMESSAGE_TYPE_PAR="${2:-}"
+    local lENTRY=""
+    for lENTRY in "${OUTPUT_ARR[@]}" ; do
+      if [[ -n "${lENTRY//[[:blank:]]/}" ]] && [[ "${lENTRY}" != "\\n" ]] && [[ -n "${lENTRY}" ]] ; then
+        if [[ -n "${lMESSAGE_TYPE_PAR}" ]] ; then
+          MESSAGE_TYPE="${lMESSAGE_TYPE_PAR}"
+          lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
           TYPE=2
         else
-          TYPE_CHECK="$( echo "${E}" | cut -c1-3 )"
-          if [[ "${TYPE_CHECK}" == "[-]" ]] ; then
+          lTYPE_CHECK="$( echo "${lENTRY}" | cut -c1-3 )"
+          if [[ "${lTYPE_CHECK}" == "[-]" ]] ; then
             MESSAGE_TYPE="FALSE"
-            OLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
+            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
             TYPE=1
-          elif [[ "${TYPE_CHECK}" == "[*]" ]] ; then
+          elif [[ "${lTYPE_CHECK}" == "[*]" ]] ; then
             MESSAGE_TYPE="MESSAGE"
-            OLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
+            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
             TYPE=1
-          elif [[ "${TYPE_CHECK}" == "[!]" ]] ; then
+          elif [[ "${lTYPE_CHECK}" == "[!]" ]] ; then
             MESSAGE_TYPE="WARNING"
-            OLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
+            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
             TYPE=1
-          elif [[ "${TYPE_CHECK}" == "[+]" ]] ; then
+          elif [[ "${lTYPE_CHECK}" == "[+]" ]] ; then
             MESSAGE_TYPE="POSITIVE"
-            OLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
+            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
             TYPE=1
           else
-            MESSAGE_TYPE="${OLD_MESSAGE_TYPE}"
+            MESSAGE_TYPE="${lOLD_MESSAGE_TYPE}"
             TYPE=3
           fi
         fi
         if [[ ${TYPE} -eq 1 ]] ; then
-          echo -e "${MESSAGE_TYPE}""${GREP_LOG_DELIMITER}""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$(echo "${E}" | cut -c4- )")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
+          echo -e "${MESSAGE_TYPE}""${GREP_LOG_DELIMITER}""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$(echo "${lENTRY}" | cut -c4- )")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
         elif [[ ${TYPE} -eq 2 ]] ; then
-          echo -e "${MESSAGE_TYPE}""${GREP_LOG_DELIMITER}""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "${E}")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
+          echo -e "${MESSAGE_TYPE}""${GREP_LOG_DELIMITER}""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "${lENTRY}")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
         elif [[ ${TYPE} -eq 3 ]] ; then
           truncate -s -1 "${GREP_LOG_FILE}"
-          echo -e "${GREP_LOG_LINEBREAK}""$(echo -e "$(format_grep_log "${E}")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
+          echo -e "${GREP_LOG_LINEBREAK}""$(echo -e "$(format_grep_log "${lENTRY}")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
         fi
       fi
     done
@@ -405,14 +406,14 @@ write_grep_log()
 write_link()
 {
   if [[ ${HTML} -eq 1 ]] ; then
-    local LINK="${1:-}"
-    LINK="$(format_log "[REF] ""${LINK}" 1)"
-    local LOG_FILE_ALT="${2:-}"
-    if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
-      if [[ -f "${LOG_FILE_ALT}" ]] ; then
-        echo -e "${LINK}" | tee -a "${LOG_FILE_ALT}" >/dev/null
+    local lLINK="${1:-}"
+    lLINK="$(format_log "[REF] ""${lLINK}" 1)"
+    local lLOG_FILE_ALT="${2:-}"
+    if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]] ; then
+      if [[ -f "${lLOG_FILE_ALT}" ]] ; then
+        echo -e "${lLINK}" | tee -a "${lLOG_FILE_ALT}" >/dev/null
       else
-        echo -e "${LINK}" | tee -a "${LOG_FILE}" >/dev/null
+        echo -e "${lLINK}" | tee -a "${LOG_FILE}" >/dev/null
       fi
     fi
   fi
@@ -425,14 +426,14 @@ write_link()
 write_local_overlay_link()
 {
   if [[ ${HTML} -eq 1 ]] ; then
-    local LINK="${1:-}"
-    LINK="$(format_log "[LOV] ""${LINK}" 1)"
-    local LOG_FILE_ALT="${2:-}"
-    if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
-      if [[ -f "${LOG_FILE_ALT}" ]] ; then
-        echo -e "${LINK}" | tee -a "${LOG_FILE_ALT}" >/dev/null
+    local lLINK="${1:-}"
+    lLINK="$(format_log "[LOV] ""${lLINK}" 1)"
+    local lLOG_FILE_ALT="${2:-}"
+    if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]] ; then
+      if [[ -f "${lLOG_FILE_ALT}" ]] ; then
+        echo -e "${lLINK}" | tee -a "${lLOG_FILE_ALT}" >/dev/null
       else
-        echo -e "${LINK}" | tee -a "${LOG_FILE}" >/dev/null
+        echo -e "${lLINK}" | tee -a "${LOG_FILE}" >/dev/null
       fi
     fi
   fi
@@ -442,14 +443,14 @@ write_local_overlay_link()
 write_anchor()
 {
   if [[ ${HTML} -eq 1 ]] ; then
-    local ANCHOR="${1:-}"
-    ANCHOR="$(format_log "[ANC] ""${ANCHOR}" 1)"
-    local LOG_FILE_ALT="${2:-}"
-    if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
-      if [[ -f "${LOG_FILE_ALT}" ]] ; then
-        echo -e "${ANCHOR}" | tee -a "${LOG_FILE_ALT}" >/dev/null
+    local lANCHOR="${1:-}"
+    lANCHOR="$(format_log "[ANC] ""${lANCHOR}" 1)"
+    local lLOG_FILE_ALT="${2:-}"
+    if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]] ; then
+      if [[ -f "${lLOG_FILE_ALT}" ]] ; then
+        echo -e "${lANCHOR}" | tee -a "${lLOG_FILE_ALT}" >/dev/null
       else
-        echo -e "${ANCHOR}" | tee -a "${LOG_FILE}" >/dev/null
+        echo -e "${lANCHOR}" | tee -a "${LOG_FILE}" >/dev/null
       fi
     fi
   fi
@@ -463,184 +464,184 @@ reset_module_count()
 
 color_output()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray TEXT_ARR <<< "${1:-}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray lTEXT_ARR <<< "${1:-}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    local TYPE_CHECK=""
-    TYPE_CHECK="$( echo "${E}" | cut -c1-3 )"
-    if [[ "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]" ]] ; then
-      local STR=""
-      STR="$( echo "${E}" | cut -c 4- || true)"
-      if [[ "${TYPE_CHECK}" == "[-]" ]] ; then
-        TEXT="${TEXT}""[""${RED}""-""${NC}""]""${STR}"
-      elif [[ "${TYPE_CHECK}" == "[*]" ]] ; then
-        TEXT="${TEXT}""[""${ORANGE}""*""${NC}""]""${STR}"
-      elif [[ "${TYPE_CHECK}" == "[!]" ]] ; then
-        TEXT="${TEXT}""[""${MAGENTA}""!""${NC}""]""${MAGENTA}""${STR}""${NC}"
-      elif [[ "${TYPE_CHECK}" == "[+]" ]] ; then
-        TEXT="${TEXT}""[""${GREEN}""+""${NC}""]""${GREEN}""${STR}""${NC}"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    local lTYPE_CHECK=""
+    lTYPE_CHECK="$( echo "${lENTRY}" | cut -c1-3 )"
+    if [[ "${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]" ]] ; then
+      local lSTR=""
+      lSTR="$( echo "${lENTRY}" | cut -c 4- || true)"
+      if [[ "${lTYPE_CHECK}" == "[-]" ]] ; then
+        lTEXT="${lTEXT}""[""${RED}""-""${NC}""]""${lSTR}"
+      elif [[ "${lTYPE_CHECK}" == "[*]" ]] ; then
+        lTEXT="${lTEXT}""[""${ORANGE}""*""${NC}""]""${lSTR}"
+      elif [[ "${lTYPE_CHECK}" == "[!]" ]] ; then
+        lTEXT="${lTEXT}""[""${MAGENTA}""!""${NC}""]""${MAGENTA}""${lSTR}""${NC}"
+      elif [[ "${lTYPE_CHECK}" == "[+]" ]] ; then
+        lTEXT="${lTEXT}""[""${GREEN}""+""${NC}""]""${GREEN}""${lSTR}""${NC}"
       else
-        TEXT="${TEXT}""${E}"
+        lTEXT="${lTEXT}""${lENTRY}"
       fi
     else
-      TEXT="${TEXT}""${E}"
+      lTEXT="${lTEXT}""${lENTRY}"
     fi
   done
-  echo "${TEXT}"
+  echo "${lTEXT}"
 }
 
 white()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${NC}""${E}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${NC}""${lENTRY}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 red()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${RED}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${RED}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 green()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${GREEN}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${GREEN}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 blue()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${BLUE}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${BLUE}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 cyan()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${CYAN}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${CYAN}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 magenta()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${MAGENTA}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${MAGENTA}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 orange()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${ORANGE}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${ORANGE}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 bold()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${BOLD}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${BOLD}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 italic()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""${ITALIC}""${E}""${NC}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""${ITALIC}""${lENTRY}""${NC}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 indent()
 {
-  local TEXT_ARR=()
-  local TEXT=""
-  local E=""
-  readarray -t TEXT_ARR <<< "${1}"
+  local lTEXT_ARR=()
+  local lTEXT=""
+  local lENTRY=""
+  readarray -t lTEXT_ARR <<< "${1}"
 
-  for E in "${TEXT_ARR[@]}" ; do
-    TEXT="${TEXT}""    ""${E}""\\n"
+  for lENTRY in "${lTEXT_ARR[@]}" ; do
+    lTEXT="${lTEXT}""    ""${lENTRY}""\\n"
   done
-  echo -e "${TEXT}"
+  echo -e "${lTEXT}"
 }
 
 format_log()
 {
-  local LOG_STRING="${1:-}"
+  local lLOG_STRING="${1:-}"
   # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
-  local OVERWRITE_SETTING="${2:-}"
-  if [[ ${FORMAT_LOG} -eq 0 ]] || [[ ${OVERWRITE_SETTING} -eq 1 ]] ; then
-    echo "${LOG_STRING}" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+  local lOVERWRITE_SETTING="${2:-}"
+  if [[ ${FORMAT_LOG} -eq 0 ]] || [[ ${lOVERWRITE_SETTING} -eq 1 ]] ; then
+    echo "${lLOG_STRING}" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/\\\\n/\\n/g"
   else
-    echo "${LOG_STRING}"
+    echo "${lLOG_STRING}"
   fi
 }
 
 format_grep_log()
 {
-  local LOG_STRING="${1:-}"
-  echo "${LOG_STRING}" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+  local lLOG_STRING="${1:-}"
+  echo "${lLOG_STRING}" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/^ *//" \
@@ -709,25 +710,25 @@ print_help()
 
 print_firmware_info()
 {
-  local _VENDOR="${1:-}"
-  local _VERSION="${2:-}"
-  local _DEVICE="${3:-}"
-  local _NOTES="${4:-}"
+  local lVENDOR="${1:-}"
+  local lVERSION="${2:-}"
+  local lDEVICE="${3:-}"
+  local lNOTES="${4:-}"
 
-  if [[ -n "${_VENDOR}" || -n "${_VERSION}" || -n "${_DEVICE}" || -n "${_NOTES}" ]]; then
+  if [[ -n "${lVENDOR}" || -n "${lVERSION}" || -n "${lDEVICE}" || -n "${lNOTES}" ]]; then
     print_bar "no_log"
     print_output "[*] Firmware information:" "no_log"
-    if [[ -n "${_VENDOR}" ]]; then
-      print_output "$(indent "${BOLD}""Vendor:\t""${NC}""${ORANGE}""${_VENDOR}""${NC}")" "no_log"
+    if [[ -n "${lVENDOR}" ]]; then
+      print_output "$(indent "${BOLD}""Vendor:\t""${NC}""${ORANGE}""${lVENDOR}""${NC}")" "no_log"
     fi
-    if [[ -n "${_VERSION}" ]]; then
-      print_output "$(indent "${BOLD}""Version:\t""${NC}""${ORANGE}""${_VERSION}""${NC}")" "no_log"
+    if [[ -n "${lVERSION}" ]]; then
+      print_output "$(indent "${BOLD}""Version:\t""${NC}""${ORANGE}""${lVERSION}""${NC}")" "no_log"
     fi
-    if [[ -n "${_DEVICE}" ]]; then
-      print_output "$(indent "${BOLD}""Device:\t""${NC}""${ORANGE}""${_DEVICE}""${NC}")" "no_log"
+    if [[ -n "${lDEVICE}" ]]; then
+      print_output "$(indent "${BOLD}""Device:\t""${NC}""${ORANGE}""${lDEVICE}""${NC}")" "no_log"
     fi
-    if [[ -n "${_NOTES}" ]]; then
-      print_output "$(indent "${BOLD}""Additional notes:\t""${NC}""${ORANGE}""${_NOTES}""${NC}")" "no_log"
+    if [[ -n "${lNOTES}" ]]; then
+      print_output "$(indent "${BOLD}""Additional notes:\t""${NC}""${ORANGE}""${lNOTES}""${NC}")" "no_log"
     fi
     print_bar "no_log"
   fi
@@ -735,56 +736,56 @@ print_firmware_info()
 
 print_etc()
 {
-  local ETC=""
+  local lETC=""
 
   if [[ ${#ETC_PATHS[@]} -gt 1 ]] ; then
     print_ln "no_log"
     print_output "[*] Found more paths for etc (these are automatically taken into account):" "no_log"
-    for ETC in "${ETC_PATHS[@]}" ; do
-      if [[ "${ETC}" != "${FIRMWARE_PATH}""/etc" ]] ; then
-        print_output "$(indent "$(orange "$(print_path "${ETC}")")")" "no_log"
+    for lETC in "${ETC_PATHS[@]}" ; do
+      if [[ "${lETC}" != "${FIRMWARE_PATH}""/etc" ]] ; then
+        print_output "$(indent "$(orange "$(print_path "${lETC}")")")" "no_log"
       fi
     done
   fi
 }
 
 print_excluded() {
-  local EXCL=""
-  local EXCLUDE_PATHS_ARR=()
+  local lEXCL=""
+  local lEXCLUDE_PATHS_ARR=()
 
-  readarray -t EXCLUDE_PATHS_ARR < <(printf '%s' "${EXCLUDE_PATHS}")
-  if [[ ${#EXCLUDE_PATHS_ARR[@]} -gt 0 ]] ; then
+  readarray -t lEXCLUDE_PATHS_ARR < <(printf '%s' "${EXCLUDE_PATHS}")
+  if [[ ${#lEXCLUDE_PATHS_ARR[@]} -gt 0 ]] ; then
     print_ln "no_log"
     print_output "[*] Excluded: " "no_log"
-    for EXCL in "${EXCLUDE_PATHS_ARR[@]}" ; do
-      print_output ".""$(indent "$(orange "$(print_path "${EXCL}")")")" "no_log"
+    for lEXCL in "${lEXCLUDE_PATHS_ARR[@]}" ; do
+      print_output ".""$(indent "$(orange "$(print_path "${lEXCL}")")")" "no_log"
     done
     print_ln "no_log"
   fi
 }
 
 print_bar() {
-  local LOG_SETTINGS="${1:-}"
+  local lLOG_SETTINGS="${1:-}"
 
-  if [[ -n "${LOG_SETTINGS}" ]]; then
-    print_output "\\n-----------------------------------------------------------------\\n" "${LOG_SETTINGS}"
+  if [[ -n "${lLOG_SETTINGS}" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "${lLOG_SETTINGS}"
   else
     print_output "\\n-----------------------------------------------------------------\\n"
   fi
 }
 
 module_start_log() {
-  local MODULE_MAIN_NAME="${1:-}"
-  print_output "[*] $(print_date) - ${MODULE_MAIN_NAME} starting" "main"
+  local lMODULE_MAIN_NAME="${1:-}"
+  print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} starting" "main"
   export LOG_PATH_MODULE=""
   if [[ "${LOG_DIR: -1}" == "/" ]]; then
     # strip final slash from log dir
     LOG_DIR="${LOG_DIR:: -1}"
   fi
-  # LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""$(echo "${MODULE_MAIN_NAME}" | tr '[:upper:]' '[:lower:]')")
-  LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""${MODULE_MAIN_NAME,,}")
+  # LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""$(echo "${lMODULE_MAIN_NAME}" | tr '[:upper:]' '[:lower:]')")
+  LOG_PATH_MODULE=$(abs_path "${LOG_DIR}""/""${lMODULE_MAIN_NAME,,}")
   if [[ -d "${LOG_PATH_MODULE}" ]] ; then
-    print_output "[*] Found old module log path for ${ORANGE}${MODULE_MAIN_NAME}${NC} ... creating a backup" "no_log"
+    print_output "[*] Found old module log path for ${ORANGE}${lMODULE_MAIN_NAME}${NC} ... creating a backup" "no_log"
     export OLD_LOG_DIR=""
     OLD_LOG_DIR="${LOG_PATH_MODULE}".bak."${RANDOM}" || true
     mv "${LOG_PATH_MODULE}" "${OLD_LOG_DIR}" || true
@@ -795,18 +796,18 @@ module_start_log() {
 }
 
 pre_module_reporter() {
-  local MODULE_MAIN_NAME="${1:-}"
-  local REPORT_TEMPLATE=""
-  REPORT_TEMPLATE="$(basename -s ".sh" "${MODULE_MAIN_NAME}")-pre"
+  local lMODULE_MAIN_NAME="${1:-}"
+  local lREPORT_TEMPLATE=""
+  lREPORT_TEMPLATE="$(basename -s ".sh" "${lMODULE_MAIN_NAME}")-pre"
 
   # We handle .txt and .sh files in report_template folder.
   # .txt are just echoed on cli and report
   # .sh are executed via source -> you can use variables, color codes, execute further commands
-  if [[ -f "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.txt" ]]; then
-    tee -a "${LOG_FILE}" < "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.txt"
-  elif [[ -f "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.sh" ]]; then
+  if [[ -f "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.txt" ]]; then
+    tee -a "${LOG_FILE}" < "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.txt"
+  elif [[ -f "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.sh" ]]; then
     # shellcheck source=/dev/null
-    source "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.sh"
+    source "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.sh"
   fi
   print_ln
 }
@@ -815,31 +816,31 @@ pre_module_reporter() {
 # additionally we log that EMBA has nothing found -> this is used for index generation of the web reporter
 # additionally we generate the HTML file of the web reporter if web reporting is enabled
 module_end_log() {
-  local MODULE_MAIN_NAME="${1:-}"
-  local MODULE_REPORT_STATE="${2:-}"
+  local lMODULE_MAIN_NAME="${1:-}"
+  local lMODULE_REPORT_STATE="${2:-}"
 
-  if [[ "${MODULE_REPORT_STATE}" -eq 0 ]]; then
-    print_output "[-] $(print_date) - ${MODULE_MAIN_NAME} nothing reported"
+  if [[ "${lMODULE_REPORT_STATE}" -eq 0 ]]; then
+    print_output "[-] $(print_date) - ${lMODULE_MAIN_NAME} nothing reported"
   fi
 
   # we do not report the templates on restarted tests
-  if [[ "${MODULE_REPORT_STATE}" -ne 0 ]]; then
-    REPORT_TEMPLATE="$(basename -s ".sh" "${MODULE_MAIN_NAME}")-post"
+  if [[ "${lMODULE_REPORT_STATE}" -ne 0 ]]; then
+    lREPORT_TEMPLATE="$(basename -s ".sh" "${lMODULE_MAIN_NAME}")-post"
     # We handle .txt and .sh files in report_template folder.
     # .txt are just echoed on cli and report
     # .sh are executed via source -> you can use variables, color codes, execute further commands
-    if [[ -f "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.txt" ]]; then
+    if [[ -f "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.txt" ]]; then
       print_bar ""
-      tee -a "${LOG_FILE}" < "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.txt"
+      tee -a "${LOG_FILE}" < "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.txt"
       print_bar ""
-    elif [[ -f "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.sh" ]]; then
+    elif [[ -f "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.sh" ]]; then
       print_bar ""
       # shellcheck source=/dev/null
-      source "${CONFIG_DIR}/report_templates/${REPORT_TEMPLATE}.sh"
+      source "${CONFIG_DIR}/report_templates/${lREPORT_TEMPLATE}.sh"
       print_bar ""
     fi
   fi
-  [[ "${HTML}" -eq 1 ]] && run_web_reporter_mod_name "${MODULE_MAIN_NAME}"
+  [[ "${HTML}" -eq 1 ]] && run_web_reporter_mod_name "${lMODULE_MAIN_NAME}"
   if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "${LOG_PATH_MODULE}" ]]; then
       if [[ "$(find "${LOG_PATH_MODULE}" -type f | wc -l)" -eq 0 ]]; then
@@ -850,17 +851,17 @@ module_end_log() {
 
   # check if there is some content in the csv log file. If there is only
   # one entry line we remove the file at all
-  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
-  if [[ -f "${CSV_LOG}" ]]; then
-    if [[ $(wc -l "${CSV_LOG}" | awk '{print $1}') -lt 2 ]]; then
-      rm "${CSV_LOG}"
+  lCSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  if [[ -f "${lCSV_LOG}" ]]; then
+    if [[ $(wc -l "${lCSV_LOG}" | awk '{print $1}') -lt 2 ]]; then
+      rm "${lCSV_LOG}"
     fi
   fi
 
   if [[ "${DISABLE_NOTIFICATIONS}" -eq 0 ]]; then
-    write_notification "Module ${MODULE_MAIN_NAME} finished"
+    write_notification "Module ${lMODULE_MAIN_NAME} finished"
   fi
-  print_output "[*] $(print_date) - ${MODULE_MAIN_NAME} finished" "main"
+  print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main"
 }
 
 strip_color_codes() {
@@ -868,16 +869,16 @@ strip_color_codes() {
 }
 
 banner_printer() {
-  local BANNER_TO_PRINT=""
+  local lBANNER_TO_PRINT=""
 
   echo ""
-  BANNER_TO_PRINT=$(find "${CONFIG_DIR}"/banner/ -type f -name "*${EMBA_VERSION}*"| shuf -n 1)
+  lBANNER_TO_PRINT=$(find "${CONFIG_DIR}"/banner/ -type f -name "*${EMBA_VERSION}*"| shuf -n 1)
   if [[ "${RELEASE}" -ne 1 ]]; then
-    BANNER_TO_PRINT=$(find "${CONFIG_DIR}"/banner/ -type f | shuf -n 1)
+    lBANNER_TO_PRINT=$(find "${CONFIG_DIR}"/banner/ -type f | shuf -n 1)
   fi
 
-  if [[ -f "${BANNER_TO_PRINT}" ]]; then
-    cat "${BANNER_TO_PRINT}"
+  if [[ -f "${lBANNER_TO_PRINT}" ]]; then
+    cat "${lBANNER_TO_PRINT}"
     echo ""
   fi
 }
@@ -892,17 +893,17 @@ write_notification() {
     return
   fi
 
-  local MESSAGE="${1:-}"
+  local lMESSAGE="${1:-}"
 
   if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -d "${TMP_DIR}" ]]; then
     # we are in the docker container and so we need to write the
     # notification to a temp file which is checked via print_notification
-    local NOTIFICATION_LOCATION="${TMP_DIR}"/notifications.log
-    echo "${MESSAGE}" > "${NOTIFICATION_LOCATION}" || true
+    local lNOTIFICATION_LOCATION="${TMP_DIR}"/notifications.log
+    echo "${lMESSAGE}" > "${lNOTIFICATION_LOCATION}" || true
   else
     # if we are on the host (e.g., in developer mode) we can directly handle
     # the notification
-    NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${MESSAGE}" -t 2 || true)
+    NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${lMESSAGE}" -t 2 || true)
   fi
 }
 
@@ -915,27 +916,27 @@ print_notification() {
     # in case DISPLAY is not set we are not able to show notifications
     return
   fi
-  local NOTIFICATION_LOCATION="${TMP_DIR}"/notifications.log
+  local lNOTIFICATION_LOCATION="${TMP_DIR}"/notifications.log
 
-  until [[ -f "${NOTIFICATION_LOCATION}" ]]; do
+  until [[ -f "${lNOTIFICATION_LOCATION}" ]]; do
     sleep 1
   done
 
-  local CURRENT=""
-  CURRENT=$(<"${NOTIFICATION_LOCATION}")
+  local lCURRENT=""
+  lCURRENT=$(<"${lNOTIFICATION_LOCATION}")
 
   disable_strict_mode "${STRICT_MODE}" 0
-  inotifywait -q -m -e modify "${NOTIFICATION_LOCATION}" --format "%e" | while read -r EVENT; do
+  inotifywait -q -m -e modify "${lNOTIFICATION_LOCATION}" --format "%e" | while read -r EVENT; do
     if [[ "${EVENT}" == "MODIFY" ]]; then
-      if ! [[ -f "${NOTIFICATION_LOCATION}" ]]; then
+      if ! [[ -f "${lNOTIFICATION_LOCATION}" ]]; then
         return
       fi
-      local PREV="${CURRENT}"
-      CURRENT=$(<"${NOTIFICATION_LOCATION}")
-      if ! [[ "${CURRENT}" == "${PREV}" ]]; then
+      local lPREV="${lCURRENT}"
+      lCURRENT=$(<"${lNOTIFICATION_LOCATION}")
+      if ! [[ "${lCURRENT}" == "${lPREV}" ]]; then
         # notification replacement see https://super-unix.com/ubuntu/ubuntu-how-to-use-notify-send-to-immediately-replace-an-existing-notification/
         export NOTIFICATION_ID=""
-        NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${CURRENT}" -t 2)
+        NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${lCURRENT}" -t 2)
       fi
     fi
   done
@@ -944,37 +945,37 @@ print_notification() {
 # writes inputs into csv for chatgpt
 # Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
 write_csv_gpt() {
-  local CSV_ITEMS=("$@")
+  local lCSV_ITEMS_ARR=("$@")
   if ! [[ -d "${CSV_DIR}" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  printf '%s;' "${CSV_ITEMS[@]}" >> "${CSV_DIR}/q02_openai_question.csv" || true
+  printf '%s;' "${lCSV_ITEMS_ARR[@]}" >> "${CSV_DIR}/q02_openai_question.csv" || true
   printf '\n' >> "${CSV_DIR}/q02_openai_question.csv" || true
 }
 
 # writes inputs into tmp csv for chatgpt
 # Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
 write_csv_gpt_tmp() {
-  local CSV_ITEMS=("$@")
+  local lCSV_ITEMS_ARR=("$@")
   if ! [[ -d "${CSV_DIR}" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  printf '%s;' "${CSV_ITEMS[@]}" >> "${CSV_DIR}/q02_openai_question.csv.tmp" || true
+  printf '%s;' "${lCSV_ITEMS_ARR[@]}" >> "${CSV_DIR}/q02_openai_question.csv.tmp" || true
   printf '\n' >> "${CSV_DIR}/q02_openai_question.csv.tmp" || true
 }
 
 write_anchor_gpt() {
   if [[ ${HTML} -eq 1 ]] ; then
-    local LINK="${1:-}"
-    LINK="$(format_log "[ASK_GPT] ""${LINK}" 1)"
-    local LOG_FILE_ALT="${2:-}"
-    if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
-      if [[ -f "${LOG_FILE_ALT}" ]] ; then
-        echo -e "${LINK}" | tee -a "${LOG_FILE_ALT}" >/dev/null
+    local lLINK="${1:-}"
+    lLINK="$(format_log "[ASK_GPT] ""${lLINK}" 1)"
+    local lLOG_FILE_ALT="${2:-}"
+    if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]] ; then
+      if [[ -f "${lLOG_FILE_ALT}" ]] ; then
+        echo -e "${lLINK}" | tee -a "${lLOG_FILE_ALT}" >/dev/null
       else
-        echo -e "${LINK}" | tee -a "${LOG_FILE}" >/dev/null
+        echo -e "${lLINK}" | tee -a "${LOG_FILE}" >/dev/null
       fi
     fi
   fi
@@ -985,12 +986,12 @@ write_anchor_gpt() {
 # if EMBA is finished it returns and the caller can exit also
 # paramter: $1 is sleep time in seconds
 secure_sleep() {
-  local SLEEP_TIME="${1:-}"
-  local CUR_SLEEP_TIME=0
+  local lSLEEP_TIME="${1:-}"
+  local lCUR_SLEEP_TIME=0
 
-  while [[ "${CUR_SLEEP_TIME}" -lt "${SLEEP_TIME}" ]]; do
+  while [[ "${lCUR_SLEEP_TIME}" -lt "${lSLEEP_TIME}" ]]; do
     sleep 10
-    CUR_SLEEP_TIME=$((CUR_SLEEP_TIME + 10))
+    lCUR_SLEEP_TIME=$((lCUR_SLEEP_TIME + 10))
     if check_emba_ended; then
       return
     fi
@@ -1008,21 +1009,21 @@ print_running_modules() {
     # we print status about running modules every hour
     secure_sleep 3600
 
-    local STARTED_EMBA_PROCESSES=()
-    local EMBA_STARTED_PROC=""
-    mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${LOG_DIR}""/""${MAIN_LOG_FILE}" | cut -d '-' -f2 | awk '{print $1}' || true)
+    local lSTARTED_EMBA_PROCESSES_ARR=()
+    local lEMBA_STARTED_PROC=""
+    mapfile -t lSTARTED_EMBA_PROCESSES_ARR < <(grep starting "${LOG_DIR}""/""${MAIN_LOG_FILE}" | cut -d '-' -f2 | awk '{print $1}' || true)
 
-    for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
-      if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
-        print_output "[*] $(print_date) - ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
+    for lEMBA_STARTED_PROC in "${lSTARTED_EMBA_PROCESSES_ARR[@]}"; do
+      if ! grep -i -q "${lEMBA_STARTED_PROC}"" finished" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+        print_output "[*] $(print_date) - ${ORANGE}${lEMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
   done
 }
 
 show_runtime() {
-  local SHORT="${1:-0}"
-  if [[ "${SHORT}" -eq 1 ]]; then
+  local lSHORT="${1:-0}"
+  if [[ "${lSHORT}" -eq 1 ]]; then
     date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )):%H:%M:%S"
   else
     date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"

@@ -35,10 +35,10 @@ load_strict_mode_settings() {
 }
 
 enable_strict_mode() {
-  local STRICT_MODE_="${1:-0}"
-  local PRINTER="${2:-1}"
+  local lSTRICT_MODE="${1:-0}"
+  local lPRINTER="${2:-1}"
 
-  if [[ "${STRICT_MODE_}" -eq 1 ]]; then
+  if [[ "${lSTRICT_MODE}" -eq 1 ]]; then
     # http://redsymbol.net/articles/unofficial-bash-strict-mode/
     # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
     # shellcheck source=./installer/wickStrictModeFail.sh
@@ -52,17 +52,17 @@ enable_strict_mode() {
       trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
     fi
 
-    if [[ "${PRINTER}" -eq 1 ]]; then
+    if [[ "${lPRINTER}" -eq 1 ]]; then
       echo -e "[!] INFO: EMBA running in STRICT mode!" || true
     fi
   fi
 }
 
 disable_strict_mode() {
-  local STRICT_MODE_="${1:-0}"
-  local PRINTER="${2:-1}"
+  local lSTRICT_MODE="${1:-0}"
+  local lPRINTER="${2:-1}"
 
-  if [[ "${STRICT_MODE_}" -eq 1 ]]; then
+  if [[ "${lSTRICT_MODE}" -eq 1 ]]; then
     # disable all STRICT_MODE settings - can be used for modules that are not compatible
     # WARNING: this should only be a temporary solution. The goal is to make modules
     # STRICT_MODE compatible
@@ -77,7 +77,7 @@ disable_strict_mode() {
     trap - ERR
     set +x
 
-    if [[ "${PRINTER}" -eq 1 ]]; then
+    if [[ "${lPRINTER}" -eq 1 ]]; then
       echo -e "[!] INFO: EMBA STRICT mode disabled!" || true
     fi
   fi
