@@ -592,13 +592,14 @@ dependency_check()
       check_dep_tool "uboot mkimage" "mkimage"
 
       # binwalk
-      check_dep_tool "binwalk extractor" "binwalk"
       if command -v binwalk > /dev/null ; then
         export BINWALK_BIN=("$(which binwalk)")
+        check_dep_tool "binwalk"
       else
         export BINWALK_BIN=(""${EXT_DIR}"/binwalk/target/release/binwalk")
+        check_dep_file "binwalk extractor" "${BINWALK_BIN[@]}"
         local lBINWALK_VER=""
-        lBINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "[Bb]inwalk " | cut -d+ -f1 | awk '{print $2}' || true)
+        lBINWALK_VER=$("${BINWALK_BIN[@]}" -V 2>&1 | grep "[Bb]inwalk " | cut -d+ -f1 | awk '{print $2}' || true)
         if ! [ "$(version "${lBINWALK_VER}")" -ge "$(version "3.0.0")" ]; then
           echo -e "${ORANGE}""    binwalk version ${lBINWALK_VER} - not optimal""${NC}"
           echo -e "${ORANGE}""    Upgrade your binwalk to version 3.0.0 or higher""${NC}"

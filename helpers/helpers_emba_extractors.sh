@@ -40,9 +40,10 @@ docker_container_extractor() {
   fi
 }
 
-binwalker_v3_matryoshka() {
+binwalker_matryoshka() {
   local lFIRMWARE_PATH="${1:-}"
   local lOUTPUT_DIR_BINWALK="${2:-}"
+  local lTIMEOUT="300m"
 
   sub_module_title "Analyze binary firmware blob with binwalk"
 
@@ -52,11 +53,11 @@ binwalker_v3_matryoshka() {
     mkdir -p "${lOUTPUT_DIR_BINWALK}"
   fi
 
-  timeout --preserve-status --signal SIGINT 300 "${BINWALK_BIN[@]}" -v -e -c -M -C "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${LOG_FILE}" || true
+  timeout --preserve-status --signal SIGINT "${lTIMEOUT}" time "${BINWALK_BIN[@]}" -v -e -c -M -C "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${LOG_FILE}" || true
   print_ln
 }
 
-binwalker_matryoshka() {
+binwalker_v2_matryoshka() {
   local lFIRMWARE_PATH="${1:-}"
   local lOUTPUT_DIR_BINWALK="${2:-}"
 

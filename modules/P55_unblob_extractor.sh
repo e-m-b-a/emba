@@ -90,7 +90,7 @@ P55_unblob_extractor() {
 
   if [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
     lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l)
-    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l || true)
+    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l || true)
     lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
     lBINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' 2>/dev/null | grep -c "ELF" || true )
   fi
@@ -136,11 +136,11 @@ unblobber() {
   if [[ "${lVERBOSE}" -eq 1 ]]; then
     # Warning: the safe_logging is very slow.
     # TODO: We need to check on this!
-    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
+    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" time "${lUNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
       |& safe_logging "${LOG_FILE}" 0 || true
   else
     local COLUMNS=""
-    COLUMNS=100 timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
+    COLUMNS=100 timeout --preserve-status --signal SIGINT time "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
       |& safe_logging "${LOG_FILE}" 0 || true
   fi
 }

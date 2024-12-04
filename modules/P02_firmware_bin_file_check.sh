@@ -141,7 +141,7 @@ generate_entropy_graph() {
     # Docker container and binwalk fails to save the entropy picture there
     if [[ ${IN_DOCKER} -eq 1 ]] ; then
       cd "${LOG_DIR}" || return
-      print_output "$("${BINWALK_BIN[@]}" -E -F -J "${lFIRMWARE_PATH_BIN}")"
+      print_output "$("${BINWALK_BIN[@]}" -E "${lFIRMWARE_PATH_BIN}")"
       mv "$(basename "${lFIRMWARE_PATH_BIN}".png)" "${LOG_DIR}"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
