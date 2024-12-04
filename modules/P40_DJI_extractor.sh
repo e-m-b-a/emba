@@ -219,7 +219,7 @@ dji_imah_firmware_extractor() {
           print_ln
           local lOUTPUT_DIR_UNBLOB="${lFILE_EXT_KEY}"_unblob
           unblobber "${lFILE_EXT_KEY}" "${lOUTPUT_DIR_UNBLOB}" 0
-          mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %')
+          mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%"')
           if [[ "${#lUB_EXTRACTED_FILES_ARR[@]}" -gt 0 ]]; then
             sub_module_title "Extraction results of $(basename "${lFILE_EXT_KEY}")"
             print_output "[+] Extracted the following ${ORANGE}${#lUB_EXTRACTED_FILES_ARR[@]}${GREEN} files from ${ORANGE}${lFILE_EXT_KEY}${GREEN}:"

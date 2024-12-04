@@ -560,7 +560,7 @@ generate_info_file() {
     readarray -t lEXPLOIT_FILES_ARR < <(grep -a "File: " "${lINFO_FILE}" | cut -d ":" -f 2 | sed 's@^\ @@' | sort -u || true)
     for lE_PATH in "${lEXPLOIT_FILES_ARR[@]}" ; do
       if [[ -f "${lE_PATH}" ]] ; then
-        if [[ ! -d "${lRES_PATH}" ]] ; then mkdir "${lRES_PATH}" > /dev/null || true ; fi
+        if [[ ! -d "${lRES_PATH}" ]] ; then mkdir -p "${lRES_PATH}" > /dev/null || true ; fi
         cp "${lE_PATH}" "${lRES_PATH}""/""$(basename "${lE_PATH}")" || true
         lE_HTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./res/$(basename "${lE_PATH}")@g")""$(basename "${lE_PATH}")""${LINK_END}"
         printf "%s%sFile: %s%s\n" "${HR_MONO}" "${P_START}" "${lE_HTML_LINK}" "${P_END}" >> "${lTMP_INFO_FILE}"

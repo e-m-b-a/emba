@@ -33,8 +33,8 @@ S36_lighttpd() {
   local lLIGHTTP_BIN_ARR=()
   local lCFG_FILE=""
 
-  readarray -t lLIGHTTP_CFG_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*conf*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
-  readarray -t lLIGHTTP_BIN_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -iname 'lighttpd' -print0|xargs -r -0 -P 16 -I % sh -c 'file % 2>/dev/null | grep "ELF" | cut -d ':' -f1' | sort -u || true)
+  readarray -t lLIGHTTP_CFG_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*conf*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
+  readarray -t lLIGHTTP_BIN_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -iname 'lighttpd' -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" 2>/dev/null | grep "ELF" | cut -d ':' -f1' | sort -u || true)
 
   if [[ ${#lLIGHTTP_BIN_ARR[@]} -gt 0 ]] ; then
     lighttpd_binary_analysis "${lLIGHTTP_BIN_ARR[@]}"

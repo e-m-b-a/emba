@@ -98,9 +98,9 @@ P99_prepare_analyzer() {
     write_csv_log "FILES" "UNIQUE_FILES" "DIRS" "Binaries" "LINUX_PATH_COUNTER" "Root PATH detected" "architecture" "endianess"
     for lR_PATH in "${ROOT_PATH[@]}"; do
       lFILES_EXT=$(find "${ROOT_PATH}" -xdev -type f | wc -l )
-      lUNIQUE_FILES=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+      lUNIQUE_FILES=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
       lDIRS_EXT=$(find "${ROOT_PATH}" -xdev -type d | wc -l )
-      lBINS=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep -c "ELF" || true)
+      lBINS=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'file "%"' | grep -c "ELF" || true)
       write_csv_log "${lFILES_EXT}" "${lUNIQUE_FILES}" "${lDIRS_EXT}" "${lBINS}" "${LINUX_PATH_COUNTER}" "${lR_PATH}" "${ARCH}" "${D_END:-"NA"}"
     done
   fi

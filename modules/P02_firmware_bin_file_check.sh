@@ -178,16 +178,16 @@ fw_bin_detector() {
     lDJI_PRAK_ENC_CHECK=$(grep -c "PRAK\|RREK\|IAEK\|PUEK" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
     lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
     # we are running binwalk on the file to analyze the output afterwards:
-    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${TMP_DIR}"/p02_binwalk_output.txt
-    if [[ -f "${TMP_DIR}"/p02_binwalk_output.txt ]]; then
-      lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${LOG_PATH_MODULE}"/p02_binwalk_output.txt
+    if [[ -f "${LOG_PATH_MODULE}"/p02_binwalk_output.txt ]]; then
+      lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     else
       lQNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${lCHECK_FILE}")
     fi
 
     # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
     # further checks will follow in P35
-    lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     lUEFI_CHECK=$(( "${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)" ))
   fi
 
@@ -411,7 +411,7 @@ fw_bin_detector() {
   if [[ "${lUEFI_CHECK}" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI/BIOS firmware - using UEFI extraction module"
     UEFI_DETECTED=1
-    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
       print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
     fi

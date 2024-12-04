@@ -28,7 +28,7 @@ S23_lua_check()
   local lWAIT_PIDS_S23_ARR=()
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnerabilities detected" "common linux file"
-  mapfile -t lS23_LUA_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
+  mapfile -t lS23_LUA_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
 
   sub_module_title "LUA linter checks module"
 
@@ -73,7 +73,7 @@ s23_luaseccheck() {
 
   sub_module_title "LUA Security checks module"
 
-  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. % 2>/dev/null || true | cut -d : -f1' | sort -u || true)
+  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. "%" 2>/dev/null || true | cut -d : -f1' | sort -u || true)
 
   for lQUERY_FILE in "${LUA_CGI_FILES_ARR[@]}"; do
     local lISSUES_FILE=0

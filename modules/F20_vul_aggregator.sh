@@ -1047,10 +1047,10 @@ cve_extractor() {
   if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then
     lKNOWN_EXPLOITED=1
   fi
-  if [[ -f "${CSV_LOG}" ]]; then
+  if [[ -f "${F20_CSV_LOG}" ]]; then
     # very weak search for the end of the entry - if yes we have a verified kernel vuln
     # Todo: Improve this search on field base
-    lKERNEL_VERIFIED_VULN=$(grep -c "^${lBINARY};.*;yes;$" "${CSV_LOG}" || true)
+    lKERNEL_VERIFIED_VULN=$(grep -c "^${lBINARY};.*;yes;$" "${F20_CSV_LOG}" || true)
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then

@@ -226,7 +226,7 @@ output_details() {
     lDATA_GENERATED=1
   fi
 
-  if [[ "${lGPT_RESULTS_CNT}" -gt 0 ]]; then
+  if [[ "${lGPT_RESULTS_CNT:-0}" -gt 0 ]]; then
     print_output "[+] EMBA AI tests identified ${ORANGE}${lGPT_RESULTS_CNT}${GREEN} results via ChatGPT."
     write_link "q02"
     write_csv_log "AI results" "${lGPT_RESULTS_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -707,7 +707,7 @@ output_cve_exploits() {
         write_csv_log "verified_exploited" "${MSF_VERIFIED}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       fi
       # we report only software components with exploits to csv:
-      grep "Found version details" "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "${CSV_LOG}" || true
+      grep "Found version details" "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "${F50_CSV_LOG}" || true
       lDATA_GENERATED=1
     fi
   fi
@@ -1098,7 +1098,7 @@ print_os() {
   else
     print_output "[+] Possible operating system detected (""${ORANGE}""unverified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
     write_link "s03"
-    if [[ "$(grep -c os_verified "${CSV_LOG}")" -lt 1 ]]; then
+    if [[ "$(grep -c os_verified "${F50_CSV_LOG}")" -lt 1 ]]; then
       write_csv_log "os_verified" "unknown" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     fi
     write_csv_log "os_unverified" "${lSYSTEM}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"

@@ -33,7 +33,7 @@ S22_php_check()
   export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
-    mapfile -t lPHP_SCRIPTS_ARR < <( find "${FIRMWARE_PATH}" -xdev -type f -iname "*.php" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+    mapfile -t lPHP_SCRIPTS_ARR < <( find "${FIRMWARE_PATH}" -xdev -type f -iname "*.php" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
     s22_vuln_check_semgrep "${lPHP_SCRIPTS_ARR[@]}"
@@ -253,7 +253,7 @@ s22_check_php_ini() {
   local lINI_RESULT_LINE=""
   local lPHP_INISCAN_PATH="${EXT_DIR}""/iniscan/vendor/bin/iniscan"
 
-  mapfile -t lPHP_INI_FILES_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t lPHP_INI_FILES_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
   if [[ "${#lPHP_INI_FILES_ARR[@]}" -eq 0 ]]; then
     print_output "[-] No PHP.ini issues found"
     return

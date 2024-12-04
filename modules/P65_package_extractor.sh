@@ -68,9 +68,9 @@ P65_package_extractor() {
     if [[ "${lFILES_POST_PACKAGE}" -gt "${FILES_PRE_PACKAGE}" ]]; then
       # we need to update these numbers:
       lFILES_EXT=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
-      lUNIQUE_FILES=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+      lUNIQUE_FILES=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
       lDIRS_EXT=$(find "${FIRMWARE_PATH_CP}" -xdev -type d | wc -l )
-      lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep -c "ELF" || true)
+      lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%"' | grep -c "ELF" || true)
 
       if [[ "${lBINS}" -gt 0 || "${lUNIQUE_FILES}" -gt 0 ]]; then
         sub_module_title "Firmware package extraction details"

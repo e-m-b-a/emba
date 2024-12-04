@@ -96,7 +96,7 @@ S115_usermode_emulator() {
 
       local lDIR=""
       lDIR=$(pwd)
-      mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -print0|xargs -r -0 -P 16 -I % sh -c 'file % 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${lDIR}" || exit)
+      mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${lDIR}" || exit)
       # we re-create the lBIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in lMD5_DONE_INT_ARR (for all root dirs) we test every bin only once
       lBIN_EMU_ARR=()

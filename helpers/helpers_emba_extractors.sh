@@ -40,10 +40,9 @@ docker_container_extractor() {
   fi
 }
 
-binwalker_matryoshka() {
+binwalker_v3_matryoshka() {
   local lFIRMWARE_PATH="${1:-}"
   local lOUTPUT_DIR_BINWALK="${2:-}"
-  local lBINWALK_BIN="binwalk"
 
   sub_module_title "Analyze binary firmware blob with binwalk"
 
@@ -53,6 +52,22 @@ binwalker_matryoshka() {
     mkdir -p "${lOUTPUT_DIR_BINWALK}"
   fi
 
-  timeout --preserve-status --signal SIGINT 300 "${lBINWALK_BIN}" --run-as=root --preserve-symlinks -e -M --dd='.*' -C "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${LOG_FILE}" || true
+  timeout --preserve-status --signal SIGINT 300 "${BINWALK_BIN[@]}" -v -e -c -M -C "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${LOG_FILE}" || true
+  print_ln
+}
+
+binwalker_matryoshka() {
+  local lFIRMWARE_PATH="${1:-}"
+  local lOUTPUT_DIR_BINWALK="${2:-}"
+
+  sub_module_title "Analyze binary firmware blob with binwalk"
+
+  print_output "[*] Extracting firmware to directory ${ORANGE}${lOUTPUT_DIR_BINWALK}${NC}"
+
+  if ! [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
+    mkdir -p "${lOUTPUT_DIR_BINWALK}"
+  fi
+
+  timeout --preserve-status --signal SIGINT 300 "${BINWALK_BIN[@]}" --run-as=root --preserve-symlinks -e -M --dd='.*' -C "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${LOG_FILE}" || true
   print_ln
 }

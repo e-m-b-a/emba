@@ -90,7 +90,7 @@ P55_unblob_extractor() {
 
   if [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
     lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l)
-    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l || true)
+    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l || true)
     lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
     lBINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' 2>/dev/null | grep -c "ELF" || true )
   fi

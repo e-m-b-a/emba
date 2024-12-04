@@ -515,9 +515,9 @@ dependency_check()
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 0 ]] ; then
     if command -v binwalk > /dev/null ; then
-      export BINWALK_BIN=()
-      local lBINWALK_VER=""
-      BINWALK_BIN=("$(which binwalk)")
+      export BINWALK_BIN=("$(which binwalk)")
+    else
+      export BINWALK_BIN=("${EXT_DIR}/binwalk/target/release/binwalk")
     fi
     # cyclonedx - converting csv sbom to json sbom
     if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
@@ -594,22 +594,22 @@ dependency_check()
       # binwalk
       check_dep_tool "binwalk extractor" "binwalk"
       if command -v binwalk > /dev/null ; then
-        export BINWALK_BIN=()
+        export BINWALK_BIN=("$(which binwalk)")
+      else
+        export BINWALK_BIN=(""${EXT_DIR}"/binwalk/target/release/binwalk")
         local lBINWALK_VER=""
-        BINWALK_BIN=("$(which binwalk)")
-        lBINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
-        if ! [ "$(version "${lBINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
+        lBINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "[Bb]inwalk " | cut -d+ -f1 | awk '{print $2}' || true)
+        if ! [ "$(version "${lBINWALK_VER}")" -ge "$(version "3.0.0")" ]; then
           echo -e "${ORANGE}""    binwalk version ${lBINWALK_VER} - not optimal""${NC}"
-          echo -e "${ORANGE}""    Upgrade your binwalk to version 2.3.3 or higher""${NC}"
+          echo -e "${ORANGE}""    Upgrade your binwalk to version 3.0.0 or higher""${NC}"
         fi
-        # this is typically needed in the read only docker container:
-        if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
-          mkdir -p "${HOME}"/.config/binwalk/modules/
-        fi
+        # if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
+        #   mkdir -p "${HOME}"/.config/binwalk/modules/
+        # fi
         print_output "    cpu_rec - \\c" "no_log"
         if [[ -d "${EXT_DIR}"/cpu_rec/ ]]; then
-          cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
-          cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
+          # cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
+          # cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
           echo -e "${GREEN}""ok""${NC}"
         else
           echo -e "${RED}""not ok""${NC}"

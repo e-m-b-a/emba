@@ -419,12 +419,12 @@ prepare_file_arr() {
   print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
 
   export FILE_ARR=()
-  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
+  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
     FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "${lFIRMWARE_PATH}" )
   fi
@@ -487,7 +487,7 @@ prepare_file_arr_limited() {
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
     -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
     -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" -o -iname "*.bmp" -o -path "*/\.git/*" \) \
-    -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3-)
+    -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3-)
 }
 
 set_etc_paths()

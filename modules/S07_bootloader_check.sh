@@ -41,7 +41,7 @@ check_dtb()
   local lDTB_ARR=()
   local lDTB_FILE=""
 
-  readarray -t lDTB_ARR < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" -print0|xargs -r -0 -P 16 -I % sh -c ' md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
+  readarray -t lDTB_ARR < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
 
   if [[ ${#lDTB_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Device tree blobs found - output of fdtdump:"

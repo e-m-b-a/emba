@@ -160,6 +160,9 @@ windows_exifparser_threader() {
   lAPP_VERS=${lAPP_VERS/*:\ }
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+  if [[ -z "${lAPP_VERS}" ]]; then
+    return
+  fi
 
   lAPP_ARCH=$(grep "Machine Type" "${lEXIF_LOG}" || true)
   lAPP_ARCH=${lAPP_ARCH/*:\ }

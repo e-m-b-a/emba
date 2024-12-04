@@ -13,7 +13,7 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 1. EMBA installation (dev-mode/default mode)
-2. Use the firmware available here: <Insert URL>
+2. Use the firmware available here: <Insert URL> <- WARNING: Without firmware information this issue will not be handled!!!
 3. Start EMBA with the following parameters: sudo ./emba.sh <insert further parameters>
 4. additional steps
 5. See error
@@ -25,8 +25,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
-- OS: e.g. Kali Linux 2023.01
-- EMBA version: v1.2.2 or current master branch
+- OS: e.g. Kali Linux 2024.03
+- EMBA version: v1.5.0 or current master branch
 - Installation method: default with up to date docker image
 
 **Priority issue**

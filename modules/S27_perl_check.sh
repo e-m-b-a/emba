@@ -39,7 +39,7 @@ S27_perl_check()
   export PERL5LIB="${EXT_DIR}"/zarn/lib
 
   write_csv_log "Script path" "Perl issues detected" "common linux file" "vuln title" "vuln line nr" "vuln note"
-  mapfile -t lPERL_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -name "*.pl" -o -name "*.pm" -o -name "*.cgi" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t lPERL_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -name "*.pl" -o -name "*.pm" -o -name "*.cgi" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
   for lPL_SCRIPT in "${lPERL_SCRIPTS_ARR[@]}" ; do
     if ( file "${lPL_SCRIPT}" | grep -q "Perl script.*executable" ) ; then
       if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
