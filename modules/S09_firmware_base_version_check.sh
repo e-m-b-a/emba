@@ -73,69 +73,70 @@ S09_firmware_base_version_check() {
 
   printf "%s\n" "${FILE_ARR[@]}" > "${LOG_PATH_MODULE}"/firmware_binaries.txt
 
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    print_output "[*] Checking for common package manager environments to optimize static version detection"
-    # Debian:
-    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
-    # OpenWRT
-    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
-    # Todo: rpm
-    # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
-    # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
-    # get all packages in array and run through them to extract all paths
-    # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
+  print_output "[*] Checking for common package manager environments to optimize static version detection"
+  # Debian:
+  find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
+  # the extracted packages are used to further limit the static tests
+  find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/debian_known_packages.txt || true
+  # OpenWRT
+  find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+  find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
+  # Todo: rpm
+  # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
+  # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
+  # get all packages in array and run through them to extract all paths
+  # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
 
-    if [[ -f "${LOG_PATH_MODULE}"/debian_known_files.txt ]]; then
-      cat "${LOG_PATH_MODULE}"/debian_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
-    fi
-    if [[ -f "${LOG_PATH_MODULE}"/openwrt_known_files.txt ]]; then
-      cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
-    fi
-    if [[ -f "${LOG_PATH_MODULE}"/rpm_known_files.txt ]]; then
-      cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
-    fi
+  if [[ -f "${LOG_PATH_MODULE}"/debian_known_files.txt ]]; then
+    cat "${LOG_PATH_MODULE}"/debian_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+  fi
+  if [[ -f "${LOG_PATH_MODULE}"/openwrt_known_files.txt ]]; then
+    cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+  fi
+  if [[ -f "${LOG_PATH_MODULE}"/rpm_known_files.txt ]]; then
+    cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+  fi
 
-    if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
-      sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
-      sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
-      mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
-    fi
+  if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
+    sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+    sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+    mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
+  fi
 
-    if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
-      print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
-      local lPKG_FILE=""
-      for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
-        (grep -E "${lPKG_FILE}$" "${LOG_PATH_MODULE}/firmware_binaries.txt" >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+  if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
+    print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
+    local lPKG_FILE=""
+    for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
+      (grep -E "${lPKG_FILE}$" "${LOG_PATH_MODULE}/firmware_binaries.txt" >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+    done
+
+    print_output "[*] Waiting for grepping jobs" "no_log"
+    # shellcheck disable=SC2046
+    wait $(jobs -p)
+
+    sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
+    sort -u "${LOG_PATH_MODULE}"/firmware_binaries.txt >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
+
+    # we have now all our filesystem bins in "${LOG_PATH_MODULE}/firmware_binaries.txt"
+    # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
+    # now we just need to do a diff on them and we should have only the non matching files
+    comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
+    mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
+
+    if [[ "${#lFILE_ARR_TMP[@]}" -lt "${#FILE_ARR[@]}" ]]; then
+      print_output "[*] Identified ${ORANGE}${#FILE_ARR[@]}${NC} binaries before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
+      print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
+      FILE_ARR=()
+      for lFILE in "${lFILE_ARR_TMP[@]}"; do
+        if file -b "${lFILE}"| grep -q -v "text"; then
+          # print_output "$(indent "$(orange "${lFILE}")")"
+          FILE_ARR+=( "${lFILE}" )
+          echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
+        fi
       done
-
-      print_output "[*] Waiting for grepping jobs" "no_log"
-      # shellcheck disable=SC2046
-      wait $(jobs -p)
-
-      sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
-      sort -u "${LOG_PATH_MODULE}"/firmware_binaries.txt >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
-
-      # we have now all our filesystem bins in "${LOG_PATH_MODULE}/firmware_binaries.txt"
-      # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
-      # now we just need to do a diff on them and we should have only the non matching files
-      comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
-      mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
-
-      if [[ "${#lFILE_ARR_TMP[@]}" -lt "${#FILE_ARR[@]}" ]]; then
-        print_output "[*] Identified ${ORANGE}${#FILE_ARR[@]}${NC} binaries before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
-        print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
-        FILE_ARR=()
-        for lFILE in "${lFILE_ARR_TMP[@]}"; do
-          if file -b "${lFILE}"| grep -q -v "text"; then
-            # print_output "$(indent "$(orange "${lFILE}")")"
-            FILE_ARR+=( "${lFILE}" )
-            echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
-          fi
-        done
-        print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} binaries which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
-      else
-        print_output "[*] No package manager updates for static analysis"
-      fi
+      print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} binaries which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
+    else
+      print_output "[*] No package manager updates for static analysis"
     fi
   fi
 
@@ -178,6 +179,25 @@ S09_firmware_base_version_check() {
     LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
     lAPP_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
     CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
+
+    # Todo: handle rpm based systems
+    if [[ -f "${LOG_PATH_MODULE}"/debian_known_packages.txt || -f "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
+      # extract the final product name from the sed command in the CSV_REGEX
+      local lTMP_PRODUCT=""
+      lTMP_PRODUCT="$(echo "${CSV_REGEX}" | sed 's/.*\/://' | cut -d ':' -f2 | grep -v "\"NA\"")"
+
+      if [[ -s "${LOG_PATH_MODULE}"/debian_known_packages.txt ]]; then
+        if grep -q "^${lTMP_PRODUCT}" "${LOG_PATH_MODULE}"/debian_known_packages.txt; then
+          print_output "[*] Static rule for ${lAPP_NAME} - ${lTMP_PRODUCT} - ${CSV_REGEX} already covered by debian package manager" "no_log"
+          continue
+        fi
+      elif [[ -s "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
+        if grep -q "^${lTMP_PRODUCT}" "${LOG_PATH_MODULE}"/openwrt_known_packages.txt; then
+          print_output "[*] Static rule for ${lAPP_NAME} - ${lTMP_PRODUCT} - ${CSV_REGEX} already covered by OpenWRT package manager" "no_log"
+          continue
+        fi
+      fi
+    fi
 
     if [[ -f "${S09_CSV_LOG}" ]]; then
       # this should prevent double checking - if a version identifier was already successful we do not need to
