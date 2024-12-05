@@ -24,6 +24,7 @@ IP99_binwalk_default() {
     INSTALL_APP_LIST=()
 
     print_tool_info "git" 1
+    print_tool_info "7zip-standalone" 1
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")

@@ -22,25 +22,23 @@ P40_DJI_extractor() {
   local lNEG_LOG=0
   export DJI_DETECTED=0
 
-  module_log_init "${FUNCNAME[0]}"
 
   if ! [[ -d "${EXT_DIR}"/dji-firmware-tools/ ]]; then
-    print_output "[-] WARNING: dji-firmware-tools not installed. Please update your installation."
-    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    print_output "[-] WARNING: dji-firmware-tools not installed. Please update your installation." "main"
     return
   fi
 
   if [[ "${DJI_XV4_DETECTED}" -ne 1 ]] && [[ "${DJI_PRAK_DETECTED}" -ne 1 ]]; then
-    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
     return
   fi
 
+  module_log_init "${FUNCNAME[0]}"
   module_title "DJI drone firmware extraction module"
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "${RTOS}" -ne 1 ]]; then
     # if we have already found a Linux filesytem we do not need to walk through the rest of the module
-    # this means that unblob was already able to extract a Linux filesystem
+    # this means that we were already able to extract a Linux filesystem
     print_output "[+] Found already a Linux filesytem - stopping DJI extraction module"
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
     # return

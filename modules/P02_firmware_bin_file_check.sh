@@ -105,7 +105,6 @@ set_p02_default_exports() {
   export SHA1_CHECKSUM="NA"
   export MD5_CHECKSUM="NA"
   export ENTROPY="NA"
-  export PATOOLS_INIT=0
   export DLINK_ENC_DETECTED=0
   export VMDK_DETECTED=0
   export UBOOT_IMAGE=0
@@ -229,16 +228,14 @@ fw_bin_detector() {
     export AVM_DETECTED=1
     write_csv_log "AVM firmware detected" "yes" "NA"
   fi
-  # if we have a zip, tgz, tar archive we are going to use the patools extractor
   if [[ "${lFILE_BIN_OUT}" == *"gzip compressed data"* || "${lFILE_BIN_OUT}" == *"Zip archive data"* || \
     "${lFILE_BIN_OUT}" == *"POSIX tar archive"* || "${lFILE_BIN_OUT}" == *"ISO 9660 CD-ROM filesystem data"* || \
     "${lFILE_BIN_OUT}" == *"7-zip archive data"* || "${lFILE_BIN_OUT}" == *"XZ compressed data"* || \
     "${lFILE_BIN_OUT}" == *"bzip2 compressed data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "${AVM_DETECTED}" -ne 1 ]]; then
-      print_output "[+] Identified gzip/zip/tar/iso/xz/bzip2 archive file - using patools extraction module"
-      export PATOOLS_INIT=1
-      write_csv_log "basic compressed (patool)" "yes" "NA"
+      print_output "[+] Identified gzip/zip/tar/iso/xz/bzip2 archive file"
+      write_csv_log "basic compressed" "yes" "NA"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"QEMU QCOW2 Image"* ]] || [[ "${lFILE_BIN_OUT}" == *"QEMU QCOW Image"* ]]; then
@@ -425,7 +422,6 @@ backup_p02_vars() {
   backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
   backup_var "UEFI_DETECTED" "${UEFI_DETECTED}"
   backup_var "AVM_DETECTED" "${AVM_DETECTED}"
-  backup_var "PATOOLS_INIT" "${PATOOLS_INIT}"
   backup_var "VMDK_DETECTED" "${VMDK_DETECTED}"
   backup_var "UBI_IMAGE" "${UBI_IMAGE}"
   backup_var "DLINK_ENC_DETECTED" "${DLINK_ENC_DETECTED}"

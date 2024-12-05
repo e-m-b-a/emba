@@ -124,7 +124,7 @@ s22_vuln_check_semgrep() {
       lSEMG_LINE_NR=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
       lSEMG_LINE_NR="$(echo "${lSEMG_LINE_NR}" | sed 's/line=\"//' | tr -d '"')"
 
-      sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log
+      sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log || true
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
 
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
