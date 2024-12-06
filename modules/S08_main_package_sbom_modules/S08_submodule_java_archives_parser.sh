@@ -23,8 +23,6 @@ S08_submodule_java_archives_parser() {
   sub_module_title "Java archive identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   local lJAVA_ARCHIVES_ARR=()
-  local lJAVA_ARCHIVES_JAR_ARR=()
-  local lJAVA_ARCHIVES_WAR_ARR=()
   local lJAVA_ARCHIVE=""
   local lJ_FILE=""
   local lAPP_LIC="NA"

@@ -34,11 +34,6 @@ P99_prepare_analyzer() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local lNEG_LOG=1
-  local lFILES_EXT=0
-  local lUNIQUE_FILES=0
-  local lDIRS_EXT=0
-  local lBINS=0
-  local lR_PATH=""
 
   export LINUX_PATH_COUNTER=0
   LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"

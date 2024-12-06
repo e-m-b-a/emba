@@ -36,12 +36,10 @@ S16_ghidra_decompile_checks()
     return
   fi
 
-  local lBINARY=""
   local lBIN_TO_CHECK=""
   local lTMP_PID=""
   local lVULN_COUNTER=0
   local lWAIT_PIDS_S16_ARR=()
-  local lBIN_TO_CHECK_ARR=()
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
@@ -51,15 +49,16 @@ S16_ghidra_decompile_checks()
     module_wait "S14_weak_func_radare_check"
   fi
 
+  local lBINARIES_ARR=()
   if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    local BINARIES=()
-    mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+  else
+    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f1 || true)
   fi
 
-  while read -r lBINARY; do
-    lBIN_TO_CHECK="${lBINARY/;*}"
+  for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
