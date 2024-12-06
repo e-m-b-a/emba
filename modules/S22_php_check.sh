@@ -114,16 +114,16 @@ s22_vuln_check_semgrep() {
       ! [[ -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
 
       lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^classname=")
-      lSEMG_ISSUE_NAME="$(echo "${lSEMG_ISSUE_NAME}" | sed 's/classname=\"//')"
+      lSEMG_ISSUE_NAME="${lSEMG_ISSUE_NAME/classname=\"/}"
 
       lSEMG_SOURCE_FILE=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
-      lSEMG_SOURCE_FILE="$(echo "${lSEMG_SOURCE_FILE}" | sed 's/file=\"//')"
+      lSEMG_SOURCE_FILE="${lSEMG_SOURCE_FILE/file=\"/}"
       lSEMG_SOURCE_FILE_NAME=$(basename "${lSEMG_SOURCE_FILE}")
 
       [[ -f "${lSEMG_SOURCE_FILE}" && ! -f "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log ]] && cp "${lSEMG_SOURCE_FILE}" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log
 
       lSEMG_LINE_NR=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
-      lSEMG_LINE_NR="$(echo "${lSEMG_LINE_NR}" | sed 's/line=\"//')"
+      lSEMG_LINE_NR="${lSEMG_LINE_NR/line=\"/}"
 
       sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log || true
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"

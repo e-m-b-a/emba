@@ -95,7 +95,6 @@ cwe_check() {
   fi
 
   while read -r lBINARY; do
-    lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
     lBIN_TO_CHECK="${lBINARY/;*}"
 
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
