@@ -33,28 +33,28 @@ S21_python_check()
 
   if [[ ${PYTHON_CHECK} -eq 1 ]] ; then
     write_csv_log "Script path" "Python issues detected" "common linux file"
-    mapfile -t lPYTHON_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+    # mapfile -t lPYTHON_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+    mapfile -t lPYTHON_SCRIPTS_ARR < <(grep "Python script.*executable" "${P99_CSV_LOG}" | sort -u || true)
+
     for lPY_SCRIPT in "${lPYTHON_SCRIPTS_ARR[@]}" ; do
-      if ( file "${lPY_SCRIPT}" | grep -q "Python script.*executable" ) ; then
-        if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-          # if we have the base linux config file we only test non known Linux binaries
-          # with this we do not waste too much time on open source Linux stuff
-          lNAME=$(basename "${lPY_SCRIPT}" 2> /dev/null)
-          if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-            continue
-          fi
-        fi
-        ((lS21_PY_SCRIPTS+=1))
-        if [[ "${THREADED}" -eq 1 ]]; then
-          s21_script_bandit "${lPY_SCRIPT}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S21_ARR+=( "${lTMP_PID}" )
-          max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S21_ARR[@]}"
+      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+        # if we have the base linux config file we only test non known Linux binaries
+        # with this we do not waste too much time on open source Linux stuff
+        lNAME=$(basename "${lPY_SCRIPT/;*}" 2> /dev/null)
+        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           continue
-        else
-          s21_script_bandit "${lPY_SCRIPT}"
         fi
+      fi
+      ((lS21_PY_SCRIPTS+=1))
+      if [[ "${THREADED}" -eq 1 ]]; then
+        s21_script_bandit "${lPY_SCRIPT/;*}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_S21_ARR+=( "${lTMP_PID}" )
+        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S21_ARR[@]}"
+        continue
+      else
+        s21_script_bandit "${lPY_SCRIPT/;*}"
       fi
     done
 

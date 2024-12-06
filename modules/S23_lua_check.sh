@@ -28,14 +28,15 @@ S23_lua_check()
   local lWAIT_PIDS_S23_ARR=()
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnerabilities detected" "common linux file"
-  mapfile -t lS23_LUA_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
+  # mapfile -t lS23_LUA_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
+  mapfile -t lS23_LUA_SCRIPTS_ARR < <(grep ".lua;" "${P99_CSV_LOG}" | sort -u || true)
 
   sub_module_title "LUA linter checks module"
 
   for lLUA_SCRIPT in "${lS23_LUA_SCRIPTS_ARR[@]}" ; do
     if [[ "${THREADED}" -eq 1 ]]; then
       # linting check:
-      s23_luacheck "${lLUA_SCRIPT}" &
+      s23_luacheck "${lLUA_SCRIPT/;*}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )

@@ -39,28 +39,27 @@ S27_perl_check()
   export PERL5LIB="${EXT_DIR}"/zarn/lib
 
   write_csv_log "Script path" "Perl issues detected" "common linux file" "vuln title" "vuln line nr" "vuln note"
-  mapfile -t lPERL_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -name "*.pl" -o -name "*.pm" -o -name "*.cgi" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  # mapfile -t lPERL_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -name "*.pl" -o -name "*.pm" -o -name "*.cgi" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t lPERL_SCRIPTS_ARR < <(grep "Perl script.*executable" "${P99_CSV_LOG}" | sort -u || true)
   for lPL_SCRIPT in "${lPERL_SCRIPTS_ARR[@]}" ; do
-    if ( file "${lPL_SCRIPT}" | grep -q "Perl script.*executable" ) ; then
-      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-        # if we have the base linux config file we only test non known Linux binaries
-        # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lPL_SCRIPT}" 2> /dev/null)
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          continue
-        fi
-      fi
-      ((lS27_PL_SCRIPTS+=1))
-      if [[ "${THREADED}" -eq 1 ]]; then
-        s27_zarn_perl_checks "${lPL_SCRIPT}" &
-        local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S27+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S27[@]}"
+    if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+      # if we have the base linux config file we only test non known Linux binaries
+      # with this we do not waste too much time on open source Linux stuff
+      lNAME=$(basename "${lPL_SCRIPT/;*}" 2> /dev/null)
+      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
-      else
-        s27_zarn_perl_checks "${lPL_SCRIPT}"
       fi
+    fi
+    ((lS27_PL_SCRIPTS+=1))
+    if [[ "${THREADED}" -eq 1 ]]; then
+      s27_zarn_perl_checks "${lPL_SCRIPT/;*}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S27+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S27[@]}"
+      continue
+    else
+      s27_zarn_perl_checks "${lPL_SCRIPT/;*}"
     fi
   done
 

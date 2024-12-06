@@ -41,7 +41,8 @@ S08_submodule_deb_package_parser() {
   local lPKG_MD5=""
   local lPOS_RES=0
 
-  mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
+  # mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
+  mapfile -t lDEB_ARCHIVES_ARR < <(grep "\.deb;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
 
   if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

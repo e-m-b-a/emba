@@ -33,7 +33,7 @@ S22_php_check()
   export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
-    mapfile -t lPHP_SCRIPTS_ARR < <( find "${FIRMWARE_PATH}" -xdev -type f -iname "*.php" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+    mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
     s22_vuln_check_semgrep "${lPHP_SCRIPTS_ARR[@]}"
@@ -83,24 +83,25 @@ s22_vuln_check_semgrep() {
 
   # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
   # but this output is not very beautiful to show in the report.
-  semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ > "${lPHP_SEMGREP_LOG}" 2>&1 || true
+  semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ | tidy -xml -iq > "${lPHP_SEMGREP_LOG}" 2>&1 || true
+  tidy -xml -iq "${lPHP_SEMGREP_LOG}" > "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
 
   if [[ -f "${lPHP_SEMGREP_LOG}" ]]; then
-    S22_SEMGREP_ISSUES=$(grep -c "testcase name" "${lPHP_SEMGREP_LOG}" || true)
-    lS22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "${lPHP_SEMGREP_LOG}" || true)
+    S22_SEMGREP_ISSUES=$(grep -c "testcase name" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" || true)
+    lS22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" || true)
     lS22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "${lPHP_SEMGREP_LOG}" | awk '{print $2}' || true)
 
     if [[ "${lS22_SEMGREP_VULNS}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${lS22_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${lS22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${lPHP_SEMGREP_LOG}"
+      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${lS22_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${lS22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
     elif [[ "${S22_SEMGREP_ISSUES}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" in ""${ORANGE}""${lS22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${lPHP_SEMGREP_LOG}"
+      print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" in ""${ORANGE}""${lS22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
     else
       print_output "[-] No PHP issues found with semgrep"
     fi
     # highlight security findings in semgrep log:
-    sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "${lPHP_SEMGREP_LOG}"
+    sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
 
-    mapfile -t lSEMG_SOURCES_ARR < <(grep -E -o "name=.* file=.*\" line=\"[0-9]+" "${lPHP_SEMGREP_LOG}" | sort -u || true)
+    mapfile -t lSEMG_SOURCES_ARR < <(grep -E -o -e "classname=\".*\"" -e "file=.*\"" -e "line=\"[0-9]+" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" | sed -z 's/"\n/\ /g' | sort -u || true)
 
     for lSEMG_SOURCE_NOTE in "${lSEMG_SOURCES_ARR[@]}"; do
       local lSEMG_ISSUE_NAME=""
@@ -112,17 +113,17 @@ s22_vuln_check_semgrep() {
 
       ! [[ -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
 
-      lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
-      lSEMG_ISSUE_NAME="$(echo "${lSEMG_ISSUE_NAME}" | sed 's/name=\"//' | tr -d '"')"
+      lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^classname=")
+      lSEMG_ISSUE_NAME="$(echo "${lSEMG_ISSUE_NAME}" | sed 's/classname=\"//')"
 
       lSEMG_SOURCE_FILE=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
-      lSEMG_SOURCE_FILE="$(echo "${lSEMG_SOURCE_FILE}" | sed 's/file=\"//' | tr -d '"')"
+      lSEMG_SOURCE_FILE="$(echo "${lSEMG_SOURCE_FILE}" | sed 's/file=\"//')"
       lSEMG_SOURCE_FILE_NAME=$(basename "${lSEMG_SOURCE_FILE}")
 
       [[ -f "${lSEMG_SOURCE_FILE}" && ! -f "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log ]] && cp "${lSEMG_SOURCE_FILE}" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log
 
       lSEMG_LINE_NR=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
-      lSEMG_LINE_NR="$(echo "${lSEMG_LINE_NR}" | sed 's/line=\"//' | tr -d '"')"
+      lSEMG_LINE_NR="$(echo "${lSEMG_LINE_NR}" | sed 's/line=\"//')"
 
       sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log || true
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
@@ -156,18 +157,16 @@ s22_vuln_check_caller() {
   local lWAIT_PIDS_S22_ARR=()
 
   for lPHP_SCRIPT in "${lPHP_SCRIPTS_ARR[@]}" ; do
-    if ( file "${lPHP_SCRIPT}" | grep -q "PHP script" ) ; then
-      ((S22_PHP_SCRIPTS+=1))
-      if [[ "${THREADED}" -eq 1 ]]; then
-        s22_vuln_check "${lPHP_SCRIPT}" &
-        local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S22_ARR+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S22_ARR[@]}"
-        continue
-      else
-        s22_vuln_check "${lPHP_SCRIPT}"
-      fi
+    ((S22_PHP_SCRIPTS+=1))
+    if [[ "${THREADED}" -eq 1 ]]; then
+      s22_vuln_check "${lPHP_SCRIPT}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S22_ARR+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S22_ARR[@]}"
+      continue
+    else
+      s22_vuln_check "${lPHP_SCRIPT}"
     fi
   done
 
@@ -253,7 +252,8 @@ s22_check_php_ini() {
   local lINI_RESULT_LINE=""
   local lPHP_INISCAN_PATH="${EXT_DIR}""/iniscan/vendor/bin/iniscan"
 
-  mapfile -t lPHP_INI_FILES_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  # mapfile -t lPHP_INI_FILES_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t lPHP_INI_FILES_ARR < <(grep "php.ini;" "${P99_CSV_LOG}" | sort -u || true)
   if [[ "${#lPHP_INI_FILES_ARR[@]}" -eq 0 ]]; then
     print_output "[-] No PHP.ini issues found"
     return
@@ -262,7 +262,7 @@ s22_check_php_ini() {
   disable_strict_mode "${STRICT_MODE}"
   for lPHP_FILE in "${lPHP_INI_FILES_ARR[@]}" ;  do
     # print_output "[*] iniscan check of ""$(print_path "${lPHP_FILE}")"
-    mapfile -t lINISCAN_RESULT_ARR < <( "${lPHP_INISCAN_PATH}" scan --path="${lPHP_FILE}" || true)
+    mapfile -t lINISCAN_RESULT_ARR < <( "${lPHP_INISCAN_PATH}" scan --path="${lPHP_FILE/;*}" || true)
     for lINI_RESULT_LINE in "${lINISCAN_RESULT_ARR[@]}" ; do
       local lLIMIT_CHECK=""
       # nosemgrep
@@ -298,7 +298,7 @@ s22_check_php_ini() {
     done
     if [[ "${S22_PHP_INI_ISSUES}" -gt 0 ]]; then
       print_ln
-      print_output "[+] Found ""${ORANGE}""${S22_PHP_INI_ISSUES}""${GREEN}"" PHP configuration issues in php config file :""${ORANGE}"" ""$(print_path "${lPHP_FILE}")"
+      print_output "[+] Found ""${ORANGE}""${S22_PHP_INI_ISSUES}""${GREEN}"" PHP configuration issues in php config file :""${ORANGE}"" ""$(print_path "${lPHP_FILE/;*}")"
       print_ln
     else
       print_output "[-] No PHP.ini issues found"

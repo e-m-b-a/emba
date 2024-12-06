@@ -78,20 +78,14 @@ I120_cwe_checker() {
         download_file "Ghidra Haruspex script" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts/Haruspex.java"
 
         if ! [[ -d ./external/cwe_checker ]]; then
-          # cleanup first
-          rm "${HOME}"/.cargo -r -f
-          rm "${HOME}"/.config -r -f
-          rm external/rustup -r -f
-
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-
           export PATH="${PATH}":"${HOME}"/.cargo/bin
 
           if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
           mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/EMBA-support-repos/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
-          make all GHIDRA_PATH="${HOME_PATH}""/external/ghidra/ghidra_10.3.1_PUBLIC"
+          # make all GHIDRA_PATH="${HOME_PATH}""/external/ghidra/ghidra_10.3.1_PUBLIC"
+          make all GHIDRA_PATH="${HOME_PATH}""/external/ghidra/ghidra_10.2.3_PUBLIC"
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then

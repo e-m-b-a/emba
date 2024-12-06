@@ -161,17 +161,15 @@ search_ssh_files()
 # Detailed tests possible, check if necessary
 check_squid() {
   sub_module_title "Check squid"
-  local lBIN_FILE=""
+  local lSQUID_FILE=""
   local lCHECK=0
   local lSQUID_E=""
   local lSQUID_PATHS_ARR=()
 
-  for lBIN_FILE in "${BINARIES[@]}"; do
-    if [[ "${lBIN_FILE}" == *"squid"* ]] && ( file "${lBIN_FILE}" | grep -q ELF ) ; then
-      print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lBIN_FILE}")${NC}"
-      ((SQUID_VUL_CNT+=1))
-    fi
-  done
+  while read -r lSQUID_FILE; do
+    print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lSQUID_FILE/;*}")${NC}"
+    ((SQUID_VUL_CNT+=1))
+  done < <(grep "squid" "${P99_CSV_LOG}" | grep ";ELF" || true)
   [[ ${SQUID_VUL_CNT} -eq 0 ]] && print_output "[-] No possible squid executable found"
 
   local lSQUID_DAEMON_CONFIG_LOCS_ARR=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")

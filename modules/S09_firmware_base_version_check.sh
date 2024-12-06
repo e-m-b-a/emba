@@ -44,6 +44,9 @@ S09_firmware_base_version_check() {
   local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
 
   local lFILE_ARR_TMP=()
+  # we need to ensure that we do not have duplicates in it
+  export FILE_ARR=()
+  mapfile -t FILE_ARR < <(cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -62,16 +65,6 @@ S09_firmware_base_version_check() {
     lV_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
     print_output "[*] Quick scan enabled - ${lV_CNT/\ *} version identifiers loaded"
   fi
-
-  # in sbom mode we probably have not populated our arrays
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]] || [[ "${#FILE_ARR[@]}" -eq 0 ]]; then
-    prepare_file_arr_limited "${LOG_DIR}/firmware"
-    # print_output "[*] Prepare file array ..." "no_log"
-    # readarray -t FILE_ARR < <(find "${LOG_DIR}/firmware" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    FILE_ARR=( "${FILE_ARR_LIMITED[@]}" )
-  fi
-
-  printf "%s\n" "${FILE_ARR[@]}" > "${LOG_PATH_MODULE}"/firmware_binaries.txt
 
   print_output "[*] Checking for common package manager environments to optimize static version detection"
   # Debian:
@@ -107,7 +100,7 @@ S09_firmware_base_version_check() {
     print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
     local lPKG_FILE=""
     for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
-      (grep -E "${lPKG_FILE}$" "${LOG_PATH_MODULE}/firmware_binaries.txt" >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+      (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
     done
 
     print_output "[*] Waiting for grepping jobs" "no_log"
@@ -115,29 +108,37 @@ S09_firmware_base_version_check() {
     wait $(jobs -p)
 
     sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
-    sort -u "${LOG_PATH_MODULE}"/firmware_binaries.txt >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
+    cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
 
-    # we have now all our filesystem bins in "${LOG_PATH_MODULE}/firmware_binaries.txt"
+    # we have now all our filesystem bins in "${P99_CSV_LOG}"
     # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
     # now we just need to do a diff on them and we should have only the non matching files
     comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
     mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
 
-    if [[ "${#lFILE_ARR_TMP[@]}" -lt "${#FILE_ARR[@]}" ]]; then
-      print_output "[*] Identified ${ORANGE}${#FILE_ARR[@]}${NC} binaries before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
+    local lINIT_FILES_CNT=0
+    lINIT_FILES_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
+    if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
+      print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
       print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
       FILE_ARR=()
       for lFILE in "${lFILE_ARR_TMP[@]}"; do
-        if file -b "${lFILE}"| grep -q -v "text"; then
+        if file -b "${lFILE}"| grep -q -v "text\|compressed\|archive\|empty"; then
+          if [[ "${lFILE}" == *".raw" ]]; then
+            # binwalk produces a lot of raw files - we skip them here
+            continue
+          fi
           # print_output "$(indent "$(orange "${lFILE}")")"
           FILE_ARR+=( "${lFILE}" )
           echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
         fi
       done
-      print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} binaries which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
+      print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
     else
       print_output "[*] No package manager updates for static analysis"
     fi
+  else
+    print_output "[*] No package manager updates for static analysis"
   fi
 
   print_output "[*] Generate strings overview for static version analysis ..."
@@ -157,6 +158,7 @@ S09_firmware_base_version_check() {
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
   print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} binary files"
 
+  lOS_IDENTIFIED=$(distri_check)
   while read -r VERSION_LINE; do
     print_dot
 
@@ -213,7 +215,6 @@ S09_firmware_base_version_check() {
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
     fi
-    lOS_IDENTIFIED=$(distri_check)
 
     if [[ "${lSTRICT}" == *"strict"* ]]; then
       local lSTRICT_BINS_ARR=()
@@ -225,15 +226,18 @@ S09_firmware_base_version_check() {
 
       [[ "${RTOS}" -eq 1 ]] && continue
 
-      mapfile -t lSTRICT_BINS_ARR < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3)
+      # mapfile -t lSTRICT_BINS_ARR < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${lAPP_NAME}" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3)
+      mapfile -t lSTRICT_BINS_ARR < <(grep "/${lAPP_NAME};" "${P99_CSV_LOG}" | sort -u || true)
       # before moving on we need to ensure our strings files are generated:
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for lBIN in "${lSTRICT_BINS_ARR[@]}"; do
         # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-        lBIN_FILE=$(file -b "${lBIN}")
+        lBIN_FILE=$(echo "${lBIN}" | cut -d ';' -f7)
         if [[ "${lBIN_FILE}" == *"ELF"* ]] ; then
-          MD5_SUM="$(md5sum "${lBIN}" | awk '{print $1}')"
-          lAPP_NAME="$(basename "${lBIN}")"
+          # MD5_SUM="$(md5sum "${lBIN}" | awk '{print $1}')"
+          MD5_SUM=$(echo "${lBIN}" | cut -d ';' -f8)
+          # MD5_SUM=$(echo "${lBIN}" | cut -d ';' -f8)
+          lAPP_NAME="$(basename "${lBIN/;*}")"
           local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
           if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
             continue
@@ -592,7 +596,7 @@ generate_strings() {
   fi
 
   lBIN_FILE=$(file -b "${lBIN}" || true)
-  if [[ "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* ]]; then
+  if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* ]]; then
     return
   fi
 
@@ -622,11 +626,8 @@ bin_string_checker() {
   local lOS_IDENTIFIED=""
   local lMD5_SUM=""
 
-  # check this - I think we do not really need this anymore
-  if [[ ${RTOS} -eq 0 && "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
-    local FILE_ARR=( "${BINARIES[@]}" )
-  fi
   # print_output "[*] Testing ${#FILE_ARR[@]} binaries against identifier ${VERSION_IDENTIFIER}"
+
   lOS_IDENTIFIED=$(distri_check)
 
   for lBIN in "${FILE_ARR[@]}"; do

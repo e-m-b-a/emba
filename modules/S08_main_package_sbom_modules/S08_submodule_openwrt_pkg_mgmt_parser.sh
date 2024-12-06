@@ -44,7 +44,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
+  mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(grep "opkg/info/.*.control" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
 
   if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

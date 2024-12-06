@@ -40,15 +40,16 @@ web_file_search()
   local lWEB_STUFF_ARR=()
   local lWEB_FILE=""
 
-  mapfile -t lWEB_STUFF_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
-    -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' \
-    | sort -u -k1,1 | cut -d\  -f3)
+  # mapfile -t lWEB_STUFF_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
+  #  -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' \
+  #  | sort -u -k1,1 | cut -d\  -f3)
+  mapfile -t lWEB_STUFF_ARR < <(grep ".htm;\|.html\|.cgi\|.asp\|.php\|.xml\|.rg" "${P99_CSV_LOG}" | sort -u || true)
 
   if [[ -v lWEB_STUFF_ARR[@] ]] ; then
     print_output "[+] Found web related files:"
     for lWEB_FILE in "${lWEB_STUFF_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "${lWEB_FILE}")")"
-      write_csv_log "Web served files" "$(basename "${lWEB_FILE}")" "${lWEB_FILE}"
+      print_output "$(indent "$(print_path "${lWEB_FILE/;*}")")"
+      write_csv_log "Web served files" "$(basename "${lWEB_FILE/;*}")" "${lWEB_FILE/;*}"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -88,11 +89,16 @@ webserver_check()
   local lHTTPD_FILE_ARR=()
   local lLINE=""
 
-  readarray -t lAPACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lNGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lLIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lCHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lHTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  # readarray -t lAPACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <(grep "apache" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  # readarray -t lNGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <(grep "nginx" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  # readarray -t lLIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <(grep "lighttp" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  # readarray -t lCHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <(grep "cheroke" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  # readarray -t lHTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lAPACHE_FILE_ARR < <(grep "httpd" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
 
   if [[ ${#lAPACHE_FILE_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found Apache related files:"
@@ -156,7 +162,8 @@ php_check()
   local lPHP_INI_ARR=()
   local lPHP_INI_ENTRY=""
 
-  readarray -t lPHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  # readarray -t lPHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lPHP_INI_ARR < <(grep "php.ini" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
 
   if [[ ${#lPHP_INI_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found php.ini:"

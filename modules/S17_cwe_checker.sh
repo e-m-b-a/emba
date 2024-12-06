@@ -94,56 +94,53 @@ cwe_check() {
     mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
-  for lBINARY in "${BINARIES[@]}" ; do
-    # as we usually have not the full path from the s13 log, we need to search for the binary again:
-    mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
-    for lBIN_TO_CHECK in "${lBIN_TO_CHECK_ARR[@]}"; do
-      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-        # if we have the base linux config file we only test non known Linux binaries
-        # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lBIN_TO_CHECK}")
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          continue
-        fi
+  while read -r lBINARY; do
+    lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
+    lBIN_TO_CHECK="${lBINARY/;*}"
+
+    if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+      # if we have the base linux config file we only test non known Linux binaries
+      # with this we do not waste too much time on open source Linux stuff
+      lNAME=$(basename "${lBIN_TO_CHECK}")
+      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        continue
       fi
+    fi
 
-      if ( file "${lBIN_TO_CHECK}" | grep -q ELF ) ; then
-        # do not try to analyze kernel modules:
-        [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
-        # ensure we have not tested this binary entry
-        local lBIN_MD5=""
-        lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
-        if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
-          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
-          continue
-        fi
-        lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    # do not try to analyze kernel modules:
+    [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
+    # ensure we have not tested this binary entry
+    local lBIN_MD5=""
+    lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
+    if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
+      # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+      continue
+    fi
+    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
 
-        if [[ "${THREADED}" -eq 1 ]]; then
-          # while s09 is running we throttle this module:
-          local lMAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
-          if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
-            local lMAX_MOD_THREADS=1
-          fi
-          cwe_checker_threaded "${lBIN_TO_CHECK}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S17+=( "${lTMP_PID}" )
-
-          max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
-        else
-          cwe_checker_threaded "${lBIN_TO_CHECK}"
-        fi
-        # we stop checking after the first 20 binaries
-        # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-        if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-          print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
-          print_output "[*] For complete analysis enable FULL_TEST." "no_log"
-          break 2
-        fi
+    if [[ "${THREADED}" -eq 1 ]]; then
+      # while s09 is running we throttle this module:
+      local lMAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
+      if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
+        local lMAX_MOD_THREADS=1
       fi
-    done
-  done
+      cwe_checker_threaded "${lBIN_TO_CHECK}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S17+=( "${lTMP_PID}" )
+
+      max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
+    else
+      cwe_checker_threaded "${lBIN_TO_CHECK}"
+    fi
+    # we stop checking after the first 20 binaries
+    # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+      print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
+      print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+      break
+    fi
+  done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" || true)
 
   [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S17[@]}"
 }

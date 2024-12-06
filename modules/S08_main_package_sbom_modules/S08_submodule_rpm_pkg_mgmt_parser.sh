@@ -47,7 +47,7 @@ S08_submodule_rpm_pkg_mgmt_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.rpm" -type f)
+  mapfile -t lRPM_ARCHIVES_ARR < <(grep "\.rpm" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
 
   if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

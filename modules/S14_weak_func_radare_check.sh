@@ -58,13 +58,14 @@ S14_weak_func_radare_check()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    for lBINARY in "${BINARIES[@]}" ; do
+    while read -r lBINARY; do
+      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
+      lBINARY="${lBINARY/;*}"
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
       if [[ "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${lBIN_NAME}".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
         continue
       fi
-      lBIN_FILE=$(file -b "${lBINARY}")
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then
@@ -142,7 +143,7 @@ S14_weak_func_radare_check()
       if [[ "${THREADED}" -eq 1 ]]; then
         max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S14_ARR[@]}"
       fi
-    done
+    done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
     [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S14_ARR[@]}"
 

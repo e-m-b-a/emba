@@ -32,17 +32,13 @@ S24_kernel_bin_identifier()
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
-  # just in case it is not already populated:
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]] || [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
-    prepare_file_arr_limited "${LOG_DIR}"/firmware
-  fi
-  print_output "[*] Testing ${ORANGE}${#FILE_ARR_LIMITED[@]}${NC} files for linux kernel"
-
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
   local lOS_IDENTIFIED=""
   lOS_IDENTIFIED=$(distri_check)
 
-  for lFILE in "${FILE_ARR_LIMITED[@]}" ; do
+  # for lFILE in "${ALL_FILES_ARR[@]}" ; do
+  while read -r lFILE; do
+    lFILE="${lFILE/;*}"
     local lK_ELF="NA"
     local lKCONFIG_EXTRACTED="NA"
     local lK_VER_CLEAN="NA"
@@ -62,10 +58,6 @@ S24_kernel_bin_identifier()
     local lAPP_VERS=""
     local lAPP_TYPE="operating-system"
 
-    if file -b "${lFILE}" | grep -q "ASCII text\|Unicode text"; then
-      # reduce false positive rate
-      continue
-    fi
     lK_VER=$(strings "${lFILE}" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" | sort -u | tr -dc '[:print:]' || true)
 
     if [[ "${lK_VER}" =~ Linux\ version\ .* ]]; then
@@ -250,7 +242,7 @@ S24_kernel_bin_identifier()
         fi
       fi
     fi
-  done
+  done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | sort -u || true)
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }

@@ -393,8 +393,7 @@ output_binaries() {
   local lDETAIL_STRCPY=0
   local lDETAIL_SYSTEM=0
 
-  if [[ -v BINARIES[@] ]]; then
-    if [[ -f "${S12_CSV_LOG}" ]]; then
+  if [[ -f "${S12_CSV_LOG}" ]]; then
       lBIN_CANARY_CNT=$(grep -c "No Canary" "${S12_CSV_LOG}" || true)
       lBINS_RELRO_CNT=$(grep -c "No RELRO" "${S12_CSV_LOG}" || true)
       lBIN_NX_CNT=$(grep -c "NX disabled" "${S12_CSV_LOG}" || true)
@@ -405,11 +404,11 @@ output_binaries() {
         # we have to remove the first line of the original output:
         (( lBINS_CHECKED_CNT-- ))
       fi
-    elif [[ -f "${S13_LOG}" ]]; then
+  elif [[ -f "${S13_LOG}" ]]; then
       lBINS_CHECKED_CNT=$(grep -a "\[\*\]\ Statistics:" "${S13_LOG}" | cut -d: -f3 || true)
-    fi
+  fi
 
-    if [[ "${lBIN_CANARY_CNT:-0}" -gt 0 ]]; then
+  if [[ "${lBIN_CANARY_CNT:-0}" -gt 0 ]]; then
       lCANARY_PER=$(bc -l <<< "${lBIN_CANARY_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
       lCANARY_PER=$(/bin/printf "%.0f" "${lCANARY_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${lBIN_CANARY_CNT}"" (""${lCANARY_PER}""%)""${GREEN}"" binaries without enabled stack canaries in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
@@ -417,8 +416,8 @@ output_binaries() {
       write_csv_log "canary" "${lBIN_CANARY_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "canary_per" "${lCANARY_PER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
-    fi
-    if [[ "${lBINS_RELRO_CNT:-0}" -gt 0 ]]; then
+  fi
+  if [[ "${lBINS_RELRO_CNT:-0}" -gt 0 ]]; then
       lRELRO_PER=$(bc -l <<< "${lBINS_RELRO_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
       lRELRO_PER=$(/bin/printf "%.0f" "${lRELRO_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${lBINS_RELRO_CNT}"" (""${lRELRO_PER}""%)""${GREEN}"" binaries without enabled RELRO in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
@@ -426,8 +425,8 @@ output_binaries() {
       write_csv_log "relro" "${lBINS_RELRO_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "relro_per" "${lRELRO_PER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
-    fi
-    if [[ "${lBIN_NX_CNT:-0}" -gt 0 ]]; then
+  fi
+  if [[ "${lBIN_NX_CNT:-0}" -gt 0 ]]; then
       lNX_PER=$(bc -l <<< "${lBIN_NX_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
       lNX_PER=$(/bin/printf "%.0f" "${lNX_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${lBIN_NX_CNT}"" (""${lNX_PER}""%)""${GREEN}"" binaries without enabled NX in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
@@ -435,8 +434,8 @@ output_binaries() {
       write_csv_log "nx" "${lBIN_NX_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "nx_per" "${lNX_PER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
-    fi
-    if [[ "${lBINS_PIE_CNT:-0}" -gt 0 ]]; then
+  fi
+  if [[ "${lBINS_PIE_CNT:-0}" -gt 0 ]]; then
       lPIE_PER=$(bc -l <<< "${lBINS_PIE_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
       lPIE_PER=$(/bin/printf "%.0f" "${lPIE_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${lBINS_PIE_CNT}"" (""${lPIE_PER}""%)""${GREEN}"" binaries without enabled PIE in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
@@ -444,8 +443,8 @@ output_binaries() {
       write_csv_log "pie" "${lBINS_PIE_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "pie_per" "${lPIE_PER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
-    fi
-    if [[ "${lBIN_STRIPPED_CNT:-0}" -gt 0 ]]; then
+  fi
+  if [[ "${lBIN_STRIPPED_CNT:-0}" -gt 0 ]]; then
       lSTRIPPED_PER=$(bc -l <<< "${lBIN_STRIPPED_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
       lSTRIPPED_PER=$(/bin/printf "%.0f" "${lSTRIPPED_PER}" 2>/dev/null || true)
       print_output "[+] Found ""${ORANGE}""${lBIN_STRIPPED_CNT}"" (""${lSTRIPPED_PER}""%)""${GREEN}"" stripped binaries without symbols in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
@@ -453,10 +452,9 @@ output_binaries() {
       write_csv_log "stripped" "${lBIN_STRIPPED_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "stripped_per" "${lSTRIPPED_PER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
-    fi
-    if [[ "${lBINS_CHECKED_CNT:-0}" -gt 0 ]]; then
+  fi
+  if [[ "${lBINS_CHECKED_CNT:-0}" -gt 0 ]]; then
       write_csv_log "bins_checked" "${lBINS_CHECKED_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-    fi
   fi
   if [[ ${lDATA_GENERATED} -eq 1 ]]; then
     print_bar
@@ -663,7 +661,9 @@ output_cve_exploits() {
       lDATA_GENERATED=1
     fi
     if [[ "${S30_VUL_COUNTER:-0}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${S30_VUL_COUNTER}""${GREEN}"" CVE vulnerabilities in ""${ORANGE}""${#BINARIES[@]}""${GREEN}"" executables (without version checking).""${NC}"
+      local lBINARIES_CNT=0
+      lBINARIES_CNT=$(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | wc -l)
+      print_output "[+] Found ""${ORANGE}""${S30_VUL_COUNTER}""${GREEN}"" CVE vulnerabilities in ""${ORANGE}""${lBINARIES_CNT}""${GREEN}"" executables (without version checking).""${NC}"
       write_link "s30"
       lDATA_GENERATED=1
     fi
@@ -828,7 +828,7 @@ get_data() {
     mapfile -t LINUX_DISTRIS_ARR < <(grep "Version information found" "${S06_LOG}" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u || true)
   fi
   if ! [[ "${FILE_ARR_COUNT-0}" -gt 0 ]]; then
-    FILE_ARR_COUNT=$(find "${FIRMWARE_PATH_CP}" -type f 2>/dev/null| wc -l || true)
+    FILE_ARR_COUNT=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}'|| true)
     DETECTED_DIR=$(find "${FIRMWARE_PATH_CP}" -type d 2>/dev/null | wc -l || true)
   fi
   if [[ -f "${S13_LOG}" ]]; then
