@@ -152,7 +152,10 @@ version_detection_thread() {
             # BINARY_PATH is the final array which we are using further
             # lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
             lBINARY_PATH_=$(grep "${lBINARY_PATH_}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
-            lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+            # print_output "[*] Storing ${lBINARY_PATH_} in array"
+            if [[ -n "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+            fi
           done
         done
       done

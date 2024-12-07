@@ -181,7 +181,7 @@ aggregate_versions() {
       if [ -z "${lVERSION}" ]; then
         continue
       fi
-      lVERSION="$(echo "${lVERSION}" | cut -d\; -f1 | sed 's/^/linux_kernel:/')"
+      lVERSION="$(echo "${lVERSION}" | cut -d\; -f1 | sed 's/^/:linux:linux_kernel:/')"
       print_output "[+] Found Version details (${ORANGE}kernel - with verified vulnerability details${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       lVERSION=${lVERSION/%/:}

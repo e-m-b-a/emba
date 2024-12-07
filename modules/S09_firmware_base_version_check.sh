@@ -44,9 +44,9 @@ S09_firmware_base_version_check() {
   local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
 
   local lFILE_ARR_TMP=()
-  # we need to ensure that we do not have duplicates in it
+  # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
   export FILE_ARR=()
-  mapfile -t FILE_ARR < <(cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u)
+  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -141,7 +141,7 @@ S09_firmware_base_version_check() {
     print_output "[*] No package manager updates for static analysis"
   fi
 
-  print_output "[*] Generate strings overview for static version analysis ..."
+  print_output "[*] Generate strings overview for static version analysis of ${#FILE_ARR[@]} files ..."
   mkdir "${LOG_PATH_MODULE}"/strings_bins/ || true
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
     mkdir "${LOG_PATH_MODULE}"/strings_bins || true
@@ -151,12 +151,13 @@ S09_firmware_base_version_check() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_1+=( "${lTMP_PID}" )
-    max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S09_1[@]}"
+    max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${WAIT_PIDS_S09_1[@]}"
   done
 
   print_output "[*] Waiting for strings generator" "no_log"
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
   print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} binary files"
+  print_ln
 
   lOS_IDENTIFIED=$(distri_check)
   while read -r VERSION_LINE; do
