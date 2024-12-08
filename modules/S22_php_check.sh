@@ -83,8 +83,8 @@ s22_vuln_check_semgrep() {
 
   # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
   # but this output is not very beautiful to show in the report.
-  semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ | tidy -xml -iq > "${lPHP_SEMGREP_LOG}" 2>&1 || true
-  tidy -xml -iq "${lPHP_SEMGREP_LOG}" > "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
+  semgrep --disable-version-check --metrics=off --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ > "${lPHP_SEMGREP_LOG}" 2>&1 || true
+  tidy -xml -iq "${lPHP_SEMGREP_LOG}" > "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" || true
 
   if [[ -f "${lPHP_SEMGREP_LOG}" ]]; then
     S22_SEMGREP_ISSUES=$(grep -c "testcase name" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" || true)

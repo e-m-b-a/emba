@@ -171,7 +171,7 @@ aggregate_versions() {
       lVERSION="$(echo "${lVERSION}" | cut -d\; -f1-2 | tr ';' ':')"
       print_output "[+] Found Version details (${ORANGE}kernel${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
-      # lVERSION=${lVERSION/%/:}
+      lVERSION=${lVERSION/%/:}
       lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
       # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$lVERSION$NC"
     done
@@ -1105,7 +1105,7 @@ cve_extractor() {
   if [[ "${#BUSYBOX_VERIFIED_CVE_ARR[@]}" -gt 0 ]] && [[ "${lBINARY}" == *"busybox"* ]]; then
     lCVEs+=" (${#BUSYBOX_VERIFIED_CVE_ARR[@]})"
   fi
-  local lEXPLOITS="${EXPLOIT_COUNTER_VERSION}"
+  local lEXPLOITS="${EXPLOIT_COUNTER_VERSION:-0}"
 
   if [[ "${lCVE_COUNTER_VERSION}" -gt 0 || "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     if ! [[ -f "${LOG_PATH_MODULE}"/F20_summary.csv ]]; then

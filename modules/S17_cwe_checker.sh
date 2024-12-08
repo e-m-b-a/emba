@@ -96,7 +96,6 @@ cwe_check() {
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
-
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
@@ -109,6 +108,7 @@ cwe_check() {
     # do not try to analyze kernel modules:
     [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
     # ensure we have not tested this binary entry
+    print_output "[*] S17 - Testing ${lBIN_TO_CHECK}"
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
     if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then

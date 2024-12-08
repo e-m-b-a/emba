@@ -136,17 +136,7 @@ generate_entropy_graph() {
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
   if [[ -f "${lFIRMWARE_PATH_BIN}" ]] && ! [[ -f "${LOG_DIR}"/firmware_entropy.png ]]; then
     print_output "[*] Entropy testing with binwalk ... "
-    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
-    # Docker container and binwalk fails to save the entropy picture there
-    if [[ ${IN_DOCKER} -eq 1 ]] ; then
-      cd "${LOG_DIR}" || return
-      print_output "$("${BINWALK_BIN[@]}" -E "${lFIRMWARE_PATH_BIN}")"
-      mv "$(basename "${lFIRMWARE_PATH_BIN}".png)" "${LOG_DIR}"/firmware_entropy.png 2> /dev/null || true
-      cd /emba || return
-    else
-      print_output "$("${BINWALK_BIN[@]}" -E -F -J "${lFIRMWARE_PATH_BIN}")"
-      mv "$(basename "${lFIRMWARE_PATH_BIN}".png)" "${LOG_DIR}"/firmware_entropy.png 2> /dev/null || true
-    fi
+    print_output "$("${BINWALK_BIN[@]}" -E -p "${LOG_DIR}"/firmware_entropy.png "${lFIRMWARE_PATH_BIN}")"
   fi
 }
 

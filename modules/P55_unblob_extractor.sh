@@ -24,7 +24,7 @@ export PRE_THREAD_ENA=0
 P55_unblob_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
-  if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+  if [[ "${UEFI_VERIFIED}" -eq 1 || "${DISABLE_DEEP:-0}" -eq 1 ]]; then; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi

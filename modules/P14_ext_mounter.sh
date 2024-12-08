@@ -19,7 +19,7 @@ export PRE_THREAD_ENA=0
 
 P14_ext_mounter() {
   local lNEG_LOG=0
-  if [[ "${EXT_IMAGE}" -eq 1 ]]; then
+  if [[ "${EXT_IMAGE:-0}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "EXT filesystem extractor"
     pre_module_reporter "${FUNCNAME[0]}"

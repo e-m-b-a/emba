@@ -240,7 +240,10 @@ get_kernel_vulns() {
                 lKNOWN_EXPLOITED=1
               fi
             fi
-            write_csv_log ":linux:linux_kernel" "${lVER}" "${lLES_CVE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "${lKNOWN_EXPLOITED}"
+
+            if ! grep -q ":linux:linux_kernel;${lVER};${lLES_CVE}" "${S25_CSV_LOG}"; then
+              write_csv_log ":linux:linux_kernel" "${lVER}" "${lLES_CVE}" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "${lKNOWN_EXPLOITED}"
+            fi
           done
         fi
       done
