@@ -34,7 +34,7 @@ S08_submodule_python_requirements_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lPY_REQUIREMENTS_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "requirements*.txt" -type f)
+  mapfile -t lPY_REQUIREMENTS_ARR < <(grep "requirements.*\.txt" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
 
   if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

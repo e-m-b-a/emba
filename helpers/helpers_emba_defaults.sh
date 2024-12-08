@@ -246,4 +246,5 @@ set_log_paths() {
   export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
+  export F50_CSV_LOG="${CSV_DIR}/f50_base_aggregator.csv"
 }

@@ -55,8 +55,8 @@ P60_deep_extractor() {
 
   sub_module_title "Extraction results"
 
-  lUNIQUE_FILES=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum %' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-  lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep -c "ELF"' || true)
+  lUNIQUE_FILES=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep -c "ELF"' || true)
   lFILES_EXT=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
 
   if [[ "${lBINS}" -gt 0 || "${lUNIQUE_FILES}" -gt 0 ]]; then

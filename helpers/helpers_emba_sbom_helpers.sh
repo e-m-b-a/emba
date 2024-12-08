@@ -318,9 +318,9 @@ distri_check() {
   # Todo: If this check failes we can use further tests like lsb-release or motd
   mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release")
   for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
-    lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}")
+    lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}" || true)
     lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}
-    lOS_VERS_IDENTIFIED=$(grep "^VERSION_ID=" "${lOS_RELEASE_FILE}")
+    lOS_VERS_IDENTIFIED=$(grep "^VERSION_ID=" "${lOS_RELEASE_FILE}" || true)
     lOS_VERS_IDENTIFIED=${lOS_VERS_IDENTIFIED//VERSION_ID=}
     lOS_IDENTIFIED+="-${lOS_VERS_IDENTIFIED}"
     lOS_IDENTIFIED=${lOS_IDENTIFIED//\"}

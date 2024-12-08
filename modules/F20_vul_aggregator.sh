@@ -171,7 +171,7 @@ aggregate_versions() {
       lVERSION="$(echo "${lVERSION}" | cut -d\; -f1-2 | tr ';' ':')"
       print_output "[+] Found Version details (${ORANGE}kernel${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
-      # lVERSION=${lVERSION/%/:}
+      lVERSION=${lVERSION/%/:}
       lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
       # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$lVERSION$NC"
     done
@@ -181,7 +181,7 @@ aggregate_versions() {
       if [ -z "${lVERSION}" ]; then
         continue
       fi
-      lVERSION="$(echo "${lVERSION}" | cut -d\; -f1 | sed 's/^/linux_kernel:/')"
+      lVERSION="$(echo "${lVERSION}" | cut -d\; -f1 | sed 's/^/:linux:linux_kernel:/')"
       print_output "[+] Found Version details (${ORANGE}kernel - with verified vulnerability details${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       lVERSION=${lVERSION/%/:}
@@ -1047,10 +1047,10 @@ cve_extractor() {
   if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then
     lKNOWN_EXPLOITED=1
   fi
-  if [[ -f "${CSV_LOG}" ]]; then
+  if [[ -f "${F20_CSV_LOG}" ]]; then
     # very weak search for the end of the entry - if yes we have a verified kernel vuln
     # Todo: Improve this search on field base
-    lKERNEL_VERIFIED_VULN=$(grep -c "^${lBINARY};.*;yes;$" "${CSV_LOG}" || true)
+    lKERNEL_VERIFIED_VULN=$(grep -c "^${lBINARY};.*;yes;$" "${F20_CSV_LOG}" || true)
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
@@ -1105,7 +1105,7 @@ cve_extractor() {
   if [[ "${#BUSYBOX_VERIFIED_CVE_ARR[@]}" -gt 0 ]] && [[ "${lBINARY}" == *"busybox"* ]]; then
     lCVEs+=" (${#BUSYBOX_VERIFIED_CVE_ARR[@]})"
   fi
-  local lEXPLOITS="${EXPLOIT_COUNTER_VERSION}"
+  local lEXPLOITS="${EXPLOIT_COUNTER_VERSION:-0}"
 
   if [[ "${lCVE_COUNTER_VERSION}" -gt 0 || "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     if ! [[ -f "${LOG_PATH_MODULE}"/F20_summary.csv ]]; then

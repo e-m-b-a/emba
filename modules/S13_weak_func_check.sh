@@ -56,8 +56,9 @@ S13_weak_func_check()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    for lBINARY in "${BINARIES[@]}" ; do
-      lBIN_FILE=$(file -b "${lBINARY}")
+    while read -r lBINARY; do
+      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
+      lBINARY="${lBINARY/;*}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then
@@ -139,7 +140,7 @@ S13_weak_func_check()
       if [[ "${THREADED}" -eq 1 ]]; then
         max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S13_ARR[@]}"
       fi
-    done
+    done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
     [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S13_ARR[@]}"
 
@@ -152,8 +153,10 @@ S13_weak_func_check()
       lSTRCPY_CNT=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S13_STRCPY_CNT.tmp)
     fi
 
+    local lBINS_CNT=0
+    lBINS_CNT=$(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep -c ";ELF")
     write_log ""
-    write_log "[*] Statistics:${lSTRCPY_CNT}:${#BINARIES[@]}"
+    write_log "[*] Statistics:${lSTRCPY_CNT}:${lBINS_CNT}"
     write_log ""
     write_log "[*] Statistics1:${ARCH}"
   fi
