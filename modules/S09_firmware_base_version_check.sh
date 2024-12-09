@@ -97,7 +97,7 @@ S09_firmware_base_version_check() {
   fi
 
   if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
-    print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
+    print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
     local lPKG_FILE=""
     for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
       (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
@@ -141,7 +141,7 @@ S09_firmware_base_version_check() {
     print_output "[*] No package manager updates for static analysis"
   fi
 
-  print_output "[*] Generate strings overview for static version analysis of ${#FILE_ARR[@]} files ..."
+  print_output "[*] Generate strings overview for static version analysis of ${ORANGE}${#FILE_ARR[@]}${NC} files ..."
   mkdir "${LOG_PATH_MODULE}"/strings_bins/ || true
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
     mkdir "${LOG_PATH_MODULE}"/strings_bins || true

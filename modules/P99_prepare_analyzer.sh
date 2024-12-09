@@ -57,7 +57,6 @@ P99_prepare_analyzer() {
   fi
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    lNEG_LOG=0
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
     return
   fi
