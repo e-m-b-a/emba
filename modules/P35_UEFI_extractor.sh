@@ -174,7 +174,7 @@ ami_extractor() {
 
   lFIRMWARE_NAME_="$(basename "${lFIRMWARE_PATH_}")"
 
-  echo -ne '\n' | python3 "${EXT_DIR}"/BIOSUtilities/AMI_PFAT_Extract.py -o "${lEXTRACTION_DIR_}" "${lFIRMWARE_PATH_}" &> "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log || true
+  echo -ne '\n' | python3 "${EXT_DIR}"/BIOSUtilities/biosutilities/ami_pfat_extract.py -o "${lEXTRACTION_DIR_}" "${lFIRMWARE_PATH_}" &> "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log || true
 
   if [[ -s "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log ]] && ! grep -q "Error: " "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log; then
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log

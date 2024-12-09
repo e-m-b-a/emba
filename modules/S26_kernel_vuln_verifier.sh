@@ -152,7 +152,7 @@ S26_kernel_vuln_verifier()
       continue
     fi
 
-    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}""/linux_kernel_${lK_VERSION}.txt"
+    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}""/linux_linux_kernel_${lK_VERSION}.txt"
 
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
@@ -191,6 +191,11 @@ S26_kernel_vuln_verifier()
 
     print_output "[*] Kernel sources for version ${ORANGE}${lK_VERSION}${NC} available"
     write_link "${LOG_DIR}/kernel_downloader.log"
+    mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
+    (grep -r -l "cpe:2.3:[ao]:linux:linux_kernel:" "${NVD_DIR}" | xargs cp -f -t "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true)&
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    local lWAIT_PIDS_CVE_COPY_ARR=( "${lTMP_PID}" )
 
     lKERNEL_DIR="${LOG_PATH_MODULE}/linux-${lK_VERSION_KORG}"
     [[ -d "${lKERNEL_DIR}" ]] && rm -rf "${lKERNEL_DIR}"
@@ -205,7 +210,11 @@ S26_kernel_vuln_verifier()
     export S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
     export SYMBOLS_CNT=0
 
-    cve_db_lookup_version "linux_kernel:${lK_VERSION}"
+    print_output "[*] Probably we need to wait a bit for pre-processing the NVD data ..." "no_log"
+    wait_for_pid "${lWAIT_PIDS_CVE_COPY_ARR[@]}"
+    export NVD_DIR="${LOG_PATH_MODULE}"/cpe_search_tmp_dir
+    print_output "[*] Moving on with CVE queries ..." "no_log"
+    cve_db_lookup_version ":linux:linux_kernel:${lK_VERSION}"
 
     if ! [[ -f "${lCVE_DETAILS_PATH}" ]]; then
       print_output "[-] No CVE details generated ... check for further kernel version"
@@ -235,7 +244,7 @@ S26_kernel_vuln_verifier()
     if [[ -d "${LOG_DIR}""/firmware" ]]; then
       print_output "[*] Identify kernel modules symbols ..." "no_log"
       # shellcheck disable=SC2016
-      find "${LOG_DIR}/firmware" -name "*.ko" -print0|xargs -r -0 -P 16 -I % sh -c 'readelf -a % | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >> "${LOG_PATH_MODULE}"/symbols.txt || true
+      find "${LOG_DIR}/firmware" -name "*.ko" -print0|xargs -r -0 -P 16 -I % sh -c 'readelf -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >> "${LOG_PATH_MODULE}"/symbols.txt || true
     fi
 
     uniq "${LOG_PATH_MODULE}"/symbols.txt > "${LOG_PATH_MODULE}"/symbols_uniq.txt
@@ -520,7 +529,7 @@ compile_kernel() {
 
 report_kvulns_csv() {
   local lVULN="${1:-}"
-  local lK_VERSION="${1:-}"
+  local lK_VERSION="${2:-}"
   local lCVE=""
   local lCVSS2=""
   local lCVSS3=""

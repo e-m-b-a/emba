@@ -105,7 +105,6 @@ set_p02_default_exports() {
   export SHA1_CHECKSUM="NA"
   export MD5_CHECKSUM="NA"
   export ENTROPY="NA"
-  export PATOOLS_INIT=0
   export DLINK_ENC_DETECTED=0
   export VMDK_DETECTED=0
   export UBOOT_IMAGE=0
@@ -137,17 +136,7 @@ generate_entropy_graph() {
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
   if [[ -f "${lFIRMWARE_PATH_BIN}" ]] && ! [[ -f "${LOG_DIR}"/firmware_entropy.png ]]; then
     print_output "[*] Entropy testing with binwalk ... "
-    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
-    # Docker container and binwalk fails to save the entropy picture there
-    if [[ ${IN_DOCKER} -eq 1 ]] ; then
-      cd "${LOG_DIR}" || return
-      print_output "$("${BINWALK_BIN[@]}" -E -F -J "${lFIRMWARE_PATH_BIN}")"
-      mv "$(basename "${lFIRMWARE_PATH_BIN}".png)" "${LOG_DIR}"/firmware_entropy.png 2> /dev/null || true
-      cd /emba || return
-    else
-      print_output "$("${BINWALK_BIN[@]}" -E -F -J "${lFIRMWARE_PATH_BIN}")"
-      mv "$(basename "${lFIRMWARE_PATH_BIN}".png)" "${LOG_DIR}"/firmware_entropy.png 2> /dev/null || true
-    fi
+    print_output "$("${BINWALK_BIN[@]}" -E -p "${LOG_DIR}"/firmware_entropy.png "${lFIRMWARE_PATH_BIN}")"
   fi
 }
 
@@ -178,16 +167,16 @@ fw_bin_detector() {
     lDJI_PRAK_ENC_CHECK=$(grep -c "PRAK\|RREK\|IAEK\|PUEK" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
     lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
     # we are running binwalk on the file to analyze the output afterwards:
-    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${TMP_DIR}"/p02_binwalk_output.txt
-    if [[ -f "${TMP_DIR}"/p02_binwalk_output.txt ]]; then
-      lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${LOG_PATH_MODULE}"/p02_binwalk_output.txt
+    if [[ -f "${LOG_PATH_MODULE}"/p02_binwalk_output.txt ]]; then
+      lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     else
       lQNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${lCHECK_FILE}")
     fi
 
     # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
     # further checks will follow in P35
-    lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     lUEFI_CHECK=$(( "${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)" ))
   fi
 
@@ -229,16 +218,14 @@ fw_bin_detector() {
     export AVM_DETECTED=1
     write_csv_log "AVM firmware detected" "yes" "NA"
   fi
-  # if we have a zip, tgz, tar archive we are going to use the patools extractor
   if [[ "${lFILE_BIN_OUT}" == *"gzip compressed data"* || "${lFILE_BIN_OUT}" == *"Zip archive data"* || \
     "${lFILE_BIN_OUT}" == *"POSIX tar archive"* || "${lFILE_BIN_OUT}" == *"ISO 9660 CD-ROM filesystem data"* || \
     "${lFILE_BIN_OUT}" == *"7-zip archive data"* || "${lFILE_BIN_OUT}" == *"XZ compressed data"* || \
     "${lFILE_BIN_OUT}" == *"bzip2 compressed data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "${AVM_DETECTED}" -ne 1 ]]; then
-      print_output "[+] Identified gzip/zip/tar/iso/xz/bzip2 archive file - using patools extraction module"
-      export PATOOLS_INIT=1
-      write_csv_log "basic compressed (patool)" "yes" "NA"
+      print_output "[+] Identified gzip/zip/tar/iso/xz/bzip2 archive file"
+      write_csv_log "basic compressed" "yes" "NA"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"QEMU QCOW2 Image"* ]] || [[ "${lFILE_BIN_OUT}" == *"QEMU QCOW Image"* ]]; then
@@ -411,7 +398,7 @@ fw_bin_detector() {
   if [[ "${lUEFI_CHECK}" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI/BIOS firmware - using UEFI extraction module"
     UEFI_DETECTED=1
-    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/p02_binwalk_output.txt || true)
+    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
       print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
     fi
@@ -425,7 +412,6 @@ backup_p02_vars() {
   backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
   backup_var "UEFI_DETECTED" "${UEFI_DETECTED}"
   backup_var "AVM_DETECTED" "${AVM_DETECTED}"
-  backup_var "PATOOLS_INIT" "${PATOOLS_INIT}"
   backup_var "VMDK_DETECTED" "${VMDK_DETECTED}"
   backup_var "UBI_IMAGE" "${UBI_IMAGE}"
   backup_var "DLINK_ENC_DETECTED" "${DLINK_ENC_DETECTED}"

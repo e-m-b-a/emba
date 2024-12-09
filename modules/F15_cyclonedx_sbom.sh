@@ -153,7 +153,7 @@ F15_cyclonedx_sbom() {
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
-      > "${lSBOM_LOG_FILE}.json"
+      > "${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
     sed -i 's/%SPACE%/\ /g' "${lSBOM_LOG_FILE}.json"

@@ -86,7 +86,8 @@ compile_files() {
   local lCOUNT=0
   local lCOMP_COUNT=0
 
-  mapfile -t lCOMPILE_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "libstdc++.so*" -o -name "libgcc_s.so*" \) )
+  # mapfile -t lCOMPILE_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "libstdc++.so*" -o -name "libgcc_s.so*" \) )
+  mapfile -t lCOMPILE_FILES_ARR < <(grep "libstdc++.so\|libgcc_s.so" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
 
   if [[ ${#lCOMPILE_FILES_ARR[@]} -gt 0 ]] ; then
     write_log "[+] Found ""${#lCOMPILE_FILES_ARR[@]}"" files for identification of used toolchain:" "${LOG_PATH_MODULE}"/compile_files.txt

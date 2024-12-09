@@ -19,6 +19,7 @@ export THREADED=1
 export SHORT_PATH=1
 export HTML=1
 export BINARY_EXTENDED=1
+export MAX_EXT_CHECK_BINS=100
 export QEMULATION=1
 export FULL_EMULATION=1
 export FULL_TEST=1

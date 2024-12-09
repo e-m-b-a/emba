@@ -54,8 +54,9 @@ S15_radare_decompile_checks()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    for lBINARY in "${BINARIES[@]}" ; do
-      lBIN_FILE=$(file -b "${lBINARY}")
+    while read -r lBINARY; do
+      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
+      lBINARY="${lBINARY/;*}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
 
@@ -72,7 +73,7 @@ S15_radare_decompile_checks()
       if [[ "${THREADED}" -eq 1 ]]; then
         max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S15_ARR[@]}"
       fi
-    done
+    done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
     [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S15_ARR[@]}"
 

@@ -42,7 +42,7 @@ S08_submodule_python_poetry_lock_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lPY_LCK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "poetry.lock" -type f)
+  mapfile -t lPY_LCK_ARCHIVES_ARR < <(grep "poetry.lock" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
 
   if [[ "${#lPY_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPY_LCK_ARCHIVES_ARR[@]}${NC} Python poetry.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

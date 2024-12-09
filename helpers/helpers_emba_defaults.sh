@@ -29,6 +29,7 @@ set_defaults() {
   export ARCH_CHECK=1
   export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export BINARY_EXTENDED=0
+  export MAX_EXT_CHECK_BINS=20
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
   export DEEP_EXT_DEPTH=4
@@ -246,4 +247,5 @@ set_log_paths() {
   export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
+  export F50_CSV_LOG="${CSV_DIR}/f50_base_aggregator.csv"
 }

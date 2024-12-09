@@ -130,8 +130,18 @@ version_detection_thread() {
       mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -a -h "Emulating binary:" "${lLOG_PATH_MODULE_S115}"/qemu_tmp_"${lBINARY}".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
       for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
         # lBINARY_PATH is the final array which we are using further
-        lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
-        lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+        # lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
+        lBINARY_PATH_=$(grep "${lBINARY_PATH_}.*ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+        if [[ -z "${lBINARY_PATH_}" ]]; then
+          lBINARY_PATH_=$(grep "${lBINARY_PATH_}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+        fi
+        if [[ -z "${lBINARY_PATH_}" ]]; then
+          lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
+        fi
+        print_output "[*] Storing strict ${lBINARY_PATH_} in array" "no_log"
+        if [[ -n "${lBINARY_PATH_}" ]]; then
+          lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+        fi
       done
       lTYPE="emulation/strict"
     fi
@@ -149,10 +159,17 @@ version_detection_thread() {
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${lLOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
             # BINARY_PATH is the final array which we are using further
-            print_output "[*] S116 - Testing for ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}" "no_log"
-            lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
-            print_output "[*] S116 - Testing for new ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}" "no_log"
-            lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+            lBINARY_PATH_=$(grep "${lBINARY_PATH_}.*ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+            if [[ -z "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATH_=$(grep "${lBINARY_PATH_}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+            fi
+            if [[ -z "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
+            fi
+            print_output "[*] Storing ${lBINARY_PATH_} in array" "no_log"
+            if [[ -n "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+            fi
           done
         done
       done
