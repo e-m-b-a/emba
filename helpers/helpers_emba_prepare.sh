@@ -179,7 +179,7 @@ binary_architecture_threader() {
     # noreorder, pic, cpic, o32, mips32
     local lREADELF_H_ARR=()
 
-    mapfile -t lREADELF_H_ARR < <(readelf -h "${lBINARY}" 2>/dev/null)
+    mapfile -t lREADELF_H_ARR < <(readelf -h "${lBINARY}" 2>/dev/null || true)
 
     lD_FLAGS_CNT=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Flags:" || true)
     lD_FLAGS_CNT="${lD_FLAGS_CNT// /}"

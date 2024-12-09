@@ -59,13 +59,18 @@ S16_ghidra_decompile_checks()
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
-    if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+    if [[ -f "${BASE_LINUX_FILES}" ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
       lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
       if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
+    fi
+
+    if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
+      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
+      print_output "[*] S16 - Testing ${lBIN_TO_CHECK}"
     fi
 
     # ensure we have not tested this binary entry
@@ -87,8 +92,8 @@ S16_ghidra_decompile_checks()
       ghidra_analyzer "${lBIN_TO_CHECK}"
     fi
 
-    # we stop checking after the first 20 binaries
-    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+    # we stop checking after the first MAX_EXT_CHECK_BINS binaries
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
       print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
       print_output "[*] For complete analysis enable FULL_TEST." "no_log"
       break
@@ -147,7 +152,7 @@ ghidra_analyzer() {
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local lIDENTIFIER="${RANDOM}"
 
-  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra run for ${lNAME}"
+  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then

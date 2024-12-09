@@ -91,12 +91,13 @@ cwe_check() {
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
   else
     mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f1 || true)
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
-    if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+    if [[ -f "${BASE_LINUX_FILES}" ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
       lNAME=$(basename "${lBIN_TO_CHECK}")
@@ -107,8 +108,11 @@ cwe_check() {
 
     # do not try to analyze kernel modules:
     [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
+    if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
+      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
+      print_output "[*] S17 - Testing ${lBIN_TO_CHECK}"
+    fi
     # ensure we have not tested this binary entry
-    print_output "[*] S17 - Testing ${lBIN_TO_CHECK}"
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
     if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
@@ -132,9 +136,9 @@ cwe_check() {
     else
       cwe_checker_threaded "${lBIN_TO_CHECK}"
     fi
-    # we stop checking after the first 20 binaries
+    # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
       print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
       print_output "[*] For complete analysis enable FULL_TEST." "no_log"
       break

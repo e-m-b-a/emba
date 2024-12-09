@@ -101,7 +101,7 @@ s22_vuln_check_semgrep() {
     # highlight security findings in semgrep log:
     sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
 
-    mapfile -t lSEMG_SOURCES_ARR < <(grep -E -o -e "classname=\".*\"" -e "file=.*\"" -e "line=\"[0-9]+" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" | sed -z 's/"\n/\ /g' | sort -u || true)
+    mapfile -t lSEMG_SOURCES_ARR < <(grep -E -o -e "testcase name=\".*\"" -e "file=.*\"" -e "line=\"[0-9]+" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}" | sed -z 's/"\n/\ /g' | sort -u || true)
 
     for lSEMG_SOURCE_NOTE in "${lSEMG_SOURCES_ARR[@]}"; do
       local lSEMG_ISSUE_NAME=""
@@ -113,8 +113,8 @@ s22_vuln_check_semgrep() {
 
       ! [[ -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
 
-      lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^classname=")
-      lSEMG_ISSUE_NAME="${lSEMG_ISSUE_NAME/classname=\"/}"
+      lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
+      lSEMG_ISSUE_NAME="${lSEMG_ISSUE_NAME/name=\"/}"
 
       lSEMG_SOURCE_FILE=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
       lSEMG_SOURCE_FILE="${lSEMG_SOURCE_FILE/file=\"/}"

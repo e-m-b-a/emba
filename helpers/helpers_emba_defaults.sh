@@ -29,6 +29,7 @@ set_defaults() {
   export ARCH_CHECK=1
   export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export BINARY_EXTENDED=0
+  export MAX_EXT_CHECK_BINS=20
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
   export DEEP_EXT_DEPTH=4
