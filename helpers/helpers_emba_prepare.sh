@@ -200,7 +200,7 @@ binary_architecture_threader() {
     lD_DATA=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Data:" || true)
     lD_DATA="${lD_DATA/*Data:/}"
     lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
-  
+
     lD_ARCH_GUESSED=$(readelf -p .comment "${lBINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
@@ -417,7 +417,7 @@ prepare_all_file_arrays() {
   echo ""
   print_output "[*] Auto detection of all files with further details for ${ORANGE}${lFIRMWARE_PATH}${NC}\\n"
   export ALL_FILES_ARR=()
-  
+
   # we exclude all the raw files from binwalk
   readarray -t ALL_FILES_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! -name "*.raw")
 

@@ -626,10 +626,31 @@ bin_string_checker() {
   local lPURL_IDENTIFIER="NA"
   local lOS_IDENTIFIED=""
   local lMD5_SUM=""
+  local lMD5_SUM_MATCHES_ARR=()
+  local lMD5_SUM_MATCHE=""
+  local lMACHTED_FNAME=""
 
-  # print_output "[*] Testing ${#FILE_ARR[@]} binaries against identifier ${VERSION_IDENTIFIER}"
+  # print_output "[*] Testing ${#FILE_ARR[@]} binaries against identifier ${VERSION_IDENTIFIER} -> ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
 
   lOS_IDENTIFIED=$(distri_check)
+  if [[ -d "${LOG_PATH_MODULE}"/strings_bins ]] && [[ -v lVERSION_IDENTIFIERS_ARR[0] ]]; then
+    # we always check for the first entry (also on multi greps) against all our generated strings.
+    # if we have a match we can extract the md5sum from our path and use this to get the complete pathname from p99-csv log
+    # this pathname ist finally used for hte FILE_ARR which is then used for further analysis
+    # print_output "[*] Testing ${lVERSION_IDENTIFIERS_ARR[0]}" "no_log"
+    mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -E -l "${lVERSION_IDENTIFIERS_ARR[0]}" "${LOG_PATH_MODULE}"/strings_bins/strings_* | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
+    FILE_ARR=()
+    for lMD5_SUM_MATCHE in "${lMD5_SUM_MATCHES_ARR[@]}"; do
+      lMACHTED_FNAME=$(grep ";${lMD5_SUM_MATCHE};" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+      FILE_ARR+=("${lMACHTED_FNAME}")
+    done
+
+    if [[ "${#FILE_ARR[@]}" -eq 0 ]]; then
+      return
+    fi
+  fi
+
+  # print_output "[*] Testing version identifier ${lVERSION_IDENTIFIERS_ARR[*]} against ${#FILE_ARR[@]} files" "no_log"
 
   for lBIN in "${FILE_ARR[@]}"; do
     # print_output "[*] Testing ${lBIN} for versions"

@@ -23,19 +23,16 @@ SBOM_MINIMAL=1
 
 # if no deep extraction is needed it can be disabled here - sometimes useful for
 # non Linux stuff like sources or Windows exe (could be also configured via -q parameter)
-# DISABLE_DEEP=1
+DISABLE_DEEP=1
 
 # DEEP_EXT_DEPTH -> max rounds of deep extractor 1 to 4
-DEEP_EXT_DEPTH=1
+# DEEP_EXT_DEPTH=1
 # change this to something smaller to not report all the files
 SBOM_MAX_FILE_LOG=100
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=0
 
-# If you just have a directory or some kind of zip file you can just enable P02 and P05
-# export SELECT_MODULES+=( "P02" "P05" )
-# Currently the complete pre-checking phase is enabled:
 export SELECT_MODULES+=( "S06" "S08" "S25" "F15" )
 
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
