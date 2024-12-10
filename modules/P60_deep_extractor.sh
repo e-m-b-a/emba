@@ -21,8 +21,6 @@ export PRE_THREAD_ENA=0
 
 P60_deep_extractor() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Binary firmware deep extractor"
-  pre_module_reporter "${FUNCNAME[0]}"
 
   export DISK_SPACE_CRIT=0
   local lFILES_EXT=0
@@ -38,6 +36,9 @@ P60_deep_extractor() {
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
+
+  module_title "Binary firmware deep extractor"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   check_disk_space
   if ! [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then

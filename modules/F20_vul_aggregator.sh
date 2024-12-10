@@ -172,7 +172,9 @@ aggregate_versions() {
       print_output "[+] Found Version details (${ORANGE}kernel${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       lVERSION=${lVERSION/%/:}
-      lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
+      if ! [[ "${lVERSIONS_KERNEL_ARR[*]}" == *"${lVERSION}"* ]]; then
+        lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
+      fi
       # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$lVERSION$NC"
     done
 
@@ -185,7 +187,9 @@ aggregate_versions() {
       print_output "[+] Found Version details (${ORANGE}kernel - with verified vulnerability details${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       lVERSION=${lVERSION/%/:}
-      lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
+      if ! [[ "${lVERSIONS_KERNEL_ARR[*]}" == *"${lVERSION}"* ]]; then
+        lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
+      fi
       # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$lVERSION$NC"
     done
 

@@ -58,14 +58,6 @@ S09_firmware_base_version_check() {
   # 4 -> high
   local lCONFIDENCE_LEVEL=3
 
-  if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
-    # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
-    local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
-    local lV_CNT=0
-    lV_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
-    print_output "[*] Quick scan enabled - ${lV_CNT/\ *} version identifiers loaded"
-  fi
-
   print_output "[*] Checking for common package manager environments to optimize static version detection"
   # Debian:
   find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true

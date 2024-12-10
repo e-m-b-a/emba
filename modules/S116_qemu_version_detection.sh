@@ -33,14 +33,6 @@ S116_qemu_version_detection() {
     if [[ -f "${lLOG_PATH_S115}" && -d "${LOG_DIR}/s115_usermode_emulator" ]]; then
       local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
 
-      if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
-        # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
-        local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
-        local lV_CNT=0
-        lV_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
-        print_output "[*] Quick scan enabled - ${lV_CNT/\ *} version identifiers loaded"
-      fi
-
       write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
 
       while read -r lVERSION_LINE; do

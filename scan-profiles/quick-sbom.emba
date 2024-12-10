@@ -13,10 +13,10 @@
 # Description: This is a default SBOM profile. You can Use it as a template for your own profiles
 #              or start emba with "-p sbom-default.emba" to use it
 
-export FORMAT_LOG=1
+export FORMAT_LOG=0
 export THREADED=1
 export SHORT_PATH=1
-export HTML=1
+export HTML=0
 
 # multiple sbom only optimisations
 SBOM_MINIMAL=1
