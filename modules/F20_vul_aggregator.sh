@@ -171,7 +171,7 @@ aggregate_versions() {
       lVERSION="$(echo "${lVERSION}" | cut -d\; -f1-2 | tr ';' ':')"
       print_output "[+] Found Version details (${ORANGE}kernel${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
-      lVERSION=${lVERSION/%/:}
+      # lVERSION=${lVERSION/%/:}
       if ! [[ "${lVERSIONS_KERNEL_ARR[*]}" == *"${lVERSION}"* ]]; then
         lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
       fi
@@ -186,7 +186,7 @@ aggregate_versions() {
       lVERSION="$(echo "${lVERSION}" | cut -d\; -f1 | sed 's/^/:linux:linux_kernel:/')"
       print_output "[+] Found Version details (${ORANGE}kernel - with verified vulnerability details${GREEN}): ""${ORANGE}${lVERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
-      lVERSION=${lVERSION/%/:}
+      # lVERSION=${lVERSION/%/:}
       if ! [[ "${lVERSIONS_KERNEL_ARR[*]}" == *"${lVERSION}"* ]]; then
         lVERSIONS_KERNEL_ARR+=( "${lVERSION}" )
       fi
