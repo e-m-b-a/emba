@@ -623,7 +623,7 @@ check_cve_sources() {
 
   # ensure we replace :: with :.*: to use the lBIN_VERSION in our grep command
   lBIN_VERSION=${lBIN_VERSION//::/:\.\*:}
-  # print_output "[*] Testing binary ${lBIN_NAME} with version ${lBIN_VERSION_ONLY} (${lBIN_VERSION}) for CVE matches in ${lCVE_VER_SOURCES_FILE}" "no_log"
+  print_output "[*] Testing binary ${lBIN_NAME} with version ${lBIN_VERSION_ONLY} (${lBIN_VERSION}) for CVE matches in ${lCVE_VER_SOURCES_FILE}" "no_log"
 
   lCVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${lCVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
   # lCVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${lCVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -634,7 +634,7 @@ check_cve_sources() {
 
   # check if our binary name is somewhere in the cpe identifier - if not we can drop this vulnerability:
   if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${lCVE_VER_SOURCES_FILE}" | grep -c "${lBIN_NAME//\.\*}")" -eq 0 ]]; then
-    # print_output "[-] No matching criteria found - binary ${lBIN_NAME} not vulnerable for CVE ${lCVE_ID}" "no_log"
+    print_output "[-] No matching criteria found - binary ${lBIN_NAME} not vulnerable for CVE ${lCVE_ID}" "no_log"
     return
   fi
 
@@ -643,7 +643,7 @@ check_cve_sources() {
 
   # if our cpe with the binary version matches we have a vuln and we can continue
   if grep -q "cpe:${CPE_VERSION}:.*${lBIN_VERSION%:}:" "${lCVE_VER_SOURCES_FILE}"; then
-    # print_output "[+] CPE matches - vulnerability identified - CVE: ${lCVE_ID} / BIN: ${lBIN_VERSION}" "no_log"
+    print_output "[+] CPE matches - vulnerability identified - CVE: ${lCVE_ID} / BIN: ${lBIN_VERSION}" "no_log"
     write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-NA}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
     return
   fi
@@ -666,8 +666,10 @@ check_cve_sources() {
 
   # Now we walk through all the CPEMatch entries and extract the version details for further analysis
   local lWAIT_PIDS_F20_tmp=()
+  print_output "[*] Testing ${lCVE_CPEs_vuln_ARR[*]}"
   for lCVE_CPEMATCH in "${lCVE_CPEs_vuln_ARR[@]}"; do
-    cve_cpe_matcher_threading "${lCVE_CPEMATCH}" "${lFIRST_EPSS}" "${lBIN_NAME}" &
+    print_output "[*] Testing ${lCVE_CPEMATCH} / ${lFIRST_EPSS} / ${lBIN_NAME} / ${lCVE_V2} / ${lCVE_V31} / ${lCVE_SUMMARY// /§}"
+    cve_cpe_matcher_threading "${lCVE_CPEMATCH}" "${lFIRST_EPSS}" "${lBIN_NAME}" "${lCVE_V2}" "${lCVE_V31}" "${lCVE_SUMMARY// /§}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F20_tmp+=( "${lTMP_PID}" )
@@ -680,6 +682,10 @@ cve_cpe_matcher_threading() {
   local lCVE_CPEMATCH="${1:-}"
   local lFIRST_EPSS="${2:-}"
   local lBIN_NAME="${3:-}"
+  local lCVE_V2="${4:-}"
+  local lCVE_V31="${5:-}"
+  local lCVE_SUMMARY="${6:-}"
+  lCVE_SUMMARY=${lCVE_SUMMARY//§/ }
 
   local lCVE_VER_START_INCL=""
   local lCVE_VER_START_EXCL=""
