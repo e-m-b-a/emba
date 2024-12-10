@@ -76,10 +76,11 @@ prepare_docker_home_dir() {
     if ! [[ -d "${HOME}"/.config/ ]]; then
       mkdir -p "${HOME}"/.config
     fi
-    cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
+    cp -pr "${EXT_DIR}"/cwe_checker/.config/* "${HOME}"/.config/
     # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share/composer/.htaccess "${HOME}"/.local/share/composer/
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share/cwe_checker/* "${HOME}"/.local/share/cwe_checker/
+    export PATH=${PATH}:"${HOME}"/.cargo/bin/
   fi
 }
 

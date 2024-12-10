@@ -56,29 +56,6 @@ S17_cwe_checker()
   fi
 }
 
-cwe_container_prepare() {
-  # as we are in a read only docker environment we need to trick a bit:
-  # /root is mounted as a writable tempfs. With this we need to set it up
-  # on every run from scratch:
-  if [[ -d "${EXT_DIR}"/cwe_checker/.config ]]; then
-    print_output "[*] Restoring config directory in read-only container" "no_log"
-    if ! [[ -d "${HOME}"/.config/ ]]; then
-      mkdir -p "${HOME}"/.config
-    fi
-    cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
-    # .local/share has also stored the r2 plugin data
-    cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
-  fi
-
-  # Todo: move this to dependency check
-  if [[ -d "${HOME}"/.cargo/bin ]]; then
-    export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
-  else
-    print_output "[!] CWE checker installation broken ... please check it manually!"
-    return
-  fi
-}
-
 cwe_check() {
   local lBINARY=""
   local lBIN_TO_CHECK=""
