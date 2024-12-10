@@ -189,13 +189,6 @@ l15_version_detector() {
   print_output "[*] Testing detected service ${ORANGE}${lSERVICE}${NC}" "no_log"
 
   local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
-  if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
-    # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
-    local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
-    local lV_CNT=0
-    lV_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
-    print_output "[*] Quick scan enabled - ${lV_CNT/\ *} version identifiers loaded"
-  fi
 
   while read -r lVERSION_LINE; do
     if echo "${lVERSION_LINE}" | grep -v -q "^[^#*/;]"; then

@@ -70,7 +70,7 @@ ubi_extractor() {
   print_output "[*] Extracted ${ORANGE}${FILES_UBI_EXT}${NC} files and ${ORANGE}${lDIRS_UBI_EXT}${NC} directories from the firmware image via UBI extraction round 2."
 
   if [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "UBI image"' || true)
+    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'file -b "%" | grep "UBI image"' || true)
 
     for lUBI_DATA in "${lUBI_1st_ROUND_ARR[@]}"; do
       lUBI_FILE=$(safe_echo "${lUBI_DATA}" | cut -d: -f1)

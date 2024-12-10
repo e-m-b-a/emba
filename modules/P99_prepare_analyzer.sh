@@ -34,11 +34,6 @@ P99_prepare_analyzer() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local lNEG_LOG=1
-  local lFILES_EXT=0
-  local lUNIQUE_FILES=0
-  local lDIRS_EXT=0
-  local lBINS=0
-  local lR_PATH=""
 
   export LINUX_PATH_COUNTER=0
   LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
@@ -54,19 +49,16 @@ P99_prepare_analyzer() {
   print_output "[*] Quick check for Linux operating-system"
   check_firmware
 
-  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
-    lNEG_LOG=0
-    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
-    return
-  fi
-
-  prepare_file_arr "${FIRMWARE_PATH}"
-  prepare_binary_arr "${FIRMWARE_PATH}"
-  prepare_file_arr_limited "${LOG_DIR}"/firmware
+  prepare_all_file_arrays "${FIRMWARE_PATH}"
 
   if [[ ${KERNEL} -eq 0 ]] ; then
     architecture_check "${FIRMWARE_PATH}"
     architecture_dep_check
+  fi
+
+  if [[ "${SBOM_MINIMAL:-0}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
   fi
 
   if [[ "${UEFI_VERIFIED}" -ne 1 ]] && [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
@@ -92,17 +84,6 @@ P99_prepare_analyzer() {
     fi
   elif [[ "${RTOS}" -eq 1 ]]; then
     print_output "[*] Possible RTOS system detected"
-  fi
-
-  if [[ "${#ROOT_PATH[@]}" -gt 0 ]] && ! [[ -f "${CSV_DIR}"/p99_prepare_analyzer.csv ]]; then
-    write_csv_log "FILES" "UNIQUE_FILES" "DIRS" "Binaries" "LINUX_PATH_COUNTER" "Root PATH detected" "architecture" "endianess"
-    for lR_PATH in "${ROOT_PATH[@]}"; do
-      lFILES_EXT=$(find "${ROOT_PATH}" -xdev -type f | wc -l )
-      lUNIQUE_FILES=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-      lDIRS_EXT=$(find "${ROOT_PATH}" -xdev -type d | wc -l )
-      lBINS=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep -c "ELF" || true)
-      write_csv_log "${lFILES_EXT}" "${lUNIQUE_FILES}" "${lDIRS_EXT}" "${lBINS}" "${LINUX_PATH_COUNTER}" "${lR_PATH}" "${ARCH}" "${D_END:-"NA"}"
-    done
   fi
 
   write_log "[*] Statistics:${ARCH:-NA}:${D_END:-NA}"

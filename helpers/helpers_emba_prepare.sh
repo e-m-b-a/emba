@@ -155,9 +155,65 @@ set_exclude()
   print_excluded
 }
 
+binary_architecture_threader() {
+  local lBINARY="${1:-}"
+
+  local lD_FLAGS_CNT=""
+  local lD_MACHINE="NA"
+  local lD_CLASS="NA"
+  local lD_DATA="NA"
+  local lD_ARCH_GUESSED="NA"
+  local lMD5SUM=""
+  lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
+  lMD5SUM="${lMD5SUM/\ *}"
+
+  if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
+    return
+  fi
+  echo "${lMD5SUM}" >> "${TMP_DIR}/p99_md5sum_done.tmp"
+
+  print_dot
+
+  D_FILE_OUTPUT=$(file -b "${lBINARY}")
+  if [[ "${D_FILE_OUTPUT}" == *"ELF"* ]]; then
+    # noreorder, pic, cpic, o32, mips32
+    local lREADELF_H_ARR=()
+
+    mapfile -t lREADELF_H_ARR < <(readelf -h "${lBINARY}" 2>/dev/null || true)
+
+    lD_FLAGS_CNT=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Flags:" || true)
+    lD_FLAGS_CNT="${lD_FLAGS_CNT// /}"
+    lD_FLAGS_CNT="${lD_FLAGS_CNT/*Flags:/}"
+    lD_FLAGS_CNT="${lD_FLAGS_CNT/0x0/}"
+
+    lD_MACHINE=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Machine:" || true)
+    lD_MACHINE="${lD_MACHINE// /}"
+    lD_MACHINE="${lD_MACHINE/*Machine:/}"
+    lD_MACHINE=$(echo "${lD_MACHINE}" | sed -E 's/^[[:space:]]+//')
+
+    # ELF32/64
+    lD_CLASS=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Class:" || true)
+    lD_CLASS="${lD_CLASS/*Class:/}"
+    lD_CLASS=$(echo "${lD_CLASS}" | sed -E 's/^[[:space:]]+//')
+
+    # endianes
+    lD_DATA=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Data:" || true)
+    lD_DATA="${lD_DATA/*Data:/}"
+    lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
+
+    lD_ARCH_GUESSED=$(readelf -p .comment "${lBINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
+    lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
+    lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
+  fi
+
+
+  write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT}" "${lMD5SUM}" &
+
+}
+
 architecture_check() {
   if [[ ${ARCH_CHECK} -eq 1 ]] ; then
-    print_output "[*] Architecture auto detection (could take some time)\\n"
+    print_output "[*] Architecture auto detection and backend data population for ${ORANGE}${#ALL_FILES_ARR[@]}${NC} files (could take some time)\\n"
     local lARCH_MIPS_CNT=0
     local lARCH_ARM_CNT=0
     local lARCH_ARM64_CNT=0
@@ -174,105 +230,48 @@ architecture_check() {
     local lARCH_QCOM_DSP6_CNT=0
     local lD_END_LE_CNT=0
     local lD_END_BE_CNT=0
-    local lD_FLAGS_CNT=""
-    local lD_MACHINE=""
-    local lD_CLASS=""
-    local lD_DATA=""
-    local lD_ARCH_GUESSED=""
-    local lMD5SUM=""
     export ARM_HF=0
     export ARM_SF=0
     export D_END="NA"
     local lBINARY=""
+    local D_FILE_OUTPUT=""
+    local lWAIT_PIDS_P99_ARR=()
 
-    write_csv_log "BINARY" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
-    # we use the binaries array which is already unique
-    for lBINARY in "${BINARIES[@]}" ; do
-      # noreorder, pic, cpic, o32, mips32
-      lD_FLAGS_CNT=$(readelf -h "${lBINARY}" 2>/dev/null | grep "Flags:" || true)
-      lD_FLAGS_CNT="${lD_FLAGS_CNT// /}"
-      lD_FLAGS_CNT="${lD_FLAGS_CNT/*Flags:/}"
-      lD_FLAGS_CNT="${lD_FLAGS_CNT/0x0/}"
-      lD_MACHINE=$(readelf -h "${lBINARY}" 2>/dev/null | grep "Machine:" 2>/dev/null || true)
-      lD_MACHINE="${lD_MACHINE/*Machine:/}"
-      lD_MACHINE=$(echo "${lD_MACHINE}" | sed -E 's/^[[:space:]]+//')
-      # ELF32/64
-      lD_CLASS=$(readelf -h "${lBINARY}" 2>/dev/null | grep "Class" || true)
-      lD_CLASS="${lD_CLASS/*Class:/}"
-      lD_CLASS=$(echo "${lD_CLASS}" | sed -E 's/^[[:space:]]+//')
-      # endianes
-      lD_DATA=$(readelf -h "${lBINARY}" 2>/dev/null | grep "Data" || true)
-      lD_DATA="${lD_DATA/*Data:/}"
-      lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
-
-      lD_ARCH_GUESSED=$(readelf -p .comment "${lBINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
-      lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
-      lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
-
-      D_ARCH=$(file -b "${lBINARY}")
-
-      lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
-      lMD5SUM="${lMD5SUM/\ *}"
-
-      if [[ "${D_ARCH}" == *"MSB"* ]] ; then
-        lD_END_BE_CNT=$((lD_END_BE_CNT+1))
-      elif [[ "${D_ARCH}" == *"LSB"* ]] ; then
-        lD_END_LE_CNT=$((lD_END_LE_CNT+1))
-      fi
-      write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_ARCH}" "${lMD5SUM}"
-
-      if [[ "${D_ARCH}" == *"N32 MIPS64 rel2"* ]] ; then
-        # ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1
-        lARCH_MIPS64_N32_CNT=$((lARCH_MIPS64_N32_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"MIPS64 rel2"* ]] ; then
-        lARCH_MIPS64R2_CNT=$((lARCH_MIPS64R2_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"64-bit"*"MIPS-III"* ]] ; then
-        lARCH_MIPS64_III_CNT=$((lARCH_MIPS64_III_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"64-bit"*"MIPS64 version 1"* ]] ; then
-        lARCH_MIPS64v1_CNT=$((lARCH_MIPS64v1_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"MIPS"* ]] ; then
-        lARCH_MIPS_CNT=$((lARCH_MIPS_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"ARM"* ]] ; then
-        if [[ "${D_ARCH}" == *"ARM aarch64"* ]] ; then
-          lARCH_ARM64_CNT=$((lARCH_ARM64_CNT+1))
-        else
-          lARCH_ARM_CNT=$((lARCH_ARM_CNT+1))
-        fi
-        if [[ "${lD_FLAGS_CNT}" == *"hard-float"* ]]; then
-          ARM_HF=$((ARM_HF+1))
-        fi
-        if [[ "${lD_FLAGS_CNT}" == *"soft-float"* ]]; then
-          ARM_SF=$((ARM_SF+1))
-        fi
-        continue
-      elif [[ "${D_ARCH}" == *"x86-64"* ]] ; then
-        lARCH_X64_CNT=$((lARCH_X64_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"80386"* ]] ; then
-        lARCH_X86_CNT=$((lARCH_X86_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"64-bit PowerPC"* ]] ; then
-        lARCH_PPC64_CNT=$((lARCH_PPC64_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"PowerPC"* ]] ; then
-        lARCH_PPC_CNT=$((lARCH_PPC_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"Altera Nios II"* ]] ; then
-        lARCH_NIOS2_CNT=$((lARCH_NIOS2_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"UCB RISC-V"* ]] ; then
-        lARCH_RISCV_CNT=$((lARCH_RISCV_CNT+1))
-        continue
-      elif [[ "${D_ARCH}" == *"QUALCOMM DSP6"* ]] ; then
-        lARCH_QCOM_DSP6_CNT=$((lARCH_QCOM_DSP6_CNT+1))
-        continue
-      fi
+    # write_csv_log "FILE" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
+    # we use the ALL_FILES_ARR array which should have all files
+    for lBINARY in "${ALL_FILES_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    lARCH_MIPS64_N32_CNT=$(grep -c "N32 MIPS64 rel2" "${P99_CSV_LOG}" || true)
+    lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
+    lARCH_MIPS64_III_CNT=$(grep -c "64-bit.*MIPS-III" "${P99_CSV_LOG}" || true)
+    lARCH_MIPS64v1_CNT=$(grep -c "64-bit.*MIPS64 version 1" "${P99_CSV_LOG}" || true)
+    lARCH_MIPS_CNT=$(grep -c "MIPS" "${P99_CSV_LOG}" || true)
+    lARCH_ARM64_CNT=$(grep -c "ARM aarch64" "${P99_CSV_LOG}" || true)
+    if [[ "${lARCH_ARM64_CNT}" -eq 0 ]]; then
+      lARCH_ARM_CNT=$(grep -c "ARM" "${P99_CSV_LOG}" || true)
+    fi
+    if [[ "${lARCH_ARM64_CNT}" -gt 0 || "${lARCH_ARM_CNT}" -gt 0 ]]; then
+      ARM_HF=$(cut -d ';' -f5 "${P99_CSV_LOG}" | grep -c "hard-float" || true)
+      ARM_SF=$(cut -d ';' -f5 "${P99_CSV_LOG}" | grep -c "soft-float" || true)
+    fi
+    lARCH_X64_CNT=$(grep -c "x86-64" "${P99_CSV_LOG}" || true)
+    lARCH_X86_CNT=$(grep -c "80386" "${P99_CSV_LOG}" || true)
+    lARCH_PPC64_CNT=$(grep -c "64-bit PowerPC" "${P99_CSV_LOG}" || true)
+    if [[ "${lARCH_PPC64_CNT}" -eq 0 ]]; then
+      lARCH_PPC_CNT=$(grep -c "PowerPC" "${P99_CSV_LOG}" || true)
+    fi
+    lARCH_NIOS2_CNT=$(grep -c "Altera Nios II" "${P99_CSV_LOG}" || true)
+    lARCH_RISCV_CNT=$(grep -c "UCB RISC-V" "${P99_CSV_LOG}" || true)
+    lARCH_QCOM_DSP6_CNT=$(grep -c "QUALCOMM DSP6" "${P99_CSV_LOG}" || true)
+
+    lD_END_BE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "MSB" || true)
+    lD_END_LE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "LSB" || true)
 
     if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")"
@@ -397,7 +396,7 @@ architecture_check() {
     else
       print_output "$(indent "$(red "Based on binary identification no architecture was detected.")")"
       if [[ -n "${ARCH}" ]] ; then
-        print_output "[*] Your set architecture (""${ARCH}"") will be used."
+        print_output "[*] Manually enforced architecture (""${ARCH}"") will be used."
       fi
     fi
     backup_var "ARCH" "${ARCH}"
@@ -406,10 +405,28 @@ architecture_check() {
   else
     print_output "[*] Architecture auto detection disabled\\n"
     if [[ -n "${ARCH}" ]] ; then
-      print_output "[*] Your set architecture (""${ARCH}"") will be used."
+      print_output "[*] Manually enforced architecture (""${ARCH}"") will be used."
     else
       print_output "[!] Since no architecture could be detected, you should set one."
     fi
+  fi
+}
+
+prepare_all_file_arrays() {
+  local lFIRMWARE_PATH="${1:-}"
+  echo ""
+  print_output "[*] Auto detection of all files with further details for ${ORANGE}${lFIRMWARE_PATH}${NC}\\n"
+  export ALL_FILES_ARR=()
+
+  # we exclude all the raw files from binwalk
+  readarray -t ALL_FILES_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! -name "*.raw")
+
+  # RTOS handling:
+  if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
+    local lFILE_ARR_RTOS=()
+    readarray -t lFILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f)
+    ALL_FILES_ARR+=( "${lFILE_ARR_RTOS[@]}" )
+    ALL_FILES_ARR+=( "${lFIRMWARE_PATH}" )
   fi
 }
 
@@ -419,12 +436,12 @@ prepare_file_arr() {
   print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
 
   export FILE_ARR=()
-  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
-  # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+  # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
+  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
-    # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
+    # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
     FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "${lFIRMWARE_PATH}" )
   fi
@@ -453,8 +470,8 @@ prepare_binary_arr() {
   # readarray -t BINARIES < <( find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
-  # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; -exec grep "ELF\|PE32" | cut -d: -f1 || true)
-  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' 2>/dev/null || true)
+  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; grep "ELF\|PE32" | cut -d: -f1 || true)
+  # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' 2>/dev/null || true)
   if [[ -v lBINARIES_TMP_ARR[@] ]]; then
     for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
       if [[ -f "${lBINARY}" ]]; then
@@ -487,7 +504,7 @@ prepare_file_arr_limited() {
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
     -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
     -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" -o -iname "*.bmp" -o -path "*/\.git/*" \) \
-    -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3-)
+    -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3-)
 }
 
 set_etc_paths()
@@ -554,8 +571,8 @@ detect_root_dir_helper() {
   local lCNT=0
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
-    # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file -b {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
-    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//"' 2>/dev/null | sort -u || true)
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file -b {} \; 2>/dev/null | grep "ELF.*interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
+    # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//"' 2>/dev/null | sort -u || true)
 
     if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
@@ -599,8 +616,8 @@ detect_root_dir_helper() {
         fi
       fi
     done
-    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/bash//"' || true)
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
+    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/bash//"' || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )
@@ -611,8 +628,8 @@ detect_root_dir_helper() {
         fi
       fi
     done
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/sh//"' || true)
-    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
+    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/sh//"' || true)
+    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )

@@ -38,7 +38,7 @@ S100_command_inj_check()
     for lDIR in "${lCMD_INJ_DIRS_ARR[@]}" ; do
       if [[ -d "${lDIR}" ]] ; then
         print_output "$(indent "$(print_path "${lDIR}")")"
-        mapfile -t lFILE_ARRX < <( find "${lDIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
+        mapfile -t lFILE_ARRX < <( find "${lDIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
 
         for lFILE_S in "${lFILE_ARRX[@]}" ; do
           if file "${lFILE_S}" | grep -q -E "script.*executable" ; then

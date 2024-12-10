@@ -56,7 +56,7 @@ check_lzma_backdoor() {
   local lOUTPUT="The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
   local lCHECK=0
 
-  mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF"' || true)
+  mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF"' || true)
   for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lSSH_FILE/:*}${NC}:" "no_log"
 
@@ -78,7 +78,7 @@ check_lzma_backdoor() {
   done
 
   # letz find the library directly in the system:
-  mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF"' || true)
+  mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF"' || true)
   for lLZMA_FILE in "${lLZMA_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lLZMA_FILE/:*}${NC}:" "no_log"
     if [[ "${lLZMA_FILE/:*}" == *"5.6.0"* ]] || [[ "${lLZMA_FILE/:*}" == *"5.6.1"* ]]; then
@@ -91,7 +91,7 @@ check_lzma_backdoor() {
   done
 
   # check for the xz binary in the vulnerable version
-  mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF"' || true)
+  mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF"' || true)
   for lXZ_FILE in "${lXZ_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lXZ_FILE/:*}${NC}:" "no_log"
     lXZ_V_OUT=$(strings "${lXZ_FILE/:*}" | grep "5\.6\.[01]" || true)
@@ -161,17 +161,15 @@ search_ssh_files()
 # Detailed tests possible, check if necessary
 check_squid() {
   sub_module_title "Check squid"
-  local lBIN_FILE=""
+  local lSQUID_FILE=""
   local lCHECK=0
   local lSQUID_E=""
   local lSQUID_PATHS_ARR=()
 
-  for lBIN_FILE in "${BINARIES[@]}"; do
-    if [[ "${lBIN_FILE}" == *"squid"* ]] && ( file "${lBIN_FILE}" | grep -q ELF ) ; then
-      print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lBIN_FILE}")${NC}"
-      ((SQUID_VUL_CNT+=1))
-    fi
-  done
+  while read -r lSQUID_FILE; do
+    print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lSQUID_FILE/;*}")${NC}"
+    ((SQUID_VUL_CNT+=1))
+  done < <(grep "squid" "${P99_CSV_LOG}" | grep ";ELF" || true)
   [[ ${SQUID_VUL_CNT} -eq 0 ]] && print_output "[-] No possible squid executable found"
 
   local lSQUID_DAEMON_CONFIG_LOCS_ARR=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")

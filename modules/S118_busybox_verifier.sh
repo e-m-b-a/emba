@@ -61,7 +61,8 @@ S118_busybox_verifier()
     # first grep is for identification of possible binary files:
     mapfile -t lBB_BINS_ARR < <(grep -l -a -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" "${LOG_DIR}"/firmware -r 2>/dev/null || true)
     for lBB_BIN in "${lBB_BINS_ARR[@]}"; do
-      if ! file "${lBB_BIN}" | grep -q "ELF"; then
+      lBIN_FILE=$(file -b "${lBB_BIN}")
+      if ! [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         continue
       fi
       # now modify the version identifier to use it also for our CVE identification
@@ -77,7 +78,6 @@ S118_busybox_verifier()
       lCPE_IDENTIFIER=$(build_cpe_identifier "${lVERSION_IDENTIFIER}")
       lOS_IDENTIFIED=$(distri_check)
 
-      lBIN_FILE=$(file -b "${lBB_BIN}")
       lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
       lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
@@ -90,7 +90,7 @@ S118_busybox_verifier()
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lBB_BIN}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_details:${BIN_FILE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lVERSION_IDENTIFIER}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
@@ -120,7 +120,9 @@ S118_busybox_verifier()
     export BB_VERIFIED_APPLETS=()
     local lBB_VERSION="${lBB_ENTRY/*;}"
     local lBB_BIN="${lBB_ENTRY/;*}"
-    export CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/${lBB_VERSION/:/_}.txt"
+    local lBB_VERSION_tmp="${lBB_VERSION#:}"
+    local lBB_VERSION_tmp="${lBB_VERSION_tmp//:/_}"
+    export CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/${lBB_VERSION_tmp}.txt"
     local lALL_BB_VULNS_ARR=()
     local lBB_APPLET=""
     local lSUMMARY=""
@@ -207,7 +209,7 @@ get_busybox_applets_stat() {
 
   # quite often we only have the firmware path without the filesytem area: /bin/busybox
   # This results in another search for our binary
-  mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1' | sort -u || true)
+  mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF" | cut -d: -f1' | sort -u || true)
   for lBB_BIN_ in "${lBB_BINS_ARR[@]}"; do
     print_output "[*] Extract applet data for BusyBox version ${ORANGE}${lBB_VERSION_}${NC} from binary ${ORANGE}${lBB_BIN_}${NC}"
     mapfile -t lBB_DETECTED_APPLETS_ARR < <(grep -oUaP "\x00\x5b(\x5b)?\x00.*\x00\x00" "${lBB_BIN_}" | strings | sort -u || true)

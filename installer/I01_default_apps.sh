@@ -61,6 +61,9 @@ I01_default_apps(){
     print_tool_info "libimage-exiftool-perl" 1
     print_tool_info "readpe" 1
 
+    # tidy is currently used to prettify the semgrep xml output
+    print_tool_info "tidy" 1
+
     # tools only available on Kali Linux:
     if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
@@ -94,6 +97,18 @@ I01_default_apps(){
         # sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
         # nosemgrep
         sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        # Install Rust (used from cwe_checker and binwalk)
+        rm "${HOME}"/.cargo -r -f
+        rm "${HOME}"/.config -r -f
+        rm external/rustup -r -f
+
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        # shellcheck disable=SC1091
+        . "${HOME}"/.cargo/env
+
+        export PATH="${PATH}":"${HOME}"/.cargo/bin
+
 
         pip_install "requests" "-U"
       ;;

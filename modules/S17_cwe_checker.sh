@@ -56,93 +56,69 @@ S17_cwe_checker()
   fi
 }
 
-cwe_container_prepare() {
-  # as we are in a read only docker environment we need to trick a bit:
-  # /root is mounted as a writable tempfs. With this we need to set it up
-  # on every run from scratch:
-  if [[ -d "${EXT_DIR}"/cwe_checker/.config ]]; then
-    print_output "[*] Restoring config directory in read-only container" "no_log"
-    if ! [[ -d "${HOME}"/.config/ ]]; then
-      mkdir -p "${HOME}"/.config
-    fi
-    cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
-    # .local/share has also stored the r2 plugin data
-    cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
-  fi
-
-  # Todo: move this to dependency check
-  if [[ -d "${HOME}"/.cargo/bin ]]; then
-    export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
-  else
-    print_output "[!] CWE checker installation broken ... please check it manually!"
-    return
-  fi
-}
-
 cwe_check() {
   local lBINARY=""
   local lBIN_TO_CHECK=""
-  local lBIN_TO_CHECK_ARR=()
   local lWAIT_PIDS_S17=()
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
+  local lBINARIES_ARR=()
   if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    local BINARIES=()
-    mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
+  else
+    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f1 || true)
   fi
 
-  for lBINARY in "${BINARIES[@]}" ; do
-    # as we usually have not the full path from the s13 log, we need to search for the binary again:
-    mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
-    for lBIN_TO_CHECK in "${lBIN_TO_CHECK_ARR[@]}"; do
-      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-        # if we have the base linux config file we only test non known Linux binaries
-        # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lBIN_TO_CHECK}")
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          continue
-        fi
+  for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
+    if [[ -f "${BASE_LINUX_FILES}" ]]; then
+      # if we have the base linux config file we only test non known Linux binaries
+      # with this we do not waste too much time on open source Linux stuff
+      lNAME=$(basename "${lBIN_TO_CHECK}")
+      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        continue
       fi
+    fi
 
-      if ( file "${lBIN_TO_CHECK}" | grep -q ELF ) ; then
-        # do not try to analyze kernel modules:
-        [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
-        # ensure we have not tested this binary entry
-        local lBIN_MD5=""
-        lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
-        if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
-          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
-          continue
-        fi
-        lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    # do not try to analyze kernel modules:
+    [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
+    if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
+      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+    fi
+    # ensure we have not tested this binary entry
+    local lBIN_MD5=""
+    lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
+    if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
+      # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+      continue
+    fi
+    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
 
-        if [[ "${THREADED}" -eq 1 ]]; then
-          # while s09 is running we throttle this module:
-          local lMAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
-          if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
-            local lMAX_MOD_THREADS=1
-          fi
-          cwe_checker_threaded "${lBIN_TO_CHECK}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S17+=( "${lTMP_PID}" )
-
-          max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
-        else
-          cwe_checker_threaded "${lBIN_TO_CHECK}"
-        fi
-        # we stop checking after the first 20 binaries
-        # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-        if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-          print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
-          print_output "[*] For complete analysis enable FULL_TEST." "no_log"
-          break 2
-        fi
+    if [[ "${THREADED}" -eq 1 ]]; then
+      # while s09 is running we throttle this module:
+      local lMAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
+      if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
+        local lMAX_MOD_THREADS=1
       fi
-    done
+      cwe_checker_threaded "${lBIN_TO_CHECK}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S17+=( "${lTMP_PID}" )
+
+      max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
+    else
+      cwe_checker_threaded "${lBIN_TO_CHECK}"
+    fi
+    # we stop checking after the first MAX_EXT_CHECK_BINS binaries
+    # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now." "no_log"
+      print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+      break
+    fi
   done
 
   [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S17[@]}"
@@ -167,7 +143,7 @@ cwe_checker_threaded() {
   lBINARY=$(readlink -f "${lBINARY}")
 
   ulimit -Sv "${lMEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log || true
+  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${lBINARY}")""${NC}" "no_log"
 
