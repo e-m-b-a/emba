@@ -92,7 +92,6 @@ web_file_search()
     for lWEB_FILE in "${lWEB_STUFF_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lWEB_FILE/;*}")")" "${LOG_PATH_MODULE}"/web_file_search.txt &
       write_csv_log "Web served files" "$(basename "${lWEB_FILE/;*}")" "${lWEB_FILE/;*}" &
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No web related files found" "${LOG_PATH_MODULE}"/web_file_search.txt
@@ -111,7 +110,6 @@ http_file_search()
     for lHTTP_FILE in "${lHTTP_STUFF_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lHTTP_FILE}")")" "${LOG_PATH_MODULE}"/http_file_search.txt
       write_csv_log "HTTP server files" "$(basename "${lHTTP_FILE}")" "${lHTTP_FILE}"
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No http related files found" "${LOG_PATH_MODULE}"/http_file_search.txt
@@ -143,7 +141,6 @@ webserver_check()
     for lLINE in "${lAPACHE_FILE_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lLINE}")")" "${LOG_PATH_MODULE}"/webserver_search.txt
       write_csv_log "Apache web server file" "$(basename "${lLINE}")" "${lLINE}"
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No Apache related files found" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -154,7 +151,6 @@ webserver_check()
     for lLINE in "${lNGINX_FILE_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lLINE}")")" "${LOG_PATH_MODULE}"/webserver_search.txt
       write_csv_log "Nginx web server file" "$(basename "${lLINE}")" "${lLINE}"
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No nginx related files found" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -165,7 +161,6 @@ webserver_check()
     for lLINE in "${lLIGHTTP_FILE_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lLINE}")")" "${LOG_PATH_MODULE}"/webserver_search.txt
       write_csv_log "Lighttpd web server file" "$(basename "${lLINE}")" "${lLINE}"
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No Lighttpd related files found" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -176,7 +171,6 @@ webserver_check()
     for lLINE in "${lCHEROKEE_FILE_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lLINE}")")" "${LOG_PATH_MODULE}"/webserver_search.txt
       write_csv_log "Cherokee web server file" "$(basename "${lLINE}")" "${lLINE}" "${LOG_PATH_MODULE}"/webserver_search.txt
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No Cherokee related files found" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -187,7 +181,6 @@ webserver_check()
     for lLINE in "${lHTTPD_FILE_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lLINE}")")" "${LOG_PATH_MODULE}"/webserver_search.txt
       write_csv_log "HTTPd web server file" "$(basename "${lLINE}")" "${lLINE}"
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No HTTPd related files found" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -207,7 +200,6 @@ php_check()
     for lPHP_INI_ENTRY in "${lPHP_INI_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lPHP_INI_ENTRY}")")" "${LOG_PATH_MODULE}"/php_check.txt
       write_csv_log "php.ini file" "$(basename "${lPHP_INI_ENTRY}")" "${lPHP_INI_ENTRY}"
-      ((HTTP_COUNTER+=1))
     done
   else
     write_log "[-] No php.ini found" "${LOG_PATH_MODULE}"/php_check.txt
