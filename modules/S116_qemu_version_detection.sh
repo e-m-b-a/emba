@@ -130,7 +130,7 @@ version_detection_thread() {
         if [[ -z "${lBINARY_PATH_}" ]]; then
           lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
         fi
-        print_output "[*] Storing strict ${lBINARY_PATH_} in array" "no_log"
+        # print_output "[*] Storing strict ${lBINARY_PATH_} in array" "no_log"
         if [[ -n "${lBINARY_PATH_}" ]]; then
           lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
         fi
@@ -158,7 +158,7 @@ version_detection_thread() {
             if [[ -z "${lBINARY_PATH_}" ]]; then
               lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
             fi
-            print_output "[*] Storing ${lBINARY_PATH_} in array" "no_log"
+            # print_output "[*] Storing ${lBINARY_PATH_} in array" "no_log"
             if [[ -n "${lBINARY_PATH_}" ]]; then
               lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
             fi
