@@ -120,6 +120,9 @@ S118_busybox_verifier()
     export BB_VERIFIED_APPLETS=()
     local lBB_VERSION="${lBB_ENTRY/*;}"
     local lBB_BIN="${lBB_ENTRY/;*}"
+    echo "lBB_ENTRY: ${lBB_ENTRY}"
+    echo "lBB_VERSION: ${lBB_VERSION}"
+    echo "lBB_BIN: ${lBB_BIN}"
     export CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/${lBB_VERSION/:/_}.txt"
     local lALL_BB_VULNS_ARR=()
     local lBB_APPLET=""

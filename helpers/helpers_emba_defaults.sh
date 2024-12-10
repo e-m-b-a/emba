@@ -158,6 +158,7 @@ set_defaults() {
 
   # we limit the maximal file log of our SBOM -> change this in the scanning profile
   export SBOM_MAX_FILE_LOG=200
+  export SBOM_MINIMAL=0
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used

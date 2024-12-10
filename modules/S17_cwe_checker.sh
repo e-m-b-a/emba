@@ -86,8 +86,7 @@ cwe_check() {
     # do not try to analyze kernel modules:
     [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
-      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
-      print_output "[*] S17 - Testing ${lBIN_TO_CHECK}"
+      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
     fi
     # ensure we have not tested this binary entry
     local lBIN_MD5=""
@@ -116,7 +115,7 @@ cwe_check() {
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
     if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-      print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
+      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now." "no_log"
       print_output "[*] For complete analysis enable FULL_TEST." "no_log"
       break
     fi
@@ -144,7 +143,7 @@ cwe_checker_threaded() {
   lBINARY=$(readlink -f "${lBINARY}")
 
   ulimit -Sv "${lMEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log || true
+  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${lBINARY}")""${NC}" "no_log"
 

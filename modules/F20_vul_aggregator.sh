@@ -565,7 +565,7 @@ cve_db_lookup_version() {
       # analysis of cve json files in parallel
       check_cve_sources "${lCVE_ID}" "${lBIN_VERSION}" "${lCVE_VER_SOURCES_FILE}" &
       lWAIT_PIDS_F19_CVE_SOURCE_ARR+=( "$!" )
-      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${lWAIT_PIDS_F19_CVE_SOURCE_ARR[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*3))" "${lWAIT_PIDS_F19_CVE_SOURCE_ARR[@]}"
     else
       check_cve_sources "${lCVE_ID}" "${lBIN_VERSION}" "${lCVE_VER_SOURCES_FILE}"
     fi
@@ -610,6 +610,7 @@ check_cve_sources() {
   local lBIN_VERSION="${2:-}"
   local lCVE_VER_SOURCES_FILE="${3:-}"
 
+  local lFIRST_EPSS=""
   local lBIN_VERSION_ONLY=""
   # if we have a version identifier like ::binary:1.2.3: we need to remove the last ':' before processing it correctly
   lBIN_VERSION_ONLY=$(echo "${lBIN_VERSION%:}" | cut -d':' -f4-5)
@@ -619,17 +620,6 @@ check_cve_sources() {
   lBIN_NAME=$(echo "${lBIN_VERSION%:}" | cut -d':' -f1-3)
   lBIN_NAME="${lBIN_NAME%:}"
   lBIN_NAME="${lBIN_NAME#:}"
-
-  local lCVE_VER_START_INCL=""
-  local lCVE_VER_START_EXCL=""
-  local lCVE_VER_END_INCL=""
-  local lCVE_VER_END_EXCL=""
-  local lCVE_V2=""
-  local lCVE_V31=""
-  local lCVE_CPEs_vuln_ARR=()
-  local lCVE_CPEMATCH=""
-  local lCVE_SUMMARY=""
-  local lFIRST_EPSS=""
 
   # ensure we replace :: with :.*: to use the lBIN_VERSION in our grep command
   lBIN_VERSION=${lBIN_VERSION//::/:\.\*:}
@@ -674,148 +664,171 @@ check_cve_sources() {
   # {"vulnerable":true,"criteria":"cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*","versionStartIncluding":"3.0.0","versionEndExcluding":"3.0.8","matchCriteriaId":"A6DC5D88-4E99-48F2-8892-610ACA9B5B86"}
   # {"vulnerable":true,"criteria":"cpe:2.3:a:stormshield:stormshield_management_center:*:*:*:*:*:*:*:*","versionEndExcluding":"3.3.3","matchCriteriaId":"62A933C5-C56E-485C-AD49-3B6A2C329131"}
 
-
   # Now we walk through all the CPEMatch entries and extract the version details for further analysis
+  local lWAIT_PIDS_F20_tmp=()
   for lCVE_CPEMATCH in "${lCVE_CPEs_vuln_ARR[@]}"; do
-    # we need to check the version more in details in case we have no version in our cpe identifier
-    # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
-
-    # print_output "[*] Binary ${lBIN_VERSION} - Found no version identifier in our cpe for ${lCVE_VER_SOURCES_FILE} - check for further version details with ${lCVE_CPEMATCH}" "no_log"
-
-    # extract further version details form the current cpe under test
-    lCVE_VER_START_INCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionStartIncluding' | grep -v "null" || true)
-    lCVE_VER_START_EXCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionStartExcluding' | grep -v "null" || true)
-    lCVE_VER_END_INCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionEndIncluding' | grep -v "null" || true)
-    lCVE_VER_END_EXCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionEndExcluding' | grep -v "null" || true)
-
-    # if we have found some version details we need to further check them now:
-    if [[ -n "${lCVE_VER_START_INCL}" || -n "${lCVE_VER_START_EXCL}" || -n "${lCVE_VER_END_INCL}" || -n "${lCVE_VER_END_EXCL}" ]]; then
-      # print_output "[*] Binary ${lBIN_VERSION} - CVE ${lCVE_ID} - lCVE_VER_START_INCL / lCVE_VER_START_EXCL / lCVE_VER_END_INCL / lCVE_VER_END_EXCL - ${lCVE_VER_START_INCL} / ${lCVE_VER_START_EXCL} / ${lCVE_VER_END_INCL} / ${lCVE_VER_END_EXCL}" "no_log"
-
-      ## first check lCVE_VER_START_INCL >= lVERSION <= lCVE_VER_END_INCL
-      if [[ -n "${lCVE_VER_START_INCL}" ]]; then
-        # print_output "[*] ${lBIN_VERSION} - ${lCVE_ID} - lCVE_VER_START_INCL: ${lCVE_VER_START_INCL} - $(version "${lBIN_VERSION_ONLY}") vs $(version "${lCVE_VER_START_INCL}")" "no_log"
-        # if [[ "$(version_extended "${lBIN_VERSION_ONLY}")" -lt "$(version_extended "${lCVE_VER_START_INCL}")" ]]; then
-        if version_extended "${lBIN_VERSION_ONLY}" '<' "${lCVE_VER_START_INCL}"; then
-          # lBIN_VERSION is lt lCVE_VER_START_INCL -> we can move on
-          continue
-        fi
-
-        # Case: if [[ "$(version "${lBIN_VERSION_ONLY}")" -ge "$(version "${lCVE_VER_START_INCL}")" ]]; then
-        # print_output "[*] ${lCVE_ID} - lCVE_VER_START_INCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is higher (incl) as CVE version $(version "${lCVE_VER_START_INCL}")" "no_log"
-        if [[ -n "${lCVE_VER_END_INCL}" ]]; then
-          if version_extended "${lBIN_VERSION_ONLY}" '<=' "${lCVE_VER_END_INCL}"; then
-            # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL / lCVE_VER_END_INCL" "no_log"
-            write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-            if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-              check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_INCL}" "${lCVE_ID}" &
-            fi
-          fi
-          continue
-        fi
-        ## first check VERSION < lCVE_VER_END_EXCL
-        if [[ -n "${lCVE_VER_END_EXCL}" ]]; then
-          if version_extended "${lBIN_VERSION_ONLY}" '<' "${lCVE_VER_END_EXCL}"; then
-            # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL / lCVE_VER_END_EXCL" "no_log"
-            write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-            if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-              check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_EXCL}" "${lCVE_ID}" &
-            fi
-          fi
-          continue
-        fi
-
-        # No end version is specified and start version already satisfied.
-        # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL / lCVE_VER_END_EXCL: ${ORANGE}NA${GREEN} / lCVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
-        write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-        if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-          check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_START_INCL}" "${lCVE_ID}" &
-        fi
-        continue
-      fi
-
-      if [[ -n "${lCVE_VER_START_EXCL}" ]]; then
-        # print_output "[*] ${lBIN_VERSION_ONLY} - ${lCVE_ID} - lCVE_VER_START_EXCL: ${lCVE_VER_START_EXCL}" "no_log"
-        if version_extended "${lBIN_VERSION_ONLY}" '<=' "${lCVE_VER_START_EXCL}"; then
-          # lBIN_VERSION is le lCVE_VER_START_EXCL -> we can move on
-          continue
-        fi
-
-        # Case: if [[ "$(version "${lBIN_VERSION_ONLY}")" -gt "$(version "${lCVE_VER_START_EXCL}")" ]]; then
-        # print_output "[*] ${lCVE_ID} - lCVE_VER_START_EXCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is higher (excl) as CVE version $(version "${lCVE_VER_START_EXCL}")" "no_log"
-        if [[ -n "${lCVE_VER_END_INCL}" ]]; then
-          if version_extended "${lBIN_VERSION_ONLY}" '<=' "${lCVE_VER_END_INCL}"; then
-            # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_EXCL / lCVE_VER_END_INCL" "no_log"
-            write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-            if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-              check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_INCL}" "${lCVE_ID}" &
-            fi
-          fi
-          continue
-        fi
-        if [[ -n "${lCVE_VER_END_EXCL}" ]]; then
-          if version_extended "${lBIN_VERSION_ONLY}" '<' "${lCVE_VER_END_EXCL}"; then
-            # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_EXCL / lCVE_VER_END_EXCL" "no_log"
-            write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-            if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-              check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_EXCL}" "${lCVE_ID}" &
-            fi
-          fi
-          continue
-        fi
-
-        # No end version is specified and start version already satisfied.
-        # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_EXCL / lCVE_VER_END_INCL: ${ORANGE}NA${GREEN} / lCVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
-        write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-        if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-          check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_START_EXCL}" "${lCVE_ID}" &
-        fi
-        continue
-      fi
-
-      # Last cases: no start version is specified. Check end version only.
-
-      if [[ -n "${lCVE_VER_END_INCL}" ]]; then
-        # print_output "[!] ${lCVE_ID} - lCVE_VER_END_INCL - binary ${lBIN_VERSION} - ${lBIN_VERSION_ONLY} - CVE version ${lCVE_VER_END_INCL}" "no_log"
-        if version_extended "${lBIN_VERSION_ONLY}" '>' "${lCVE_VER_END_INCL}"; then
-          # print_output "[!] ${lCVE_ID} - lCVE_VER_END_INCL - binary ${lBIN_VERSION} - ${lBIN_VERSION_ONLY} - CVE version ${lCVE_VER_END_INCL} - exit" "no_log"
-          # lBIN_VERSION is gt lCVE_VER_END_INCL -> we can move on
-          continue
-        fi
-
-        # This is the case: if [[ "$(version "${lBIN_VERSION_ONLY}")" -le "$(version "${lCVE_VER_END_INCL}")" ]]; then
-        # print_output "[*] ${lCVE_ID} - lCVE_VER_END_INCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is lower (incl) CVE version $(version "${lCVE_VER_END_INCL}")" "no_log"
-
-        # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL: ${ORANGE}NA${GREEN} / lCVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / lCVE_VER_END_INCL" "no_log"
-        write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-        if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-          check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_INCL}" "${lCVE_ID}" &
-        fi
-        continue
-      fi
-
-      if [[ -n "${lCVE_VER_END_EXCL}" ]]; then
-        if version_extended "${lBIN_VERSION_ONLY}" '>=' "${lCVE_VER_END_EXCL}"; then
-          # BIN_VERSION is ge lCVE_VER_END_EXCL -> we can move on
-          continue
-        fi
-
-        # Case handling: if [[ "$(version "${lBIN_VERSION_ONLY}")" -lt "$(version "${lCVE_VER_END_EXCL}")" ]]; then
-        # print_output "[*] ${lCVE_ID} - lCVE_VER_END_EXCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is lower (excl) CVE version $(version "${lCVE_VER_END_EXCL}")" "no_log"
-
-        # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_END_EXCL / lCVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / lCVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
-        write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-        if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
-          check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_EXCL}" "${lCVE_ID}" &
-        fi
-        continue
-      fi
-    else
-      # if we have not found further version limitations, we assume that all versions are vulnerable:
-      # print_output "[+] CPE matches - vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") - no further version limitations detected" "no_log"
-      write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
-    fi
+    cve_cpe_matcher_threading "${lCVE_CPEMATCH}" "${lFIRST_EPSS}" "${lBIN_NAME}" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_F20_tmp+=( "${lTMP_PID}" )
+    max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${lWAIT_PIDS_F20_tmp[@]}"
   done
+  wait_for_pid "${lWAIT_PIDS_F20_tmp[@]}"
+}
+
+cve_cpe_matcher_threading() {
+  local lCVE_CPEMATCH="${1:-}"
+  local lFIRST_EPSS="${2:-}"
+  local lBIN_NAME="${3:-}"
+
+  local lCVE_VER_START_INCL=""
+  local lCVE_VER_START_EXCL=""
+  local lCVE_VER_END_INCL=""
+  local lCVE_VER_END_EXCL=""
+  local lCVE_V2=""
+  local lCVE_V31=""
+  local lCVE_CPEs_vuln_ARR=()
+  local lCVE_CPEMATCH=""
+  local lCVE_SUMMARY=""
+
+  # we need to check the version more in details in case we have no version in our cpe identifier
+  # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
+
+  # print_output "[*] Binary ${lBIN_VERSION} - Found no version identifier in our cpe for ${lCVE_VER_SOURCES_FILE} - check for further version details with ${lCVE_CPEMATCH}" "no_log"
+
+  # extract further version details form the current cpe under test
+  lCVE_VER_START_INCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionStartIncluding' | grep -v "null" || true)
+  lCVE_VER_START_EXCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionStartExcluding' | grep -v "null" || true)
+  lCVE_VER_END_INCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionEndIncluding' | grep -v "null" || true)
+  lCVE_VER_END_EXCL=$(echo "${lCVE_CPEMATCH}" | jq -r '.versionEndExcluding' | grep -v "null" || true)
+
+  # if we have found some version details we need to further check them now:
+  if [[ -n "${lCVE_VER_START_INCL}" || -n "${lCVE_VER_START_EXCL}" || -n "${lCVE_VER_END_INCL}" || -n "${lCVE_VER_END_EXCL}" ]]; then
+    # print_output "[*] Binary ${lBIN_VERSION} - CVE ${lCVE_ID} - lCVE_VER_START_INCL / lCVE_VER_START_EXCL / lCVE_VER_END_INCL / lCVE_VER_END_EXCL - ${lCVE_VER_START_INCL} / ${lCVE_VER_START_EXCL} / ${lCVE_VER_END_INCL} / ${lCVE_VER_END_EXCL}" "no_log"
+
+    ## first check lCVE_VER_START_INCL >= lVERSION <= lCVE_VER_END_INCL
+    if [[ -n "${lCVE_VER_START_INCL}" ]]; then
+      # print_output "[*] ${lBIN_VERSION} - ${lCVE_ID} - lCVE_VER_START_INCL: ${lCVE_VER_START_INCL} - $(version "${lBIN_VERSION_ONLY}") vs $(version "${lCVE_VER_START_INCL}")" "no_log"
+      # if [[ "$(version_extended "${lBIN_VERSION_ONLY}")" -lt "$(version_extended "${lCVE_VER_START_INCL}")" ]]; then
+      if version_extended "${lBIN_VERSION_ONLY}" '<' "${lCVE_VER_START_INCL}"; then
+        # lBIN_VERSION is lt lCVE_VER_START_INCL -> we can move on
+        return
+      fi
+
+      # Case: if [[ "$(version "${lBIN_VERSION_ONLY}")" -ge "$(version "${lCVE_VER_START_INCL}")" ]]; then
+      # print_output "[*] ${lCVE_ID} - lCVE_VER_START_INCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is higher (incl) as CVE version $(version "${lCVE_VER_START_INCL}")" "no_log"
+      if [[ -n "${lCVE_VER_END_INCL}" ]]; then
+        if version_extended "${lBIN_VERSION_ONLY}" '<=' "${lCVE_VER_END_INCL}"; then
+          # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL / lCVE_VER_END_INCL" "no_log"
+          write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+          if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+            check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_INCL}" "${lCVE_ID}" &
+          fi
+        fi
+        return
+      fi
+      ## first check VERSION < lCVE_VER_END_EXCL
+      if [[ -n "${lCVE_VER_END_EXCL}" ]]; then
+        if version_extended "${lBIN_VERSION_ONLY}" '<' "${lCVE_VER_END_EXCL}"; then
+          # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL / lCVE_VER_END_EXCL" "no_log"
+          write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+          if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+            check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_EXCL}" "${lCVE_ID}" &
+          fi
+        fi
+        return
+      fi
+
+      # No end version is specified and start version already satisfied.
+      # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL / lCVE_VER_END_EXCL: ${ORANGE}NA${GREEN} / lCVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
+      write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+      if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+        check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_START_INCL}" "${lCVE_ID}" &
+      fi
+      return
+    fi
+
+    if [[ -n "${lCVE_VER_START_EXCL}" ]]; then
+      # print_output "[*] ${lBIN_VERSION_ONLY} - ${lCVE_ID} - lCVE_VER_START_EXCL: ${lCVE_VER_START_EXCL}" "no_log"
+      if version_extended "${lBIN_VERSION_ONLY}" '<=' "${lCVE_VER_START_EXCL}"; then
+        # lBIN_VERSION is le lCVE_VER_START_EXCL -> we can move on
+        return
+      fi
+
+      # Case: if [[ "$(version "${lBIN_VERSION_ONLY}")" -gt "$(version "${lCVE_VER_START_EXCL}")" ]]; then
+      # print_output "[*] ${lCVE_ID} - lCVE_VER_START_EXCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is higher (excl) as CVE version $(version "${lCVE_VER_START_EXCL}")" "no_log"
+      if [[ -n "${lCVE_VER_END_INCL}" ]]; then
+        if version_extended "${lBIN_VERSION_ONLY}" '<=' "${lCVE_VER_END_INCL}"; then
+          # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_EXCL / lCVE_VER_END_INCL" "no_log"
+          write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+          if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+            check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_INCL}" "${lCVE_ID}" &
+          fi
+        fi
+        return
+      fi
+      if [[ -n "${lCVE_VER_END_EXCL}" ]]; then
+        if version_extended "${lBIN_VERSION_ONLY}" '<' "${lCVE_VER_END_EXCL}"; then
+          # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_EXCL / lCVE_VER_END_EXCL" "no_log"
+          write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+          if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+            check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_EXCL}" "${lCVE_ID}" &
+          fi
+        fi
+        return
+      fi
+
+      # No end version is specified and start version already satisfied.
+      # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_EXCL / lCVE_VER_END_INCL: ${ORANGE}NA${GREEN} / lCVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
+      write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+      if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+        check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_START_EXCL}" "${lCVE_ID}" &
+      fi
+      return
+    fi
+
+    # Last cases: no start version is specified. Check end version only.
+
+    if [[ -n "${lCVE_VER_END_INCL}" ]]; then
+      # print_output "[!] ${lCVE_ID} - lCVE_VER_END_INCL - binary ${lBIN_VERSION} - ${lBIN_VERSION_ONLY} - CVE version ${lCVE_VER_END_INCL}" "no_log"
+      if version_extended "${lBIN_VERSION_ONLY}" '>' "${lCVE_VER_END_INCL}"; then
+        # print_output "[!] ${lCVE_ID} - lCVE_VER_END_INCL - binary ${lBIN_VERSION} - ${lBIN_VERSION_ONLY} - CVE version ${lCVE_VER_END_INCL} - exit" "no_log"
+        # lBIN_VERSION is gt lCVE_VER_END_INCL -> we can move on
+        return
+      fi
+
+      # This is the case: if [[ "$(version "${lBIN_VERSION_ONLY}")" -le "$(version "${lCVE_VER_END_INCL}")" ]]; then
+      # print_output "[*] ${lCVE_ID} - lCVE_VER_END_INCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is lower (incl) CVE version $(version "${lCVE_VER_END_INCL}")" "no_log"
+
+      # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_START_INCL: ${ORANGE}NA${GREEN} / lCVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / lCVE_VER_END_INCL" "no_log"
+      write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+      if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+        check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_INCL}" "${lCVE_ID}" &
+      fi
+      return
+    fi
+
+    if [[ -n "${lCVE_VER_END_EXCL}" ]]; then
+      if version_extended "${lBIN_VERSION_ONLY}" '>=' "${lCVE_VER_END_EXCL}"; then
+        # BIN_VERSION is ge lCVE_VER_END_EXCL -> we can move on
+        return
+      fi
+
+      # Case handling: if [[ "$(version "${lBIN_VERSION_ONLY}")" -lt "$(version "${lCVE_VER_END_EXCL}")" ]]; then
+      # print_output "[*] ${lCVE_ID} - lCVE_VER_END_EXCL - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") is lower (excl) CVE version $(version "${lCVE_VER_END_EXCL}")" "no_log"
+
+      # print_output "[+] Vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} - source file ${lCVE_VER_SOURCES_FILE} - lCVE_VER_END_EXCL / lCVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / lCVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
+      write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+      if [[ "${lBIN_NAME}" == *"linux_kernel"* ]]; then
+        check_kernel_major_v "${lBIN_VERSION_ONLY}" "${lCVE_VER_END_EXCL}" "${lCVE_ID}" &
+      fi
+      return
+    fi
+  else
+    # if we have not found further version limitations, we assume that all versions are vulnerable:
+    # print_output "[+] CPE matches - vulnerability identified - CVE: ${lCVE_ID} - binary ${lBIN_VERSION} version $(version "${lBIN_VERSION_ONLY}") - no further version limitations detected" "no_log"
+    write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
+  fi
 }
 
 check_kernel_major_v() {

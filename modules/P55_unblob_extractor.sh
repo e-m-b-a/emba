@@ -84,7 +84,7 @@ P55_unblob_extractor() {
     unblobber "${lFW_PATH_UNBLOB}" "${OUTPUT_DIR_UNBLOB}"
   fi
 
-  if [[ "${SBOM_MINIMAL}" -ne 1 ]]; then
+  if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB}"
     print_ln
 
