@@ -666,9 +666,8 @@ check_cve_sources() {
 
   # Now we walk through all the CPEMatch entries and extract the version details for further analysis
   local lWAIT_PIDS_F20_tmp=()
-  print_output "[*] Testing ${lCVE_CPEs_vuln_ARR[*]}"
   for lCVE_CPEMATCH in "${lCVE_CPEs_vuln_ARR[@]}"; do
-    print_output "[*] Testing ${lCVE_CPEMATCH} / ${lFIRST_EPSS} / ${lBIN_NAME} / ${lCVE_V2} / ${lCVE_V31} / ${lCVE_SUMMARY// /§}"
+    # print_output "[*] Testing ${lCVE_CPEMATCH} / ${lFIRST_EPSS} / ${lBIN_NAME} / ${lCVE_V2} / ${lCVE_V31} / ${lCVE_SUMMARY// /§}"
     cve_cpe_matcher_threading "${lCVE_CPEMATCH}" "${lFIRST_EPSS}" "${lBIN_NAME}" "${lCVE_V2}" "${lCVE_V31}" "${lCVE_SUMMARY// /§}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
@@ -691,11 +690,6 @@ cve_cpe_matcher_threading() {
   local lCVE_VER_START_EXCL=""
   local lCVE_VER_END_INCL=""
   local lCVE_VER_END_EXCL=""
-  local lCVE_V2=""
-  local lCVE_V31=""
-  local lCVE_CPEs_vuln_ARR=()
-  local lCVE_CPEMATCH=""
-  local lCVE_SUMMARY=""
 
   # we need to check the version more in details in case we have no version in our cpe identifier
   # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
