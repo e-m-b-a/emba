@@ -522,7 +522,7 @@ build_final_bins_threader() {
     return
   fi
   if [[ "${lBIN_FILE}" != *"ELF"* && "${SBOM_UNTRACKED_FILES}" -lt 2 ]]; then
-    continue
+    return
   fi
   # lets generate sbom entries for all files that are not handled by package manager
   # with this in place we can add this information later on to the SBOM (if this is really needed)
