@@ -98,11 +98,17 @@ F15_cyclonedx_sbom() {
     # build the component array for final sbom build:
     mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" | sort -u)
 
-    # as we could have so many components that everything goes b00m we need to build the
-    # components json now manually:
+    # as we can have so many components that everything goes b00m we need to build the
+    # components json manually:
     echo -n "[" > "${SBOM_LOG_PATH}/sbom_components_tmp.json"
     for lCOMP_FILE_ID in "${!lCOMP_FILES_ARR[@]}"; do
       lCOMP_FILE="${lCOMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
+
+      if [[ "${SBOM_UNTRACKED_FILES}" -ne 1 ]] && [[ "${lCOMP_FILE}" == *"unhandled_file_"* ]]; then
+        # if we do not include unhandled_file entries we can skipe them here
+        continue
+      fi
+
       if [[ -s "${lCOMP_FILE}" ]]; then
         cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
       else

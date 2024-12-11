@@ -20,6 +20,8 @@ export HTML=1
 
 # multiple sbom only optimisations
 SBOM_MINIMAL=1
+# we can include all files that are not tracked by the main packaging system into the SBOM
+SBOM_UNTRACKED_FILES=1
 
 # if no deep extraction is needed it can be disabled here - sometimes useful for
 # non Linux stuff like sources or Windows exe (could be also configured via -q parameter)

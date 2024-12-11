@@ -57,7 +57,7 @@ P60_deep_extractor() {
   sub_module_title "Extraction results"
 
   lUNIQUE_FILES=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-  lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep -c "ELF"' || true)
+  # lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep -c "ELF"' || true)
   lFILES_EXT=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
 
   if [[ "${lBINS}" -gt 0 || "${lUNIQUE_FILES}" -gt 0 ]]; then
@@ -66,7 +66,7 @@ P60_deep_extractor() {
     linux_basic_identification_helper "${FIRMWARE_PATH_CP}"
     print_ln
     print_output "[*] Found ${ORANGE}${lFILES_EXT}${NC} files (${ORANGE}${lUNIQUE_FILES}${NC} unique files) and ${ORANGE}${lDIRS_EXT}${NC} directories at all."
-    print_output "[*] Found ${ORANGE}${lBINS}${NC} binaries."
+    # print_output "[*] Found ${ORANGE}${lBINS}${NC} binaries."
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER}${NC}."
 
     tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"

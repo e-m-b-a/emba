@@ -99,8 +99,8 @@ S09_firmware_base_version_check() {
     # shellcheck disable=SC2046
     wait $(jobs -p)
 
-    sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt >> "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
-    cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u >> "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
+    sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt > "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
+    cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
 
     # we have now all our filesystem bins in "${P99_CSV_LOG}"
     # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
@@ -112,18 +112,26 @@ S09_firmware_base_version_check() {
     lINIT_FILES_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
     if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
       print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
-      print_output "[*] EMBA is testing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
-      FILE_ARR=()
+      print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
+      export FILE_ARR=()
+      local lWAIT_PIDS_S09_ARR_tmp=()
       for lFILE in "${lFILE_ARR_TMP[@]}"; do
-        if file -b "${lFILE}"| grep -q -v "text\|compressed\|archive\|empty"; then
-          if [[ "${lFILE}" == *".raw" ]]; then
-            # binwalk produces a lot of raw files - we skip them here
-            continue
-          fi
-          # print_output "$(indent "$(orange "${lFILE}")")"
-          FILE_ARR+=( "${lFILE}" )
-          echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
+        if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
+          # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
+          continue
         fi
+
+        # print_output "$(indent "$(orange "${lFILE}")")"
+        lBIN_FILE="$(file -b "${lFILE}")"
+        if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* ]]; then
+          FILE_ARR+=( "${lFILE}" )
+        fi
+
+        build_final_bins_threader "${lFILE}" "${lBIN_FILE}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
+        # max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${lWAIT_PIDS_S09_ARR_tmp[@]}"
       done
       print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
     else
@@ -143,7 +151,7 @@ S09_firmware_base_version_check() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_1+=( "${lTMP_PID}" )
-    max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${WAIT_PIDS_S09_1[@]}"
+    max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${WAIT_PIDS_S09_1[@]}"
   done
 
   print_output "[*] Waiting for strings generator" "no_log"
@@ -482,7 +490,7 @@ S09_firmware_base_version_check() {
       if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
         recover_wait_pids "${WAIT_PIDS_S09[@]}"
         if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S09[@]}"
+          max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${WAIT_PIDS_S09[@]}"
         fi
       fi
     fi
@@ -491,11 +499,51 @@ S09_firmware_base_version_check() {
 
   print_dot
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09[@]}"
+  if [[ "${THREADED}" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S09[@]}"
+    wait_for_pid "${lWAIT_PIDS_S09_ARR_tmp[@]}"
+  fi
 
   lVERSIONS_DETECTED=$(grep -c "Version information found" "${LOG_FILE}" || true)
 
   module_end_log "${FUNCNAME[0]}" "${lVERSIONS_DETECTED}"
+}
+
+build_final_bins_threader() {
+  local lFILE="${1:-}"
+  local lBIN_FILE="${2:-}"
+
+  if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ ]]; then
+    # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
+    return
+  fi
+
+  if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* ]]; then
+    echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
+  fi
+
+  if [[ "${SBOM_UNTRACKED_FILES}" -eq 1 ]]; then
+    # lets generate sbom entries for all files that are not handled by package manager
+    # with this in place we can add this information later on to the SBOM (if this is really needed)
+    lAPP_NAME=$(basename "${lFILE}")
+    local lAPP_TYPE="file"
+    local lPACKAGING_SYSTEM="unhandled_file"
+    local lPROP_ARRAY_INIT_ARR=()
+    lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
+    lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
+
+    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+    # final array with all hash values
+    if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
+      print_output "[*] Already found results for ${lAPP_NAME:-NA} / ${lAPP_VERS:-NA}" "no_log"
+      return
+    fi
+
+    # create component entry - this allows adding entries very flexible:
+    build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+  fi
 }
 
 check_pkg_files_filesystem() {

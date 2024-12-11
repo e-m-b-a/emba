@@ -716,7 +716,7 @@ check_disk_space_emu() {
   local lCRITICAL_FILES_ARR=()
   local lKILLER=""
 
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${KILL_SIZE}" -print0|xargs -r -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1 | cut -d_ -f2' || true)
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1 | cut -d_ -f2' || true)
   for lKILLER in "${lCRITICAL_FILES_ARR[@]}"; do
     if pgrep -f "${lEMULATOR}.*${lKILLER}" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"

@@ -67,14 +67,14 @@ P50_binwalk_extractor() {
       lFILES_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type f | wc -l )
       lUNIQUE_FILES_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3 | wc -l )
       lDIRS_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type d | wc -l )
-      lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+      # lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
     fi
 
     if [[ "${lBINS_BW}" -gt 0 ]] || [[ "${lFILES_EXT_BW}" -gt 0 ]]; then
       sub_module_title "Firmware extraction details"
       print_output "[*] ${ORANGE}Binwalk${NC} results:"
       print_output "[*] Found ${ORANGE}${lFILES_EXT_BW}${NC} files (${ORANGE}${lUNIQUE_FILES_BW}${NC} unique files) and ${ORANGE}${lDIRS_EXT_BW}${NC} directories at all."
-      print_output "[*] Found ${ORANGE}${lBINS_BW}${NC} binaries."
+      # print_output "[*] Found ${ORANGE}${lBINS_BW}${NC} binaries."
       print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_BINWALK}${NC}."
       print_ln
       tree -sh "${OUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
