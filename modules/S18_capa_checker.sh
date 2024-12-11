@@ -37,6 +37,9 @@ S18_capa_checker() {
   local lBINS_CHECKED_CNT=0
 
   while read -r lBINARY; do
+    # bypass the Linux kernel
+    [[ "${lBINARY}" == *"vmlinuz"* ]] && continue
+
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
