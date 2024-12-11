@@ -73,6 +73,7 @@ F20_vul_aggregator() {
 
     get_sbom_package_details "${S08_CSV_LOG}"
 
+    get_busybox_verified "${S118_CSV_LOG}"
     get_uefi_details "${S02_CSV_LOG}"
     get_systemmode_emulator "${L15_CSV_LOG}"
     get_systemmode_webchecks "${L25_CSV_LOG}"
@@ -522,7 +523,7 @@ cve_db_lookup_version() {
   local lVERSION_SEARCHx=""
   local lCVE_VER_SOURCES_FILE=""
 
-  # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
+  # if we did the CVE analysis already in module s26 and s118, we can use these results for our further analysis
   # -> we skip the complete CVE analysis here:
   if [[ "${lBIN_NAME}" == *"linux_kernel"* ]] && [[ -s "${LOG_DIR}"/s26_kernel_vuln_verifier/"${lVERSION_PATH}".txt ]]; then
     print_output "[*] Detected kernel vulnerability details from module S26 - going to use these details"
@@ -530,6 +531,13 @@ cve_db_lookup_version() {
     cve_extractor "${lBIN_VERSION}"
     return
   fi
+  if [[ "${lBIN_NAME}" == *"busybox"* ]] && [[ -s "${LOG_DIR}"/s118_busybox_verifier/"${lVERSION_PATH}".txt ]]; then
+    print_output "[*] Detected busybox vulnerability details from module S118 - going to use these details"
+    cp "${LOG_DIR}"/s118_busybox_verifier/"${lVERSION_PATH}".txt "${LOG_PATH_MODULE}" || (print_output "[-] S118 kernel vulns file found, but something was going wrong")
+    cve_extractor "${lBIN_VERSION}"
+    return
+  fi
+
   # we test for the binary_name:version and for binary_name:*:
   print_output "[*] CVE database lookup with version information: ${ORANGE}${lBIN_VERSION}${NC}" "no_log"
   local lCPE_BIN_VERSION_SEARCH=${lBIN_VERSION%:}
@@ -623,7 +631,7 @@ check_cve_sources() {
 
   # ensure we replace :: with :.*: to use the lBIN_VERSION in our grep command
   lBIN_VERSION=${lBIN_VERSION//::/:\.\*:}
-  print_output "[*] Testing binary ${lBIN_NAME} with version ${lBIN_VERSION_ONLY} (${lBIN_VERSION}) for CVE matches in ${lCVE_VER_SOURCES_FILE}" "no_log"
+  # print_output "[*] Testing binary ${lBIN_NAME} with version ${lBIN_VERSION_ONLY} (${lBIN_VERSION}) for CVE matches in ${lCVE_VER_SOURCES_FILE}" "no_log"
 
   lCVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${lCVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
   # lCVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${lCVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -643,7 +651,7 @@ check_cve_sources() {
 
   # if our cpe with the binary version matches we have a vuln and we can continue
   if grep -q "cpe:${CPE_VERSION}:.*${lBIN_VERSION%:}:" "${lCVE_VER_SOURCES_FILE}"; then
-    print_output "[+] CPE matches - vulnerability identified - CVE: ${lCVE_ID} / BIN: ${lBIN_VERSION}" "no_log"
+    # print_output "[+] CPE matches - vulnerability identified - CVE: ${lCVE_ID} / BIN: ${lBIN_VERSION}" "no_log"
     write_cve_log "${lCVE_ID}" "${lCVE_V2:-"NA"}" "${lCVE_V31:-"NA"}" "${lFIRST_EPSS}" "${lCVE_SUMMARY:-NA}" "${LOG_PATH_MODULE}"/"${lVERSION_PATH}".txt &
     return
   fi
@@ -907,8 +915,8 @@ cve_extractor() {
   # lVSOURCE is used to track the source of version details, this is relevant for the
   # final report. With this in place we know if it is from live testing via the network
   # or if it is found via static analysis or via user-mode emulation
-  if [[ -f "${S06_CSV_LOG}" && -f "${S09_CSV_LOG}" ]]; then
-    if grep -q "${lVERSION_orig}" "${S06_CSV_LOG}" 2>/dev/null || grep -q "${lVERSION_orig}" "${S09_CSV_LOG}" 2>/dev/null; then
+  if [[ -f "${S06_CSV_LOG}" || -f "${S09_CSV_LOG}" || -f "${S118_CSV_LOG}" ]]; then
+    if grep -q "${lVERSION_orig}" "${S06_CSV_LOG}" 2>/dev/null || grep -q "${lVERSION_orig}" "${S09_CSV_LOG}" 2>/dev/null || grep -q "${lVERSION_orig}" "${S118_CSV_LOG}" 2>/dev/null; then
       if [[ "${lVSOURCE}" == "unknown" ]]; then
         lVSOURCE="STAT"
       else
@@ -1086,6 +1094,7 @@ cve_extractor() {
   lANCHOR="${lBINARY_NAME}_${lVERSION}"
   lANCHOR="cve_${lANCHOR:0:20}"
   write_anchor "${lANCHOR}" "${lBIN_LOG}"
+  # print_output "[*] ${lBINARY} / ${lVERSION} / ${#BUSYBOX_VERIFIED_CVE_ARR[@]}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     write_log "" "${lBIN_LOG}"
     grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" >> "${lBIN_LOG}" || true
@@ -1264,7 +1273,7 @@ cve_extractor_thread_actor() {
     fi
   fi
 
-  if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${lBIN_BINARY}" == "busybox" ]]; then
+  if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${lBIN_BINARY}" == *"busybox"* ]]; then
     if grep -q ";${lCVE_VALUE};" "${CSV_DIR}"/s118_busybox_verifier.csv; then
       print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_VALUE}${GREEN} is a verified BusyBox vulnerability (${ORANGE}BusyBox applet${GREEN})!" "no_log"
       lBUSYBOX_VERIFIED="yes"
@@ -1564,7 +1573,7 @@ get_busybox_verified() {
 
   if [[ -f "${lS118_CSV_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${lS118_CSV_LOG}")."
-    readarray -t BUSYBOX_VERIFIED_CVE_ARR < <(cut -d\; -f1,3 "${lS118_CSV_LOG}" | tail -n +2 | grep -v "BusyBox VERSION;Verified CVE" | sort -u || true)
+    readarray -t BUSYBOX_VERIFIED_CVE_ARR < <(cut -d\; -f1,3 "${lS118_CSV_LOG}" | tail -n +2 | sort -u || true)
   fi
 }
 

@@ -126,8 +126,9 @@ S118_busybox_verifier()
     local lALL_BB_VULNS_ARR=()
     local lBB_APPLET=""
     local lSUMMARY=""
+    local lWAIT_PIDS_S118_ARR=()
 
-    if [[ -f "${S118_CSV_LOG}" ]] && tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -v "BusyBox VERSION" | grep -q "${lBB_VERSION}"; then
+    if [[ -f "${S118_CSV_LOG}" ]] && tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -q "${lBB_VERSION}"; then
       # we already tested this version and ensure we do not duplicate this check
       continue
     fi
@@ -163,7 +164,7 @@ S118_busybox_verifier()
     fi
 
     print_ln
-    sub_module_title "BusyBox - Vulnerability verification"
+    sub_module_title "BusyBox - Vulnerability verification - ${lBB_VERSION}"
     print_output "[+] Extracted ${ORANGE}${#lALL_BB_VULNS_ARR[@]}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
     print_ln
 
@@ -171,28 +172,40 @@ S118_busybox_verifier()
     write_csv_log "BusyBox VERSION" "BusyBox APPLET" "Verified CVE" "CNT all CVEs" "CVE Summary"
     for VULN in "${lALL_BB_VULNS_ARR[@]}"; do
       lVULN_CNT=$((lVULN_CNT+1))
-
-      CVE=$(echo "${VULN}" | cut -d: -f1)
-      lSUMMARY="$(echo "${VULN}" | cut -d: -f6-)"
-      print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${#lALL_BB_VULNS_ARR[@]}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
-
-      for lBB_APPLET in "${BB_VERIFIED_APPLETS[@]}"; do
-        # remove false positives for applet "which"
-        if [[ "${lBB_APPLET}" == "which" ]] && [[ "${lSUMMARY}" == *"\,\ ${lBB_APPLET}\ "* ]]; then
-          continue
-        fi
-        if [[ "${lSUMMARY}" == *" ${lBB_APPLET}\ "* ]]; then
-          print_output "[+] Verified BusyBox vulnerability ${ORANGE}${CVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}"
-          echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${LOG_FILE}"
-          lNEG_LOG=1
-          write_csv_log "${lBB_VERSION}" "${lBB_APPLET}" "${CVE}" "${#lALL_BB_VULNS_ARR[@]}" "${lSUMMARY}"
-          print_bar
-        fi
-      done
+      busybox_vuln_testing_threader "${VULN}" "${lVULN_CNT}" "${#lALL_BB_VULNS_ARR[@]}" "${lBB_VERSION}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S118_ARR+=( "${lTMP_PID}" )
+      lNEG_LOG=1
     done
+    wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
   done
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+}
+
+busybox_vuln_testing_threader() {
+  local VULN="${1:-}"
+  local lVULN_CNT="${2:-}"
+  local lALL_BB_VULNS_ARR_SIZE="${3:-}"
+  local lBB_VERSION="${4:-}"
+
+  CVE=$(echo "${VULN}" | cut -d: -f1)
+  lSUMMARY="$(echo "${VULN}" | cut -d: -f6-)"
+  print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${lALL_BB_VULNS_ARR_SIZE}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
+
+  for lBB_APPLET in "${BB_VERIFIED_APPLETS[@]}"; do
+    # remove false positives for applet "which"
+    if [[ "${lBB_APPLET}" == "which" ]] && [[ "${lSUMMARY}" == *"\,\ ${lBB_APPLET}\ "* ]]; then
+      continue
+    fi
+    if [[ "${lSUMMARY}" == *" ${lBB_APPLET}\ "* ]]; then
+      print_output "[+] Verified BusyBox vulnerability ${ORANGE}${CVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}"
+      echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${LOG_FILE}"
+      write_csv_log "${lBB_VERSION}" "${lBB_APPLET}" "${CVE}" "${lALL_BB_VULNS_ARR_SIZE}" "${lSUMMARY}"
+      print_bar
+    fi
+  done
 }
 
 get_busybox_applets_stat() {
@@ -253,13 +266,14 @@ get_busybox_applets_emu() {
 
 get_cve_busybox_data() {
   local lBB_VERSION="${1:-}"
+
   local lVULN_CNT=""
   export F20_DEEP=0
+  local lWAIT_PIDS_S118_ARR=()
 
   sub_module_title "BusyBox - Version based vulnerability detection"
 
   prepare_cve_search_module
-
   cve_db_lookup_version "${lBB_VERSION}"
 
   if [[ -f "${CVE_DETAILS_PATH}" ]]; then
@@ -267,27 +281,38 @@ get_cve_busybox_data() {
 
     # lets create a more beautifull log for the report:
     local lCVE_LINE_ENTRY=""
-    local lCVE_ID=""
-    local lCVSS_V2=""
-    local lCVSS_V3=""
-    local lFIRST_EPSS=""
-    local lCVE_SUMMARY=""
-
     while read -r lCVE_LINE_ENTRY; do
-      lCVE_ID="${lCVE_LINE_ENTRY/:*}"
-      lCVSS_V2=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f2)
-      lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f3)
-      lFIRST_EPSS=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
-      lCVE_SUMMARY=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f6-)
-
-      write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-      write_log "$(indent "CVSSv2: ${ORANGE}${lCVSS_V2}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-      write_log "$(indent "CVSSv3: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-      write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-      write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-      write_log "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+      get_cve_busybox_data_threader "${lCVE_LINE_ENTRY}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S118_ARR+=( "${lTMP_PID}" )
     done < "${CVE_DETAILS_PATH}"
+
+    wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
 
     print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
   fi
+}
+
+get_cve_busybox_data_threader() {
+  local lCVE_LINE_ENTRY="${1:-}"
+
+  local lCVE_ID=""
+  local lCVSS_V2=""
+  local lCVSS_V3=""
+  local lFIRST_EPSS=""
+  local lCVE_SUMMARY=""
+
+  lCVE_ID="${lCVE_LINE_ENTRY/:*}"
+  lCVSS_V2=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f2)
+  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f3)
+  lFIRST_EPSS=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
+  lCVE_SUMMARY=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f6-)
+
+  write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+  write_log "$(indent "CVSSv2: ${ORANGE}${lCVSS_V2}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+  write_log "$(indent "CVSSv3: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+  write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+  write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+  write_log "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
 }
