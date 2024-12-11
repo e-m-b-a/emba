@@ -21,6 +21,10 @@ export HTML=1
 # multiple sbom only optimisations
 SBOM_MINIMAL=1
 # we can include all files that are not tracked by the main packaging system into the SBOM
+# disable/enable this to (not) include all files from filesystem which are not handled
+# from the package management system
+# Value 1 for ELF files only
+# Value 2 for all files
 SBOM_UNTRACKED_FILES=1
 
 # if no deep extraction is needed it can be disabled here - sometimes useful for

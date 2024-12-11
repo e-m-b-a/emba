@@ -114,7 +114,6 @@ S09_firmware_base_version_check() {
       print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
       print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
       export FILE_ARR=()
-      local lWAIT_PIDS_S09_ARR_tmp=()
       for lFILE in "${lFILE_ARR_TMP[@]}"; do
         if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
           # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
@@ -126,12 +125,6 @@ S09_firmware_base_version_check() {
         if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* ]]; then
           FILE_ARR+=( "${lFILE}" )
         fi
-
-        build_final_bins_threader "${lFILE}" "${lBIN_FILE}" &
-        local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
-        # max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${lWAIT_PIDS_S09_ARR_tmp[@]}"
       done
       print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
     else
@@ -140,13 +133,16 @@ S09_firmware_base_version_check() {
   else
     print_output "[*] No package manager updates for static analysis"
   fi
-
   print_output "[*] Generate strings overview for static version analysis of ${ORANGE}${#FILE_ARR[@]}${NC} files ..."
   mkdir "${LOG_PATH_MODULE}"/strings_bins/ || true
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
     mkdir "${LOG_PATH_MODULE}"/strings_bins || true
   fi
+  export WAIT_PIDS_S09_ARR_tmp=()
   for lBIN in "${FILE_ARR[@]}"; do
+    if [[ "${lBIN}" =~ .*\.padding$ || "${lBIN}" =~ .*\.unknown$ || "${lBIN}" =~ .*\.uncompressed$ || "${lBIN}" =~ .*\.raw$ || "${lBIN}" =~ .*\.elf$ || "${lBIN}" =~ .*\.decompressed\.bin$ || "${lBIN}" =~ .*__symbols__.* ]]; then
+      continue
+    fi
     generate_strings "${lBIN}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
@@ -501,7 +497,7 @@ S09_firmware_base_version_check() {
 
   if [[ "${THREADED}" -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S09[@]}"
-    wait_for_pid "${lWAIT_PIDS_S09_ARR_tmp[@]}"
+    wait_for_pid "${WAIT_PIDS_S09_ARR_tmp[@]}"
   fi
 
   lVERSIONS_DETECTED=$(grep -c "Version information found" "${LOG_FILE}" || true)
@@ -522,28 +518,43 @@ build_final_bins_threader() {
     echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
   fi
 
-  if [[ "${SBOM_UNTRACKED_FILES}" -eq 1 ]]; then
-    # lets generate sbom entries for all files that are not handled by package manager
-    # with this in place we can add this information later on to the SBOM (if this is really needed)
-    lAPP_NAME=$(basename "${lFILE}")
-    local lAPP_TYPE="file"
-    local lPACKAGING_SYSTEM="unhandled_file"
-    local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
-
-    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
-      print_output "[*] Already found results for ${lAPP_NAME:-NA} / ${lAPP_VERS:-NA}" "no_log"
-      return
-    fi
-
-    # create component entry - this allows adding entries very flexible:
-    build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+  if [[ "${SBOM_UNTRACKED_FILES}" -lt 1 ]]; then
+    return
   fi
+  if [[ "${lBIN_FILE}" != *"ELF"* && "${SBOM_UNTRACKED_FILES}" -lt 2 ]]; then
+    continue
+  fi
+  # lets generate sbom entries for all files that are not handled by package manager
+  # with this in place we can add this information later on to the SBOM (if this is really needed)
+
+  lAPP_NAME=$(basename "${lFILE}")
+  if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
+    local lAPP_TYPE="library"
+  elif [[ "${lBIN_FILE}" == *"data"* ]]; then
+    # is this correct?
+    local lAPP_TYPE="data"
+  elif [[ "${lBIN_FILE}" == *"block special"* || "${lBIN_FILE}" == *"character special"* ]]; then
+    # is this correct?
+    local lAPP_TYPE="device-driver"
+  else
+    local lAPP_TYPE="file"
+  fi
+  local lPACKAGING_SYSTEM="unhandled_file"
+  local lPROP_ARRAY_INIT_ARR=()
+  lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
+  lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
+
+  build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+  # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+  # final array with all hash values
+  if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
+    print_output "[*] Already found results for ${lAPP_NAME:-NA} / ${lAPP_VERS:-NA}" "no_log"
+    return
+  fi
+
+  # create component entry - this allows adding entries very flexible:
+  build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 }
 
 check_pkg_files_filesystem() {
@@ -627,6 +638,8 @@ build_cpe_identifier() {
 
 generate_strings() {
   local lBIN="${1:-}"
+  local lPCK_MGR_UPDATES="${2:-}"
+
   local lBIN_FILE=""
   local lMD5_SUM=""
   local lBIN_NAME_REAL=""
@@ -637,6 +650,15 @@ generate_strings() {
   fi
 
   lBIN_FILE=$(file -b "${lBIN}" || true)
+
+  # Just in case we need to create SBOM entries for every file
+  if [[ "${SBOM_UNTRACKED_FILES:-0}" -eq 1 ]]; then
+    build_final_bins_threader "${lBIN}" "${lBIN_FILE}" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    WAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
+  fi
+
   if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* ]]; then
     return
   fi

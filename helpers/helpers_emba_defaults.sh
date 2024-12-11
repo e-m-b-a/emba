@@ -206,7 +206,6 @@ set_log_paths() {
   export S16_LOG="${LOG_DIR}/s16_ghidra_decompile_checks.txt"
   export S17_LOG="${LOG_DIR}/s17_cwe_checker.txt"
   export S17_CSV_LOG="${CSV_DIR}/s17_apk_check.csv"
-  export S24_CSV_LOG="${CSV_DIR}/s24_kernel_bin_identifier.csv"
   export S25_CSV_LOG="${CSV_DIR}/s25_kernel_check.csv"
   export S20_LOG="${LOG_DIR}/s20_shell_check.txt"
   export S21_LOG="${LOG_DIR}/s21_python_check.txt"
