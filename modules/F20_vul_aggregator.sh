@@ -642,7 +642,7 @@ check_cve_sources() {
 
   # check if our binary name is somewhere in the cpe identifier - if not we can drop this vulnerability:
   if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${lCVE_VER_SOURCES_FILE}" | grep -c "${lBIN_NAME//\.\*}")" -eq 0 ]]; then
-    print_output "[-] No matching criteria found - binary ${lBIN_NAME} not vulnerable for CVE ${lCVE_ID}" "no_log"
+    # print_output "[-] No matching criteria found - binary ${lBIN_NAME} not vulnerable for CVE ${lCVE_ID}" "no_log"
     return
   fi
 

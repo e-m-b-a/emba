@@ -86,11 +86,23 @@ capa_runner_fct() {
   local lBIN_NAME=""
   lBIN_NAME="$(basename "${lBINARY}")"
   local lBIN_MD5=""
+  local lCAPA_OPTS=()
+
+  if grep -q "${lBINARY}.*ELF" "${P99_CSV_LOG}"; then
+    lCAPA_OPTS=("--os" "linux")
+  elif grep -q "${lBINARY}.*PE32" "${P99_CSV_LOG}"; then
+    lCAPA_OPTS=("--os" "windows")
+  elif grep -q "${lBINARY}.*MSI" "${P99_CSV_LOG}"; then
+    lCAPA_OPTS=("--os" "windows")
+  else
+    print_output "[-] No supported architecture identified for capa on $(print_path "${lBINARY}")" "no_log"
+    return
+  fi
 
   print_output "[*] Testing binary behavior with capa for $(print_path "${lBINARY}")" "no_log"
-  "${EXT_DIR}"/capa "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_error "[-] Capa analysis failed for ${lBINARY}"
+  "${EXT_DIR}"/capa "${lCAPA_OPTS[@]}" "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_error "[-] Capa analysis failed for ${lBINARY}"
 
-  if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
+  if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || [[ ! -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"
     rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
     return
