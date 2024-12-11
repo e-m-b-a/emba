@@ -33,47 +33,41 @@ S18_capa_checker() {
   fi
 
   local lBINARY=""
-  local lBIN_TO_CHECK=""
   local lWAIT_PIDS_S18=()
-  local lBIN_TO_CHECK_ARR=()
   local lBINS_CHECKED_CNT=0
 
-  for lBINARY in "${BINARIES[@]}"; do
-    mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
-    for lBIN_TO_CHECK in "${lBIN_TO_CHECK_ARR[@]}"; do
-      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-        # if we have the base linux config file we only test non known Linux binaries
-        # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          continue 2
-        fi
-      fi
+  while read -r lBINARY; do
+    # bypass the Linux kernel
+    [[ "${lBINARY}" == *"vmlinuz"* ]] && continue
 
-      if ( file "${lBIN_TO_CHECK}" | grep -q "ELF.*Intel\|PE32\|MSI" ); then
-        # ensure we have not tested this binary
-        local lBIN_MD5=""
-        lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
-        if ( grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
-          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with capa" "no_log"
-          continue
-        fi
-        echo "${lBIN_MD5}" >> "${TMP_DIR}"/s18_checked.tmp
-
-        if [[ "${THREADED}" -eq 1 ]]; then
-          capa_runner_fct "${lBIN_TO_CHECK}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S18+=( "${lTMP_PID}" )
-          max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S18[@]}"
-        else
-          capa_runner_fct "${lBIN_TO_CHECK}"
-        fi
-      else
-        print_output "[-] Binary behavior testing with capa for $(print_path "${lBIN_TO_CHECK}") not possible ... unsupported architecture" "no_log"
+    if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+      # if we have the base linux config file we only test non known Linux binaries
+      # with this we do not waste too much time on open source Linux stuff
+      lNAME=$(basename "${lBINARY}" 2> /dev/null)
+      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        continue 2
       fi
-    done
-  done
+    fi
+
+    # ensure we have not tested this binary
+    local lBIN_MD5=""
+    lBIN_MD5="$(md5sum "${lBINARY}" | awk '{print $1}')"
+    if ( grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
+      # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with capa" "no_log"
+      continue
+    fi
+    echo "${lBIN_MD5}" >> "${TMP_DIR}"/s18_checked.tmp
+
+    if [[ "${THREADED}" -eq 1 ]]; then
+      capa_runner_fct "${lBINARY}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S18+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S18[@]}"
+    else
+      capa_runner_fct "${lBINARY}"
+    fi
+  done < <(grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S18[@]}"
 
@@ -95,11 +89,23 @@ capa_runner_fct() {
   local lBIN_NAME=""
   lBIN_NAME="$(basename "${lBINARY}")"
   local lBIN_MD5=""
+  local lCAPA_OPTS=()
+
+  if grep -q "${lBINARY}.*ELF" "${P99_CSV_LOG}"; then
+    lCAPA_OPTS=("--os" "linux")
+  elif grep -q "${lBINARY}.*PE32" "${P99_CSV_LOG}"; then
+    lCAPA_OPTS=("--os" "windows")
+  elif grep -q "${lBINARY}.*MSI" "${P99_CSV_LOG}"; then
+    lCAPA_OPTS=("--os" "windows")
+  else
+    print_output "[-] No supported architecture identified for capa on $(print_path "${lBINARY}")" "no_log"
+    return
+  fi
 
   print_output "[*] Testing binary behavior with capa for $(print_path "${lBINARY}")" "no_log"
-  "${EXT_DIR}"/capa "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_error "[-] Capa analysis failed for ${lBINARY}"
+  "${EXT_DIR}"/capa "${lCAPA_OPTS[@]}" "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_error "[-] Capa analysis failed for ${lBINARY}"
 
-  if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
+  if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || [[ ! -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"
     rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
     return

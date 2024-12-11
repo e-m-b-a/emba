@@ -32,14 +32,7 @@ S08_submodule_windows_exifparser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
-    # if we already know that we have a windows binary to analyze we can check every file with the file command
-    # to ensure we do not miss anything
-    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep "PE32\|MSI" | cut -d ':' -f1)
-  else
-    # if we just search through an unknwon environment we search for exe, dll and msi files
-    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.msi" \))
-  fi
+  mapfile -t lEXE_ARCHIVES_ARR < <(grep "PE32\|MSI" "${P99_CSV_LOG}" | grep -v "ASCII text\|Unicode text" | cut -d ';' -f1 || true)
 
   if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -160,6 +153,9 @@ windows_exifparser_threader() {
   lAPP_VERS=${lAPP_VERS/*:\ }
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+  if [[ -z "${lAPP_VERS}" ]]; then
+    return
+  fi
 
   lAPP_ARCH=$(grep "Machine Type" "${lEXIF_LOG}" || true)
   lAPP_ARCH=${lAPP_ARCH/*:\ }

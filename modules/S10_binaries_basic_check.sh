@@ -39,22 +39,20 @@ S10_binaries_basic_check()
   if [[ "${lVULNERABLE_FUNCTIONS}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "${lVULNERABLE_FUNCTIONS}" ]] ; then
     print_output "[*] Interesting functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-    for lBINARY in "${BINARIES[@]}" ; do
-      if ( file "${lBINARY}" | grep -q "ELF" ) ; then
-        lBIN_COUNT=$((lBIN_COUNT+1))
-        mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -s --use-dynamic "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
-        if [[ "${#lVUL_FUNC_RESULT_ARR[@]}" -ne 0 ]] ; then
-          print_ln
-          print_output "[+] Interesting function in ""$(print_path "${lBINARY}")"" found:"
-          for lVUL_FUNC in "${lVUL_FUNC_RESULT_ARR[@]}" ; do
-            # shellcheck disable=SC2001
-            lVUL_FUNC="$(echo "${lVUL_FUNC}" | sed -e 's/[[:space:]]\+/\t/g')"
-            print_output "$(indent "${lVUL_FUNC}")"
-          done
-          lCOUNTER=$((lCOUNTER+1))
-        fi
+    while read -r lBINARY; do
+      lBIN_COUNT=$((lBIN_COUNT+1))
+      mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -s --use-dynamic "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
+      if [[ "${#lVUL_FUNC_RESULT_ARR[@]}" -ne 0 ]] ; then
+        print_ln
+        print_output "[+] Interesting function in ""$(print_path "${lBINARY}")"" found:"
+        for lVUL_FUNC in "${lVUL_FUNC_RESULT_ARR[@]}" ; do
+          # shellcheck disable=SC2001
+          lVUL_FUNC="$(echo "${lVUL_FUNC}" | sed -e 's/[[:space:]]\+/\t/g')"
+          print_output "$(indent "${lVUL_FUNC}")"
+        done
+        lCOUNTER=$((lCOUNTER+1))
       fi
-    done
+    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
     print_ln
     print_output "[*] Found ""${ORANGE}${lCOUNTER}${NC}"" binaries with interesting functions in ""${ORANGE}${lBIN_COUNT}${NC}"" files (vulnerable functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi

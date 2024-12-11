@@ -36,12 +36,10 @@ S16_ghidra_decompile_checks()
     return
   fi
 
-  local lBINARY=""
   local lBIN_TO_CHECK=""
   local lTMP_PID=""
   local lVULN_COUNTER=0
   local lWAIT_PIDS_S16_ARR=()
-  local lBIN_TO_CHECK_ARR=()
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
@@ -51,54 +49,55 @@ S16_ghidra_decompile_checks()
     module_wait "S14_weak_func_radare_check"
   fi
 
+  local lBINARIES_ARR=()
   if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    local BINARIES=()
-    mapfile -t BINARIES < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+  else
+    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f1 || true)
   fi
 
-  for lBINARY in "${BINARIES[@]}"; do
-    mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
-    for lBIN_TO_CHECK in "${lBIN_TO_CHECK_ARR[@]}"; do
-      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-        # if we have the base linux config file we only test non known Linux binaries
-        # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          continue 2
-        fi
+  for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
+    if [[ -f "${BASE_LINUX_FILES}" ]]; then
+      # if we have the base linux config file we only test non known Linux binaries
+      # with this we do not waste too much time on open source Linux stuff
+      lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
+      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        continue
       fi
+    fi
 
-      if ( file "${lBIN_TO_CHECK}" | grep -q ELF ) ; then
-        # ensure we have not tested this binary entry
-        local lBIN_MD5=""
-        lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
-        if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
-          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
-          continue
-        fi
-        # print_output "[*] Testing ${lBIN_TO_CHECK} with ghidra/semgrep"
-        lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
-        if [[ "${THREADED}" -eq 1 ]]; then
-          ghidra_analyzer "${lBIN_TO_CHECK}" &
-          lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
-          max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" "${lWAIT_PIDS_S16_ARR[@]}"
-        else
-          ghidra_analyzer "${lBIN_TO_CHECK}"
-        fi
+    if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
+      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+    fi
 
-        # we stop checking after the first 20 binaries
-        if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-          print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
-          print_output "[*] For complete analysis enable FULL_TEST." "no_log"
-          break 2
-        fi
-      fi
-    done
-  done
+    # ensure we have not tested this binary entry
+    local lBIN_MD5=""
+    lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
+    if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
+      # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+      continue
+    fi
+    # print_output "[*] Testing ${lBIN_TO_CHECK} with ghidra/semgrep"
+    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    if [[ "${THREADED}" -eq 1 ]]; then
+      ghidra_analyzer "${lBIN_TO_CHECK}" &
+      lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
+      max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" "${lWAIT_PIDS_S16_ARR[@]}"
+    else
+      ghidra_analyzer "${lBIN_TO_CHECK}"
+    fi
+
+    # we stop checking after the first MAX_EXT_CHECK_BINS binaries
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now." "no_log"
+      print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+      break
+    fi
+  done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" || true)
 
   [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
@@ -152,7 +151,7 @@ ghidra_analyzer() {
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local lIDENTIFIER="${RANDOM}"
 
-  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra run for ${lNAME}"
+  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then

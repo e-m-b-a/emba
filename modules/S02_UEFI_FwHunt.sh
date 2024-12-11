@@ -36,7 +36,8 @@ S02_UEFI_FwHunt() {
     # we first analyze the entire firmware for performance reasons, if we do not find anything, we analyze each file
     fwhunter "${FIRMWARE_PATH_BAK}"
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
-      for lEXTRACTED_FILE in "${FILE_ARR_LIMITED[@]}"; do
+      while read -r lFILE_DETAILS; do
+        lEXTRACTED_FILE="${lFILE_DETAILS/;*}"
         if [[ ${THREADED} -eq 1 ]]; then
           fwhunter "${lEXTRACTED_FILE}" &
           local lTMP_PID="$!"
@@ -46,7 +47,7 @@ S02_UEFI_FwHunt() {
         else
           fwhunter "${lEXTRACTED_FILE}"
         fi
-      done
+      done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" || true)
     fi
   fi
 
@@ -98,7 +99,7 @@ fwhunter_logging() {
   local lFWHUNTER_BINARY_MATCH=""
   local lFWHUNTER_BINARLY_IDs_ARR=()
 
-  mapfile -t FWHUNTER_RESULTS_ARR < <(find "${LOG_PATH_MODULE}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" %')
+  mapfile -t FWHUNTER_RESULTS_ARR < <(find "${LOG_PATH_MODULE}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" "%"')
   if ! [[ "${#FWHUNTER_RESULTS_ARR[@]}" -gt 0 ]]; then
     return
   fi

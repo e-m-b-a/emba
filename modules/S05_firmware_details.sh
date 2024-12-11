@@ -26,10 +26,11 @@ S05_firmware_details()
 
   local lDETECTED_DIR=""
 
-  # we use the file FILE_ARR from helpers module
   lDETECTED_DIR=$(find "${LOG_DIR}/firmware" -xdev -type d 2>/dev/null | wc -l)
 
-  print_output "[*] ${ORANGE}${#FILE_ARR[@]}${NC} files and ${ORANGE}${lDETECTED_DIR}${NC} directories detected."
+  local lFILE_CNT=0
+  lFILE_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
+  print_output "[*] ${ORANGE}${lFILE_CNT}${NC} files and ${ORANGE}${lDETECTED_DIR}${NC} directories detected."
 
   release_info
   filesystem_tree

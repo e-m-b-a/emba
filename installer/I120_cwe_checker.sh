@@ -27,6 +27,7 @@ I120_cwe_checker() {
     print_tool_info "gcc" 1
     print_tool_info "curl" 1
     print_tool_info "make" 1
+    print_tool_info "openjdk-17-jdk" 1
     # print_tool_info "rust-all" 1
     # print_tool_info "cargo" 1
 
@@ -52,39 +53,32 @@ I120_cwe_checker() {
         ## GHIDRA
 
         # Java SDK for ghidra
-        if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
-        curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
-        mkdir external/jdk 2>/dev/null
-        tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
-        rm external/jdk.tar.gz
+        # if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
+        # curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
+        # mkdir external/jdk 2>/dev/null
+        # tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
+        # rm external/jdk.tar.gz
 
         # Ghidra
         if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
-        # curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip -Sf -o external/ghidra.zip
-        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.2.3_build/ghidra_10.2.3_PUBLIC_20230208.zip -Sf -o external/ghidra.zip
+        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip -Sf -o external/ghidra.zip
+        # curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.2.3_build/ghidra_10.2.3_PUBLIC_20230208.zip -Sf -o external/ghidra.zip
         mkdir external/ghidra 2>/dev/null
         unzip -qo external/ghidra.zip -d external/ghidra
-        if [[ "${IN_DOCKER}" -eq 1 ]]; then
-          # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
-          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
-        else
-          # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
-          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
-        fi
-        rm external/ghidra.zip
+        # if [[ "${IN_DOCKER}" -eq 1 ]]; then
+        #   # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+        #   sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
+        # else
+        #   # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+        #   sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
+        # fi
+        # rm external/ghidra.zip
 
         # further Ghidra installation stuff:
         mkdir external/ghidra_scripts
         download_file "Ghidra Haruspex script" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts/Haruspex.java"
 
         if ! [[ -d ./external/cwe_checker ]]; then
-          # cleanup first
-          rm "${HOME}"/.cargo -r -f
-          rm "${HOME}"/.config -r -f
-          rm external/rustup -r -f
-
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-
           export PATH="${PATH}":"${HOME}"/.cargo/bin
 
           if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
@@ -92,11 +86,12 @@ I120_cwe_checker() {
           git clone https://github.com/EMBA-support-repos/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
           make all GHIDRA_PATH="${HOME_PATH}""/external/ghidra/ghidra_10.3.1_PUBLIC"
+          # make all GHIDRA_PATH="${HOME_PATH}""/external/ghidra/ghidra_10.2.3_PUBLIC"
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then
             # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
-            echo '{"ghidra_path":"/external/ghidra/ghidra_10.2.3_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
+            echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
             cp -pr "${HOME}"/.config ./external/cwe_checker/

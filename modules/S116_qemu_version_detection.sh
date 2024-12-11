@@ -33,14 +33,6 @@ S116_qemu_version_detection() {
     if [[ -f "${lLOG_PATH_S115}" && -d "${LOG_DIR}/s115_usermode_emulator" ]]; then
       local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
 
-      if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
-        # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
-        local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
-        local lV_CNT=0
-        lV_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
-        print_output "[*] Quick scan enabled - ${lV_CNT/\ *} version identifiers loaded"
-      fi
-
       write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
 
       while read -r lVERSION_LINE; do
@@ -130,8 +122,18 @@ version_detection_thread() {
       mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -a -h "Emulating binary:" "${lLOG_PATH_MODULE_S115}"/qemu_tmp_"${lBINARY}".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
       for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
         # lBINARY_PATH is the final array which we are using further
-        lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
-        lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+        # lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
+        lBINARY_PATH_=$(grep "${lBINARY_PATH_}.*ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+        if [[ -z "${lBINARY_PATH_}" ]]; then
+          lBINARY_PATH_=$(grep "${lBINARY_PATH_}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+        fi
+        if [[ -z "${lBINARY_PATH_}" ]]; then
+          lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
+        fi
+        # print_output "[*] Storing strict ${lBINARY_PATH_} in array" "no_log"
+        if [[ -n "${lBINARY_PATH_}" ]]; then
+          lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+        fi
       done
       lTYPE="emulation/strict"
     fi
@@ -149,10 +151,17 @@ version_detection_thread() {
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${lLOG_PATH_}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
             # BINARY_PATH is the final array which we are using further
-            print_output "[*] S116 - Testing for ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}" "no_log"
-            lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
-            print_output "[*] S116 - Testing for new ${lBINARY_PATH_} - ${lVERSION_IDENTIFIER}" "no_log"
-            lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+            lBINARY_PATH_=$(grep "${lBINARY_PATH_}.*ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+            if [[ -z "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATH_=$(grep "${lBINARY_PATH_}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+            fi
+            if [[ -z "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATH_=$(find "${FIRMWARE_PATH}" -xdev -wholename "*${lBINARY_PATH_}" | sort -u | head -1)
+            fi
+            # print_output "[*] Storing ${lBINARY_PATH_} in array" "no_log"
+            if [[ -n "${lBINARY_PATH_}" ]]; then
+              lBINARY_PATHS_FINAL_ARR+=( "${lBINARY_PATH_}" )
+            fi
           done
         done
       done

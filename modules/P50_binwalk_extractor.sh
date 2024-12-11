@@ -21,22 +21,22 @@
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
 
-P61_binwalk_extractor() {
+P50_binwalk_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
   # if we have a verified UEFI firmware we do not need to do anything here
   # if we have already found a linux (RTOS==0) we do not need to do anything here
-  if [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${RTOS}" -eq 0 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${WINDOWS_EXE}" -eq 1 ]] || [[ "${DISABLE_DEEP}" -eq 1 ]]; then
-    module_end_log "${FUNCNAME[0]}" 0
-    return
-  fi
+  # if [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${RTOS}" -eq 0 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${WINDOWS_EXE}" -eq 1 ]] || [[ "${DISABLE_DEEP}" -eq 1 ]]; then
+  #  module_end_log "${FUNCNAME[0]}" 0
+  #  return
+  # fi
 
   # shellcheck disable=SC2153
   if [[ -d "${FIRMWARE_PATH}" ]] && [[ "${RTOS}" -eq 1 ]]; then
     detect_root_dir_helper "${FIRMWARE_PATH}"
   fi
 
-  # we do not rely on any EMBA extraction mechanism -> we use the main firmware file
+  # we do not rely on any EMBA extraction mechanism -> we use the original firmware file
   local lFW_PATH_BINWALK="${FIRMWARE_PATH_BAK}"
 
   if [[ -d "${lFW_PATH_BINWALK}" ]]; then
@@ -45,17 +45,12 @@ P61_binwalk_extractor() {
     return
   fi
 
-  if ! command -v binwalk >/dev/null; then
-    print_output "[-] Binwalk not correct installed - check your installation"
-    return
-  fi
-
   local lFILES_EXT_BW=0
   local lUNIQUE_FILES_BW=0
   local lDIRS_EXT_BW=0
   local lBINS_BW=0
 
-  module_title "Binwalk binary firmware extractor (backup mode)"
+  module_title "Binwalk binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
   export LINUX_PATH_COUNTER_BINWALK=0
@@ -65,32 +60,32 @@ P61_binwalk_extractor() {
     binwalker_matryoshka "${lFW_PATH_BINWALK}" "${OUTPUT_DIR_BINWALK}"
   fi
 
-  linux_basic_identification_binwalk "${OUTPUT_DIR_BINWALK}"
+  if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
+    linux_basic_identification_binwalk "${OUTPUT_DIR_BINWALK}"
+    print_ln
+    if [[ -d "${OUTPUT_DIR_BINWALK}" ]]; then
+      lFILES_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type f | wc -l )
+      lUNIQUE_FILES_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+      lDIRS_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type d | wc -l )
+      lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+    fi
 
-  print_ln
-
-  if [[ -d "${OUTPUT_DIR_BINWALK}" ]]; then
-    lFILES_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type f | wc -l )
-    lUNIQUE_FILES_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum % 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    lDIRS_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type d | wc -l )
-    lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep -c "ELF" || true)
+    if [[ "${lBINS_BW}" -gt 0 ]] || [[ "${lFILES_EXT_BW}" -gt 0 ]]; then
+      sub_module_title "Firmware extraction details"
+      print_output "[*] ${ORANGE}Binwalk${NC} results:"
+      print_output "[*] Found ${ORANGE}${lFILES_EXT_BW}${NC} files (${ORANGE}${lUNIQUE_FILES_BW}${NC} unique files) and ${ORANGE}${lDIRS_EXT_BW}${NC} directories at all."
+      print_output "[*] Found ${ORANGE}${lBINS_BW}${NC} binaries."
+      print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_BINWALK}${NC}."
+      print_ln
+      tree -sh "${OUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
+      print_ln
+    fi
   fi
 
-  if [[ "${lBINS_BW}" -gt 0 ]] || [[ "${lFILES_EXT_BW}" -gt 0 ]]; then
-    sub_module_title "Firmware extraction details"
-    print_output "[*] ${ORANGE}Binwalk${NC} results:"
-    print_output "[*] Found ${ORANGE}${lFILES_EXT_BW}${NC} files (${ORANGE}${lUNIQUE_FILES_BW}${NC} unique files) and ${ORANGE}${lDIRS_EXT_BW}${NC} directories at all."
-    print_output "[*] Found ${ORANGE}${lBINS_BW}${NC} binaries."
-    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_BINWALK}${NC}."
-    print_ln
-    tree -sh "${OUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
-    print_ln
+  detect_root_dir_helper "${OUTPUT_DIR_BINWALK}"
 
-    detect_root_dir_helper "${OUTPUT_DIR_BINWALK}"
-
-    write_csv_log "FILES Binwalk" "UNIQUE FILES Binwalk" "directories Binwalk" "Binaries Binwalk" "LINUX_PATH_COUNTER Binwalk"
-    write_csv_log "${lFILES_EXT_BW}" "${lUNIQUE_FILES_BW}" "${lDIRS_EXT_BW}" "${lBINS_BW}" "${LINUX_PATH_COUNTER_BINWALK}"
-  fi
+  write_csv_log "FILES Binwalk" "UNIQUE FILES Binwalk" "directories Binwalk" "Binaries Binwalk" "LINUX_PATH_COUNTER Binwalk"
+  write_csv_log "${lFILES_EXT_BW}" "${lUNIQUE_FILES_BW}" "${lDIRS_EXT_BW}" "${lBINS_BW}" "${LINUX_PATH_COUNTER_BINWALK}"
 
   module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_BW}"
 }

@@ -28,6 +28,8 @@ export YARA=0
 # extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
 # it in the default profile.
 export BINARY_EXTENDED=1
+# we test only the first 10 binaries with cwe_checker and extended semgrep rules
+export MAX_EXT_CHECK_BINS=15
 
 # the following modules are long running modules which are disabled in the default profile
 export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )

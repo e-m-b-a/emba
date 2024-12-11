@@ -129,17 +129,11 @@ S04_windows_basic_analysis() {
   local lEXE_ARCHIVE=""
   local lEXE_NAME=""
 
-  if [[ "${WINDOWS_EXE:-0}" -eq 1 ]]; then
-    # if we already know that we have a windows binary to analyze we can check every file with the file command
-    # to ensure we do not miss anything
-    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "PE32\|MSI" | cut -d : -f1')
-  else
-    # if we just search through an unknwon environment we search for exe, dll and msi files
-    mapfile -t lEXE_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.msi" \))
-  fi
+  mapfile -t lEXE_ARCHIVES_ARR < <(grep "PE32\|MSI" "${P99_CSV_LOG}" | sort -u || true)
 
   if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
+      lEXE_ARCHIVE="${lEXE_ARCHIVE/;*}"
       lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
 
       sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"

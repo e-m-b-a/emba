@@ -20,14 +20,13 @@
 
 INVOCATION_PATH="."
 
-import_helper()
-{
+import_helper() {
   local lHELPERS_ARR=()
   local lHELPER_CNT=0
   local lHELPER_FILE=""
   mapfile -d '' lHELPERS_ARR < <(find "${HELP_DIR}" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for lHELPER_FILE in "${lHELPERS_ARR[@]}" ; do
-    if ( file "${lHELPER_FILE}" | grep -q "shell script" ) && ! [[ "${lHELPER_FILE}" =~ \ |\' ]] ; then
+    if ( file -b "${lHELPER_FILE}" | grep -q "shell script" ) && ! [[ "${lHELPER_FILE}" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "${lHELPER_FILE}"
@@ -37,8 +36,7 @@ import_helper()
   print_output "==> ""${GREEN}""Imported ""${lHELPER_CNT}"" helper files""${NC}" "no_log"
 }
 
-import_module()
-{
+import_module() {
   local lMODULES_ARR=()
   local lMODULES_LOCAL_ARR=()
   local lMODULES_EMBA_ARR=()
@@ -53,7 +51,7 @@ import_module()
   fi
   lMODULES_ARR=( "${lMODULES_EMBA_ARR[@]}" "${lMODULES_LOCAL_ARR[@]}" )
   for lMODULE_FILE in "${lMODULES_ARR[@]}" ; do
-    if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
+    if ( file -b "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "${lMODULE_FILE}"
@@ -63,12 +61,11 @@ import_module()
   print_output "==> ""${GREEN}""Imported ""${lMODULE_COUNT}"" module/s""${NC}" "no_log"
 }
 
-sort_modules()
-{
+sort_modules() {
   local lSORTED_MODULES_ARR=()
   local lMODULE_FILE=""
-  for lMODULE_FILE in "${MODULES[@]}" ; do
-    if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
+  for lMODULE_FILE in "${MODULES_ARR[@]}" ; do
+    if ( file -b "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
       THREAD_PRIO=0
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
@@ -80,14 +77,13 @@ sort_modules()
       fi
     fi
   done
-  MODULES=( "${lSORTED_MODULES_ARR[@]}" )
+  MODULES_ARR=( "${lSORTED_MODULES_ARR[@]}" )
 }
 
 # $1: module group letter [P, S, L, F, Q]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
-run_modules()
-{
+run_modules() {
   MODULE_GROUP="${1:-}"
   printf -v THREADING_SET '%d\n' "${2}" 2>/dev/null
   THREADING_MOD_GROUP="${THREADING_SET}"
@@ -104,6 +100,7 @@ run_modules()
     export MODULES_ARR=()
     local lMODULES_LOCAL_ARR=()
     local lMODULES_EMBA_ARR=()
+    local lMODULE_NAME=""
 
     mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     if [[ -d "${MOD_DIR_LOCAL}" ]]; then
@@ -115,18 +112,18 @@ run_modules()
       sort_modules
     fi
     for lMODULE_FILE in "${MODULES_ARR[@]}" ; do
-      # check if "${MODULE_NAME}" is in blacklist from config directory and skip it
-      MODULE_NAME=$(basename -s .sh "${lMODULE_FILE}")
-      if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
-        print_output "[*] $(print_date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
+      # check if "${lMODULE_NAME}" is in blacklist from config directory and skip it
+      lMODULE_NAME=$(basename -s .sh "${lMODULE_FILE}")
+      if [[ " ${MODULE_BLACKLIST[*]} " =~  ${lMODULE_NAME}  ]]; then
+        print_output "[*] $(print_date) - ${lMODULE_NAME} not executed - blacklist triggered " "main"
         continue
       fi
       if [[ "${SKIP_PRE_CHECKERS}" == 1 ]] && [[ "${MODULE_GROUP}" == "P" ]]; then
-        print_output "[*] $(print_date) - ${MODULE_NAME} not executed - skip pre-checkers is set " "main"
+        print_output "[*] $(print_date) - ${lMODULE_NAME} not executed - skip pre-checkers is set " "main"
         continue
       fi
       local lMOD_FIN=0
-      if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
+      if ( file -b "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
           # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
           # export PRE_THREAD_ENA=1/0
@@ -136,28 +133,34 @@ run_modules()
             THREADING_SET=0
           fi
         fi
-        MODULE_BN=$(basename "${lMODULE_FILE}")
-        MODULE_MAIN=${MODULE_BN%.*}
-        # module_start_log "${MODULE_MAIN}"
+
+        local lMODULE_BN=""
+        lMODULE_BN=$(basename "${lMODULE_FILE}")
+        local lMODULE_MAIN=${lMODULE_BN%.*}
+        # module_start_log "${lMODULE_MAIN}"
         if [[ "${RESTART}" -eq 1 ]]; then
-          if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
-            if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
-              print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
+          if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
+            if [[ "${lMODULE_MAIN}" == "P99_"* ]] || [[ "${lMODULE_MAIN}" == "L1"* ]]; then
+              print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished but essential - rerun it" "main"
               lMOD_FIN=0
             else
-              print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
+              print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished ... skipping" "main"
               lMOD_FIN=1
               if [[ ${HTML} -eq 1 ]] ; then
                 # we need to build the web reporter links for skipping modules
-                mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MODULE_MAIN}*.txt" | sort)
-                for LOG_FILE_ in "${LOG_FILES[@]}"; do
-                  if grep -q "nothing reported" "${LOG_FILE_}"; then
+                local lLOG_FILES_ARR=()
+                local lLOG_FILE_TMP=""
+                mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMODULE_MAIN}*.txt" | sort)
+                for lLOG_FILE_TMP in "${lLOG_FILES_ARR[@]}"; do
+                  if grep -q "nothing reported" "${lLOG_FILE_TMP}"; then
                     continue
                   fi
-                  MODULE_NAME_=$(basename -s .txt "${LOG_FILE_}")
-                  MODUL_NAME="$( strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "${LOG_FILE_}" | head -n 1 )" | cut -d" " -f2- )"
-                  HTML_FILE="${MODULE_NAME_}.html"
-                  add_link_to_index "${HTML_FILE}" "${MODUL_NAME}"
+                  local lMODULE_NAME_TMP=""
+                  lMODULE_NAME_TMP=$(basename -s .txt "${lLOG_FILE_TMP}")
+                  local lMODUL_NAME=""
+                  lMODUL_NAME="$(strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "${lLOG_FILE_TMP}" | head -n 1 )" | cut -d" " -f2-)"
+                  local lHTML_FILE="${lMODULE_NAME_TMP}.html"
+                  add_link_to_index "${lHTML_FILE}" "${lMODUL_NAME}"
                 done
               fi
             fi
@@ -165,13 +168,13 @@ run_modules()
         fi
         if [[ "${lMOD_FIN}" -eq 0 ]]; then
           if [[ ${THREADING_SET} -eq 1 ]]; then
-            "${MODULE_MAIN}" &
-            MOD_PID="$!"
-            store_kill_pids "${MOD_PID}"
-            WAIT_PIDS+=( "${MOD_PID}" )
+            "${lMODULE_MAIN}" &
+            local lMOD_PID="$!"
+            store_kill_pids "${lMOD_PID}"
+            WAIT_PIDS+=( "${lMOD_PID}" )
             max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
           else
-            "${MODULE_MAIN}"
+            "${lMODULE_MAIN}"
           fi
         fi
         reset_module_count
@@ -203,29 +206,34 @@ run_modules()
         MODULE=$(find "${MOD_DIR}" -maxdepth 1 -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
         # we need the whole module name including path in our array for later checks on it
         export MODULES_EXPORTED+=("${MODULE}")
-        if ( file "${MODULE}" | grep -q "shell script" ) && ! [[ "${MODULE}" =~ \ |\' ]] ; then
-          MODULE_BN=$(basename "${MODULE}")
-          MODULE_MAIN=${MODULE_BN%.*}
-          # module_start_log "${MODULE_MAIN}"
+        if ( file -b "${MODULE}" | grep -q "shell script" ) && ! [[ "${MODULE}" =~ \ |\' ]] ; then
+          local lMODULE_BN=""
+          lMODULE_BN=$(basename "${MODULE}")
+          local lMODULE_MAIN=${lMODULE_BN%.*}
+          # module_start_log "${lMODULE_MAIN}"
           if [[ "${RESTART}" -eq 1 ]]; then
-            if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
-              if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
-                print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
+            if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
+              if [[ "${lMODULE_MAIN}" == "P99_"* ]] || [[ "${lMODULE_MAIN}" == "L1"* ]]; then
+                print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished but essential - rerun it" "main"
                 lMOD_FIN=0
               else
-                print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
+                print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished ... skipping" "main"
                 lMOD_FIN=1
                 if [[ ${HTML} -eq 1 ]] ; then
                   # we need to build the web reporter links for skipping modules
-                  mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MODULE_MAIN}*.txt" | sort)
-                  for LOG_FILE_ in "${LOG_FILES[@]}"; do
-                    if grep -q "nothing reported" "${LOG_FILE_}"; then
+                  local lLOG_FILES_ARR=()
+                  local lLOG_FILE_TMP=""
+                  mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMODULE_MAIN}*.txt" | sort)
+                  for lLOG_FILE_TMP in "${lLOG_FILES_ARR[@]}"; do
+                    if grep -q "nothing reported" "${lLOG_FILE_TMP}"; then
                       continue
                     fi
-                    MODULE_NAME_=$(basename -s .txt "${LOG_FILE_}")
-                    MODUL_NAME="$( strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "${LOG_FILE_}" | head -n 1 )" | cut -d" " -f2- )"
-                    HTML_FILE="${MODULE_NAME_}.html"
-                    add_link_to_index "${HTML_FILE}" "${MODUL_NAME}"
+                    local lMODULE_NAME_TMP=""
+                    lMODULE_NAME_TMP=$(basename -s .txt "${lLOG_FILE_TMP}")
+                    local lMODUL_NAME=""
+                    lMODUL_NAME="$(strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "${lLOG_FILE_TMP}" | head -n 1 )" | cut -d" " -f2-)"
+                    local lHTML_FILE="${lMODULE_NAME_TMP}.html"
+                    add_link_to_index "${lHTML_FILE}" "${lMODUL_NAME}"
                   done
                 fi
               fi
@@ -233,13 +241,13 @@ run_modules()
           fi
           if [[ "${lMOD_FIN}" -eq 0 ]]; then
             if [[ ${THREADING_SET} -eq 1 ]]; then
-              "${MODULE_MAIN}" &
-              MOD_PID="$!"
-              store_kill_pids "${MOD_PID}"
-              WAIT_PIDS+=( "${MOD_PID}" )
+              "${lMODULE_MAIN}" &
+              local lMOD_PID="$!"
+              store_kill_pids "${lMOD_PID}"
+              WAIT_PIDS+=( "${lMOD_PID}" )
               max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
             else
-              "${MODULE_MAIN}"
+              "${lMODULE_MAIN}"
             fi
           fi
           reset_module_count
@@ -257,14 +265,14 @@ run_modules()
         [[ ${THREADING_SET} -eq 1 ]] && sort_modules
 
         for lMODULE_FILE in "${MODULES_ARR[@]}" ; do
-          # check if "${MODULE_NAME}" is in blacklist from config directory and skip it
-          MODULE_NAME=$(basename -s .sh "${lMODULE_FILE}")
-          if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
-            print_output "[*] $(print_date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
+          # check if "${lMODULE_NAME}" is in blacklist from config directory and skip it
+          lMODULE_NAME=$(basename -s .sh "${lMODULE_FILE}")
+          if [[ " ${MODULE_BLACKLIST[*]} " =~  ${lMODULE_NAME}  ]]; then
+            print_output "[*] $(print_date) - ${lMODULE_NAME} not executed - blacklist triggered " "main"
             continue
           fi
           local lMOD_FIN=0
-          if ( file "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
+          if ( file -b "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
             if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
               # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
               # export PRE_THREAD_ENA=1/0
@@ -275,28 +283,33 @@ run_modules()
               fi
             fi
 
-            MODULE_BN=$(basename "${lMODULE_FILE}")
-            MODULE_MAIN=${MODULE_BN%.*}
-            # module_start_log "${MODULE_MAIN}"
+            local lMODULE_BN=""
+            lMODULE_BN=$(basename "${lMODULE_FILE}")
+            local lMODULE_MAIN=${lMODULE_BN%.*}
+            # module_start_log "${lMODULE_MAIN}"
             if [[ "${RESTART}" -eq 1 ]]; then
-              if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
-                if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
-                  print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
+              if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
+                if [[ "${lMODULE_MAIN}" == "P99_"* ]] || [[ "${lMODULE_MAIN}" == "L1"* ]]; then
+                  print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished but essential - rerun it" "main"
                   lMOD_FIN=0
                 else
-                  print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
+                  print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished ... skipping" "main"
                   lMOD_FIN=1
                   if [[ ${HTML} -eq 1 ]] ; then
                     # we need to build the web reporter links for skipping modules
-                    mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MODULE_MAIN}*.txt" | sort)
-                    for LOG_FILE_ in "${LOG_FILES[@]}"; do
-                      if grep -q "nothing reported" "${LOG_FILE_}"; then
+                    local lLOG_FILES_ARR=()
+                    local lLOG_FILE_TMP=""
+                    mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMODULE_MAIN}*.txt" | sort)
+                    for lLOG_FILE_TMP in "${lLOG_FILES_ARR[@]}"; do
+                      if grep -q "nothing reported" "${lLOG_FILE_TMP}"; then
                         continue
                       fi
-                      MODULE_NAME_=$(basename -s .txt "${LOG_FILE_}")
-                      MODUL_NAME="$( strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "${LOG_FILE_}" | head -n 1 )" | cut -d" " -f2- )"
-                      HTML_FILE="${MODULE_NAME_}.html"
-                      add_link_to_index "${HTML_FILE}" "${MODUL_NAME}"
+                      local lMODULE_NAME_TMP=""
+                      lMODULE_NAME_TMP=$(basename -s .txt "${lLOG_FILE_TMP}")
+                      local lMODUL_NAME=""
+                      lMODUL_NAME="$(strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "${lLOG_FILE_TMP}" | head -n 1 )" | cut -d" " -f2-)"
+                      local lHTML_FILE="${lMODULE_NAME_TMP}.html"
+                      add_link_to_index "${lHTML_FILE}" "${lMODUL_NAME}"
                     done
                   fi
                 fi
@@ -304,13 +317,13 @@ run_modules()
             fi
             if [[ "${lMOD_FIN}" -eq 0 ]]; then
               if [[ ${THREADING_SET} -eq 1 ]]; then
-                "${MODULE_MAIN}" &
-                MOD_PID="$!"
-                store_kill_pids "${MOD_PID}"
-                WAIT_PIDS+=( "${MOD_PID}" )
+                "${lMODULE_MAIN}" &
+                local lMOD_PID="$!"
+                store_kill_pids "${lMOD_PID}"
+                WAIT_PIDS+=( "${lMOD_PID}" )
                 max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
               else
-                "${MODULE_MAIN}"
+                "${lMODULE_MAIN}"
               fi
             fi
             reset_module_count

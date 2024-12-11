@@ -48,14 +48,15 @@ S03_firmware_bin_base_analyzer() {
     export PRE_ARCH_A_ARR=()
     export PRE_ARCH_CPU_REC=""
     if [[ ${RTOS} -eq 1 ]] ; then
-      if [[ ${THREADED} -eq 1 ]]; then
-        binary_architecture_detection "${FIRMWARE_PATH_BAK}" &
-        local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S03_ARR+=( "${lTMP_PID}" )
-      else
-        binary_architecture_detection "${FIRMWARE_PATH_BAK}"
-      fi
+      print_output "[*] INFO: S03 Architecture detection mechanism is currently not available"
+      # if [[ ${THREADED} -eq 1 ]]; then
+      #  binary_architecture_detection "${FIRMWARE_PATH_BAK}" &
+      #  local lTMP_PID="$!"
+      #  store_kill_pids "${lTMP_PID}"
+      #  lWAIT_PIDS_S03_ARR+=( "${lTMP_PID}" )
+      # else
+      #  binary_architecture_detection "${FIRMWARE_PATH_BAK}"
+      # fi
     fi
   fi
 
@@ -93,7 +94,7 @@ os_identification() {
 
   strings "${FIRMWARE_PATH}" 2>/dev/null > "${LOG_PATH_MODULE}/strings_firmware.txt" || true &
   lWAIT_PIDS_S03_1_ARR+=( "${!}" )
-  find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'strings % | uniq >> '"${LOG_PATH_MODULE}/all_strings_firmware.txt"' 2> /dev/null' || true &
+  find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'strings "%" | uniq >> '"${LOG_PATH_MODULE}/all_strings_firmware.txt"' 2> /dev/null' || true &
   lWAIT_PIDS_S03_1_ARR+=( "${!}" )
   wait_for_pid "${lWAIT_PIDS_S03_1_ARR[@]}"
 
