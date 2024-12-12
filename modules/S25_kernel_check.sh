@@ -381,6 +381,7 @@ module_analyzer() {
     lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
     lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
     lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+    lPROP_ARRAY_INIT_ARR+=( "dependency:linux_kernel" )
 
     build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

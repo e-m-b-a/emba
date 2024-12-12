@@ -29,6 +29,16 @@ S116_qemu_version_detection() {
     # check emba.log for S115_usermode_emulator
     module_wait "S115_usermode_emulator"
 
+    # if module s09 is in our running modules array we wait until this module created the unhandled_files entries
+    # otherwise we can't delete the irrelevant entries
+    while ! [[ -f "${TMP_DIR}/S09_strings_generated.tmp" ]]; do
+      if ! [[ " ${MODULES_EXPORTED[*]} " == *S09* ]]; then
+        break
+      fi
+      print_output "[*] Waiting for S09 module - strings and unhandled file generaation ..." "no_log"
+      sleep 1
+    done
+
     local lLOG_PATH_S115="${LOG_DIR}"/s115_usermode_emulator.txt
     if [[ -f "${lLOG_PATH_S115}" && -d "${LOG_DIR}/s115_usermode_emulator" ]]; then
       local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg

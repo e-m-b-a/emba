@@ -159,6 +159,7 @@ set_defaults() {
   # we limit the maximal file log of our SBOM -> change this in the scanning profile
   export SBOM_MAX_FILE_LOG=200
   export SBOM_MINIMAL=0
+  export SBOM_UNTRACKED_FILES=1
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
@@ -182,7 +183,7 @@ set_defaults() {
 }
 
 set_log_paths() {
-  export SBOM_LOG_PATH="${LOG_DIR}/SBOM/"
+  export SBOM_LOG_PATH="${LOG_DIR}/SBOM"
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export P55_LOG="${LOG_DIR}/p55_unblob_extractor.txt"
@@ -206,7 +207,6 @@ set_log_paths() {
   export S16_LOG="${LOG_DIR}/s16_ghidra_decompile_checks.txt"
   export S17_LOG="${LOG_DIR}/s17_cwe_checker.txt"
   export S17_CSV_LOG="${CSV_DIR}/s17_apk_check.csv"
-  export S24_CSV_LOG="${CSV_DIR}/s24_kernel_bin_identifier.csv"
   export S25_CSV_LOG="${CSV_DIR}/s25_kernel_check.csv"
   export S20_LOG="${LOG_DIR}/s20_shell_check.txt"
   export S21_LOG="${LOG_DIR}/s21_python_check.txt"

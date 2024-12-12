@@ -81,6 +81,15 @@ F15_cyclonedx_sbom() {
     lTOOL_COMP_ARR+=( version="${lSBOM_TOOL_VERS}" )
     lTOOL_COMP_ARR+=( description="EMBA firmware analyzer - https://github.com/e-m-b-a/emba" )
 
+    # the following removes the duplicate untracked files that are handled from an other SBOM entry
+    if [[ -s "${SBOM_LOG_PATH}"/duplicates_to_delete.txt ]]; then
+      local lDUP_DEL=""
+      print_output "[*] Deleting duplicates" "no_log"
+      while read -r lDUP_DEL; do
+        rm -f "${lDUP_DEL}" || true
+      done < "${SBOM_LOG_PATH}"/duplicates_to_delete.txt
+    fi
+
     # Firmeware details for the SBOM
     local lFW_COMPONENT_DATA_ARR=()
     lFW_COMPONENT_DATA_ARR+=( name="${lFW_PATH}" )
@@ -96,13 +105,23 @@ F15_cyclonedx_sbom() {
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
-    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" | sort -u)
+    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" -not -name "unhandled_file_*" | sort -u)
+    if [[ "${SBOM_UNTRACKED_FILES}" -gt 0 ]]; then
+      mapfile -t lCOMP_FILES_ARR_UNHANDLED < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "unhandled_file_*.json" | sort -u)
+     lCOMP_FILES_ARR+=("${lCOMP_FILES_ARR_UNHANDLED[@]}")
+    fi
 
-    # as we could have so many components that everything goes b00m we need to build the
-    # components json now manually:
+    # as we can have so many components that everything goes b00m we need to build the
+    # components json manually:
     echo -n "[" > "${SBOM_LOG_PATH}/sbom_components_tmp.json"
     for lCOMP_FILE_ID in "${!lCOMP_FILES_ARR[@]}"; do
       lCOMP_FILE="${lCOMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
+
+      if [[ "${SBOM_UNTRACKED_FILES:-0}" -ne 1 ]] && [[ "${lCOMP_FILE}" == *"unhandled_file_"* ]]; then
+        # if we do not include unhandled_file entries we can skipe them here
+        continue
+      fi
+
       if [[ -s "${lCOMP_FILE}" ]]; then
         cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
       else
@@ -153,6 +172,7 @@ F15_cyclonedx_sbom() {
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
+      vulnerabilities="[]" \
       > "${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(

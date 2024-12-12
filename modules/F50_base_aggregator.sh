@@ -1087,11 +1087,12 @@ print_os() {
   lSYSTEM=$(echo "${lSYSTEM}" | tr -dc '[:print:]')
 
   if [[ ${VERIFIED} -eq 1 ]]; then
+    print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
     if [[ "${VERIFIED_S03}" -eq 1 ]]; then
-      print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
       write_link "s03"
+    elif [[ -f "${S24_LOG}" ]]; then
+      write_link "s24"
     else
-      print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
       write_link "s25"
     fi
     write_csv_log "os_verified" "${lSYSTEM}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
