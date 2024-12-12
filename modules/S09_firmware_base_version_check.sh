@@ -638,7 +638,6 @@ build_cpe_identifier() {
 
 generate_strings() {
   local lBIN="${1:-}"
-  local lPCK_MGR_UPDATES="${2:-}"
 
   local lBIN_FILE=""
   local lMD5_SUM=""
