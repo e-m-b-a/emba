@@ -90,7 +90,7 @@ S24_kernel_bin_identifier()
       lAPP_VERS=$(echo "${lSTRIPPED_VERS}" | cut -d ':' -f4-5)
       # it could be that we have a version like 2.14b:* -> we remove the last field
       lAPP_VERS="${lAPP_VERS/:\*}"
-      lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
+      lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "NA")
 
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file ${ORANGE}${lFILE}${NC} with ${ORANGE}vmlinux-to-elf:${NC}"
@@ -108,7 +108,7 @@ S24_kernel_bin_identifier()
             lK_ARCH=$(echo "${lK_ELF}" | cut -d ':' -f2)
             lK_ARCH=$(echo "${lK_ARCH}" | cut -d ',' -f2)
             lK_ARCH=${lK_ARCH#\ }
-            lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ELF:-NA}")
+            lPURL_IDENTIFIER=$(build_generic_purl "${lSTRIPPED_VERS}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()

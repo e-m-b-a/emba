@@ -72,6 +72,7 @@ S16_ghidra_decompile_checks()
       lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
     fi
 
+    print_output "[*] S16 - Testing ${lBIN_TO_CHECK}"
     # ensure we have not tested this binary entry
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"

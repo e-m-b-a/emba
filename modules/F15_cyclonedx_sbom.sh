@@ -104,7 +104,7 @@ F15_cyclonedx_sbom() {
     for lCOMP_FILE_ID in "${!lCOMP_FILES_ARR[@]}"; do
       lCOMP_FILE="${lCOMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
 
-      if [[ "${SBOM_UNTRACKED_FILES}" -ne 1 ]] && [[ "${lCOMP_FILE}" == *"unhandled_file_"* ]]; then
+      if [[ "${SBOM_UNTRACKED_FILES:-0}" -ne 1 ]] && [[ "${lCOMP_FILE}" == *"unhandled_file_"* ]]; then
         # if we do not include unhandled_file entries we can skipe them here
         continue
       fi
