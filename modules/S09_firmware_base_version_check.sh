@@ -92,7 +92,8 @@ S09_firmware_base_version_check() {
     print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
     local lPKG_FILE=""
     for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
-      (grep -E "${lPKG_FILE@Q};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+      lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
+      (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
     done
 
     print_output "[*] Waiting for grepping jobs" "no_log"
@@ -153,6 +154,7 @@ S09_firmware_base_version_check() {
   print_output "[*] Waiting for strings generator" "no_log"
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
   print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} binary files"
+  echo "S09_strings_generated" > "${TMP_DIR}/S09_strings_generated.tmp"
   print_ln
 
   lOS_IDENTIFIED=$(distri_check)

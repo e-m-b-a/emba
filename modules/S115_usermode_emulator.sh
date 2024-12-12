@@ -107,6 +107,12 @@ S115_usermode_emulator() {
         # we emulate every binary only once. So calculate the checksum and store it for checking
         local lBIN_MD5_=""
         lBIN_MD5_=$(md5sum "${R_PATH}"/"${lBINARY}" | cut -d\  -f1)
+        if [[ -d "${SBOM_LOG_PATH}" ]]; then
+          if grep -lr '"alg":"MD5","content":"'"${lBIN_MD5_}" "${SBOM_LOG_PATH}"/* | grep -qv "unhandled_file"; then
+            print_output "[*] Already found SBOM results for ${lBINARY} ... skip emulation tests" "no_log"
+            continue
+          fi
+        fi
         if [[ ! " ${lMD5_DONE_INT_ARR[*]} " =~ ${lBIN_MD5_} ]]; then
           lBIN_EMU_ARR+=( "${lBINARY}" )
           lMD5_DONE_INT_ARR+=( "${lBIN_MD5_}" )

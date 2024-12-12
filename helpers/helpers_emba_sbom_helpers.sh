@@ -169,7 +169,7 @@ build_sbom_json_hashes_arr() {
 
   if [[ "${lPACKAGING_SYSTEM}" != "unhandled_file" && -d "${SBOM_LOG_PATH}" ]]; then
     # Finally, we check if there is another "unhandled_file_*.json" with the same hash. If we find such a file we can remove it now
-    mapfile -t lDUP_CHECK_FILE_ARR < <(grep -lr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"/unhandled_file_*.json || true)
+    mapfile -t lDUP_CHECK_FILE_ARR < <(grep -lr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"/unhandled_file_*.json 2>/dev/null || true)
     for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
       print_output "[*] Duplicate unhandled_file sbom entry detected for ${lAPP_NAME} - ${lDUP_CHECK_FILE}" "no_log"
       if ! grep -q "${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates_to_delete.txt 2>/dev/null; then

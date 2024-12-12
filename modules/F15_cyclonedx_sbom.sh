@@ -105,7 +105,11 @@ F15_cyclonedx_sbom() {
     [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
 
     # build the component array for final sbom build:
-    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" | sort -u)
+    mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" -not -name "unhandled_file_*" | sort -u)
+    if [[ "${SBOM_UNTRACKED_FILES}" -gt 0 ]]; then
+      mapfile -t lCOMP_FILES_ARR_UNHANDLED < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "unhandled_file_*.json" | sort -u)
+     lCOMP_FILES_ARR+=("${lCOMP_FILES_ARR_UNHANDLED[@]}")
+    fi
 
     # as we can have so many components that everything goes b00m we need to build the
     # components json manually:
@@ -168,7 +172,7 @@ F15_cyclonedx_sbom() {
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
-      vulnerabilities="null" \
+      vulnerabilities="[]" \
       > "${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
