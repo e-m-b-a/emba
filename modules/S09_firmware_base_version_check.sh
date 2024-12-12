@@ -83,7 +83,7 @@ S09_firmware_base_version_check() {
   fi
 
   if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
-    sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+    # sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
     sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
     mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
   fi
@@ -92,7 +92,7 @@ S09_firmware_base_version_check() {
     print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
     local lPKG_FILE=""
     for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
-      (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+      (grep -E "${lPKG_FILE@Q};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
     done
 
     print_output "[*] Waiting for grepping jobs" "no_log"

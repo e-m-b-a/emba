@@ -81,6 +81,14 @@ F15_cyclonedx_sbom() {
     lTOOL_COMP_ARR+=( version="${lSBOM_TOOL_VERS}" )
     lTOOL_COMP_ARR+=( description="EMBA firmware analyzer - https://github.com/e-m-b-a/emba" )
 
+    # the following removes the duplicate untracked files that are handled from an other SBOM entry
+    if [[ -s "${SBOM_LOG_PATH}"/duplicates_to_delete.txt ]]; then
+      local lDUP_DEL=""
+      while read -r lDUP_DEL; do
+        rm -f "${lDUP_DEL}" || true
+      done
+    fi
+
     # Firmeware details for the SBOM
     local lFW_COMPONENT_DATA_ARR=()
     lFW_COMPONENT_DATA_ARR+=( name="${lFW_PATH}" )
