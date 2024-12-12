@@ -651,7 +651,7 @@ generate_strings() {
   lBIN_FILE=$(file -b "${lBIN}" || true)
 
   # Just in case we need to create SBOM entries for every file
-  if [[ "${SBOM_UNTRACKED_FILES:-0}" -eq 1 ]]; then
+  if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
     build_final_bins_threader "${lBIN}" "${lBIN_FILE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"

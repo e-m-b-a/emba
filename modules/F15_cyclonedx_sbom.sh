@@ -84,9 +84,10 @@ F15_cyclonedx_sbom() {
     # the following removes the duplicate untracked files that are handled from an other SBOM entry
     if [[ -s "${SBOM_LOG_PATH}"/duplicates_to_delete.txt ]]; then
       local lDUP_DEL=""
+      print_output "[*] Deleting duplicates" "no_log"
       while read -r lDUP_DEL; do
         rm -f "${lDUP_DEL}" || true
-      done
+      done < "${SBOM_LOG_PATH}"/duplicates_to_delete.txt
     fi
 
     # Firmeware details for the SBOM
@@ -167,6 +168,7 @@ F15_cyclonedx_sbom() {
           "${lFW_COMPONENT_DATA_ARR[@]}")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
+      vulnerabilities="null" \
       > "${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
 
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
