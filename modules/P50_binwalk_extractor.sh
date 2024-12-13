@@ -40,7 +40,7 @@ P50_binwalk_extractor() {
   local lFW_PATH_BINWALK="${FIRMWARE_PATH_BAK}"
 
   if [[ -d "${lFW_PATH_BINWALK}" ]]; then
-    print_output "[-] Binalk module only deals with firmware files - directories should be already handled via deep extractor"
+    print_output "[-] Binwalk module only deals with firmware files - directories should be already handled via deep extractor"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi

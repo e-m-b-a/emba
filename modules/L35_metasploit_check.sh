@@ -140,6 +140,10 @@ check_live_metasploit() {
       # Print the session output from the metasploit log:
       sed -n '/Active sessions/,/Stopping all jobs/p' "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt | tee -a "${LOG_FILE}" || true
       print_ln
+    if grep -q "session .* opened" "${LOG_PATH_MODULE}/metasploit-check-${IP_ADDRESS_}.txt"; then
+      print_ln
+      print_output "[+] Possible Metasploit sessions for verification - check the log" "" "${LOG_PATH_MODULE}/metasploit-check-${IP_ADDRESS_}.txt"
+      print_ln
     else
       print_output "[-] No Metasploit session detected"
     fi

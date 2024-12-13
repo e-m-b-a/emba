@@ -34,6 +34,7 @@ S22_php_check()
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
     mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+    write_csv_log "Script path" "PHP issue" "source (e.g. semgrep)" "common linux file"
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
     s22_vuln_check_semgrep "${lPHP_SCRIPTS_ARR[@]}"
@@ -127,6 +128,7 @@ s22_vuln_check_semgrep() {
 
       sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log || true
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
+      write_csv_log "${lSEMG_SOURCE_FILE}" "${lSEMG_ISSUE_NAME}" "semgrep" "unknown"
 
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         lGPT_ANCHOR_="$(openssl rand -hex 8)"
@@ -150,7 +152,6 @@ s22_vuln_check_semgrep() {
 
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities (progpilot)"
-  write_csv_log "Script path" "PHP issues detected" "common linux file"
   local lPHP_SCRIPTS_ARR=("$@")
   local lVULNS=0
   local lPHP_SCRIPT=""
@@ -225,7 +226,8 @@ s22_vuln_check() {
       lCFF="NA"
     fi
     print_output "[+] Found ""${ORANGE}""${lVULNS}"" vulnerabilities""${GREEN}"" in php file"": ""${ORANGE}""$(print_path "${lPHP_SCRIPT_}")""${GREEN}""${lCOMMON_FILES_FOUND}""${NC}" "" "${lPHP_LOG}"
-    write_csv_log "$(print_path "${lPHP_SCRIPT_}")" "${lVULNS}" "${lCFF}" "NA"
+    write_csv_log "${lPHP_SCRIPT_}" "TODO" "progpilot" "${lCFF}"
+
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
       lGPT_ANCHOR_="$(openssl rand -hex 8)"
       # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"

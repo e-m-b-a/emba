@@ -437,15 +437,17 @@ web_access_crawler() {
     if [[ -f "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" ]] && [[ -f "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log ]]; then
       while read -r lWEB_PATH; do
         lWEB_NAME="$(basename "${lWEB_PATH}")"
-        mapfile -t lCRAWLED_VULNS_ARR < <(grep "semgrep-rules.php.lang.security.*${lWEB_NAME}" "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log || true)
+        mapfile -t lCRAWLED_VULNS_ARR < <(grep "semgrep-rules.php.lang.security.*${lWEB_NAME}" "${S22_CSV_LOG}" || true)
         for lC_VULN in "${lCRAWLED_VULNS_ARR[@]}"; do
-          lVULN_NAME=$(echo "${lC_VULN}" | tr ' ' '\n' | grep "^name=" | cut -d '=' -f2 || true)
-          lVULN_FILE=$(echo "${lC_VULN}" | tr ' ' '\n' | grep "^file=" | cut -d '=' -f2 || true)
+          lVULN_NAME=$(echo "${lC_VULN}" | cut -d ';' -f2)
+          lVULN_FILE="${lC_VULN/;*}"
+          lVULN_FILE=$(basename "${lVULN_FILE}")
 
           if ! [[ -f "${L25_CSV_LOG}" ]]; then
             write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
           fi
-          print_output "[+] Found possible vulnerability ${ORANGE}${lVULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${lWEB_NAME}${NC}." "" "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log
+          print_output "[+] Found possible vulnerability ${ORANGE}${lVULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${lWEB_NAME}${NC}."
+          write_link "s22"
           write_csv_log "${lWEB_NAME}" "semgrep" "php" "${lVULN_NAME}" "${lVULN_FILE}"
         done
       done < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log"

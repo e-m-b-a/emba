@@ -36,9 +36,9 @@ S05_firmware_details()
   filesystem_tree
 
   write_log ""
-  write_log "[*] Statistics:${#FILE_ARR[@]}:${lDETECTED_DIR}"
+  write_log "[*] Statistics:${lFILE_CNT}:${lDETECTED_DIR}"
 
-  module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
+  module_end_log "${FUNCNAME[0]}" "${lFILE_CNT}"
 }
 
 filesystem_tree() {
