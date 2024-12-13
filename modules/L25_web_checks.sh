@@ -437,7 +437,7 @@ web_access_crawler() {
     if [[ -f "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" ]] && [[ -f "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log ]]; then
       while read -r lWEB_PATH; do
         lWEB_NAME="$(basename "${lWEB_PATH}")"
-        mapfile -t lCRAWLED_VULNS_ARR < <(grep "semgrep-rules.php.lang.security.*${lWEB_NAME}" "${S22_CSV_LOG}" || true)
+        mapfile -t lCRAWLED_VULNS_ARR < <(grep "${lWEB_NAME}.*semgrep-rules.php.lang.security" "${S22_CSV_LOG}" || true)
         for lC_VULN in "${lCRAWLED_VULNS_ARR[@]}"; do
           lVULN_NAME=$(echo "${lC_VULN}" | cut -d ';' -f2)
           lVULN_FILE="${lC_VULN/;*}"
