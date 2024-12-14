@@ -1277,7 +1277,6 @@ cve_extractor_thread_actor() {
         ((lKERNEL_VERIFIED_VULN+=1))
         lKERNEL_VERIFIED="yes"
       fi
-      print_output "[*] testing for ${lCVE_VALUE} / ${lBIN_BINARY} / ${lVERSION} / ${lKERNEL_VERIFIED} / ${lKERNEL_VERIFIED_VULN}"
     fi
   fi
 
