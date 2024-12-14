@@ -1082,7 +1082,7 @@ cve_extractor() {
   if [[ -f "${F20_CSV_LOG}" ]]; then
     # very weak search for the end of the entry - if yes we have a verified kernel vuln
     # Todo: Improve this search on field base
-    lKERNEL_VERIFIED_VULN=$(grep -c "^${lBINARY};.*;yes;$" "${F20_CSV_LOG}" || true)
+    lKERNEL_VERIFIED_VULN=$(grep -E -c "^${lBINARY};.*;yes;[0-9]+;[0-9]+;$" "${F20_CSV_LOG}" || true)
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
@@ -1249,7 +1249,6 @@ cve_extractor_thread_actor() {
 
   local lEDB=0
   # as we already know about a bunch of kernel exploits - lets search them first
-  print_output "[*] testing for ${lCVE_VALUE} / ${lVERSION}"
   if [[ "${lBIN_BINARY}" == *kernel* ]]; then
     for lKERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS_ARR[@]}"; do
       lKERNEL_CVE_EXPLOIT=$(echo "${lKERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
