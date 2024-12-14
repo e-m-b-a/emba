@@ -123,9 +123,15 @@ F15_cyclonedx_sbom() {
       fi
 
       if [[ -s "${lCOMP_FILE}" ]]; then
-        cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+        if (cat "${lCOMP_FILE}" | json_pp); then
+          cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+        else
+          print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
+          continue
+        fi
       else
         print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to decode"
+        continue
       fi
       if [[ $((lCOMP_FILE_ID+1)) -lt "${#lCOMP_FILES_ARR[@]}" ]]; then
         echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
@@ -178,7 +184,7 @@ F15_cyclonedx_sbom() {
     # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
     sed -i 's/%SPACE%/\ /g' "${lSBOM_LOG_FILE}.json"
 
-    if [[ -f "${lSBOM_LOG_FILE}.json" ]]; then
+    if [[ -s "${lSBOM_LOG_FILE}.json" ]]; then
       local lNEG_LOG=1
       print_output "[*] Converting SBOM to further SBOM formats ..." "no_log"
       cyclonedx convert --output-format xml --input-file "${lSBOM_LOG_FILE}.json" --output-file "${lSBOM_LOG_FILE}.xml" || print_error "[-] Error while generating xml SBOM for SBOM"

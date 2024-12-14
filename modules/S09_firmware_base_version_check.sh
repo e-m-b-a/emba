@@ -543,7 +543,12 @@ build_final_bins_threader() {
   fi
   local lPACKAGING_SYSTEM="unhandled_file"
   local lPROP_ARRAY_INIT_ARR=()
+  lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
+  lBIN_ARCH=${lBIN_ARCH#\ }
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
+  if [[ -n "${lBIN_ARCH}" ]]; then
+    lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+  fi
   lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
@@ -771,8 +776,8 @@ bin_string_checker() {
             lSHA256_CHECKSUM="$(sha256sum "${lBIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lBIN}" | awk '{print $1}')"
 
-            lBIN_FILE=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
-            lBIN_ARCH=${lBIN_FILE#\ }
+            lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
+            lBIN_ARCH=${lBIN_ARCH#\ }
 
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
             lPURL_IDENTIFIER=$(build_generic_purl "${CSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")

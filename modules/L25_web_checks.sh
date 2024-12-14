@@ -23,7 +23,7 @@ L25_web_checks() {
 
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
-    module_title "Web tests of emulated device."
+    module_title "Web server analysis of emulated device"
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -v IP_ADDRESS_ ]]; then

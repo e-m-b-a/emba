@@ -152,6 +152,13 @@ aggregate_versions() {
 
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
+    for lVERSION in "${VERSIONS_S08_PACKAGE_DETAILS_ARR[@]}"; do
+      if [ -z "${lVERSION}" ]; then
+        continue
+      fi
+      print_output "[+] Found Version details (${ORANGE}main SBOM environment${GREEN}): ""${ORANGE}${lVERSION}${NC}"
+    done
+
     for lVERSION in "${VERSIONS_SYS_EMULATOR_ARR[@]}"; do
       if [ -z "${lVERSION}" ]; then
         continue
