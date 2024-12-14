@@ -236,7 +236,8 @@ S09_firmware_base_version_check() {
           # MD5_SUM="$(md5sum "${lBIN}" | awk '{print $1}')"
           MD5_SUM=$(echo "${lBIN}" | cut -d ';' -f8)
           # MD5_SUM=$(echo "${lBIN}" | cut -d ';' -f8)
-          lAPP_NAME="$(basename "${lBIN/;*}")"
+          lBIN="${lBIN/;*}"
+          lAPP_NAME="$(basename "${lBIN}")"
           local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
           if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
             continue
@@ -250,6 +251,7 @@ S09_firmware_base_version_check() {
             write_csv_log "${lBIN}" "${lAPP_NAME}" "${lVERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
             check_for_s08_csv_log "${S08_CSV_LOG}"
 
+            lBIN="${lBIN/;*}"
             lSHA256_CHECKSUM="$(sha256sum "${lBIN}" | awk '{print $1}')"
             lSHA512_CHECKSUM="$(sha512sum "${lBIN}" | awk '{print $1}')"
             lCPE_IDENTIFIER=$(build_cpe_identifier "${CSV_RULE}")
@@ -355,7 +357,7 @@ S09_firmware_base_version_check() {
 
     else
 
-      # This is default mode!
+      # This is the fallback/default mode!
 
       if [[ -f "${lEXTRACTOR_LOG}" ]]; then
         # check unblob files sometimes we can find kernel version information or something else in it
@@ -467,6 +469,8 @@ S09_firmware_base_version_check() {
           write_csv_log "firmware" "${lAPP_NAME}" "${lVERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
         fi
       fi
+
+      # The following area is responsible to check all binaries against our version database:
 
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       if [[ "${THREADED}" -eq 1 ]]; then

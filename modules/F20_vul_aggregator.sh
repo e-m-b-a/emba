@@ -1132,6 +1132,7 @@ cve_extractor() {
 
   # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel or BusyBox we also add this detail
   local lCVEs="${lCVE_COUNTER_VERSION}"
+  print_output "[!] BINARY: ${lBINARY} / lKERNEL_VERIFIED_VULN: ${lKERNEL_VERIFIED_VULN}"
   if [[ "${lKERNEL_VERIFIED_VULN}" -gt 0 ]] && [[ "${lBINARY}" == *"kernel"* ]]; then
     lCVEs+=" (${lKERNEL_VERIFIED_VULN})"
   fi
@@ -1235,7 +1236,6 @@ cve_extractor_thread_actor() {
   if [[ -f "${KNOWN_EXP_CSV}" ]]; then
     # if grep -q \""${lCVE_VALUE}"\", "${KNOWN_EXP_CSV}"; then
     if grep -q "^${lCVE_VALUE}," "${KNOWN_EXP_CSV}"; then
-      print_output "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_VALUE}${GREEN} is a known exploited vulnerability."
       write_log "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_VALUE}${GREEN} is a known exploited vulnerability." "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log
 
       if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
@@ -1249,6 +1249,7 @@ cve_extractor_thread_actor() {
 
   local lEDB=0
   # as we already know about a bunch of kernel exploits - lets search them first
+  print_output "[*] testing for ${lCVE_VALUE} / ${lVERSION}"
   if [[ "${lBIN_BINARY}" == *kernel* ]]; then
     for lKERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS_ARR[@]}"; do
       lKERNEL_CVE_EXPLOIT=$(echo "${lKERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
@@ -1277,6 +1278,7 @@ cve_extractor_thread_actor() {
         ((lKERNEL_VERIFIED_VULN+=1))
         lKERNEL_VERIFIED="yes"
       fi
+      print_output "[*] testing for ${lCVE_VALUE} / ${lBIN_BINARY} / ${lVERSION} / ${lKERNEL_VERIFIED} / ${lKERNEL_VERIFIED_VULN}"
     fi
   fi
 

@@ -123,7 +123,7 @@ F15_cyclonedx_sbom() {
       fi
 
       if [[ -s "${lCOMP_FILE}" ]]; then
-        if (cat "${lCOMP_FILE}" | json_pp); then
+        if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
           cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
         else
           print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
