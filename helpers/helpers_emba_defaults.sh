@@ -211,6 +211,7 @@ set_log_paths() {
   export S20_LOG="${LOG_DIR}/s20_shell_check.txt"
   export S21_LOG="${LOG_DIR}/s21_python_check.txt"
   export S22_LOG="${LOG_DIR}/s22_php_check.txt"
+  export S22_CSV_LOG="${CSV_DIR}/s22_php_check.csv"
   export S23_LOG="${LOG_DIR}/s23_lua_check.txt"
   export S23_CSV_LOG="${CSV_DIR}/s23_lua_check.csv"
   export S24_LOG="${LOG_DIR}/s24_kernel_bin_identifier.txt"

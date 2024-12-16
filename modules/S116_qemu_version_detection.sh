@@ -193,7 +193,12 @@ version_detection_thread() {
     # ensure we have a unique array
     eval "lBINARY_PATHS_FINAL_ARR=($(for i in "${lBINARY_PATHS_FINAL_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
+    local lCNT=0
     for lBINARY_PATH in "${lBINARY_PATHS_FINAL_ARR[@]}"; do
+      lCNT=$((lCNT+1))
+      # I think it is enough to log the same version identifier for 10 times
+      [[ "${lCNT}" -gt 10 ]] && break
+
       print_output "[+] Version information found ${RED}""${lVERSION_DETECTED}""${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN} (license: ${ORANGE}${lAPP_LIC}${GREEN}) (${ORANGE}${lTYPE}${GREEN})." "" "${lLOG_PATH_}"
       write_csv_log "${lBINARY_PATH}" "${lBINARY}" "${lVERSION_DETECTED}" "${lCSV_RULE}" "${lAPP_LIC}" "${lTYPE}"
       lBIN_NAME=$(basename "${lBINARY_PATH}")

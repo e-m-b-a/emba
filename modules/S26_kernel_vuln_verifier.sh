@@ -272,8 +272,28 @@ S26_kernel_vuln_verifier()
     print_output "[*] Checking vulnerabilities for kernel version ${ORANGE}${lK_VERSION}${NC}" "" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
     print_ln
 
+    local lVULN=""
     for lVULN in "${lALL_KVULNS_ARR[@]}"; do
       NEG_LOG=1
+      vuln_checker_threader "${lVULN}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_S26_ARR_MAIN+=( "${lTMP_PID}" )
+      ((VULN_CNT+=1))
+      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S26_ARR_MAIN[@]}"
+    done
+
+    wait_for_pid "${lWAIT_PIDS_S26_ARR_MAIN[@]}"
+
+    final_log_kernel_vulns "${lK_VERSION}" "${lALL_KVULNS_ARR[@]}"
+  done
+
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+}
+
+
+vuln_checker_threader() {
+  local lVULN="${1:-}"
       local lK_PATHS_ARR=()
       local lK_PATHS_FILES_TMP_ARR=()
       local lSUMMARY=""
@@ -358,15 +378,7 @@ S26_kernel_vuln_verifier()
         write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
         ((CNT_PATHS_UNK+=1))
       fi
-      ((VULN_CNT+=1))
-    done
-
     wait_for_pid "${lWAIT_PIDS_S26_ARR[@]}"
-
-    final_log_kernel_vulns "${lK_VERSION}" "${lALL_KVULNS_ARR[@]}"
-  done
-
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
 split_symbols_file() {

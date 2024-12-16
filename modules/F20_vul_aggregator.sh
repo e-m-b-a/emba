@@ -152,6 +152,13 @@ aggregate_versions() {
 
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
+    for lVERSION in "${VERSIONS_S08_PACKAGE_DETAILS_ARR[@]}"; do
+      if [ -z "${lVERSION}" ]; then
+        continue
+      fi
+      print_output "[+] Found Version details (${ORANGE}main SBOM environment${GREEN}): ""${ORANGE}${lVERSION}${NC}"
+    done
+
     for lVERSION in "${VERSIONS_SYS_EMULATOR_ARR[@]}"; do
       if [ -z "${lVERSION}" ]; then
         continue
@@ -1075,7 +1082,7 @@ cve_extractor() {
   if [[ -f "${F20_CSV_LOG}" ]]; then
     # very weak search for the end of the entry - if yes we have a verified kernel vuln
     # Todo: Improve this search on field base
-    lKERNEL_VERIFIED_VULN=$(grep -c "^${lBINARY};.*;yes;$" "${F20_CSV_LOG}" || true)
+    lKERNEL_VERIFIED_VULN=$(grep -E -c "^${lBINARY};.*;yes;[0-9]+;[0-9]+;$" "${F20_CSV_LOG}" || true)
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
@@ -1125,6 +1132,7 @@ cve_extractor() {
 
   # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel or BusyBox we also add this detail
   local lCVEs="${lCVE_COUNTER_VERSION}"
+  print_output "[!] BINARY: ${lBINARY} / lKERNEL_VERIFIED_VULN: ${lKERNEL_VERIFIED_VULN}"
   if [[ "${lKERNEL_VERIFIED_VULN}" -gt 0 ]] && [[ "${lBINARY}" == *"kernel"* ]]; then
     lCVEs+=" (${lKERNEL_VERIFIED_VULN})"
   fi
@@ -1228,7 +1236,6 @@ cve_extractor_thread_actor() {
   if [[ -f "${KNOWN_EXP_CSV}" ]]; then
     # if grep -q \""${lCVE_VALUE}"\", "${KNOWN_EXP_CSV}"; then
     if grep -q "^${lCVE_VALUE}," "${KNOWN_EXP_CSV}"; then
-      print_output "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_VALUE}${GREEN} is a known exploited vulnerability."
       write_log "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_VALUE}${GREEN} is a known exploited vulnerability." "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log
 
       if [[ "${lEXPLOIT}" == "No exploit available" ]]; then

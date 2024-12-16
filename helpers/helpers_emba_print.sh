@@ -219,9 +219,9 @@ escape_echo() {
   # %q  ARGUMENT is printed in a format that can be reused as shell input, escaping non-printable characters with the proposed POSIX $'' syntax.
   if [[ -v 2 ]]; then
     local lLOG_TO_FILE="${2:-}"
-    printf -- "%q" "${lSTRING_TO_ECHO}" | tee -a "${lLOG_TO_FILE}" >/dev/null || true
+    printf "%q\n" "${lSTRING_TO_ECHO}" | tee -a "${lLOG_TO_FILE}" >/dev/null || true
   else
-    printf -- "%q" "${lSTRING_TO_ECHO}" || true
+    printf "%q\n" "${lSTRING_TO_ECHO}" || true
   fi
 }
 

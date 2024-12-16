@@ -67,7 +67,7 @@ cwe_check() {
   if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
     # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
   else
     mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f1 || true)
@@ -85,11 +85,13 @@ cwe_check() {
 
     # do not try to analyze kernel modules:
     [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
+    lBIN_TO_CHECK="${lBIN_TO_CHECK#\.}"
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
-      lBIN_TO_CHECK=$(grep "${lBIN_TO_CHECK}" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+      lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
     fi
-    # ensure we have not tested this binary entry
-    print_output "[*] S17 - Testing ${lBIN_TO_CHECK}"
+    if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
+      continue
+    fi
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
     if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
@@ -155,6 +157,7 @@ cwe_checker_threaded() {
     mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | cut -d\) -f1 | tr -d '(' | sort -u || true)
     # this is the logging after every tested file
     if [[ ${#lCWE_OUT[@]} -ne 0 ]] ; then
+      print_ln
       print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
       for lCWE_LINE in "${lCWE_OUT[@]}"; do
         lCWE="$(echo "${lCWE_LINE}" | awk '{print $1}')"
@@ -171,8 +174,6 @@ cwe_checker_threaded() {
       rm "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
     fi
   fi
-
-  print_ln
 
   if [[ -f "${LOG_FILE}" ]]; then
     cat "${LOG_FILE}" >> "${lOLD_LOG_FILE}"
