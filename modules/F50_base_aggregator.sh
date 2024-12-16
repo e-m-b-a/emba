@@ -1090,7 +1090,7 @@ print_os() {
     print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
     if [[ "${VERIFIED_S03}" -eq 1 ]]; then
       write_link "s03"
-    elif [[ -f "${S24_LOG}" ]]; then
+    elif [[ -s "${S24_LOG}" ]] && ! (grep -q "nothing reported" "${S24_LOG}"); then
       write_link "s24"
     else
       write_link "s25"
