@@ -230,6 +230,7 @@ set_log_paths() {
   export S95_LOG="${LOG_DIR}/s95_interesting_files_check.txt"
   export S107_LOG="${LOG_DIR}/s107_deep_password_search.txt"
   export S108_LOG="${LOG_DIR}/s108_stacs_password_search.txt"
+  export S108_CSV_LOG="${CSV_DIR}/s108_stacs_password_search.csv"
   export S109_LOG="${LOG_DIR}/s109_jtr_local_pw_cracking.txt"
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
