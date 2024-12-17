@@ -132,11 +132,15 @@ set_p02_default_exports() {
 
 generate_entropy_graph() {
   local lFIRMWARE_PATH_BIN="${1:-}"
+  local lENTROPY_PIC_PATH="${LOG_DIR}/firmware_entropy.png"
 
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
-  if [[ -f "${lFIRMWARE_PATH_BIN}" ]] && ! [[ -f "${LOG_DIR}"/firmware_entropy.png ]]; then
+  if [[ -f "${lFIRMWARE_PATH_BIN}" ]] && ! [[ -f "${lENTROPY_PIC_PATH}" ]]; then
     print_output "[*] Entropy testing with binwalk ... "
-    print_output "$("${BINWALK_BIN[@]}" -E -p "${LOG_DIR}"/firmware_entropy.png "${lFIRMWARE_PATH_BIN}")"
+    print_output "$("${BINWALK_BIN[@]}" -E -p "${lENTROPY_PIC_PATH}" "${lFIRMWARE_PATH_BIN}")"
+    if [[ -s "${lENTROPY_PIC_PATH}" ]]; then
+      write_link "${lENTROPY_PIC_PATH}"
+    fi
   fi
 }
 

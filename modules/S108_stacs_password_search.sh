@@ -31,6 +31,7 @@ S108_stacs_password_search()
   local lPW_HASH=""
   local lPW_HASH_REAL=""
   local lMESSAGE=""
+  local lHASHES_FOUND=0
 
   if command -v stacs > /dev/null ; then
     stacs --skip-unprocessable --rule-pack "${lSTACS_RULES_DIR}"/credential.json "${FIRMWARE_PATH}" 2> "${TMP_DIR}"/stacs.err 1> "${lSTACS_LOG_FILE}" || true
@@ -57,16 +58,19 @@ S108_stacs_password_search()
         lPW_HASH_REAL=$(jq ".runs[0] .results[${ELEMENT}] .locations[] .physicalLocation[].snippet.text" "${lSTACS_LOG_FILE}" \
           | grep -v null | head -2 | tail -1 | sed 's/\\n//g' | tr -d '[:blank:]' || true)
 
-        print_output "[+] PATH: ${ORANGE}/${lPW_PATH}${GREEN}\t-\tHash: ${ORANGE}${lPW_HASH}${GREEN}."
-        write_csv_log "${lMESSAGE}" "/${lPW_PATH}" "${lPW_HASH}" "${lPW_HASH_REAL}"
+        if [[ -s "${S108_CSV_LOG}" ]] && ! (grep -q "/${lPW_PATH};${lPW_HASH}" "${S108_CSV_LOG}"); then
+          print_output "[+] PATH: ${ORANGE}/${lPW_PATH}${GREEN}\t-\tHash: ${ORANGE}${lPW_HASH}${GREEN}."
+          write_csv_log "${lMESSAGE}" "/${lPW_PATH}" "${lPW_HASH}" "${lPW_HASH_REAL}"
+          lHASHES_FOUND=$((lHASHES_FOUND+1))
+        fi
       done
 
       print_ln
-      print_output "[*] Found ${ORANGE}${lELEMENTS_}${NC} password hashes."
+      print_output "[*] Found ${ORANGE}${lHASHES_FOUND}${NC} password hashes."
     fi
     write_log ""
-    write_log "[*] Statistics:${lELEMENTS_}"
+    write_log "[*] Statistics:${lHASHES_FOUND}"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${lELEMENTS_}"
+  module_end_log "${FUNCNAME[0]}" "${lHASHES_FOUND}"
 }

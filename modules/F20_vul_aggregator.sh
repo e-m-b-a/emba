@@ -1132,7 +1132,6 @@ cve_extractor() {
 
   # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel or BusyBox we also add this detail
   local lCVEs="${lCVE_COUNTER_VERSION}"
-  print_output "[!] BINARY: ${lBINARY} / lKERNEL_VERIFIED_VULN: ${lKERNEL_VERIFIED_VULN}"
   if [[ "${lKERNEL_VERIFIED_VULN}" -gt 0 ]] && [[ "${lBINARY}" == *"kernel"* ]]; then
     lCVEs+=" (${lKERNEL_VERIFIED_VULN})"
   fi
