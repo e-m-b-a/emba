@@ -180,6 +180,7 @@ S24_kernel_bin_identifier()
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
         disable_strict_mode "${STRICT_MODE}" 0
         extract_kconfig "${lFILE}"
+        lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
         enable_strict_mode "${STRICT_MODE}" 0
 
         lK_VER_TMP="${lK_VER/Linux version /}"
