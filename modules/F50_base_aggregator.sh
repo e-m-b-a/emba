@@ -92,7 +92,7 @@ output_overview() {
     fi
   fi
 
-  if [[ -n "${ARCH}" ]]; then
+  if [[ -n "${ARCH}" ]] && [[ "${ARCH}" != "NA" ]]; then
     if [[ -n "${D_END:-"NA"}" ]]; then
       write_csv_log "architecture_verified" "${ARCH}" "${D_END}" "NA" "NA" "NA" "NA" "NA" "NA"
       print_output "[+] Detected architecture and endianness (""${ORANGE}""verified${GREEN}):""${ORANGE}"" ""${ARCH}"" / ""${D_END}""${NC}"
@@ -804,8 +804,8 @@ get_data() {
     EFI_ARCH=$(strip_color_codes "${EFI_ARCH}")
   fi
   if [[ -f "${P99_LOG}" ]]; then
-    P99_ARCH="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 2 || true)"
-    P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3 || true)"
+    P99_ARCH="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 2 | grep -v "NA" || true)"
+    P99_ARCH_END="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f 3 | grep -v "NA" || true)"
   fi
   if [[ -f "${S24_CSV_LOG}" ]]; then
     K_ARCH="$(tail -n +2 "${S24_CSV_LOG}" | cut -d\; -f 8 | sort -u | grep "\S" | head -1 || true)"
