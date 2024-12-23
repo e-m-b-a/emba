@@ -142,6 +142,8 @@ ghidra_analyzer() {
   local lS16_SEMGREP_ISSUES=0
   local lHARUSPEX_FILE_ARR=()
   local lWAIT_PIDS_S16_1=()
+  # just in case Ghidra hangs on a binary
+  local lGHIDRA_TIMEOUT=7200
 
   if ! [[ -f "${lBINARY}" ]]; then
     return
@@ -157,7 +159,7 @@ ghidra_analyzer() {
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local lIDENTIFIER="${RANDOM}"
 
-  "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
+  timeout --preserve-status --signal SIGINT "${lGHIDRA_TIMEOUT}" "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}"/"ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then
