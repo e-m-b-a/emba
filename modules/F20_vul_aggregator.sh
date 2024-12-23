@@ -1010,6 +1010,16 @@ cve_extractor() {
     fi
   fi
 
+  if [[ -f "${S25_CSV_LOG}" ]]; then
+    if grep -q "${lBINARY};.*${lVERSION}" "${S25_CSV_LOG}" 2>/dev/null; then
+      if [[ "${lVSOURCE}" == "unknown" ]]; then
+        lVSOURCE="KMOD"
+      else
+        lVSOURCE+="/KMOD"
+      fi
+    fi
+  fi
+
   if [[ -f "${S36_CSV_LOG}" ]]; then
     if grep -q "${lBINARY};.*${lVERSION}" "${S36_CSV_LOG}" 2>/dev/null; then
       if [[ "${lVSOURCE}" == "unknown" ]]; then
