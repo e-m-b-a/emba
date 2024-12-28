@@ -206,12 +206,15 @@ binary_architecture_threader() {
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
 
-
   write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT}" "${lMD5SUM}" &
-
 }
 
 architecture_check() {
+  if [[ ! -f "${P99_CSV_LOG}" ]] || [[ ${#ALL_FILES_ARR[@]} -eq 0 ]] ; then
+    print_output "[-] WARNING: Architecture auto detection and backend data population not possible\\n"
+    return
+  fi
+
   if [[ ${ARCH_CHECK} -eq 1 ]] ; then
     print_output "[*] Architecture auto detection and backend data population for ${ORANGE}${#ALL_FILES_ARR[@]}${NC} files (could take some time)\\n"
     local lARCH_MIPS_CNT=0
