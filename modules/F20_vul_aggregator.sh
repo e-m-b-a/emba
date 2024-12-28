@@ -1519,7 +1519,7 @@ cve_extractor_thread_actor() {
 
   # we do not deal with output formatting the usual way -> we use printf
   if [[ ! -f "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" ]]; then
-    printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:  %-10.10s : %-4.4s :   %-15.15s:   %s${NC}\n" "BIN NAME" "BIN VERS" "CVE ID" "CVSS VALUE" "EPSS" "SOURCE" "lEXPLOIT" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:  %-10.10s : %-4.4s :   %-15.15s:   %s${NC}\n" "BIN NAME" "BIN VERS" "CVE ID" "CVSS VALUE" "EPSS" "SOURCE" "EXPLOIT" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
   fi
   if (( $(echo "${lCVSS_VALUE} > 6.9" | bc -l) )); then
     # put a note in the output if we have switched to CVSSv2
