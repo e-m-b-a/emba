@@ -31,9 +31,10 @@ S09_firmware_base_version_check() {
   module_title "Static binary firmware versions detection"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  if [[ ! -f "${P99_CSV_LOG}" ]]; then
+  if ! [[ -f "${P99_CSV_LOG}" ]]; then
     print_error "[-] Missing P99 CSV log file"
     module_end_log "${FUNCNAME[0]}" 0
+    return
   fi
 
   local lEXTRACTOR_LOG="${LOG_DIR}"/p55_unblob_extractor/unblob_firmware.log
@@ -51,7 +52,7 @@ S09_firmware_base_version_check() {
   local lFILE_ARR_TMP=()
   # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
   export FILE_ARR=()
-  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u)
+  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -284,7 +285,7 @@ S09_firmware_base_version_check() {
             if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
               # now we can create the dependencies based on ldd
               mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR}"; do
+              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
                 lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
               done
             fi
@@ -576,7 +577,7 @@ build_final_bins_threader() {
   if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
     # now we can create the dependencies based on ldd
     mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-    for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR}"; do
+    for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
       lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
     done
   fi
@@ -831,7 +832,7 @@ bin_string_checker() {
             if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
               # now we can create the dependencies based on ldd
               mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR}"; do
+              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
                 lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
               done
             fi
@@ -901,7 +902,7 @@ bin_string_checker() {
             if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
               # now we can create the dependencies based on ldd
               mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR}"; do
+              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
                 lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
               done
             fi
@@ -967,7 +968,7 @@ bin_string_checker() {
           if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
             # now we can create the dependencies based on ldd
             mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-            for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR}"; do
+            for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
               lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
             done
           fi
