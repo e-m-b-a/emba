@@ -24,12 +24,16 @@ S05_firmware_details()
 
   pre_module_reporter "${FUNCNAME[0]}"
 
+  if [[ ! -f "${P99_CSV_LOG}" ]]; then
+    print_error "[-] Missing P99 CSV log file"
+  fi
+
   local lDETECTED_DIR=""
 
   lDETECTED_DIR=$(find "${LOG_DIR}/firmware" -xdev -type d 2>/dev/null | wc -l)
 
   local lFILE_CNT=0
-  lFILE_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
+  lFILE_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}' || true)"
   print_output "[*] ${ORANGE}${lFILE_CNT}${NC} files and ${ORANGE}${lDETECTED_DIR}${NC} directories detected."
 
   release_info

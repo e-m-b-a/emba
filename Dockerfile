@@ -2,7 +2,7 @@ FROM kalilinux/kali-rolling
 # FROM kalilinux/kali-last-release
 
 COPY ./installer.sh /
-COPY ["./installer", "./helpers/helpers_emba_load_strict_settings.sh", "/installer"]
+COPY ["./installer", "./helpers/helpers_emba_load_strict_settings.sh", "/installer/"]
 
 
 WORKDIR /

@@ -31,6 +31,12 @@ S09_firmware_base_version_check() {
   module_title "Static binary firmware versions detection"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  if ! [[ -f "${P99_CSV_LOG}" ]]; then
+    print_error "[-] Missing P99 CSV log file"
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   local lEXTRACTOR_LOG="${LOG_DIR}"/p55_unblob_extractor/unblob_firmware.log
 
   print_output "[*] Static version detection running ..." "no_log" | tr -d "\n"
@@ -46,7 +52,7 @@ S09_firmware_base_version_check() {
   local lFILE_ARR_TMP=()
   # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
   export FILE_ARR=()
-  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u)
+  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -176,6 +182,9 @@ S09_firmware_base_version_check() {
     local lPACKAGING_SYSTEM="static_bin_analysis"
     local lVERSION_FINDER=""
 
+    local lBIN_DEPS_ARR=()
+    local lBIN_DEPENDENCY=""
+
     lSTRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
     LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
     lAPP_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
@@ -271,6 +280,15 @@ S09_firmware_base_version_check() {
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
             lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+
+            # build the dependencies based on linker details
+            if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
+              # now we can create the dependencies based on ldd
+              mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
+                lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+              done
+            fi
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -555,6 +573,15 @@ build_final_bins_threader() {
   fi
   lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
 
+  # build the dependencies based on linker details
+  if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
+    # now we can create the dependencies based on ldd
+    mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+    for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
+      lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+    done
+  fi
+
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
@@ -701,6 +728,8 @@ bin_string_checker() {
   local lMD5_SUM_MATCHES_ARR=()
   local lMD5_SUM_MATCHED=""
   local lMACHTED_FNAME=""
+  local lBIN_DEPS_ARR=()
+  local lBIN_DEPENDENCY=""
 
   # print_output "[*] Testing ${#FILE_ARR[@]} binaries against identifier ${VERSION_IDENTIFIER} -> ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
 
@@ -799,6 +828,15 @@ bin_string_checker() {
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
             lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
+            # build the dependencies based on linker details
+            if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
+              # now we can create the dependencies based on ldd
+              mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
+                lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+              done
+            fi
+
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
@@ -860,6 +898,15 @@ bin_string_checker() {
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
             lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
 
+            # build the dependencies based on linker details
+            if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
+              # now we can create the dependencies based on ldd
+              mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
+                lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+              done
+            fi
+
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
             # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
@@ -916,6 +963,15 @@ bin_string_checker() {
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
           lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+
+          # build the dependencies based on linker details
+          if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
+            # now we can create the dependencies based on ldd
+            mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+            for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
+              lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+            done
+          fi
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

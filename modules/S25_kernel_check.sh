@@ -28,6 +28,7 @@ S25_kernel_check()
   export KERNEL_VERSION=()
   export KERNEL_DESC=()
   export KERNEL_MODULES=()
+  export VERIFIED_KERNEL_MODULES=0
   local lFOUND=0
   export KMOD_BAD=0
 
@@ -82,7 +83,7 @@ S25_kernel_check()
       write_log "[*] Statistics:${lK_VERS}"
     done
   fi
-  write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:${KMOD_BAD}"
+  write_log "[*] Statistics1:${VERIFIED_KERNEL_MODULES}:${KMOD_BAD}"
 
   module_end_log "${FUNCNAME[0]}" "${lFOUND}"
 }
@@ -276,6 +277,7 @@ analyze_kernel_module() {
     if [[ "${lFILE_KMOD}" != *"ELF"* ]]; then
       continue
     fi
+    VERIFIED_KERNEL_MODULES=$((VERIFIED_KERNEL_MODULES+1))
     # modinfos can run in parallel:
     if [[ "${THREADED}" -eq 1 ]]; then
       module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
@@ -289,6 +291,9 @@ analyze_kernel_module() {
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S25_ARR[@]}"
 
+  if [[ "${VERIFIED_KERNEL_MODULES}" -eq 0 ]]; then
+    print_output "[-] No verified kernel module identified."
+  fi
   # in threading we need to go via a temp file with the need to count it now:
   if [[ -f "${TMP_DIR}"/KMOD_BAD.tmp ]]; then
     KMOD_BAD=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/KMOD_BAD.tmp)
