@@ -210,7 +210,7 @@ binary_architecture_threader() {
 }
 
 architecture_check() {
-  if [[ ! -f "${P99_CSV_LOG}" ]] || [[ ${#ALL_FILES_ARR[@]} -eq 0 ]] ; then
+  if [[ ${#ALL_FILES_ARR[@]} -eq 0 ]] ; then
     print_output "[-] WARNING: Architecture auto detection and backend data population not possible\\n"
     return
   fi

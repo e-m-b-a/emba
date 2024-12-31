@@ -35,7 +35,10 @@ S116_qemu_version_detection() {
       if ! [[ " ${MODULES_EXPORTED[*]} " == *S09* ]]; then
         break
       fi
-      print_output "[*] Waiting for S09 module - strings and unhandled file generaation ..." "no_log"
+      if grep -q "S09_*finished" "${LOG_DIR}/emba.log"; then
+        break
+      fi
+      print_output "[*] Waiting for S09 module - strings and unhandled file generation ..." "no_log"
       sleep 1
     done
 
