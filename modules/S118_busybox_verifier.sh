@@ -41,6 +41,7 @@ S118_busybox_verifier()
   local lPACKAGING_SYSTEM="static_busybox_analysis"
   local lCPE_IDENTIFIER=""
   local lPURL_IDENTIFIER=""
+  local lBB_RESULT_FILE=""
 
   module_wait "S116_qemu_version_detection"
   module_wait "S09_firmware_base_version_check"
@@ -181,6 +182,14 @@ S118_busybox_verifier()
     wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
   done
 
+  for lBB_RESULT_FILE in "${LOG_PATH_MODULE}"/tmp/*; do
+    tee -a "${LOG_FILE}" < "${lBB_RESULT_FILE}"
+  done
+
+  if [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
+    rm -r "${LOG_PATH_MODULE}/tmp" || true
+  fi
+
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
@@ -191,6 +200,12 @@ busybox_vuln_testing_threader() {
   local lBB_VERSION="${4:-}"
 
   CVE=$(echo "${VULN}" | cut -d: -f1)
+  local LOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${CVE}"
+
+  if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
+    mkdir "${LOG_PATH_MODULE}/tmp" || true
+  fi
+
   lSUMMARY="$(echo "${VULN}" | cut -d: -f6-)"
   print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${lALL_BB_VULNS_ARR_SIZE}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
 
@@ -200,10 +215,10 @@ busybox_vuln_testing_threader() {
       continue
     fi
     if [[ "${lSUMMARY}" == *" ${lBB_APPLET}\ "* ]]; then
-      print_output "[+] Verified BusyBox vulnerability ${ORANGE}${CVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}"
-      echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${LOG_FILE}"
+      write_log "[+] Verified BusyBox vulnerability ${ORANGE}${CVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}" "${LOG_FILE_BB_MODULE}"
+      echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${LOG_FILE_BB_MODULE}"
       write_csv_log "${lBB_VERSION}" "${lBB_APPLET}" "${CVE}" "${lALL_BB_VULNS_ARR_SIZE}" "${lSUMMARY}"
-      print_bar
+      write_log "\\n-----------------------------------------------------------------\\n" "${LOG_FILE_BB_MODULE}"
     fi
   done
 }
