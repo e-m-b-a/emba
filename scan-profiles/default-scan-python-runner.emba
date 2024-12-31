@@ -1,0 +1,61 @@
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2024 Thomas Gingele <b1tc0r3@proton.me>
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+#
+# Author(s): Thomas Gingele
+#
+# Description: Perform a default EMBA scan and run additional, user-supplied python scripts as
+#              modules.
+
+export SELECT_MODULES+=( "S28" )
+export PYTHON_SCRIPTS=( "example_script" )
+
+export FORMAT_LOG=1
+export THREADED=1
+export SHORT_PATH=1
+export HTML=1
+
+# disable yara tests (s110)
+export YARA=0
+
+# extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
+# it in the default profile.
+export BINARY_EXTENDED=1
+
+# the following modules are long running modules which are disabled in the default profile
+export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
+
+# enable silent mode and status bar
+export DISABLE_STATUS_BAR=0
+export SILENT=1
+
+# enable GPT connection:
+export GPT_OPTION=0
+
+# we output the profile only at the beginning - outside the docker environment
+if [[ $IN_DOCKER -ne 1 ]] ; then
+  print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
+  print_output "$(indent "$(orange "Activate multi threading")")" "no_log"
+  print_output "$(indent "$(orange "Prints only relative paths")")" "no_log"
+  print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
+  if [[ "$USE_DOCKER" -ne 1 ]]; then
+    print_output "$(indent "$(orange "Enables automated qemu emulation tests (WARNING this module could harm your host!)")")" "no_log"
+  else
+    print_output "$(indent "$(orange "Enables automated qemu emulation tests")")" "no_log"
+  fi
+  print_output "$(indent "$(orange "Runs EMBA in docker container")")" "no_log"
+  print_output "$(indent "$(orange "Disable EMBA module via profile")")" "no_log"
+  for MODULE_ in "${MODULE_BLACKLIST[@]}"; do
+    print_output "$(indent "$(orange "Blacklisted module: $MODULE_")")" "no_log"
+  done
+  for MODULE_ in "${SELECT_MODULES[@]}"; do
+    print_output "$(indent "$(green "Enabled module: $MODULE_")")" "no_log"
+  done
+  export USE_DOCKER=1
+fi
