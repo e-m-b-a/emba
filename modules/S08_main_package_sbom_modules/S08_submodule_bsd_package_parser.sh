@@ -35,6 +35,9 @@ S08_submodule_bsd_package_parser() {
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
+  local lAPP_DEPS_ARR=()
+  local lPKG_DEP_ID=""
+  local lAPP_DEP=""
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
   local lMD5_CHECKSUM="NA"
@@ -93,12 +96,31 @@ S08_submodule_bsd_package_parser() {
       lAPP_NAME=$(jq -r '.name' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
+      lAPP_ARCH=$(jq -cr '.arch' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+      lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+
+      lAPP_MAINT=$(jq -cr '.maintainer' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+      lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+
+      lAPP_DESC=$(jq -cr '.comment' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+      lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
+
       lAPP_LIC=$(jq -cr '.licenses' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
       lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
       lAPP_VERS=$(jq -r '.version' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+
+      mapfile -t lAPP_DEPS_ARR < <(jq -r '.deps[].origin' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
+
+      # └─$ jq -r '.deps'  /home/m1k3/Downloads/pkg_tmp/+COMPACT_MANIFEST
+      # {
+      #   "icu": {
+      #     "origin": "devel/icu",
+      #     "version": "74.2_1,1"
+      #   }
+      # }
 
       lMD5_CHECKSUM="$(md5sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lPKG_ARCHIVE}" | awk '{print $1}')"
@@ -136,6 +158,13 @@ S08_submodule_bsd_package_parser() {
           fi
         done
       fi
+
+      # Add dependencies to properties
+      for lPKG_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
+        lAPP_DEP="${lAPP_DEPS_ARR["${lPKG_DEP_ID}"]}"
+        lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+      done
+
       [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR}"/pkg_tmp
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
