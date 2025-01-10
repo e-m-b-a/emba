@@ -59,7 +59,14 @@ P65_package_extractor() {
       apk_extractor
     else
       print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(print_date) - Ending extraction processes - apk extraction performed" "main"
+      print_output "[!] $(print_date) - Ending extraction processes - no apk extraction performed" "main"
+      lDISK_SPACE_CRIT=1
+    fi
+    if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
+      rpm_extractor
+    else
+      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+      print_output "[!] $(print_date) - Ending extraction processes - no rpm extraction performed" "main"
       lDISK_SPACE_CRIT=1
     fi
 
@@ -93,39 +100,61 @@ P65_package_extractor() {
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
-apk_extractor() {
-  sub_module_title "APK archive extraction mode"
+rpm_extractor() {
+  sub_module_title "RPM archive extraction mode"
 
-  local lAPK_ARCHIVES=0
+  local lRPM_ARCHIVES_ARR=()
+  local lRPM_NAME=""
+  local lFILES_AFTER_RPM=0
+  local lR_PATH=""
+  local lRPM=""
+
+  print_output "[*] Identify RPM archives and extracting it to the root directories ..."
+  mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.rpm" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+
+  if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Identified ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives - extracting archives to the root directories ..."
+    for lR_PATH in "${ROOT_PATH[@]}"; do
+      for lRPM in "${lRPM_ARCHIVES_ARR[@]}"; do
+        lRPM_NAME=$(basename "${lRPM}")
+        print_output "[*] Extracting ${ORANGE}${lRPM_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
+        rpm2cpio "${lRPM}" | cpio -D "${lR_PATH}" -idm || true
+      done
+    done
+
+    lFILES_AFTER_RPM=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    print_ln "no_log"
+    print_output "[*] Before deep extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after RPM extraction we have ${ORANGE}${lFILES_AFTER_RPM}${NC} files extracted."
+  else
+    print_output "[-] No rpm packages extracted."
+  fi
+}
+
+apk_extractor() {
+  sub_module_title "Android APK archive extraction mode"
+
+  local lAPK_ARCHIVES_ARR=()
   local lAPK_NAME=""
   local lFILES_AFTER_APK=0
   local lR_PATH=""
   local lAPK=""
 
   print_output "[*] Identify apk archives and extracting it to the root directories ..."
-  extract_apk_helper &
-  WAIT_PIDS_ARR+=( "$!" )
-  wait_for_extractor
-  export WAIT_PIDS_ARR=( )
+  mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
-  if [[ -f "${TMP_DIR}"/apk_db.txt ]] ; then
-    lAPK_ARCHIVES=$(wc -l "${TMP_DIR}"/apk_db.txt | awk '{print $1}')
-    if [[ "${lAPK_ARCHIVES}" -gt 0 ]]; then
-      print_output "[*] Found ${ORANGE}${lAPK_ARCHIVES}${NC} APK archives - extracting them to the root directories ..."
-      for lR_PATH in "${ROOT_PATH[@]}"; do
-        while read -r lAPK; do
-          lAPK_NAME=$(basename "${lAPK}")
-          print_output "[*] Extracting ${ORANGE}${lAPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
-          # tar xpf "${lAPK}" --directory "${lR_PATH}" || true
-          unzip -o -d "${lR_PATH}" "${lAPK}" || true
-        done < "${TMP_DIR}"/apk_db.txt
+  if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} APK archives - extracting them to the root directories ..."
+    for lR_PATH in "${ROOT_PATH[@]}"; do
+      for lAPK in "${lAPK_ARCHIVES_ARR[@]}"; do
+        lAPK_NAME=$(basename "${lAPK}")
+        print_output "[*] Extracting ${ORANGE}${lAPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
+        unzip -o -d "${lR_PATH}" "${lAPK}" || true
       done
+    done
 
-      lFILES_AFTER_APK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
-      print_ln "no_log"
-      print_output "[*] Before apk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_APK}${NC} files extracted."
-    fi
-    check_disk_space
+    lFILES_AFTER_APK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    print_ln "no_log"
+    print_output "[*] Before apk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_APK}${NC} files extracted."
   else
     print_output "[-] No apk packages extracted."
   fi
@@ -133,48 +162,42 @@ apk_extractor() {
 
 ipk_extractor() {
   sub_module_title "IPK archive extraction mode"
-  local lIPK_ARCHIVES=0
+  local lIPK_ARCHIVES_ARR=()
   local lIPK_NAME=""
   local lFILES_AFTER_IPK=0
   local lR_PATH=""
+  local lIPK=""
 
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  extract_ipk_helper &
-  WAIT_PIDS_ARR+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS_ARR=( )
+  mapfile -t lIPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
-  if [[ -f "${TMP_DIR}"/ipk_db.txt ]] ; then
-    lIPK_ARCHIVES=$(wc -l "${TMP_DIR}"/ipk_db.txt | awk '{print $1}')
-    if [[ "${lIPK_ARCHIVES}" -gt 0 ]]; then
-      print_output "[*] Found ${ORANGE}${lIPK_ARCHIVES}${NC} IPK archives - extracting them to the root directories ..."
-      mkdir "${LOG_DIR}"/ipk_tmp
-      for lR_PATH in "${ROOT_PATH[@]}"; do
-        while read -r IPK; do
-          lIPK_NAME=$(basename "${IPK}")
-          if [[ $(file -b "${IPK}") == *"gzip"* ]]; then
-            print_output "[*] Extracting ${ORANGE}${lIPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
-            tar zxpf "${IPK}" --directory "${LOG_DIR}"/ipk_tmp || true
-          else
-            print_output "[-] Is ${ORANGE}${lIPK_NAME}${NC} a valid ipk (tgz) archive?"
-          fi
-          if [[ -f "${LOG_DIR}"/ipk_tmp/data.tar.gz ]]; then
-            tar xzf "${LOG_DIR}"/ipk_tmp/data.tar.gz --directory "${lR_PATH}" || true
-          fi
-          if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
-            rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
-          fi
-        done < "${TMP_DIR}"/ipk_db.txt
+  if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Found ${ORANGE}${#lIPK_ARCHIVES_ARR[@]}${NC} IPK archives - extracting them to the root directories ..."
+    mkdir "${LOG_DIR}"/ipk_tmp
+    for lR_PATH in "${ROOT_PATH[@]}"; do
+      for lIPK in "${lIPK_ARCHIVES_ARR[@]}"; do
+        lIPK_NAME=$(basename "${lIPK}")
+        if [[ $(file -b "${lIPK}") == *"gzip"* ]]; then
+          print_output "[*] Extracting ${ORANGE}${lIPK_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
+          tar zxpf "${lIPK}" --directory "${LOG_DIR}"/ipk_tmp || true
+        else
+          print_output "[-] Is ${ORANGE}${lIPK_NAME}${NC} a valid ipk (tgz) archive?"
+        fi
+        if [[ -f "${LOG_DIR}"/ipk_tmp/data.tar.gz ]]; then
+          tar xzf "${LOG_DIR}"/ipk_tmp/data.tar.gz --directory "${lR_PATH}" || true
+        fi
+        if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
+          rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
+        fi
       done
+    done
 
-      lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
-      print_ln "no_log"
-      print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_IPK}${NC} files extracted."
-      if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
-        rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
-      fi
+    lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    print_ln "no_log"
+    print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_IPK}${NC} files extracted."
+    if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
+      rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
     fi
-    check_disk_space
   else
     print_output "[-] No ipk packages extracted."
   fi
@@ -183,54 +206,35 @@ ipk_extractor() {
 deb_extractor() {
   sub_module_title "Debian archive extraction mode"
 
-  local lDEB_ARCHIVES=0
+  local lDEB_ARCHIVES_ARR=()
   local lFILES_AFTER_DEB=0
   local lR_PATH=""
   local lDEB=""
 
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  extract_deb_helper &
-  WAIT_PIDS_ARR+=( "$!" )
-  wait_for_extractor
-  export WAIT_PIDS_ARR=( )
+  mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
-  if [[ -f "${TMP_DIR}"/deb_db.txt ]] ; then
-    lDEB_ARCHIVES=$(wc -l "${TMP_DIR}"/deb_db.txt | awk '{print $1}')
-    if [[ "${lDEB_ARCHIVES}" -gt 0 ]]; then
-      print_output "[*] Found ${ORANGE}${lDEB_ARCHIVES}${NC} debian archives - extracting them to the root directories ..."
-      for lR_PATH in "${ROOT_PATH[@]}"; do
-        while read -r lDEB; do
-          if [[ "${THREADED}" -eq 1 ]]; then
-            extract_deb_extractor_helper "${lDEB}" "${lR_PATH}" &
-            WAIT_PIDS_P20+=( "$!" )
-          else
-            extract_deb_extractor_helper "${lDEB}" "${lR_PATH}"
-          fi
-        done < "${TMP_DIR}"/deb_db.txt
+  if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} debian archives - extracting them to the root directories ..."
+    for lR_PATH in "${ROOT_PATH[@]}"; do
+      for lDEB in "${lDEB_ARCHIVES_ARR[@]}"; do
+        if [[ "${THREADED}" -eq 1 ]]; then
+          extract_deb_extractor_helper "${lDEB}" "${lR_PATH}" &
+          WAIT_PIDS_P20+=( "$!" )
+        else
+          extract_deb_extractor_helper "${lDEB}" "${lR_PATH}"
+        fi
       done
+    done
 
-      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
 
-      lFILES_AFTER_DEB=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
-      print_ln "no_log"
-      print_output "[*] Before deb extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_DEB}${NC} files extracted."
-    fi
-    check_disk_space
+    lFILES_AFTER_DEB=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    print_ln "no_log"
+    print_output "[*] Before deb extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_DEB}${NC} files extracted."
   else
     print_output "[-] No deb packages extracted."
   fi
-}
-
-extract_ipk_helper() {
-  find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "${TMP_DIR}"/ipk_db.txt
-}
-
-extract_apk_helper() {
-  find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "${TMP_DIR}"/apk_db.txt
-}
-
-extract_deb_helper() {
-  find "${FIRMWARE_PATH_CP}" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "${TMP_DIR}"/deb_db.txt
 }
 
 extract_deb_extractor_helper() {
