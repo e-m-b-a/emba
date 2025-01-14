@@ -131,9 +131,8 @@ node_js_package_lock_threader() {
   local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
   if [[ "${lAPP_DEPS}" != "null" ]]; then
-    # extract the dependency names from '{"ansi-styles":"^4.0.0","string-width":"^4.1.0","strip-ansi":"^6.0.0"}'
-    # Todo: respect also the versions
-    mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | jq -r '. | to_entries | .[].key' || true)
+    # extract the dependencies lAPP_DEPS from '{"ansi-styles":"^4.0.0","string-width":"^4.1.0","strip-ansi":"^6.0.0"}'
+    mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | jq -r '. | to_entries[] | "\(.key)(\(.value))"' || true)
   fi
 
   # add the node lock path information to our properties array:
@@ -147,7 +146,6 @@ node_js_package_lock_threader() {
   # Add dependencies to properties
   for lJS_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
     lAPP_DEP="${lAPP_DEPS_ARR["${lJS_DEP_ID}"]}"
-    # lPROP_ARRAY_INIT_ARR+=( "dependency:$(escape_echo ${lAPP_DEP#\ })" )
     lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
   done
 
