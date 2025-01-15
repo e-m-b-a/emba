@@ -441,7 +441,7 @@ var_checker modules
 var_checker helpers
 function_entry_space_check
 dockerchecker
-copy_right_check "Siemens Energy AG" 2024 ./ ./external
+copy_right_check "Siemens Energy AG" 2025 ./ ./external
 list_linter_exceptions shellcheck ./ ./external
 list_linter_exceptions semgrep ./ ./external
 summary
