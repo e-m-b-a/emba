@@ -2588,7 +2588,12 @@ create_emulation_archive() {
     sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "${lARCHIVE_PATH}"/run.sh
     # fix the path for the kernel which is currently something like ./Linux-Kernel/vmlinux.mipsel.4
     # and should be ./vmlinux.mipsel.4
-    sed -i "s/\.\/Linux-Kernel-v${L10_KERNEL_V_LONG}\//\.\//g" "${lARCHIVE_PATH}"/run.sh
+    local lL10_KERNEL_V_LONG_TMP="4.1.52"
+    if [[ "${lARCH_END}" == *"x86el"* ]] && [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
+      # for x86el we currently have kernel issues
+      lL10_KERNEL_V_LONG_TMP="4.1.17"
+    fi
+    sed -i "s/\.\/Linux-Kernel-v${lL10_KERNEL_V_LONG_TMP}\//\.\//g" "${lARCHIVE_PATH}"/run.sh
 
     if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
       # create archive
