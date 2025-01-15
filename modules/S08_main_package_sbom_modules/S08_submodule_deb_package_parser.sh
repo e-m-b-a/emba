@@ -71,6 +71,8 @@ S08_submodule_deb_package_parser() {
     write_log "[-] No Debian deb archives found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   fi
 
+  wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+
   write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   if [[ "${lPOS_RES}" -eq 1 ]]; then

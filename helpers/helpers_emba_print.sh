@@ -96,9 +96,6 @@ module_title()
     echo -e "$(format_log "${lMODULE_TITLE_FORMAT}")" | tee -a "${lLOG_FILE_TO_LOG}" >/dev/null || true
   fi
 
-  if [[ ${LOG_GREP} -eq 1 ]] ; then
-    write_grep_log "${lMODULE_TITLE}" "MODULE_TITLE"
-  fi
   SUB_MODULE_COUNT=0
 }
 
@@ -119,11 +116,6 @@ sub_module_title()
   echo -e "${lSUB_MODULE_TITLE_FORMAT}" || true
   if [[ "${lLOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
     echo -e "$(format_log "${lSUB_MODULE_TITLE_FORMAT}")" | tee -a "${lLOG_FILE_TO_LOG}" >/dev/null || true
-  fi
-
-  if [[ ${LOG_GREP} -eq 1 ]] ; then
-    SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
-    write_grep_log "${lSUB_MODULE_TITLE}" "SUB_MODULE_TITLE"
   fi
 }
 
@@ -193,9 +185,6 @@ print_output() {
         fi
       fi
     fi
-  fi
-  if [[ "${lLOG_SETTING}" != "no_log" ]]; then
-    write_grep_log "${lOUTPUT}"
   fi
 }
 
@@ -293,7 +282,6 @@ write_log() {
   local lTEXT_ARR=()
   readarray lTEXT_ARR <<< "${1}"
   local lLOG_FILE_ALT="${2:-}"
-  local lGREP_LOG_WRITE="${3:-}"
   if [[ "${lLOG_FILE_ALT}" == "" ]] ; then
     local lW_LOG_FILE="${LOG_FILE}"
   else
@@ -312,9 +300,6 @@ write_log() {
       echo -e "$(format_log "${lENTRY}")" | tee -a "${lW_LOG_FILE}" >/dev/null || true
     fi
   done
-  if [[ "${lGREP_LOG_WRITE}" == "g" ]] ; then
-    write_grep_log "${1:-}"
-  fi
 }
 
 # for generating csv log file in LOG_DIR/csv_logs/<module_name>.csv
@@ -351,56 +336,6 @@ write_pid_log() {
 
   # shellcheck disable=SC2153
   echo "${lLOG_MESSAGE}" >> "${TMP_DIR}"/"${PID_LOG_FILE}" || true
-}
-
-write_grep_log()
-{
-  local lOLD_MESSAGE_TYPE=""
-
-  if [[ ${LOG_GREP:-0} -eq 1 ]] ; then
-    readarray -t OUTPUT_ARR <<< "${1}"
-    local lMESSAGE_TYPE_PAR="${2:-}"
-    local lENTRY=""
-    for lENTRY in "${OUTPUT_ARR[@]}" ; do
-      if [[ -n "${lENTRY//[[:blank:]]/}" ]] && [[ "${lENTRY}" != "\\n" ]] && [[ -n "${lENTRY}" ]] ; then
-        if [[ -n "${lMESSAGE_TYPE_PAR}" ]] ; then
-          MESSAGE_TYPE="${lMESSAGE_TYPE_PAR}"
-          lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
-          TYPE=2
-        else
-          lTYPE_CHECK="$( echo "${lENTRY}" | cut -c1-3 )"
-          if [[ "${lTYPE_CHECK}" == "[-]" ]] ; then
-            MESSAGE_TYPE="FALSE"
-            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
-            TYPE=1
-          elif [[ "${lTYPE_CHECK}" == "[*]" ]] ; then
-            MESSAGE_TYPE="MESSAGE"
-            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
-            TYPE=1
-          elif [[ "${lTYPE_CHECK}" == "[!]" ]] ; then
-            MESSAGE_TYPE="WARNING"
-            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
-            TYPE=1
-          elif [[ "${lTYPE_CHECK}" == "[+]" ]] ; then
-            MESSAGE_TYPE="POSITIVE"
-            lOLD_MESSAGE_TYPE="${MESSAGE_TYPE}"
-            TYPE=1
-          else
-            MESSAGE_TYPE="${lOLD_MESSAGE_TYPE}"
-            TYPE=3
-          fi
-        fi
-        if [[ ${TYPE} -eq 1 ]] ; then
-          echo -e "${MESSAGE_TYPE}""${GREP_LOG_DELIMITER}""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$(echo "${lENTRY}" | cut -c4- )")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
-        elif [[ ${TYPE} -eq 2 ]] ; then
-          echo -e "${MESSAGE_TYPE}""${GREP_LOG_DELIMITER}""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "${lENTRY}")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
-        elif [[ ${TYPE} -eq 3 ]] ; then
-          truncate -s -1 "${GREP_LOG_FILE}"
-          echo -e "${GREP_LOG_LINEBREAK}""$(echo -e "$(format_grep_log "${lENTRY}")")" | tee -a "${GREP_LOG_FILE}" >/dev/null
-        fi
-      fi
-    done
-  fi
 }
 
 write_link()

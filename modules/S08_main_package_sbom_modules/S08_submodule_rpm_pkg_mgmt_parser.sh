@@ -17,161 +17,181 @@
 # shellcheck disable=SC2094
 
 S08_submodule_rpm_pkg_mgmt_parser() {
-  local lPACKAGING_SYSTEM="rpm_package"
+  local lPACKAGING_SYSTEM="rpm_package_mgmt"
   local lOS_IDENTIFIED="${1:-}"
 
   sub_module_title "RPM package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-  local lRPM_ARCHIVES_ARR=()
-  local lRPM_ARCHIVE=""
-  local lR_FILE=""
-  local lAPP_LIC="NA"
-  local lAPP_NAME="NA"
-  local lAPP_VERS="NA"
+  local lWAIT_PIDS_S08_ARR_LCK=()
+  local lRPM_PACKAGE_DBS_BRK_ARR=()
+  local lRPM_PACKAGE_DBS_SQLITE_ARR=()
+  local lRPM_PACKAGE_DBS_ARR=()
+  local lPACKAGE_FILE=""
+  local lRPM_PACKAGES_ARR=()
+  local lPACKAGE_AND_VERSION=""
+  local lMD5_CHECKSUM="NA"
+  local lSHA256_CHECKSUM="NA"
+  local lSHA512_CHECKSUM="NA"
+  local lRPM_DIR=""
+
+  # if we have found multiple status files but all are the same -> we do not need to test duplicates
+  local lPKG_CHECKED_ARR=()
+  local lPKG_MD5=""
+
+  # this handles the Berkley database
+  mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(grep "rpm/Packages;" "${P99_CSV_LOG}" | cut -d ';'  -f1 || true)
+  # this handles the sqlite database
+  mapfile -t lRPM_PACKAGE_DBS_SQLITE_ARR < <(grep "rpm/rpmdb.sqlite;" "${P99_CSV_LOG}" | cut -d ';'  -f1 || true)
+  lRPM_PACKAGE_DBS_ARR=( "${lRPM_PACKAGE_DBS_BRK_ARR[@]}" "${lRPM_PACKAGE_DBS_SQLITE_ARR[@]}" )
+
+  if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]] ; then
+    write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+
+      lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
+
+      lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
+      # not sure this works on an offline system - we need further tests on this:
+      mapfile -t lRPM_PACKAGES_ARR < <(rpm -qa --dbpath "${lRPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${lRPM_DIR}")
+      for lPACKAGE_AND_VERSION in "${lRPM_PACKAGES_ARR[@]}" ; do
+        rpm_pkg_mgmt_analysis_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPACKAGE_FILE}" "${lPACKAGE_AND_VERSION}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+        lPOS_RES=1
+      done
+    done
+
+    wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+
+    if [[ "${lPOS_RES}" -eq 0 ]]; then
+      write_log "[-] No RPM packages found (based on RPM package management database)!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
+  else
+    write_log "[-] No RPM package management database found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+  if [[ "${lPOS_RES}" -eq 1 ]]; then
+    print_output "[+] RPM package managment database SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  else
+    print_output "[*] No RPM package management database SBOM results available"
+  fi
+}
+
+rpm_pkg_mgmt_analysis_threader() {
+  local lPACKAGING_SYSTEM="${1:-}"
+  local lOS_IDENTIFIED="${2:-}"
+  local lPACKAGE_FILE="${3:-}"
+  local lPACKAGE_AND_VERSION="${4:-}"
+
+  local lAPP_NAME=""
+  local lAPP_VERS=""
   local lAPP_ARCH="NA"
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
-  local lMD5_CHECKSUM="NA"
-  local lSHA256_CHECKSUM="NA"
-  local lSHA512_CHECKSUM="NA"
-  local lPURL_IDENTIFIER="NA"
-  local lRPM_FILES_ARR=()
-  local lRPM_FILE=""
-  local lRPM_DEP_ARR=()
-  local lRPM_DEP=""
+  local lAPP_DEPS_ARR=()
+  local lAPP_DEP=""
+  local lAPP_FILE=""
+  local lAPP_FILE_ID=""
+  local lAPP_FILES_ARR=()
 
-  # if we have found multiple status files but all are the same -> we do not need to test duplicates
-  local lPKG_CHECKED_ARR=()
-  local lPKG_MD5=""
+  local lRPM_DIR=""
+  lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
+  write_log "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-  mapfile -t lRPM_ARCHIVES_ARR < <(grep "\.rpm" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  lAPP_VERS=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
+  lAPP_VERS="${lAPP_VERS/*:\ }"
+  lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
 
-  if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
-    write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
-      write_log "$(indent "$(orange "$(print_path "${lRPM_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    done
+  lAPP_NAME=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Name" || true)
+  lAPP_NAME="${lAPP_NAME/*:\ }"
+  lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    write_log "[*] Analyzing ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-
-    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
-      lR_FILE=$(file "${lRPM_ARCHIVE}")
-      if [[ ! "${lR_FILE}" == *"RPM"* ]]; then
-        continue
-      fi
-
-      # if we have found multiple status files but all are the same -> we do not need to test duplicates
-      lPKG_MD5="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
-      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-        print_output "[*] ${ORANGE}${lRPM_ARCHIVE}${NC} already analyzed" "no_log"
-        continue
-      fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
-
-      lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Name" || true)
-      lAPP_NAME=${lAPP_NAME/*:\ /}
-      lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
-
-      lAPP_LIC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^License" || true)
-      lAPP_LIC=${lAPP_LIC/*:\ /}
-      lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
-
-      lAPP_VERS=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Version" || true)
-      lAPP_VERS=${lAPP_VERS/*:\ /}
-      lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-      lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
-
-      lAPP_MAINT=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Vendor" || true)
-      lAPP_MAINT=${lAPP_MAINT/*:\ /}
-      lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
-
-      lAPP_ARCH=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Architecture" || true)
-      lAPP_ARCH=${lAPP_ARCH/*:\ /}
-      lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
-
-      lAPP_DESC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Summary" || true)
-      lAPP_DESC=${lAPP_DESC/*:\ /}
-      lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
-
-      lMD5_CHECKSUM="$(md5sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
-      lSHA256_CHECKSUM="$(sha256sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
-
-      lAPP_VENDOR="${lAPP_NAME}"
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
-
-      if [[ -z "${lOS_IDENTIFIED}" ]]; then
-        lOS_IDENTIFIED="rpm-based"
-      fi
-      lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "rpm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
-
-      local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
-
-      mapfile -t lRPM_FILES_ARR < <(rpm -qlp "${lRPM_ARCHIVE}" 2>/dev/null || true)
-      mapfile -t lRPM_DEPS_ARR < <(rpm -qR "${lRPM_ARCHIVE}" 2>/dev/null || true)
-
-      # add rpm path information to our properties array:
-      local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
-
-      # add dependencies to properties
-      if [[ "${#lRPM_DEPS_ARR[@]}" -gt 0 ]]; then
-        for lRPM_DEP in "${lRPM_DEP_ARR[@]}"; do
-          lPROP_ARRAY_INIT_ARR+=( "dependency:${lRPM_DEP}" )
-        done
-      fi
-
-      # add package files to properties
-      if [[ "${#lRPM_FILES_ARR[@]}" -gt 0 ]]; then
-        for lRPM_FILE_ID in "${!lRPM_FILES_ARR[@]}"; do
-          lRPM_FILE="${lRPM_FILES_ARR["${lRPM_FILE_ID}"]}"
-          lPROP_ARRAY_INIT_ARR+=( "path:${lRPM_FILE}" )
-          # we limit the logging of the package files to 500 files per package
-          if [[ "${lRPM_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-            lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
-            break
-          fi
-        done
-      fi
-
-      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-      # final array with all hash values
-      if ! build_sbom_json_hashes_arr "${lRPM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-        continue
-      fi
-
-      # create component entry - this allows adding entries very flexible:
-      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
-
-      write_log "[*] RPM archive details: ${ORANGE}${lRPM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
-      lPOS_RES=1
-    done
-
-    if [[ "${lPOS_RES}" -eq 0 ]]; then
-      write_log "[-] No RPM packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    fi
-  else
-    write_log "[-] No RPM package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  if [[ -z "${lAPP_NAME}" ]]; then
+    return
   fi
 
-  write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  lAPP_LIC=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^License" || true)
+  lAPP_LIC="${lAPP_LIC/*:\ }"
+  lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
-  if [[ "${lPOS_RES}" -eq 1 ]]; then
-    print_output "[+] RPM packages SBOM results" "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-  else
-    print_output "[*] No RPM package SBOM results available"
+  lAPP_ARCH=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Architecture" || true)
+  lAPP_ARCH="${lAPP_ARCH/*:\ }"
+  lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
+
+  mapfile -t lAPP_DEPS_ARR < <(rpm -qR --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
+  mapfile -t lAPP_FILES_ARR < <(rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
+
+  lAPP_VENDOR="${lAPP_NAME}"
+  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+
+  if [[ -z "${lOS_IDENTIFIED}" ]]; then
+    lOS_IDENTIFIED="rpm-based"
   fi
+  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "rpm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+  local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
+
+  # add the rpm database path information to our properties array:
+  # Todo: in the future we should check for the package, package hashes and which files
+  # are in the package
+  local lPROP_ARRAY_INIT_ARR=()
+  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+
+  if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
+    for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+      lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+    done
+  fi
+
+  # add package files to properties
+  if [[ "${#lAPP_FILES_ARR[@]}" -gt 0  ]]; then
+    for lAPP_FILE_ID in "${!lAPP_FILES_ARR[@]}"; do
+      lAPP_FILE="${lAPP_FILES_ARR["${lAPP_FILE_ID}"]}"
+      lPROP_ARRAY_INIT_ARR+=( "path:${lAPP_FILE#\.}" )
+      # we limit the logging of the package files to 500 files per package
+      if [[ "${lAPP_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
+        lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+        break
+      fi
+    done
+  fi
+
+  build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+  # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+  # final array with all hash values
+  if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    return
+  fi
+
+  # create component entry - this allows adding entries very flexible:
+  build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+
+  write_log "[*] RPM package details (based on package management): ${ORANGE}${lAPP_NAME}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  write_csv_log "${lPACKAGING_SYSTEM}" "${lRPM_DIR} / ${lPACKAGE_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
 }

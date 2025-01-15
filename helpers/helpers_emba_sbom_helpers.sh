@@ -59,7 +59,7 @@ build_sbom_json_properties_arr() {
     local lPROPERTIES_ARRAY_TMP=()
     lPROPERTIES_ARRAY_TMP+=("-s" "name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
     [[ "${lPROPERTIES_ELEMENT_2}" == "NA" ]] && continue
-    lPROPERTIES_ARRAY_TMP+=("-s" "value=${lPROPERTIES_ELEMENT_2}")
+    lPROPERTIES_ARRAY_TMP+=("-s" "value=${lPROPERTIES_ELEMENT_2@Q}")
     PROPERTIES_JSON_ARR+=( "$(jo -n -- "${lPROPERTIES_ARRAY_TMP[@]}")")
   done
   # lPROPERTIES_PATH_JSON=$(jo -p -a "${lPROPERTIES_PATH_ARR_TMP[@]}")

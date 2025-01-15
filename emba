@@ -610,12 +610,6 @@ main() {
       prepare_report
     fi
 
-    if [[ ${LOG_GREP} -eq 1 ]] ; then
-      # Create grep-able log file
-      create_grep_log
-      write_grep_log "sudo ""${EMBA_COMMAND}" "COMMAND"
-    fi
-
     if [[ "${KERNEL}" -ne 1 ]] && [[ ${FIRMWARE} -eq 1 ]]; then
       # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
       set_exclude
@@ -676,7 +670,7 @@ main() {
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:d:De:Ef:Fghijk:l:m:N:o:p:P:qQrsStT:UX:yY:WzZ: OPT ; do
+    while getopts a:A:BcC:d:De:Ef:Fhijk:l:m:N:o:p:P:qQrsStT:UX:yY:WzZ: OPT ; do
       case ${OPT} in
         D|f|i|l|o)
           ;;
@@ -918,7 +912,6 @@ main() {
       print_output "[!] $(print_date) - Testing phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "Testing phase finished"
-    write_grep_log "$(print_date)" "TIMESTAMP"
 
     run_modules "S" "${THREADED}" "${HTML}"
 
@@ -948,7 +941,6 @@ main() {
     fi
     write_notification "System emulation phase started"
 
-    write_grep_log "$(print_date)" "TIMESTAMP"
     # these modules are not threaded!
     run_modules "L" "0" "${HTML}"
 
@@ -998,8 +990,6 @@ main() {
     else
       print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
-    write_grep_log "$(print_date)" "TIMESTAMP"
-    write_grep_log "$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)" "DURATION"
   else
     print_output "[!] $(print_date) - No extracted firmware found" "no_log"
     print_output "$(indent "Try using binwalk or something else to extract the firmware")"

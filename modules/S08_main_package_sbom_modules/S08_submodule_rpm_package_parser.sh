@@ -61,8 +61,8 @@ S08_submodule_rpm_package_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
-      lR_FILE=$(file "${lRPM_ARCHIVE}")
-      if [[ ! "${lR_FILE}" == *"RPM"* ]]; then
+      lR_FILE=$(file -b "${lRPM_ARCHIVE}")
+      if [[ ! "${lR_FILE}" == "RPM "* ]]; then
         continue
       fi
 
