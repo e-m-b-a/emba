@@ -282,7 +282,6 @@ write_log() {
   local lTEXT_ARR=()
   readarray lTEXT_ARR <<< "${1}"
   local lLOG_FILE_ALT="${2:-}"
-  local lGREP_LOG_WRITE="${3:-}"
   if [[ "${lLOG_FILE_ALT}" == "" ]] ; then
     local lW_LOG_FILE="${LOG_FILE}"
   else
