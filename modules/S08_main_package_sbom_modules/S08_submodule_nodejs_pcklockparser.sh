@@ -39,7 +39,7 @@ S08_submodule_node_js_package_lock_parser() {
   local lPKG_MD5=""
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "package.*json" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "/package.*json;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
 
   if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} Node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -111,12 +111,15 @@ node_js_package_lock_threader() {
   local lCPE_IDENTIFIER=""
   local lPURL_IDENTIFIER=""
 
+  local lAPP_DEPS_ARR=()
+  local lJS_DEP_ID=""
+  local lAPP_DEP=""
+
   lAPP_NAME=$(echo "${lAPP_NAME}" | rev | cut -d '/' -f1 | rev)
   [[ -z "${lAPP_NAME}" ]] && return
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
-  lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
 
   lAPP_VENDOR="${lAPP_NAME}"
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
@@ -127,6 +130,11 @@ node_js_package_lock_threader() {
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "npm" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
   local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+  if [[ "${lAPP_DEPS}" != "null" ]]; then
+    # extract the dependencies lAPP_DEPS from '{"ansi-styles":"^4.0.0","string-width":"^4.1.0","strip-ansi":"^6.0.0"}'
+    mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | jq -r '. | to_entries[] | "\(.key)(\(.value))"' || true)
+  fi
+
   # add the node lock path information to our properties array:
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
@@ -134,6 +142,12 @@ node_js_package_lock_threader() {
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lNODE_LCK_ARCHIVE}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
   lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+
+  # Add dependencies to properties
+  for lJS_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
+    lAPP_DEP="${lAPP_DEPS_ARR["${lJS_DEP_ID}"]}"
+    lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+  done
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
