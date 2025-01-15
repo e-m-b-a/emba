@@ -1,9 +1,9 @@
 #!/firmadyne/sh
 # shellcheck shell=sh
 
-# Copyright (c) 2015 - 2016, Daming Dominic Chen
-# Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
-# Copyright (c) 2022 - 2024 Siemens Energy AG
+# Copyright 2015 - 2016 Daming Dominic Chen
+# Copyright 2017 - 2020 Mingeun Kim, Dongkwan Kim, Eunsoo Kim
+# Copyright 2022 - 2025 Siemens Energy AG
 #
 # This script is based on the original scripts from the firmadyne and firmAE project
 # Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
