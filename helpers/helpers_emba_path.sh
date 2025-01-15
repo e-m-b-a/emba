@@ -229,11 +229,6 @@ create_log_dir() {
   mkdir -p "${SUPPL_PATH}" 2> /dev/null || true
 }
 
-create_grep_log() {
-  export GREP_LOG_FILE="${LOG_DIR}""/fw_grep_log.log"
-  print_output "[*] grep-able log file will be generated:""${NC}""\\n    ""${ORANGE}""${GREP_LOG_FILE}""${NC}" "no_log"
-}
-
 config_list() {
   if [[ -f "${1:-}" ]] ;  then
     if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then

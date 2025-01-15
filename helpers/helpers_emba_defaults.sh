@@ -57,7 +57,6 @@ set_defaults() {
   export MD5_DONE_DEEP=()       # for tracking the extracted files in deep extractor
   export ROOT_PATH=()
   export FILE_ARR=()
-  export LOG_GREP=0
   export MAX_MODS=0
   export MAX_MOD_THREADS=0
   export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
