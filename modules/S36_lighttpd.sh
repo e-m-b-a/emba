@@ -169,7 +169,7 @@ lighttpd_binary_analysis() {
   print_ln
   print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
   for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}" ; do
-    print_output "$("${EXT_DIR}"/checksec --file="${lLIGHT_BIN}")"
+    print_output "$("${EXT_DIR}"/checksec --file="${lLIGHT_BIN}" || true)"
   done
 
   print_ln

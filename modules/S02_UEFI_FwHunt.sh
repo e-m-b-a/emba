@@ -99,7 +99,7 @@ fwhunter_logging() {
   local lFWHUNTER_BINARY_MATCH=""
   local lFWHUNTER_BINARLY_IDs_ARR=()
 
-  mapfile -t FWHUNTER_RESULTS_ARR < <(find "${LOG_PATH_MODULE}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" "%"')
+  mapfile -t FWHUNTER_RESULTS_ARR < <(find "${LOG_PATH_MODULE}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" "%" || true')
   if ! [[ "${#FWHUNTER_RESULTS_ARR[@]}" -gt 0 ]]; then
     return
   fi
@@ -128,7 +128,7 @@ fwhunter_logging() {
       done
     fi
 
-    mapfile -t lFWHUNTER_BINARY_MATCH_ARR < <(basename "$(grep "Running FwHunt on" "${lFWHUNTER_RESULT_FILE}" | cut -d\  -f5-)" | sort -u)
+    mapfile -t lFWHUNTER_BINARY_MATCH_ARR < <(basename "$(grep "Running FwHunt on" "${lFWHUNTER_RESULT_FILE}" | cut -d\  -f5-)" | sort -u || true)
     if [[ "${lFWHUNTER_RESULT}" == *"rule has been triggered and threat detected"* ]]; then
       if [[ "${#lCVE_RESULTS_BINARLY_ARR[@]}" -gt 0 ]]; then
         for lBINARLY_ID_CVE in "${lCVE_RESULTS_BINARLY_ARR[@]}"; do
