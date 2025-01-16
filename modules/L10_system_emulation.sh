@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2024 Siemens Energy AG
+# Copyright 2020-2025 Siemens Energy AG
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 #
