@@ -34,7 +34,7 @@ S107_deep_password_search()
     write_csv_log "PW_PATH" "PW_HASH"
     while read -r lPW_HASH; do
       lPW_PATH="${lPW_HASH/:*}"
-      mapfile -t lPW_HASHES_ARR < <(strings "${lPW_PATH}" | grep --color -a -E -f "${lPW_HASH_CONFIG}")
+      mapfile -t lPW_HASHES_ARR < <(strings "${lPW_PATH}" | grep --color -a -E -f "${lPW_HASH_CONFIG}" || true)
       for lPW_HASH in "${lPW_HASHES_ARR[@]}"; do
         print_output "[+] PATH: ${ORANGE}$(print_path "${lPW_PATH}")${GREEN}\t-\tHash: ${ORANGE}${lPW_HASH}${GREEN}."
         write_csv_log "NA" "${lPW_PATH}" "${lPW_HASH}"

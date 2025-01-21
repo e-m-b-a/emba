@@ -760,7 +760,10 @@ bin_string_checker() {
   # print_output "[*] Testing version identifier ${lVERSION_IDENTIFIERS_ARR[*]} against ${#FILE_ARR[@]} files" "no_log"
 
   for lBIN in "${FILE_ARR[@]}"; do
-    # print_output "[*] Testing ${lBIN} for versions"
+    if [[ ! -f "${lBIN}" ]]; then
+      print_output "[*] Binary ${lBIN} not found - Not testing for versions"
+      continue
+    fi
     lMD5_SUM="$(md5sum "${lBIN}")"
     lMD5_SUM="${lMD5_SUM/\ *}"
     local lBIN_NAME_REAL=""
