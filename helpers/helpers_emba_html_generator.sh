@@ -609,7 +609,7 @@ generate_report_file() {
         # add anchor to file
         lA_MODUL_NAME="$(echo "${lMODUL_NAME}" | sed -e "s@\ @_@g" | tr "[:upper:]" "[:lower:]")"
         lLINE="$(echo "${TITLE_ANCHOR}" | sed -e "s@ANCHOR@${lA_MODUL_NAME}@g")""${lMODUL_NAME}""${LINK_END}"
-        sed -i -E "s@${lMODUL_NAME}@${lLINE}@" "${lTMP_FILE}"
+        sed -i -E "s@${lMODUL_NAME}@${lLINE}@" "${lTMP_FILE}" || true
         # add link to index navigation
         add_link_to_index "${lHTML_FILE}" "${lMODUL_NAME}"
         # add module anchor to navigation
@@ -626,7 +626,7 @@ generate_report_file() {
           lSUBMODUL_NAME="$( strip_color_tags "${lSUBMODUL_NAME}" | cut -d" " -f 2- )"
           lA_SUBMODUL_NAME="$(echo "${lSUBMODUL_NAME}" | sed -e "s@[^a-zA-Z0-9]@@g" | tr "[:upper:]" "[:lower:]")"
           lLINE="$(echo "${TITLE_ANCHOR}" | sed -e "s@ANCHOR@${lA_SUBMODUL_NAME}@g")""${lSUBMODUL_NAME}""${LINK_END}"
-          sed -i -E "s@${lSUBMODUL_NAME}@${lLINE}@" "${lTMP_FILE}"
+          sed -i -E "s@${lSUBMODUL_NAME}@${lLINE}@" "${lTMP_FILE}" || true
           # Add anchor to file
           lSUB_NAV_LINK="$(echo "${SUBMODUL_LINK}" | sed -e "s@LINK@#${lA_SUBMODUL_NAME}@g")"
           sed -i "${lLINE_NUMBER_REP_NAV}"'s@$@'"${lSUB_NAV_LINK}""${lSUBMODUL_NAME}""${LINK_END}"'@' "${ABS_HTML_PATH}""/""${lHTML_FILE}"
