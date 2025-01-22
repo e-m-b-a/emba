@@ -314,15 +314,13 @@ write_csv_log() {
 
   # shellcheck disable=SC2005
   echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${lCSV_LOG}" || true
-  # printf '\n' >> "${lCSV_LOG}" || true
 }
 
-# for generating json log file in LOG_DIR/json_logs/<module_name>.json
-# this is for the main module logging in json
-# Most of the time this is the json equivalent to the write_csv_log
-# We write to tmp files which we put together via write_json_module_log
+# For generating json log file in LOG_DIR/json_logs/<module_name>.json
+# Usually this is the json equivalent to the write_csv_log
+# We write to tmp files which we put together via write_json_module_log(), which is automatically called in module_end_log()
 write_json_module_log_entry() {
-  local lJSON_ITEMS=("$@")
+  local lJSON_ITEMS_ARR=("$@")
 
   if ! [[ -d "${JSON_DIR}" ]]; then
     print_output "[-] WARNING: JSON directory ${ORANGE}${JSON_DIR}${NC} not found"
@@ -330,10 +328,10 @@ write_json_module_log_entry() {
   fi
   local lJSON_LOG="${LOG_PATH_MODULE}""/""JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
 
-  jo -p "${lJSON_ITEMS[@]}" >> "${lJSON_LOG}" || true
+  jo -p "${lJSON_ITEMS_ARR[@]}" >> "${lJSON_LOG}" || true
 }
 
-# now we need to put every temp json together to a complete json log file
+# This function collects all temp json files from LOG_PATH_MODULE and puts all temp json files together to a complete json log file
 write_json_module_log() {
   local lJSON_TMP_FILES_ARR=()
   mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u)
@@ -342,10 +340,11 @@ write_json_module_log() {
   fi
 
   local lJSON_LOG="${JSON_DIR}""/""${LOG_FILE_NAME/\.txt/\.tmp}"
+  local lCOMP_FILE_ID=0
 
   echo -n "[" > "${lJSON_LOG}"
   for lCOMP_FILE_ID in "${!lJSON_TMP_FILES_ARR[@]}"; do
-    lCOMP_FILE="${lJSON_TMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
+    local lCOMP_FILE="${lJSON_TMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
     if [[ -s "${lCOMP_FILE}" ]]; then
       if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
         cat "${lCOMP_FILE}" >> "${lJSON_LOG}"
@@ -366,17 +365,7 @@ write_json_module_log() {
   # as our json is not beautifull we remove all \n and further formatting should be done via jq
   tr -d '\n' < "${lJSON_LOG}" > "${lJSON_LOG/\.tmp/\.json}"
   find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete
-}
-
-write_json_end_log() {
-  local lJSON_LOG="${1:-}"
-
-  if ! tail -1 "${lJSON_LOG}" | grep -q ']'; then
-    echo -n "]" >> "${lJSON_LOG}"
-  fi
-
-  # at the end we need to fix our json elements and ensure our start is correct
-
+  rm "${lJSON_LOG}" || true
 }
 
 # write_pid_log is a functions used for debugging
