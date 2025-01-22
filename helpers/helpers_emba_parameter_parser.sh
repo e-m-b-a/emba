@@ -111,6 +111,7 @@ emba_parameter_parsing() {
         LOG_DIR="$(escape_echo "${OPTARG}")"
         export TMP_DIR="${LOG_DIR}""/tmp"
         export CSV_DIR="${LOG_DIR}""/csv_logs"
+        export JSON_DIR="${LOG_DIR}""/json_logs"
         ;;
       m)
         check_alnum "${OPTARG}"

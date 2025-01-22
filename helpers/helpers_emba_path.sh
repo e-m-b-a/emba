@@ -208,10 +208,13 @@ create_log_dir() {
     mkdir "${LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
   fi
   if ! [[ -d "${TMP_DIR}" ]] ; then
-    mkdir "${TMP_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
+    mkdir "${TMP_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create TMP log directory" "no_log" && exit 1)
   fi
   if ! [[ -d "${CSV_DIR}" ]]; then
-    mkdir "${CSV_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
+    mkdir "${CSV_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create CSV log directory" "no_log" && exit 1)
+  fi
+  if ! [[ -d "${JSON_DIR}" ]]; then
+    mkdir "${JSON_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create JSON log directory" "no_log" && exit 1)
   fi
 
   if ! [[ -f "${MAIN_LOG}" ]]; then

@@ -317,6 +317,23 @@ write_csv_log() {
   # printf '\n' >> "${lCSV_LOG}" || true
 }
 
+# for generating json log file in LOG_DIR/json_logs/<module_name>.json
+# this is for the main module logging in json
+# Most of the time this is the json equivalent to the write_csv_log
+write_json_module_log() {
+  local lJSON_ITEMS=("$@")
+
+  if ! [[ -d "${JSON_DIR}" ]]; then
+    print_output "[-] WARNING: JSON directory ${ORANGE}${JSON_DIR}${NC} not found"
+    return
+  fi
+  local lJSON_LOG="${LOG_FILE_NAME/\.txt/\.json}"
+  lJSON_LOG="${JSON_DIR}""/""${lJSON_LOG}"
+
+  jo -p "${lJSON_ITEMS[@]}" >> "${lJSON_LOG}" || true
+}
+
+
 # write_pid_log is a functions used for debugging
 # enable it with setting PID_LOGGING to 1 in the main emba script
 # additionally you need to add a function call like the following to

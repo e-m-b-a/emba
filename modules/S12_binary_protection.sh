@@ -74,6 +74,8 @@ binary_protection_threader() {
   local lSYMBOLS=""
   local lFILE=""
   local lCSV_BIN_OUT=""
+  # lJSON_ARRAY_OUT only needed for JSON logging
+  local lJSON_ARRAY_OUT=()
 
   lCSV_BIN_OUT=$("${EXT_DIR}"/checksec --format=csv --file="${lBINARY}")
 
@@ -136,4 +138,19 @@ binary_protection_threader() {
 
   printf "\t%-22.22s  %-25.25s  %-20.20s  %-20.20s  %-20.20s  %-20.20s  %-20.20s  %-5.5s  %s\n" \
     "${lRELRO}" "${lCANARY}" "${lNX}" "${lPIE}" "${lRPATH}" "${lRUNPATH}" "${lSYMBOLS}" "${lFORTIFY}" "${lFILE}" | tee -a "${TMP_DIR}"/s12.tmp || true
+
+  lJSON_ARRAY_OUT+=("EMBA module name=S12_binary_protection")
+  lJSON_ARRAY_OUT+=("Source of results=checksec")
+  lJSON_ARRAY_OUT+=("Binary path=${lBINARY}")
+  lJSON_ARRAY_OUT+=("Binary name=$(basename "${lBINARY}")")
+  lJSON_ARRAY_OUT+=("RELRO=$(strip_color_codes "${lRELRO}")")
+  lJSON_ARRAY_OUT+=("Stack Canaries=$(strip_color_codes "${lCANARY}")")
+  lJSON_ARRAY_OUT+=("NX Memory protection=$(strip_color_codes "${lNX}")")
+  lJSON_ARRAY_OUT+=("PIE=$(strip_color_codes "${lPIE}")")
+  lJSON_ARRAY_OUT+=("RPATH=$(strip_color_codes "${lRPATH}")")
+  lJSON_ARRAY_OUT+=("RUNPATH=$(strip_color_codes "${lRUNPATH}")")
+  lJSON_ARRAY_OUT+=("SYMBOLS=$(strip_color_codes "${lSYMBOLS}")")
+  lJSON_ARRAY_OUT+=("FORTIFY=$(strip_color_codes "${lFORTIFY}")")
+
+  write_json_module_log "${lJSON_ARRAY_OUT[@]}"
 }

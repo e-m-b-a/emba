@@ -99,6 +99,7 @@ set_defaults() {
   # export ERROR_LOG="${LOG_DIR}/emba_error.log"
   export TMP_DIR="${LOG_DIR}""/tmp"
   export CSV_DIR="${LOG_DIR}""/csv_logs"
+  export JSON_DIR="${LOG_DIR}""/json_logs"
   export MAIN_LOG_FILE="emba.log"
   export CONFIG_DIR="${INVOCATION_PATH}""/config"
   export EXT_DIR="${INVOCATION_PATH}""/external"
