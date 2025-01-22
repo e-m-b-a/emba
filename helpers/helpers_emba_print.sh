@@ -320,19 +320,68 @@ write_csv_log() {
 # for generating json log file in LOG_DIR/json_logs/<module_name>.json
 # this is for the main module logging in json
 # Most of the time this is the json equivalent to the write_csv_log
-write_json_module_log() {
+write_json_module_log_entry() {
   local lJSON_ITEMS=("$@")
 
   if ! [[ -d "${JSON_DIR}" ]]; then
     print_output "[-] WARNING: JSON directory ${ORANGE}${JSON_DIR}${NC} not found"
     return
   fi
-  local lJSON_LOG="${LOG_FILE_NAME/\.txt/\.json}"
-  lJSON_LOG="${JSON_DIR}""/""${lJSON_LOG}"
+  local lJSON_LOG="${LOG_PATH_MODULE}""/""JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
+  #if ! [[ -s "${lJSON_LOG}" ]]; then
+  #  write_json_entry_log "${lJSON_LOG}"
+  #fi
 
   jo -p "${lJSON_ITEMS[@]}" >> "${lJSON_LOG}" || true
 }
 
+write_json_entry_log() {
+  local lJSON_LOG="${1:-}"
+
+  if ! [[ -s "${lJSON_LOG}" ]]; then
+    echo "[" > "${lJSON_LOG}"
+  fi
+}
+
+# now we need to put every temp json together to a complete json log file
+write_json_module_log() {
+  local lJSON_TMP_FILES_ARR=()
+  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u)
+
+  local lJSON_LOG="${JSON_DIR}""/""${LOG_FILE_NAME/\.txt/\.json}"
+
+  echo -n "[" > "${lJSON_LOG}"
+  for lCOMP_FILE_ID in "${!lJSON_TMP_FILES_ARR[@]}"; do
+      lCOMP_FILE="${lJSON_TMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
+      if [[ -s "${lCOMP_FILE}" ]]; then
+        if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
+          cat "${lCOMP_FILE}" >> "${lJSON_LOG}"
+        else
+          print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
+          continue
+        fi
+      else
+        print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
+        continue
+      fi
+      if [[ $((lCOMP_FILE_ID+1)) -lt "${#lJSON_TMP_FILES_ARR[@]}" ]]; then
+        echo -n "," >> "${lJSON_LOG}"
+      fi
+    done
+    echo -n "]" >> "${lJSON_LOG}"
+    tr -d '\n' < "${lJSON_LOG}" > "${lJSON_LOG}_01"
+}
+
+write_json_end_log() {
+  local lJSON_LOG="${1:-}"
+
+  if ! tail -1 "${lJSON_LOG}" | grep -q ']'; then
+    echo -n "]" >> "${lJSON_LOG}"
+  fi
+
+  # at the end we need to fix our json elements and ensure our start is correct
+
+}
 
 # write_pid_log is a functions used for debugging
 # enable it with setting PID_LOGGING to 1 in the main emba script

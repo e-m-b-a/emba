@@ -55,6 +55,7 @@ S12_binary_protection()
     print_output "[-] Binary protection analyzer ${ORANGE}${EXT_DIR}/checksec${NC} not found - check your installation."
   fi
 
+  write_json_module_log
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
@@ -152,5 +153,5 @@ binary_protection_threader() {
   lJSON_ARRAY_OUT+=("SYMBOLS=$(strip_color_codes "${lSYMBOLS}")")
   lJSON_ARRAY_OUT+=("FORTIFY=$(strip_color_codes "${lFORTIFY}")")
 
-  write_json_module_log "${lJSON_ARRAY_OUT[@]}"
+  write_json_module_log_entry "${lJSON_ARRAY_OUT[@]}"
 }
