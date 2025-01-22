@@ -55,7 +55,6 @@ S12_binary_protection()
     print_output "[-] Binary protection analyzer ${ORANGE}${EXT_DIR}/checksec${NC} not found - check your installation."
   fi
 
-  write_json_module_log
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
