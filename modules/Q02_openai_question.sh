@@ -141,7 +141,12 @@ ask_chatgpt() {
         # print_output "[*] AI-Assisted analysis for ${ORANGE}${lGPT_INPUT_FILE_}${NC}" "" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
         print_output "[*] AI-Assisted analysis for ${lGPT_INPUT_FILE_mod}" "" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
         print_output "$(indent "$(orange "$(print_path "${lSCRIPT_PATH_TMP_}")")")"
-        head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
+        head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json" || print_error "[-] Tmp file create error for ${lSCRIPT_PATH_TMP_}"
+        if [[ ! -f "${TMP_DIR}/chat.json" ]]; then
+          print_output "[-] Temp file ${TMP_DIR}/chat.json for further analysis of ${lSCRIPT_PATH_TMP_} was not created ... some Error occured"
+          return
+        fi
+
         lCHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${lSCRIPT_PATH_TMP_}" | tr -d '[:space:]' | sed 's/\[ASK_GPT\].*//')
         if [[ "${#lCHATGPT_CODE_}" -gt 4561 ]]; then
           print_output "[*] GPT request is too big ... stripping it now" "no_log"
@@ -209,6 +214,9 @@ ask_chatgpt() {
             readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
             # reset the array index to start again with the highest rated entry
             lELE_INDEX=0
+            if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+              return
+            fi
             sleep 30s
             continue
           fi

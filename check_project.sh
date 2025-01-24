@@ -130,7 +130,7 @@ dockerchecker() {
   mapfile -t DOCKER_COMPS < <(find . -maxdepth 1 -iname "docker-compose*.yml")
   for DOCKER_COMP in "${DOCKER_COMPS[@]}"; do
     echo -e "\\n""${GREEN}""Run docker check on ${DOCKER_COMP}:""${NC}""\\n"
-    if docker-compose -f "${DOCKER_COMP}" config 1>/dev/null || [[ $? -ne 1 ]]; then
+    if docker compose -f "${DOCKER_COMP}" config 1>/dev/null || [[ $? -ne 1 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
@@ -275,7 +275,7 @@ summary() {
   fi
   if [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
-    echo -e "Modules to check (docker-compose): ${#MODULES_TO_CHECK_ARR_DOCKER[@]}\\n"
+    echo -e "Modules to check (docker compose): ${#MODULES_TO_CHECK_ARR_DOCKER[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_DOCKER[@]}"; do
       echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done

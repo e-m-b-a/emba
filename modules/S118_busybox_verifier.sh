@@ -183,7 +183,9 @@ S118_busybox_verifier()
   done
 
   for lBB_RESULT_FILE in "${LOG_PATH_MODULE}"/tmp/*; do
-    tee -a "${LOG_FILE}" < "${lBB_RESULT_FILE}"
+    if [[ -f "${lBB_RESULT_FILE}" ]]; then
+      tee -a "${LOG_FILE}" < "${lBB_RESULT_FILE}"
+    fi
   done
 
   if [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
