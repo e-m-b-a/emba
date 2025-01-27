@@ -559,7 +559,7 @@ cve_db_lookup_version() {
   # we are looking for cpe:2.3:[aoh]:BINARY_NAME:BINARY_VERSION:.* and for cpe:2.3:[aoh]:BINARY_NAME:*:.*
   # with this we are also able to further process just BINARY_NAME with further version details which are not in the cpe identifier
   print_output "[*] Testing against NVD dir ${NVD_DIR}" "no_log"
-  mapfile -t lCVE_VER_SOURCES_ARR < <(grep -l -r -E -e "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" -e "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
+  mapfile -t lCVE_VER_SOURCES_ARR < <(rg -l -e "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_VERSION_SEARCH}:.*:.*:.*:.*:.*:" -e "cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
   print_output "[*] CVE database lookup with version information: ${ORANGE}${lCPE_BIN_VERSION_SEARCH}${NC} resulted in ${ORANGE}${#lCVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
   print_output "[*] Testing: cpe:${CPE_VERSION}:[aoh]${lCPE_BIN_NAME_SEARCH}:\*:.*:.*:.*:.*:.*:" "no_log"
 

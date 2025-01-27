@@ -38,7 +38,7 @@ for STRING_ENTRY in "${STRING_ENTRY_ARR[@]}"; do
 
   echo "[*] Testing SBOM entry ${COMPONENT//::}"
 
-  if [[ "$(grep -h "cpe.*${COMPONENT//::}:" external/nvd-json-data-feeds/* -r | wc -l 2>/dev/null)" -gt 0 ]]; then
+  if [[ "$(rg -I -N "cpe.*${COMPONENT//::}:" external/nvd-json-data-feeds/* | wc -l 2>/dev/null)" -gt 0 ]]; then
     # we can add the entry to our quick scan profile
     echo "[*] Adding component entry for ${COMPONENT} to our quick scan profile"
     echo "${STRING_ENTRY}" >> config/bin_version_strings_quick.cfg

@@ -58,7 +58,7 @@ IF20_nvd_feed() {
           git clone --depth 1 -b main https://github.com/EMBA-support-repos/EPSS-data.git external/EPSS-data || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )
         fi
 
-        if [[ $(grep -l -E "cpe.*busybox:" external/nvd-json-data-feeds/* -r 2>/dev/null | wc -l) -gt 18 ]]; then
+        if [[ $(rg -l "cpe.*busybox:" external/nvd-json-data-feeds/* 2>/dev/null | wc -l) -gt 18 ]]; then
           echo -e "\\n""${GREEN}""NVD JSON data feed is installed.""${NC}"
         else
           echo -e "\\n""${MAGENTA}""NVD JSON data feed is not ready.""${NC}"

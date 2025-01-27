@@ -35,6 +35,7 @@ I01_default_apps_host() {
   print_tool_info "net-tools" 1
   print_tool_info "curl" 1
   print_tool_info "file" 1
+  print_tool_info "ripgrep" 1
 
   # python3.10-request
   print_tool_info "python3-pip" 1
