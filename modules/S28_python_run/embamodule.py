@@ -15,8 +15,8 @@ Author(s): Thomas Gingele
 
 Description: This file contains wrapper code for custom Python modules.
 """
-from os import _Environ, environ
-from sys import argv
+from os import _Environ
+from embaformatting import FORMAT
 
 
 class EmbaModule():
@@ -49,13 +49,22 @@ class EmbaModule():
 
         try:
             self.logfile_dir = env.get('LOG_PATH_MODULE')
-        except:
-            self.panic(f"Unable to determine log path for python module '{self.filename}'.", Exception)
-
-        try:
             self.logfile = open(f"{self.logfile_dir}/{self.filename}.txt", "w")
-        except:
-            self.panic("Unable to open log files for '{self.filename}'.", Exception)
+
+        except KeyError as key_error:
+            err = f"Unable to determine log path for python module '{self.filename}'.\n Aborting."
+            self.panic(err)
+            raise key_error
+
+        except PermissionError as perm_error:
+            err = f"Access to '{self.filename}' denied.\n Aborting."
+            self.panic(err)
+            raise perm_error
+
+        except FileNotFoundError as file_not_found_error:
+            err = f"File '{self.filename}' could not be found/created.\n Does the underlying directory exist?\n Aborting."
+            self.panic(err)
+            raise file_not_found_error
 
 
     def __del__(self):
@@ -69,16 +78,25 @@ class EmbaModule():
 
 
     def log(self, text: str):
-        self.__write_formatted_log("*", text)
+        self.__write_formatted_log(
+            f"{FORMAT['ORANGE']}*{FORMAT['NC']}",
+            text
+        )
 
 
     def add_finding(self, description: str):
         self.findings.append(description)
-        self.__write_formatted_log(f"F{len(self.findings)}", description)
+        self.__write_formatted_log(
+            f"{FORMAT['GREEN']}F{len(self.findings)}{FORMAT['NC']}",
+            description
+        )
 
 
-    def panic(self, description: str, except_type: type[Exception]):
-        self.__write_formatted_log("!", description)
+    def panic(self, description: str):
+        self.__write_formatted_log(
+            f"{FORMAT['RED']}!{FORMAT['NC']}",
+            description
+        )
 
 
 def setup_module(argv: list, env: _Environ):

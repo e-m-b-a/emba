@@ -16,6 +16,7 @@ Author(s): Thomas Gingele
 Description: This python script serves as an example of a Python module. It echoes passed parameters and then exits.
 """
 from embamodule import setup_module, shutdown_module
+from embaformatting import FORMAT
 from traceback import format_exc
 from sys import argv
 from os import environ
@@ -27,7 +28,8 @@ def module_run(module, argv, environ):
     All custom code should go here or in a function called by this one.
     """
     # Create a basic log entry.
-    module.log(f"Received a total of {len(environ)} environment variables.")
+    # Colored output is supported.
+    module.log(f"Received a total of {FORMAT['ORANGE']}{len(environ)}{FORMAT['NC']} environment variables.")
 
     # Add a finding.
     module.add_finding("You look great today!")
@@ -35,8 +37,7 @@ def module_run(module, argv, environ):
     # Raise an exception.
     # All exceptions, wether intentionally raised or not are automatically
     # formatted and written to the module log.
-    if not type(argv) == list:
-        raise AttributeError("How did you even do that?")
+    raise Exception("Dummy Exception")
 
 
 def main():
@@ -49,8 +50,8 @@ def main():
     try:
         module_run(module, argv, environ)
 
-    except Exception as exc:
-        module.panic(format_exc(), type(exc))
+    except:
+        module.panic(format_exc())
 
     finally:
         shutdown_module(module)
