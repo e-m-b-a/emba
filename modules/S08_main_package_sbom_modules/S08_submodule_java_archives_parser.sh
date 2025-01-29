@@ -110,14 +110,16 @@ S08_submodule_java_archives_parser() {
       local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
       # for the dependencies we can check for pom.xml
-      if (unzip -l "${lJAVA_ARCHIVE}" | grep -q "pom.xml"); then
+      local lPOM_XML=""
+      lPOM_XML=$(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
+      if [[ -n "${lPOM_XML}" ]]; then
         write_log "[*] Found pom.xml metadata in ${lJAVA_ARCHIVE}. Analysis is currently not supported" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        unzip -p "${lJAVA_ARCHIVE}" *"pom.xml" | tee -a "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | tee -a "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_log "[*] Please open an issue at https://github.com/e-m-b-a/emba/issues and provide the Java package" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         # We could do something like the following
-          # unzip -p "${lJAVA_ARCHIVE}" *"pom.xml" | xpath -e project/dependencies
-          # unzip -p "${lJAVA_ARCHIVE}" *"pom.xml" | xpath -e project/dependencies/dependency
-          # unzip -p "${lJAVA_ARCHIVE}" *"pom.xml" | xpath -e project/dependencies/dependency[1]/version
+          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
+          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
+          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
         # With a usefull java package we are going to implement this mechanism
       fi
 
