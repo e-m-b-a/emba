@@ -16,23 +16,43 @@ Author(s): Thomas Gingele
 Description: This python script serves as an example of a Python module. It echoes passed parameters and then exits.
 """
 from embamodule import setup_module, shutdown_module
+from traceback import format_exc
 from sys import argv
 from os import environ
 
 
+def module_run(module, argv, environ):
+    """
+    This function holds the modules logic.
+    All custom code should go here or in a function called by this one.
+    """
+    # Create a basic log entry.
+    module.log(f"Received a total of {len(environ)} environment variables.")
+
+    # Add a finding.
+    module.add_finding("You look great today!")
+
+    # Raise an exception.
+    # All exceptions, wether intentionally raised or not are automatically
+    # formatted and written to the module log.
+    if not type(argv) == list:
+        raise AttributeError("How did you even do that?")
+
+
 def main():
-    # Setup module and logging.
-    # This line is required.
+    """
+    This function should not be changed.
+    It handles the setup and reporting of the module.
+    """
     module = setup_module(argv, environ)
 
-    # This is just some example code.
-    # The module logic would go here.
-    module.log("Received arguments a total of {len(environ)} environment variables.")
-    for key in environ.keys():
-        module.add_finding(f"Found envvar: {key}={environ[key]}")
+    try:
+        module_run(module, argv, environ)
 
-    # Shutdown module and report results.
-    # This line is required
-    shutdown_module(module)
+    except Exception as exc:
+        module.panic(format_exc(), type(exc))
+
+    finally:
+        shutdown_module(module)
 
 main()

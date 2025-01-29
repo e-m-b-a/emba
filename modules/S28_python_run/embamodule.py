@@ -15,7 +15,8 @@ Author(s): Thomas Gingele
 
 Description: This file contains wrapper code for custom Python modules.
 """
-from os import _Environ
+from os import _Environ, environ
+from sys import argv
 
 
 class EmbaModule():
@@ -78,7 +79,6 @@ class EmbaModule():
 
     def panic(self, description: str, except_type: type[Exception]):
         self.__write_formatted_log("!", description)
-        raise except_type(description)
 
 
 def setup_module(argv: list, env: _Environ):
