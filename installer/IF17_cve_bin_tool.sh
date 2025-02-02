@@ -44,7 +44,7 @@ IF17_cve_bin_tool() {
         pip install -U -r requirements.txt
         python3 -m pip install -e .
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
-        ./external/cve-bin-tool/cli.py --update now
+        python3 external/cve-bin-tool/cve_bin_tool/cli.py --update now || true
         cp -pr "${HOME}"/.cache/cve-bin-tool ./external/cve-bin-tool/cache_cve-bin-tool
       ;;
     esac
