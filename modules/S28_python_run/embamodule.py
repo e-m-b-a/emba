@@ -59,7 +59,7 @@ class EmbaModule():
             raise key_error
 
         except PermissionError as perm_error:
-            err = f"Access to '{self.filename}' denied."
+            err = f"Access to '{self.filename}.py' denied."
             self.panic(err)
             raise perm_error
 
