@@ -139,6 +139,10 @@ F17_cve_bin_tool() {
 
     echo -n "]" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
     tr -d '\n' < "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
+      print_output "[+] VEX data can be found in the SBOM log path" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+    fi
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -572,29 +576,28 @@ tear_down_cve_threader() {
 
   # we do not deal with output formatting the usual way -> we use printf
   if [[ ! -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt" ]]; then
-    printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:  %-10.10s : %-4.4s :   %-15.15s:   %s${NC}\n" "BIN NAME" "BIN VERS" "CVE ID" "CVSS VALUE" "EPSS" "SOURCE" "EXPLOIT" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+    printf "${GREEN}\t%-20.20s:   %-12.12s:   %-19.19s:  %-10.10s : %-4.4s :   %-15.15s:   %s${NC}\n" "BIN NAME" "BIN VERS" "CVE ID" "CVSS VALUE" "EPSS" "SOURCE" "EXPLOIT" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
   fi
   if [[ "${lCVSS_SEVERITY}" == "HIGH" || "${lCVSS_SEVERITY}" == "CRITICAL" ]]; then
-    # put a note in the output if we have switched to CVSSv2
     if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
       "${lEXPLOIT}" == *PS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-19.19s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     else
-      printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${RED}\t%-20.20s:   %-12.12s:   %-19.19s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   elif [[ "${lCVSS_SEVERITY}" == "MEDIUM" ]]; then
     if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
       "${lEXPLOIT}" == *PS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-19.19s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     else
-      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-19.19s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   else
     if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
       "${lEXPLOIT}" == *PS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-19.19s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     else
-      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-19.19s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID_VERS}" "${lCVSS_SCORE}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   fi
 

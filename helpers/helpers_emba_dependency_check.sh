@@ -693,8 +693,11 @@ dependency_check()
       fi
       # CVE searchsploit
       check_dep_tool "CVE Searchsploit" "cve_searchsploit"
+
       check_dep_file "cve-bin-tool" "${EXT_DIR}""/cve-bin-tool/cve_bin_tool/cli.py"
       preparing_cve_bin_tool &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
 
       check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
       check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"

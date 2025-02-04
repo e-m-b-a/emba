@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2025-2025 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -30,7 +30,7 @@ IF17_cve_bin_tool() {
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""${MAGENTA}""${BOLD}""${BINUTIL_VERSION_NAME}"" will be downloaded (if not already on the system) and objdump compiled!""${NC}"
+      echo -e "\\n""${MAGENTA}""${BOLD}"" cve-bin-tool will be downloaded (if not already on the system)!""${NC}"
     fi
 
     case ${ANSWER:0:1} in
