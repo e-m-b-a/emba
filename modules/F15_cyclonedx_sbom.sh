@@ -108,7 +108,7 @@ F15_cyclonedx_sbom() {
     mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" -not -name "unhandled_file_*" | sort -u)
     if [[ "${SBOM_UNTRACKED_FILES}" -gt 0 ]]; then
       mapfile -t lCOMP_FILES_ARR_UNHANDLED < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "unhandled_file_*.json" | sort -u)
-     lCOMP_FILES_ARR+=("${lCOMP_FILES_ARR_UNHANDLED[@]}")
+      lCOMP_FILES_ARR+=("${lCOMP_FILES_ARR_UNHANDLED[@]}")
     fi
 
     # as we can have so many components that everything goes b00m we need to build the
