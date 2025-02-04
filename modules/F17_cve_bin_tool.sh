@@ -36,15 +36,11 @@ F17_cve_bin_tool() {
   local lVEX_FILE_ID=0
   local lVEX_FILE=""
   local lNEG_LOG=0
+  local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
 
-  mkdir "${LOG_PATH_MODULE}/json/"
-  mkdir "${LOG_PATH_MODULE}/cve_sum/"
-  mkdir "${LOG_PATH_MODULE}/exploit/"
-
-  # this should be moved to dep checker
-  print_output "[*] Preparing cve-bin-tool ..."
-  mkdir "${HOME}"/.cache/cve-bin-tool
-  cp -pri /external/cve-bin-tool/cache_cve-bin-tool/* "${HOME}"/.cache/cve-bin-tool/
+  mkdir "${LOG_PATH_MODULE}/json/" || true
+  mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
+  mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..."
   # read each item in the JSON array to an item in the Bash array
