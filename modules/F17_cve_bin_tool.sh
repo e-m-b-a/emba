@@ -23,8 +23,6 @@ F17_cve_bin_tool() {
 
   pre_module_reporter "${FUNCNAME[0]}"
 
-  # new global option -> move this to scanning profile
-  VEX_ENABLED=1
   export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
 
   # our first approach is to use our beautiful SBOM and walk through it
