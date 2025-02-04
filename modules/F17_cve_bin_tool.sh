@@ -45,8 +45,8 @@ F17_cve_bin_tool() {
 
   # this should be moved to dep checker
   print_output "[*] Preparing cve-bin-tool ..."
-  mkdir ${HOME}/.cache/cve-bin-tool
-  cp -pri /external/cve-bin-tool/cache_cve-bin-tool/* ${HOME}/.cache/cve-bin-tool/
+  mkdir "${HOME}"/.cache/cve-bin-tool
+  cp -pri /external/cve-bin-tool/cache_cve-bin-tool/* "${HOME}"/.cache/cve-bin-tool/
 
   print_output "[*] Loading SBOM ..."
   # read each item in the JSON array to an item in the Bash array
@@ -74,7 +74,7 @@ F17_cve_bin_tool() {
     lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
     lPROD="${lMIN_IDENTIFIER[*]:2:1}"
     lVERS="${lMIN_IDENTIFIER[*]:3:1}"
-    cve_bin_tool_threader "$lBOM_REF" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}" &
+    cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
