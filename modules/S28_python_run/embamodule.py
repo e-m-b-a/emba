@@ -31,13 +31,15 @@ class EmbaModule():
             Close module files and destroy the class instance.
 
         __write_formatted_log:
-            Base method for logging. Should not be called by Python modules directly.
+            Base method for logging. Should not be
+            called by Python modules directly.
 
         log:
             Log a new message into the module log files.
 
         add_finding:
-            Add a new finding to the module. This will later be used during report generation.
+            Add a new finding to the module. This will later be
+            used during report generation.
 
         panic:
             Ensures propper logging when throwing exceptions.
@@ -52,30 +54,27 @@ class EmbaModule():
             self.logfile = open(f"{self.logfile_dir}/{self.filename}.txt", "w")
 
         except KeyError as key_error:
-            err = f"Unable to determine log path for python module '{self.filename}'.\n Aborting."
+            err = f"Unable to determine log path for module '{self.filename}'."
             self.panic(err)
             raise key_error
 
         except PermissionError as perm_error:
-            err = f"Access to '{self.filename}' denied.\n Aborting."
+            err = f"Access to '{self.filename}' denied."
             self.panic(err)
             raise perm_error
 
         except FileNotFoundError as file_not_found_error:
-            err = f"File '{self.filename}' could not be found/created.\n Does the underlying directory exist?\n Aborting."
+            err = f"Unable to access '{self.filename}'."
             self.panic(err)
             raise file_not_found_error
 
-
     def __del__(self):
         self.logfile.close()
-
 
     def __write_formatted_log(self, operator: str, text: str):
         lines = text.split('\n')
         for line in lines:
             self.logfile.write(f"[{operator}] {line}\n")
-
 
     def log(self, text: str):
         self.__write_formatted_log(
@@ -83,14 +82,12 @@ class EmbaModule():
             text
         )
 
-
     def add_finding(self, description: str):
         self.findings.append(description)
         self.__write_formatted_log(
             f"{FORMAT['GREEN']}F{len(self.findings)}{FORMAT['NC']}",
             description
         )
-
 
     def panic(self, description: str):
         self.__write_formatted_log(
@@ -116,7 +113,8 @@ def setup_module(argv: list, env: _Environ):
 def shutdown_module(module: EmbaModule):
     """
     Shut down an emba python module.
-    This will also print the amount of findings as an interger so EMBA can parse the number.
+    This will also print the amount of findings as an
+    interger so EMBA can parse the number.
 
     Parameters:
         module (EmbaModule): A class instance of EmbaModule.

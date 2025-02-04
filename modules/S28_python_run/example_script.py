@@ -13,7 +13,8 @@ SPDX-License-Identifier: GPL-3.0-only
 
 Author(s): Thomas Gingele
 
-Description: This python script serves as an example of a Python module. It echoes passed parameters and then exits.
+Description: This python script serves as an example of a Python module.
+             It echoes passed parameters and then exits.
 """
 from embamodule import setup_module, shutdown_module
 from embaformatting import FORMAT
@@ -29,7 +30,7 @@ def module_run(module, argv, environ):
     """
     # Create a basic log entry.
     # Colored output is supported.
-    module.log(f"Received a total of {FORMAT['ORANGE']}{len(environ)}{FORMAT['NC']} environment variables.")
+    module.log(f"Envvar count: {FORMAT['ORANGE']}{len(environ)}{FORMAT['NC']}")
 
     # Add a finding.
     module.add_finding("You look great today!")
@@ -50,10 +51,11 @@ def main():
     try:
         module_run(module, argv, environ)
 
-    except:
+    except Exception:
         module.panic(format_exc())
 
     finally:
         shutdown_module(module)
+
 
 main()

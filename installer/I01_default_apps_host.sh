@@ -23,6 +23,7 @@ I01_default_apps_host() {
   echo -e "\\n""${ORANGE}""${BOLD}""These applications will be installed/updated:""${NC}"
   print_tool_info "jq" 1
   print_tool_info "shellcheck" 1
+  print_tool_info "flake8" 1
   print_tool_info "unzip" 1
   print_tool_info "bc" 1
   print_tool_info "coreutils" 1

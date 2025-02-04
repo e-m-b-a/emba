@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Benedikt Kuehne
+# Contributor(s): Benedikt Kuehne, Thomas Gingele
 
 # Description:  Check all shell scripts inside ./helpers, ./modules, emba and itself with shellchecker
 
@@ -22,6 +22,7 @@ STRICT_MODE=1
 INSTALLER_DIR="./installer"
 HELP_DIR="./helpers"
 MOD_DIR="./modules"
+PYTHON_MOD_DIR="${MOD_DIR}/S28_python_run"
 MOD_DIR_LOCAL="./modules_local"
 CONF_DIR="./config"
 EXT_DIR="./external"
@@ -49,6 +50,7 @@ MODULES_TO_CHECK_ARR=()
 MODULES_TO_CHECK_ARR_TAB=()
 MODULES_TO_CHECK_ARR_SEMGREP=()
 MODULES_TO_CHECK_ARR_DOCKER=()
+MODULES_TO_CHECK_ARR_PYTHON=()
 MODULES_TO_CHECK_ARR_PERM=()
 MODULES_TO_CHECK_ARR_COMMENT=()
 MODULES_TO_CHECK_ARR_GREP=()
@@ -123,7 +125,6 @@ import_emba_main() {
   done
 }
 
-
 dockerchecker() {
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA docker-files check""${NC}"
   echo -e "${BOLD}""=================================================================""${NC}"
@@ -136,6 +137,24 @@ dockerchecker() {
       echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
       ((MODULES_TO_CHECK=MODULES_TO_CHECK+1))
       MODULES_TO_CHECK_ARR_DOCKER+=( "${DOCKER_COMP}" )
+    fi
+  done
+}
+
+pythoncheck() {
+  echo -e "\\n""${ORANGE}""${BOLD}""EMBA Python modules check""${NC}"
+  echo -e "${BOLD}""=================================================================""${NC}"
+  PYTHON_MODULES=()
+  mapfile -t PYTHON_MODULES < <(find "${PYTHON_MOD_DIR}" -iname "*.py" 2>/dev/null)
+  for PYTHON_MODULE in "${PYTHON_MODULES[@]}"; do
+    if (file "${PYTHON_MODULE}" | grep -q "Python script"); then
+      echo -e "\\n""${GREEN}""Run Python check on ${PYTHON_MODULE}:""${NC}""\\n"
+      if flake8 "${PYTHON_MODULE}" || [[ $? -ne 1 ]]; then
+        echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
+      else
+        echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
+        MODULES_TO_CHECK_ARR_PYTHON+=( "${PYTHON_MODULE}" )
+      fi
     fi
   done
 }
@@ -441,6 +460,7 @@ var_checker modules
 var_checker helpers
 function_entry_space_check
 dockerchecker
+pythoncheck
 copy_right_check "Siemens Energy AG" 2025 ./ ./external
 list_linter_exceptions shellcheck ./ ./external
 list_linter_exceptions semgrep ./ ./external
@@ -451,6 +471,6 @@ if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[
   [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]] || \
-  [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
+  [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PYTHON[@]}" -gt 0 ]]; then
   exit 1
 fi
