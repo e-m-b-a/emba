@@ -131,9 +131,9 @@ cve_bin_tool_threader() {
   # real    398.48s
   # with metric
   # real    1363.45s
-  #if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
-  #  rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
-  #fi
+  # if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
+  #   rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
+  # fi
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}.csv" ]]; then
