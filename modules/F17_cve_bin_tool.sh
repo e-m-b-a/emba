@@ -191,7 +191,7 @@ cve_bin_tool_threader() {
   if [[ -f "${lBIN_LOG}" ]]; then
     tee -a "${LOG_FILE}" < "${lBIN_LOG}"
   fi
-  
+
 }
 
 tear_down_cve_threader() {
@@ -583,7 +583,7 @@ tear_down_cve_threader() {
     affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -n component="${lPROD}" version="${lVERS}")")")" \
     properties="$(jo -a "${PROPERTIES_JSON_ARR[@]:-null}")" \
     > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.json"
-  
+
   write_log "EXPLOIT entry: ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}" "${LOG_PATH_MODULE}/exploit_notes.txt"
 }
 
