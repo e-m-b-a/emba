@@ -173,7 +173,7 @@ cve_bin_tool_threader() {
     # write detailed log
     cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}.txt" >> "${lBIN_LOG}"
     write_log "" "${lBIN_LOG}"
-    write_log "[+] Found ${RED}${BOLD}${lCVE_COUNTER_VERSION}${GREEN} CVEs and ${RED}${BOLD}${lEXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" >> "${lBIN_LOG}"
+    write_log "[+] Found ${RED}${BOLD}${lCVE_COUNTER_VERSION}${GREEN} CVEs and ${RED}${BOLD}${lEXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
 
     # write summary log:
     printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERSION}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
@@ -432,8 +432,7 @@ tear_down_cve_threader() {
     if [[ ${lEDB} -eq 0 ]]; then
       # only count the msf exploit if we have not already count an other exploit
       # otherwise we count an exploit for one CVE multiple times
-      # write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};MSF" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      echo "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};MSF" >> "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};MSF" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
       lEDB=1
     fi
   fi
@@ -457,8 +456,7 @@ tear_down_cve_threader() {
     if [[ ${lEDB} -eq 0 ]]; then
       # only count the snyk exploit if we have not already count an other exploit
       # otherwise we count an exploit for one CVE multiple times
-      # write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};SNYK" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      echo "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};SNYK" >> "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};SNYK" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
       lEDB=1
     fi
   fi
@@ -494,8 +492,7 @@ tear_down_cve_threader() {
     if [[ ${lEDB} -eq 0 ]]; then
       # only count the packetstorm exploit if we have not already count an other exploit
       # otherwise we count an exploit for one CVE multiple times
-      # write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      echo "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PS" >> "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
       lEDB=1
     fi
   fi
@@ -530,8 +527,7 @@ tear_down_cve_threader() {
     if [[ ${lEDB} -eq 0 ]]; then
       # only count the routersploit exploit if we have not already count an other exploit
       # otherwise we count an exploit for one CVE multiple times
-      # write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};RS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      echo "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};RS" >> "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};RS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
       lEDB=1
     fi
   fi
