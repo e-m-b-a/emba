@@ -147,9 +147,7 @@ cve_bin_tool_threader() {
   fi
   wait_for_pid "${lWAIT_PIDS_F17_ARR_2[@]}"
 
-  #
   # lets start the final logging per component
-  #
 
   # now we have our nice formatted logs somewhere over here: "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
   # lets build the final log for every binary:
@@ -367,7 +365,7 @@ tear_down_cve_threader() {
     for lEXPLOIT_ID in "${lEXPLOIT_IDS_ARR[@]}" ; do
       lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:EDB:${lEXPLOIT_ID}" )
       lEXPLOIT+=" ${lEXPLOIT_ID}"
-      # write_log "[+] Exploit for ${lCVE_ID}:\\n" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
+      write_log "[+] Exploit for ${lCVE_ID}:\\n" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
       write_log "[+] EDB Exploit for ${lCVE_ID} identified"  "${LOG_PATH_MODULE}/exploit/EDB_${lEXPLOIT_ID}_notes.txt"
       write_log "${lEXPLOIT_AVAIL_EDB_ARR[*]/\ /\\n}" "${LOG_PATH_MODULE}/exploit/edb_${lEXPLOIT_ID}_notes.txt"
       # write_log "${lLINE}" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
@@ -570,33 +568,28 @@ tear_down_cve_threader() {
     fi
   fi
 
-  if [[ "${VEX_ENABLED}" -eq 1 ]]; then
-    # generate the vulnerability details for the SBOM (VEX)
+  # generate the vulnerability details for the SBOM (VEX)
 
-    # external/nvd-json-data-feeds/CVE-2022/CVE-2022-25xx/CVE-2022-2586.json
-    mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u || true)
-    lCVE_DESC=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
+  # external/nvd-json-data-feeds/CVE-2022/CVE-2022-25xx/CVE-2022-2586.json
+  mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u || true)
+  lCVE_DESC=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
 
-    lVULN_BOM_REF=$(uuidgen)
-    build_sbom_json_properties_arr "${lVEX_EXPLOIT_PROP_ARRAY_ARR[@]}"
-    # => we get PROPERTIES_JSON_ARR as global
+  lVULN_BOM_REF=$(uuidgen)
+  build_sbom_json_properties_arr "${lVEX_EXPLOIT_PROP_ARRAY_ARR[@]}"
+  # => we get PROPERTIES_JSON_ARR as global
 
-    jo -p -n -- \
-      bom-ref="${lVULN_BOM_REF}" \
-      id="${lCVE_ID}" \
-      source="$(jo -a "$(jo -n name="NVD" url="https://nvd.nist.gov/vuln/detail/${lCVE_ID}")")" \
-      ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY}" method="${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
-      cwes="$(jo -a "${lCWE[@]:-null}")" \
-      analysis="$(jo -a "$(jo -n state="not_verified")")" \
-      description="${lCVE_DESC}" \
-      affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -n component="${lPROD}" version="${lVERS}")")")" \
-      properties="$(jo -a "${PROPERTIES_JSON_ARR[@]:-null}")" \
-      > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.json"
+  jo -p -n -- \
+    bom-ref="${lVULN_BOM_REF}" \
+    id="${lCVE_ID}" \
+    source="$(jo -a "$(jo -n name="NVD" url="https://nvd.nist.gov/vuln/detail/${lCVE_ID}")")" \
+    ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY}" method="${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
+    cwes="$(jo -a "${lCWE[@]:-null}")" \
+    analysis="$(jo -a "$(jo -n state="not_verified")")" \
+    description="${lCVE_DESC}" \
+    affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -n component="${lPROD}" version="${lVERS}")")")" \
+    properties="$(jo -a "${PROPERTIES_JSON_ARR[@]:-null}")" \
+    > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.json"
   
-      # future addons:
-      # advisories=$(jo -a $(jo -n title="ID/Name-of-PoC" url="link-to-poc")) \
-  fi
-
   write_log "EXPLOIT entry: ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}" "${LOG_PATH_MODULE}/exploit_notes.txt"
 }
 
