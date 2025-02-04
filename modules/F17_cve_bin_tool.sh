@@ -42,17 +42,18 @@ F17_cve_bin_tool() {
   mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
-  print_output "[*] Loading SBOM ..."
+  print_output "[*] Loading SBOM ..." "no_log"
   # read each item in the JSON array to an item in the Bash array
   readarray -t lSBOM_ARR < <(jq --compact-output '.components[]' "${lEMBA_SBOM_JSON}" || print_error "[-] SBOM loading error - Vulnerability analysis not available")
 
-  print_output "[*] Analyzing SBOM ..."
+  print_output "[*] Analyzing SBOM ..." "no_log"
 
   local lSBOM_ARR_PRE_PROCESSED=()
   # first round is primarly for removing duplicates and unhandled_file entries
   # 2nd round is for the real testing
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     local lNEG_LOG=1
+    local lBOM_REF=""
     local lORIG_SOURCE=""
     local lMIN_IDENTIFIER=()
     local lPROD=""
@@ -83,8 +84,18 @@ F17_cve_bin_tool() {
     if [[ "${lSBOM_ARR_PRE_PROCESSED[*]}" =~ .*\"name\":\""${lPROD}"\",\"version\":\""${lVERS}"\".* ]]; then
       continue
     fi
+    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
+
+    local lANCHOR=""
+    lANCHOR="${lPROD}_${lVERS}"
+    lANCHOR="cve_${lANCHOR:0:20}"
+    print_output "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} - vendor ${ORANGE}${lVENDOR:-NOTDEFINED}${NC} - version ${ORANGE}${lVERS}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}"
+    write_link "f17#${lANCHOR}"
+
     lSBOM_ARR_PRE_PROCESSED+=("${lSBOM_ENTRY}")
   done
+
+  print_bar
 
   # 2nd round with pre-processed array -> we are going to check for CVEs now
   for lSBOM_ENTRY in "${lSBOM_ARR_PRE_PROCESSED[@]}"; do
@@ -112,7 +123,7 @@ F17_cve_bin_tool() {
 
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
-  print_output "[*] Generating final VEX vulnerability json ..."
+  print_output "[*] Generating final VEX vulnerability json ..." "no_log"
   # now we need to build our full vex json
   mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json")
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
@@ -141,7 +152,7 @@ F17_cve_bin_tool() {
     tr -d '\n' < "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
 
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
-      print_output "[+] VEX data can be found in the SBOM log path" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+      print_output "[+] VEX data can be found in the SBOM log path" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
     fi
   fi
 
@@ -158,9 +169,8 @@ cve_bin_tool_threader() {
   local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
   write_log "product,vendor,version,bom-ref" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
   write_log "${lPROD},${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
-  print_output "[*] Testing ${lPROD},${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}"
 
-  python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}" || print_error "[-] cve_bin_tool error for ${lBOM_REF}_${lPROD}_${lVERS}"
+  python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}" || true
   # benchmark no metric:
   # real    398.48s
   # with metric
@@ -186,10 +196,12 @@ cve_bin_tool_threader() {
   # now we have our nice formatted logs somewhere over here: "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
   # lets build the final log for every binary:
   local lBIN_LOG="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}_finished.txt"
-  write_log "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} / version ${ORANGE}${lVERS}${NC} / source ${ORANGE}${lORIG_SOURCE}${NC}:" "${lBIN_LOG}"
+  write_log "" "${lBIN_LOG}"
+
   local lANCHOR=""
   lANCHOR="${lPROD}_${lVERS}"
   lANCHOR="cve_${lANCHOR:0:20}"
+  write_log "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} / version ${ORANGE}${lVERS}${NC} / source ${ORANGE}${lORIG_SOURCE}${NC}:" "${lBIN_LOG}"
   write_anchor "${lANCHOR}" "${lBIN_LOG}"
 
   local lEXPLOIT_COUNTER_VERSION=0
