@@ -48,12 +48,13 @@ F17_cve_bin_tool() {
 
   print_output "[*] Analyzing SBOM ..."
 
+  local lSBOM_ARR_PRE_PROCESSED=()
+  # first round is primarly for removing duplicates and unhandled_file entries
+  # 2nd round is for the real testing
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     local lNEG_LOG=1
-    local lBOM_REF=""
     local lORIG_SOURCE=""
     local lMIN_IDENTIFIER=()
-    local lVENDOR=""
     local lPROD=""
     local lVERS=""
 
@@ -62,18 +63,53 @@ F17_cve_bin_tool() {
     # "name": "EMBA:sbom:2:minimal_identifier",
     # "value": "::debconf-i18n:1.5.82"
     # }
+    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
+
+    # if source is unhandled_file we can skip this entry completely
+    if [[ "${lORIG_SOURCE}" == "unhandled_file" ]]; then
+      continue
+    fi
+
+    mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
+    lPROD="${lMIN_IDENTIFIER[*]:2:1}"
+    lVERS="${lMIN_IDENTIFIER[*]:3:1}"
+
+    # ensure we have some version to test
+    if [[ -z "${lVERS}" ]]; then
+      continue
+    fi
+
+    # ensure this product/version combination is not already in our testing array:
+    if [[ "${lSBOM_ARR_PRE_PROCESSED[*]}" =~ .*\"name\":\""${lPROD}"\",\"version\":\""${lVERS}"\".* ]]; then
+      continue
+    fi
+    lSBOM_ARR_PRE_PROCESSED+=("${lSBOM_ENTRY}")
+  done
+
+  # 2nd round with pre-processed array -> we are going to check for CVEs now
+  for lSBOM_ENTRY in "${lSBOM_ARR_PRE_PROCESSED[@]}"; do
+    local lBOM_REF=""
+    local lORIG_SOURCE=""
+    local lMIN_IDENTIFIER=()
+    local lVENDOR=""
+    local lPROD=""
+    local lVERS=""
+
     lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
     lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
+
     mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
     lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
     lPROD="${lMIN_IDENTIFIER[*]:2:1}"
     lVERS="${lMIN_IDENTIFIER[*]:3:1}"
+
     cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
     max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR[@]}"
   done
+
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
   print_output "[*] Generating final VEX vulnerability json ..."
