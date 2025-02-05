@@ -675,10 +675,10 @@ output_cve_exploits() {
       print_output "$(indent "$(green "Identified ${RED}${BOLD}${HIGH_CVE_COUNTER}${NC}${GREEN} High rated CVE entries / Exploits: ${ORANGE}${EXPLOIT_HIGH_COUNT:-NA}${NC}")")"
       print_output "$(indent "$(green "Identified ${ORANGE}${BOLD}${MEDIUM_CVE_COUNTER}${NC}${GREEN} Medium rated CVE entries / Exploits: ${ORANGE}${EXPLOIT_MEDIUM_COUNT:-NA}${NC}")")"
       print_output "$(indent "$(green "Identified ${GREEN}${BOLD}${LOW_CVE_COUNTER}${NC}${GREEN} Low rated CVE entries /Exploits: ${ORANGE}${EXPLOIT_LOW_COUNT:-NA}${NC}")")"
-      write_csv_log "cve_critical" "${CRITICAL_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-      write_csv_log "cve_high" "${HIGH_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-      write_csv_log "cve_medium" "${MEDIUM_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-      write_csv_log "cve_low" "${LOW_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "cve_critical" "${CRITICAL_CVE_COUNTER}" "${EXPLOIT_CRITICAL_COUNT}" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "cve_high" "${HIGH_CVE_COUNTER}" "${EXPLOIT_HIGH_COUNT}" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "cve_medium" "${MEDIUM_CVE_COUNTER}" "${EXPLOIT_MEDIUM_COUNT}" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "cve_low" "${LOW_CVE_COUNTER}" "${EXPLOIT_LOW_COUNT}" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
     fi
     if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]] || [[ "${MSF_VERIFIED}" -gt 0 ]]; then
@@ -722,6 +722,7 @@ get_data() {
   export MEDIUM_CVE_COUNTER=0
   export LOW_CVE_COUNTER=0
   export EXPLOIT_COUNTER=0
+  export EXPLOIT_CRITICAL_COUNT=0
   export EXPLOIT_HIGH_COUNT=0
   export EXPLOIT_MEDIUM_COUNT=0
   export EXPLOIT_LOW_COUNT=0
@@ -955,17 +956,12 @@ get_data() {
     REMOTE_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(R\)" || true)"
     LOCAL_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(L\)" || true)"
     DOS_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(D\)" || true)"
-    ##### TODO for F17:
-    if [[ -f "${TMP_DIR}"/EXPLOIT_HIGH_COUNTER.tmp ]]; then
-      EXPLOIT_HIGH_COUNT="$(cat "${TMP_DIR}"/EXPLOIT_HIGH_COUNTER.tmp || true)"
+    if [[ -f "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp ]]; then
+      EXPLOIT_CRITICAL_COUNT="$(grep -c "CRITICAL" "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp || true)"
+      EXPLOIT_HIGH_COUNT="$(grep -c "HIGH" "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp || true)"
+      EXPLOIT_MEDIUM_COUNT="$(grep -c "MEDIUM" "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp || true)"
+      EXPLOIT_LOW_COUNT="$(grep -c "LOW" "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp || true)"
     fi
-    if [[ -f "${TMP_DIR}"/EXPLOIT_MEDIUM_COUNTER.tmp ]]; then
-      EXPLOIT_MEDIUM_COUNT="$(cat "${TMP_DIR}"/EXPLOIT_MEDIUM_COUNTER.tmp || true)"
-    fi
-    if [[ -f "${TMP_DIR}"/EXPLOIT_LOW_COUNTER.tmp ]]; then
-      EXPLOIT_LOW_COUNT="$(cat "${TMP_DIR}"/EXPLOIT_LOW_COUNTER.tmp || true)"
-    fi
-    ##### TODO for F17:
   fi
   if [[ -f "${S17_CSV_LOG}" ]]; then
     APK_ISSUES="$(cut -d\; -f 2 "${S17_CSV_LOG}" | awk '{ sum += $1 } END { print sum }' || true)"
