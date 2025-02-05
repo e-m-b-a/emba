@@ -25,6 +25,8 @@ F20_vul_aggregator() {
 
   pre_module_reporter "${FUNCNAME[0]}"
 
+  print_output "[!] DEPRECATION WARNING: This module is deprecated and will get completely removed from EMBA very soon."
+
   # we use this for later decisions:
   export F20_DEEP=1
   export WAIT_PIDS_F19=()

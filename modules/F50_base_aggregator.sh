@@ -685,11 +685,11 @@ output_cve_exploits() {
       write_csv_log "exploits" "${EXPLOIT_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       if [[ "${MSF_MODULE_CNT}" -gt 0 ]]; then
         print_output "$(indent "$(green "${MAGENTA}${BOLD}${EXPLOIT_COUNTER}${NC}${GREEN} possible exploits available (${MAGENTA}${MSF_MODULE_CNT}${GREEN} Metasploit modules).")")"
-        write_link "f20#minimalreportofexploitsandcves"
+        write_link "f17#minimalreportofexploitsandcves"
         write_csv_log "metasploit_modules" "${MSF_MODULE_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       else
         print_output "$(indent "$(green "${MAGENTA}${BOLD}${EXPLOIT_COUNTER}${NC}${GREEN} possible exploits available.")")"
-        write_link "f20#minimalreportofexploitsandcves"
+        write_link "f17#minimalreportofexploitsandcves"
       fi
       if [[ "${MSF_VERIFIED}" -gt 0 ]]; then
         print_output "$(indent "$(green "${MAGENTA}${BOLD}${MSF_VERIFIED}${NC}${GREEN} exploits in system mode emulation verified.")")"
@@ -949,7 +949,7 @@ get_data() {
     KNOWN_EXPLOITED_COUNTER=$(wc -l "${F17_LOG_DIR}"/KEV.txt)
     KNOWN_EXPLOITED_COUNTER=${KNOWN_EXPLOITED_COUNTER/\ *}
   fi
-  if [[ -f "${F20_EXPLOITS_LOG}" ]]; then
+  if [[ -d "${F17_LOG_DIR}/cve_sum" ]]; then
     EXPLOIT_COUNTER="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c "Exploit (" || true)"
     MSF_MODULE_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*MSF" || true)"
     REMOTE_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(R\)" || true)"
@@ -1049,7 +1049,7 @@ os_detector() {
 
   #### The following check is just in place if something went wrong
   if [[ ${VERIFIED} -eq 0 ]]; then
-    # usually the results of the kernel module checker are already used in f20 (first os check)
+    # usually the results of the kernel module checker are already used in f17 (first os check)
     # but just in case something went wrong we use it now
     os_kernel_module_detect
     if [[ ${VERIFIED} -eq 1 ]]; then
