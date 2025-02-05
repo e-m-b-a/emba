@@ -717,6 +717,7 @@ get_data() {
   export REMOTE_EXPLOIT_CNT=0
   export LOCAL_EXPLOIT_CNT=0
   export DOS_EXPLOIT_CNT=0
+  export CRITICAL_CVE_COUNTER=0
   export HIGH_CVE_COUNTER=0
   export MEDIUM_CVE_COUNTER=0
   export LOW_CVE_COUNTER=0
