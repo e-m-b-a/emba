@@ -46,16 +46,17 @@ F17_cve_bin_tool() {
   # read each item in the JSON array to an item in the Bash array
   readarray -t lSBOM_ARR < <(jq --compact-output '.components[]' "${lEMBA_SBOM_JSON}" || print_error "[-] SBOM loading error - Vulnerability analysis not available")
 
+  sub_module_title "Software inventory overview"
   print_output "[*] Analyzing SBOM ..." "no_log"
 
   local lSBOM_ARR_PRE_PROCESSED=()
   # first round is primarly for removing duplicates and unhandled_file entries
   # 2nd round is for the real testing
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
-    local lNEG_LOG=1
     local lBOM_REF=""
     local lORIG_SOURCE=""
     local lMIN_IDENTIFIER=()
+    local lVENDOR=""
     local lPROD=""
     local lVERS=""
 
@@ -72,6 +73,7 @@ F17_cve_bin_tool() {
     fi
 
     mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
+    lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
     lPROD="${lMIN_IDENTIFIER[*]:2:1}"
     lVERS="${lMIN_IDENTIFIER[*]:3:1}"
 
@@ -93,10 +95,12 @@ F17_cve_bin_tool() {
     write_link "f17#${lANCHOR}"
 
     lSBOM_ARR_PRE_PROCESSED+=("${lSBOM_ENTRY}")
+    local lNEG_LOG=1
   done
 
   print_bar
 
+  sub_module_title "Vulnerability overview"
   # 2nd round with pre-processed array -> we are going to check for CVEs now
   for lSBOM_ENTRY in "${lSBOM_ARR_PRE_PROCESSED[@]}"; do
     local lBOM_REF=""
@@ -152,7 +156,8 @@ F17_cve_bin_tool() {
     tr -d '\n' < "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
 
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
-      print_output "[+] VEX data can be found in the SBOM log path" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+      sub_module_title "VEX - Vulnerability Exploitability eXchange"
+      print_output "[+] VEX data in json format is available" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
     fi
   fi
 
