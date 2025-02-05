@@ -635,29 +635,29 @@ output_cve_exploits() {
   local lDATA_GENERATED=0
   local lBINARY=""
 
-  if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED_ARR[@] ]]; then
-    if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED_ARR[@] ]] && [[ -f "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" ]]; then
+  if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 ]]; then
+    if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 ]] && [[ -f "${F17_LOG_DIR}/vuln_summary.txt" ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
-      write_link "f20#softwareinventoryinitialoverview"
+      write_link "f17#softwareinventoryinitialoverview"
 
-      # run over F20_summary.txt and add links - need to do this here and not in f20 as there bites us the threading mode
+      # run over F17/vuln_summary.txt and add links - need to do this here and not in f17 as there the threading mode kicks us
       while read -r OVERVIEW_LINE; do
         lBINARY="$(echo "${OVERVIEW_LINE}" | cut -d: -f2 | tr -d '[:blank:]')"
         print_output "${OVERVIEW_LINE}"
-        write_link "f20#cve_${lBINARY}"
-      done < "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt"
+        write_link "f17#cve_${lBINARY}"
+      done < "${F17_LOG_DIR}/vuln_summary.txt"
       print_ln
     fi
 
-    if [[ -v VERSIONS_AGGREGATED_ARR[@] ]]; then
+    if [[ "${F17_VERSIONS_IDENTIFIED}" -gt 0 ]]; then
       if [[ -f "${F15_LOG}" ]]; then
-        print_output "[+] Identified a SBOM including ""${ORANGE}""${#VERSIONS_AGGREGATED_ARR[@]}""${GREEN}"" software components with version details."
+        print_output "[+] Identified a SBOM including ""${ORANGE}${F17_VERSIONS_IDENTIFIED}${GREEN}"" software components with version details."
         write_link "f15"
       else
-        print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED_ARR[@]}""${GREEN}"" software components with version details.\\n"
-        write_link "f20#softwareinventoryinitialoverview"
+        print_output "[+] Identified ""${ORANGE}${F17_VERSIONS_IDENTIFIED}${GREEN}"" software components with version details.\\n"
+        write_link "f17#softwareinventoryinitialoverview"
       fi
-      write_csv_log "versions_identified" "${#VERSIONS_AGGREGATED_ARR[@]}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "versions_identified" "${F17_VERSIONS_IDENTIFIED}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
     fi
     if [[ "${S30_VUL_COUNTER:-0}" -gt 0 ]]; then
@@ -670,18 +670,16 @@ output_cve_exploits() {
     if [[ "${CVE_COUNTER:-0}" -gt 0 ]]; then
       echo -e "\n" >> "${LOG_FILE}"
       print_output "[+] Identified ""${ORANGE}""${CVE_COUNTER}""${GREEN}"" CVE entries."
-      write_link "f20#collectcveandexploitdetails"
+      write_link "f17#collectcveandexploitdetails"
+      print_output "$(indent "$(green "Identified ${RED}${BOLD}${CRITICAL_CVE_COUNTER}${NC}${GREEN} High rated CVE entries / Exploits: ${ORANGE}${EXPLOIT_CRITICAL_COUNT:-0}${NC}")")"
       print_output "$(indent "$(green "Identified ${RED}${BOLD}${HIGH_CVE_COUNTER}${NC}${GREEN} High rated CVE entries / Exploits: ${ORANGE}${EXPLOIT_HIGH_COUNT:-0}${NC}")")"
       print_output "$(indent "$(green "Identified ${ORANGE}${BOLD}${MEDIUM_CVE_COUNTER}${NC}${GREEN} Medium rated CVE entries / Exploits: ${ORANGE}${EXPLOIT_MEDIUM_COUNT:-0}${NC}")")"
       print_output "$(indent "$(green "Identified ${GREEN}${BOLD}${LOW_CVE_COUNTER}${NC}${GREEN} Low rated CVE entries /Exploits: ${ORANGE}${EXPLOIT_LOW_COUNT:-0}${NC}")")"
+      write_csv_log "cve_critical" "${CRITICAL_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "cve_high" "${HIGH_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "cve_medium" "${MEDIUM_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "cve_low" "${LOW_CVE_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       lDATA_GENERATED=1
-    elif [[ "${CVE_SEARCH}" -ne 1 ]]; then
-      print_ln
-      print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
-      print_ln
     fi
     if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]] || [[ "${MSF_VERIFIED}" -gt 0 ]]; then
       write_csv_log "exploits" "${EXPLOIT_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -697,17 +695,16 @@ output_cve_exploits() {
         print_output "$(indent "$(green "${MAGENTA}${BOLD}${MSF_VERIFIED}${NC}${GREEN} exploits in system mode emulation verified.")")"
         write_link "l35"
       fi
-      if [[ "${REMOTE_EXPLOIT_CNT}" -gt 0 || "${LOCAL_EXPLOIT_CNT}" -gt 0 || "${DOS_EXPLOIT_CNT}" -gt 0 || "${GITHUB_EXPLOIT_CNT}" -gt 0 || "${KNOWN_EXPLOITED_COUNTER}" -gt 0 || "${MSF_VERIFIED}" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: ${MAGENTA}${BOLD}${REMOTE_EXPLOIT_CNT}${NC}${GREEN} / Local exploits: ${MAGENTA}${BOLD}${LOCAL_EXPLOIT_CNT}${NC}${GREEN} / DoS exploits: ${MAGENTA}${BOLD}${DOS_EXPLOIT_CNT}${NC}${GREEN} / Github PoCs: ${MAGENTA}${BOLD}${GITHUB_EXPLOIT_CNT}${NC}${GREEN} / Known exploited vulnerabilities: ${MAGENTA}${BOLD}${KNOWN_EXPLOITED_COUNTER}${GREEN} / Verified Exploits: ${MAGENTA}${BOLD}${MSF_VERIFIED}${NC}")")"
+      if [[ "${REMOTE_EXPLOIT_CNT}" -gt 0 || "${LOCAL_EXPLOIT_CNT}" -gt 0 || "${DOS_EXPLOIT_CNT}" -gt 0 || "${KNOWN_EXPLOITED_COUNTER}" -gt 0 || "${MSF_VERIFIED}" -gt 0 ]]; then
+        print_output "$(indent "$(green "Remote exploits: ${MAGENTA}${BOLD}${REMOTE_EXPLOIT_CNT}${NC}${GREEN} / Local exploits: ${MAGENTA}${BOLD}${LOCAL_EXPLOIT_CNT}${NC}${GREEN} / DoS exploits: ${MAGENTA}${BOLD}${DOS_EXPLOIT_CNT}${NC}${GREEN} / Known exploited vulnerabilities: ${MAGENTA}${BOLD}${KNOWN_EXPLOITED_COUNTER}${GREEN} / Verified Exploits: ${MAGENTA}${BOLD}${MSF_VERIFIED}${NC}")")"
         write_csv_log "remote_exploits" "${REMOTE_EXPLOIT_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
         write_csv_log "local_exploits" "${LOCAL_EXPLOIT_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
         write_csv_log "dos_exploits" "${DOS_EXPLOIT_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-        write_csv_log "github_exploits" "${GITHUB_EXPLOIT_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
         write_csv_log "known_exploited" "${KNOWN_EXPLOITED_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
         write_csv_log "verified_exploited" "${MSF_VERIFIED}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       fi
       # we report only software components with exploits to csv:
-      grep "Found version details" "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "${F50_CSV_LOG}" || true
+      grep "Found version details" "${F17_LOG_DIR}/vuln_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "${F50_CSV_LOG}" || true
       lDATA_GENERATED=1
     fi
   fi
@@ -720,7 +717,6 @@ get_data() {
   export REMOTE_EXPLOIT_CNT=0
   export LOCAL_EXPLOIT_CNT=0
   export DOS_EXPLOIT_CNT=0
-  export GITHUB_EXPLOIT_CNT=0
   export HIGH_CVE_COUNTER=0
   export MEDIUM_CVE_COUNTER=0
   export LOW_CVE_COUNTER=0
@@ -785,7 +781,6 @@ get_data() {
   export WEB_UP=0
   export ROUTERSPLOIT_VULN=0
   export CVE_COUNTER=0
-  export CVE_SEARCH=1
   export FWHUNTER_CNT=0
   # export FWHUNTER_CNT_CVE=0
   export MSF_VERIFIED=0
@@ -794,6 +789,7 @@ get_data() {
   export APK_ISSUES=0
   export TOTAL_CWE_CNT=0
   export TOTAL_CWE_BINS=0
+  export F17_VERSIONS_IDENTIFIED=0
 
   if [[ -f "${P02_CSV_LOG}" ]]; then
     ENTROPY=$(grep -a "Entropy" "${P02_CSV_LOG}" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -936,32 +932,29 @@ get_data() {
   if [[ -f "${L35_CSV_LOG}" ]]; then
     MSF_VERIFIED=$(grep -v -c "Source" "${L35_CSV_LOG}" || true)
   fi
-  if [[ -f "${F20_LOG}" ]]; then
-    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "${F20_LOG}" | sort -u | cut -d: -f2 || true)
-  fi
-  if [[ -f "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp ]]; then
-    HIGH_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp)
+  if [[ -d "${F17_LOG_DIR}" ]]; then
+    F17_VERSIONS_IDENTIFIED=$(wc -l "${F17_LOG_DIR}/vuln_summary.txt")
+    F17_VERSIONS_IDENTIFIED="${F17_VERSIONS_IDENTIFIED/\ *}"
+    CRITICAL_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,CRITICAL")
+    (( CVE_COUNTER="${CVE_COUNTER}"+"${CRITICAL_CVE_COUNTER}" ))
+    HIGH_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,HIGH")
     (( CVE_COUNTER="${CVE_COUNTER}"+"${HIGH_CVE_COUNTER}" ))
-  fi
-  if [[ -f "${TMP_DIR}"/MEDIUM_CVE_COUNTER.tmp ]]; then
-    MEDIUM_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "${TMP_DIR}"/MEDIUM_CVE_COUNTER.tmp)
+    MEDIUM_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,MEDIUM")
     (( CVE_COUNTER="${CVE_COUNTER}"+"${MEDIUM_CVE_COUNTER}" ))
-  fi
-  if [[ -f "${TMP_DIR}"/LOW_CVE_COUNTER.tmp ]]; then
-    LOW_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "${TMP_DIR}"/LOW_CVE_COUNTER.tmp)
+    LOW_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,LOW")
     (( CVE_COUNTER="${CVE_COUNTER}"+"${LOW_CVE_COUNTER}" ))
   fi
   if [[ -f "${TMP_DIR}"/KNOWN_EXPLOITED_COUNTER.tmp ]]; then
-    KNOWN_EXPLOITED_COUNTER=$(cat "${TMP_DIR}"/KNOWN_EXPLOITED_COUNTER.tmp)
+    KNOWN_EXPLOITED_COUNTER=$(wc -l "${F17_LOG_DIR}"/KEV.txt)
+    KNOWN_EXPLOITED_COUNTER=${KNOWN_EXPLOITED_COUNTER/\ *}
   fi
   if [[ -f "${F20_EXPLOITS_LOG}" ]]; then
-    # EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "${F20_EXPLOITS_LOG}" || true)"
-    EXPLOIT_COUNTER="$(grep -E "Exploit\ .*" "${F20_EXPLOITS_LOG}" | grep -cv "Exploit summary" || true)"
-    MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*MSF" "${F20_EXPLOITS_LOG}" || true)"
-    REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "${F20_EXPLOITS_LOG}" || true)"
-    LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "${F20_EXPLOITS_LOG}" || true)"
-    DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "${F20_EXPLOITS_LOG}" || true)"
-    GITHUB_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(G\)" "${F20_EXPLOITS_LOG}" || true)"
+    EXPLOIT_COUNTER="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c "Exploit (" || true)"
+    MSF_MODULE_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*MSF" || true)"
+    REMOTE_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(R\)" || true)"
+    LOCAL_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(L\)" || true)"
+    DOS_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(D\)" || true)"
+    ##### TODO for F17:
     if [[ -f "${TMP_DIR}"/EXPLOIT_HIGH_COUNTER.tmp ]]; then
       EXPLOIT_HIGH_COUNT="$(cat "${TMP_DIR}"/EXPLOIT_HIGH_COUNTER.tmp || true)"
     fi
@@ -971,6 +964,7 @@ get_data() {
     if [[ -f "${TMP_DIR}"/EXPLOIT_LOW_COUNTER.tmp ]]; then
       EXPLOIT_LOW_COUNT="$(cat "${TMP_DIR}"/EXPLOIT_LOW_COUNTER.tmp || true)"
     fi
+    ##### TODO for F17:
   fi
   if [[ -f "${S17_CSV_LOG}" ]]; then
     APK_ISSUES="$(cut -d\; -f 2 "${S17_CSV_LOG}" | awk '{ sum += $1 } END { print sum }' || true)"
