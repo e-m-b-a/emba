@@ -32,7 +32,7 @@ export BINARY_EXTENDED=1
 export MAX_EXT_CHECK_BINS=15
 
 # the following modules are long running modules which are disabled in the default profile
-export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
+export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" "F20_vul_aggregator" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0
