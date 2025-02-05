@@ -218,7 +218,7 @@ check_docker_version() {
 }
 
 preparing_cve_bin_tool() {
-  print_output "[*] Preparing cve-bin-tool ..." "no_log"
+  print_output "    Preparing cve-bin-tool ..." "no_log"
   mkdir "${HOME}"/.cache/cve-bin-tool
   cp -pri /external/cve-bin-tool/cache_cve-bin-tool/* "${HOME}"/.cache/cve-bin-tool/
 }

@@ -513,15 +513,15 @@ tear_down_cve_threader() {
 
   if [[ ${#lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]} -gt 0 ]]; then
     if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (PS:"
+      lEXPLOIT="Exploit (PSS:"
     else
-      lEXPLOIT+=" / PS:"
+      lEXPLOIT+=" / PSS:"
     fi
 
     for lEXPLOIT_PS in "${lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]}" ; do
       # we use the html file as lEXPLOIT_NAME.
       lEXPLOIT_NAME=$(echo "${lEXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
-      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:PS:${lEXPLOIT_NAME}" )
+      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:PSS:${lEXPLOIT_NAME}" )
       lEXPLOIT+=" ${lEXPLOIT_NAME}"
       lPS_TYPE=$(grep "^${lCVE_ID};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${lEXPLOIT_NAME}" | cut -d\; -f4 || true)
       if [[ "${lPS_TYPE}" == "remote" ]]; then
@@ -542,7 +542,7 @@ tear_down_cve_threader() {
     if [[ ${lEDB} -eq 0 ]]; then
       # only count the packetstorm exploit if we have not already count an other exploit
       # otherwise we count an exploit for one CVE multiple times
-      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PSS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
       lEDB=1
     fi
   fi
@@ -598,21 +598,21 @@ tear_down_cve_threader() {
   fi
   if [[ "${lCVSS_SEVERITY}" == "HIGH" || "${lCVSS_SEVERITY}" == "CRITICAL" ]]; then
     if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
-      "${lEXPLOIT}" == *PS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
+      "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
       printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     else
       printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   elif [[ "${lCVSS_SEVERITY}" == "MEDIUM" ]]; then
     if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
-      "${lEXPLOIT}" == *PS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
+      "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
       printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     else
       printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   else
     if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
-      "${lEXPLOIT}" == *PS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
+      "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
       printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     else
       printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
