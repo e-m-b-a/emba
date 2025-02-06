@@ -136,7 +136,8 @@ S118_busybox_verifier()
     mapfile -t lBB_VERSION_ARR < <(echo "${lBB_VERSION}" | tr ':' '\n')
 
     local lBOM_REF="INVALID"
-    local lORIG_SOURCE="bb_verified"
+    lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/*busybox_*.json | sort -u | head -1 || true)
+    local lORIG_SOURCE="static_busybox_analysis"
     local lVENDOR="${lBB_VERSION_ARR[*]:1:1}"
     local lPROD="${lBB_VERSION_ARR[*]:2:1}"
     local lVERS="${lBB_VERSION_ARR[*]:3:1}"
@@ -294,7 +295,7 @@ get_busybox_applets_emu() {
 }
 
 get_cve_busybox_data() {
-  local lBB_VERSION_ARR=($@)
+  local lBB_VERSION_ARR=("${@}")
   shift
 
   local lVULN_CNT=""
@@ -342,7 +343,6 @@ get_cve_busybox_data_threader() {
   local lCVE_SUMMARY=""
 
   lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
-  lCVSS_V2="NA"
   lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f7)
   lFIRST_EPSS="NA"
   lCVE_SUMMARY="NA"
