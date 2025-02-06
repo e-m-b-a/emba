@@ -179,6 +179,12 @@ cve_bin_tool_threader() {
   if ! [[ -d "${LOG_PATH_MODULE}/cve_sum/" ]]; then
     mkdir "${LOG_PATH_MODULE}/cve_sum/"
   fi
+  if ! [[ -d "${LOG_PATH_MODULE}/json/" ]]; then
+    mkdir "${LOG_PATH_MODULE}/json/"
+  fi
+  if ! [[ -d "${LOG_PATH_MODULE}/exploit/" ]]; then
+    mkdir "${LOG_PATH_MODULE}/exploit/"
+  fi
 
   python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}" || true
   # benchmark no metric:
@@ -224,6 +230,15 @@ cve_bin_tool_threader() {
   # Todo: Include verified vulnerabilties
   # * s26
   # * s118
+  if [[ "${lPROD}" == "linux_kernel" ]]; then
+    local lKVERIFIED=0
+    if [[ -f "${S26_LOG_DIR}/kernel_verification_${lVERS}_detailed.log" ]]; then
+      lKVERIFIED=$(grep -c " verified - " "${S26_LOG_DIR}/kernel_verification_${lVERS}_detailed.log")
+    fi
+    if [[ "${lKVERIFIED}" -gt 0 ]]; then
+      lCVE_COUNTER_VERSION="${lCVE_COUNTER_VERSION} (${lKVERIFIED})"
+    fi
+  fi
 
   if [[ "${lEXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     write_log "" "${lBIN_LOG}"
@@ -274,6 +289,7 @@ tear_down_cve_threader() {
   local lCVE_ID="${lCVE_DATA_ARR[*]:6:1}"
   local lCVSS_SEVERITY="${lCVE_DATA_ARR[*]:7:1}"
   local lCVSS_SCORE="${lCVE_DATA_ARR[*]:8:1}"
+  local lVULN_SOURCE="${lCVE_DATA_ARR[*]:9:1}"
   local lCVSS_VERS="${lCVE_DATA_ARR[*]:10:1}"
   local lCVSS_VECTOR="${lCVE_DATA_ARR[*]:11:1}"
 
@@ -450,7 +466,7 @@ tear_down_cve_threader() {
       if [[ "${lEXPLOIT_ENTRY}" =~ "File:" ]]; then
         lE_FILE=$(echo "${lEXPLOIT_ENTRY}" | awk '{print $2}')
         if [[ -f "${lE_FILE}" ]] ; then
-          cp "${lE_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${lE_FILE}")"
+          cp "${lE_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${lE_FILE}")" || print_error "[-] Copy exploit error for ${lE_FILE}"
         fi
       fi
     done
@@ -644,6 +660,7 @@ tear_down_cve_threader() {
   mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u || true)
   lCVE_DESC=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
 
+  local lVULN_BOM_REF=""
   lVULN_BOM_REF=$(uuidgen)
   build_sbom_json_properties_arr "${lVEX_EXPLOIT_PROP_ARRAY_ARR[@]}"
   # => we get PROPERTIES_JSON_ARR as global
@@ -651,13 +668,16 @@ tear_down_cve_threader() {
   print_output "[*] Generating CVE entry as VEX json: ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}" "no_log"
 
   # Todo: do this more dynamically
-  local lVULN_SRC="NVD"
-  local lVULN_URL="https://nvd.nist.gov/vuln/detail/${lCVE_ID}"
+  if [[ "${lVULN_SOURCE}" == "NVD" ]]; then
+    local lVULN_URL="https://nvd.nist.gov/vuln/detail/${lCVE_ID}"
+  else
+    local lVULN_URL="UNKNOWN"
+  fi
 
   jo -p -n -- \
     bom-ref="${lVULN_BOM_REF}" \
     id="${lCVE_ID}" \
-    source="$(jo -a "$(jo -n name="${lVULN_SRC}" url="${lVULN_URL}")")" \
+    source="$(jo -a "$(jo -n name="${lVULN_SOURCE}" url="${lVULN_URL}")")" \
     ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY}" method="${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
     cwes="$(jo -a "${lCWE[@]:-null}")" \
     analysis="$(jo -a "$(jo -n state="not_verified")")" \

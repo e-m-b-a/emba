@@ -153,7 +153,10 @@ S26_kernel_vuln_verifier()
     fi
 
     # local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}""/linux_linux_kernel_${lK_VERSION}.txt"
-    local lBOM_REF="INVALID"
+    # try to find a bom-ref
+    if ! lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/linux_kernel_linux_kernel_*.json | sort -u | head -1); then
+      local lBOM_REF="INVALID"
+    fi
     local lPROD="linux_kernel"
     local lVENDOR="linux"
     local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lK_VERSION}_finished.txt"
