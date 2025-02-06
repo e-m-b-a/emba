@@ -23,8 +23,6 @@ F17_cve_bin_tool() {
 
   pre_module_reporter "${FUNCNAME[0]}"
 
-  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
-
   # our first approach is to use our beautiful SBOM and walk through it
   # if for any reasons (disabled F15 module) there is no SBOM we check for s08_package_mgmt_extractor.csv
 
@@ -222,9 +220,11 @@ cve_bin_tool_threader() {
 
   local lEXPLOIT_COUNTER_VERSION=0
   local lCVE_COUNTER_VERSION=0
+  local lCVE_COUNTER_VERIFIED=0
   if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}.txt" ]]; then
     lEXPLOIT_COUNTER_VERSION=$(grep -c "Exploit (" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}.txt" || true)
     lCVE_COUNTER_VERSION=$(grep -c -E "CVE-[0-9]+-[0-9]+" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}.txt" || true)
+    lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION}"
   fi
 
   # Todo: Include verified vulnerabilties
@@ -233,11 +233,21 @@ cve_bin_tool_threader() {
   if [[ "${lPROD}" == "linux_kernel" ]]; then
     local lKVERIFIED=0
     if [[ -f "${S26_LOG_DIR}/kernel_verification_${lVERS}_detailed.log" ]]; then
-      lKVERIFIED=$(grep -c " verified - " "${S26_LOG_DIR}/kernel_verification_${lVERS}_detailed.log")
+      lKVERIFIED=$(grep -c " verified - " "${S26_LOG_DIR}/kernel_verification_${lVERS}_detailed.log" || true)
     fi
     if [[ "${lKVERIFIED}" -gt 0 ]]; then
-      lCVE_COUNTER_VERSION="${lCVE_COUNTER_VERSION} (${lKVERIFIED})"
+      lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION} (${lKVERIFIED})"
     fi
+  fi
+  if [[ "${lPROD}" == "busybox" ]]; then
+    local lBB_VERIFIED=0
+    if [[ -f "${S118_CSV_LOG}" ]]; then
+      lBB_VERIFIED=$(grep -c ":busybox:" "${S118_CSV_LOG}" || true)
+      if [[ "${lBB_VERIFIED}" -gt 0 ]]; then
+        lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION} (${lBB_VERIFIED})"
+      fi
+    fi
+
   fi
 
   if [[ "${lEXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
@@ -245,21 +255,21 @@ cve_bin_tool_threader() {
     # write detailed log
     cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}.txt" >> "${lBIN_LOG}"
     write_log "" "${lBIN_LOG}"
-    write_log "[+] Found ${RED}${BOLD}${lCVE_COUNTER_VERSION}${GREEN} CVEs and ${RED}${BOLD}${lEXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
+    write_log "[+] Found ${RED}${BOLD}${lCVE_COUNTER_VERIFIED}${GREEN} CVEs and ${RED}${BOLD}${lEXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
 
     # write summary log:
-    printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERSION}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
   elif [[ "${lCVE_COUNTER_VERSION}" -gt 0 ]]; then
     write_log "" "${lBIN_LOG}"
     cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}.txt" >> "${lBIN_LOG}"
     write_log "" "${lBIN_LOG}"
-    write_log "[+] Found ${ORANGE}${BOLD}${lCVE_COUNTER_VERSION}${GREEN} CVEs in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
+    write_log "[+] Found ${ORANGE}${BOLD}${lCVE_COUNTER_VERIFIED}${GREEN} CVEs in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
 
     # write summary log:
-    printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERSION}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
   else
-    write_log "[+] Found ${GREEN}${BOLD}${lCVE_COUNTER_VERSION:-0}${GREEN} CVEs in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
-    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERSION:-0}" "${lEXPLOIT_COUNTER_VERSION:-0}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    write_log "[+] Found ${GREEN}${BOLD}${lCVE_COUNTER_VERIFIED:-0}${GREEN} CVEs in ${ORANGE}${lPROD}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
+    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${lPROD}" "${lVERS}" "${lCVE_COUNTER_VERIFIED:-0}" "${lEXPLOIT_COUNTER_VERSION:-0}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
   fi
   write_log "\\n-----------------------------------------------------------------\\n" "${lBIN_LOG}"
 
@@ -665,7 +675,7 @@ tear_down_cve_threader() {
   build_sbom_json_properties_arr "${lVEX_EXPLOIT_PROP_ARRAY_ARR[@]}"
   # => we get PROPERTIES_JSON_ARR as global
 
-  print_output "[*] Generating CVE entry as VEX json: ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}" "no_log"
+  # print_output "[*] Generating CVE entry as VEX json: ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}" "no_log"
 
   # Todo: do this more dynamically
   if [[ "${lVULN_SOURCE}" == "NVD" ]]; then

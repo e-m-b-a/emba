@@ -116,6 +116,7 @@ set_defaults() {
   if [[ -f "${CONFIG_DIR}"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="${CONFIG_DIR}"/msf_cve-db.txt
   fi
+  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
   if [[ -f "${CONFIG_DIR}"/trickest_cve-db.txt ]]; then
     export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi

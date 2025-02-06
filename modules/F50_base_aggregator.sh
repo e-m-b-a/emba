@@ -937,16 +937,16 @@ get_data() {
   if [[ -d "${F17_LOG_DIR}" ]]; then
     F17_VERSIONS_IDENTIFIED=$(wc -l "${F17_LOG_DIR}/vuln_summary.txt")
     F17_VERSIONS_IDENTIFIED="${F17_VERSIONS_IDENTIFIED/\ *}"
-    CRITICAL_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,CRITICAL")
+    CRITICAL_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,CRITICAL" || true)
     (( CVE_COUNTER="${CVE_COUNTER}"+"${CRITICAL_CVE_COUNTER}" ))
-    HIGH_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,HIGH")
+    HIGH_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,HIGH" || true)
     (( CVE_COUNTER="${CVE_COUNTER}"+"${HIGH_CVE_COUNTER}" ))
-    MEDIUM_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,MEDIUM")
+    MEDIUM_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,MEDIUM" || true)
     (( CVE_COUNTER="${CVE_COUNTER}"+"${MEDIUM_CVE_COUNTER}" ))
-    LOW_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,LOW")
+    LOW_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,LOW" || true)
     (( CVE_COUNTER="${CVE_COUNTER}"+"${LOW_CVE_COUNTER}" ))
   fi
-  if [[ -f "${TMP_DIR}"/KNOWN_EXPLOITED_COUNTER.tmp ]]; then
+  if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
     KNOWN_EXPLOITED_COUNTER=$(wc -l "${F17_LOG_DIR}"/KEV.txt)
     KNOWN_EXPLOITED_COUNTER=${KNOWN_EXPLOITED_COUNTER/\ *}
   fi

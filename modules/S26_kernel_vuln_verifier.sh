@@ -223,8 +223,7 @@ S26_kernel_vuln_verifier()
     fi
 
     print_output "[*] Generate CVE vulnerabilities array for kernel version ${ORANGE}${lK_VERSION}${NC} ..." "no_log"
-    # mapfile -t lALL_KVULNS_ARR < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${lCVE_DETAILS_PATH}")
-    mapfile -t lALL_KVULNS_ARR < "${lCVE_DETAILS_PATH}"
+    mapfile -t lALL_KVULNS_ARR < <(tail -n+2 "${lCVE_DETAILS_PATH}")
     # readable log file for the web report:
     # jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${lCVE_DETAILS_PATH}" > "${LOG_PATH_MODULE}""/kernel-${lK_VERSION}-vulns.log"
 
@@ -295,91 +294,97 @@ S26_kernel_vuln_verifier()
 
 vuln_checker_threader() {
   local lVULN="${1:-}"
-      local lK_PATHS_ARR=()
-      local lK_PATHS_FILES_TMP_ARR=()
-      local lSUMMARY=""
-      local lCVSS2=""
-      local lCVSS3=""
+  local lK_PATHS_ARR=()
+  local lK_PATHS_FILES_TMP_ARR=()
+  local lSUMMARY=""
+  local lCVSS2=""
+  local lCVSS3=""
 
-      # lK_PATH is now defined with some backup text for output if lK_PATHS_ARR population without results
-      local lK_PATH="missing vulnerability path from advisory"
+  # lK_PATH is now defined with some backup text for output if lK_PATHS_ARR population without results
+  local lK_PATH="missing vulnerability path from advisory"
 
-      lCVE=$(echo "${lVULN}" | cut -d: -f1)
-      local lOUTx="[*] Testing vulnerability ${ORANGE}${VULN_CNT}${NC} / ${ORANGE}${#lALL_KVULNS_ARR[@]}${NC} / ${ORANGE}${lCVE}${NC}"
+  lCVE=$(echo "${lVULN}" | cut -d: -f5)
+  if [[ "${lCVE}" == "CVE-"* ]]; then
+    print_output "[-] No CVE identifier extracted for ${lVULN} ..."
+    return
+  fi
+  local lOUTx="[*] Testing vulnerability ${ORANGE}${VULN_CNT}${NC} / ${ORANGE}${#lALL_KVULNS_ARR[@]}${NC} / ${ORANGE}${lCVE}${NC}"
+  print_output "${lOUTx}" "no_log"
+  write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
+
+  lCVSS2="NA"
+  lCVSS3="$(echo "${lVULN}" | cut -d: -f7)"
+  # lSUMMARY="$(echo "${lVULN}" | cut -d: -f6-)"
+  lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
+
+  # print_output "$(indent "CVSSv2: ${ORANGE}${lCVSS2}${NC} / CVSSv3: ${ORANGE}${lCVSS3}${NC} / Summary: ${ORANGE}${lSUMMARY}${NC}")"
+
+  # extract kernel source paths from summary -> we use these paths to check if they are used by our
+  # symbols or during kernel compilation
+  mapfile -t lK_PATHS_ARR < <(echo "${lSUMMARY}" | tr ' ' '\n' | sed 's/\\$//' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' \
+    | sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 || true)
+
+  for lK_PATH in "${lK_PATHS_ARR[@]}"; do
+    # we have only a filename without path -> we search for possible candidate files in the kernel sources
+    if ! [[ "${lK_PATH}" == *"/"* ]]; then
+      lOUTx="[*] Found file name ${ORANGE}${lK_PATH}${NC} for ${ORANGE}${lCVE}${NC} without path details ... looking for candidates now"
       print_output "${lOUTx}" "no_log"
       write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
+      mapfile -t lK_PATHS_FILES_TMP_ARR < <(find "${lKERNEL_DIR}" -name "${lK_PATH}" | sed "s&${lKERNEL_DIR}\/&&")
+    fi
+    lK_PATHS_ARR+=("${lK_PATHS_FILES_TMP_ARR[@]}")
+  done
 
-      lCVSS2="$(echo "${lVULN}" | cut -d: -f2)"
-      lCVSS3="$(echo "${lVULN}" | cut -d: -f3)"
-      lSUMMARY="$(echo "${lVULN}" | cut -d: -f6-)"
-      # print_output "$(indent "CVSSv2: ${ORANGE}${lCVSS2}${NC} / CVSSv3: ${ORANGE}${lCVSS3}${NC} / Summary: ${ORANGE}${lSUMMARY}${NC}")"
-
-      # extract kernel source paths from summary -> we use these paths to check if they are used by our
-      # symbols or during kernel compilation
-      mapfile -t lK_PATHS_ARR < <(echo "${lSUMMARY}" | tr ' ' '\n' | sed 's/\\$//' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' \
-        | sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 || true)
-
-      for lK_PATH in "${lK_PATHS_ARR[@]}"; do
-        # we have only a filename without path -> we search for possible candidate files in the kernel sources
-        if ! [[ "${lK_PATH}" == *"/"* ]]; then
-          lOUTx="[*] Found file name ${ORANGE}${lK_PATH}${NC} for ${ORANGE}${lCVE}${NC} without path details ... looking for candidates now"
-          print_output "${lOUTx}" "no_log"
-          write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
-          mapfile -t lK_PATHS_FILES_TMP_ARR < <(find "${lKERNEL_DIR}" -name "${lK_PATH}" | sed "s&${lKERNEL_DIR}\/&&")
-        fi
-        lK_PATHS_ARR+=("${lK_PATHS_FILES_TMP_ARR[@]}")
-      done
-
-      if [[ "${#lK_PATHS_ARR[@]}" -gt 0 ]]; then
-        for lK_PATH in "${lK_PATHS_ARR[@]}"; do
-          if [[ -f "${lKERNEL_DIR}/${lK_PATH}" ]]; then
-            # check if arch is in path -> if so we check if our architecture is also in the path
-            # if we find our architecture then we can proceed with symbol_verifier
-            if [[ "${lK_PATH}" == "arch/"* ]]; then
-              if [[ "${lK_PATH}" == "arch/${ORIG_K_ARCH}/"* ]]; then
-                ((CNT_PATHS_FOUND+=1))
-                if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
-                  symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" "${lKERNEL_DIR}" &
-                  lWAIT_PIDS_S26_ARR+=( "$!" )
-                fi
-                if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
-                  compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" &
-                  lWAIT_PIDS_S26_ARR+=( "$!" )
-                fi
-              else
-                # this vulnerability is for a different architecture -> we can skip it for our kernel
-                lOUTx="[-] Vulnerable path for different architecture found for ${ORANGE}${lK_PATH}${NC} - not further processing ${ORANGE}${lCVE}${NC}"
-                print_output "${lOUTx}" "no_log"
-                write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
-                ((CNT_PATHS_FOUND_WRONG_ARCH+=1))
-              fi
-            else
-              ((CNT_PATHS_FOUND+=1))
-              if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
-                symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" "${lKERNEL_DIR}" &
-                lWAIT_PIDS_S26_ARR+=( "$!" )
-              fi
-              if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
-                compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" &
-                lWAIT_PIDS_S26_ARR+=( "$!" )
-              fi
+  if [[ "${#lK_PATHS_ARR[@]}" -gt 0 ]]; then
+    for lK_PATH in "${lK_PATHS_ARR[@]}"; do
+      if [[ -f "${lKERNEL_DIR}/${lK_PATH}" ]]; then
+        # check if arch is in path -> if so we check if our architecture is also in the path
+        # if we find our architecture then we can proceed with symbol_verifier
+        if [[ "${lK_PATH}" == "arch/"* ]]; then
+          if [[ "${lK_PATH}" == "arch/${ORIG_K_ARCH}/"* ]]; then
+            ((CNT_PATHS_FOUND+=1))
+            if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
+              symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" "${lKERNEL_DIR}" &
+              lWAIT_PIDS_S26_ARR+=( "$!" )
+            fi
+            if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
+              compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" &
+              lWAIT_PIDS_S26_ARR+=( "$!" )
             fi
           else
-            # no source file in our kernel sources -> no vulns
-            lOUTx="[-] ${ORANGE}${lCVE}${NC} - ${ORANGE}${lK_PATH}${NC} - vulnerable source file not found in kernel sources"
+            # this vulnerability is for a different architecture -> we can skip it for our kernel
+            lOUTx="[-] Vulnerable path for different architecture found for ${ORANGE}${lK_PATH}${NC} - not further processing ${ORANGE}${lCVE}${NC}"
             print_output "${lOUTx}" "no_log"
             write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
-            ((CNT_PATHS_NOT_FOUND+=1))
+            ((CNT_PATHS_FOUND_WRONG_ARCH+=1))
           fi
-          max_pids_protection 20 "${lWAIT_PIDS_S26_ARR[@]}"
-        done
+        else
+          ((CNT_PATHS_FOUND+=1))
+          if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
+            symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" "${lKERNEL_DIR}" &
+            lWAIT_PIDS_S26_ARR+=( "$!" )
+          fi
+          if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
+            compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" &
+            lWAIT_PIDS_S26_ARR+=( "$!" )
+          fi
+        fi
       else
-        lOUTx="[-] ${lCVE} - ${lK_PATH}"
+        # no source file in our kernel sources -> no vulns
+        lOUTx="[-] ${ORANGE}${lCVE}${NC} - ${ORANGE}${lK_PATH}${NC} - vulnerable source file not found in kernel sources"
         print_output "${lOUTx}" "no_log"
         write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
-        ((CNT_PATHS_UNK+=1))
+        ((CNT_PATHS_NOT_FOUND+=1))
       fi
-    wait_for_pid "${lWAIT_PIDS_S26_ARR[@]}"
+      max_pids_protection 20 "${lWAIT_PIDS_S26_ARR[@]}"
+    done
+  else
+    lOUTx="[-] ${lCVE} - ${lK_PATH}"
+    print_output "${lOUTx}" "no_log"
+    write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
+    ((CNT_PATHS_UNK+=1))
+  fi
+  wait_for_pid "${lWAIT_PIDS_S26_ARR[@]}"
 }
 
 split_symbols_file() {
