@@ -135,18 +135,19 @@ S118_busybox_verifier()
 
     mapfile -t lBB_VERSION_ARR < <(echo "${lBB_VERSION}" | tr ':' '\n')
 
-    local lBOM_REF="INVALID"
+    local lBOM_REF=""
     lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/*busybox_*.json | sort -u | head -1 || true)
     local lORIG_SOURCE="static_busybox_analysis"
     local lVENDOR="${lBB_VERSION_ARR[*]:1:1}"
     local lPROD="${lBB_VERSION_ARR[*]:2:1}"
     local lVERS="${lBB_VERSION_ARR[*]:3:1}"
     export CVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}.csv"
+    print_output "[*] ${lBOM_REF}_${lPROD}_${lVERS}.csv"
 
     get_cve_busybox_data "${lBB_VERSION_ARR[@]}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then
-      print_output "[-] No CVE details generated ... check for further BusyBox version"
+      print_output "[-] No CVE details generated (${lBOM_REF}_${lPROD}_${lVERS}.csv) ... check for further BusyBox version"
       continue
     fi
 
@@ -302,12 +303,12 @@ get_cve_busybox_data() {
   export F20_DEEP=0
   local lWAIT_PIDS_S118_ARR=()
 
-  local lBOM_REF="INVALID"
+  local lBOM_REF=""
+  lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/*busybox_*.json | sort -u | head -1 || true)
   local lORIG_SOURCE="bb_verified"
-  local lVENDOR="${lBB_VERSION_ARR[*]:0:1}"
-  local lPROD="${lBB_VERSION_ARR[*]:1:1}"
-  local lVERS="${lBB_VERSION_ARR[*]:2:1}"
-  # local lVENDOR="${lBB_VERSION_ARR[*]:1:1}"
+  local lVENDOR="${lBB_VERSION_ARR[*]:1:1}"
+  local lPROD="${lBB_VERSION_ARR[*]:2:1}"
+  local lVERS="${lBB_VERSION_ARR[*]:3:1}"
 
   sub_module_title "BusyBox - Version based vulnerability detection"
   print_output "${lBOM_REF} - ${lVENDOR} - ${lPROD} - ${lVERS} - ${lORIG_SOURCE}"

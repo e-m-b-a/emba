@@ -237,6 +237,8 @@ set_log_paths() {
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
+  export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"
+  export S118_LOG_DIR="${S118_LOG/\.txt/\/}"
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
   export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
