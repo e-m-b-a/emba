@@ -333,12 +333,12 @@ get_cve_busybox_data() {
   fi
 }
 
+# Todo: Fix this
 get_cve_busybox_data_threader() {
   local lCVE_LINE_ENTRY="${1:-}"
   # print_output "[*] lCVE_LINE_ENTRY: ${lCVE_LINE_ENTRY}"
 
   local lCVE_ID=""
-  local lCVSS_V2=""
   local lCVSS_V3=""
   local lFIRST_EPSS=""
   local lCVE_SUMMARY=""
