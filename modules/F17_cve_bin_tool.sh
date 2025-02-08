@@ -127,7 +127,7 @@ F17_cve_bin_tool() {
         cat "${S118_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
       local lBIN_LOG=""
-      lBIN_LOG=$(find ${LOG_PATH_MODULE}/cve_sum/ -name *"_${lPROD}_${lVERS}_finished.txt" | sort -u | head -1)
+      lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPROD}_${lVERS}_finished.txt" | sort -u | head -1)
 
       # now, lets write the main f20 log file with the results of the current binary:
       if [[ -f "${lBIN_LOG}" ]]; then
@@ -136,6 +136,7 @@ F17_cve_bin_tool() {
       else
         print_error "[-] S118 Busybox details missing ... continue in default mode"
       fi
+    # Linux Kernel verification module handling - we already have all the data from s26. Now we just copy these details
     elif [[ "${lPROD}" == "linux_kernel" ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
       print_output "[*] Linux kernel results from s26 detected ... no CVE detection needed" "no_log"
       cp "${S26_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] Linux Kernel CVE log copy process failed"
@@ -145,7 +146,8 @@ F17_cve_bin_tool() {
       if [[ -f  "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
         cat "${S26_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
-      local lBIN_LOG="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}_finished.txt"
+      local lBIN_LOG=""
+      lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPROD}_${lVERS}_finished.txt" | sort -u | head -1)
 
       # now, lets write the main f20 log file with the results of the current binary:
       if [[ -f "${lBIN_LOG}" ]]; then
@@ -234,6 +236,7 @@ cve_bin_tool_threader() {
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}.csv" ]]; then
+    print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
     while read -r lCVE_LINE; do
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"

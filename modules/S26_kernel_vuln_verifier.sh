@@ -23,7 +23,6 @@ export THREAD_PRIO=1
 
 S26_kernel_vuln_verifier()
 {
-  return
   module_log_init "${FUNCNAME[0]}"
   module_title "Kernel vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -215,7 +214,6 @@ S26_kernel_vuln_verifier()
     print_output "[*] Kernel version ${ORANGE}${lK_VERSION}${NC} CVE detection ... "
     cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lK_VERSION}" "kernel_verification"
 
-    export S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
     export SYMBOLS_CNT=0
 
     if ! [[ -f "${lCVE_DETAILS_PATH}" ]]; then
@@ -305,7 +303,7 @@ vuln_checker_threader() {
   local lK_PATH="missing vulnerability path from advisory"
 
   lCVE=$(echo "${lVULN}" | cut -d: -f5)
-  if [[ "${lCVE}" == "CVE-"* ]]; then
+  if ! [[ "${lCVE}" == "CVE-"* ]]; then
     print_output "[-] No CVE identifier extracted for ${lVULN} ..."
     return
   fi
