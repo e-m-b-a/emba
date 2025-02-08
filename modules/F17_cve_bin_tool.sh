@@ -117,16 +117,17 @@ F17_cve_bin_tool() {
     lVERS="${lMIN_IDENTIFIER[*]:3:1}"
 
     # BusyBox verification module handling - we already have all the data from s118. Now we just copy these details
-    if [[ -f "${S118_LOG_DIR}/${lBOM_REF}_${lPROD}_${lVERS}.csv" ]]; then
+    if [[ "${lPROD}" == "busybox" ]] && [[ -s "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
       print_output "[*] BusyBox results from s118 detected ... no CVE detection needed" "no_log"
-      cp "${S118_LOG_DIR}/${lBOM_REF}_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] BusyBox CVE log copy process failed"
+      cp "${S118_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] BusyBox CVE log copy process failed"
       cp "${S118_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] BusyBox CVE log copy process failed"
       cp "${S118_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] BusyBox CVE log copy process failed"
       cp "${S118_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] BusyBox CVE log copy process failed"
       if [[ -f  "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
         cat "${S118_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
-      local lBIN_LOG="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}_finished.txt"
+      local lBIN_LOG=""
+      lBIN_LOG=$(find ${LOG_PATH_MODULE}/cve_sum/ -name *"_${lPROD}_${lVERS}_finished.txt" | sort -u | head -1)
 
       # now, lets write the main f20 log file with the results of the current binary:
       if [[ -f "${lBIN_LOG}" ]]; then
@@ -135,9 +136,26 @@ F17_cve_bin_tool() {
       else
         print_error "[-] S118 Busybox details missing ... continue in default mode"
       fi
+    elif [[ "${lPROD}" == "linux_kernel" ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
+      print_output "[*] Linux kernel results from s26 detected ... no CVE detection needed" "no_log"
+      cp "${S26_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] Linux Kernel CVE log copy process failed"
+      cp "${S26_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] Linux Kernel CVE log copy process failed"
+      cp "${S26_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] Linux Kernel CVE log copy process failed"
+      cp "${S26_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] Linux Kernel CVE log copy process failed"
+      if [[ -f  "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
+        cat "${S26_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+      fi
+      local lBIN_LOG="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lVERS}_finished.txt"
+
+      # now, lets write the main f20 log file with the results of the current binary:
+      if [[ -f "${lBIN_LOG}" ]]; then
+        tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+        continue
+      else
+        print_error "[-] S26 Linux Kernel details missing ... continue in default mode"
+      fi
     fi
 
-    # Todo: if we have a kernel we should first check the s26 log if we have already results available and can use them
     cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"

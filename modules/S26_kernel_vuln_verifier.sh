@@ -23,6 +23,7 @@ export THREAD_PRIO=1
 
 S26_kernel_vuln_verifier()
 {
+  return
   module_log_init "${FUNCNAME[0]}"
   module_title "Kernel vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
