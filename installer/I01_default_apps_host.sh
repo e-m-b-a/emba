@@ -24,7 +24,6 @@ I01_default_apps_host() {
   print_tool_info "jq" 1
   print_tool_info "shellcheck" 1
   print_tool_info "flake8" 1
-  print_tool_info "pylint" 1
   print_tool_info "unzip" 1
   print_tool_info "bc" 1
   print_tool_info "coreutils" 1
@@ -41,6 +40,7 @@ I01_default_apps_host() {
   # python3.10-request
   print_tool_info "python3-pip" 1
   print_pip_info "requests"
+  print_pip_info "prospector"
 
   if [[ "${LIST_DEP}" -eq 1 ]] ; then
     ANSWER=("n")
@@ -53,6 +53,7 @@ I01_default_apps_host() {
       echo
       apt-get install "${INSTALL_APP_LIST[@]}" -y
       pip_install "requests" "-U"
+      pip_install "prospector" "-U"
 
       if ! command -v "${DOCKER_COMPOSE[@]}" > /dev/null; then
         echo "Installing ${DOCKER_COMPOSE[*]} manually:"

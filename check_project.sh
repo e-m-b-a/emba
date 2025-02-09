@@ -151,7 +151,7 @@ pythoncheck() {
       echo -e "\\n""${GREEN}""Run Python check on ${PYTHON_MODULE}:""${NC}""\\n"
       PYTHON_ISSUE_FOUND=0
       flake8 "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
-      pylint "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
+      "${EXT_DIR}/emba_venv/bin/prospector" "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
       if [[ "${PYTHON_ISSUE_FOUND}" -eq 0 ]]; then
         echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
       else
