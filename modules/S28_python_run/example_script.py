@@ -16,21 +16,23 @@ Author(s): Thomas Gingele
 Description: This python script serves as an example of a Python module.
              It echoes passed parameters and then exits.
 """
-from embamodule import setup_module, shutdown_module
-from embaformatting import FORMAT
-from traceback import format_exc
+# pylint: disable=W0718  # The generic Exception caught in 'main' is required
+#                        # to handle _all_ errors thrown by 'module_run'
 from sys import argv
 from os import environ
+from traceback import format_exc
+from embamodule import setup_module, shutdown_module
+from embaformatting import Format
 
 
-def module_run(module, argv, environ):
+def module_run(module, env, fmt):
     """
     This function holds the modules logic.
     All custom code should go here or in a function called by this one.
     """
     # Create a basic log entry.
     # Colored output is supported.
-    module.log(f"Envvar count: {FORMAT['ORANGE']}{len(environ)}{FORMAT['NC']}")
+    module.log(f"Envvar count: {fmt.ORANGE}{len(env)}{fmt.NC}")
 
     # Add a finding.
     module.add_finding("You look great today!")
@@ -38,7 +40,7 @@ def module_run(module, argv, environ):
     # Raise an exception.
     # All exceptions, wether intentionally raised or not are automatically
     # formatted and written to the module log.
-    raise Exception("Dummy Exception")
+    raise ValueError("Dummy Exception")
 
 
 def main():
@@ -47,9 +49,10 @@ def main():
     It handles the setup and reporting of the module.
     """
     module = setup_module(argv, environ)
+    fmt = Format()
 
     try:
-        module_run(module, argv, environ)
+        module_run(module, environ, fmt)
 
     except Exception:
         module.panic(format_exc())

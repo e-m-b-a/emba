@@ -15,8 +15,9 @@ Author(s): Thomas Gingele
 
 Description: This file contains wrapper code for custom Python modules.
 """
+# pylint: disable=R1732  # The log file is opened without 'with' on purpose.
 from os import _Environ
-from embaformatting import FORMAT
+from embaformatting import Format
 
 
 class EmbaModule():
@@ -46,12 +47,17 @@ class EmbaModule():
     """
 
     def __init__(self, argv: list, env: _Environ):
+        self.format = Format()
         self.findings = []
         self.filename = argv[0].split("/")[-1].split('.')[0]
 
         try:
             self.logfile_dir = env.get('LOG_PATH_MODULE')
-            self.logfile = open(f"{self.logfile_dir}/{self.filename}.txt", "w")
+            self.logfile = open(
+                f"{self.logfile_dir}/{self.filename}.txt",
+                "w",
+                encoding="utf-8"
+            )
 
         except KeyError as key_error:
             err = f"Unable to determine log path for module '{self.filename}'."
@@ -77,21 +83,43 @@ class EmbaModule():
             self.logfile.write(f"[{operator}] {line}\n")
 
     def log(self, text: str):
+        """
+        Creates a log entry.
+        Supports multiple lines.
+
+        Parameters:
+            text (str): The contents of the log entry.
+        """
         self.__write_formatted_log(
-            f"{FORMAT['ORANGE']}*{FORMAT['NC']}",
+            f"{self.format.ORANGE}*{self.format.NC}",
             text
         )
 
     def add_finding(self, description: str):
+        """
+        Creates a log entry.
+        Supports multiple lines.
+
+        Parameters:
+            description (str): A description of the finding.
+        """
         self.findings.append(description)
         self.__write_formatted_log(
-            f"{FORMAT['GREEN']}F{len(self.findings)}{FORMAT['NC']}",
+            f"{self.format.GREEN}F{len(self.findings)}{self.format.NC}",
             description
         )
 
     def panic(self, description: str):
+        """
+        Formats and logs error messages.
+        Does NOT terminate the script.
+        Supports multiple lines.
+
+        Parameters:
+            description (str): A description of the error or an error message.
+        """
         self.__write_formatted_log(
-            f"{FORMAT['RED']}!{FORMAT['NC']}",
+            f"{self.format.RED}!{self.format.NC}",
             description
         )
 

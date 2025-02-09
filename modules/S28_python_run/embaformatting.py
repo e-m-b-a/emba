@@ -16,27 +16,41 @@ Author(s): Thomas Gingele
 Description: This file converts EMBAs formatting variables into values
              which can be used by Python.
 """
+# pylint: disable=R0903  # Disable 'to few public methods' warning for Format
+#                        # class because it is equivalent to an Enum
 import re
 
 from os import environ
 
 
-FORMAT = {}
-
-
-def generate_format():
+class FormatMeta(type):
     """
-    This function grabs all available formatting codes
-    from the environment variables via a regex
-    and populates the FORMAT dictionary with them
+    Metaclass for a Singlton of type Format.
     """
-    global FORMAT
 
-    pattern = r"^\\033\[[;0-9]+m$"
-    for key in environ:
-        if re.search(pattern, environ[key]):
-            FORMAT[key] = environ[key].replace("\\033", "\x1b")
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+
+        return cls._instances[cls]
 
 
-if __name__ != "__main__" and len(FORMAT) == 0:
-    generate_format()
+class Format(metaclass=FormatMeta):
+    """
+    Class holding all formatting/color codes from the EMBA environment
+    variables as attributes.
+    """
+
+    def __init__(self):
+        """
+        This function grabs all available formatting codes
+        from the environment variables via a regex
+        and adds them to the Format instance as attributes.
+        """
+        pattern = r"^\\033\[[;0-9]+m$"
+        for key in environ:
+            if re.search(pattern, environ[key]):
+                setattr(self, key, environ[key].replace("\\033", "\x1b"))

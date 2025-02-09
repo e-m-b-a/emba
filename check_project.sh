@@ -149,7 +149,10 @@ pythoncheck() {
   for PYTHON_MODULE in "${PYTHON_MODULES[@]}"; do
     if (file "${PYTHON_MODULE}" | grep -q "Python script"); then
       echo -e "\\n""${GREEN}""Run Python check on ${PYTHON_MODULE}:""${NC}""\\n"
-      if flake8 "${PYTHON_MODULE}" || [[ $? -ne 1 ]]; then
+      PYTHON_ISSUE_FOUND=0
+      flake8 "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
+      pylint "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
+      if [[ "${PYTHON_ISSUE_FOUND}" -eq 0 ]]; then
         echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
       else
         echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"

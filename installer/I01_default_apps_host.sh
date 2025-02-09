@@ -24,6 +24,7 @@ I01_default_apps_host() {
   print_tool_info "jq" 1
   print_tool_info "shellcheck" 1
   print_tool_info "flake8" 1
+  print_tool_info "pylint" 1
   print_tool_info "unzip" 1
   print_tool_info "bc" 1
   print_tool_info "coreutils" 1
