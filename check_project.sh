@@ -145,13 +145,14 @@ pythoncheck() {
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA Python modules check""${NC}"
   echo -e "${BOLD}""=================================================================""${NC}"
   PYTHON_MODULES=()
+  PROSPECTOR_BIN=$(which prospector || echo -n "${EXT_DIR}""/emba_venv/bin/prospector")
   mapfile -t PYTHON_MODULES < <(find "${PYTHON_MOD_DIR}" -iname "*.py" 2>/dev/null)
   for PYTHON_MODULE in "${PYTHON_MODULES[@]}"; do
     if (file "${PYTHON_MODULE}" | grep -q "Python script"); then
       echo -e "\\n""${GREEN}""Run Python check on ${PYTHON_MODULE}:""${NC}""\\n"
       PYTHON_ISSUE_FOUND=0
       flake8 "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
-      "${EXT_DIR}""/emba_venv/bin/prospector" "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
+      "${PROSPECTOR_BIN}" "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
       if [[ "${PYTHON_ISSUE_FOUND}" -eq 0 ]]; then
         echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
       else
