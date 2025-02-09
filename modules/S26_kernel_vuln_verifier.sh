@@ -159,7 +159,7 @@ S26_kernel_vuln_verifier()
     fi
     local lPROD="linux_kernel"
     local lVENDOR="linux"
-    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPROD}_${lK_VERSION}_finished.txt"
+    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lK_VERSION}.csv"
 
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
@@ -287,6 +287,19 @@ S26_kernel_vuln_verifier()
     final_log_kernel_vulns "${lK_VERSION}" "${lALL_KVULNS_ARR[@]}"
   done
 
+  # fix the CVE log file and add the verified vulnerabilities:
+  if [[ -f "${LOG_PATH_MODULE}/vuln_summary.txt" ]]; then
+    # extract the verified CVEs:
+    mapfile -t lVERIFIED_BB_VULNS_ARR < <(cut -d ';' -f3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | grep ";1;\|;1$" | cut -d ';' -f1 || true)
+    if [[ "${#lVERIFIED_BB_VULNS_ARR[@]}" -gt 0 ]]; then
+      sed -i -r 's/(CVEs:\ [0-9]+)/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/' "${LOG_PATH_MODULE}/vuln_summary.txt"
+      for lVERIFIED_BB_CVE in "${lVERIFIED_BB_VULNS_ARR[@]}"; do
+        print_output "[*] Replacing ${lVERIFIED_BB_CVE} in ${LOG_PATH_MODULE}/cve_sum/*_finished.txt" "no_log"
+        sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 (V)/' "${LOG_PATH_MODULE}/cve_sum/"*_finished.txt || true
+      done
+    fi
+  fi
+
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
@@ -302,7 +315,7 @@ vuln_checker_threader() {
   # lK_PATH is now defined with some backup text for output if lK_PATHS_ARR population without results
   local lK_PATH="missing vulnerability path from advisory"
 
-  lCVE=$(echo "${lVULN}" | cut -d: -f5)
+  lCVE=$(echo "${lVULN}" | cut -d, -f5)
   if ! [[ "${lCVE}" == "CVE-"* ]]; then
     print_output "[-] No CVE identifier extracted for ${lVULN} ..."
     return
@@ -312,7 +325,7 @@ vuln_checker_threader() {
   write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
 
   lCVSS2="NA"
-  lCVSS3="$(echo "${lVULN}" | cut -d: -f7)"
+  lCVSS3="$(echo "${lVULN}" | cut -d, -f7)"
   # lSUMMARY="$(echo "${lVULN}" | cut -d: -f6-)"
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
 
@@ -343,11 +356,11 @@ vuln_checker_threader() {
           if [[ "${lK_PATH}" == "arch/${ORIG_K_ARCH}/"* ]]; then
             ((CNT_PATHS_FOUND+=1))
             if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
-              symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" "${lKERNEL_DIR}" &
+              symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS3}" "${lKERNEL_DIR}" &
               lWAIT_PIDS_S26_ARR+=( "$!" )
             fi
             if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
-              compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" &
+              compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS3}" &
               lWAIT_PIDS_S26_ARR+=( "$!" )
             fi
           else
@@ -360,11 +373,11 @@ vuln_checker_threader() {
         else
           ((CNT_PATHS_FOUND+=1))
           if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
-            symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" "${lKERNEL_DIR}" &
+            symbol_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS3}" "${lKERNEL_DIR}" &
             lWAIT_PIDS_S26_ARR+=( "$!" )
           fi
           if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
-            compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS2}/${lCVSS3}" &
+            compile_verifier "${lCVE}" "${lK_VERSION}" "${lK_PATH}" "${lCVSS3}" &
             lWAIT_PIDS_S26_ARR+=( "$!" )
           fi
         fi
@@ -553,12 +566,11 @@ report_kvulns_csv() {
   local lCVE_SYMBOL_FOUND=0
   local lCVE_COMPILE_FOUND=0
 
-  lCVE=$(echo "${lVULN}" | cut -d: -f1)
-  lCVSS2="$(echo "${lVULN}" | cut -d: -f2)"
-  lCVSS3="$(echo "${lVULN}" | cut -d: -f3)"
+  lCVE=$(echo "${lVULN}" | cut -d, -f5)
+  lCVSS="$(echo "${lVULN}" | cut -d: -f7)"
   lCVE_SYMBOL_FOUND=$(find "${LOG_PATH_MODULE}" -name "${lCVE}_symbol_verified.txt" | wc -l)
   lCVE_COMPILE_FOUND=$(find "${LOG_PATH_MODULE}" -name "${lCVE}_compiled_verified.txt" | wc -l)
-  echo "${lK_VERSION};${ORIG_K_ARCH};${lCVE};${lCVSS2};${lCVSS3};${lCVE_SYMBOL_FOUND:-0};${lCVE_COMPILE_FOUND:-0}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${lK_VERSION}".csv
+  echo "${lK_VERSION};${ORIG_K_ARCH};${lCVE};NA;${lCVSS};${lCVE_SYMBOL_FOUND:-0};${lCVE_COMPILE_FOUND:-0}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${lK_VERSION}".csv
 }
 
 final_log_kernel_vulns() {
