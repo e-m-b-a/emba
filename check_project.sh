@@ -151,7 +151,7 @@ pythoncheck() {
       echo -e "\\n""${GREEN}""Run Python check on ${PYTHON_MODULE}:""${NC}""\\n"
       PYTHON_ISSUE_FOUND=0
       flake8 "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
-      "${EXT_DIR}/emba_venv/bin/prospector" "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
+      "${EXT_DIR}""/emba_venv/bin/prospector" "${PYTHON_MODULE}" || ((PYTHON_ISSUE_FOUND=PYTHON_ISSUE_FOUND+$?))
       if [[ "${PYTHON_ISSUE_FOUND}" -eq 0 ]]; then
         echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
       else
@@ -324,6 +324,14 @@ summary() {
     echo -e "Modules to check (space usage in function definition): ${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_FCT_SPACE[@]}"; do
       echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
+    done
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+  if [[ "${#MODULES_TO_CHECK_ARR_PYTHON[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
+    echo -e "Modules to check (Python): ${#MODULES_TO_CHECK_ARR_PYTHON[@]}\\n"
+    for PYTHON_MODULE in "${MODULES_TO_CHECK_ARR_PYTHON[@]}"; do
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${PYTHON_MODULE}""${NC}"
     done
     echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
