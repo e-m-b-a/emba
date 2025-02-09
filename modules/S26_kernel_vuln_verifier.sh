@@ -309,7 +309,6 @@ vuln_checker_threader() {
   local lK_PATHS_ARR=()
   local lK_PATHS_FILES_TMP_ARR=()
   local lSUMMARY=""
-  local lCVSS2=""
   local lCVSS3=""
 
   # lK_PATH is now defined with some backup text for output if lK_PATHS_ARR population without results
@@ -324,12 +323,11 @@ vuln_checker_threader() {
   print_output "${lOUTx}" "no_log"
   write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
 
-  lCVSS2="NA"
   lCVSS3="$(echo "${lVULN}" | cut -d, -f7)"
   # lSUMMARY="$(echo "${lVULN}" | cut -d: -f6-)"
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
 
-  # print_output "$(indent "CVSSv2: ${ORANGE}${lCVSS2}${NC} / CVSSv3: ${ORANGE}${lCVSS3}${NC} / Summary: ${ORANGE}${lSUMMARY}${NC}")"
+  # print_output "$(indent "CVSSv3: ${ORANGE}${lCVSS3}${NC} / Summary: ${ORANGE}${lSUMMARY}${NC}")"
 
   # extract kernel source paths from summary -> we use these paths to check if they are used by our
   # symbols or during kernel compilation
@@ -561,7 +559,6 @@ report_kvulns_csv() {
   local lVULN="${1:-}"
   local lK_VERSION="${2:-}"
   local lCVE=""
-  local lCVSS2=""
   local lCVSS3=""
   local lCVE_SYMBOL_FOUND=0
   local lCVE_COMPILE_FOUND=0
