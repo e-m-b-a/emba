@@ -27,7 +27,7 @@ export GPT_OPTION=1
 export BINARY_EXTENDED=1
 
 # disable long running modules - enable them if needed
-export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S26_kernel_vuln_verifier" "S99_grepit" "S110_yara_check" )
+export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S26_kernel_vuln_verifier" "S99_grepit" "S110_yara_check" "F20_vul_aggregator" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0

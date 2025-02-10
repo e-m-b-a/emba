@@ -365,7 +365,7 @@ create_emulation_filesystem() {
 
     print_output "[*] fixImage.sh (chroot)"
     cp "${MODULE_SUB_PATH}/fixImage.sh" "${MNT_POINT}" || true
-    EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh | tee -a "${LOG_FILE}"
+    EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh || true | tee -a "${LOG_FILE}"
 
     # ensure that the needed permissions for exec files are set correctly
     # This is needed at some firmwares have corrupted permissions on ELF or sh files

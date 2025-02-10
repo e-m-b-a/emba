@@ -116,6 +116,7 @@ set_defaults() {
   if [[ -f "${CONFIG_DIR}"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="${CONFIG_DIR}"/msf_cve-db.txt
   fi
+  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
   if [[ -f "${CONFIG_DIR}"/trickest_cve-db.txt ]]; then
     export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi
@@ -236,6 +237,8 @@ set_log_paths() {
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
+  export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"
+  export S118_LOG_DIR="${S118_LOG/\.txt/\/}"
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
   export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
@@ -251,5 +254,6 @@ set_log_paths() {
   export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
+  export F17_LOG_DIR="${LOG_DIR}/f17_cve_bin_tool"
   export F50_CSV_LOG="${CSV_DIR}/f50_base_aggregator.csv"
 }

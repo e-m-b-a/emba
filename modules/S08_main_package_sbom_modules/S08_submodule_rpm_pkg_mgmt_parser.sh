@@ -33,6 +33,7 @@ S08_submodule_rpm_pkg_mgmt_parser() {
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lRPM_DIR=""
+  local lPOS_RES=0
 
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()

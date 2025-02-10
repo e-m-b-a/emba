@@ -13,11 +13,3 @@ write_link "https://security.snyk.io/vuln"
 print_output "$(indent "${ORANGE}X${NC} - Vulnerability is known as exploited")"
 write_link "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
 print_output "$(indent "${ORANGE}V${NC} - Vulnerability verified - Kernel or BusyBox (S26, S118)")"
-
-print_ln
-print_ln
-print_output "[*] Source notes:"
-print_output "$(indent "${ORANGE}STAT${NC} - Details found by static modules (S06, S09, S24, S25)")"
-print_output "$(indent "${ORANGE}PACK${NC} - Details found by package management environment (S08)")"
-print_output "$(indent "${ORANGE}UEMU${NC} - Details found by dynamic user-mode emulation modules (S115, S116)")"
-print_output "$(indent "${ORANGE}SEMU${NC} - Details found by dynamic system emulation modules (L*)")"

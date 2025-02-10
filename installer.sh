@@ -396,6 +396,8 @@ if [[ "${CVE_SEARCH}" -ne 1 ]] || [[ "${DOCKER_SETUP}" -ne 1 ]] || [[ "${IN_DOCK
 
   IL15_emulated_checks_init
 
+  IF17_cve_bin_tool
+
   IF50_aggregator_common
 fi
 

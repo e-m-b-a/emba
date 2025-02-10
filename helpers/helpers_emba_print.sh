@@ -983,7 +983,7 @@ secure_sleep() {
     sleep 10
     lCUR_SLEEP_TIME=$((lCUR_SLEEP_TIME + 10))
     if check_emba_ended; then
-      return
+      exit
     fi
   done
 }

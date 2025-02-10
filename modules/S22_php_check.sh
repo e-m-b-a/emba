@@ -62,6 +62,10 @@ s22_phpinfo_check() {
       print_output "[-] Warning: ionCube protected PHP file detected ${ORANGE}${lPHPINFO}${NC}"
       continue
     fi
+    if grep -E "return sg_load\('" "${lPHPINFO}"; then
+      print_output "[-] Warning: SourceGuardian protected PHP file detected ${ORANGE}${lPHPINFO}${NC}"
+      continue
+    fi
     if grep -q "phpinfo()" "${lPHPINFO}"; then
       print_output "[+] Found php file with debugging information: ${ORANGE}${lPHPINFO}${NC}"
       grep -A 2 -B 2 "phpinfo()" "${lPHPINFO}" | tee -a "${LOG_FILE}"
