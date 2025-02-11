@@ -203,10 +203,24 @@ S118_busybox_verifier()
     # extract the verified CVEs:
     mapfile -t lVERIFIED_BB_VULNS_ARR < <(grep -E -o ";CVE-[0-9]+-[0-9]+;" "${S118_CSV_LOG}" || true)
     if [[ "${#lVERIFIED_BB_VULNS_ARR[@]}" -gt 0 ]]; then
-      sed -i -r 's/(CVEs:\ [0-9]+)/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/' "${S118_LOG_DIR}/vuln_summary.txt"
+      local lTMP_CVE_ENTRY=""
+      # get the CVEs part of vuln_summary.txt
+      lTMP_CVE_ENTRY=$(grep -o -E ":\s+CVEs:\ [0-9]+\s+:" "${LOG_PATH_MODULE}/vuln_summary.txt" || true)
+      # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
+      lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/')
+      # ensure we have the right length -> :  CVEs: 1234 (123)  :
+      lTMP_CVE_ENTRY=$(printf '%s%*s' ${lTMP_CVE_ENTRY%:} $((22-${#lTMP_CVE_ENTRY})) ":")
+
+      # final replacement in file:
+      sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt"
+
+      # now add the (V) entry to every verified vulnerability
       for lVERIFIED_BB_CVE in "${lVERIFIED_BB_VULNS_ARR[@]}"; do
         lVERIFIED_BB_CVE="${lVERIFIED_BB_CVE//;}"
-        sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 (V)/' "${S118_LOG_DIR}/cve_sum/"*_finished.txt || true
+        local lV_ENTRY="(V)"
+        # ensure we have the correct length
+        lV_ENTRY=$(printf '%s%*s' ${lV_ENTRY} $((19-${#lVERIFIED_BB_CVE}-${#lV_ENTRY})))
+        sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 '"${lV_ENTRY}"'/' "${S118_LOG_DIR}/cve_sum/"*_finished.txt || true
       done
     fi
   fi
@@ -324,7 +338,7 @@ get_cve_busybox_data() {
   local lVERS="${lBB_VERSION_ARR[*]:3:1}"
 
   sub_module_title "BusyBox - Version based vulnerability detection"
-  print_output "${lBOM_REF} - ${lVENDOR} - ${lPROD} - ${lVERS} - ${lORIG_SOURCE}"
+  # print_output "${lBOM_REF} - ${lVENDOR} - ${lPROD} - ${lVERS} - ${lORIG_SOURCE}"
 
   cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}"
 

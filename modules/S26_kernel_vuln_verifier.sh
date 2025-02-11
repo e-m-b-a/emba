@@ -292,9 +292,22 @@ S26_kernel_vuln_verifier()
     # extract the verified CVEs:
     mapfile -t lVERIFIED_BB_VULNS_ARR < <(cut -d ';' -f3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | grep ";1;\|;1$" | cut -d ';' -f1 || true)
     if [[ "${#lVERIFIED_BB_VULNS_ARR[@]}" -gt 0 ]]; then
-      sed -i -r 's/(CVEs:\ [0-9]+)/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/' "${LOG_PATH_MODULE}/vuln_summary.txt"
+      local lTMP_CVE_ENTRY=""
+      # get the CVEs part of vuln_summary.txt
+      lTMP_CVE_ENTRY=$(grep -o -E ":\s+CVEs:\ [0-9]+\s+:" "${LOG_PATH_MODULE}/vuln_summary.txt" || true)
+      # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
+      lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/')
+      # ensure we have the right length -> :  CVEs: 1234 (123)  :
+      lTMP_CVE_ENTRY=$(printf '%s%*s' ${lTMP_CVE_ENTRY%:} $((22-${#lTMP_CVE_ENTRY})) ":")
+
+      # final replacement in file:
+      sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt"
+
       for lVERIFIED_BB_CVE in "${lVERIFIED_BB_VULNS_ARR[@]}"; do
         print_output "[*] Replacing ${lVERIFIED_BB_CVE} in ${LOG_PATH_MODULE}/cve_sum/*_finished.txt" "no_log"
+        local lV_ENTRY="(V)"
+        # ensure we have the correct length
+        lV_ENTRY=$(printf '%s%*s' ${lV_ENTRY} $((19-${#lVERIFIED_BB_CVE}-${#lV_ENTRY})))
         sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 (V)/' "${LOG_PATH_MODULE}/cve_sum/"*_finished.txt || true
       done
     fi
