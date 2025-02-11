@@ -718,7 +718,7 @@ tear_down_cve_threader() {
   # generate the vulnerability details for the SBOM (VEX)
 
   # external/nvd-json-data-feeds/CVE-2022/CVE-2022-25xx/CVE-2022-2586.json
-  mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u || true)
+  mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u | cut -d '-' -f2|| true)
   lCVE_DESC=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
 
   local lVULN_BOM_REF=""
@@ -739,7 +739,7 @@ tear_down_cve_threader() {
     bom-ref="${lVULN_BOM_REF}" \
     id="${lCVE_ID}" \
     source="$(jo -a "$(jo -n name="${lVULN_SOURCE}" url="${lVULN_URL}")")" \
-    ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY}" method="${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
+    ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY}" method="CVSSv${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
     cwes="$(jo -a "${lCWE[@]:-null}")" \
     analysis="$(jo -a "$(jo -n state="not_verified")")" \
     description="${lCVE_DESC}" \
