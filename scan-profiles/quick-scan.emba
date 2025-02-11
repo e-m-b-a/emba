@@ -25,6 +25,7 @@ export QEMULATION=1
 # in Quick scan the binary testing takes too long
 export BINARY_EXTENDED=0
 
+# VEX metrics (check for KEV, Exploits, EPSS)
 export VEX_METRICS=0
 
 # the following modules are long running modules which are disabled in the quick scan profile

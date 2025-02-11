@@ -62,7 +62,7 @@ F17_cve_bin_tool() {
 
   print_bar
 
-  if ! [[ -f "${TMP_DIR}/sbom_entry_preprocessed.tmp" ]]; then
+  if ! [[ -f "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" ]]; then
     print_output "[*] No SBOM components for further analysis detected"
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -133,7 +133,7 @@ F17_cve_bin_tool() {
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
     max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR[@]}"
-  done < "${TMP_DIR}/sbom_entry_preprocessed.tmp"
+  done < "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
@@ -182,6 +182,7 @@ F17_cve_bin_tool() {
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
+
 sbom_preprocessing_threader() {
   local lSBOM_ENTRY="${1:-}"
 
@@ -215,7 +216,7 @@ sbom_preprocessing_threader() {
   fi
 
   # ensure this product/version combination is not already in our testing array:
-  if [[ "${lSBOM_ARR_PRE_PROCESSED[*]}" =~ .*\"name\":\""${lPROD}"\",\"version\":\""${lVERS}"\".* ]]; then
+  if (grep -q "\"name\":\"${lPROD}\",\"version\":\"${lVERS}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
     return
   fi
   lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
@@ -226,7 +227,7 @@ sbom_preprocessing_threader() {
   print_output "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} - vendor ${ORANGE}${lVENDOR:-NOTDEFINED}${NC} - version ${ORANGE}${lVERS}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}"
   write_link "f17#${lANCHOR}"
 
-  echo "${lSBOM_ENTRY}" >> "${TMP_DIR}/sbom_entry_preprocessed.tmp"
+  echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 }
 
 cve_bin_tool_threader() {
@@ -751,6 +752,14 @@ tear_down_cve_threader() {
     local lVULN_URL="https://nvd.nist.gov/vuln/detail/${lCVE_ID}"
   else
     local lVULN_URL="UNKNOWN"
+  fi
+
+  # trivially rounding the cvss score to ensure we have clean values:
+  if [[ "${lCVSS_SCORE}" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    lCVSS_SCORE=$(printf "%.${2:-1}f" "${lCVSS_SCORE}")
+  else
+    # just in case we have some bogus not number thing in the score field
+    lCVSS_SCORE=0
   fi
 
   jo -p -n -- \
