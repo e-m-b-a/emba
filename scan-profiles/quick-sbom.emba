@@ -37,7 +37,7 @@ export SBOM_MAX_FILE_LOG=100
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=0
 
-export SELECT_MODULES+=( "S06" "S08" "S25" "F15" )
+export SELECT_MODULES+=( "S06" "S08" "S24" "S25" "F15" )
 
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
 # that should not be used
