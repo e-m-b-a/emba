@@ -45,62 +45,32 @@ F17_cve_bin_tool() {
   readarray -t lSBOM_ARR < <(jq --compact-output '.components[]' "${lEMBA_SBOM_JSON}" || print_error "[-] SBOM loading error - Vulnerability analysis not available")
 
   sub_module_title "Software inventory overview"
-  print_output "[*] Analyzing SBOM ..." "no_log"
+  print_output "[*] Analyzing ${#lSBOM_ARR[@]} SBOM components ..." "no_log"
 
-  local lSBOM_ARR_PRE_PROCESSED=()
-  # first round is primarly for removing duplicates and unhandled_file entries
+  local lWAIT_PIDS_TEMP=()
+  # first round is primarly for removing duplicates, unhandled_file entries and printing a quick initial overview for the html report
   # 2nd round is for the real testing
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
-    local lBOM_REF=""
-    local lORIG_SOURCE=""
-    local lMIN_IDENTIFIER=()
-    local lVENDOR=""
-    local lPROD=""
-    local lVERS=""
-
-    # we need └─$ jq --raw-output '.components[].properties[]' ~/Downloads/EMBA_cyclonedx_sbom.json
-    # {
-    # "name": "EMBA:sbom:2:minimal_identifier",
-    # "value": "::debconf-i18n:1.5.82"
-    # }
-    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
-
-    # if source is unhandled_file we can skip this entry completely
-    if [[ "${lORIG_SOURCE}" == "unhandled_file" ]]; then
-      continue
-    fi
-
-    mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
-    lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
-    lPROD="${lMIN_IDENTIFIER[*]:2:1}"
-    lVERS="${lMIN_IDENTIFIER[*]:3:1}"
-
-    # ensure we have some version to test
-    if [[ -z "${lVERS}" ]]; then
-      continue
-    fi
-
-    # ensure this product/version combination is not already in our testing array:
-    if [[ "${lSBOM_ARR_PRE_PROCESSED[*]}" =~ .*\"name\":\""${lPROD}"\",\"version\":\""${lVERS}"\".* ]]; then
-      continue
-    fi
-    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
-
-    local lANCHOR=""
-    lANCHOR="${lPROD}_${lVERS}"
-    lANCHOR="cve_${lANCHOR:0:20}"
-    print_output "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} - vendor ${ORANGE}${lVENDOR:-NOTDEFINED}${NC} - version ${ORANGE}${lVERS}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}"
-    write_link "f17#${lANCHOR}"
-
-    lSBOM_ARR_PRE_PROCESSED+=("${lSBOM_ENTRY}")
+    sbom_preprocessing_threader "${lSBOM_ENTRY}" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_TEMP+=( "${lTMP_PID}" )
+    max_pids_protection $((2*"${MAX_MOD_THREADS}")) "${lWAIT_PIDS_TEMP[@]}"
     local lNEG_LOG=1
   done
+  wait_for_pid "${lWAIT_PIDS_TEMP[@]}"
 
   print_bar
 
+  if ! [[ -f "${TMP_DIR}/sbom_entry_preprocessed.tmp" ]]; then
+    print_output "[*] No SBOM components for further analysis detected"
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   sub_module_title "Vulnerability overview"
   # 2nd round with pre-processed array -> we are going to check for CVEs now
-  for lSBOM_ENTRY in "${lSBOM_ARR_PRE_PROCESSED[@]}"; do
+  while read -r lSBOM_ENTRY; do
     local lBOM_REF=""
     local lORIG_SOURCE=""
     local lMIN_IDENTIFIER=()
@@ -163,7 +133,7 @@ F17_cve_bin_tool() {
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
     max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR[@]}"
-  done
+  done < "${TMP_DIR}/sbom_entry_preprocessed.tmp"
 
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
@@ -211,6 +181,52 @@ F17_cve_bin_tool() {
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+}
+sbom_preprocessing_threader() {
+  local lSBOM_ENTRY="${1:-}"
+
+  local lBOM_REF=""
+  local lORIG_SOURCE=""
+  local lMIN_IDENTIFIER=()
+  local lVENDOR=""
+  local lPROD=""
+  local lVERS=""
+
+  # we need └─$ jq --raw-output '.components[].properties[]' ~/Downloads/EMBA_cyclonedx_sbom.json
+  # {
+  # "name": "EMBA:sbom:2:minimal_identifier",
+  # "value": "::debconf-i18n:1.5.82"
+  # }
+  lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
+
+  # if source is unhandled_file we can skip this entry completely
+  if [[ "${lORIG_SOURCE}" == "unhandled_file" ]]; then
+    return
+  fi
+
+  mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
+  lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
+  lPROD="${lMIN_IDENTIFIER[*]:2:1}"
+  lVERS="${lMIN_IDENTIFIER[*]:3:1}"
+
+  # ensure we have some version to test
+  if [[ -z "${lVERS}" ]]; then
+    return
+  fi
+
+  # ensure this product/version combination is not already in our testing array:
+  if [[ "${lSBOM_ARR_PRE_PROCESSED[*]}" =~ .*\"name\":\""${lPROD}"\",\"version\":\""${lVERS}"\".* ]]; then
+    return
+  fi
+  lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
+
+  local lANCHOR=""
+  lANCHOR="${lPROD}_${lVERS}"
+  lANCHOR="cve_${lANCHOR:0:20}"
+  print_output "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} - vendor ${ORANGE}${lVENDOR:-NOTDEFINED}${NC} - version ${ORANGE}${lVERS}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}"
+  write_link "f17#${lANCHOR}"
+
+  echo "${lSBOM_ENTRY}" >> "${TMP_DIR}/sbom_entry_preprocessed.tmp"
 }
 
 cve_bin_tool_threader() {
