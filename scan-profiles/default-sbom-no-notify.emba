@@ -8,7 +8,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Benedikt Kuehne
 #
 # Description: This is a default SBOM profile. You can Use it as a template for your own profiles
 #              or start emba with "-p sbom-default.emba" to use it
