@@ -745,9 +745,12 @@ tear_down_cve_threader() {
     cwes="$(jo -a "${lCWE[@]:-null}")" \
     analysis="$(jo -n state="in_triage")" \
     description="${lCVE_DESC}" \
-    affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -a "$(jo -n component="${lPROD}" version="${lVERS}")")")")" \
+    affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -a "$(jo -n -- -s component="${lPROD}" -s version="${lVERS}")")")")" \
     properties="$(jo -a "${PROPERTIES_JSON_ARR[@]:-null}")" \
-    > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.json" || print_error "[*] VEX entry failed for ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}"
+    > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.tmp.json" || print_error "[*] VEX entry failed for ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}"
+
+  # make it nice:
+  jq . "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.tmp.json" > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.json"
 }
 
 get_kernel_s25_data() {
