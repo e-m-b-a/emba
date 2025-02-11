@@ -420,255 +420,257 @@ tear_down_cve_threader() {
     lTYPE="R"
   fi
 
-  # check if the CVE is known as a knwon exploited vulnerability:
-  if grep -q "^${lCVE_ID}," "${KNOWN_EXP_CSV}"; then
-    write_log "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a known exploited vulnerability.${NC}" "${LOG_PATH_MODULE}/KEV.txt"
+  if [[ "${VEX_METRICS}" -eq 1 ]]; then
+    # check if the CVE is known as a knwon exploited vulnerability:
+    if grep -q "^${lCVE_ID}," "${KNOWN_EXP_CSV}"; then
+      write_log "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a known exploited vulnerability.${NC}" "${LOG_PATH_MODULE}/KEV.txt"
 
-    if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (KEV"
-    else
-      lEXPLOIT+=" / KEV"
-    fi
-    if [[ "${lTYPE}" != "NA" ]]; then
-      lEXPLOIT+=" (${lTYPE})"
-    fi
-    lKNOWN_EXPLOITED=1
-    lEDB=1
-  fi
-
-  if [[ "${lBIN_NAME}" == *kernel* ]]; then
-    for lKERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS_ARR[@]}"; do
-      lKERNEL_CVE_EXPLOIT=$(echo "${lKERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
-      if [[ "${lKERNEL_CVE_EXPLOIT}" == "${lCVE_ID}" ]]; then
-        lEXPLOIT="Exploit (linux-exploit-suggester"
-        if [[ "${lTYPE}" != "NA" ]]; then
-          lEXPLOIT+=" (${lTYPE})"
-        fi
-        write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};kernel exploit" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-        lEDB=1
-      fi
-    done
-
-    if [[ -f "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv ]]; then
-      # check if the current CVE is a verified kernel CVE from s26 module
-      if grep -q ";${lCVE_ID};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!" "no_log"
-        ((lKERNEL_VERIFIED_VULN+=1))
-        lKERNEL_VERIFIED="yes"
-      fi
-      if grep -q ";${lCVE_ID};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!" "no_log"
-        ((lKERNEL_VERIFIED_VULN+=1))
-        lKERNEL_VERIFIED="yes"
-      fi
-      if grep -q ";${lCVE_ID};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!" "no_log"
-        ((lKERNEL_VERIFIED_VULN+=1))
-        lKERNEL_VERIFIED="yes"
-      fi
-    fi
-  fi
-
-  if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${lBIN_NAME}" == *"busybox"* ]]; then
-    if grep -q ";${lCVE_ID};" "${CSV_DIR}"/s118_busybox_verifier.csv; then
-      print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified BusyBox vulnerability (${ORANGE}BusyBox applet${GREEN})!" "no_log"
-      lBUSYBOX_VERIFIED="yes"
-    fi
-  fi
-
-  mapfile -t lEXPLOIT_AVAIL_EDB_ARR < <(cve_searchsploit "${lCVE_ID}" 2>/dev/null || true)
-  mapfile -t lEXPLOIT_AVAIL_MSF_ARR < <(grep -E "${lCVE_ID}"$ "${MSF_DB_PATH}" 2>/dev/null || true)
-  mapfile -t lEXPLOIT_AVAIL_PACKETSTORM_ARR < <(grep -E "^${lCVE_ID}\;" "${CONFIG_DIR}"/PS_PoC_results.csv 2>/dev/null || true)
-  mapfile -t lEXPLOIT_AVAIL_SNYK_ARR < <(grep -E "^${lCVE_ID}\;" "${CONFIG_DIR}"/Snyk_PoC_results.csv 2>/dev/null || true)
-  mapfile -t lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR < <(grep -E "${lCVE_ID}"$ "${CONFIG_DIR}/routersploit_cve-db.txt" 2>/dev/null || true)
-
-  # now, we check the exploit-db results if we have a routersploit module:
-  if [[ " ${lEXPLOIT_AVAIL_EDB_ARR[*]} " =~ "Exploit DB Id:" ]]; then
-    for lEID_VALUE in "${EXPLOIT_AVAIL_EDB_ARR[@]}"; do
-      if ! echo "${lEID_VALUE}" | grep -q "Exploit DB Id:"; then
-        continue
-      fi
-      lEID_VALUE=$(echo "${lEID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
-      mapfile -t lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR < <(grep "${lEID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
-    done
-
-    readarray -t lEXPLOIT_IDS_ARR < <(echo "${lEXPLOIT_AVAIL_EDB_ARR[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
-    if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (EDB ID:"
-    else
-      lEXPLOIT+=" / EDB ID:"
-    fi
-
-    for lEXPLOIT_ID in "${lEXPLOIT_IDS_ARR[@]}" ; do
-      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:EDB:${lEXPLOIT_ID}" )
-      lEXPLOIT+=" ${lEXPLOIT_ID}"
-      write_log "[+] Exploit for ${lCVE_ID}:\\n" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
-      write_log "[+] EDB Exploit for ${lCVE_ID} identified"  "${LOG_PATH_MODULE}/exploit/EDB_${lEXPLOIT_ID}_notes.txt"
-      write_log "${lEXPLOIT_AVAIL_EDB_ARR[*]/\ /\\n}" "${LOG_PATH_MODULE}/exploit/edb_${lEXPLOIT_ID}_notes.txt"
-      # write_log "${lLINE}" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
-      if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: local" && "${lLOCAL:-0}" -eq 0 ]]; then
-        lEXPLOIT+=" (L)"
-        lLOCAL=1
-      fi
-      if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: remote" && "${lREMOTE:-0}" -eq 0 ]]; then
-        lEXPLOIT+=" (R)"
-        lREMOTE=1
-      fi
-      if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: dos" && "${lDOS:-0}" -eq 0 ]]; then
-        lEXPLOIT+=" (D)"
-        lDOS=1
-      fi
-      lEDB=1
-      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};exploit_db" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-    done
-
-    # copy the exploit-db exploits to the report
-    for lEXPLOIT_ENTRY in "${lEXPLOIT_AVAIL_EDB_ARR[@]}"; do
-      if [[ "${lEXPLOIT_ENTRY}" =~ "File:" ]]; then
-        lE_FILE=$(echo "${lEXPLOIT_ENTRY}" | awk '{print $2}')
-        if [[ -f "${lE_FILE}" ]] ; then
-          cp "${lE_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${lE_FILE}")" || print_error "[-] Copy exploit error for ${lE_FILE}"
-        fi
-      fi
-    done
-  fi
-
-  if [[ ${#lEXPLOIT_AVAIL_MSF_ARR[@]} -gt 0 ]]; then
-    if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (MSF:"
-    else
-      lEXPLOIT+=" / MSF:"
-    fi
-
-    for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}" ; do
-      if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
-        lEXPLOIT_PATH=$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
+      if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
+        lEXPLOIT="Exploit (KEV"
       else
-        lEXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
+        lEXPLOIT+=" / KEV"
       fi
-      lEXPLOIT_NAME=$(basename -s .rb "${lEXPLOIT_PATH}")
-      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:MSF:${lEXPLOIT_NAME}" )
-      lEXPLOIT+=" ${lEXPLOIT_NAME}"
-      if [[ -f "${lEXPLOIT_PATH}" ]] ; then
-        # for the web reporter we copy the original metasploit module into the EMBA log directory
-        cp "${lEXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/msf_""${lEXPLOIT_NAME}".rb
-        if grep -q "< Msf::Exploit::Remote" "${lEXPLOIT_PATH}"; then
-          lEXPLOIT+=" (R)"
-        fi
-        if grep -q "< Msf::Exploit::Local" "${lEXPLOIT_PATH}"; then
-          lEXPLOIT+=" (L)"
-        fi
-        if grep -q "include Msf::Auxiliary::Dos" "${lEXPLOIT_PATH}"; then
-          lEXPLOIT+=" (D)"
-        fi
-      fi
-    done
-
-    if [[ ${lEDB} -eq 0 ]]; then
-      # only count the msf exploit if we have not already count an other exploit
-      # otherwise we count an exploit for one CVE multiple times
-      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};MSF" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      lEDB=1
-    fi
-  fi
-
-  if [[ ${#lEXPLOIT_AVAIL_SNYK_ARR[@]} -gt 0 ]]; then
-    if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (Snyk:"
-    else
-      lEXPLOIT+=" / Snyk:"
-    fi
-
-    for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}" ; do
-      lEXPLOIT_NAME=$(echo "${lEXPLOIT_SNYK}" | cut -d\; -f2)
-      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:SNYK:${lEXPLOIT_NAME}" )
-      lEXPLOIT+=" ${lEXPLOIT_NAME}"
       if [[ "${lTYPE}" != "NA" ]]; then
         lEXPLOIT+=" (${lTYPE})"
       fi
-    done
-
-    if [[ ${lEDB} -eq 0 ]]; then
-      # only count the snyk exploit if we have not already count an other exploit
-      # otherwise we count an exploit for one CVE multiple times
-      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};SNYK" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      lKNOWN_EXPLOITED=1
       lEDB=1
     fi
-  fi
 
-  if [[ ${#lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]} -gt 0 ]]; then
-    if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (PSS:"
-    else
-      lEXPLOIT+=" / PSS:"
-    fi
-
-    for lEXPLOIT_PS in "${lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]}" ; do
-      # we use the html file as lEXPLOIT_NAME.
-      lEXPLOIT_NAME=$(echo "${lEXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
-      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:PSS:${lEXPLOIT_NAME}" )
-      lEXPLOIT+=" ${lEXPLOIT_NAME}"
-      lPS_TYPE=$(grep "^${lCVE_ID};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${lEXPLOIT_NAME}" | cut -d\; -f4 || true)
-      if [[ "${lPS_TYPE}" == "remote" ]]; then
-        lPS_TYPE="R"
-      elif [[ "${lPS_TYPE}" == "local" ]]; then
-        lPS_TYPE="L"
-      elif [[ "${lPS_TYPE}" == "DoS" ]]; then
-        lPS_TYPE="D"
-      else
-        # fallback to CVSS type
-        if [[ "${lTYPE}" != "NA" ]]; then
-          lPS_TYPE="${lTYPE}"
-        fi
-      fi
-      lEXPLOIT+=" (${lPS_TYPE})"
-    done
-
-    if [[ ${lEDB} -eq 0 ]]; then
-      # only count the packetstorm exploit if we have not already count an other exploit
-      # otherwise we count an exploit for one CVE multiple times
-      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PSS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      lEDB=1
-    fi
-  fi
-
-  if [[ "${#lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" -gt 0 || "${#lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}" -gt 0 ]]; then
-    if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
-      lEXPLOIT="Exploit (Routersploit:"
-    else
-      lEXPLOIT+=" / Routersploit:"
-    fi
-    local lEXPLOIT_ROUTERSPLOIT_ARR=("${lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" "${lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}")
-
-    for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}" ; do
-      lEXPLOIT_PATH=$(echo "${lEXPLOIT_RS}" | cut -d: -f1)
-      lEXPLOIT_NAME=$(basename -s .py "${lEXPLOIT_PATH}")
-      lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:RS:${lEXPLOIT_NAME}" )
-      lEXPLOIT+=" ${lEXPLOIT_NAME}"
-      if [[ -f "${lEXPLOIT_PATH}" ]] ; then
-        # for the web reporter we copy the original metasploit module into the EMBA log directory
-        cp "${lEXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/routersploit_""${lEXPLOIT_NAME}".py
-        if grep -q Port "${lEXPLOIT_PATH}"; then
-          lEXPLOIT+=" (R)"
-        else
-          # fallback to CVSS type
+    if [[ "${lBIN_NAME}" == *kernel* ]]; then
+      for lKERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS_ARR[@]}"; do
+        lKERNEL_CVE_EXPLOIT=$(echo "${lKERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
+        if [[ "${lKERNEL_CVE_EXPLOIT}" == "${lCVE_ID}" ]]; then
+          lEXPLOIT="Exploit (linux-exploit-suggester"
           if [[ "${lTYPE}" != "NA" ]]; then
             lEXPLOIT+=" (${lTYPE})"
           fi
+          write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};kernel exploit" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+          lEDB=1
+        fi
+      done
+
+      if [[ -f "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv ]]; then
+        # check if the current CVE is a verified kernel CVE from s26 module
+        if grep -q ";${lCVE_ID};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
+          print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!" "no_log"
+          ((lKERNEL_VERIFIED_VULN+=1))
+          lKERNEL_VERIFIED="yes"
+        fi
+        if grep -q ";${lCVE_ID};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
+          print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!" "no_log"
+          ((lKERNEL_VERIFIED_VULN+=1))
+          lKERNEL_VERIFIED="yes"
+        fi
+        if grep -q ";${lCVE_ID};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
+          print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!" "no_log"
+          ((lKERNEL_VERIFIED_VULN+=1))
+          lKERNEL_VERIFIED="yes"
         fi
       fi
-    done
-
-    if [[ ${lEDB} -eq 0 ]]; then
-      # only count the routersploit exploit if we have not already count an other exploit
-      # otherwise we count an exploit for one CVE multiple times
-      write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};RS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
-      lEDB=1
     fi
-  fi
 
-  if [[ ${lEDB} -eq 1 ]]; then
-    lEXPLOIT+=")"
+    if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${lBIN_NAME}" == *"busybox"* ]]; then
+      if grep -q ";${lCVE_ID};" "${CSV_DIR}"/s118_busybox_verifier.csv; then
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified BusyBox vulnerability (${ORANGE}BusyBox applet${GREEN})!" "no_log"
+        lBUSYBOX_VERIFIED="yes"
+      fi
+    fi
+
+    mapfile -t lEXPLOIT_AVAIL_EDB_ARR < <(cve_searchsploit "${lCVE_ID}" 2>/dev/null || true)
+    mapfile -t lEXPLOIT_AVAIL_MSF_ARR < <(grep -E "${lCVE_ID}"$ "${MSF_DB_PATH}" 2>/dev/null || true)
+    mapfile -t lEXPLOIT_AVAIL_PACKETSTORM_ARR < <(grep -E "^${lCVE_ID}\;" "${CONFIG_DIR}"/PS_PoC_results.csv 2>/dev/null || true)
+    mapfile -t lEXPLOIT_AVAIL_SNYK_ARR < <(grep -E "^${lCVE_ID}\;" "${CONFIG_DIR}"/Snyk_PoC_results.csv 2>/dev/null || true)
+    mapfile -t lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR < <(grep -E "${lCVE_ID}"$ "${CONFIG_DIR}/routersploit_cve-db.txt" 2>/dev/null || true)
+
+    # now, we check the exploit-db results if we have a routersploit module:
+    if [[ " ${lEXPLOIT_AVAIL_EDB_ARR[*]} " =~ "Exploit DB Id:" ]]; then
+      for lEID_VALUE in "${EXPLOIT_AVAIL_EDB_ARR[@]}"; do
+        if ! echo "${lEID_VALUE}" | grep -q "Exploit DB Id:"; then
+          continue
+        fi
+        lEID_VALUE=$(echo "${lEID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
+        mapfile -t lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR < <(grep "${lEID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
+      done
+
+      readarray -t lEXPLOIT_IDS_ARR < <(echo "${lEXPLOIT_AVAIL_EDB_ARR[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
+      if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
+        lEXPLOIT="Exploit (EDB ID:"
+      else
+        lEXPLOIT+=" / EDB ID:"
+      fi
+
+      for lEXPLOIT_ID in "${lEXPLOIT_IDS_ARR[@]}" ; do
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:EDB:${lEXPLOIT_ID}" )
+        lEXPLOIT+=" ${lEXPLOIT_ID}"
+        write_log "[+] Exploit for ${lCVE_ID}:\\n" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
+        write_log "[+] EDB Exploit for ${lCVE_ID} identified"  "${LOG_PATH_MODULE}/exploit/EDB_${lEXPLOIT_ID}_notes.txt"
+        write_log "${lEXPLOIT_AVAIL_EDB_ARR[*]/\ /\\n}" "${LOG_PATH_MODULE}/exploit/edb_${lEXPLOIT_ID}_notes.txt"
+        # write_log "${lLINE}" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
+        if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: local" && "${lLOCAL:-0}" -eq 0 ]]; then
+          lEXPLOIT+=" (L)"
+          lLOCAL=1
+        fi
+        if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: remote" && "${lREMOTE:-0}" -eq 0 ]]; then
+          lEXPLOIT+=" (R)"
+          lREMOTE=1
+        fi
+        if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: dos" && "${lDOS:-0}" -eq 0 ]]; then
+          lEXPLOIT+=" (D)"
+          lDOS=1
+        fi
+        lEDB=1
+        write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};exploit_db" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+      done
+
+      # copy the exploit-db exploits to the report
+      for lEXPLOIT_ENTRY in "${lEXPLOIT_AVAIL_EDB_ARR[@]}"; do
+        if [[ "${lEXPLOIT_ENTRY}" =~ "File:" ]]; then
+          lE_FILE=$(echo "${lEXPLOIT_ENTRY}" | awk '{print $2}')
+          if [[ -f "${lE_FILE}" ]] ; then
+            cp "${lE_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${lE_FILE}")" || print_error "[-] Copy exploit error for ${lE_FILE}"
+          fi
+        fi
+      done
+    fi
+
+    if [[ ${#lEXPLOIT_AVAIL_MSF_ARR[@]} -gt 0 ]]; then
+      if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
+        lEXPLOIT="Exploit (MSF:"
+      else
+        lEXPLOIT+=" / MSF:"
+      fi
+
+      for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}" ; do
+        if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
+          lEXPLOIT_PATH=$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
+        else
+          lEXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
+        fi
+        lEXPLOIT_NAME=$(basename -s .rb "${lEXPLOIT_PATH}")
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:MSF:${lEXPLOIT_NAME}" )
+        lEXPLOIT+=" ${lEXPLOIT_NAME}"
+        if [[ -f "${lEXPLOIT_PATH}" ]] ; then
+          # for the web reporter we copy the original metasploit module into the EMBA log directory
+          cp "${lEXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/msf_""${lEXPLOIT_NAME}".rb
+          if grep -q "< Msf::Exploit::Remote" "${lEXPLOIT_PATH}"; then
+            lEXPLOIT+=" (R)"
+          fi
+          if grep -q "< Msf::Exploit::Local" "${lEXPLOIT_PATH}"; then
+            lEXPLOIT+=" (L)"
+          fi
+          if grep -q "include Msf::Auxiliary::Dos" "${lEXPLOIT_PATH}"; then
+            lEXPLOIT+=" (D)"
+          fi
+        fi
+      done
+
+      if [[ ${lEDB} -eq 0 ]]; then
+        # only count the msf exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};MSF" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+        lEDB=1
+      fi
+    fi
+
+    if [[ ${#lEXPLOIT_AVAIL_SNYK_ARR[@]} -gt 0 ]]; then
+      if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
+        lEXPLOIT="Exploit (Snyk:"
+      else
+        lEXPLOIT+=" / Snyk:"
+      fi
+
+      for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}" ; do
+        lEXPLOIT_NAME=$(echo "${lEXPLOIT_SNYK}" | cut -d\; -f2)
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:SNYK:${lEXPLOIT_NAME}" )
+        lEXPLOIT+=" ${lEXPLOIT_NAME}"
+        if [[ "${lTYPE}" != "NA" ]]; then
+          lEXPLOIT+=" (${lTYPE})"
+        fi
+      done
+
+      if [[ ${lEDB} -eq 0 ]]; then
+        # only count the snyk exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};SNYK" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+        lEDB=1
+      fi
+    fi
+
+    if [[ ${#lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]} -gt 0 ]]; then
+      if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
+        lEXPLOIT="Exploit (PSS:"
+      else
+        lEXPLOIT+=" / PSS:"
+      fi
+
+      for lEXPLOIT_PS in "${lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]}" ; do
+        # we use the html file as lEXPLOIT_NAME.
+        lEXPLOIT_NAME=$(echo "${lEXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:PSS:${lEXPLOIT_NAME}" )
+        lEXPLOIT+=" ${lEXPLOIT_NAME}"
+        lPS_TYPE=$(grep "^${lCVE_ID};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${lEXPLOIT_NAME}" | cut -d\; -f4 || true)
+        if [[ "${lPS_TYPE}" == "remote" ]]; then
+          lPS_TYPE="R"
+        elif [[ "${lPS_TYPE}" == "local" ]]; then
+          lPS_TYPE="L"
+        elif [[ "${lPS_TYPE}" == "DoS" ]]; then
+          lPS_TYPE="D"
+        else
+          # fallback to CVSS type
+          if [[ "${lTYPE}" != "NA" ]]; then
+            lPS_TYPE="${lTYPE}"
+          fi
+        fi
+        lEXPLOIT+=" (${lPS_TYPE})"
+      done
+
+      if [[ ${lEDB} -eq 0 ]]; then
+        # only count the packetstorm exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};PSS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+        lEDB=1
+      fi
+    fi
+
+    if [[ "${#lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" -gt 0 || "${#lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}" -gt 0 ]]; then
+      if [[ "${lEXPLOIT}" == "No exploit available" ]]; then
+        lEXPLOIT="Exploit (Routersploit:"
+      else
+        lEXPLOIT+=" / Routersploit:"
+      fi
+      local lEXPLOIT_ROUTERSPLOIT_ARR=("${lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" "${lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}")
+
+      for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}" ; do
+        lEXPLOIT_PATH=$(echo "${lEXPLOIT_RS}" | cut -d: -f1)
+        lEXPLOIT_NAME=$(basename -s .py "${lEXPLOIT_PATH}")
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:RS:${lEXPLOIT_NAME}" )
+        lEXPLOIT+=" ${lEXPLOIT_NAME}"
+        if [[ -f "${lEXPLOIT_PATH}" ]] ; then
+          # for the web reporter we copy the original metasploit module into the EMBA log directory
+          cp "${lEXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/routersploit_""${lEXPLOIT_NAME}".py
+          if grep -q Port "${lEXPLOIT_PATH}"; then
+            lEXPLOIT+=" (R)"
+          else
+            # fallback to CVSS type
+            if [[ "${lTYPE}" != "NA" ]]; then
+              lEXPLOIT+=" (${lTYPE})"
+            fi
+          fi
+        fi
+      done
+
+      if [[ ${lEDB} -eq 0 ]]; then
+        # only count the routersploit exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        write_log "${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lCVSS_SEVERITY};RS" "${LOG_PATH_MODULE}"/exploit_cnt.tmp
+        lEDB=1
+      fi
+    fi
+
+    if [[ ${lEDB} -eq 1 ]]; then
+      lEXPLOIT+=")"
+    fi
   fi
 
   # if this CVE is a kernel verified CVE we add a V to the CVE
@@ -738,12 +740,12 @@ tear_down_cve_threader() {
   jo -p -n -- \
     bom-ref="${lVULN_BOM_REF}" \
     id="${lCVE_ID}" \
-    source="$(jo -a "$(jo -n name="${lVULN_SOURCE}" url="${lVULN_URL}")")" \
-    ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY}" method="CVSSv${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
+    source="$(jo -n name="${lVULN_SOURCE}" url="${lVULN_URL}")" \
+    ratings="$(jo -a "$(jo -n score="${lCVSS_SCORE}" severity="${lCVSS_SEVERITY,,}" method="CVSSv${lCVSS_VERS}" vector="${lCVSS_VECTOR}")")" \
     cwes="$(jo -a "${lCWE[@]:-null}")" \
-    analysis="$(jo -a "$(jo -n state="not_verified")")" \
+    analysis="$(jo -n state="in_triage")" \
     description="${lCVE_DESC}" \
-    affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -n component="${lPROD}" version="${lVERS}")")")" \
+    affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -a "$(jo -n component="${lPROD}" version="${lVERS}")")")")" \
     properties="$(jo -a "${PROPERTIES_JSON_ARR[@]:-null}")" \
     > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPROD}_${lVERS}.json" || print_error "[*] VEX entry failed for ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}"
 }
