@@ -209,7 +209,7 @@ S118_busybox_verifier()
       # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
       lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/')
       # ensure we have the right length -> :  CVEs: 1234 (123)  :
-      lTMP_CVE_ENTRY=$(printf '%s%*s' ${lTMP_CVE_ENTRY%:} $((22-${#lTMP_CVE_ENTRY})) ":")
+      lTMP_CVE_ENTRY=$(printf '%s%*s' "${lTMP_CVE_ENTRY%:}" $((22-${#lTMP_CVE_ENTRY})) ":")
 
       # final replacement in file:
       sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt"
