@@ -25,6 +25,8 @@ export QEMULATION=1
 # in Quick scan the binary testing takes too long
 export BINARY_EXTENDED=0
 
+export VEX_METRICS=0
+
 # the following modules are long running modules which are disabled in the quick scan profile
 export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S16_ghidra_decompile_checks" "S17_cwe_checker" "S26_kernel_vuln_verifier" "S99_grepit" "S100_command_inj_check" "S109_jtr_local_pw_cracking" "S110_yara_check" "S118_busybox_verifier" "L25_web_checks" "F20_vul_aggregator" )
 

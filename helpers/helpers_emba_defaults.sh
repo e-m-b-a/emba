@@ -161,6 +161,7 @@ set_defaults() {
   export SBOM_MAX_FILE_LOG=200
   export SBOM_MINIMAL=0
   export SBOM_UNTRACKED_FILES=1
+  export VEX_METRICS=1
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
