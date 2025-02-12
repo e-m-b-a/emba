@@ -215,17 +215,17 @@ sbom_preprocessing_threader() {
     return
   fi
 
+  lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
+  local lANCHOR=""
+  lANCHOR="${lPROD}_${lVERS}"
+  lANCHOR="cve_${lANCHOR:0:20}"
+
   # ensure this product/version combination is not already in our testing array:
   if (grep -q "\"name\":\"${lPROD}\",\"version\":\"${lVERS}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
     return
   fi
-  lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
 
-  local lANCHOR=""
-  lANCHOR="${lPROD}_${lVERS}"
-  lANCHOR="cve_${lANCHOR:0:20}"
-  print_output "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} - vendor ${ORANGE}${lVENDOR:-NOTDEFINED}${NC} - version ${ORANGE}${lVERS}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}"
-  write_link "f17#${lANCHOR}"
+  print_output "[*] Vulnerability details for ${ORANGE}${lPROD}${NC} - vendor ${ORANGE}${lVENDOR:-NOTDEFINED}${NC} - version ${ORANGE}${lVERS}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 
   echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 }

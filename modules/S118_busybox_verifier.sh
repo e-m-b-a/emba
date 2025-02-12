@@ -327,7 +327,6 @@ get_cve_busybox_data() {
   shift
 
   local lVULN_CNT=""
-  export F20_DEEP=0
   local lWAIT_PIDS_S118_ARR=()
 
   local lBOM_REF=""

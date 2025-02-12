@@ -334,7 +334,7 @@ write_json_module_log_entry() {
 # This function collects all temp json files from LOG_PATH_MODULE and puts all temp json files together to a complete json log file
 write_json_module_log() {
   local lJSON_TMP_FILES_ARR=()
-  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u)
+  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u || true)
   if [[ "${#lJSON_TMP_FILES_ARR[@]}" -eq 0 ]]; then
     return
   fi
@@ -364,7 +364,7 @@ write_json_module_log() {
 
   # as our json is not beautifull we remove all \n and further formatting should be done via jq
   tr -d '\n' < "${lJSON_LOG}" > "${lJSON_LOG/\.tmp/\.json}"
-  find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete
+  find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete || true
   rm "${lJSON_LOG}" || true
 }
 

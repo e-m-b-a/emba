@@ -150,7 +150,6 @@ set_defaults() {
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   export Q_MOD_PID=""
-  export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
   export UEFI_VERIFIED=0
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
@@ -249,10 +248,6 @@ set_log_paths() {
   export L25_LOG="${LOG_DIR}/l25_web_checks.txt"
   export L25_CSV_LOG="${CSV_DIR}/l25_web_checks.csv"
   export L35_CSV_LOG="${CSV_DIR}/l35_metasploit_check.csv"
-  export F20_LOG="${LOG_DIR}/f20_vul_aggregator.txt"
-  export F20_CSV_LOG="${CSV_DIR}/f20_vul_aggregator.csv"
-  export F20_LOG_DIR="${F20_LOG/\.txt/\/}"
-  export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
   export F17_LOG_DIR="${LOG_DIR}/f17_cve_bin_tool"

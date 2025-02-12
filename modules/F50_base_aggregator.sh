@@ -988,6 +988,7 @@ os_detector() {
   local lSYSTEM_VERSION=""
 
   #### The following check is based on the results of the aggregator:
+  # Todo: Port this to F17
   if [[ -f "${F20_LOG}" ]]; then
     for lOS_TO_CHECK in "${lOS_TO_CHECK_ARR[@]}"; do
       mapfile -t lSYSTEM_VERSION_ARR < <(grep -i "Found Version details" "${F20_LOG}" | grep aggregated | grep "${lOS_TO_CHECK}" | cut -d: -f5 | sed -e 's/[[:blank:]]//g' | sort -u || true)
