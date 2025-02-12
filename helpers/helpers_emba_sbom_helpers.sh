@@ -191,6 +191,7 @@ build_sbom_json_component_arr() {
   local lAPP_TYPE="${2:-}"
   local lAPP_NAME="${3:-}"
   local lAPP_VERS="${4:-}"
+  # lAPP_MAINT is used as supplier
   local lAPP_MAINT="${5:-}"
   local lAPP_LIC="${6:-}"
   local lCPE_IDENTIFIER="${7:-}"
@@ -203,7 +204,7 @@ build_sbom_json_component_arr() {
   local lAPP_LIC_ARR=()
 
   if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
-    lAPP_MAINT=""
+    lAPP_MAINT="Unknown"
   fi
   [[ -n "${lAPP_MAINT}" ]] && lAPP_MAINT=$(translate_vendor "${lAPP_MAINT}")
 
@@ -235,8 +236,10 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "type=${lAPP_TYPE}" )
   lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
   lCOMPONENT_ARR+=( "-s" "version=${lAPP_VERS}" )
-  lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
-  # lCOMPONENT_ARR+=( "supplier=${lAPP_MAINT}" )
+  if [[ -n "${lAPP_MAINT}" ]]; then
+    lCOMPONENT_ARR+=( "supplier=$(jo name="${lAPP_MAINT}")" )
+    # lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
+  fi
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
   if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then

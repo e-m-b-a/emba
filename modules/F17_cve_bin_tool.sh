@@ -78,13 +78,16 @@ F17_cve_bin_tool() {
     local lPROD=""
     local lVERS=""
 
-    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
-    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
-
     mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
     lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
     lPROD="${lMIN_IDENTIFIER[*]:2:1}"
     lVERS="${lMIN_IDENTIFIER[*]:3:1}"
+
+    # avoid duplicates
+    if (grep -q "${lVENDOR};${lPROD};${lVERS}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
+      continue
+    fi
+    echo "${lVENDOR};${lPROD};${lVERS}" >> "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
 
     # BusyBox verification module handling - we already have all the data from s118. Now we just copy these details
     if [[ "${lPROD}" == "busybox" ]] && [[ -s "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
@@ -105,6 +108,25 @@ F17_cve_bin_tool() {
         continue
       else
         print_error "[-] S118 Busybox details missing ... continue in default mode"
+      fi
+    elif [[ "${lPROD}" == "lighttpd" ]] && [[ -s "${S36_LOG_DIR}/vuln_summary.txt" ]]; then
+      print_output "[*] lighttpd results from s36 detected ... no CVE detection needed" "no_log"
+      cp "${S36_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] lighttpd CVE log copy process failed"
+      cp "${S36_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] lighttpd CVE log copy process failed"
+      cp "${S36_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] lighttpd CVE log copy process failed"
+      cp "${S36_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] lighttpd CVE log copy process failed"
+      if [[ -f  "${S36_LOG_DIR}/vuln_summary.txt" ]]; then
+        cat "${S36_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+      fi
+      local lBIN_LOG=""
+      lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPROD}_${lVERS}_finished.txt" | sort -u | head -1)
+
+      # now, lets write the main f20 log file with the results of the current binary:
+      if [[ -f "${lBIN_LOG}" ]]; then
+        tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+        continue
+      else
+        print_error "[-] S36 lighttpd details missing ... continue in default mode"
       fi
     # Linux Kernel verification module handling - we already have all the data from s26. Now we just copy these details
     elif [[ "${lPROD}" == "linux_kernel" ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
@@ -127,6 +149,9 @@ F17_cve_bin_tool() {
         print_error "[-] S26 Linux Kernel details missing ... continue in default mode"
       fi
     fi
+
+    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
+    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
 
     cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}" &
     local lTMP_PID="$!"

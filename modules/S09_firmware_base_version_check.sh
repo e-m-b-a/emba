@@ -552,6 +552,7 @@ build_final_bins_threader() {
   # with this in place we can add this information later on to the SBOM (if this is really needed)
 
   lAPP_NAME=$(basename "${lFILE}")
+  local lAPP_VERS="Unknown Version"
   if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
     local lAPP_TYPE="library"
   elif [[ "${lBIN_FILE}" == *"data"* ]]; then

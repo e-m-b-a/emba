@@ -222,6 +222,8 @@ set_log_paths() {
   export S26_LOG="${LOG_DIR}/s26_kernel_vuln_verifier.txt"
   export S26_LOG_DIR="${S26_LOG/\.txt/\/}"
   export S30_LOG="${LOG_DIR}/s30_version_vulnerability_check.txt"
+  export S36_LOG="${LOG_DIR}/s36_lighttpd.txt"
+  export S36_LOG_DIR="${S36_LOG/\.txt/\/}"
   export S36_CSV_LOG="${CSV_DIR}/s36_lighttpd.csv"
   export S40_LOG="${LOG_DIR}/s40_weak_perm_check.txt"
   export S45_LOG="${LOG_DIR}/s45_pass_file_check.txt"
