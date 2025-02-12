@@ -991,8 +991,8 @@ os_detector() {
   # Todo: Port this to F17
   if [[ -f "${F20_LOG:-}" ]]; then
     for lOS_TO_CHECK in "${lOS_TO_CHECK_ARR[@]}"; do
-      # Todo: adjustment of this grep is needed
-      mapfile -t lSYSTEM_VERSION_ARR < <(grep -i "Vulnerability details for" "${F17_LOG}" | grep "${lOS_TO_CHECK}" | cut -d: -f5 | sed -e 's/[[:blank:]]//g' | sort -u || true)
+      # Todo: We should not grep on plain text if not needed -> fix this
+      mapfile -t lSYSTEM_VERSION_ARR < <(grep -i "Vulnerability details for" "${F17_LOG}" | grep "${lOS_TO_CHECK}" | cut -d: -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
       if [[ "${#lSYSTEM_VERSION_ARR[@]}" -gt 0 ]]; then
         if [[ "${lOS_TO_CHECK}" == "kernel" ]]; then
           SYSTEM="Linux"
