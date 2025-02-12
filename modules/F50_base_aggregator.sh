@@ -988,7 +988,7 @@ os_detector() {
   local lSYSTEM_VERSION=""
 
   #### The following check is based on the results of the aggregator:
-  if [[ -f "${F20_LOG:-}" ]]; then
+  if [[ -f "${F17_LOG_DIR}"/vuln_summary.txt ]]; then
     for lOS_TO_CHECK in "${lOS_TO_CHECK_ARR[@]}"; do
       mapfile -t lSYSTEM_VERSION_ARR < <(grep "Component details" "${F17_LOG_DIR}"/vuln_summary.txt | grep "${lOS_TO_CHECK}" | cut -d ':' -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
       if [[ "${#lSYSTEM_VERSION_ARR[@]}" -gt 0 ]]; then
