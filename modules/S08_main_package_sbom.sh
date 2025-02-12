@@ -139,6 +139,7 @@ create_comp_dep_tree_threader() {
   # now we check every dependency for the current component
   for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
     # lets extract the name of the dependency
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP//\'}"
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
 

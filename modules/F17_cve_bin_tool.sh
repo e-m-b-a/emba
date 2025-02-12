@@ -375,7 +375,6 @@ cve_bin_tool_threader() {
   if [[ -f "${lBIN_LOG}" ]]; then
     tee -a "${LOG_FILE}" < "${lBIN_LOG}"
   fi
-
 }
 
 tear_down_cve_threader() {
@@ -416,12 +415,6 @@ tear_down_cve_threader() {
     fi
   fi
 
-  # we get "EPSS;percentage" back
-  local lFIRST_EPSS=""
-  lFIRST_EPSS=$(get_epss_data "${lCVE_ID}")
-  # local lFIRST_PERC="${lFIRST_EPSS/*\;}"
-  lFIRST_EPSS="${lFIRST_EPSS/\;*}"
-
   # default value
   local lEXPLOIT="No exploit available"
   local lKNOWN_EXPLOITED=0
@@ -453,6 +446,7 @@ tear_down_cve_threader() {
   local lEXPLOIT_PS=""
   local lEXPLOIT_RS=""
   local lPS_TYPE=""
+  local lFIRST_EPSS=0
 
   # remote/local vulnerability
   local lTYPE="NA"
@@ -463,6 +457,11 @@ tear_down_cve_threader() {
   fi
 
   if [[ "${VEX_METRICS}" -eq 1 ]]; then
+    # we get "EPSS;percentage" back
+    lFIRST_EPSS=$(get_epss_data "${lCVE_ID}")
+    # local lFIRST_PERC="${lFIRST_EPSS/*\;}"
+    lFIRST_EPSS="${lFIRST_EPSS/\;*}"
+
     # check if the CVE is known as a knwon exploited vulnerability:
     if grep -q "^${lCVE_ID}," "${KNOWN_EXP_CSV}"; then
       write_log "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a known exploited vulnerability.${NC}" "${LOG_PATH_MODULE}/KEV.txt"
@@ -713,11 +712,11 @@ tear_down_cve_threader() {
     if [[ ${lEDB} -eq 1 ]]; then
       lEXPLOIT+=")"
     fi
-  fi
 
-  # if this CVE is a kernel verified CVE we add a V to the CVE
-  if [[ "${lKERNEL_VERIFIED}" == "yes" ]]; then lCVE_ID+=" (V)"; fi
-  if [[ "${lBUSYBOX_VERIFIED}" == "yes" ]]; then lCVE_ID+=" (V)"; fi
+    # if this CVE is a kernel verified CVE we add a V to the CVE
+    if [[ "${lKERNEL_VERIFIED}" == "yes" ]]; then lCVE_ID+=" (V)"; fi
+    if [[ "${lBUSYBOX_VERIFIED}" == "yes" ]]; then lCVE_ID+=" (V)"; fi
+  fi
 
   lCVSS_SCORE_VERS="${lCVSS_SCORE} (v${lCVSS_VERS})"
 
