@@ -163,6 +163,7 @@ F17_cve_bin_tool() {
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
   print_output "[*] Generating final VEX vulnerability json ..." "no_log"
+
   # now we need to build our full vex json
   mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json")
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
@@ -194,10 +195,16 @@ F17_cve_bin_tool() {
       sub_module_title "VEX - Vulnerability Exploitability eXchange"
       print_output "[+] VEX data in json format is available" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
 
+      # let's replace the vulnerability marker with our VEX:
       sed -e '/\"vulnerabilities\": \[\]/{r '"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" -e 'd;}' "${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json" > "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" || print_error "[-] SBOM - VEX merge failed"
 
       # now we ensure that we have a valid vex only json:
       sed -i '1i {' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      # probably we need to adjust our initial header to something like shown here
+      # https://github.com/CycloneDX/bom-examples/blob/master/VEX/vex.json
+      #   "bomFormat": "CycloneDX",
+      #   "specVersion": "1.5",
+      #   "version": 1,
       echo '}' >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
     fi
     if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
