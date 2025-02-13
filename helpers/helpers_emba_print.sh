@@ -349,11 +349,11 @@ write_json_module_log() {
       if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
         cat "${lCOMP_FILE}" >> "${lJSON_LOG}"
       else
-        print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
+        print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
         continue
       fi
     else
-      print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
+      print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
       continue
     fi
     if [[ $((lCOMP_FILE_ID+1)) -lt "${#lJSON_TMP_FILES_ARR[@]}" ]]; then
