@@ -36,7 +36,8 @@ GCC_OUTPUT_CSV="./config/gcc_details.csv"
 curl "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
 
 if ! [[ -f "${GCC_RELEASES_FILE}" ]]; then
-  print_output "[-] Error downloading ${GCC_RELEASES_FILE}"
+  print_output "[-] Error downloading ${GCC_RELEASES_FILE}" "no_log"
+  exit 1
 fi
 
 [[ -f "${GCC_OUTPUT_CSV}" ]] && rm "${GCC_OUTPUT_CSV}"
