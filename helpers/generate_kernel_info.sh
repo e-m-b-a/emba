@@ -31,7 +31,8 @@ KERNEL_OUTPUT_CSV="./config/kernel_details.csv"
 curl -s "${KERNEL_RELEASES_URL}" > "${KERNEL_RELEASES_FILE}"
 
 if ! [[ -f "${KERNEL_RELEASES_FILE}" ]]; then
-  print_output "[-] Error downloading ${KERNEL_RELEASES_FILE}"
+  print_output "[-] Error downloading ${KERNEL_RELEASES_FILE}" "no_log"
+  exit 1
 fi
 
 [[ -f "${KERNEL_OUTPUT_CSV}" ]] && rm "${KERNEL_OUTPUT_CSV}"
