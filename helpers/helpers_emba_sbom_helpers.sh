@@ -203,6 +203,9 @@ build_sbom_json_component_arr() {
 
   local lAPP_LIC_ARR=()
 
+  # detected component is always required
+  local lAPP_SCOPE="required"
+
   if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
     lAPP_MAINT="Unknown"
   fi
@@ -249,6 +252,7 @@ build_sbom_json_component_arr() {
     lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
     rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
   fi
+  lCOMPONENT_ARR+=( "scope=${lAPP_SCOPE}" )
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )

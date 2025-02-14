@@ -199,12 +199,13 @@ F17_cve_bin_tool() {
       sed -e '/\"vulnerabilities\": \[\]/{r '"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" -e 'd;}' "${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json" > "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" || print_error "[-] SBOM - VEX merge failed"
 
       # now we ensure that we have a valid vex only json:
-      sed -i '1i {' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
-      # probably we need to adjust our initial header to something like shown here
       # https://github.com/CycloneDX/bom-examples/blob/master/VEX/vex.json
-      #   "bomFormat": "CycloneDX",
-      #   "specVersion": "1.5",
-      #   "version": 1,
+      sed -i '1i "version": 1,' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i "specVersion": "1.5",' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i "bomFormat": "CycloneDX",' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i {' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+
+      # adjust the end of our json:
       echo '}' >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
     fi
     if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then

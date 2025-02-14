@@ -161,6 +161,9 @@ set_defaults() {
   export SBOM_MINIMAL=0
   export SBOM_UNTRACKED_FILES=1
   export VEX_METRICS=1
+  # usually we test firmware that is already out in the field
+  # if this changes this option can be adjusted in the scanning profile
+  export SBOM_LIFECYCLE_PHASE="operations"
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
