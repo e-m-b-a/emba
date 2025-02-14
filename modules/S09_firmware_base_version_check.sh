@@ -744,7 +744,7 @@ bin_string_checker() {
       lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
     fi
     # print_output "[*] Testing ${lVERSION_IDENTIFIER} from ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
-    mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l "${lVERSION_IDENTIFIER}" "${LOG_PATH_MODULE}"/strings_bins/strings_* | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
+    mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
     FILE_ARR=()
     for lMD5_SUM_MATCHED in "${lMD5_SUM_MATCHES_ARR[@]}"; do
       lMACHTED_FNAME=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
