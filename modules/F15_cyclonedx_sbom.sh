@@ -177,7 +177,7 @@ F15_cyclonedx_sbom() {
         component="$(jo -n \
           "${lFW_COMPONENT_DATA_ARR[@]}")" \
         supplier="$(jo -n \
-          name="${FW_VENDOR:-EMBA binary analyzer}" url=$(jo -a "${lEMBA_URLS_ARR[@]}"))")" \
+          name="${FW_VENDOR:-EMBA binary analyzer}" url="$(jo -a "${lEMBA_URLS_ARR[@]}")")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
       vulnerabilities="[]" \
