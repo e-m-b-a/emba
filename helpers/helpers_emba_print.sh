@@ -334,7 +334,7 @@ write_json_module_log_entry() {
 # This function collects all temp json files from LOG_PATH_MODULE and puts all temp json files together to a complete json log file
 write_json_module_log() {
   local lJSON_TMP_FILES_ARR=()
-  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u)
+  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u || true)
   if [[ "${#lJSON_TMP_FILES_ARR[@]}" -eq 0 ]]; then
     return
   fi
@@ -349,11 +349,11 @@ write_json_module_log() {
       if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
         cat "${lCOMP_FILE}" >> "${lJSON_LOG}"
       else
-        print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
+        print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
         continue
       fi
     else
-      print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
+      print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
       continue
     fi
     if [[ $((lCOMP_FILE_ID+1)) -lt "${#lJSON_TMP_FILES_ARR[@]}" ]]; then
@@ -364,7 +364,7 @@ write_json_module_log() {
 
   # as our json is not beautifull we remove all \n and further formatting should be done via jq
   tr -d '\n' < "${lJSON_LOG}" > "${lJSON_LOG/\.tmp/\.json}"
-  find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete
+  find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete || true
   rm "${lJSON_LOG}" || true
 }
 
@@ -983,7 +983,7 @@ secure_sleep() {
     sleep 10
     lCUR_SLEEP_TIME=$((lCUR_SLEEP_TIME + 10))
     if check_emba_ended; then
-      return
+      exit
     fi
   done
 }

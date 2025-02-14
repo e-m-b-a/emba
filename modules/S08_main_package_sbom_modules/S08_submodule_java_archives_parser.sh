@@ -109,6 +109,20 @@ S08_submodule_java_archives_parser() {
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "java" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
       local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
+      # for the dependencies we can check for pom.xml
+      local lPOM_XML=""
+      lPOM_XML=$(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
+      if [[ -n "${lPOM_XML}" ]]; then
+        write_log "[*] Found pom.xml metadata in ${lJAVA_ARCHIVE}. Analysis is currently not supported" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | tee -a "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_log "[*] Please open an issue at https://github.com/e-m-b-a/emba/issues and provide the Java package" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        # We could do something like the following
+          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
+          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
+          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
+        # With a usefull java package we are going to implement this mechanism
+      fi
+
       # add the python requirement path information to our properties array:
       # Todo: in the future we should check for the package, package hashes and which files
       # are in the package
