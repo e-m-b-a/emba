@@ -748,7 +748,7 @@ bin_string_checker() {
     mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
     FILE_ARR=()
     for lMD5_SUM_MATCHED in "${lMD5_SUM_MATCHES_ARR[@]}"; do
-      lMACHTED_FNAME=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+      lMACHTED_FNAME=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | cut -d ';' -f1 | head -1 || true)
       FILE_ARR+=("${lMACHTED_FNAME}")
       # print_output "[*] Matched ${lMACHTED_FNAME}" "no_log"
     done
