@@ -167,10 +167,16 @@ binary_architecture_threader() {
   lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
   lMD5SUM="${lMD5SUM/\ *}"
 
-  if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
+  local lDONE_MD5_FILE="${TMP_DIR}/p99_md5sum_done.tmp"  
+  local lDONE_MD5_LOCK="${lDONE_MD5_FILE}.lock"
+  exec {lDONE_MD5_LOCK_FD}>"${lDONE_MD5_LOCK}" || { print_output "[-] Error accessing ${lDONE_MD5_LOCK}. Skipping ${lBINARY}"; return; }
+  flock -x "${lDONE_MD5_LOCK_FD}"
+  if grep -q "${lMD5SUM}" "${lDONE_MD5_FILE}" 2>/dev/null; then
+    exec {lDONE_MD5_LOCK_FD}>&-
     return
   fi
-  echo "${lMD5SUM}" >> "${TMP_DIR}/p99_md5sum_done.tmp"
+  echo "${lMD5SUM}" >> "${lDONE_MD5_FILE}"
+  exec {lDONE_MD5_LOCK_FD}>&-
 
   print_dot
 
