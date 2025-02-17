@@ -1004,7 +1004,7 @@ bin_string_checker() {
 }
 
 recover_wait_pids() {
-  local -n lrWAIT_PIDS_ARR=$1
+  local -n lrWAIT_PIDS_ARR=${1:-}
   local lTEMP_PIDS_ARR=()
   local lPID=""
   # check for really running PIDs and re-create the array
