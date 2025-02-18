@@ -253,6 +253,13 @@ architecture_check() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+
+      if [[ "${#lWAIT_PIDS_P99_ARR[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
+        filter_out_dead_pids lWAIT_PIDS_P99_ARR
+        if [[ "${#lWAIT_PIDS_P99_ARR[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
+          max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${lWAIT_PIDS_P99_ARR[@]}"
+        fi
+      fi
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
