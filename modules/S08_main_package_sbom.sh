@@ -25,7 +25,7 @@ S08_main_package_sbom() {
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
   local lS08_SUBMODULE_PATH="${MOD_DIR}/S08_main_package_sbom_modules"
-  export S08_DUPLICATES_LOG="${LOG_PATH_MODULE}/S08_duplicates.log"
+  export S08_DUPLICATES_LOG="${LOG_PATH_MODULE}/SBOM_duplicates.log"
   local lS08_SUBMODULES_FILES_ARR=()
   local lS08_SUBMODULE=""
 
