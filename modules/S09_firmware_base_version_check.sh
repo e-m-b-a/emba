@@ -154,8 +154,13 @@ S09_firmware_base_version_check() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_1+=( "${lTMP_PID}" )
-    max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${WAIT_PIDS_S09_1[@]}"
-  done
+    if [[ "${#WAIT_PIDS_S09_1[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
+      recover_wait_pids WAIT_PIDS_S09_1
+      if [[ "${#WAIT_PIDS_S09_1[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
+        max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${WAIT_PIDS_S09_1[@]}"
+      fi
+    fi
+done
 
   print_output "[*] Waiting for strings generator" "no_log"
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
@@ -508,7 +513,7 @@ S09_firmware_base_version_check() {
 
     if [[ "${THREADED}" -eq 1 ]]; then
       if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-        recover_wait_pids "${WAIT_PIDS_S09[@]}"
+        recover_wait_pids WAIT_PIDS_S09
         if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
           max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${WAIT_PIDS_S09[@]}"
         fi
@@ -1000,10 +1005,11 @@ bin_string_checker() {
 }
 
 recover_wait_pids() {
+  local -n lrWAIT_PIDS_ARR=${1:-}
   local lTEMP_PIDS_ARR=()
   local lPID=""
   # check for really running PIDs and re-create the array
-  for lPID in "${WAIT_PIDS_S09[@]}"; do
+  for lPID in "${lrWAIT_PIDS_ARR[@]}"; do
     # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
     if [[ -e /proc/"${lPID}" ]]; then
       lTEMP_PIDS_ARR+=( "${lPID}" )
@@ -1012,7 +1018,7 @@ recover_wait_pids() {
   # print_output "[!] S09 - really running pids: ${#lTEMP_PIDS_ARR[@]}"
 
   # recreate the array with the current running PIDS
-  WAIT_PIDS_S09=()
-  WAIT_PIDS_S09=("${lTEMP_PIDS_ARR[@]}")
+  lrWAIT_PIDS_ARR=()
+  lrWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
 }
 
