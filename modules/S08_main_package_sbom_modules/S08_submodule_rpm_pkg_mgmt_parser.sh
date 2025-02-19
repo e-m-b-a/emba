@@ -122,7 +122,7 @@ rpm_pkg_mgmt_analysis_threader() {
 
   local lRPM_DIR=""
   lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
-  write_log "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  print_output "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "no_log"
 
   lAPP_VERS=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
   lAPP_VERS="${lAPP_VERS/*:\ }"
@@ -186,7 +186,7 @@ rpm_pkg_mgmt_analysis_threader() {
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
   if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
     return
   fi
 

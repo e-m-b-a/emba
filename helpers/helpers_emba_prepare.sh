@@ -206,7 +206,7 @@ binary_architecture_threader() {
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
 
-  write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT}" "${lMD5SUM}" &
+  write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}" &
 }
 
 architecture_check() {

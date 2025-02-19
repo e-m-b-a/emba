@@ -185,6 +185,7 @@ set_defaults() {
   S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
   S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
   S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
 }
 
 set_log_paths() {
