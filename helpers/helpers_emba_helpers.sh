@@ -58,27 +58,6 @@ wait_for_pid() {
   done
 }
 
-
-filter_out_dead_pids() {
-  local -n lrPIDS_ARR=${1:-}
-  local lTEMP_PIDS_ARR=()
-  local lPID=""
-
-  # print_output "[*] filter out dead pids from: ${#lrPIDS_ARR[@]}"
-  for lPID in "${lrPIDS_ARR[@]}"; do
-    if [[ -e /proc/"${lPID}" ]]; then
-      if ! grep -q "State:.*zombie.*" "/proc/${lPID}/status" 2>/dev/null; then
-        lTEMP_PIDS_ARR+=( "${lPID}" )
-      fi
-    fi
-  done
-  # print_output "[!] really running pids: ${#lTEMP_PIDS_ARR[@]}"
-
-  lrPIDS_ARR=()
-  lrPIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
-}
-
-
 max_pids_protection() {
   if [[ -n "${1:-}" ]]; then
     local lMAX_PIDS_="${1:-}"
@@ -90,13 +69,26 @@ max_pids_protection() {
   local lPID=""
 
   while [[ ${#lWAIT_PIDS_ARR[@]} -gt "${lMAX_PIDS_}" ]]; do
+    local lTEMP_PIDS_ARR=()
+    # check for really running PIDs and re-create the array
+    for lPID in "${lWAIT_PIDS_ARR[@]}"; do
+      # print_output "[*] max pid protection: ${#lWAIT_PIDS_ARR[@]}"
+      if [[ -e /proc/"${lPID}" ]]; then
+        if ! grep -q "State:.*zombie.*" "/proc/${lPID}/status" 2>/dev/null; then
+          lTEMP_PIDS_ARR+=( "${lPID}" )
+        fi
+      fi
+    done
     # if S115 is running we have to kill old qemu processes
     if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 && -n "${QRUNTIME}" ]]; then
       killall -9 --quiet --older-than "${QRUNTIME}" -r .*qemu.*sta.* || true
     fi
 
-    filter_out_dead_pids lWAIT_PIDS_ARR
+    # print_output "[!] really running pids: ${#lTEMP_PIDS_ARR[@]}"
 
+    # recreate the arry with the current running PIDS
+    lWAIT_PIDS_ARR=()
+    lWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
     print_dot
   done
 }

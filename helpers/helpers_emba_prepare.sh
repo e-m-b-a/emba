@@ -167,16 +167,10 @@ binary_architecture_threader() {
   lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
   lMD5SUM="${lMD5SUM/\ *}"
 
-  local lDONE_MD5_FILE="${TMP_DIR}/p99_md5sum_done.tmp"
-  local lDONE_MD5_LOCK="${lDONE_MD5_FILE}.lock"
-  exec {lDONE_MD5_LOCK_FD}>"${lDONE_MD5_LOCK}" || { print_output "[-] Error accessing ${lDONE_MD5_LOCK}. Skipping ${lBINARY}"; return; }
-  flock -x "${lDONE_MD5_LOCK_FD}"
-  if grep -q "${lMD5SUM}" "${lDONE_MD5_FILE}" 2>/dev/null; then
-    exec {lDONE_MD5_LOCK_FD}>&-
+  if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
     return
   fi
-  echo "${lMD5SUM}" >> "${lDONE_MD5_FILE}"
-  exec {lDONE_MD5_LOCK_FD}>&-
+  echo "${lMD5SUM}" >> "${TMP_DIR}/p99_md5sum_done.tmp"
 
   print_dot
 
@@ -253,15 +247,10 @@ architecture_check() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
-
-      if [[ "${#lWAIT_PIDS_P99_ARR[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-        filter_out_dead_pids lWAIT_PIDS_P99_ARR
-        if [[ "${#lWAIT_PIDS_P99_ARR[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-          max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${lWAIT_PIDS_P99_ARR[@]}"
-        fi
-      fi
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    sort -u -t';' -k8,8 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
 
     lARCH_MIPS64_N32_CNT=$(grep -c "N32 MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
