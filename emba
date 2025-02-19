@@ -452,12 +452,6 @@ main() {
       fi
     fi
 
-    # failesave non-interactive session (EMBArk)
-    if ! [[ $- == *i* ]]; then
-      export DISABLE_STATUS_BAR=1
-      export DISABLE_NOTIFICATIONS=1
-    fi
-
     if [[ "${ONLY_DEP}" -eq 0 ]]; then
       # check provided paths for validity
       check_path_valid "${FIRMWARE_PATH}"
