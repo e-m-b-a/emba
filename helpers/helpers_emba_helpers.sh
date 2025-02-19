@@ -94,7 +94,7 @@ max_pids_protection() {
     if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 && -n "${QRUNTIME}" ]]; then
       killall -9 --quiet --older-than "${QRUNTIME}" -r .*qemu.*sta.* || true
     fi
-    
+
     filter_out_dead_pids lWAIT_PIDS_ARR
 
     print_dot
