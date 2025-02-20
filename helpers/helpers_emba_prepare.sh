@@ -250,6 +250,8 @@ architecture_check() {
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
+    sort -u -t';' -k8,8 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
+
     lARCH_MIPS64_N32_CNT=$(grep -c "N32 MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64_III_CNT=$(grep -c "64-bit.*MIPS-III" "${P99_CSV_LOG}" || true)
