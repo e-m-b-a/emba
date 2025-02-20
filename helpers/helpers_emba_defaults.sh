@@ -125,7 +125,7 @@ set_defaults() {
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
   [[ -v DISABLE_NOTIFICATIONS ]] || export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
   if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
-    [[ -v DISABLE_NOTIFICATIONS ]] || export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience ???????????????????????????????
+    [[ -v DISABLE_NOTIFICATIONS ]] || export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   fi
   [[ -v NOTIFICATION_ID ]] || export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
