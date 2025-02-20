@@ -22,79 +22,79 @@ set_defaults() {
   export RELEASE=0
   export EMBA_VERSION="1.5.1"
 
-  export CLEANED=0              # used for the final cleaner function for not running it multiple times
-  export STRICT_MODE=0
-  export DEBUG_SCRIPT=0
-  export UPDATE=0
-  export ARCH_CHECK=1
-  export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
-  export BINARY_EXTENDED=0
-  export MAX_EXT_CHECK_BINS=20
-  export CONTAINER_EXTRACT=0
-  export DISABLE_DEEP=0
-  export DEEP_EXT_DEPTH=4
-  export FACT_EXTRACTOR=0
+  export CLEANED=0                    # used for the final cleaner function for not running it multiple times
+  [[ -v STRICT_MODE ]] || export STRICT_MODE=0
+  [[ -v DEBUG_SCRIPT ]] || export DEBUG_SCRIPT=0
+  [[ -v UPDATE ]] || export UPDATE=0
+  [[ -v ARCH_CHECK ]] || export ARCH_CHECK=1
+  [[ -v RTOS ]] || export RTOS=1                          # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
+  [[ -v BINARY_EXTENDED ]] || export BINARY_EXTENDED=0
+  [[ -v MAX_EXT_CHECK_BINS ]] || export MAX_EXT_CHECK_BINS=20
+  [[ -v CONTAINER_EXTRACT ]] || export CONTAINER_EXTRACT=0
+  [[ -v DISABLE_DEEP ]] || export DISABLE_DEEP=0
+  [[ -v DEEP_EXT_DEPTH ]] || export DEEP_EXT_DEPTH=4
+  [[ -v FACT_EXTRACTOR ]] || export FACT_EXTRACTOR=0
   export FIRMWARE=0
-  export FORCE=0
-  export FORMAT_LOG=0
-  export HTML=0
+  [[ -v FORCE ]] || export FORCE=0
+  [[ -v FORMAT_LOG ]] || export FORMAT_LOG=0
+  [[ -v HTML ]] || export HTML=0
   export IN_DOCKER=0
-  export USE_DOCKER=1
-  export KERNEL=0
-  export KERNEL_CONFIG=""
-  export FIRMWARE_PATH=""
-  export FIRMWARE_PATH1=""
-  export DIFF_MODE=0
-  export FW_VENDOR=""
-  export FW_VERSION=""
-  export FW_DEVICE=""
-  export FW_NOTES=""
-  export ARCH=""
-  export EFI_ARCH=""
-  export EXLUDE=()
+  [[ -v USE_DOCKER ]] || export USE_DOCKER=1
+  [[ -v KERNEL ]] || export KERNEL=0
+  [[ -v KERNEL_CONFIG ]] || export KERNEL_CONFIG=""
+  [[ -v FIRMWARE_PATH ]] || export FIRMWARE_PATH=""
+  [[ -v FIRMWARE_PATH1 ]] || export FIRMWARE_PATH1=""
+  [[ -v DIFF_MODE ]] || export DIFF_MODE=0
+  [[ -v FW_VENDOR ]] || export FW_VENDOR=""
+  [[ -v FW_VERSION ]] || export FW_VERSION=""
+  [[ -v FW_DEVICE ]] || export FW_DEVICE=""
+  [[ -v FW_NOTES ]] || export FW_NOTES=""
+  [[ -v ARCH ]] || export ARCH=""
+  [[ -v EFI_ARCH ]] || export EFI_ARCH=""
+  [[ -v EXLUDE ]] || export EXLUDE=()
   export SELECT_MODULES=()
   export MODULES_EXPORTED=()
-  export MD5_DONE_DEEP=()       # for tracking the extracted files in deep extractor
+  export MD5_DONE_DEEP=()                                 # for tracking the extracted files in deep extractor
   export ROOT_PATH=()
   export FILE_ARR=()
-  export MAX_MODS=0
-  export MAX_MOD_THREADS=0
-  export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
-  export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
-  export ONLY_DEP=0             # test only dependency
-  export PHP_CHECK=1
-  export PRE_CHECK=0            # test and extract binary files with binwalk
-                                # afterwards do a default EMBA scan
-  export SKIP_PRE_CHECKERS=0    # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
-  export PYTHON_CHECK=1
+  [[ -v MAX_MODS ]] || export MAX_MODS=0
+  [[ -v MAX_MOD_THREADS ]] || export MAX_MOD_THREADS=0
+  export RESTART=0                                        # if we find an unfinished EMBA scan we try to only process not finished modules
+  [[ -v FINAL_FW_RM ]] || export FINAL_FW_RM=0            # remove the firmware working copy after testing (do not waste too much disk space)
+  [[ -v ONLY_DEP ]] || export ONLY_DEP=0                  # test only dependency
+  [[ -v PHP_CHECK ]] || export PHP_CHECK=1
+  [[ -v PRE_CHECK ]] || export PRE_CHECK=0                # test and extract binary files with binwalk
+                                                          # afterwards do a default EMBA scan
+  [[ -v SKIP_PRE_CHECKERS ]] || export SKIP_PRE_CHECKERS=0        # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
+  [[ -v PYTHON_CHECK ]] || export PYTHON_CHECK=1
   # enable L10_DEBUG_MODE in scan profile or default config for further debugging capabilities:
   # * create_emulation_archive for all attempts
   # * do not stop after 2 detected network services
-  export L10_DEBUG_MODE=0
-  export FULL_EMULATION=0       # full system emulation - set it via command line parameter -Q
-  export QEMULATION=0           # user-mode emulation - set it via command line parameter -E
+  [[ -v L10_DEBUG_MODE ]] || export L10_DEBUG_MODE=0
+  [[ -v FULL_EMULATION ]] || export FULL_EMULATION=0           # full system emulation - set it via command line parameter -Q
+  [[ -v QEMULATION ]] || export QEMULATION=0               # user-mode emulation - set it via command line parameter -E
   # export L10_KERNEL_V_LONG="4.1.17"
-  export L10_KERNEL_V_LONG="4.1.52"
-  export L10_BB_VER="1.36.1"
-  export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
-                                # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
-                                # binary which results in long runtimes
+  [[ -v L10_KERNEL_V_LONG ]] || export L10_KERNEL_V_LONG="4.1.52"
+  [[ -v L10_BB_VER ]] || export L10_BB_VER="1.36.1"
+  [[ -v FULL_TEST ]] || export FULL_TEST=0                # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
+                                                          # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
+                                                          # binary which results in long runtimes
   # to get rid of all the running stuff we are going to kill it after RUNTIME
-  export QRUNTIME="20s"
+  [[ -v QRUNTIME ]] || export QRUNTIME="20s"
 
-  export SHELLCHECK=1
+  [[ -v SHELLCHECK ]] || export SHELLCHECK=1
 
   export QUEST_CONTAINER=""
-  export GPT_OPTION=0           # 0 -> off 1-> unpayed plan 2 -> no rate-limit
-  export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
-  export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
+  [[ -v GPT_OPTION ]] || export GPT_OPTION=0           # 0 -> off 1-> unpayed plan 2 -> no rate-limit
+  [[ -v GPT_QUESTION ]] || export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
+  [[ -v MINIMUM_GPT_PRIO ]] || export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
 
-  export SHORT_PATH=0           # short paths in cli output
-  export THREADED=1             # 0 -> single thread
-                                # 1 -> multi threaded
-  export YARA=0                 # default: disable yara tests
-  export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
-  export MAX_EXT_SPACE=110000   # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
+  [[ -v SHORT_PATH ]] || export SHORT_PATH=0              # short paths in cli output
+  [[ -v THREADED ]] || export THREADED=1                  # 0 -> single thread
+                                                          # 1 -> multi threaded
+  [[ -v YARA ]] || export YARA=0                          # default: disable yara tests
+  [[ -v OVERWRITE_LOG ]] || export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
+  [[ -v MAX_EXT_SPACE ]] || export MAX_EXT_SPACE=110000   # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
   export LOG_DIR="${INVOCATION_PATH}""/logs"
   # export ERROR_LOG="${LOG_DIR}/emba_error.log"
   export TMP_DIR="${LOG_DIR}""/tmp"
@@ -106,9 +106,9 @@ set_defaults() {
   export HELP_DIR="${INVOCATION_PATH}""/helpers"
   export MOD_DIR="${INVOCATION_PATH}""/modules"
   export MOD_DIR_LOCAL="${INVOCATION_PATH}""/EMBA-Non-free/modules_local"
-  export PID_LOGGING=0
+  [[ -v PID_LOGGING ]] || export PID_LOGGING=0
   # this will be in TMP_DIR/pid_notes.log
-  export PID_LOG_FILE="pid_notes.log"
+  [[ -v PID_LOG_FILE ]] || export PID_LOG_FILE="pid_notes.log"
   export BASE_LINUX_FILES="${CONFIG_DIR}""/linux_common_files.txt"
   if [[ -f "${CONFIG_DIR}"/known_exploited_vulnerabilities.csv ]]; then
     export KNOWN_EXP_CSV="${CONFIG_DIR}"/known_exploited_vulnerabilities.csv
@@ -120,21 +120,20 @@ set_defaults() {
     export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi
   export GTFO_CFG="${CONFIG_DIR}"/gtfobins_urls.cfg         # gtfo urls
-  export SILENT=0
-  export DISABLE_STATUS_BAR=1
+  [[ -v SILENT ]] || export SILENT=0
+  [[ -v DISABLE_STATUS_BAR ]] || export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
-  export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
-  export NOTIFICATION_ID=1
+  [[ -v DISABLE_NOTIFICATIONS ]] || export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
   if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
-    export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+    [[ -v DISABLE_NOTIFICATIONS ]] || export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience ???????????????????????????????
   fi
-  export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
+  [[ -v NOTIFICATION_ID ]] || export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "${HELP_DIR}"/emba.svg)
-  export WSL=0    # wsl environment detected
-  export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
-                  # currently the extracted results are not further used. The current implementation
-                  # is for evaluation purposes
+  [[ -v WSL ]] || export WSL=0     # wsl environment detected
+  [[ -v UNBLOB ]] || export UNBLOB=1  # additional extraction with unblob - https://github.com/onekey-sec/unblob
+                                          # currently the extracted results are not further used. The current implementation
+                                          # is for evaluation purposes
 
   export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
@@ -148,18 +147,18 @@ set_defaults() {
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
-  export Q_MOD_PID=""
-  export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
-  export UEFI_VERIFIED=0
+  [[ -v Q_MOD_PID ]] || export Q_MOD_PID=""
+  [[ -v F20_DEEP ]] || export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
+  [[ -v UEFI_VERIFIED ]] || export UEFI_VERIFIED=0
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
-  export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
-  export CPE_VERSION="2.3"
+  [[ -v DISABLE_DOTS ]] || export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
+  [[ -v CPE_VERSION ]] || export CPE_VERSION="2.3"
 
   # we limit the maximal file log of our SBOM -> change this in the scanning profile
-  export SBOM_MAX_FILE_LOG=200
-  export SBOM_MINIMAL=0
-  export SBOM_UNTRACKED_FILES=1
+  [[ -v SBOM_MAX_FILE_LOG ]] || export SBOM_MAX_FILE_LOG=200
+  [[ -v SBOM_MINIMAL ]] || export SBOM_MINIMAL=0
+  [[ -v SBOM_UNTRACKED_FILES ]] || export SBOM_UNTRACKED_FILES=1
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
