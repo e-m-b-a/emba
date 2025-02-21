@@ -62,10 +62,6 @@ S115_usermode_emulator() {
     # ensure that the emulator does not reconfigure the interface
     get_local_ip
 
-    # some processes are running long and logging a lot
-    # to protect the host we are going to kill them on a KILL_SIZE limit
-    export KILL_SIZE="50M"
-
     # load blacklist of binaries that could cause troubles during emulation:
     readarray -t lBIN_BLACKLIST_ARR < "${CONFIG_DIR}"/emulation_blacklist.cfg
 
@@ -722,7 +718,7 @@ check_disk_space_emu() {
   local lCRITICAL_FILES_ARR=()
   local lKILL_PROC_NAME=""
 
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1' || true)
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1' || true)
   for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_}"
