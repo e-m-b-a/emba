@@ -62,10 +62,6 @@ S115_usermode_emulator() {
     # ensure that the emulator does not reconfigure the interface
     get_local_ip
 
-    # some processes are running long and logging a lot
-    # to protect the host we are going to kill them on a KILL_SIZE limit
-    export KILL_SIZE="50M"
-
     # load blacklist of binaries that could cause troubles during emulation:
     readarray -t lBIN_BLACKLIST_ARR < "${CONFIG_DIR}"/emulation_blacklist.cfg
 
@@ -720,14 +716,17 @@ emulate_binary() {
 check_disk_space_emu() {
   local lEMULATOR="${1:-}"
   local lCRITICAL_FILES_ARR=()
-  local lKILLER=""
+  local lKILL_PROC_NAME=""
 
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -type f -size +"${KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename % 2>/dev/null| cut -d\. -f1 | cut -d_ -f2' || true)
-  for lKILLER in "${lCRITICAL_FILES_ARR[@]}"; do
-    if pgrep -f "${lEMULATOR}.*${lKILLER}" > /dev/null; then
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename -s .txt % 2>/dev/null' || true)
+  for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
+    lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_}"
+    lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_}"
+    lKILL_PROC_NAME="${lKILL_PROC_NAME/stracer_}"
+    if pgrep -f "${lEMULATOR}.*${lKILL_PROC_NAME}" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"
-      print_output "[*] Killing process ${ORANGE}${lEMULATOR}.*${lKILLER}.*${NC}" "no_log"
-      pkill -f "${lEMULATOR}.*${lKILLER}.*" >/dev/null|| true
+      print_output "[*] Killing process ${ORANGE}${lEMULATOR}.*${lKILL_PROC_NAME}.*${NC}" "no_log"
+      pkill -f "${lEMULATOR}.*${lKILL_PROC_NAME}.*" >/dev/null|| true
       # rm "${LOG_DIR}"/qemu_emulator/*"${lKILLER}"*
     fi
   done

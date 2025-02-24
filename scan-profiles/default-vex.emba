@@ -13,31 +13,37 @@
 # Description: This is a default SBOM profile. You can Use it as a template for your own profiles
 #              or start emba with "-p sbom-default.emba" to use it
 
-export FORMAT_LOG=0
+export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
-export HTML=0
+export HTML=1
 
 # multiple sbom only optimisations
 SBOM_MINIMAL=1
-SBOM_UNTRACKED_FILES=0
+# we can include all files that are not tracked by the main packaging system into the SBOM
+# disable/enable this to (not) include all files from filesystem which are not handled
+# from the package management system
+# Value 1 for ELF files only
+# Value 2 for all files
+SBOM_UNTRACKED_FILES=1
+
+# VEX metrics (check for KEV, Exploits, EPSS)
+export VEX_METRICS=1
 
 # if no deep extraction is needed it can be disabled here - sometimes useful for
 # non Linux stuff like sources or Windows exe (could be also configured via -q parameter)
-export DISABLE_DEEP=1
+DISABLE_DEEP=1
 
 # DEEP_EXT_DEPTH -> max rounds of deep extractor 1 to 4
-# DEEP_EXT_DEPTH=1
+DEEP_EXT_DEPTH=1
 # change this to something smaller to not report all the files
-export SBOM_MAX_FILE_LOG=100
+SBOM_MAX_FILE_LOG=500
 
-# VEX metrics (check for KEV, Exploits, EPSS) -> F17 module is not enabled by default
-# export VEX_METRICS=0
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" "F17" )
 
-# QEMULATION - for user-mode emulation to generate an optimised SBOM
+# with user-mode emulation enabled (QEMULATION=1):
 export QEMULATION=0
-
-export SELECT_MODULES+=( "S06" "S08" "S24" "S25" "F15" )
+# export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "S115" "S116" "F15" )
 
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
 # that should not be used
@@ -58,7 +64,6 @@ S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
 S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
 S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
 S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
-S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0

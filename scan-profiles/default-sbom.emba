@@ -36,7 +36,7 @@ DEEP_EXT_DEPTH=1
 # change this to something smaller to not report all the files
 SBOM_MAX_FILE_LOG=500
 
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" "F17" )
 
 # with user-mode emulation enabled (QEMULATION=1):
 export QEMULATION=0
@@ -61,6 +61,7 @@ S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
 S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
 S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
 S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
+S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0

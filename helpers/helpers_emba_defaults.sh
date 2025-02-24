@@ -73,6 +73,9 @@ set_defaults() {
   [[ -v L10_DEBUG_MODE ]] || export L10_DEBUG_MODE=0
   [[ -v FULL_EMULATION ]] || export FULL_EMULATION=0           # full system emulation - set it via command line parameter -Q
   [[ -v QEMULATION ]] || export QEMULATION=0               # user-mode emulation - set it via command line parameter -E
+  # some processes are running long and logging a lot
+  # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
+  export QEMU_KILL_SIZE="10M"
   # export L10_KERNEL_V_LONG="4.1.17"
   [[ -v L10_KERNEL_V_LONG ]] || export L10_KERNEL_V_LONG="4.1.52"
   [[ -v L10_BB_VER ]] || export L10_BB_VER="1.36.1"
@@ -116,6 +119,7 @@ set_defaults() {
   if [[ -f "${CONFIG_DIR}"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="${CONFIG_DIR}"/msf_cve-db.txt
   fi
+  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
   if [[ -f "${CONFIG_DIR}"/trickest_cve-db.txt ]]; then
     export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi
@@ -148,7 +152,6 @@ set_defaults() {
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   [[ -v Q_MOD_PID ]] || export Q_MOD_PID=""
-  [[ -v F20_DEEP ]] || export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
   [[ -v UEFI_VERIFIED ]] || export UEFI_VERIFIED=0
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
@@ -159,6 +162,10 @@ set_defaults() {
   [[ -v SBOM_MAX_FILE_LOG ]] || export SBOM_MAX_FILE_LOG=200
   [[ -v SBOM_MINIMAL ]] || export SBOM_MINIMAL=0
   [[ -v SBOM_UNTRACKED_FILES ]] || export SBOM_UNTRACKED_FILES=1
+  export VEX_METRICS=1
+  # usually we test firmware that is already out in the field
+  # if this changes this option can be adjusted in the scanning profile
+  export SBOM_LIFECYCLE_PHASE="operations"
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
@@ -180,6 +187,7 @@ set_defaults() {
   S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
   S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
   S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
 }
 
 set_log_paths() {
@@ -220,6 +228,8 @@ set_log_paths() {
   export S26_LOG="${LOG_DIR}/s26_kernel_vuln_verifier.txt"
   export S26_LOG_DIR="${S26_LOG/\.txt/\/}"
   export S30_LOG="${LOG_DIR}/s30_version_vulnerability_check.txt"
+  export S36_LOG="${LOG_DIR}/s36_lighttpd.txt"
+  export S36_LOG_DIR="${S36_LOG/\.txt/\/}"
   export S36_CSV_LOG="${CSV_DIR}/s36_lighttpd.csv"
   export S40_LOG="${LOG_DIR}/s40_weak_perm_check.txt"
   export S45_LOG="${LOG_DIR}/s45_pass_file_check.txt"
@@ -235,6 +245,8 @@ set_log_paths() {
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
+  export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"
+  export S118_LOG_DIR="${S118_LOG/\.txt/\/}"
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
   export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
@@ -244,11 +256,8 @@ set_log_paths() {
   export L25_LOG="${LOG_DIR}/l25_web_checks.txt"
   export L25_CSV_LOG="${CSV_DIR}/l25_web_checks.csv"
   export L35_CSV_LOG="${CSV_DIR}/l35_metasploit_check.csv"
-  export F20_LOG="${LOG_DIR}/f20_vul_aggregator.txt"
-  export F20_CSV_LOG="${CSV_DIR}/f20_vul_aggregator.csv"
-  export F20_LOG_DIR="${F20_LOG/\.txt/\/}"
-  export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
+  export F17_LOG_DIR="${LOG_DIR}/f17_cve_bin_tool"
   export F50_CSV_LOG="${CSV_DIR}/f50_base_aggregator.csv"
 }

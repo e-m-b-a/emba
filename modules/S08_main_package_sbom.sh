@@ -25,6 +25,7 @@ S08_main_package_sbom() {
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
   local lS08_SUBMODULE_PATH="${MOD_DIR}/S08_main_package_sbom_modules"
+  export S08_DUPLICATES_LOG="${LOG_PATH_MODULE}/SBOM_duplicates.log"
   local lS08_SUBMODULES_FILES_ARR=()
   local lS08_SUBMODULE=""
 
@@ -139,6 +140,7 @@ create_comp_dep_tree_threader() {
   # now we check every dependency for the current component
   for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
     # lets extract the name of the dependency
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP//\'}"
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
 

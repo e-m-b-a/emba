@@ -151,17 +151,21 @@ lighttpd_binary_analysis() {
   eval "LIGHT_VERSIONS=($(for i in "${LIGHT_VERSIONS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
   if [[ ${#LIGHT_VERSIONS[@]} -gt 0 ]] ; then
-    prepare_cve_search_module
     print_ln
     # lets do a quick vulnerability check on our lighttpd version
-    if ! [[ -d "${LOG_PATH_MODULE}"/cve_sum ]]; then
-      mkdir "${LOG_PATH_MODULE}"/cve_sum
-    fi
     for lLIGHT_VER in "${LIGHT_VERSIONS[@]}"; do
-      # cve_db_lookup_version writes the logs to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
-      export F20_DEEP=1
-      export S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
-      cve_db_lookup_version "${lLIGHT_VER}"
+      for lLIGH_JSON in "${SBOM_LOG_PATH}"/*lighttpd*.json; do
+        lVERS=$(jq -r '.version' "${lLIGH_JSON}" || true)
+        if [[ "${lVERS}" != "${lLIGHT_VER/*:}" ]]; then
+          continue
+        fi
+        local lBOM_REF=""
+        lBOM_REF=$(jq -r '."bom-ref"' "${lLIGH_JSON}" || true)
+        local lORIG_SOURCE="lighttpd_static"
+        local lVENDOR="lighttpd"
+        local lPROD="lighttpd"
+        cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}"
+      done
     done
   fi
 
