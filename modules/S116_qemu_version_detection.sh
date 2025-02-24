@@ -226,6 +226,8 @@ version_detection_thread() {
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lBINARY_PATH}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
       lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
+      lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_DETECTED}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

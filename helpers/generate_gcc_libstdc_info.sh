@@ -39,10 +39,12 @@ curl "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
 curl "${GCC_STD_HTML}" > "${GCC_STC_MATCHING_FILE}"
 
 if ! [[ -f "${GCC_STC_MATCHING_FILE}" ]]; then
-  print_output "[-] Error downloading ${GCC_STD_HTML}"
+  print_output "[-] Error downloading ${GCC_STD_HTML}" "no_log"
+  exit 1
 fi
 if ! [[ -f "${GCC_RELEASES_FILE}" ]]; then
-  print_output "[-] Error downloading ${GCC_RELEASES_FILE}"
+  print_output "[-] Error downloading ${GCC_RELEASES_FILE}" "no_log"
+  exit 1
 fi
 
 [[ -f "${GCC_OUTPUT_CSV}" ]] && rm "${GCC_OUTPUT_CSV}"
