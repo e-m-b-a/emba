@@ -52,7 +52,7 @@ IL15_emulated_checks_init() {
     # needed for cutycapt
     #
     # future extension
-    # print_pip_info "upnpclient"
+    print_pip_info "upnpclient"
     print_pip_info "beautifulsoup4"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
@@ -76,7 +76,7 @@ IL15_emulated_checks_init() {
       fi
 
       # EMBAbite fuzzer used this:
-      pip_install "upnpclient"
+      # pip_install "upnpclient"
 
       ;;
     esac
