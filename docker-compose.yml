@@ -40,16 +40,8 @@ services:
     environment:
         - USER
         - CONTAINER_NUMBER=1
-        - STRICT_MODE
-        - DEBUG_SCRIPT
-        - UPDATE
-        - FORCE
-        - FORMAT_LOG
-        - HTML
-        - SILENT
-        - DISABLE_STATUS_BAR
-        - DISABLE_NOTIFICATIONS
-        - DISABLE_DOTS
+    env_file:
+      - ${EMBA}/config/.env
     # network_mode: host
     devices:
       - /dev/fuse:/dev/fuse:rwm
@@ -81,19 +73,8 @@ services:
     environment:
         - USER
         - CONTAINER_NUMBER=2
-        - STRICT_MODE
-        - DEBUG_SCRIPT
-        - UPDATE
-        - FORCE
-        - FORMAT_LOG
-        - HTML
-        - GPT_OPTION
-        - GPT_QUESTION
-        - MINIMUM_GPT_PRIO
-        - SILENT
-        - DISABLE_STATUS_BAR
-        - DISABLE_NOTIFICATIONS
-        - DISABLE_DOTS
+    env_file:
+      - ${EMBA}/config/.env
     network_mode: host
     ulimits:
       core:
