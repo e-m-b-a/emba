@@ -184,7 +184,7 @@ set_defaults() {
       S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
       S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
       S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
-      echo "S08_MODULES_ARR=(${S08_MODULES_ARR[@]})"
+      echo "S08_MODULES_ARR=(${S08_MODULES_ARR[*]})"
     } > "${INVOCATION_PATH}/config/.env" 2>/dev/null         # store that into env file
   else
     print_output "[DEBUG] env already set" # TODO this is an error state make it print proper
