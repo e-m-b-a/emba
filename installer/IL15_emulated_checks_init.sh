@@ -76,7 +76,7 @@ IL15_emulated_checks_init() {
       fi
 
       # EMBAbite fuzzer used this:
-      pip_install "upnpclient"
+      # pip_install "upnpclient"
 
       ;;
     esac

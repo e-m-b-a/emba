@@ -114,7 +114,8 @@ qcow_extractor() {
   mapfile -t lNBD_DEVS_ARR < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
   if [[ "${#lNBD_DEVS_ARR[@]}" -eq 0 ]]; then
     # sometimes we are not able to find the partitions with fdisk -> fallback
-    lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    # lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    lNBD_DEVS_ARR+=( "/dev/${lNBD_DEV_NAME}" )
   fi
 
   print_ln
@@ -126,7 +127,7 @@ qcow_extractor() {
     mount "${NBD_DEV}" "${lTMP_QCOW_MOUNT}" || true
 
     if mount | grep -q "${NBD_DEV}"; then
-      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_%\/}"/"$(basename "${NBD_DEV}")"
 
       copy_qemu_nbd "${lTMP_QCOW_MOUNT}" "${lEXTRACTION_DIR_FINAL}"
 
