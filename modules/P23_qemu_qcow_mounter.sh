@@ -127,7 +127,7 @@ qcow_extractor() {
     mount "${NBD_DEV}" "${lTMP_QCOW_MOUNT}" || true
 
     if mount | grep -q "${NBD_DEV}"; then
-      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_%\/}"/"$(basename "${NBD_DEV}")"
 
       copy_qemu_nbd "${lTMP_QCOW_MOUNT}" "${lEXTRACTION_DIR_FINAL}"
 

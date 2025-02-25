@@ -52,7 +52,7 @@ IL15_emulated_checks_init() {
     # needed for cutycapt
     #
     # future extension
-    print_pip_info "upnpclient"
+    # print_pip_info "upnpclient"
     print_pip_info "beautifulsoup4"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
