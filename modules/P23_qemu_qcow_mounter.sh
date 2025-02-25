@@ -114,7 +114,8 @@ qcow_extractor() {
   mapfile -t lNBD_DEVS_ARR < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
   if [[ "${#lNBD_DEVS_ARR[@]}" -eq 0 ]]; then
     # sometimes we are not able to find the partitions with fdisk -> fallback
-    lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    # lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    lNBD_DEVS_ARR+=( "/dev/${lNBD_DEV_NAME}" )
   fi
 
   print_ln
