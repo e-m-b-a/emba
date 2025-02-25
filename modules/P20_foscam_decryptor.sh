@@ -126,8 +126,9 @@ foscam_ubi_extractor() {
     print_output "[*] 2nd extraction round successful - ${ORANGE}app_ubifs${NC} found"
     print_output "[*] Checking nandsim kernel module"
     if ! lsmod | grep -q "^nandsim[[:space:]]"; then
+      lsmod | grep "nandsim" || true
       print_output "[-] WARNING: Nandsim kernel module not loaded - can't proceed"
-      return
+      # return
       #   # we need to load nandsim with some parameters - unload it before
       #   modprobe -r nandsim
     fi
