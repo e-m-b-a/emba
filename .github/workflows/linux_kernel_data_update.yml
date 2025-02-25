@@ -30,7 +30,7 @@ jobs:
         committer: GitHub <noreply@github.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
         signoff: false
-        branch: gcc_update
+        branch: kernelv_update
         delete-branch: true
         title: 'Linux kernel version database update'
         body: |

@@ -108,7 +108,7 @@ build_sbom_json_hashes_arr() {
   # we check all SBOM results for the same file hash and afterwards for name and version
   # if all are matching this is duplicate and we do not need to log it
   # we return 1 if we already found something and the caller needs to handle it
-  if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" ]]; then
+  if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" && "${lAPP_VERS}" != "null" ]]; then
     # first check is for same hash, same name, same version:
     if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"; then
       # if we have found some sbom log file with the matching sha512 checksum, we then check if

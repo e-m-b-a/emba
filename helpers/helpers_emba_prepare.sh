@@ -206,7 +206,7 @@ binary_architecture_threader() {
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
 
-  write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT}" "${lMD5SUM}" &
+  write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}" &
 }
 
 architecture_check() {
@@ -249,6 +249,8 @@ architecture_check() {
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    sort -u -t';' -k8,8 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
 
     lARCH_MIPS64_N32_CNT=$(grep -c "N32 MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
