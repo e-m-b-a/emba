@@ -279,12 +279,12 @@ architecture_check() {
     lD_END_LE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "LSB" || true)
 
     if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT)) -gt 0 ]] ; then
-      print_output "$(indent "$(orange "Architecture  Count")")"
+      print_output "$(indent "$(orange "Architecture Count")")"
       if [[ ${lARCH_MIPS_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""${lARCH_MIPS_CNT}")")" ; fi
       if [[ ${lARCH_MIPS64R2_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64r2     ""${lARCH_MIPS64R2_CNT}")")" ; fi
       if [[ ${lARCH_MIPS64_III_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 III     ""${lARCH_MIPS64_III_CNT}")")" ; fi
       if [[ ${lARCH_MIPS64_N32_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 N32     ""${lARCH_MIPS64_N32_CNT}")")" ; fi
-      if [[ ${lARCH_MIPS64v1_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64v1      ""${lARCH_MIPS64v1_CNT}}")")" ; fi
+      if [[ ${lARCH_MIPS64v1_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64v1      ""${lARCH_MIPS64v1_CNT}")")" ; fi
       if [[ ${lARCH_ARM_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""${lARCH_ARM_CNT}")")" ; fi
       if [[ ${lARCH_ARM64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "ARM64         ""${lARCH_ARM64_CNT}")")" ; fi
       if [[ ${lARCH_X64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""${lARCH_X64_CNT}")")" ; fi
