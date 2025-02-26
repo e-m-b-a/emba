@@ -95,25 +95,25 @@ set_defaults() {
     echo "OVERWRITE_LOG=${OVERWRITE_LOG:-0}"              # automaticially overwrite log directory, if necessary
     echo "MAX_EXT_SPACE=${MAX_EXT_SPACE:-110000}"         # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
     # Important directories
-    LOG_DIR="${INVOCATION_PATH:=.}/logs"                  # !set innvocation path if unset
+    LOG_DIR="./logs"                  # !set innvocation path if unset
     echo "LOG_DIR=${LOG_DIR}"
     # echo "ERROR_LOG=${LOG_DIR}/emba_error.log"
     echo "TMP_DIR=${LOG_DIR}/tmp"
     echo "CSV_DIR=${LOG_DIR}/csv_log"
     echo "JSON_DIR=${LOG_DIR}/json_logs"
     echo "MAIN_LOG_FILE=${MAIN_LOG_FILE:-'emba.log'}"
-    CONFIG_DIR="${INVOCATION_PATH}/config"
+    CONFIG_DIR="./config"
     echo "CONFIG_DIR=${CONFIG_DIR}"
-    EXT_DIR="${INVOCATION_PATH}/external"
+    EXT_DIR="./external"
     echo "EXT_DIR=${EXT_DIR}"
-    HELP_DIR="${INVOCATION_PATH}/helpers"
+    HELP_DIR="./helpers"
     echo "HELP_DIR=${HELP_DIR}"
-    echo "MOD_DIR=${INVOCATION_PATH:-''}/modules"
-    echo "MOD_DIR_LOCAL=${INVOCATION_PATH:-''}/EMBA-Non-free/modules_local"
+    echo "MOD_DIR=./modules"
+    echo "MOD_DIR_LOCAL=./EMBA-Non-free/modules_local"
     echo "PID_LOGGING=${PID_LOGGING:-0}"
     # this will be in TMP_DIR/pid_notes.log
     echo "PID_LOG_FILE=${PID_LOG_FILE:-'pid_notes.log'}"
-    echo "BASE_LINUX_FILES=${INVOCATION_PATH:-''}/config/linux_common_files.txt"
+    echo "BASE_LINUX_FILES=./config/linux_common_files.txt"
     if [[ -f "${CONFIG_DIR}/known_exploited_vulnerabilities.csv" ]]; then
       echo "KNOWN_EXP_CSV=${CONFIG_DIR}/known_exploited_vulnerabilities.csv"
     fi
@@ -185,11 +185,11 @@ set_defaults() {
     'S08_submodule_node_js_package_lock_parser '\
     'S08_submodule_c_conanfile_txt_parser '\
     ")"
-  } > "${INVOCATION_PATH}/config/.env" 2>/dev/null         # store that into env file
+  } > "./config/.env" 2>/dev/null         # store that into env file
   # readin .env
   set -a # automatically export all variables
   # shellcheck source=/dev/null
-  source "${INVOCATION_PATH}/config/.env"
+  source "./config/.env"
   set +a
 }
 
