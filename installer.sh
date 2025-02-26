@@ -23,6 +23,8 @@ STRICT_MODE=1
 ORIG_USER="${SUDO_USER:-${USER}}"
 ORIG_GROUP=$(groups "${ORIG_USER}" | cut -d: -f2 | awk '{print $1}')
 
+INVOCATION_PATH="$(dirname "${0}")"
+
 export DEBIAN_FRONTEND=noninteractive
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
@@ -343,6 +345,7 @@ fi
 
 # initial installation of the host environment:
 I01_default_apps_host
+I01_default_vars  # writes config/.env
 
 if [[ "${OTHER_OS}" -eq 1 ]]; then
   # UBUNTU
