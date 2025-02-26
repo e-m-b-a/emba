@@ -192,5 +192,4 @@ foscam_ubi_extractor() {
       write_csv_log "Foscam decryptor/extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${lFOSCAM_UBI_FILES}" "${lFOSCAM_UBI_DIRS}" "NA"
     fi
   fi
-  exit 1
 }
