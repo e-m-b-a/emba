@@ -127,7 +127,7 @@ foscam_ubi_extractor() {
     print_output "[*] Checking nandsim kernel module"
     if ! lsmod | grep -q "^nandsim[[:space:]]"; then
       lsmod | grep "nandsim" || true
-      print_output "[-] WARNING: Nandsim kernel module not loaded - can't proceed"
+      print_output "[-] WARNING: Nandsim kernel module loading issue - trying to proceed"
       # return
       #   # we need to load nandsim with some parameters - unload it before
       #   modprobe -r nandsim
@@ -153,9 +153,10 @@ foscam_ubi_extractor() {
       print_output "[*] Mounting ${ORANGE}${lUBI_DEV}${NC} ubi device to ${ORANGE}${lUBI_MNT_PT}${NC}"
       mkdir -p "${lUBI_MNT_PT}" || true
       mount -t ubifs "${lUBI_DEV}" "${lUBI_MNT_PT}"
-      print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_}/${lUBI_DEV}${NC}"
-      mkdir -p "${lEXTRACTION_DIR_}/${lUBI_DEV}"
-      cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_}/${lUBI_DEV}"
+      print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_%\/}/${lUBI_DEV}${NC}"
+      mkdir -p "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      print_output "[*] Umount ubi device from ${ORANGE}${lUBI_MNT_PT}/${lUBI_DEV}${NC}"
       umount "${lUBI_MNT_PT}" || true
       rm -r "${lUBI_MNT_PT}" || true
     done
@@ -169,6 +170,8 @@ foscam_ubi_extractor() {
     # modprobe -r ubi || true
 
     if [[ -d "${lEXTRACTION_DIR_}" ]]; then
+      print_output "[*] Checking ${lEXTRACTION_DIR_} for files and directories"
+      ls ${lEXTRACTION_DIR_} -R
       lFOSCAM_UBI_FILES=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
       lFOSCAM_UBI_DIRS=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
     fi
@@ -182,4 +185,5 @@ foscam_ubi_extractor() {
       write_csv_log "Foscam decryptor/extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${lFOSCAM_UBI_FILES}" "${lFOSCAM_UBI_DIRS}" "NA"
     fi
   fi
+  exit 1
 }
