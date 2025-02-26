@@ -154,9 +154,9 @@ foscam_ubi_extractor() {
       mkdir -p "${lUBI_MNT_PT}" || true
       mount -t ubifs "${lUBI_DEV}" "${lUBI_MNT_PT}"
       print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_%\/}/${lUBI_DEV}${NC}"
-      ls "${lUBI_MNT_PT}" -R
       mkdir -p "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
       cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      # after this we should have a ubi image in our extraction directory. This should be extractable via unblob
       print_output "[*] Umount ubi device from ${ORANGE}${lUBI_MNT_PT}/${lUBI_DEV}${NC}"
       umount "${lUBI_MNT_PT}" || true
       rm -r "${lUBI_MNT_PT}" || true
@@ -165,6 +165,17 @@ foscam_ubi_extractor() {
     # do some cleanup
     print_output "[*] Detaching ubi device"
     ubidetach -d 0 || true
+    # ensure we have some extracted ubifs:
+    lUBI_FS_TARGET=$(find "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}" -name ubifs)
+    if [[ -f "${lUBI_FS_TARGET}" ]]; then
+      print_output "[*] Unblobber start"
+      time unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 1
+      print_output "[*] Unblobber end"
+      print_output "[*] Binwalker start"
+      time binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
+      print_output "[*] Binwalker end"
+    fi
+
     # print_output "[*] Unloading nandsim module"
     # modprobe -r nandsim || true
     # print_output "[*] Unloading ubi module"
