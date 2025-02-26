@@ -21,7 +21,10 @@
 set_defaults() {
   # read and export all vars in .env
   if [[ -f "${INVOCATION_PATH}/config/.env" ]]; then
-    export "$(grep -v '^#' "${INVOCATION_PATH}/config/.env" | xargs)"
+    # readin .env
+    set -a # automatically export all variables
+    source "${INVOCATION_PATH}/config/.env"
+    set +a
   else
     echo -e "${RED}""    Missing ""${INVOCATION_PATH}/config/.env"" - check your installation""${NC}"
   fi

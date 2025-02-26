@@ -185,6 +185,8 @@ I01_default_vars() {
     S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
     echo "S08_MODULES_ARR=( ${S08_MODULES_ARR[@]} )"
   } > "${INVOCATION_PATH:-.}/config/.env" 2>/dev/null         # store that into env file
-  # read and export all vars in .env
-  export "$(grep -v '^#' "${INVOCATION_PATH}/config/.env" | xargs)"
+  # read and export all vars in .env 
+  set -a # automatically export all variables
+  source "${INVOCATION_PATH}/config/.env"
+  set +a
 }
