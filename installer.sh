@@ -343,7 +343,6 @@ fi
 
 # initial installation of the host environment:
 I01_default_apps_host
-I01_default_vars  # writes config/.env
 
 if [[ "${OTHER_OS}" -eq 1 ]]; then
   # UBUNTU
