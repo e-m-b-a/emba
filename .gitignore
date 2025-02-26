@@ -10,5 +10,4 @@ config/emba_updater
 config/emba_updater_data
 config/module_blacklist.txt
 config/jtr_wordlist.txt
-config/gpt_config.env
 config/*.env
