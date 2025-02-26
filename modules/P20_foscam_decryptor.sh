@@ -154,6 +154,7 @@ foscam_ubi_extractor() {
       mkdir -p "${lUBI_MNT_PT}" || true
       mount -t ubifs "${lUBI_DEV}" "${lUBI_MNT_PT}"
       print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_%\/}/${lUBI_DEV}${NC}"
+      ls "${lUBI_MNT_PT}" -R
       mkdir -p "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
       cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
       print_output "[*] Umount ubi device from ${ORANGE}${lUBI_MNT_PT}/${lUBI_DEV}${NC}"
