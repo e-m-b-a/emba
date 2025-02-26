@@ -168,12 +168,8 @@ foscam_ubi_extractor() {
     # ensure we have some extracted ubifs:
     lUBI_FS_TARGET=$(find "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}" -name ubifs)
     if [[ -f "${lUBI_FS_TARGET}" ]]; then
-      print_output "[*] Unblobber start"
-      time unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 1
-      print_output "[*] Unblobber end"
-      print_output "[*] Binwalker start"
-      time binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
-      print_output "[*] Binwalker end"
+      # unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 1
+      binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
     fi
 
     # print_output "[*] Unloading nandsim module"
@@ -181,11 +177,10 @@ foscam_ubi_extractor() {
     # print_output "[*] Unloading ubi module"
     # modprobe -r ubi || true
 
-    if [[ -d "${lEXTRACTION_DIR_}" ]]; then
-      print_output "[*] Checking ${lEXTRACTION_DIR_} for files and directories"
-      ls ${lEXTRACTION_DIR_} -R
-      lFOSCAM_UBI_FILES=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-      lFOSCAM_UBI_DIRS=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
+    if [[ -d "${lEXTRACTION_DIR_%\/}_binwalk_extracted" ]]; then
+      print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"
+      lFOSCAM_UBI_FILES=$(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type f | wc -l)
+      lFOSCAM_UBI_DIRS=$(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type d | wc -l)
     fi
 
     if [[ "${lFOSCAM_UBI_FILES}" -gt 0 ]]; then
