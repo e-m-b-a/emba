@@ -95,7 +95,7 @@ I01_default_vars() {
     echo "OVERWRITE_LOG=${OVERWRITE_LOG:-0}"              # automaticially overwrite log directory, if necessary
     echo "MAX_EXT_SPACE=${MAX_EXT_SPACE:-110000}"         # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
     # Important directories
-    LOG_DIR="${INVOCATION_PATH}/logs"
+    LOG_DIR="${INVOCATION_PATH:=.}/logs"                  # !set innvocation path if unset
     echo "LOG_DIR=${LOG_DIR}"
     # echo "ERROR_LOG=${LOG_DIR}/emba_error.log"
     echo "TMP_DIR=${LOG_DIR}/tmp"
@@ -183,10 +183,11 @@ I01_default_vars() {
     S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
     S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
     S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
-    echo "S08_MODULES_ARR=( ${S08_MODULES_ARR[@]} )"
+    echo "S08_MODULES_ARR=""( ""${S08_MODULES_ARR[@]}"" )"
   } > "${INVOCATION_PATH:-.}/config/.env" 2>/dev/null         # store that into env file
-  # read and export all vars in .env 
+  # read and export all vars in .env
   set -a # automatically export all variables
+  # shellcheck source=/dev/null
   source "${INVOCATION_PATH}/config/.env"
   set +a
 }

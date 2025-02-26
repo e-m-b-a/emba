@@ -23,6 +23,7 @@ set_defaults() {
   if [[ -f "${INVOCATION_PATH}/config/.env" ]]; then
     # readin .env
     set -a # automatically export all variables
+    # shellcheck source=/dev/null
     source "${INVOCATION_PATH}/config/.env"
     set +a
   else
