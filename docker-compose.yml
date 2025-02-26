@@ -41,7 +41,7 @@ services:
         - USER
         - CONTAINER_NUMBER=1
     env_file:
-      - ${EMBA}/config/.env
+      - ./config/.env
     # network_mode: host
     devices:
       - /dev/fuse:/dev/fuse:rwm
@@ -74,7 +74,7 @@ services:
         - USER
         - CONTAINER_NUMBER=2
     env_file:
-      - ${EMBA}/config/.env
+      - ./config/.env
     network_mode: host
     ulimits:
       core:
