@@ -88,7 +88,7 @@ set_defaults() {
       echo "SHELLCHECK=${SHELLCHECK:-1}"
       echo "QUEST_CONTAINER=${QUEST_CONTAINER:-''}"
       echo "GPT_OPTION=${GPT_OPTION:-0}"                    # 0 -> off 1-> unpayed plan 2 -> no rate-limit
-      echo "GPT_QUESTION='${GPT_QUESTION:-'For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:'}'"
+      echo "GPT_QUESTION='${GPT_QUESTION:-For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:}'"
       echo "MINIMUM_GPT_PRIO=${MINIMUM_GPT_PRIO:-1}"        # everything above this value gets checked
       echo "SHORT_PATH=${SHORT_PATH:-0}"                    # short paths in cli output
       echo "THREADED=${THREADED:-1}"                        # 0 -> single thread, 1 -> multi threaded
