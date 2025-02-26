@@ -52,6 +52,13 @@ IL15_emulated_checks_init() {
     # needed for cutycapt
     #
     # future extension
+    print_tool_info "libxslt1-dev"
+    print_tool_info "libxml2-dev"
+    # currently upnpclient failes during installing lxml:
+    #   ERROR: Failed building wheel for lxml
+    #   pip3 install lxml==5.3.1
+    #   pip3 install upnpclient --no-dependencies lxml
+    print_pip_info "lxml"
     print_pip_info "upnpclient"
     print_pip_info "beautifulsoup4"
 
@@ -77,6 +84,8 @@ IL15_emulated_checks_init() {
 
       # EMBAbite fuzzer used this:
       # pip_install "upnpclient"
+      pip3 install lxml==5.3.1
+      pip3 install upnpclient --no-dependencies lxml
 
       ;;
     esac
