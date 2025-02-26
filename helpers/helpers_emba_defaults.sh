@@ -31,26 +31,26 @@ set_defaults() {
       echo "ARCH_CHECK=${ARCH_CHECK:-1}"
       echo "RTOS=${RTOS:-1}"                                # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
       echo "BINARY_EXTENDED=${BINARY_EXTENDED:-0}"
-      echo "MAX_EXT_CHECK_BINS=${MAX_EXT_CHECK_BINS:-20}"  
-      echo "CONTAINER_EXTRACT=${CONTAINER_EXTRACT:-0}"  
-      echo "DISABLE_DEEP=${DISABLE_DEEP:-0}"  
-      echo "DEEP_EXT_DEPTH=${DEEP_EXT_DEPTH:-4}"  
-      echo "FACT_EXTRACTOR=${FACT_EXTRACTOR:-0}"  
-      echo "FIRMWARE=${FIRMWARE:-0}"  
-      echo "FORCE=${FORCE:-0}"  
-      echo "FORMAT_LOG=${FORMAT_LOG:-0}"  
-      echo "HTML=${HTML:-0}"  
+      echo "MAX_EXT_CHECK_BINS=${MAX_EXT_CHECK_BINS:-20}"
+      echo "CONTAINER_EXTRACT=${CONTAINER_EXTRACT:-0}"
+      echo "DISABLE_DEEP=${DISABLE_DEEP:-0}"
+      echo "DEEP_EXT_DEPTH=${DEEP_EXT_DEPTH:-4}"
+      echo "FACT_EXTRACTOR=${FACT_EXTRACTOR:-0}"
+      echo "FIRMWARE=${FIRMWARE:-0}"
+      echo "FORCE=${FORCE:-0}"
+      echo "FORMAT_LOG=${FORMAT_LOG:-0}"
+      echo "HTML=${HTML:-0}"
       echo "IN_DOCKER=${IN_DOCKER:-0}"
-      echo "USE_DOCKER=${USE_DOCKER:-1}"      
-      echo "KERNEL=${KERNEL:-0}"  
-      echo "KERNEL_CONFIG=${KERNEL_CONFIG:-''}"  
-      echo "FIRMWARE_PATH=${FIRMWARE_PATH:-''}"  
-      echo "FIRMWARE_PATH1=${FIRMWARE_PATH1:-''}"  
-      echo "DIFF_MODE=${DIFF_MODE:-0}"  
-      echo "FW_VENDOR=${FW_VENDOR:-''}"  
-      echo "FW_VERSION=${FW_VERSION:-''}"  
-      echo "FW_DEVICE=${FW_DEVICE:-''}"  
-      echo "FW_NOTES=${FW_NOTES:-''}"  
+      echo "USE_DOCKER=${USE_DOCKER:-1}"
+      echo "KERNEL=${KERNEL:-0}"
+      echo "KERNEL_CONFIG=${KERNEL_CONFIG:-''}"
+      echo "FIRMWARE_PATH=${FIRMWARE_PATH:-''}"
+      echo "FIRMWARE_PATH1=${FIRMWARE_PATH1:-''}"
+      echo "DIFF_MODE=${DIFF_MODE:-0}"
+      echo "FW_VENDOR=${FW_VENDOR:-''}"
+      echo "FW_VERSION=${FW_VERSION:-''}"
+      echo "FW_DEVICE=${FW_DEVICE:-''}"
+      echo "FW_NOTES=${FW_NOTES:-''}"
       echo "ARCH=${ARCH:-''}"
       echo "EFI_ARCH=${EFI_ARCH:-''}"
       echo "EXLUDE=${EXLUDE:-()}"
@@ -88,7 +88,7 @@ set_defaults() {
       echo "SHELLCHECK=${SHELLCHECK:-1}"
       echo "QUEST_CONTAINER=${QUEST_CONTAINER:-''}"
       echo "GPT_OPTION=${GPT_OPTION:-0}"                    # 0 -> off 1-> unpayed plan 2 -> no rate-limit
-      echo "GPT_QUESTION=${GPT_QUESTION:-'For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:'}"
+      echo "GPT_QUESTION='${GPT_QUESTION:-'For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:'}'"
       echo "MINIMUM_GPT_PRIO=${MINIMUM_GPT_PRIO:-1}"        # everything above this value gets checked
       echo "SHORT_PATH=${SHORT_PATH:-0}"                    # short paths in cli output
       echo "THREADED=${THREADED:-1}"                        # 0 -> single thread, 1 -> multi threaded
@@ -182,7 +182,7 @@ set_defaults() {
       'S08_submodule_node_js_package_lock_parser'\
       'S08_submodule_c_conanfile_txt_parser'\
       ")"
-    } > "${CONFIG_DIR}/.env"        # store that into env file
+    } > "${CONFIG_DIR}/.env" 2>/dev/null        # store that into env file
   fi
   # readin .env
   set -a # automatically export all variables
