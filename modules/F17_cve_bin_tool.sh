@@ -41,6 +41,12 @@ F17_cve_bin_tool() {
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..." "no_log"
+  if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
+    print_error "[-] No SBOM available!"
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
+  fi
+
   # read each item in the JSON array to an item in the Bash array
   readarray -t lSBOM_ARR < <(jq --compact-output '.components[]' "${lEMBA_SBOM_JSON}" || print_error "[-] SBOM loading error - Vulnerability analysis not available")
 

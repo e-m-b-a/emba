@@ -134,7 +134,7 @@ check_nvd_db() {
   local lREMOTE_HASH="${1:-}"
   local lLOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]] ; then
-    lLOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
+    [[ -f "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main ]] && lLOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
 
     if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    CVE database version - ${GREEN}ok${NC}"
@@ -148,7 +148,7 @@ check_epss_db() {
   local lREMOTE_HASH="${1:-}"
   local lLOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/EPSS-data ]] ; then
-    lLOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
+    [[ -f "${EXT_DIR}"/EPSS-data/.git/refs/heads/main ]] && lLOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
 
     if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    EPSS database version - ${GREEN}ok${NC}"
@@ -162,7 +162,7 @@ check_git_hash() {
   local lREMOTE_HASH="${1:-}"
   local lLOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    lLOCAL_HASH="$(head .git/refs/heads/master)"
+    [[ -f .git/refs/heads/master ]] && lLOCAL_HASH="$(head .git/refs/heads/master)"
     # lLOCAL_HASH="$(git describe --always)"
 
     if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
