@@ -220,7 +220,25 @@ check_docker_version() {
 preparing_cve_bin_tool() {
   print_output "    Preparing cve-bin-tool ..." "no_log"
   mkdir "${HOME}"/.cache/cve-bin-tool
-  cp -pri /external/cve-bin-tool/cache_cve-bin-tool/* "${HOME}"/.cache/cve-bin-tool/
+
+  # this is a health check of the cve-bin-tool with our database
+  local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  if [[ -f config/cve-bin-tool.db ]]; then
+    # first: import the database
+    python3 "${lCVE_BIN_TOOL}" --import config/cve-bin-tool.db >/dev/null || true
+
+    # 2nd: check the database
+    write_log "product,vendor,version" "${TMP_DIR}/cve_bin_tool_health_check.csv"
+    write_log "busybox,busybox,1.14.1" "${TMP_DIR}/cve_bin_tool_health_check.csv"
+    python3 "${lCVE_BIN_TOOL}" -i "${TMP_DIR}/cve_bin_tool_health_check.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${TMP_DIR}/cve_bin_tool_health_check_results" >/dev/null || true
+  fi
+
+  if [[ -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv" ]]; then
+    echo "cve-bin-tool database preparation finshed" >> "${TMP_DIR}/tmp_state_data.log"
+    print_output "[+] cve-bin-tool database preparation finished" "no_log"
+  else
+    print_output "[-] cve-bin-tool database preparation failed - No CVE queries possible" "no_log"
+  fi
 }
 
 dependency_check()
