@@ -225,7 +225,13 @@ preparing_cve_bin_tool() {
   local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
   if [[ -f config/cve-bin-tool.db ]]; then
     # first: import the database
-    python3 "${lCVE_BIN_TOOL}" --import config/cve-bin-tool.db >/dev/null || true
+    if [[ -f "${CONFIG_DIR}/cve-bin-tool.db" ]]; then
+      print_output "[*] Importing CVE config from EMBA config directory" "no_log"
+      python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-bin-tool.db" >/dev/null || true
+    elif [[ -f "${EXT_DIR}/cve-bin-tool.db" ]]; then
+      print_output "[*] Importing CVE config from EMBA docker external directory" "no_log"
+      python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool.db" >/dev/null || true
+    fi
 
     # 2nd: check the database
     write_log "product,vendor,version" "${TMP_DIR}/cve_bin_tool_health_check.csv"
