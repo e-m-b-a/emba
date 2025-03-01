@@ -85,8 +85,9 @@ IL15_emulated_checks_init() {
       # EMBAbite fuzzer used this:
       # pip_install "upnpclient"
       pip_install "lxml==5.3.1"
-      pip_install "upnpclient" "--no-dependencies lxml"
-
+      # pip_install helper function does not support further parameters
+      # Todo: fix this
+      pip3 install "upnpclient" --no-dependencies lxml
       ;;
     esac
   fi
