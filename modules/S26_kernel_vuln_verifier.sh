@@ -212,6 +212,9 @@ S26_kernel_vuln_verifier()
     fi
 
     print_output "[*] Kernel version ${ORANGE}${lK_VERSION}${NC} CVE detection ... "
+    if ! grep -q "cve-bin-tool database preparation finshed" "${TMP_DIR}/tmp_state_data.log"; then
+      print_error "[-] cve-bin-tool database not prepared - cve analysis probably not working"
+    fi
     cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lK_VERSION}" "kernel_verification"
 
     export SYMBOLS_CNT=0

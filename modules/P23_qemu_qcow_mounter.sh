@@ -93,7 +93,8 @@ qcow_extractor() {
   local lNBD_SIZE=""
   local lNBD_DEV_NAME=""
   local lIS_MOUNTED="no"
-  for lNBD_DEV in /sys/class/block/nbd[0-9]{1,}; do
+  for lNBD_DEV in {0..15}; do
+    lNBD_DEV="/sys/class/block/nbd${lNBD_DEV}"
     lNBD_SIZE=$(cat "${lNBD_DEV}"/size || true)
     if [[ "${lNBD_SIZE}" == "0" ]]; then
       lNBD_DEV_NAME=$(basename "${lNBD_DEV}")
@@ -119,7 +120,7 @@ qcow_extractor() {
   fi
 
   print_ln
-  fdisk /dev/"${lNBD_DEV_NAME}" -l
+  fdisk /dev/"${lNBD_DEV_NAME}" -l || print_error "[-] fdisk for /dev/${lNBD_DEV_NAME} was not successful"
   print_ln
 
   for NBD_DEV in "${lNBD_DEVS_ARR[@]}"; do
