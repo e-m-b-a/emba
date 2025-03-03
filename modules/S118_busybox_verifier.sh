@@ -117,6 +117,7 @@ S118_busybox_verifier()
     return
   fi
 
+  local lBB_VERSION_DONE_ARR=()
   for lBB_ENTRY in "${lBB_VERSIONS_ARR[@]}"; do
     export BB_VERIFIED_APPLETS=()
     local lBB_VERSION="${lBB_ENTRY/*;}"
@@ -128,12 +129,13 @@ S118_busybox_verifier()
     local lSUMMARY=""
     local lWAIT_PIDS_S118_ARR=()
 
-    if [[ -f "${S118_CSV_LOG}" ]] && tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -q "${lBB_VERSION}"; then
+    if [[ "${lBB_VERSION_DONE_ARR[*]}" == *"${lBB_VERSION}"* ]]; then
       # we already tested this version and ensure we do not duplicate this check
       continue
     fi
 
     mapfile -t lBB_VERSION_ARR < <(echo "${lBB_VERSION}" | tr ':' '\n')
+    lBB_VERSION_DONE_ARR+=( "${lBB_VERSION}" )
 
     local lBOM_REF=""
     lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/*busybox_*.json | sort -u | head -1 || true)
@@ -205,14 +207,14 @@ S118_busybox_verifier()
     if [[ "${#lVERIFIED_BB_VULNS_ARR[@]}" -gt 0 ]]; then
       local lTMP_CVE_ENTRY=""
       # get the CVEs part of vuln_summary.txt
-      lTMP_CVE_ENTRY=$(grep -o -E ":\s+CVEs:\ [0-9]+\s+:" "${LOG_PATH_MODULE}/vuln_summary.txt" || true)
+      lTMP_CVE_ENTRY=$(grep -o -E ":\s+CVEs:\ [0-9]+\s+:" "${LOG_PATH_MODULE}/vuln_summary.txt" | sort -u || true)
       # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
       lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/')
       # ensure we have the right length -> :  CVEs: 1234 (123)  :
       lTMP_CVE_ENTRY=$(printf '%s%*s' "${lTMP_CVE_ENTRY%:}" $((22-${#lTMP_CVE_ENTRY})) ":")
 
       # final replacement in file:
-      sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt"
+      sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt" || print_error "[-] BusyBox verification module - final replacement failed for ${lTMP_CVE_ENTRY}"
 
       # now add the (V) entry to every verified vulnerability
       for lVERIFIED_BB_CVE in "${lVERIFIED_BB_VULNS_ARR[@]}"; do
