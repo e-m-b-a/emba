@@ -103,7 +103,6 @@ perl_cpanfiles_analysis_threader() {
   local lAPP_ARCH="NA"
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
-  local lAPP_VENDOR="NA"
   local lCPE_IDENTIFIER="NA"
   local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
@@ -129,6 +128,7 @@ perl_cpanfiles_analysis_threader() {
   lVERSION=${lVERSION//\ }
   lVERSION=${lVERSION//\'}
   lVERSION=${lVERSION//\"}
+  # we have seen entries with invalid "0" entries in the version -> drop these results here
   if [[ "${lVERSION}" == "0" ]]; then
     return
   fi
@@ -138,10 +138,11 @@ perl_cpanfiles_analysis_threader() {
     lOS_IDENTIFIED="unknown"
   fi
   # as we have quite often something like asdf::qwertz as identifier we currently do not generate purl and cpe
-  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE//:/\\\\\:}" "${lVERSION//:/\\\\\:}" "${lAPP_ARCH:-NA}")
-  lAPP_VENDOR="${lPACKAGE}"
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR//:/\\\\\:}:${lPACKAGE//:/\\\\\:}:${lVERSION//:/\\\\\:}:*:*:*:*:*:*"
-  local lSTRIPPED_VERSION="::${lPACKAGE//:/\\\\\:}:${lVERSION//:/\\\\\:}"
+  # cpe data looks like: "criteria": "cpe:2.3:a:cpan:parallel\\:\\:forkmanager:*:*:*:*:*:*:*:*",
+  # escaping hell looks like: grep "cpe.*cpan:parallel\\\\\\\\:\\\\\\\\:forkmanager" external/nvd-json-data-feeds/CVE-2011/CVE-2011-41xx/CVE-2011-4115.json
+  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE//:/\\\\\\\\:}" "${lVERSION//:/\\\\\\\\:}" "${lAPP_ARCH:-NA}")
+  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:cpan:${lPACKAGE//:/\\\\\\\\:}:${lVERSION//:/\\\\\\\\:}:*:*:*:*:*:*"
+  local lSTRIPPED_VERSION=":cpan:${lPACKAGE//:/\\\\\\\\:}:${lVERSION//:/\\\\\\\\:}"
 
   # add source file path information to our properties array:
   local lPROP_ARRAY_INIT_ARR=()
