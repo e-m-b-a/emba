@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+# pylint: disable=broad-exception-caught
+#   broad-exception-caught: The generic exception caught in 'main' is required
+#                           to handle any errors thrown by 'module_run'
+#                           independant of the type.
 """
 EMBA - EMBEDDED LINUX ANALYZER
 
@@ -16,8 +20,6 @@ Author(s): Thomas Gingele
 Description: This python script serves as an example of a Python module.
              It echoes passed parameters and then exits.
 """
-# pylint: disable=W0718  # The generic Exception caught in 'main' is required
-#                        # to handle _all_ errors thrown by 'module_run'
 from sys import argv
 from os import environ
 from traceback import format_exc

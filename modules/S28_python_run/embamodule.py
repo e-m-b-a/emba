@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+# pylint: disable=consider-using-with, no-member
+#   consider-using-with: The log file is opened without 'with' on purpose
+#                        to enable writing to it across methods.
+#   no-member: Attributes of the Format class are dynamically generated during
+#              runtime.
 """
 EMBA - EMBEDDED LINUX ANALYZER
 
@@ -15,7 +20,6 @@ Author(s): Thomas Gingele
 
 Description: This file contains wrapper code for custom Python modules.
 """
-# pylint: disable=R1732  # The log file is opened without 'with' on purpose.
 from os import _Environ
 from embaformatting import Format
 

@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+# pylint: disable=too-few-public-methods
+#   to-few-public-methods: Format is treated similarly to an enum and hence
+#                          has no public methods.
 """
 EMBA - EMBEDDED LINUX ANALYZER
 
@@ -16,8 +19,6 @@ Author(s): Thomas Gingele
 Description: This file converts EMBAs formatting variables into values
              which can be used by Python.
 """
-# pylint: disable=R0903  # Disable 'to few public methods' warning for Format
-#                        # class because it is equivalent to an Enum
 import re
 
 from os import environ
