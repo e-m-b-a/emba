@@ -138,10 +138,9 @@ perl_cpanfiles_analysis_threader() {
     lOS_IDENTIFIED="unknown"
   fi
   # as we have quite often something like asdf::qwertz as identifier we currently do not generate purl and cpe
-  # lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE:-NA}" "${lVERSION:-NA}" "${lAPP_ARCH:-NA}")
+  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE//:/\\\\\:}" "${lVERSION//:/\\\\\:}" "${lAPP_ARCH:-NA}")
   lAPP_VENDOR="${lPACKAGE}"
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR//:/\\\\\:}:${lPACKAGE//:/\\\\\:}:${lVERSION//:/\\\\\:}:*:*:*:*:*:*"
-  # "${ASDF//:/\\\\\:}"
   local lSTRIPPED_VERSION="::${lPACKAGE//:/\\\\\:}:${lVERSION//:/\\\\\:}"
 
   # add source file path information to our properties array:
