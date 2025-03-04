@@ -120,7 +120,8 @@ php_composer_lock_threader() {
   lAPP_DEPS=$(jq -r .require <<< "${lCOMPOSER_LCK_ENTRY}")
 
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
-  lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+  # version outcome from compose is mostly v1.2.3 -> 1.2.3
+  lAPP_VERS=$(clean_package_details "${lAPP_VERS#v}")
   [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_VENDOR="${lAPP_NAME}"
