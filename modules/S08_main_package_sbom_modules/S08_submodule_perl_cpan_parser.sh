@@ -20,7 +20,7 @@ S08_submodule_perl_cpan_parser() {
   local lPACKAGING_SYSTEM="perl_cpan_mgmt"
   local lOS_IDENTIFIED="${1:-}"
 
-  sub_module_title "Perl cpan package management identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  sub_module_title "Perl cpan package management SBOM analysis" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   local lPERL_CPAN_FILES_ARR=()
   local lPACKAGE_FILE=""

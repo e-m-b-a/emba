@@ -20,7 +20,7 @@ S08_submodule_php_composer_lock() {
   local lOS_IDENTIFIED="${1:-}"
   local lPACKAGING_SYSTEM="php_composer_lock"
 
-  sub_module_title "PHP composer lock identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  sub_module_title "PHP composer.lock SBOM analysis" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
   local lCOMPOSER_LCK_ARCHIVES_ARR=()
   local lCOMPOSER_LCK_ARCHIVE=""
@@ -28,13 +28,6 @@ S08_submodule_php_composer_lock() {
   local lC_LOCK_ENTRY=""
 
   local lR_FILE=""
-  local lAPP_LIC="NA"
-  local lAPP_NAME="NA"
-  local lAPP_VERS=""
-  local lAPP_ARCH=""
-  local lAPP_MAINT="NA"
-  local lAPP_DESC="NA"
-  local lAPP_VENDOR="NA"
   local lPOS_RES=0
 
   # if we have found multiple lock files but all are the same -> we do not need to test duplicates
@@ -97,7 +90,6 @@ S08_submodule_php_composer_lock() {
   else
     print_output "[*] No PHP composer lock SBOM results available"
   fi
-
 }
 
 php_composer_lock_threader() {
@@ -113,7 +105,14 @@ php_composer_lock_threader() {
   local lAPP_DEPS_ARR=()
   local lPHP_DEP_ID=""
   local lAPP_DEP=""
-
+  local lAPP_DESC="NA"
+  local lAPP_LIC="NA"
+  local lAPP_NAME="NA"
+  local lAPP_VERS=""
+  local lAPP_ARCH="NA"
+  local lAPP_MAINT="NA"
+  local lAPP_VENDOR="NA"
+ 
   lAPP_NAME=$(jq -r .name <<< "${lCOMPOSER_LCK_ENTRY}")
   lAPP_VERS=$(jq -r .version <<< "${lCOMPOSER_LCK_ENTRY}")
   lAPP_DESC=$(jq -r .description <<< "${lCOMPOSER_LCK_ENTRY}")
@@ -130,7 +129,7 @@ php_composer_lock_threader() {
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="generic"
   fi
-  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "php" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "php_composer" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
   local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
   if [[ "${lAPP_DEPS}" != "null" ]]; then
