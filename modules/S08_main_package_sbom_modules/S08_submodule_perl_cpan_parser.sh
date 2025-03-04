@@ -140,7 +140,7 @@ perl_cpanfiles_analysis_threader() {
   # as we have quite often something like asdf::qwertz as identifier we currently do not generate purl and cpe
   # cpe data looks like: "criteria": "cpe:2.3:a:cpan:parallel\\:\\:forkmanager:*:*:*:*:*:*:*:*",
   # escaping hell looks like: grep "cpe.*cpan:parallel\\\\\\\\:\\\\\\\\:forkmanager" external/nvd-json-data-feeds/CVE-2011/CVE-2011-41xx/CVE-2011-4115.json
-  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE//:/\\\\\\\\:}" "${lVERSION//:/\\\\\\\\:}" "${lAPP_ARCH:-NA}")
+  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE}" "${lVERSION}" "${lAPP_ARCH:-NA}")
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:cpan:${lPACKAGE//:/\\\\\\\\:}:${lVERSION//:/\\\\\\\\:}:*:*:*:*:*:*"
   local lSTRIPPED_VERSION=":cpan:${lPACKAGE//:/\\\\\\\\:}:${lVERSION//:/\\\\\\\\:}"
 
