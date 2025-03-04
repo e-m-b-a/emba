@@ -63,7 +63,7 @@ jobs:
             -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/emba/emba":"/github/workspace" d6f297:4714451b1eca4e41a4cc10f0a8a8c25a  \
             "-a image" "-b template" "-c @/contrib/sarif.tpl" "-d " "-e false" "-f os,library" "-h trivy-results.sarif" \
             "-i embeddedanalyzer/emba" \
-            "-j ." "-k /external/semgrep-rules,/external/routersploit,/external/arachni,/etc/ssl/private/,/external/jdk,/external/emba_venv/lib/python3.11/site-packages/cve_searchsploit/exploitdb,/external/dji-firmware-tools,/external/emba_venv/lib/python3.11/site-packages/binwalk*,/external/binwalk/src/plugins" \
+            "-j ." "-k /external/semgrep-rules,/external/routersploit,/external/arachni,/etc/ssl/private/,/external/jdk,/external/emba_venv/lib/python3.12/site-packages/cve_searchsploit/exploitdb,/external/dji-firmware-tools,/external/emba_venv/lib/python3.12/site-packages/binwalk*,/external/binwalk/src/plugins" \
             "-l " "-m " "-n 60m" "-o " "-p " "-q " "-r false" "-s " "-t " "-u "
 
       - name: Upload Trivy scan results to GitHub Security tab
