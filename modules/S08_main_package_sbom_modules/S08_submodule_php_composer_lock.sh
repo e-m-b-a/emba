@@ -112,7 +112,7 @@ php_composer_lock_threader() {
   local lAPP_ARCH="NA"
   local lAPP_MAINT="NA"
   local lAPP_VENDOR="NA"
- 
+
   lAPP_NAME=$(jq -r .name <<< "${lCOMPOSER_LCK_ENTRY}")
   lAPP_VERS=$(jq -r .version <<< "${lCOMPOSER_LCK_ENTRY}")
   lAPP_DESC=$(jq -r .description <<< "${lCOMPOSER_LCK_ENTRY}")
