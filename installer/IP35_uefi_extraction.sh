@@ -24,6 +24,7 @@ IP35_uefi_extraction() {
     print_file_info "UEFIExtract_NE_A62_linux_x86_64.zip" "Release-version A62" "https://github.com/LongSoft/UEFITool/releases/download/A62/UEFIExtract_NE_A62_linux_x86_64.zip" "external/UEFITool/UEFIExtract_NE_A62_linux_x86_64.zip"
     print_tool_info "unzip" 1
     print_pip_info "uefi_firmware"
+    print_pip_info "biosutilities"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
@@ -36,6 +37,7 @@ IP35_uefi_extraction() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip_install "uefi_firmware"
+        pip_install "biosutilities"
 
         if ! [[ -d external/UEFITool ]]; then
           mkdir external/UEFITool
