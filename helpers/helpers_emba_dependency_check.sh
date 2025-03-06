@@ -219,7 +219,7 @@ check_docker_version() {
 
 preparing_cve_bin_tool() {
   print_output "    Preparing cve-bin-tool ..." "no_log"
-  mkdir "${HOME}"/.cache/cve-bin-tool
+  [[ ! -d "${HOME}"/.cache/cve-bin-tool ]] && mkdir "${HOME}"/.cache/cve-bin-tool
 
   # this is a health check of the cve-bin-tool with our database
 
@@ -568,8 +568,7 @@ dependency_check()
     fi
   fi
 
-  # we should check all the dependencies if they are needed in our quest container:
-  if [[ "${CONTAINER_NUMBER}" -ne 2 ]]; then
+  if [[ "${USE_DOCKER}" -eq 0  && "${CONTAINER_NUMBER}" -ne 2 ]]; then
     check_dep_file "cve-bin-tool" "${EXT_DIR}""/cve-bin-tool/cve_bin_tool/cli.py"
     preparing_cve_bin_tool &
     local lTMP_PID="$!"
