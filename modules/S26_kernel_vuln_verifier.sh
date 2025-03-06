@@ -311,7 +311,7 @@ S26_kernel_vuln_verifier()
         local lV_ENTRY="(V)"
         # ensure we have the correct length
         lV_ENTRY=$(printf '%s%*s' ${lV_ENTRY} $((19-${#lVERIFIED_BB_CVE}-${#lV_ENTRY})))
-        sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 (V)/' "${LOG_PATH_MODULE}/cve_sum/"*_finished.txt || true
+        sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 '"${lV_ENTRY}"'/' "${LOG_PATH_MODULE}/cve_sum/"*_finished.txt || true
       done
     fi
   fi

@@ -189,6 +189,9 @@ set_defaults() {
   S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
   S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
   S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_perl_cpan_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_php_composer_lock" )
+  S08_MODULES_ARR+=( "S08_submodule_python_pipfile_lock" )
 }
 
 set_log_paths() {
