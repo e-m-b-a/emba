@@ -21,6 +21,9 @@ I24_25_kernel_tools() {
 
     print_tool_info "python3-pip" 1
     print_tool_info "flex"
+    print_tool_info "pahole"
+    print_tool_info "bison"
+    print_tool_info "pkg-config"
     print_pip_info "python-lzo"
     print_git_info "kconfig-hardened-check" "EMBA-support-repos/kconfig-hardened-check" "There are plenty of security hardening options for the Linux kernel. This tool checks them."
 
