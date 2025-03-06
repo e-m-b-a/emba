@@ -59,7 +59,7 @@ IP00_extractors(){
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip_install "setuptools" "-U"
         pip_install "wheel" "-U"
-        pip_install "protobuf"
+        pip_install "protobuf" "-U"
         pip_install "bsdiff4"
         pip_install "python-lzo>=1.14"
         pip_install "pycryptodome"
