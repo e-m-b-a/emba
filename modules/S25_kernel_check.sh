@@ -386,6 +386,7 @@ module_analyzer() {
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
       lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${lMOD_VERSION}:" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
       lPROP_ARRAY_INIT_ARR+=( "dependency:linux_kernel" )
 
@@ -418,6 +419,7 @@ module_analyzer() {
     lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
     lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
     lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:" )
     lPROP_ARRAY_INIT_ARR+=( "module_version_details:${lK_VERSION,,}" )
     lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 

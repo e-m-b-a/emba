@@ -135,7 +135,7 @@ F17_cve_bin_tool() {
         print_error "[-] S36 lighttpd details missing ... continue in default mode"
       fi
     # Linux Kernel verification module handling - we already have all the data from s26. Now we just copy these details
-    elif [[ "${lPROD}" == "linux_kernel" ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
+    elif [[ "${lPROD}" == "linux_kernel"* ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
       print_output "[*] Possible Linux kernel results from s26 detected ... no CVE detection needed" "no_log"
       cp "${S26_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] Linux Kernel CVE log copy process failed"
       cp "${S26_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] Linux Kernel CVE log copy process failed"
