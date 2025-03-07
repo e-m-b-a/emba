@@ -124,17 +124,19 @@ F15_cyclonedx_sbom() {
 
       if [[ -s "${lCOMP_FILE}" ]]; then
         if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
+          # before adding the new component we need to check that this is not our first entry (after the initial [) and for a ','
+          # if it is not found we need to add it now
+          if [[ "$(tail -c1 "${SBOM_LOG_PATH}/sbom_components_tmp.json")" != '[' ]] && [[ "$(tail -n1 "${SBOM_LOG_PATH}/sbom_components_tmp.json")" != ',' ]]; then
+             echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+          fi
           cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
         else
-          print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
+          print_error "[-] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
           continue
         fi
       else
-        print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to decode"
+        print_error "[-] WARNING: SBOM component ${lCOMP_FILE} failed to decode"
         continue
-      fi
-      if [[ $((lCOMP_FILE_ID+1)) -lt "${#lCOMP_FILES_ARR[@]}" ]]; then
-        echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
       fi
     done
     echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
