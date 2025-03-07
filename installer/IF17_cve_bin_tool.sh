@@ -23,6 +23,7 @@ IF17_cve_bin_tool() {
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] ; then
       print_tool_info "gsutil"
+      print_pip_info "protobuf"
       # print_pip_info "cve_bin_tool"
       print_git_info "cve-bin-tool" "https://github.com/EMBA-support-repos/cve-bin-tool.git" "cve-bin-tool"
     fi
@@ -43,6 +44,9 @@ IF17_cve_bin_tool() {
         cd external/cve-bin-tool || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
         pip install -U -r requirements.txt
         python3 -m pip install -e .
+
+        # we need a more up to date protobuf for the android extractor -> lets update it now
+        pip_install "protobuf==5.*"
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
         python3 external/cve-bin-tool/cve_bin_tool/cli.py --update now || true
         python3 external/cve-bin-tool/cve_bin_tool/cli.py --export external/cve-bin-tool/cve-database.db || true
