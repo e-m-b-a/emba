@@ -22,7 +22,6 @@ IP00_extractors(){
 
     print_tool_info "python3-pip" 1
     print_tool_info "patool" 1
-    print_pip_info "protobuf"
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
@@ -59,7 +58,6 @@ IP00_extractors(){
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip_install "setuptools" "-U"
         pip_install "wheel" "-U"
-        pip_install "protobuf" "-U"
         pip_install "bsdiff4"
         pip_install "python-lzo>=1.14"
         pip_install "pycryptodome"
