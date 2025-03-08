@@ -196,6 +196,7 @@ set_defaults() {
 
 set_log_paths() {
   export SBOM_LOG_PATH="${LOG_DIR}/SBOM"
+  export P02_LOG="${LOG_DIR}/p02_firmware_bin_file_check.txt"
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export P55_LOG="${LOG_DIR}/p55_unblob_extractor.txt"

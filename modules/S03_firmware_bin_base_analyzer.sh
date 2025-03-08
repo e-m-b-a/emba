@@ -48,7 +48,14 @@ S03_firmware_bin_base_analyzer() {
     export PRE_ARCH_A_ARR=()
     export PRE_ARCH_CPU_REC=""
     if [[ ${RTOS} -eq 1 ]] ; then
-      print_output "[*] INFO: S03 Architecture detection mechanism is currently not available"
+      if grep -q "Identified Android APK package - performing APK checks" "${P02_LOG}"
+        lOS_="Android APK"
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "${lOS_} detected" "NA" | tee -a "${LOG_FILE}"
+        write_csv_log "${lOS_}" "NA" "APK verified" "NA"
+      else
+        print_output "[*] INFO: S03 Architecture detection mechanism is currently not available"
+      fi
+
       # if [[ ${THREADED} -eq 1 ]]; then
       #  binary_architecture_detection "${FIRMWARE_PATH_BAK}" &
       #  local lTMP_PID="$!"
@@ -79,7 +86,7 @@ os_identification() {
   write_log "[*] Initial OS guessing:"
   write_csv_log "Guessed OS" "confidential rating" "verified" "Linux root filesystems found"
 
-  lOS_SEARCHER_ARR=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics" "UEFI" "HelenOS" "Windows\ CE")
+  lOS_SEARCHER_ARR=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics" "UEFI" "HelenOS" "Windows\ CE" "Android")
   print_dot
   declare -A OS_COUNTER=()
   local lWAIT_PIDS_S03_1_ARR=()
