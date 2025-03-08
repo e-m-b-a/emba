@@ -48,7 +48,7 @@ S03_firmware_bin_base_analyzer() {
     export PRE_ARCH_A_ARR=()
     export PRE_ARCH_CPU_REC=""
     if [[ ${RTOS} -eq 1 ]] ; then
-      if grep -q "Identified Android APK package - performing APK checks" "${P02_LOG}"
+      if grep -q "Identified Android APK package - performing APK checks" "${P02_LOG}"; then
         lOS_="Android APK"
         printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "${lOS_} detected" "NA" | tee -a "${LOG_FILE}"
         write_csv_log "${lOS_}" "NA" "APK verified" "NA"
