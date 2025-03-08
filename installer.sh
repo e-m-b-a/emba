@@ -310,7 +310,10 @@ if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; 
   export DOCKER_COMPOSE=("docker" "compose")
 elif command -v docker-compose > /dev/null ; then
   echo -e "\n${ORANGE}""${BOLD}""WARNING: Old docker-compose installation found""${NC}"
-  echo -e "${ORANGE}""${BOLD}""It is recommend to remove the current installation and restart the EMBA installation afterwards!""${NC}"
+  echo -e "${ORANGE}""${BOLD}""It is recommend to remove the current docker installation and restart the EMBA installation afterwards!""${NC}"
+  echo -e "${ORANGE}Please check the installed docker packages the following way: dpkg -l | grep docker.${NC}"
+  echo -e "${ORANGE}Afterwards it can be cleaned up via apt-get the following way:${NC}"
+  echo -e "${ORANGE}$ sudo apt-get remove docker docker-compose docker.io python3-docker${NC}"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   export DOCKER_COMPOSE=("docker-compose")
   # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package

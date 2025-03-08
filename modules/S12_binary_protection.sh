@@ -47,7 +47,7 @@ S12_binary_protection()
 
     wait_for_pid "${lWAIT_PIDS_S12[@]}"
 
-    if [[ -s "${TMP_DIR}"/s12.tmp ]]; then
+    if [[ "$(wc -l "${TMP_DIR}"/s12.tmp 2>/dev/null)" -gt 2 ]]; then
       cat "${TMP_DIR}"/s12.tmp >> "${LOG_FILE}"
       lNEG_LOG=1
     fi

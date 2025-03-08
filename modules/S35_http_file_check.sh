@@ -50,28 +50,36 @@ S35_http_file_check()
   wait_for_pid "${lWAIT_PIDS_S35_ARR[@]}"
 
   # Reporting - we report now to ensure our output is not destroyed from threading
-  if [[ -f "${LOG_PATH_MODULE}"/php_check.txt ]]; then
+  if [[ -s "${LOG_PATH_MODULE}"/php_check.txt ]]; then
     sub_module_title "Check for php.ini"
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/php_check.txt
-    lNEG_LOG=1
+    if grep -v -q "No.*found" "${LOG_PATH_MODULE}"/php_check.txt; then
+      lNEG_LOG=1
+    fi
   fi
 
-  if [[ -f "${LOG_PATH_MODULE}"/web_file_search.txt ]]; then
+  if [[ -s "${LOG_PATH_MODULE}"/web_file_search.txt ]]; then
     sub_module_title "Search web served files"
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/web_file_search.txt
-    lNEG_LOG=1
+    if grep -v -q "No.*found" "${LOG_PATH_MODULE}"/web_file_search.txt; then
+      lNEG_LOG=1
+    fi
   fi
 
-  if [[ -f "${LOG_PATH_MODULE}"/http_file_search.txt ]]; then
+  if [[ -s "${LOG_PATH_MODULE}"/http_file_search.txt ]]; then
     sub_module_title "Search http files"
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/http_file_search.txt
-    lNEG_LOG=1
+    if grep -v -q "No.*found" "${LOG_PATH_MODULE}"/http_file_search.txt; then
+      lNEG_LOG=1
+    fi
   fi
 
-  if [[ -f "${LOG_PATH_MODULE}"/webserver_search.txt ]]; then
+  if [[ -s "${LOG_PATH_MODULE}"/webserver_search.txt ]]; then
     sub_module_title "Check for apache or nginx related files"
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/webserver_search.txt
-    lNEG_LOG=1
+    if grep -v -q "No.*found" "${LOG_PATH_MODULE}"/webserver_search.txt; then
+      lNEG_LOG=1
+    fi
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
