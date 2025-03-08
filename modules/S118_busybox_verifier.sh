@@ -144,7 +144,7 @@ S118_busybox_verifier()
     local lPROD="${lBB_VERSION_ARR[*]:2:1}"
     local lVERS="${lBB_VERSION_ARR[*]:3:1}"
     export CVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}.csv"
-    print_output "[*] ${lBOM_REF}_${lPROD}_${lVERS}.csv"
+    # print_output "[*] ${lBOM_REF}_${lPROD}_${lVERS}.csv"
 
     get_cve_busybox_data "${lBB_VERSION_ARR[@]}"
 
@@ -248,7 +248,6 @@ busybox_vuln_testing_threader() {
     mkdir "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
   fi
 
-  # lSUMMARY="$(echo "${VULN}" | cut -d: -f6-)"
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${CVE%-*}/${CVE:0:11}"*"xx/${CVE}.json" 2>/dev/null || true)
   # print_output "[*] ${CVE} - ${lSUMMARY}"
   print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${lALL_BB_VULNS_ARR_SIZE}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
@@ -357,11 +356,14 @@ get_cve_busybox_data() {
 
     wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
 
+    for lCVE_NICE_REPORT in "${CVE_DETAILS_PATH/.csv/_CVE-}"*; do
+      cat "${lCVE_NICE_REPORT}" >> "${CVE_DETAILS_PATH/.csv/_nice.txt}"
+    done
+
     print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
   fi
 }
 
-# Todo: Fix this
 get_cve_busybox_data_threader() {
   local lCVE_LINE_ENTRY="${1:-}"
   # print_output "[*] lCVE_LINE_ENTRY: ${lCVE_LINE_ENTRY}"
@@ -371,14 +373,16 @@ get_cve_busybox_data_threader() {
   local lFIRST_EPSS=""
   local lCVE_SUMMARY=""
 
-  lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
-  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f7)
-  lFIRST_EPSS="NA"
-  lCVE_SUMMARY="NA"
+  lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f5)
+  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f7)
+  lFIRST_EPSS="$(get_epss_data "${lCVE_ID}")"
+  lFIRST_EPSS="${lFIRST_EPSS/\;*}"
+  lCVE_SUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
+  # print_output "[*] ${lCVE_ID} - ${lCVSS_V3} - ${lFIRST_EPSS} - ${lCVE_SUMMARY}"
 
-  write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
-  write_log "$(indent "CVSS: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
-  write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
-  write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
-  write_log "" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
+  write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "$(indent "CVSS: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
 }
