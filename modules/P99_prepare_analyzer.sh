@@ -82,6 +82,9 @@ P99_prepare_analyzer() {
     if [[ -f "${LOG_DIR}"/p07_windows_exe_extract.txt ]]; then
       write_link "p07"
     fi
+  elif grep -q "Identified Android APK package - performing APK checks" "${P02_LOG}"; then
+    print_output "[+] Android APK package detected"
+    write_link "p02"
   elif [[ "${RTOS}" -eq 1 ]]; then
     print_output "[*] Possible RTOS system detected"
   fi
