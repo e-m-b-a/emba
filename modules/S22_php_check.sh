@@ -168,7 +168,8 @@ s22_vuln_check_caller() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S22_ARR+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S22_ARR[@]}"
+      # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S22_ARR[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S22_ARR
       continue
     else
       s22_vuln_check "${lPHP_SCRIPT}"

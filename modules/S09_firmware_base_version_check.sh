@@ -157,7 +157,8 @@ S09_firmware_base_version_check() {
     if [[ "${#WAIT_PIDS_S09_1[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
       recover_wait_pids WAIT_PIDS_S09_1
       if [[ "${#WAIT_PIDS_S09_1[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-        max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${WAIT_PIDS_S09_1[@]}"
+        # max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) "${WAIT_PIDS_S09_1[@]}"
+        max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) WAIT_PIDS_S09_1
       fi
     fi
 done
@@ -515,7 +516,8 @@ done
       if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
         recover_wait_pids WAIT_PIDS_S09
         if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-          max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${WAIT_PIDS_S09[@]}"
+          # max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) "${WAIT_PIDS_S09[@]}"
+          max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) WAIT_PIDS_S09
         fi
       fi
     fi

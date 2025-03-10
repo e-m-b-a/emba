@@ -172,7 +172,8 @@ run_modules() {
             local lMOD_PID="$!"
             store_kill_pids "${lMOD_PID}"
             WAIT_PIDS+=( "${lMOD_PID}" )
-            max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+            # max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+            max_pids_protection "${MAX_MODS}" WAIT_PIDS
           else
             "${lMODULE_MAIN}"
           fi
@@ -245,7 +246,8 @@ run_modules() {
               local lMOD_PID="$!"
               store_kill_pids "${lMOD_PID}"
               WAIT_PIDS+=( "${lMOD_PID}" )
-              max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+              # max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+              max_pids_protection "${MAX_MODS}" WAIT_PIDS
             else
               "${lMODULE_MAIN}"
             fi
@@ -321,7 +323,8 @@ run_modules() {
                 local lMOD_PID="$!"
                 store_kill_pids "${lMOD_PID}"
                 WAIT_PIDS+=( "${lMOD_PID}" )
-                max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+                # max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+                max_pids_protection "${MAX_MODS}" WAIT_PIDS
               else
                 "${lMODULE_MAIN}"
               fi

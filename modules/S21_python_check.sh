@@ -51,7 +51,8 @@ S21_python_check()
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S21_ARR+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S21_ARR[@]}"
+        # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S21_ARR[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S21_ARR
         continue
       else
         s21_script_bandit "${lPY_SCRIPT/;*}"

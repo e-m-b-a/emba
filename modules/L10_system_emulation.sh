@@ -2061,7 +2061,8 @@ nvram_check() {
       for lNVRAM_FILE in "${lNVRAM_FILE_LIST[@]}"; do
         nvram_searcher_emulation "${lNVRAM_FILE/:*}" &
         lWAIT_PIDS_AE+=( "$!" )
-        max_pids_protection "${lMAX_THREADS_NVRAM}" "${lWAIT_PIDS_AE[@]}"
+        # max_pids_protection "${lMAX_THREADS_NVRAM}" "${lWAIT_PIDS_AE[@]}"
+        max_pids_protection "${lMAX_THREADS_NVRAM}" lWAIT_PIDS_AE
       done
       wait_for_pid "${lWAIT_PIDS_AE[@]}"
       cd "${lCURRENT_DIR}" || exit

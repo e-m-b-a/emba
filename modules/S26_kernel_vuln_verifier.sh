@@ -278,7 +278,8 @@ S26_kernel_vuln_verifier()
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S26_ARR_MAIN+=( "${lTMP_PID}" )
       ((VULN_CNT+=1))
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S26_ARR_MAIN[@]}"
+      # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S26_ARR_MAIN[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S26_ARR_MAIN
     done
 
     wait_for_pid "${lWAIT_PIDS_S26_ARR_MAIN[@]}"
@@ -398,7 +399,8 @@ vuln_checker_threader() {
         write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
         write_log "lCNT_PATHS_NOT_FOUND" "${TMP_DIR}/s25_counting.tmp"
       fi
-      max_pids_protection 20 "${lWAIT_PIDS_S26_ARR[@]}"
+      # max_pids_protection 20 "${lWAIT_PIDS_S26_ARR[@]}"
+      max_pids_protection 20 lWAIT_PIDS_S26_ARR
     done
   else
     lOUTx="[-] ${lCVE} - ${lK_PATH}"
@@ -628,7 +630,8 @@ final_log_kernel_vulns() {
     report_kvulns_csv "${lVULN}" "${lK_VERSION}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S26_1_ARR+=( "${lTMP_PID}" )
-    max_pids_protection $((2*"${MAX_MOD_THREADS}")) "${lWAIT_PIDS_S26_1_ARR[@]}"
+    # max_pids_protection $((2*"${MAX_MOD_THREADS}")) "${lWAIT_PIDS_S26_1_ARR[@]}"
+    max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_S26_1_ARR
   done
 
   lSYM_USAGE_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null | tail -1 | awk '{print $1}' 2>/dev/null || true)
