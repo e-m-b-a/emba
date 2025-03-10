@@ -46,7 +46,7 @@ S20_shell_check()
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S20_ARR+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S20_ARR[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S20_ARR
         continue
       else
         s20_script_check "${lSH_SCRIPT/;*}"

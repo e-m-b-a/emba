@@ -63,7 +63,7 @@ apk_checker() {
       apk_checker_helper "${lAPK_FILE}"
     fi
     if [[ "${THREADED}" -eq 1 ]]; then
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S19_ARR[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S19_ARR
     fi
   done
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S19_ARR[@]}"

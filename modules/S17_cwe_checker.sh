@@ -110,8 +110,7 @@ cwe_check() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S17+=( "${lTMP_PID}" )
-
-      max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
+      max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S17
     else
       cwe_checker_threaded "${lBIN_TO_CHECK}"
     fi

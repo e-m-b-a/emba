@@ -42,12 +42,12 @@ S12_binary_protection()
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S12+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S12[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S12
     done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
 
     wait_for_pid "${lWAIT_PIDS_S12[@]}"
 
-    if [[ "$(wc -l "${TMP_DIR}"/s12.tmp 2>/dev/null)" -gt 2 ]]; then
+    if [[ "$(wc -l "${TMP_DIR}"/s12.tmp 2>/dev/null | awk '{print $1}')" -gt 2 ]]; then
       cat "${TMP_DIR}"/s12.tmp >> "${LOG_FILE}"
       lNEG_LOG=1
     fi

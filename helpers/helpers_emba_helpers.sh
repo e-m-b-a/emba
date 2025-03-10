@@ -59,20 +59,16 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
-  if [[ -n "${1:-}" ]]; then
-    local lMAX_PIDS_="${1:-}"
-    shift
-  else
-    local lMAX_PIDS_="${MAX_MODS:1}"
-  fi
-  local lWAIT_PIDS_ARR=("$@")
+  local lMAX_PIDS_="${1:-}"
+  local -n lrWAIT_PIDS_ARR=${2:-}
+
   local lPID=""
 
-  while [[ ${#lWAIT_PIDS_ARR[@]} -gt "${lMAX_PIDS_}" ]]; do
+  while [[ ${#lrWAIT_PIDS_ARR[@]} -gt "${lMAX_PIDS_}" ]]; do
     local lTEMP_PIDS_ARR=()
     # check for really running PIDs and re-create the array
-    for lPID in "${lWAIT_PIDS_ARR[@]}"; do
-      # print_output "[*] max pid protection: ${#lWAIT_PIDS_ARR[@]}"
+    for lPID in "${lrWAIT_PIDS_ARR[@]}"; do
+      # print_output "[*] max pid protection: ${#lrWAIT_PIDS_ARR[@]}"
       if [[ -e /proc/"${lPID}" ]]; then
         if ! grep -q "State:.*zombie.*" "/proc/${lPID}/status" 2>/dev/null; then
           lTEMP_PIDS_ARR+=( "${lPID}" )
@@ -87,8 +83,8 @@ max_pids_protection() {
     # print_output "[!] really running pids: ${#lTEMP_PIDS_ARR[@]}"
 
     # recreate the arry with the current running PIDS
-    lWAIT_PIDS_ARR=()
-    lWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
+    lrWAIT_PIDS_ARR=()
+    lrWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
     print_dot
   done
 }

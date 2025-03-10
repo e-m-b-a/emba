@@ -141,7 +141,7 @@ S14_weak_func_radare_check()
       fi
 
       if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S14_ARR[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S14_ARR
       fi
     done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 

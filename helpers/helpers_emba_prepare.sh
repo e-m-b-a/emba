@@ -256,7 +256,7 @@ architecture_check() {
     lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64_III_CNT=$(grep -c "64-bit.*MIPS-III" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64v1_CNT=$(grep -c "64-bit.*MIPS64 version 1" "${P99_CSV_LOG}" || true)
-    lARCH_MIPS_CNT=$(grep -c "MIPS" "${P99_CSV_LOG}" || true)
+    lARCH_MIPS_CNT=$(grep -c "MIPS32" "${P99_CSV_LOG}" || true)
     lARCH_ARM64_CNT=$(grep -c "ARM aarch64" "${P99_CSV_LOG}" || true)
     if [[ "${lARCH_ARM64_CNT}" -eq 0 ]]; then
       lARCH_ARM_CNT=$(grep -c "ARM" "${P99_CSV_LOG}" || true)
