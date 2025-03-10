@@ -86,7 +86,6 @@ build_dependency_tree() {
     create_comp_dep_tree_threader "${lSBOM_COMP}" &
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-    # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR[@]}"
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR
   done
   wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"

@@ -92,7 +92,6 @@ S16_ghidra_decompile_checks()
       lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
-      # max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" "${lWAIT_PIDS_S16_ARR[@]}"
       max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" lWAIT_PIDS_S16_ARR
     else
       ghidra_analyzer "${lBIN_TO_CHECK}"
@@ -241,7 +240,6 @@ ghidra_analyzer() {
         s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}" &
         local lTMP_PID="$!"
         lWAIT_PIDS_S16_1+=( "${lTMP_PID}" )
-        # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S16_1[@]}"
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S16_1
       else
         s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}"

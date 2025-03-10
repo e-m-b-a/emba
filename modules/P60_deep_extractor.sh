@@ -334,7 +334,6 @@ deeper_extractor_helper() {
     fi
 
     MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
-    # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_P60[@]}"
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_P60
 
     check_disk_space

@@ -61,7 +61,6 @@ F17_cve_bin_tool() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_TEMP+=( "${lTMP_PID}" )
-    # max_pids_protection $((2*"${MAX_MOD_THREADS}")) "${lWAIT_PIDS_TEMP[@]}"
     max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_TEMP
     local lNEG_LOG=1
   done
@@ -164,7 +163,6 @@ F17_cve_bin_tool() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
-    # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR[@]}"
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
   done < "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 
@@ -309,7 +307,6 @@ cve_bin_tool_threader() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_F17_ARR_2+=( "${lTMP_PID}" )
-      # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR_2[@]}"
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
     done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}.csv")
   fi

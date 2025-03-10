@@ -56,7 +56,6 @@ S27_perl_check()
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S27+=( "${lTMP_PID}" )
-      # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S27[@]}"
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S27
       continue
     else

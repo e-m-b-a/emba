@@ -85,7 +85,6 @@ S99_grepit() {
       local lTMP_PID="$!"
       lWAIT_PIDS_S99_ARR+=( "${lTMP_PID}" )
       store_kill_pids "${lTMP_PID}"
-      # max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S99_ARR[@]}"
       max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S99_ARR
     done
   else

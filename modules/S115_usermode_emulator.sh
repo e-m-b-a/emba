@@ -196,7 +196,6 @@ S115_usermode_emulator() {
                 store_kill_pids "${lTMP_PID}"
                 write_pid_log "${FUNCNAME[0]} - emulate_binary - ${BIN_} - ${lTMP_PID}"
                 lWAIT_PIDS_S115_ARR+=( "${lTMP_PID}" )
-                # max_pids_protection "${lMAX_THREADS_S115}" "${lWAIT_PIDS_S115_ARR[@]}"
                 max_pids_protection "${lMAX_THREADS_S115}" lWAIT_PIDS_S115_ARR
               else
                 emulate_binary "${lEMULATOR}" "${R_PATH}" "${BIN_}"

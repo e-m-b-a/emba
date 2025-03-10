@@ -43,7 +43,6 @@ S02_UEFI_FwHunt() {
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
           lWAIT_PIDS_S02_ARR+=( "${lTMP_PID}" )
-          # max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S02_ARR[@]}"
           max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S02_ARR
         else
           fwhunter "${lEXTRACTED_FILE}"
