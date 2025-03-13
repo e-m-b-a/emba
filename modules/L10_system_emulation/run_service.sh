@@ -49,8 +49,6 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tEMBA_NVRAM: ${EMBA_NVRAM}"
       "${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
       "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
-      "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
-      "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
       "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
       "${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
       "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
@@ -69,6 +67,9 @@ if ("${EMBA_ETC}"); then
       # debugger bins - only started with EMBA_NC=true
       if [ "${EMBA_NC}" = "true" ]; then
         if [ "${BINARY_NAME}" = "netcat" ]; then
+          "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+          "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
+
           "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} debugging service ..."
           # we only start our netcat listener if we set EMBA_NC_STARTER on startup (see run.sh script)
           # otherwise we move on to the next binary starter
@@ -76,6 +77,9 @@ if ("${EMBA_ETC}"); then
           continue
         fi
         if [ "${_BINARY}" = "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh" ]; then
+          "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+          "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
+
           "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}Telnetd - ${_BINARY}${NC} debugging service ..."
           ${_BINARY} &
           continue
@@ -87,6 +91,9 @@ if ("${EMBA_ETC}"); then
 
       # normal service startups
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
+        "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+        "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
+
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &

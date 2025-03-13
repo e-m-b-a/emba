@@ -59,7 +59,6 @@ S06_distribution_identification()
           continue
         fi
       fi
-      # mapfile -t lFOUND_FILES_ARR < <(find "${FIRMWARE_PATH}" -xdev -iwholename "*${lSEARCH_FILE}" || true)
       mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         # print_output "lFILE: ${lFILE}"
@@ -69,12 +68,14 @@ S06_distribution_identification()
           lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
           lFILE_QUOTED=$(escape_echo "${lFILE}")
           lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
+          lOUT1="${lOUT1//\'}"
+          # print_output "lCONFIG: ${lCONFIG}"
           # print_output "lPATTERN: ${lPATTERN}"
           # print_output "SED command: ${lSED_COMMAND}"
           # print_output "FILE: ${lFILE_QUOTED}"
           # print_output "identified before: ${lOUT1}"
           lOUT1=$(echo "${lOUT1}" | sort -u | tr '\n' ' ')
-          lOUT1=$(echo "${lOUT1}" | tr -d '"')
+          lOUT1="${lOUT1//\"}"
           # print_output "identified mod: ${lOUT1}"
           if [[ -n "${lSED_COMMAND}" ]]; then
             lIDENTIFIER=$(echo "${lOUT1}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)

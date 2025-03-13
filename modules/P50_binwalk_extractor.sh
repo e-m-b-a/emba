@@ -24,16 +24,16 @@ export PRE_THREAD_ENA=0
 P50_binwalk_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
-  # if we have a verified UEFI firmware we do not need to do anything here
-  # if we have already found a linux (RTOS==0) we do not need to do anything here
-  # if [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${RTOS}" -eq 0 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${WINDOWS_EXE}" -eq 1 ]] || [[ "${DISABLE_DEEP}" -eq 1 ]]; then
-  #  module_end_log "${FUNCNAME[0]}" 0
-  #  return
-  # fi
-
   # shellcheck disable=SC2153
   if [[ -d "${FIRMWARE_PATH}" ]] && [[ "${RTOS}" -eq 1 ]]; then
     detect_root_dir_helper "${FIRMWARE_PATH}"
+  fi
+
+  # if we have a verified UEFI firmware we do not need to do anything here
+  # if we have already found a linux (RTOS==0) we do not need to do anything here
+  if [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${RTOS}" -eq 0 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${WINDOWS_EXE}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
   fi
 
   # we do not rely on any EMBA extraction mechanism -> we use the original firmware file

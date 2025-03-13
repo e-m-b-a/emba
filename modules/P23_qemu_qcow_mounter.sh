@@ -93,7 +93,8 @@ qcow_extractor() {
   local lNBD_SIZE=""
   local lNBD_DEV_NAME=""
   local lIS_MOUNTED="no"
-  for lNBD_DEV in /sys/class/block/nbd[0-9]{1,}; do
+  for lNBD_DEV in {0..15}; do
+    lNBD_DEV="/sys/class/block/nbd${lNBD_DEV}"
     lNBD_SIZE=$(cat "${lNBD_DEV}"/size || true)
     if [[ "${lNBD_SIZE}" == "0" ]]; then
       lNBD_DEV_NAME=$(basename "${lNBD_DEV}")
@@ -114,11 +115,12 @@ qcow_extractor() {
   mapfile -t lNBD_DEVS_ARR < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
   if [[ "${#lNBD_DEVS_ARR[@]}" -eq 0 ]]; then
     # sometimes we are not able to find the partitions with fdisk -> fallback
-    lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    # lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    lNBD_DEVS_ARR+=( "/dev/${lNBD_DEV_NAME}" )
   fi
 
   print_ln
-  fdisk /dev/"${lNBD_DEV_NAME}" -l
+  fdisk /dev/"${lNBD_DEV_NAME}" -l || print_error "[-] fdisk for /dev/${lNBD_DEV_NAME} was not successful"
   print_ln
 
   for NBD_DEV in "${lNBD_DEVS_ARR[@]}"; do
@@ -126,7 +128,7 @@ qcow_extractor() {
     mount "${NBD_DEV}" "${lTMP_QCOW_MOUNT}" || true
 
     if mount | grep -q "${NBD_DEV}"; then
-      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_%\/}"/"$(basename "${NBD_DEV}")"
 
       copy_qemu_nbd "${lTMP_QCOW_MOUNT}" "${lEXTRACTION_DIR_FINAL}"
 
