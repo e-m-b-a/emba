@@ -158,10 +158,10 @@ set_defaults() {
 
     # if we use docker the env file needs different paths in the env file
     if [[ "${USE_DOCKER}" -eq 1 ]]; then
-      echo "CONFIG_DIR=/config"
-      echo "EXT_DIR=/external"
-      echo "HELP_DIR=/helpers"
-      echo "MOD_DIR=/modules"
+      echo "CONFIG_DIR=/emba/config"
+      echo "EXT_DIR=/emba/external"
+      echo "HELP_DIR=/emba/helpers"
+      echo "MOD_DIR=/emba/modules"
       # echo "MOD_DIR_LOCAL=/EMBA-Non-free/modules_local"
       echo "LOG_DIR=/logs"
       echo "ERROR_LOG=/logs/emba_error.log"
@@ -171,25 +171,25 @@ set_defaults() {
       echo "MAIN_LOG_FILE=/logs/emba.log"
       # this will be in TMP_DIR/pid_notes.log
       echo "PID_LOG_FILE=/logs/pid_notes.log"
-      echo "BASE_LINUX_FILES=/config/linux_common_files.txt"
-      if [[ -f "/config/known_exploited_vulnerabilities.csv" ]]; then
-        echo "KNOWN_EXP_CSV=/config/known_exploited_vulnerabilities.csv"
+      echo "BASE_LINUX_FILES=/emba/config/linux_common_files.txt"
+      if [[ -f "/emba/config/known_exploited_vulnerabilities.csv" ]]; then
+        echo "KNOWN_EXP_CSV=/emba/config/known_exploited_vulnerabilities.csv"
       fi
-      if [[ -f "/config/msf_cve-db.txt" ]]; then
-        echo "MSF_DB_PATH=/config/msf_cve-db.txt"
+      if [[ -f "/emba/config/msf_cve-db.txt" ]]; then
+        echo "MSF_DB_PATH=/emba/config/msf_cve-db.txt"
       fi
       echo "MSF_INSTALL_PATH=/usr/share/metasploit-framework"
-      if [[ -f "/config/trickest_cve-db.txt" ]]; then
-        echo "TRICKEST_DB_PATH=/config/trickest_cve-db.txt"
+      if [[ -f "/emba/config/trickest_cve-db.txt" ]]; then
+        echo "TRICKEST_DB_PATH=/emba/config/trickest_cve-db.txt"
       fi
-      echo "GTFO_CFG=/config/gtfobins_urls.cfg"       # gtfo urls
-      echo "EMBA_ICON=/helpers/emba.svg"
-      echo "CVE_BLACKLIST=/config/cve-blacklist.txt"     # include the blacklisted CVE values to this file
-      echo "CVE_WHITELIST=/config/cve-whitelist.txt"     # include the whitelisted CVE values to this file
-      echo "NVD_DIR=/external/nvd-json-data-feeds"
-      echo "EPSS_DATA_PATH=/external/EPSS-data/EPSS_CVE_data"
-      if [[ -f "/config/module_blacklist.txt" ]]; then
-        readarray -t MODULE_BLACKLIST < "/config/module_blacklist.txt"
+      echo "GTFO_CFG=/emba/config/gtfobins_urls.cfg"       # gtfo urls
+      echo "EMBA_ICON=/emba/helpers/emba.svg"
+      echo "CVE_BLACKLIST=/emba/config/cve-blacklist.txt"     # include the blacklisted CVE values to this file
+      echo "CVE_WHITELIST=/emba/config/cve-whitelist.txt"     # include the whitelisted CVE values to this file
+      echo "NVD_DIR=/emba/external/nvd-json-data-feeds"
+      echo "EPSS_DATA_PATH=/emba/external/EPSS-data/EPSS_CVE_data"
+      if [[ -f "/emba/config/module_blacklist.txt" ]]; then
+        readarray -t MODULE_BLACKLIST < "/emba/config/module_blacklist.txt"
         echo "MODULE_BLACKLIST=${MODULE_BLACKLIST:=()}"
       fi
     fi
