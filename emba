@@ -348,11 +348,15 @@ main() {
   # loads default values for EMBA
   export HELP_DIR="${INVOCATION_PATH}""/helpers"
   import_helper
-  set_defaults
-
   print_ln "no_log"
+
+  # import modules
+  export MOD_DIR="${INVOCATION_PATH}""/modules"
+  export MOD_DIR_LOCAL="${INVOCATION_PATH}""/EMBA-Non-free/modules_local"
   import_module
 
+  export CONFIG_DIR="${INVOCATION_PATH}""/config"
+  export EXT_DIR="${INVOCATION_PATH}""/external"
   welcome  # Print EMBA welcome message
 
   if [[ $# -eq 0 ]]; then
@@ -366,6 +370,9 @@ main() {
   EMBA_COMMAND="$(dirname "${0}")""/emba ""$*"
 
   emba_parameter_parsing "$@"
+  if [[ "${IN_DOCKER}" -ne 1 ]]; then  # if we are in the container we have the .env for that
+    set_defaults
+  fi
   set_log_paths
 
   print_ln "no_log"
