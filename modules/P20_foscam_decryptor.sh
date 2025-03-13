@@ -126,8 +126,9 @@ foscam_ubi_extractor() {
     print_output "[*] 2nd extraction round successful - ${ORANGE}app_ubifs${NC} found"
     print_output "[*] Checking nandsim kernel module"
     if ! lsmod | grep -q "^nandsim[[:space:]]"; then
-      print_output "[-] WARNING: Nandsim kernel module not loaded - can't proceed"
-      return
+      lsmod | grep "nandsim" || true
+      print_output "[-] WARNING: Nandsim kernel module loading issue - trying to proceed"
+      # return
       #   # we need to load nandsim with some parameters - unload it before
       #   modprobe -r nandsim
     fi
@@ -152,9 +153,11 @@ foscam_ubi_extractor() {
       print_output "[*] Mounting ${ORANGE}${lUBI_DEV}${NC} ubi device to ${ORANGE}${lUBI_MNT_PT}${NC}"
       mkdir -p "${lUBI_MNT_PT}" || true
       mount -t ubifs "${lUBI_DEV}" "${lUBI_MNT_PT}"
-      print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_}/${lUBI_DEV}${NC}"
-      mkdir -p "${lEXTRACTION_DIR_}/${lUBI_DEV}"
-      cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_}/${lUBI_DEV}"
+      print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_%\/}/${lUBI_DEV}${NC}"
+      mkdir -p "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      # after this we should have a ubi image in our extraction directory. This should be extractable via unblob
+      print_output "[*] Umount ubi device from ${ORANGE}${lUBI_MNT_PT}/${lUBI_DEV}${NC}"
       umount "${lUBI_MNT_PT}" || true
       rm -r "${lUBI_MNT_PT}" || true
     done
@@ -162,14 +165,22 @@ foscam_ubi_extractor() {
     # do some cleanup
     print_output "[*] Detaching ubi device"
     ubidetach -d 0 || true
+    # ensure we have some extracted ubifs:
+    lUBI_FS_TARGET=$(find "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}" -name ubifs)
+    if [[ -f "${lUBI_FS_TARGET}" ]]; then
+      # unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 1
+      binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
+    fi
+
     # print_output "[*] Unloading nandsim module"
     # modprobe -r nandsim || true
     # print_output "[*] Unloading ubi module"
     # modprobe -r ubi || true
 
-    if [[ -d "${lEXTRACTION_DIR_}" ]]; then
-      lFOSCAM_UBI_FILES=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-      lFOSCAM_UBI_DIRS=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
+    if [[ -d "${lEXTRACTION_DIR_%\/}_binwalk_extracted" ]]; then
+      print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"
+      lFOSCAM_UBI_FILES=$(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type f | wc -l)
+      lFOSCAM_UBI_DIRS=$(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type d | wc -l)
     fi
 
     if [[ "${lFOSCAM_UBI_FILES}" -gt 0 ]]; then

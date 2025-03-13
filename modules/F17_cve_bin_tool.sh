@@ -41,6 +41,12 @@ F17_cve_bin_tool() {
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..." "no_log"
+  if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
+    print_error "[-] No SBOM available!"
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
+  fi
+
   # read each item in the JSON array to an item in the Bash array
   readarray -t lSBOM_ARR < <(jq --compact-output '.components[]' "${lEMBA_SBOM_JSON}" || print_error "[-] SBOM loading error - Vulnerability analysis not available")
 
@@ -55,7 +61,7 @@ F17_cve_bin_tool() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_TEMP+=( "${lTMP_PID}" )
-    max_pids_protection $((2*"${MAX_MOD_THREADS}")) "${lWAIT_PIDS_TEMP[@]}"
+    max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_TEMP
     local lNEG_LOG=1
   done
   wait_for_pid "${lWAIT_PIDS_TEMP[@]}"
@@ -129,8 +135,8 @@ F17_cve_bin_tool() {
         print_error "[-] S36 lighttpd details missing ... continue in default mode"
       fi
     # Linux Kernel verification module handling - we already have all the data from s26. Now we just copy these details
-    elif [[ "${lPROD}" == "linux_kernel" ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
-      print_output "[*] Linux kernel results from s26 detected ... no CVE detection needed" "no_log"
+    elif [[ "${lPROD}" == "linux_kernel"* ]] && [[ -s "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
+      print_output "[*] Possible Linux kernel results from s26 detected ... no CVE detection needed" "no_log"
       cp "${S26_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] Linux Kernel CVE log copy process failed"
       cp "${S26_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] Linux Kernel CVE log copy process failed"
       cp "${S26_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] Linux Kernel CVE log copy process failed"
@@ -157,7 +163,7 @@ F17_cve_bin_tool() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
-    max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR[@]}"
+    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
   done < "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
@@ -301,7 +307,7 @@ cve_bin_tool_threader() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_F17_ARR_2+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F17_ARR_2[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
     done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}.csv")
   fi
   wait_for_pid "${lWAIT_PIDS_F17_ARR_2[@]}"

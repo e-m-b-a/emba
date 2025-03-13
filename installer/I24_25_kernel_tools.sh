@@ -20,6 +20,10 @@ I24_25_kernel_tools() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
 
     print_tool_info "python3-pip" 1
+    print_tool_info "flex"
+    print_tool_info "pahole"
+    print_tool_info "bison"
+    print_tool_info "pkg-config"
     print_pip_info "python-lzo"
     print_git_info "kconfig-hardened-check" "EMBA-support-repos/kconfig-hardened-check" "There are plenty of security hardening options for the Linux kernel. This tool checks them."
 

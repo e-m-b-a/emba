@@ -106,7 +106,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           PEM_FILE=$("${BUSYBOX}" grep "ssl.pemfile" "${LIGHT_CONFIG}" | "${BUSYBOX}" sort -u | "${BUSYBOX}" cut -d\" -f2)
           if ! [ -f "${PEM_FILE}" ]; then
             "${BUSYBOX}" echo -e "[*] Disabling ssl configuration for ${ORANGE}${BINARY} - ${LIGHT_CONFIG} -> ${LIGHT_CONFIG}_ssl_disable${NC}"
-            sed 's/.*ssl\..*/# &/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
+            "${BUSYBOX}" sed 's/.*ssl\..*/# &/' "${LIGHT_CONFIG}" > "${LIGHT_CONFIG}_ssl_disable"
             "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}_ssl_disable\n" >> /firmadyne/service
           fi
         fi

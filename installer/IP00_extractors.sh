@@ -22,7 +22,6 @@ IP00_extractors(){
 
     print_tool_info "python3-pip" 1
     print_tool_info "patool" 1
-    print_pip_info "protobuf"
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
@@ -43,6 +42,7 @@ IP00_extractors(){
     print_file_info "buffalo-lib.h" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.h"
     print_tool_info "gcc" 1
     print_tool_info "libc6-dev" 1
+    print_tool_info "mtd-utils" 1
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -58,7 +58,6 @@ IP00_extractors(){
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip_install "setuptools" "-U"
         pip_install "wheel" "-U"
-        pip_install "protobuf"
         pip_install "bsdiff4"
         pip_install "python-lzo>=1.14"
         pip_install "pycryptodome"

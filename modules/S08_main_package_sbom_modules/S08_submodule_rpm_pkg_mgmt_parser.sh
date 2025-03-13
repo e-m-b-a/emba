@@ -122,7 +122,7 @@ rpm_pkg_mgmt_analysis_threader() {
 
   local lRPM_DIR=""
   lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
-  print_output "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "no_log"
+  # print_output "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "no_log"
 
   lAPP_VERS=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
   lAPP_VERS="${lAPP_VERS/*:\ }"

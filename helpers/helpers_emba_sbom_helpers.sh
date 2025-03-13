@@ -86,6 +86,10 @@ build_sbom_json_hashes_arr() {
   local lDUP_CHECK_NAME=""
   local lDUP_CHECK_VERS=""
 
+  if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
+    mkdir "${SBOM_LOG_PATH}" 2>/dev/null || true
+  fi
+
   # hashes of the source file that is currently tested:
   lMD5_CHECKSUM="$(md5sum "${lBINARY}" | awk '{print $1}')"
   lSHA256_CHECKSUM="$(sha256sum "${lBINARY}" | awk '{print $1}')"
@@ -127,6 +131,7 @@ build_sbom_json_hashes_arr() {
     # this results in the need to merge the new path of the binary into the already available component json
     # mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "${lPACKAGING_SYSTEM:-*}_${lAPP_NAME}_*" || true)
     mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*_${lAPP_NAME}_*.json" || true)
+    # print_output "[*] Duplicate check for ${lAPP_NAME} - ${lAPP_VERS} reached - ${lDUP_CHECK_FILE_ARR[*]}"
     for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
       # write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
       lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
