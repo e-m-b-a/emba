@@ -63,6 +63,7 @@ foscam_enc_extractor() {
     local lFOSCAM_DECRYTED=0
     print_output "[*] Testing FOSCAM decryption key ${ORANGE}${l_FOSCAM_KEY}${NC}."
     # shellcheck disable=SC2086
+    # nosemgrep
     openssl enc -d -aes-128-cbc -md md5 -k ${l_FOSCAM_KEY} -in "${lFOSCAM_ENC_PATH_}" > "${lEXTRACTION_FILE_}" || true
 
     if [[ -f "${lEXTRACTION_FILE_}" ]]; then
