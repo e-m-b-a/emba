@@ -937,24 +937,29 @@ get_data() {
   if [[ -d "${F17_LOG_DIR}" ]]; then
     F17_VERSIONS_IDENTIFIED=$(wc -l "${F17_LOG_DIR}/vuln_summary.txt")
     F17_VERSIONS_IDENTIFIED="${F17_VERSIONS_IDENTIFIED/\ *}"
-    CRITICAL_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,CRITICAL" || true)
-    (( CVE_COUNTER="${CVE_COUNTER}"+"${CRITICAL_CVE_COUNTER:-0}" ))
-    HIGH_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,HIGH" || true)
-    (( CVE_COUNTER="${CVE_COUNTER}"+"${HIGH_CVE_COUNTER:-0}" ))
-    MEDIUM_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,MEDIUM" || true)
-    (( CVE_COUNTER="${CVE_COUNTER}"+"${MEDIUM_CVE_COUNTER:-0}" ))
-    LOW_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv | sort -u | grep -c "CVE-.*,LOW" || true)
-    (( CVE_COUNTER="${CVE_COUNTER}"+"${LOW_CVE_COUNTER:-0}" ))
+    CRITICAL_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
+    CVE_COUNTER=$((CVE_COUNTER+CRITICAL_CVE_COUNTER))
+    HIGH_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)
+    CVE_COUNTER=$((CVE_COUNTER+HIGH_CVE_COUNTER))
+    MEDIUM_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,MEDIUM" || true)
+    CVE_COUNTER=$((CVE_COUNTER+MEDIUM_CVE_COUNTER))
+    LOW_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,LOW" || true)
+    CVE_COUNTER=$((CVE_COUNTER+LOW_CVE_COUNTER))
   fi
   if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
     KNOWN_EXPLOITED_COUNTER=$(wc -l "${F17_LOG_DIR}"/KEV.txt)
     KNOWN_EXPLOITED_COUNTER=${KNOWN_EXPLOITED_COUNTER/\ *}
   fi
   if [[ -d "${F17_LOG_DIR}/cve_sum" ]]; then
+    # nosemgrep
     EXPLOIT_COUNTER="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c "Exploit (" || true)"
+    # nosemgrep
     MSF_MODULE_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*MSF" || true)"
+    # nosemgrep
     REMOTE_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(R\)" || true)"
+    # nosemgrep
     LOCAL_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(L\)" || true)"
+    # nosemgrep
     DOS_EXPLOIT_CNT="$(cat "${F17_LOG_DIR}"/cve_sum/*finished.txt | grep -c -E "Exploit\ .*\ \(D\)" || true)"
     if [[ -f "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp ]]; then
       EXPLOIT_CRITICAL_COUNT="$(grep -c "CRITICAL" "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp || true)"
