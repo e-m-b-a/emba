@@ -22,7 +22,7 @@ set_defaults() {
   local ENV_FILE
 
   ENV_FILE="${LOG_DIR:=./logs}/.env"      # .env file gets written into log directory
-  
+
   echo "[DEBUG] writing env to ${ENV_FILE}"
   {
     set -a # automatically export all variables
@@ -153,7 +153,7 @@ set_defaults() {
       'S08_submodule_c_conanfile_txt_parser '\
     ')'}"
     set +a  # stop exporting variables
-    
+
     # important paths
 
     # if we use docker the env file needs different paths in the env file
