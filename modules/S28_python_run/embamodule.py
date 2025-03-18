@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-# pylint: disable=consider-using-with, no-member
-#   consider-using-with: The log file is opened without 'with' on purpose
-#                        to enable writing to it across methods.
+# pylint: disable=no-member
 #   no-member: Attributes of the Format class are dynamically generated during
 #              runtime.
 """
@@ -57,11 +55,7 @@ class EmbaModule():
 
         try:
             self.logfile_dir = env.get('LOG_PATH_MODULE')
-            self.logfile = open(
-                f"{self.logfile_dir}/{self.filename}.txt",
-                "w",
-                encoding="utf-8"
-            )
+            self.logfile = f"{self.logfile_dir}/{self.filename}.txt"
 
         except KeyError as key_error:
             err = f"Unable to determine log path for module '{self.filename}'."
@@ -78,13 +72,13 @@ class EmbaModule():
             self.panic(err)
             raise file_not_found_error
 
-    def __del__(self):
-        self.logfile.close()
-
     def __write_formatted_log(self, operator: str, text: str):
         lines = text.split('\n')
-        for line in lines:
-            self.logfile.write(f"[{operator}] {line}\n")
+
+        with open(self.logfile, "a") as log:
+            for line in lines:
+                log.write(f"[{operator}] {line}\n")
+
 
     def log(self, text: str):
         """
