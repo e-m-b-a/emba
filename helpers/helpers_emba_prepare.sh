@@ -217,6 +217,7 @@ architecture_check() {
 
   if [[ ${ARCH_CHECK} -eq 1 ]] ; then
     print_output "[*] Architecture auto detection and backend data population for ${ORANGE}${#ALL_FILES_ARR[@]}${NC} files (could take some time)\\n"
+    # lARCH_MIPS_CNT -> 32 bit MIPS
     local lARCH_MIPS_CNT=0
     local lARCH_ARM_CNT=0
     local lARCH_ARM64_CNT=0
@@ -256,11 +257,9 @@ architecture_check() {
     lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64_III_CNT=$(grep -c "64-bit.*MIPS-III" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64v1_CNT=$(grep -c "64-bit.*MIPS64 version 1" "${P99_CSV_LOG}" || true)
-    lARCH_MIPS_CNT=$(grep -c "MIPS32" "${P99_CSV_LOG}" || true)
+    lARCH_MIPS_CNT=$(grep -c "32-bit.*MIPS" "${P99_CSV_LOG}" || true)
     lARCH_ARM64_CNT=$(grep -c "ARM aarch64" "${P99_CSV_LOG}" || true)
-    if [[ "${lARCH_ARM64_CNT}" -eq 0 ]]; then
-      lARCH_ARM_CNT=$(grep -c "ARM" "${P99_CSV_LOG}" || true)
-    fi
+    lARCH_ARM_CNT=$(grep -c "32-bit.*ARM" "${P99_CSV_LOG}" || true)
     if [[ "${lARCH_ARM64_CNT}" -gt 0 || "${lARCH_ARM_CNT}" -gt 0 ]]; then
       ARM_HF=$(cut -d ';' -f5 "${P99_CSV_LOG}" | grep -c "hard-float" || true)
       ARM_SF=$(cut -d ';' -f5 "${P99_CSV_LOG}" | grep -c "soft-float" || true)

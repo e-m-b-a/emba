@@ -36,11 +36,17 @@ DEEP_EXT_DEPTH=1
 # change this to something smaller to not report all the files
 SBOM_MAX_FILE_LOG=500
 
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" "F17" )
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
+
+# VEX is created by module F17 -> enable it here
+# export SELECT_MODULES+=( "F17" "F50" )
+
+# VEX metrics (check for KEV, Exploits, EPSS)
+export VEX_METRICS=0
 
 # with user-mode emulation enabled (QEMULATION=1):
-export QEMULATION=0
-# export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "S115" "S116" "F15" )
+export QEMULATION=1
+export SELECT_MODULES+=( "S115" "S116" )
 
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
 # that should not be used

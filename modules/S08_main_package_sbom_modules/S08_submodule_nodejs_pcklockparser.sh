@@ -75,7 +75,7 @@ S08_submodule_node_js_package_lock_parser() {
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
         lPOS_RES=1
       done < "${TMP_DIR}/node.lock.tmp"
       wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"

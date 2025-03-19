@@ -212,12 +212,12 @@ check() {
     fi
 
     echo -e "\\n""${GREEN}""Run ${ORANGE}semgrep${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    semgrep --disable-version-check --metrics=off --config "${EXT_DIR}"/semgrep-rules/bash "${SOURCE}" | tee /tmp/emba_semgrep.log
-    if grep -q "Findings:" /tmp/emba_semgrep.log; then
+    semgrep --disable-version-check --metrics=off --config "${EXT_DIR}"/semgrep-rules/bash "${SOURCE}" 2>&1 | tee /tmp/emba_semgrep.log
+    if grep -q ": 0 findings." /tmp/emba_semgrep.log; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
+    else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
       MODULES_TO_CHECK_ARR_SEMGREP+=("${SOURCE}")
-    else
-      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     fi
   done
 
