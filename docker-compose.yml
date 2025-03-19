@@ -37,9 +37,13 @@ services:
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
+    env_file:
+        - path: ${LOG}/.env
+          required: false
     environment:
         - USER
         - CONTAINER_NUMBER=1
+        - IN_DOCKER=1
     # network_mode: host
     devices:
       - /dev/fuse:/dev/fuse:rwm
@@ -68,9 +72,13 @@ services:
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
         - /etc/localtime:/etc/localtime:ro
+    env_file:
+        - path: ${LOG}/.env
+          required: false
     environment:
         - USER
         - CONTAINER_NUMBER=2
+        - IN_DOCKER=1
     network_mode: host
     ulimits:
       core:
