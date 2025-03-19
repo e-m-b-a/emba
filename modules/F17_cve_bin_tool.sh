@@ -98,10 +98,10 @@ F17_cve_bin_tool() {
     # BusyBox verification module handling - we already have all the data from s118. Now we just copy these details
     if [[ "${lPROD}" == "busybox" ]] && [[ -s "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
       print_output "[*] BusyBox results from s118 detected ... no CVE detection needed" "no_log"
-      cp "${S118_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" || print_error "[-] BusyBox CVE log copy process failed"
-      cp "${S118_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] BusyBox CVE log copy process failed"
-      cp "${S118_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] BusyBox CVE log copy process failed"
-      cp "${S118_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] BusyBox CVE log copy process failed"
+      cp "${S118_LOG_DIR}/"*"_${lPROD}_${lVERS}.csv" "${LOG_PATH_MODULE}" 2>/dev/null || true
+      cp "${S118_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" 2>/dev/null || true
+      cp "${S118_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" 2>/dev/null || true
+      cp "${S118_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || true
       if [[ -f  "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
         cat "${S118_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
