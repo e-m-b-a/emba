@@ -404,37 +404,38 @@ module_analyzer() {
       write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
     fi
 
-    # ensure we do not log the kernel multiple times
-    local lPACKAGING_SYSTEM="linux_kernel+module"
-    local lK_AUTHOR="linux"
-    local lLICENSE="GPL-2.0-only"
-    # we can rewrite the APP_NAME as we also log the source_path from where we know the exact source of this kernel entry
-    local lAPP_NAME="linux_kernel"
+    if [[ "${#KV_ARR[@]}" -gt 0 ]]; then
+      # ensure we do not log the kernel multiple times
+      local lPACKAGING_SYSTEM="linux_kernel+module"
+      local lK_AUTHOR="linux"
+      local lLICENSE="GPL-2.0-only"
+      # we can rewrite the APP_NAME as we also log the source_path from where we know the exact source of this kernel entry
+      local lAPP_NAME="linux_kernel"
 
-    lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
-    lPURL_IDENTIFIER=$(build_generic_purl ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
+      lPURL_IDENTIFIER=$(build_generic_purl ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
-    # add source file path information to our properties array:
-    local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:" )
-    lPROP_ARRAY_INIT_ARR+=( "module_version_details:${lK_VERSION,,}" )
-    lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      # add source file path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:" )
+      lPROP_ARRAY_INIT_ARR+=( "module_version_details:${lK_VERSION,,}" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
-    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lPACKAGING_SYSTEM:-NA}"; then
-      print_output "[*] Already found results for ${lAPP_NAME} / ${KV_ARR[*]}" "no_log"
-    else
-      # create component entry - this allows adding entries very flexible:
-      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-      write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${KV_ARR[*]}" "no_log"
+      else
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+        write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+      fi
     fi
-
   elif [[ "${lKMODULE}" == *".o" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     print_output "[-] No support for .o kernel modules - ${ORANGE}${lKMODULE}${NC}" "no_log"
   fi
