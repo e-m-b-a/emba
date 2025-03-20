@@ -48,26 +48,6 @@ export SELECT_MODULES+=( "F17" "F50" )
 # VEX metrics (check for KEV, Exploits, EPSS)
 export VEX_METRICS=1
 
-# we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
-# that should not be used
-export S08_MODULES_ARR=()
-S08_MODULES_ARR=( "S08_submodule_debian_pkg_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_deb_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_openwrt_pkg_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_openwrt_ipk_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_rpm_pkg_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_rpm_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_bsd_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_python_pip_package_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_python_requirements_parser" )
-S08_MODULES_ARR+=( "S08_submodule_python_poetry_lock_parser" )
-S08_MODULES_ARR+=( "S08_submodule_java_archives_parser" )
-S08_MODULES_ARR+=( "S08_submodule_ruby_gem_archive_parser" )
-S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
-S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
-S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
-
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0
 export SILENT=1

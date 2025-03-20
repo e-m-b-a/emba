@@ -192,6 +192,7 @@ set_defaults() {
   S08_MODULES_ARR+=( "S08_submodule_perl_cpan_parser" )
   S08_MODULES_ARR+=( "S08_submodule_php_composer_lock" )
   S08_MODULES_ARR+=( "S08_submodule_python_pipfile_lock" )
+  S08_MODULES_ARR+=( "S08_submodule_apk_pkg_mgmt_parser" )
 }
 
 set_log_paths() {
