@@ -64,7 +64,6 @@ output_overview() {
     print_output "[+] Additional notes: ""${ORANGE}""${FW_NOTES}""${NC}"
     write_csv_log "FW_notes" "${FW_NOTES}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
-
   if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
     local lFW_PATH_ORIG_ARR=()
     local lFW_PATH_ORIG=""
@@ -83,6 +82,15 @@ output_overview() {
     print_output "[+] EMBA start command:""${ORANGE}"" ""${EMBA_COMMAND}""${NC}"
     write_csv_log "emba_command" "${EMBA_COMMAND}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
+
+  # EMBA details
+  local lSBOM_TOOL_VERS=""
+  lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
+  if [[ -f "${INVOCATION_PATH}"/.git/refs/heads/master ]]; then
+    lSBOM_TOOL_VERS+="-$(cat "${INVOCATION_PATH}"/.git/refs/heads/master)"
+  fi
+  print_output "[+] EMBA version: ""${ORANGE}""${lSBOM_TOOL_VERS}""${NC}"
+  write_csv_log "EMBA_version" "${lSBOM_TOOL_VERS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
 
   if [[ -f "${Q02_LOG}" ]] && [[ "${GPT_OPTION}" -gt 0 ]]; then
     lGPT_RESULTS_CNT=$(grep -c "AI analysis for" "${Q02_LOG}" || true)

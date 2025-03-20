@@ -316,7 +316,6 @@ S26_kernel_vuln_verifier()
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
-
 vuln_checker_threader() {
   local lVULN="${1:-}"
   local lK_PATHS_ARR=()
