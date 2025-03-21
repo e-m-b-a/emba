@@ -203,7 +203,7 @@ S118_busybox_verifier()
   # fix the CVE log file and add the verified vulnerabilities:
   if [[ -f "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
     # extract the verified CVEs:
-    mapfile -t lVERIFIED_BB_VULNS_ARR < <(grep -E -o ";CVE-[0-9]+-[0-9]+;" "${S118_CSV_LOG}" || true)
+    mapfile -t lVERIFIED_BB_VULNS_ARR < <(grep -E -o ";CVE-[0-9]+-[0-9]+;" "${S118_CSV_LOG}" 2>/dev/null || true)
     if [[ "${#lVERIFIED_BB_VULNS_ARR[@]}" -gt 0 ]]; then
       local lTMP_CVE_ENTRY=""
       # get the CVEs part of vuln_summary.txt
@@ -226,6 +226,7 @@ S118_busybox_verifier()
         sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 '"${lV_ENTRY}"'/' "${S118_LOG_DIR}/cve_sum/"*_finished.txt || true
       done
     fi
+    lNEG_LOG=1
   fi
 
   if [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
