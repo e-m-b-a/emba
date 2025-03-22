@@ -324,12 +324,6 @@ elif command -v docker-compose > /dev/null ; then
       apt-get install docker-cli -y
     fi
   fi
-else
-  echo -e "\n${ORANGE}""${BOLD}""WARNING: No docker installation performed""${NC}"
-  echo -e "${ORANGE}If you are running into installation issues please check your docker installation${NC}"
-  echo -e "${ORANGE}and ensure the docker and docker compose command are available in your system path.${NC}"
-  echo ""
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 fi
 
 # docker moved around v7 to a new API (API v2)
@@ -347,10 +341,16 @@ if command -v docker > /dev/null; then
       echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites${NC}"
       read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
     fi
-  else
-    echo -e "\n${ORANGE}""${BOLD}""WARNING: No docker setup performed""${NC}"
-    echo -e "${ORANGE}If you are running into installation issues please check your docker installation${NC}"
   fi
+fi
+
+# if DOCKER_COMPOSE is not set we are in trouble
+if ! [[ -v DOCKER_COMPOSE[@] ]]; then
+  echo -e "\n${ORANGE}""${BOLD}""WARNING: No docker installation performed""${NC}"
+  echo -e "${ORANGE}If you are running into installation issues please check your docker installation${NC}"
+  echo -e "${ORANGE}and ensure the docker and docker compose command are available in your system path.${NC}"
+  echo ""
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 fi
 
 # initial installation of the host environment:
