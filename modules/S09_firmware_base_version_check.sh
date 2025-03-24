@@ -104,7 +104,7 @@ S09_firmware_base_version_check() {
 
     print_output "[*] Waiting for grepping jobs" "no_log"
     # shellcheck disable=SC2046
-    wait $(jobs -p)
+    wait $(jobs -p) # nosemgrep
 
     sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt > "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
     cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
@@ -284,7 +284,7 @@ done
             lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
             # build the dependencies based on linker details
             if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
@@ -360,7 +360,7 @@ done
         lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
         lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+        lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -409,7 +409,7 @@ done
           lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXTRACTOR_LOG}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -463,7 +463,7 @@ done
           lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
           build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -835,7 +835,7 @@ bin_string_checker() {
             lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
             # build the dependencies based on linker details
             if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
@@ -905,7 +905,7 @@ bin_string_checker() {
             lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
             # build the dependencies based on linker details
             if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
@@ -971,7 +971,7 @@ bin_string_checker() {
           lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
           lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
           lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${CSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string ${lCONFIDENCE_LEVEL})" )
+          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
 
           # build the dependencies based on linker details
           if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then

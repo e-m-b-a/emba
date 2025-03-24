@@ -13,7 +13,7 @@ def help_me
 
   Usage:
     ./msfconsole -r [rc_path] [ip_address] [list_of_ports] [arch]
-    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1 123,1337,101 mipsle
+    ./msfconsole -r ./helpers/l35_msf_check.rc 127.0.0.1 123,1337,101 mipsle
   |
 
   help = help.gsub(/^\t/, '')
@@ -123,7 +123,7 @@ def exploit_checker(host,ports,architecture)
           print_status("Check code for #{name}: #{result.to_s}")
         end
 
-        if (result =~ /Vulnerable/ or result =~ /Appears/)
+        if (result.to_s =~ /Vulnerable/ or result.to_s =~ /Appears/)
           print_good("Vulnerability identified for module #{name} - #{host.to_s}:#{serv}")
           print_good("Check state #{result} for module #{name} - #{host.to_s}:#{serv}")
         end

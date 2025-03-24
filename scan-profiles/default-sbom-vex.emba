@@ -27,9 +27,6 @@ SBOM_MINIMAL=1
 # Value 2 for all files
 SBOM_UNTRACKED_FILES=1
 
-# VEX metrics (check for KEV, Exploits, EPSS)
-export VEX_METRICS=1
-
 # if no deep extraction is needed it can be disabled here - sometimes useful for
 # non Linux stuff like sources or Windows exe (could be also configured via -q parameter)
 DISABLE_DEEP=1
@@ -39,31 +36,17 @@ DEEP_EXT_DEPTH=1
 # change this to something smaller to not report all the files
 SBOM_MAX_FILE_LOG=500
 
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" "F17" )
+# main SBOM modules
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
 
-# with user-mode emulation enabled (QEMULATION=1):
-export QEMULATION=0
-# export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "S115" "S116" "F15" )
+# SBOM with user-mode emulation enabled (QEMULATION=1):
+export QEMULATION=1
+export SELECT_MODULES+=( "S115" "S116" )
 
-# we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
-# that should not be used
-export S08_MODULES_ARR=()
-S08_MODULES_ARR=( "S08_submodule_debian_pkg_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_deb_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_openwrt_pkg_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_openwrt_ipk_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_rpm_pkg_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_rpm_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_bsd_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_python_pip_package_mgmt_parser" )
-S08_MODULES_ARR+=( "S08_submodule_python_requirements_parser" )
-S08_MODULES_ARR+=( "S08_submodule_python_poetry_lock_parser" )
-S08_MODULES_ARR+=( "S08_submodule_java_archives_parser" )
-S08_MODULES_ARR+=( "S08_submodule_ruby_gem_archive_parser" )
-S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
-S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
-S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
-S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
+# enable VEX for vulnerability checks
+export SELECT_MODULES+=( "F17" "F50" )
+# VEX metrics (check for KEV, Exploits, EPSS)
+export VEX_METRICS=1
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0
