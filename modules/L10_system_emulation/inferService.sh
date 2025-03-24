@@ -31,10 +31,11 @@ if [ -e /etc/manual.starter ]; then
 fi
 
 if [ -d /etc/init.d/ ]; then
-  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f -name "*httpd*" -o -type f -name "ftpd" -o -type f -name "miniupnpd" \
-    -o -type f -name "*apache*" -o -type f -name "*service*"); do
+  # for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f -name "*httpd*" -o -type f -name "ftpd" -o -type f -name "miniupnpd" \
+  #   -o -type f -name "*apache*" -o -type f -name "*service*" -o -type f -name "*nvram*"); do
+  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f); do
     # -o -type f -name "*apache*" -o -type f -name "*init*" -o -type f -name "*service*"); do
-    if "${BUSYBOX}" echo "${SERVICE}" | grep -q "factory"; then
+    if "${BUSYBOX}" echo "${SERVICE}" | grep -q "factory\|dhcp\|reset\|halt\|shutdown"; then
       # do not use entries like factory.init or init.factory and so on
       continue
     fi
