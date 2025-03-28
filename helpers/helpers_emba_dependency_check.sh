@@ -416,7 +416,7 @@ dependency_check()
   # Some other nice features like restarting the mongod will not work without root privs.
   if [[ "${QEMULATION}" -eq 1 && "${EUID}" -ne 0 ]] || [[ "${USE_DOCKER}" -eq 1 && "${EUID}" -ne 0 ]] || [[ "${FULL_EMULATION}" -eq 1 && "${EUID}" -ne 0 ]]; then
     if [[ "${QEMULATION}" -eq 1 && "${USE_DOCKER}" -eq 0 ]] || [[ "${FULL_EMULATION}" -eq 1 && "${USE_DOCKER}" -eq 0 ]]; then
-      print_output "    user permission - emulation mode - \\c" "no_log"
+      print_output "    User permission - emulation mode - \\c" "no_log"
       echo -e "${RED}""not ok""${NC}"
       echo -e "${RED}""    With emulation enabled this script needs root privileges""${NC}"
       DEP_EXIT=1
@@ -460,7 +460,7 @@ dependency_check()
   fi
 
   # Check for ./config
-  print_output "    configuration directory - \\c" "no_log"
+  print_output "    Configuration directory - \\c" "no_log"
   if ! [[ -d "${CONFIG_DIR}" ]] ; then
     echo -e "${RED}""not ok""${NC}"
     echo -e "${RED}""    Missing configuration directory - check your installation""${NC}"
@@ -481,11 +481,20 @@ dependency_check()
     fi
   fi
 
-  if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
-    check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
-  fi
   # Python virtual environment in external directory
   check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
+
+  if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
+    check_dep_file "NVD CVE database in JSON format" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+  fi
+
+  print_output "    SQLite CVE database update in config directory - \\c" "no_log"
+  if [[ ! -f "${CONFIG_DIR}/cve-database.db" ]]; then
+    echo -e "${ORANGE}""not ok""${NC}"
+    echo -e "${ORANGE}""    Missing SQLite CVE database updates - Check update instructions""${NC}"
+  else
+    echo -e "${GREEN}""ok""${NC}"
+  fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
     print_ln "no_log"
