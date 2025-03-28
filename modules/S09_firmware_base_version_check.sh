@@ -160,7 +160,7 @@ S09_firmware_base_version_check() {
         max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) WAIT_PIDS_S09_1
       fi
     fi
-done
+  done
 
   print_output "[*] Waiting for strings generator" "no_log"
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
