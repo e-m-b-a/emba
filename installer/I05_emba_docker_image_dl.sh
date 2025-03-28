@@ -73,7 +73,21 @@ I05_emba_docker_image_dl() {
                 echo -e "${GREEN}""Found alternative local EMBA image, will use that instead.""${NC}"
                 # Use the latest local EMBA image
                 LOCAL_IMAGE=$(docker images embeddedanalyzer/emba --format "{{.Repository}}:{{.Tag}}" | head -1)
+                ORIGINAL_CONTAINER="${CONTAINER}"
                 CONTAINER="${LOCAL_IMAGE}"
+                
+                # Check if the local image matches what's expected in docker-compose.yml
+                if [[ "${ORIGINAL_CONTAINER}" != "${CONTAINER}" ]]; then
+                  echo -e "${RED}""WARNING: Using local image ${CONTAINER} instead of ${ORIGINAL_CONTAINER}""${NC}"
+                  echo -e "${RED}""This might cause compatibility issues with your docker-compose configuration.""${NC}"
+                  read -p "Continue with this image anyway? (y/n): " -n1 -r CONTINUE_ANSWER
+                  echo
+                  if [[ ${CONTINUE_ANSWER,,} != "y" ]]; then
+                    echo -e "${RED}""Installation aborted by user. Please pull the correct image with:""${NC}"
+                    echo -e "${ORANGE}""docker pull ${ORIGINAL_CONTAINER}""${NC}"
+                    exit 1
+                  fi
+                fi
               fi
             fi
           fi
