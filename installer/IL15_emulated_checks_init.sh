@@ -24,7 +24,7 @@ IL15_emulated_checks_init() {
     print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
     print_git_info "Nikto" "sullo/nikto" "external/nikto"
 
-    print_tool_info "dnsutils" 1
+    print_tool_info "bind9-dnsutils" 1
     print_tool_info "nmap" 1
     print_tool_info "snmp" 1
     # nikto is somehow complicated with our read only container -> we install it manually
