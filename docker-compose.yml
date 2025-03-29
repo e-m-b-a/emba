@@ -35,6 +35,8 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
+        - ${EMBA}/external/EMBA_Live_bins/libnvram/:/external/EMBA_Live_bins/libnvram:ro
+        - ${EMBA}/external/EMBA_Live_bins/libnvram_ioctl/:/external/EMBA_Live_bins/libnvram_ioctl:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:
