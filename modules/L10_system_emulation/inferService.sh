@@ -30,34 +30,38 @@ if [ -e /etc/manual.starter ]; then
   fi
 fi
 
-if [ -d /etc/init.d/ ]; then
-  # for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f -name "*httpd*" -o -type f -name "ftpd" -o -type f -name "miniupnpd" \
-  #   -o -type f -name "*apache*" -o -type f -name "*service*" -o -type f -name "*nvram*"); do
-  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -type f); do
-    # -o -type f -name "*apache*" -o -type f -name "*init*" -o -type f -name "*service*"); do
-    if "${BUSYBOX}" echo "${SERVICE}" | grep -q "factory\|dhcp\|reset\|halt\|shutdown"; then
+# we search for possible init startup directories and iterate them later for possible init scripts
+for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init.d*"); do
+  for SERVICE in $("${BUSYBOX}" find "${INIT_DIR}" -type f); do
+    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "factory\|dhcp\|reset\|halt\|shutdown"; then
       # do not use entries like factory.init or init.factory and so on
       continue
     fi
-    if [ -e "${SERVICE}" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
-        "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
-        "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+    # currently we only use some services for startup
+    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp"; then
+      if [ -e "${SERVICE}" ]; then
+        if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+          "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
+          "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+        fi
       fi
     fi
   done
-fi
+done
 
-if [ -d /etc/rc.d/ ]; then
-  for SERVICE in $("${BUSYBOX}" find /etc/rc.d/ -name "S*httpd*" -o -name "S*apache*"); do
-    if [ -e "${SERVICE}" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
-        "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
-        "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+# we search for possible rc startup directories and iterate them later for possible rc startup scripts
+for RC_DIR in $("${BUSYBOX}" find / -type d -name "*rc.d*"); do
+  for SERVICE in $("${BUSYBOX}" find "${RC_DIR}" -type f); do
+    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp"; then
+      if [ -e "${SERVICE}" ]; then
+        if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+          "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
+          "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+        fi
       fi
     fi
   done
-fi
+done
 
 if [ -e /bin/boa ]; then
   if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
@@ -86,7 +90,7 @@ fi
 # twonkystarter: F9K1119_WW_1.00.01.bin
 # lighttpd with non working ssl config: https://www.greynoise.io/blog/debugging-d-link-emulating-firmware-and-hacking-hardware
 
-for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -type f -o -name "upnpd" -type f \
+for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -type f -o -name "upnpd" -type f \
   -o -name "*telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
   -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
   -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \

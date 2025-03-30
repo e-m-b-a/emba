@@ -767,14 +767,18 @@ main_emulation() {
         local lCOUNTING_2nd=0
         local lF_STARTUP=0
         if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
+          print_output "[*] qemu.initial.serial.log detected and checking for STARTUP and Service data"
           # now we need to check if something is better now or we should switch back to the original init
           lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
           lF_STARTUP=$(( "${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" ))
           lCOUNTING_2nd=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $1}')
           lPORTS_2nd=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
           # IPS_INT_VLAN is always at least 1 for the default configuration
+        else
+          print_output "[-] NO qemu.initial.serial.log detected and NO checking for STARTUP and Service data possible"
         fi
 
+        print_output "[*] lPORTS_1st: ${lPORTS_1st} / lPORTS_2nd: ${lPORTS_2nd} / lF_STARTUP: ${lF_STARTUP}"
         if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
           [[ "${DETECTED_IP}" -eq 0 ]]; then
           if [[ "${#PANICS[@]}" -gt 0 ]]; then
@@ -1450,6 +1454,7 @@ get_networking_details_emulation() {
     local lTCP_PORT=""
     local lUDP_PORT=""
     local lMISSING_FILES_TMP=()
+    local lMISSING_DIRS_TMP=()
     local lSERVICE_NAME=""
 
     mapfile -t lINTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //' \
@@ -1468,6 +1473,8 @@ get_networking_details_emulation() {
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
     mapfile -t lMISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
     MISSING_FILES+=( "${lMISSING_FILES_TMP[@]}" )
+    mapfile -t lMISSING_DIRS_TMP < <(grep -a -E "nonexistent directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
+    MISSING_FILES+=( "${lMISSING_DIRS_TMP[@]}" )
 
     lNVRAM_TMP=( "${lNVRAM_ARR[@]}" )
 
@@ -2008,6 +2015,7 @@ write_network_config_to_filesystem() {
       eval "MISSING_FILES=($(for i in "${MISSING_FILES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
       for lFILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
+        print_output "[*] Checking for missing area ${ORANGE}${lFILE_PATH_MISSING}${NC} in filesystem ..."
         [[ "${lFILE_PATH_MISSING}" == *"firmadyne"* ]] && continue
         [[ "${lFILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${lFILE_PATH_MISSING}" == *"/sys/"* ]] && continue

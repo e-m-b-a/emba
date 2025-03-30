@@ -9,6 +9,10 @@
 # Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
+if ! [ -f /dev/null ]; then
+  "${BUSYBOX}" mknod -m 666 /dev/null c 1 3
+fi
+
 # we should build a real and useful PATH ... currently it is just guessing
 export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
 

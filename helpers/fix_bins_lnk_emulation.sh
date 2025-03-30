@@ -115,8 +115,8 @@ for POSSIBLE_DEAD_SYMLNK in "${POSSIBLE_DEAD_SYMLNKS[@]}"; do
     # sometimes the directory of the final dest does not exist - lets check and create it
     DIR_LNK_TARGET=$(dirname "${LNK_TARGET}")
     if ! [[ -d "${DIR_LNK_TARGET}" ]]; then
-      echo "[*] Creating ${DIR_LNK_TARGET}"
-      chroot . "${BUSYBOX}" mkdir -p "${DIR_LNK_TARGET}"
+      echo "[*] Creating ${DIR_LNK_TARGET#\.}"
+      chroot . "${BUSYBOX}" mkdir -p "${DIR_LNK_TARGET#\.}"
     fi
   else
     LNK_TARGET="${DIR_ORIG_FILE}"/"${TMP_LNK_ORIG}"
