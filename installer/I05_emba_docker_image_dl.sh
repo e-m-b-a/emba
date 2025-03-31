@@ -30,7 +30,6 @@ I05_emba_docker_image_dl() {
       if ! f="$(docker manifest inspect "${CONTAINER}" 2>/dev/null | grep "size" | sed -e 's/[^0-9 ]//g')"; then
         echo -e "${ORANGE}The container image size cannot be obtained. The installation process will continue...${NC}"
         echo "Estimated download-Size: ~5500 MB"
-        f="0"
       else
         echo "Download-Size : ""$(("$(( "${f//$'\n'/+}" ))"/1048576))"" MB"
       fi
@@ -53,10 +52,10 @@ I05_emba_docker_image_dl() {
         fi
         if command -v docker > /dev/null ; then
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          echo -e "${ORANGE}""Checking for EMBA docker image...""${NC}"
+          echo -e "${ORANGE}""Checking for EMBA docker image ...""${NC}"
           echo -e "${ORANGE}""CONTAINER VARIABLE SET TO ""${CONTAINER}""${NC}"
           
-          # First, check whether the local mirror exists
+          # First, check whether the local mirror exists with the correct base image and version
           if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "${CONTAINER}"; then
             echo -e "${GREEN}""Found local image ${CONTAINER}, skipping download.""${NC}"
           else
@@ -68,7 +67,7 @@ I05_emba_docker_image_dl() {
               # Check if there are any embeddedanalyzer/emba images
               if ! docker images | grep -q "embeddedanalyzer/emba"; then
                 echo -e "${RED}""No local EMBA images found. Installation may be incomplete.""${NC}"
-                read -p "Press any key to continue anyway..." -n1 -s -r
+                exit 1
               else
                 echo -e "${GREEN}""Found alternative local EMBA image, will use that instead.""${NC}"
                 # Use the latest local EMBA image
@@ -82,7 +81,7 @@ I05_emba_docker_image_dl() {
                   echo -e "${RED}""This might cause compatibility issues with your docker-compose configuration.""${NC}"
                   read -p "Continue with this image anyway? (y/n): " -n1 -r CONTINUE_ANSWER
                   echo
-                  if [[ ${CONTINUE_ANSWER,,} != "y" ]]; then
+                  if [[ "${CONTINUE_ANSWER,,}" != "y" ]]; then
                     echo -e "${RED}""Installation aborted by user. Please pull the correct image with:""${NC}"
                     echo -e "${ORANGE}""docker pull ${ORIGINAL_CONTAINER}""${NC}"
                     exit 1
