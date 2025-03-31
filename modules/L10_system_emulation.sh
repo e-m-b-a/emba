@@ -1473,7 +1473,7 @@ get_networking_details_emulation() {
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
     mapfile -t lMISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
     MISSING_FILES+=( "${lMISSING_FILES_TMP[@]}" )
-    mapfile -t lMISSING_DIRS_TMP < <(grep -a -E "nonexistent directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
+    mapfile -t lMISSING_DIRS_TMP < <(grep -a -E "nonexistent directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | grep -a "^/" | sort -u || true)
     MISSING_FILES+=( "${lMISSING_DIRS_TMP[@]}" )
 
     lNVRAM_TMP=( "${lNVRAM_ARR[@]}" )
