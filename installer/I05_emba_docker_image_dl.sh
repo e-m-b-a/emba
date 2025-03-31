@@ -62,7 +62,7 @@ I05_emba_docker_image_dl() {
             echo -e "${ORANGE}""Local image not found, attempting to download.""${NC}"
             if ! docker pull "${CONTAINER}"; then
               echo -e "${RED}""Failed to download ${CONTAINER}.""${NC}"
-              echo -e "${ORANGE}""Checking if we have any usable local images...""${NC}"
+              echo -e "${ORANGE}""Checking if we have any usable local images ...""${NC}"
 
               # Check if there are any embeddedanalyzer/emba images
               if ! docker images | grep -q "embeddedanalyzer/emba"; then
