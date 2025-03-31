@@ -63,7 +63,7 @@ I05_emba_docker_image_dl() {
             if ! docker pull "${CONTAINER}"; then
               echo -e "${RED}""Failed to download ${CONTAINER}.""${NC}"
               echo -e "${ORANGE}""Checking if we have any usable local images...""${NC}"
-              
+
               # Check if there are any embeddedanalyzer/emba images
               if ! docker images | grep -q "embeddedanalyzer/emba"; then
                 echo -e "${RED}""No local EMBA images found. Installation may be incomplete.""${NC}"
@@ -74,7 +74,7 @@ I05_emba_docker_image_dl() {
                 LOCAL_IMAGE=$(docker images embeddedanalyzer/emba --format "{{.Repository}}:{{.Tag}}" | head -1)
                 ORIGINAL_CONTAINER="${CONTAINER}"
                 CONTAINER="${LOCAL_IMAGE}"
-                
+
                 # Check if the local image matches what's expected in docker-compose.yml
                 if [[ "${ORIGINAL_CONTAINER}" != "${CONTAINER}" ]]; then
                   echo -e "${RED}""WARNING: Using local image ${CONTAINER} instead of ${ORIGINAL_CONTAINER}""${NC}"
@@ -90,7 +90,7 @@ I05_emba_docker_image_dl() {
               fi
             fi
           fi
-          
+
           # Make sure the image has the latest label
           docker tag "${CONTAINER}" "${CONTAINER/:*}:latest"
           sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
