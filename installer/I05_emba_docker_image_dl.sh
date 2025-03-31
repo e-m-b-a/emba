@@ -54,7 +54,7 @@ I05_emba_docker_image_dl() {
           export DOCKER_CLI_EXPERIMENTAL=enabled
           echo -e "${ORANGE}""Checking for EMBA docker image ...""${NC}"
           echo -e "${ORANGE}""CONTAINER VARIABLE SET TO ""${CONTAINER}""${NC}"
-          
+
           # First, check whether the local mirror exists with the correct base image and version
           if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "${CONTAINER}"; then
             echo -e "${GREEN}""Found local image ${CONTAINER}, skipping download.""${NC}"
