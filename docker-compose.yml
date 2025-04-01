@@ -1,0 +1,81 @@
+services:
+  # nosemgrep
+  emba:
+    image: embeddedanalyzer/emba:1.5.2
+    container_name: emba
+    read_only: false
+    # all pre-checker mount modules need privileged mode
+    # nosemgrep
+    privileged: true
+    # /root/.config is needed for binwalk - further recovery for other tools needed
+    # /root/.config is needed for cwe_checker
+    # /root/.local is needed for cwe_checker
+    tmpfs:
+      # exec on /tmp is needed for capa -> Todo: find better solution
+      - /tmp:exec
+      - /root/.config/
+      - /root/.local/share/composer/
+      - /root/.local/share/cwe_checker/
+        # - /root/.local/share
+      - /root/.cache/
+      - /root/.semgrep/
+      - /root/.ghidra/
+      - /root/.msf4
+      - /root/.john
+      - /root/.gnupg
+      - /run/lock
+      - /var/run
+      - /var/tmp
+      - /var/lock
+    build: .
+    # /dev is needed for the system emulator (L10)
+    volumes:
+        - ${FIRMWARE}/:/firmware:ro
+        - ${LOG}/:/logs
+        - ${EMBA}/:/emba:ro
+        - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
+        - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
+        - /etc/localtime:/etc/localtime:ro
+        - /dev:/dev
+    environment:
+        - USER
+        - CONTAINER_NUMBER=1
+    # network_mode: host
+    devices:
+      - /dev/fuse:/dev/fuse:rwm
+    cap_add:
+      - SYS_ADMIN
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
+
+  emba_quest:
+    image: embeddedanalyzer/emba:1.5.2
+    container_name: emba_quest
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root
+      - /run/lock
+      - /var/run
+      - /var/tmp
+      - /var/lock
+    volumes:
+        - ${FIRMWARE}/:/firmware:ro
+        - ${LOG}/:/logs
+        - ${EMBA}/:/emba:ro
+        - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
+        - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
+        - /etc/localtime:/etc/localtime:ro
+    environment:
+        - USER
+        - CONTAINER_NUMBER=2
+    network_mode: host
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
+    security_opt:
+      - no-new-privileges:true
+
