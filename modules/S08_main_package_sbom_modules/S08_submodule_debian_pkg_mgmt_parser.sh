@@ -24,7 +24,8 @@ S08_submodule_debian_pkg_mgmt_parser() {
 
   local lDEBIAN_MGMT_STATUS_ARR=()
   local lPACKAGE_FILE=""
-  local lDEBIAN_PACKAGES_ARR=()
+  local lDPKG_PACKAGE_FILES_ARR=()
+  local lDPKG_PACKAGE_FILE_TMP=""
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
@@ -56,14 +57,20 @@ S08_submodule_debian_pkg_mgmt_parser() {
       lPACKAGE_DIR="$(dirname "${lPACKAGE_FILE}")"
 
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
-        mapfile -t lDEBIAN_PACKAGES_ARR < <(grep "^Package: \|^Status: \|^Version: \|^Maintainer: \|^Architecture: \|^Description: \|^Depends: " "${lPACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' \
-          | sed -z 's/\nStatus: / - Status: /g' | sed -z 's/\nMaintainer: / - Maintainer: /g' | sed -z 's/\nDescription: / - Description: /g' | sed -z 's/\nArchitecture: / - Architecture: /g' \
-          | sed -z 's/\nDepends: / - Depends: /g')
+        if [[ ! -d "${LOG_PATH_MODULE}"/dpkg_tmp_db ]]; then
+          mkdir "${LOG_PATH_MODULE}"/dpkg_tmp_db
+        fi
+
+        # split lPACKAGE_FILE on empty lines into separate package entry files for further processing
+        awk -v RS= '{print > ("'"${LOG_PATH_MODULE}"/dpkg_tmp_db/dpkg-'" NR ".txt")}' "${lPACKAGE_FILE}"
+
         write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_log "[*] Found debian package details in ${ORANGE}${lPACKAGE_FILE}${NC}:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-        for lPACKAGE_VERSION in "${lDEBIAN_PACKAGES_ARR[@]}" ; do
-          debian_status_files_analysis_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPACKAGE_FILE}" "${lPACKAGE_VERSION}" &
+        mapfile -t lDPKG_PACKAGE_FILES_ARR < <(find "${LOG_PATH_MODULE}"/dpkg_tmp_db -name "dpkg-*")
+
+        for lDPKG_PACKAGE_FILE_TMP in "${lDPKG_PACKAGE_FILES_ARR[@]}" ; do
+          debian_status_files_analysis_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPACKAGE_FILE}" "${lDPKG_PACKAGE_FILE_TMP}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
           lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
@@ -94,7 +101,7 @@ debian_status_files_analysis_threader() {
   local lPACKAGING_SYSTEM="${1:-}"
   local lOS_IDENTIFIED="${2:-}"
   local lPACKAGE_FILE="${3:-}"
-  local lPACKAGE_VERSION="${4:-}"
+  local lDPKG_PACKAGE_FILE_TMP="${4:-}"
 
   local lPACKAGE=""
   local lVERSION=""
@@ -112,40 +119,38 @@ debian_status_files_analysis_threader() {
   local lAPP_DEPS=""
   local lAPP_DEPS_ARR=()
 
-  # Package: dbus - Status: install ok installed - Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com> - Version: 1.12.16-2ubuntu2.1 - Description: simple interprocess messaging system (daemon and utilities)
-  lPACKAGE=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}')
-  lPACKAGE=$(clean_package_details "${lPACKAGE}")
+  lPACKAGE=$(grep "^Package: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
+  lPACKAGE=$(clean_package_details "${lPACKAGE/Package:\ }")
 
-  lAPP_MAINT=${lPACKAGE_VERSION/*Maintainer:\ /}
-  lAPP_MAINT=${lAPP_MAINT/- Architecture:\ */}
-  lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
-  lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+  lAPP_MAINT=$(grep "^Maintainer: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
+  lAPP_MAINT=${lAPP_MAINT/Maintainer:\ }
+  # lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+  # lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
-  lVERSION=${lPACKAGE_VERSION/*Version:\ /}
-  lVERSION=${lVERSION/ - Depends:\ */}
-  # if we have not dependencies:
-  lVERSION=${lVERSION/ - Description:\ */}
+  lVERSION=$(grep "^Version: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
+  lVERSION=${lVERSION/Version:\ }
   lVERSION=$(clean_package_details "${lVERSION}")
   lVERSION=$(clean_package_versions "${lVERSION}")
 
-  lAPP_ARCH=${lPACKAGE_VERSION/*Architecture:\ /}
-  lAPP_ARCH=${lAPP_ARCH/ - Version:\ */}
+  lAPP_ARCH=$(grep "^Architecture: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
+  lAPP_ARCH=${lAPP_ARCH/Architecture:\ }
   lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
   lAPP_ARCH=$(clean_package_versions "${lAPP_ARCH}")
 
-  if [[ "${lPACKAGE_VERSION}" == *"Depends:"* ]]; then
-    lAPP_DEPS=${lPACKAGE_VERSION/*Depends:\ /}
-    lAPP_DEPS=${lAPP_DEPS/ - Description:\ */}
-    # lAPP_DEPS=$(clean_package_details "${lAPP_DEPS}")
+  # Depends and Pre-Depends
+  lAPP_DEPS=$(grep "Depends: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
+  if [[ -n "${lAPP_DEPS}" ]]; then
+    lAPP_DEPS=${lAPP_DEPS/*Depends:\ /}
     lAPP_DEPS=$(clean_package_versions "${lAPP_DEPS}")
     mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | tr ',' '\n' | sed 's/\.\ /\n/g' | sort -u)
   fi
 
-  lAPP_DESC=${lPACKAGE_VERSION/*Description:\ /}
+  lAPP_DESC=$(grep "^Description: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
+  lAPP_DESC=${lAPP_DESC/Description:\ }
   lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
   lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
-  lINSTALL_STATE=$(safe_echo "${lPACKAGE_VERSION}" | cut -d: -f3)
+  lINSTALL_STATE=$(grep "^Status: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
   if [[ "${lINSTALL_STATE}" == *"deinstall ok"* ]]; then
     write_log "[*] Debian package details: ${ORANGE}${lPACKAGE_FILE}${NC} - ${ORANGE}${lPACKAGE}${NC} - ${ORANGE}${lVERSION}${NC} - ${RED}STATE: Not installed${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     return
