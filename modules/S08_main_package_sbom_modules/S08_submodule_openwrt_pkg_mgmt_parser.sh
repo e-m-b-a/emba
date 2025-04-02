@@ -80,8 +80,8 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
 
         lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
         lAPP_MAINT=${lAPP_MAINT#\ }
-        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
-        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+        # lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        # lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
         lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
         lAPP_DESC=${lAPP_DESC#\ }
