@@ -182,6 +182,8 @@ debian_status_files_analysis_threader() {
     while IFS= read -r lPKG_LIST_ENTRY; do
       # exclude the root directory entry as this will confuse people
       [[ "${lPKG_LIST_ENTRY}" == "/." ]] && continue
+      [[ "${lPKG_LIST_ENTRY}" == "/" ]] && continue
+
       lCNT=$((lCNT+1))
       lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
       # we limit the logging of the package files to 500 files per package
