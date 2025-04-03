@@ -345,6 +345,7 @@ module_analyzer() {
 
     lK_AUTHOR=$(modinfo "${lKMODULE}" | grep "^author:" || true)
     lK_AUTHOR="${lK_AUTHOR//author:\ }"
+    lK_AUTHOR="${lK_AUTHOR//Maintainer:\ }"
     lK_AUTHOR="$(echo "${lK_AUTHOR}" | tr '\n' '-')"
     lK_AUTHOR=$(clean_package_details "${lK_AUTHOR}")
 
