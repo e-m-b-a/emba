@@ -164,7 +164,8 @@ exe_extractor() {
 
     # Error handling. If we have errors on exe extraction we try binwalk
     if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
-       binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
+      print_output "[*] Extraction error detected -> using binwalk as fallback extraction mechanism"
+      binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
     fi
   fi
 
