@@ -354,7 +354,7 @@ fw_bin_detector() {
   fi
   if [[ "${lFILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"PE32+ executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"MSI Installer"* ]]; then
     print_output "[+] Identified Windows executable"
-    export DISABLE_DEEP=1
+    # export DISABLE_DEEP=1
     export WINDOWS_EXE=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" || print_error "[-] Windows executable copy process failed"
