@@ -575,8 +575,8 @@ detect_root_dir_helper() {
   local lCNT=0
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
-    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file -b {} \; 2>/dev/null | grep "ELF.*interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
-    # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % | grep "ELF" | grep "interpreter" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//"' 2>/dev/null | sort -u || true)
+    # xargs threading is much faster. Big testcase firmware 9mins vs. 3mins
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % 2>/dev/null' | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
 
     if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do

@@ -161,15 +161,35 @@ exe_extractor() {
 
   if [[ -s "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log ]]; then
     cat "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log >> "${LOG_FILE}"
+
+    # Error handling. If we have errors on exe extraction we try binwalk
+    if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
+      print_ln
+      print_output "[*] Windows exe extraction error detected -> using binwalk as fallback extraction mechanism"
+      binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
+
+      print_ln
+      print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR%\/}_binwalk${NC}) as base directory:"
+      find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+    else
+      print_ln
+      print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
+      find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+    fi
   fi
 
-  print_ln
-  print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
-  find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
   print_ln
 
   FILES_EXE=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
   lDIRS_EXE=$(find "${lEXTRACTION_DIR}" -type d | wc -l)
+  if [[ -d "${lEXTRACTION_DIR%\/}_binwalk" ]]; then
+    local lFILES_EXE_2=0
+    local lDIRS_EXE_2=0
+    lFILES_EXE_2=$(find "${lEXTRACTION_DIR%\/}_binwalk" -type f | wc -l)
+    lDIRS_EXE_2=$(find "${lEXTRACTION_DIR%\/}_binwalk" -type d | wc -l)
+    FILES_EXE=$((FILES_EXE+lFILES_EXE_2))
+    lDIRS_EXE=$((lDIRS_EXE+lDIRS_EXE_2))
+  fi
   print_output "[*] Extracted ${ORANGE}${FILES_EXE}${NC} files and ${ORANGE}${lDIRS_EXE}${NC} directories from the Windows executable."
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "EXE extractor" "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR}" "${FILES_EXE}" "${lDIRS_EXE}" "NA"
