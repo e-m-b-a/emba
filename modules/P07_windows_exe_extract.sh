@@ -175,6 +175,14 @@ exe_extractor() {
 
   FILES_EXE=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
   lDIRS_EXE=$(find "${lEXTRACTION_DIR}" -type d | wc -l)
+  if [[ -d "${lEXTRACTION_DIR%\/}_binwalk" ]]; then
+    local lFILES_EXE_2=0
+    local lDIRS_EXE_2=0
+    lFILES_EXE_2=$(find "${lEXTRACTION_DIR%\/}_binwalk" -type f | wc -l)
+    lDIRS_EXE_2=$(find "${lEXTRACTION_DIR%\/}_binwalk" -type d | wc -l)
+    FILES_EXE=$((FILES_EXE+lFILES_EXE_2))
+    lDIRS_EXE=$((lDIRS_EXE+lDIRS_EXE_2))
+  fi
   print_output "[*] Extracted ${ORANGE}${FILES_EXE}${NC} files and ${ORANGE}${lDIRS_EXE}${NC} directories from the Windows executable."
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "EXE extractor" "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR}" "${FILES_EXE}" "${lDIRS_EXE}" "NA"
