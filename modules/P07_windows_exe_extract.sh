@@ -164,14 +164,20 @@ exe_extractor() {
 
     # Error handling. If we have errors on exe extraction we try binwalk
     if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
-      print_output "[*] Extraction error detected -> using binwalk as fallback extraction mechanism"
+      print_ln
+      print_output "[*] Windows exe extraction error detected -> using binwalk as fallback extraction mechanism"
       binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
+
+      print_ln
+      print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR%\/}_binwalk${NC}) as base directory:"
+      find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+    else
+      print_ln
+      print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
+      find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
     fi
   fi
 
-  print_ln
-  print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
-  find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
   print_ln
 
   FILES_EXE=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
