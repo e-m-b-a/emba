@@ -127,7 +127,7 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         done
       done
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniupnpd" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      if ! "${BUSYBOX}" grep -q "${BINARY} -" /firmadyne/service 2>/dev/null; then
         for MINIUPNPD_CONFIG in $("${BUSYBOX}" find / -name "*miniupnpd*.conf" -type f); do
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${MINIUPNPD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
@@ -135,7 +135,7 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         "${BUSYBOX}" echo -e -n "${BINARY} -p 9875 -a 0.0.0.0 -i eth0 -d\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      if ! "${BUSYBOX}" grep -q "${BINARY} -" /firmadyne/service 2>/dev/null; then
         for WSCD_CONFIG in $("${BUSYBOX}" find / -name "*wscd*.conf" -type f); do
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${WSCD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG}\n" >> /firmadyne/service
@@ -144,14 +144,14 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         "${BUSYBOX}" echo -e -n "${BINARY} -a 0.0.0.0 -m 3 -D -d 3\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnp" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      if ! "${BUSYBOX}" grep -q "${BINARY}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} -L eth0 -W eth0${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} -L eth0 -W eth0\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      if ! "${BUSYBOX}" grep -q "${BINARY}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
 
@@ -161,18 +161,18 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         "${BUSYBOX}" echo -e -n "${BINARY} eth0 eth0\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "ftpd" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      if ! "${BUSYBOX}" grep -q "${BINARY} -D" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} -D\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniigd" ]; then
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      if ! "${BUSYBOX}" grep -q "${BINARY} -i" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} -i eth0 -a 0.0.0.0 -p 49156\n" >> /firmadyne/service
       fi
     fi
     # this is the default case - without config but only if the service is not already in the service file
-    if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+    if ! "${BUSYBOX}" grep -q "${BINARY}" /firmadyne/service 2>/dev/null; then
       "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
       "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
     fi
