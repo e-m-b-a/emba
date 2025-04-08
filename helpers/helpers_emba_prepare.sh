@@ -214,7 +214,7 @@ binary_architecture_threader() {
 }
 
 architecture_check() {
-  if [[ ${#ALL_FILES_ARR[@]} -eq 0 ]] ; then
+  if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] WARNING: Architecture auto detection and backend data population not possible\\n"
     return
   fi
@@ -245,10 +245,6 @@ architecture_check() {
     local D_FILE_OUTPUT=""
 
     # sort and make P99_CSV_LOG unique
-    if [[ ! -f "${P99_CSV_LOG}" ]]; then
-      print_output "[-] WARNING: Architecture check without P99 csv log file is not working!" "no_log"
-      return
-    fi
     sort -u -t';' -k9,9 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
     # this needs to be added to the first line
     # write_csv_log_to_path "CSV log file" "SOURCE MODULE" "FILE" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
@@ -274,8 +270,8 @@ architecture_check() {
     lARCH_RISCV_CNT=$(grep -c "UCB RISC-V" "${P99_CSV_LOG}" || true)
     lARCH_QCOM_DSP6_CNT=$(grep -c "QUALCOMM DSP6" "${P99_CSV_LOG}" || true)
 
-    lD_END_BE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "MSB" || true)
-    lD_END_LE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "LSB" || true)
+    lD_END_BE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "MSB" || true)
+    lD_END_LE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "LSB" || true)
 
     if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture Count")")"
