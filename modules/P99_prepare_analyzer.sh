@@ -36,7 +36,7 @@ P99_prepare_analyzer() {
   local lNEG_LOG=1
 
   export LINUX_PATH_COUNTER=0
-  LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER="$(linux_basic_identification "${LOG_DIR}/firmware")"
 
   # we have a linux:
   if [[ ${LINUX_PATH_COUNTER} -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then

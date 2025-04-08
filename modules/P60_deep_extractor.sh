@@ -56,18 +56,26 @@ P60_deep_extractor() {
 
   sub_module_title "Extraction results"
 
-  lUNIQUE_FILES=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-  # lBINS=$(find "${FIRMWARE_PATH_CP}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep -c "ELF"' || true)
-  lFILES_EXT=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+  mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
 
-  if [[ "${lBINS}" -gt 0 || "${lUNIQUE_FILES}" -gt 0 ]]; then
-    lDIRS_EXT=$(find "${FIRMWARE_PATH_CP}" -xdev -type d | wc -l )
-    export LINUX_PATH_COUNTER=0
-    linux_basic_identification_helper "${FIRMWARE_PATH_CP}"
+  if [[ "${#lFILES_EXT_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_EXT_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+
+    local lLINUX_PATH_COUNTER=0
+    lLINUX_PATH_COUNTER=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
     print_ln
-    print_output "[*] Found ${ORANGE}${lFILES_EXT}${NC} files (${ORANGE}${lUNIQUE_FILES}${NC} unique files) and ${ORANGE}${lDIRS_EXT}${NC} directories at all."
-    # print_output "[*] Found ${ORANGE}${lBINS}${NC} binaries."
-    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER}${NC}."
+    print_output "[*] Found ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files at all."
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
 
     tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
 
@@ -75,15 +83,14 @@ P60_deep_extractor() {
     export FIRMWARE_PATH="${FIRMWARE_PATH_CP}"
 
     if [[ "${#ROOT_PATH[@]}" -gt 0 ]] ; then
-      write_csv_log "FILES" "UNIQUE_FILES" "DIRS" "Binaries" "LINUX_PATH_COUNTER" "Root PATH detected"
+      write_csv_log "FILES" "LINUX_PATH_COUNTER" "Root PATH detected"
       for lR_PATH in "${ROOT_PATH[@]}"; do
-        write_csv_log "${lFILES_EXT}" "${lUNIQUE_FILES}" "${lDIRS_EXT}" "${lBINS}" "${LINUX_PATH_COUNTER}" "${lR_PATH}"
+        write_csv_log "${#lFILES_EXT_ARR[@]}" "${lLINUX_PATH_COUNTER}" "${lR_PATH}"
       done
     fi
-    backup_var "FILES_EXT" "${lFILES_EXT}"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${lFILES_EXT}"
+  module_end_log "${FUNCNAME[0]}" "${#lFILES_EXT_ARR[@]}"
 }
 
 check_disk_space() {
@@ -115,7 +122,7 @@ deep_extractor() {
   sub_module_title "Deep extraction mode"
   local lFILES_AFTER_DEEP=0
   local lFILES_BEFORE_DEEP=0
-  lFILES_BEFORE_DEEP=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+  lFILES_BEFORE_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
 
   # if we run into the deep extraction mode we always do at least one extraction round:
   if [[ "${DISK_SPACE_CRIT}" -eq 0 ]] && [[ "${DEEP_EXT_DEPTH:-4}" -gt 0 ]]; then
@@ -152,7 +159,7 @@ deep_extractor() {
     detect_root_dir_helper "${FIRMWARE_PATH_CP}"
   fi
 
-  lFILES_AFTER_DEEP=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+  lFILES_AFTER_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
 
   print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_BEFORE_DEEP}${NC} files, after deep extraction we have now ${ORANGE}${lFILES_AFTER_DEEP}${NC} files extracted."
 }
@@ -197,16 +204,17 @@ deeper_extractor_helper() {
       else
         vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted"
       fi
-    elif [[ "${UBI_IMAGE}" -eq 1 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
-        ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted" &
-        lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted"
-      fi
+    # now handled via unblob
+    # elif [[ "${UBI_IMAGE}" -eq 1 ]]; then
+    #  if [[ "${THREADED}" -eq 1 ]]; then
+    #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted" &
+    #    lBIN_PID="$!"
+    #    store_kill_pids "${lBIN_PID}"
+    #    disown "${lBIN_PID}" 2> /dev/null || true
+    #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
+    #  else
+    #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted"
+    #  fi
     # now handled via unblob
     # elif [[ "${DLINK_ENC_DETECTED}" -eq 1 ]]; then
     #  if [[ "${THREADED}" -eq 1 ]]; then
@@ -355,16 +363,6 @@ deeper_extractor_helper() {
   done
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_P60[@]}"
-}
-
-linux_basic_identification_helper() {
-  local lFIRMWARE_PATH_CHECK="${1:-}"
-  if ! [[ -d "${lFIRMWARE_PATH_CHECK}" ]]; then
-    LINUX_PATH_COUNTER=0
-    return
-  fi
-  LINUX_PATH_COUNTER="$(find "${lFIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
-  backup_var "LINUX_PATH_COUNTER" "${LINUX_PATH_COUNTER}"
 }
 
 wait_for_extractor() {

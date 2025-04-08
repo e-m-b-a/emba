@@ -31,8 +31,9 @@ P20_foscam_decryptor() {
     local lEXTRACTION_FILE="${LOG_DIR}"/firmware/firmware_foscam_dec.bin
 
     foscam_enc_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
-
-    lNEG_LOG=1
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+      lNEG_LOG=1
+    fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
@@ -75,7 +76,7 @@ foscam_enc_extractor() {
         backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
         print_ln
         print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
-        write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+        write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
         write_csv_log "Foscam decryptor" "${lFOSCAM_ENC_PATH_}" "${lEXTRACTION_FILE_}" "1" "NA" "NA"
         lFOSCAM_DECRYTED=1
         if [[ -z "${FW_VENDOR:-}" ]]; then
@@ -105,8 +106,9 @@ foscam_ubi_extractor() {
   local lEXTRACTION_DIR_GZ="${LOG_DIR}/firmware/foscam_gz_extractor"
   local lUBI_DEV=""
   local lUBI_DEVS_ARR=()
-  local lFOSCAM_UBI_FILES=0
-  local lFOSCAM_UBI_DIRS=0
+  local lFILES_FOSCAM_UBI_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lFIRMWARE_PATH_}" ]]; then
     print_output "[-] No file for extraction found"
@@ -171,26 +173,29 @@ foscam_ubi_extractor() {
     if [[ -f "${lUBI_FS_TARGET}" ]]; then
       # unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 1
       binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
+
+      print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"
+      mapfile -t lFILES_FOSCAM_UBI_ARR < <(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type f ! -name "*.raw")
+      print_ln
+      print_output "[*] Extracted ${ORANGE}${#lFILES_FOSCAM_UBI_ARR[@]}${NC} files from the firmware image."
+      print_output "[*] Populating backend data for ${ORANGE}${#lFILES_FOSCAM_UBI_ARR[@]}${NC} files ... could take some time" "no_log"
+
+      for lBINARY in "${lFILES_FOSCAM_UBI_ARR[@]}" ; do
+        binary_architecture_threader "${lBINARY}" "P20_foscam_decryptor" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      done
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+      export FIRMWARE_PATH="${LOG_DIR}"/firmware
+      backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+      write_csv_log "Foscam decryptor/extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_FOSCAM_UBI_ARR[@]}" "NA"
     fi
 
     # print_output "[*] Unloading nandsim module"
     # modprobe -r nandsim || true
     # print_output "[*] Unloading ubi module"
     # modprobe -r ubi || true
-
-    if [[ -d "${lEXTRACTION_DIR_%\/}_binwalk_extracted" ]]; then
-      print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"
-      lFOSCAM_UBI_FILES=$(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type f | wc -l)
-      lFOSCAM_UBI_DIRS=$(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type d | wc -l)
-    fi
-
-    if [[ "${lFOSCAM_UBI_FILES}" -gt 0 ]]; then
-      print_ln
-      print_output "[*] Extracted ${ORANGE}${lFOSCAM_UBI_FILES}${NC} files and ${ORANGE}${lFOSCAM_UBI_DIRS}${NC} directories from the firmware image."
-      write_csv_log "Foscam UBI extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${lFOSCAM_UBI_FILES}" "${lFOSCAM_UBI_DIRS}" "NA"
-      export FIRMWARE_PATH="${LOG_DIR}"/firmware
-      backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
-      write_csv_log "Foscam decryptor/extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${lFOSCAM_UBI_FILES}" "${lFOSCAM_UBI_DIRS}" "NA"
-    fi
   fi
 }
