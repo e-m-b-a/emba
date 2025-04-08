@@ -92,7 +92,6 @@ dji_imah_firmware_extractor() {
   local lDJI_FILE=""
   local lDJI_KEY=""
   local lFNAME=""
-  local lEFILE=""
   local lFILES_EXT_KEY_ARR=()
   local lFILE_EXT_KEY=""
   local lDJI_KEYS_ARR=()
@@ -210,6 +209,7 @@ dji_imah_firmware_extractor() {
         print_ln "no_log"
         print_output "[+] Decrypted firmware files:"
         for lBINARY in "${lFILES_DJI_ARR[@]}" ; do
+          # shellcheck disable=SC2010
           ls -1lh "${lBINARY}" | grep -v "total [0-9]" | tee -a "${LOG_FILE}" || true
           binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
           local lTMP_PID="$!"

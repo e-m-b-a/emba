@@ -52,7 +52,7 @@ P50_binwalk_extractor() {
   module_title "Binwalk binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local LINUX_PATH_COUNTER_BINWALK=0
+  local lLINUX_PATH_COUNTER_BINWALK=0
   local lOUTPUT_DIR_BINWALK="${LOG_DIR}"/firmware/binwalk_extracted
 
   if [[ -f "${lFW_PATH_BINWALK}" ]]; then

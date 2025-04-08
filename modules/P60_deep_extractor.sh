@@ -23,10 +23,6 @@ P60_deep_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
   export DISK_SPACE_CRIT=0
-  local lFILES_EXT=0
-  local lUNIQUE_FILES=0
-  local lDIRS_EXT=0
-  local lBINS=0
   local lR_PATH=""
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
