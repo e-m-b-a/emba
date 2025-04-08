@@ -42,7 +42,7 @@ check_dtb()
   local lDTB_FILE=""
 
   # readarray -t lDTB_ARR < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
-  mapfile -t lDTB_ARR < <(grep ".dtb;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lDTB_ARR < <(grep ".dtb;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ ${#lDTB_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Device tree blobs found - output of fdtdump:"
@@ -71,7 +71,7 @@ check_bootloader()
   local lSYSLINUX_PATHS_ARR=()
   local lSYSLINUX_FILE=""
   # mapfile -t lSYSLINUX_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/syslinux/syslinux.cfg" || true)
-  mapfile -t lSYSLINUX_PATHS_ARR < <(grep "/boot/syslinux/syslinux.cfg;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lSYSLINUX_PATHS_ARR < <(grep "/boot/syslinux/syslinux.cfg;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lSYSLINUX_FILE in "${lSYSLINUX_PATHS_ARR[@]}" ; do
     if [[ -f "${lSYSLINUX_FILE}" ]] ; then
       lCHECK=1
@@ -89,7 +89,7 @@ check_bootloader()
   local lGRUB_PATHS_ARR=()
   local lGRUB_FILE=""
   # mapfile -t lGRUB_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/grub/grub.conf" || true)
-  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.conf;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.conf;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lGRUB_FILE in "${lGRUB_PATHS_ARR[@]}" ; do
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
@@ -100,7 +100,7 @@ check_bootloader()
     fi
   done
   # mapfile -t lGRUB_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/grub/menu.lst" || true)
-  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/menu.lst;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/menu.lst;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lGRUB_FILE in "${lGRUB_PATHS_ARR[@]}" ; do
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
@@ -117,7 +117,7 @@ check_bootloader()
   # Grub2
   lCHECK=0
   # mapfile -t lGRUB_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/grub/grub.cfg" || true)
-  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.cfg;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.cfg;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lGRUB_FILE in "${lGRUB_PATHS_ARR[@]}" ; do
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
@@ -128,7 +128,7 @@ check_bootloader()
     fi
   done
   # mapfile -t lGRUB_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/grub/grub.conf" || true)
-  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.conf;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.conf;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lGRUB_FILE in "${lGRUB_PATHS_ARR[@]}" ; do
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
@@ -181,9 +181,9 @@ check_bootloader()
   local lBOOT2_ARR=()
   local lBOOTL_ARR=()
   # mapfile -t lBOOT1_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/boot1" || true)
-  mapfile -t lBOOT1_ARR < <(grep "/boot/boot1;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
-  mapfile -t lBOOT2_ARR < <(grep "/boot/boot2;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
-  mapfile -t lBOOTL_ARR < <(grep "/boot/loader;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lBOOT1_ARR < <(grep "/boot/boot1;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  mapfile -t lBOOT2_ARR < <(grep "/boot/boot2;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  mapfile -t lBOOTL_ARR < <(grep "/boot/loader;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   # mapfile -t lBOOT2_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/boot2" || true)
   # mapfile -t lBOOTL_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/loader" || true)
 
@@ -268,9 +268,9 @@ check_bootloader()
   local lOBSD_FILE1=""
   local lOBSD_FILE2=""
   # mapfile -t lOBSD_PATH1_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/usr/mdec/biosboot" || true)
-  mapfile -t lOBSD_PATH1_ARR < <(grep "/usr/mdec/biosboot;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lOBSD_PATH1_ARR < <(grep "/usr/mdec/biosboot;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   # mapfile -t lOBSD_PATH2_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot" || true)
-  mapfile -t lOBSD_PATH2_ARR < <(grep "/boot;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lOBSD_PATH2_ARR < <(grep "/boot;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lOBSD_FILE1 in "${lOBSD_PATH1_ARR[@]}" ; do
     for lOBSD_FILE2 in "${lOBSD_PATH2_ARR[@]}" ; do
       if [[ -f "${lOBSD_FILE2}" ]] && [[ -f "${lOBSD_FILE2}" ]] ; then

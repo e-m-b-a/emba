@@ -249,7 +249,7 @@ architecture_check() {
       print_output "[-] WARNING: Architecture check without P99 csv log file is not working!" "no_log"
       return
     fi
-    sort -u -t';' -k8,8 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
+    sort -u -t';' -k9,9 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
     # this needs to be added to the first line
     # write_csv_log_to_path "CSV log file" "SOURCE MODULE" "FILE" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
 

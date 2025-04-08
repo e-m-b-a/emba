@@ -43,7 +43,7 @@ S12_binary_protection()
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S12+=( "${lTMP_PID}" )
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S12
-    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
     wait_for_pid "${lWAIT_PIDS_S12[@]}"
 
