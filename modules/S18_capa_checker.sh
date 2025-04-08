@@ -67,7 +67,7 @@ S18_capa_checker() {
     else
       capa_runner_fct "${lBINARY}"
     fi
-  done < <(grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  done < <(grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S18[@]}"
 

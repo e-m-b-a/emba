@@ -33,7 +33,7 @@ S22_php_check()
   export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
-    mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+    mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
     write_csv_log "Script path" "PHP issue" "source (e.g. semgrep)" "common linux file"
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
