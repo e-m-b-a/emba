@@ -243,8 +243,6 @@ architecture_check() {
     export D_END="NA"
     local lBINARY=""
     local D_FILE_OUTPUT=""
-    local lWAIT_PIDS_P99_ARR=()
-
 
     # sort and make P99_CSV_LOG unique
     if [[ ! -f "${P99_CSV_LOG}" ]]; then
