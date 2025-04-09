@@ -45,11 +45,11 @@ check_dtb()
   mapfile -t lDTB_ARR < <(grep ".dtb;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ ${#lDTB_ARR[@]} -gt 0 ]] ; then
-    print_output "[+] Device tree blobs found - output of fdtdump:"
+    print_output "[+] Device tree blobs found:"
     for lDTB_FILE in "${lDTB_ARR[@]}" ; do
-      print_output "$(indent "${lDTB_FILE}")"
+      print_output "$(indent "$(orange "${lDTB_FILE}")")"
       write_link "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
-      write_log "$(fdtdump "${lDTB_FILE}" 2> /dev/null || true)" "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt" "g"
+      fdtdump "${lDTB_FILE}" 2>/dev/null || true > "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
       ((STARTUP_FINDS+=1))
     done
     print_ln
