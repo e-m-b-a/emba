@@ -58,7 +58,7 @@ S13_weak_func_check()
 
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
-      lBINARY="${lBINARY/;*}"
+      lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then
