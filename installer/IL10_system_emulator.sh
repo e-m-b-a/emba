@@ -31,7 +31,9 @@ IL10_system_emulator() {
     print_tool_info "kpartx" 1
     # uml-utilities provides tunctl for L10 -> uml-utilities was removed somewhere in August 2024
     # print_tool_info "uml-utilities" 1
-    print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-1+b1_amd64.deb" "external/uml-utilities.deb"
+    # print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-1+b1_amd64.deb" "external/uml-utilities.deb"
+    print_tool_info "libfuse2t64" 1
+    print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2_amd64.deb" "external/uml-utilities.deb"
     print_tool_info "util-linux" 1
     print_tool_info "vlan" 1
     print_tool_info "qemu-utils" 1
