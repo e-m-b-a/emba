@@ -59,34 +59,32 @@ P50_binwalk_extractor() {
     binwalker_matryoshka "${lFW_PATH_BINWALK}" "${lOUTPUT_DIR_BINWALK}"
   fi
 
-  if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
+  print_ln
+  if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
+    mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
+  fi
+
+  if [[ "${#lFILES_BINWALK_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Extracted ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_BINWALK_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+
+    lLINUX_PATH_COUNTER_BINWALK=$(linux_basic_identification "${lOUTPUT_DIR_BINWALK}" "${FUNCNAME[0]}")
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    sub_module_title "Firmware extraction details"
+    print_output "[*] ${ORANGE}Binwalk${NC} results:"
+    print_output "[*] Found ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
     print_ln
-    if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
-      mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
-    fi
-
-    if [[ "${#lFILES_BINWALK_ARR[@]}" -gt 0 ]]; then
-      print_output "[*] Extracted ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
-      print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files ... could take some time" "no_log"
-
-      for lBINARY in "${lFILES_BINWALK_ARR[@]}" ; do
-        binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-        local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
-      done
-
-      lLINUX_PATH_COUNTER_BINWALK=$(linux_basic_identification "${lOUTPUT_DIR_BINWALK}" "${FUNCNAME[0]}")
-      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
-
-      sub_module_title "Firmware extraction details"
-      print_output "[*] ${ORANGE}Binwalk${NC} results:"
-      print_output "[*] Found ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
-      print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
-      print_ln
-      tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
-      print_ln
-    fi
+    tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
+    print_ln
   fi
 
   detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
