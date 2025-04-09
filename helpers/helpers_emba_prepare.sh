@@ -647,7 +647,7 @@ detect_root_dir_helper() {
       # we only use paths with more then 4 matches as possible root path
       continue
     fi
-    # lR_PATH=$(echo "${lR_PATH}" | awk '{print $2}')
+    lR_PATH=$(echo "${lR_PATH}" | awk '{print $2}')
     if [[ -d "${lR_PATH}" ]]; then
       ROOT_PATH+=( "${lR_PATH}" )
       if [[ -z "${lMECHANISM}" ]]; then
