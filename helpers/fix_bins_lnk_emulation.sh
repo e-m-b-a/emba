@@ -28,7 +28,7 @@ cp "$(command -v busybox)" "${ROOT_DIR}"
 chmod +x "${ROOT_DIR}"/busybox
 
 echo "[*] Identifying possible executable files"
-mapfile -t POSSIBLE_ELFS < <(find "${ROOT_DIR}" -type f -exec file {} \; | grep "ELF\|executable" | cut -d: -f1)
+mapfile -t POSSIBLE_ELFS < <(find "${ROOT_DIR}" -type f ! -name "*.raw" -exec file {} \; | grep "ELF\|executable" | cut -d: -f1)
 mapfile -t POSSIBLE_SH < <(find "${ROOT_DIR}" -type f -name "*.sh")
 POSSIBLE_EXES_ARR=( "${POSSIBLE_ELFS[@]}" "${POSSIBLE_SH[@]}" )
 
@@ -56,6 +56,10 @@ done
 if [[ -s "${ROOT_DIR}/busybox_applets.txt" ]]; then
   echo ""
   echo "[*] BusyBox applet recovery process"
+  if [[ -f "${ROOT_DIR}"/bin ]]; then
+    # sometimes we have seen /bin as file after extraction. Now we rebuild it
+    rm "${ROOT_DIR}"/bin
+  fi
   if [[ ! -d "${ROOT_DIR}"/bin ]]; then
     mkdir "${ROOT_DIR}"/bin
   fi
