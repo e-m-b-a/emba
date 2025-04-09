@@ -46,7 +46,7 @@ S08_submodule_alpine_apk_package_parser() {
   local lPKG_MD5=""
 
   # mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
-  mapfile -t lAPK_ARCHIVES_ARR < <(grep "\.apk;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lAPK_ARCHIVES_ARR < <(grep "\.apk;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

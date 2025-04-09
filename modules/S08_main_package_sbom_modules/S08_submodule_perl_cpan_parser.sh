@@ -32,7 +32,7 @@ S08_submodule_perl_cpan_parser() {
 
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -t lPERL_CPAN_FILES_ARR < <(grep "cpanfile" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lPERL_CPAN_FILES_ARR < <(grep "cpanfile" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lPERL_CPAN_FILES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPERL_CPAN_FILES_ARR[@]}${NC} perl CPAN package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
