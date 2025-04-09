@@ -59,7 +59,7 @@ S14_weak_func_radare_check()
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
-      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
+      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
       lBINARY="${lBINARY/;*}"
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
