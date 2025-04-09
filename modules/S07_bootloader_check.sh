@@ -49,7 +49,7 @@ check_dtb()
     for lDTB_FILE in "${lDTB_ARR[@]}" ; do
       print_output "$(indent "$(orange "${lDTB_FILE}")")"
       write_link "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
-      fdtdump "${lDTB_FILE}" 2>/dev/null || true > "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
+      write_log "$(fdtdump "${lDTB_FILE}" 2>/dev/null || true)" "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt" "g"
       ((STARTUP_FINDS+=1))
     done
     print_ln
