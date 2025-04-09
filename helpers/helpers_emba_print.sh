@@ -318,7 +318,8 @@ write_csv_log() {
 
 # for generating csv log file in somewhere else
 # $1: path with filename for csv log file
-# 2nd parameter: array with csv items
+# $2: source module
+# $@: array with csv items
 write_csv_log_to_path() {
   local lCSV_LOG="${1:-}"
   local lSOURCE_MODULE="${2:-}"
