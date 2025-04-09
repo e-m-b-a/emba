@@ -2,7 +2,7 @@ name: Update version identifiers for quick scan
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # do it every week
+    - cron: '0 0 * * 1' # do it every week
 
 jobs:
   update_quick_versions:

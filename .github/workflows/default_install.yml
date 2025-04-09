@@ -2,7 +2,7 @@ name: EMBA default installation on Ubuntu
 
 on:
   schedule:
-    - cron: '0 0 * * *' # do it every day
+    - cron: '0 0 * * */2' # do it every 2nd day
 #  push:
 #    branches:
 #      - '**'        # matches every branch
