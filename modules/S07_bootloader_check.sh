@@ -48,11 +48,9 @@ check_dtb()
     print_output "[+] Device tree blobs found - output of fdtdump:"
     for lDTB_FILE in "${lDTB_ARR[@]}" ; do
       print_output "$(indent "${lDTB_FILE}")"
-      if [[ ${DTBDUMP} -eq 1 ]] ; then
-        write_log "$(fdtdump "${lDTB_FILE}" 2> /dev/null || true)" "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt" "g"
-        write_link "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
-        ((STARTUP_FINDS+=1))
-      fi
+      write_link "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
+      write_log "$(fdtdump "${lDTB_FILE}" 2> /dev/null || true)" "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt" "g"
+      ((STARTUP_FINDS+=1))
     done
     print_ln
   else
