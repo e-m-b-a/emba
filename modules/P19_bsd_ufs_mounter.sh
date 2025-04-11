@@ -31,7 +31,7 @@ P19_bsd_ufs_mounter() {
 
     ufs_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ "${FILES_UFS_MOUNT}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -44,8 +44,9 @@ ufs_extractor() {
   local lUFS_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_UFS_MOUNT="${TMP_DIR}""/ufs_mount_${RANDOM}"
-  local lDIRS_UFS_MOUNT=0
-  export FILES_UFS_MOUNT=0
+  local lFILES_UFS_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lUFS_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -58,8 +59,7 @@ ufs_extractor() {
   print_output "[*] Trying to mount ${ORANGE}${lUFS_PATH_}${NC} to ${ORANGE}${lTMP_UFS_MOUNT}${NC} directory"
   # modprobe ufs
   if ! lsmod | grep -q "^ufs[[:space:]]"; then
-    print_output "[-] WARNING: Ufs kernel module not loaded - can't proceed"
-    return
+    print_output "[-] WARNING: Ufs kernel module probably not loaded - trying to proceed"
   fi
   mount -r -t ufs -o ufstype=ufs2 "${lUFS_PATH_}" "${lTMP_UFS_MOUNT}"
 
@@ -73,12 +73,21 @@ ufs_extractor() {
     print_ln
     print_output "[*] Unmounting ${ORANGE}${lTMP_UFS_MOUNT}${NC} directory"
 
-    FILES_UFS_MOUNT=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-    lDIRS_UFS_MOUNT=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
-    print_output "[*] Extracted ${ORANGE}${FILES_UFS_MOUNT}${NC} files and ${ORANGE}${lDIRS_UFS_MOUNT}${NC} directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "UFS filesystem extractor" "${lUFS_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UFS_MOUNT}" "${lDIRS_UFS_MOUNT}" "NA"
+    mapfile -t lFILES_UFS_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+    print_output "[*] Extracted ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files from the firmware image."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files ... could take some time" "no_log"
+    for lBINARY in "${lFILES_UFS_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+    write_csv_log "UFS filesystem extractor" "${lUFS_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_UFS_ARR[@]}" "NA"
     umount "${lTMP_UFS_MOUNT}" 2>/dev/null || true
+
     detect_root_dir_helper "${lEXTRACTION_DIR_}"
   fi
   rm -r "${lTMP_UFS_MOUNT}"

@@ -69,50 +69,56 @@ P55_unblob_extractor() {
     return
   fi
 
-  local lFILES_EXT_UB=0
-  local lUNIQUE_FILES_UB=0
-  local lDIRS_EXT_UB=0
-  local lBINS_UB=0
+  local lFILES_UNBLOB_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  export LINUX_PATH_COUNTER_UNBLOB=0
-  export OUTPUT_DIR_UNBLOB="${LOG_DIR}"/firmware/unblob_extracted
+  local lLINUX_PATH_COUNTER_UNBLOB=0
+  local lOUTPUT_DIR_UNBLOB="${LOG_DIR}"/firmware/unblob_extracted
 
   if [[ -f "${lFW_PATH_UNBLOB}" ]]; then
-    unblobber "${lFW_PATH_UNBLOB}" "${OUTPUT_DIR_UNBLOB}"
+    unblobber "${lFW_PATH_UNBLOB}" "${lOUTPUT_DIR_UNBLOB}"
   fi
 
   if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
-    linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB}"
     print_ln
-
-    if [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
-      lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l)
-      lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 | wc -l || true)
-      lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
-      # lBINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' 2>/dev/null | grep -c "ELF" || true )
+    if [[ -d "${lOUTPUT_DIR_UNBLOB}" ]]; then
+      mapfile -t lFILES_UNBLOB_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f ! -name "*.raw")
     fi
 
-    if [[ "${lBINS_UB}" -gt 0 ]] || [[ "${lFILES_EXT_UB}" -gt 0 ]]; then
+    if [[ "${#lFILES_UNBLOB_ARR[@]}" -gt 0 ]]; then
+      print_output "[*] Extracted ${ORANGE}${#lFILES_UNBLOB_ARR[@]}${NC} files."
+      print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UNBLOB_ARR[@]}${NC} files ... could take some time" "no_log"
+
+      for lBINARY in "${lFILES_UNBLOB_ARR[@]}" ; do
+        binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      done
+
+      lLINUX_PATH_COUNTER_UNBLOB=$(linux_basic_identification "${lOUTPUT_DIR_UNBLOB}" "${FUNCNAME[0]}")
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
       sub_module_title "Firmware extraction details"
       print_output "[*] ${ORANGE}Unblob${NC} results:"
-      print_output "[*] Found ${ORANGE}${lFILES_EXT_UB}${NC} files (${ORANGE}${lUNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${lDIRS_EXT_UB}${NC} directories at all."
-      # print_output "[*] Found ${ORANGE}${lBINS_UB}${NC} binaries."
-      print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
+      print_output "[*] Found ${ORANGE}${#lFILES_UNBLOB_ARR[@]}${NC} files."
+      print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_UNBLOB}${NC}."
       print_ln
-      tree -sh "${OUTPUT_DIR_UNBLOB}" | tee -a "${LOG_FILE}"
+      tree -sh "${lOUTPUT_DIR_UNBLOB}" | tee -a "${LOG_FILE}"
       print_ln
     fi
   fi
 
-  detect_root_dir_helper "${OUTPUT_DIR_UNBLOB}"
+  detect_root_dir_helper "${lOUTPUT_DIR_UNBLOB}"
 
-  write_csv_log "FILES Unblob" "UNIQUE FILES Unblob" "directories Unblob" "Binaries Unblob" "LINUX_PATH_COUNTER Unblob"
-  write_csv_log "${lFILES_EXT_UB}" "${lUNIQUE_FILES_UB}" "${lDIRS_EXT_UB}" "${lBINS_UB}" "${LINUX_PATH_COUNTER_UNBLOB}"
+  write_csv_log "FILES Unblob" "LINUX_PATH_COUNTER Unblob"
+  write_csv_log "${#lFILES_UNBLOB_ARR[@]}" "${lLINUX_PATH_COUNTER_UNBLOB}"
 
-  module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_UB}"
+  module_end_log "${FUNCNAME[0]}" "${#lFILES_UNBLOB_ARR[@]}"
 }
 
 unblobber() {
@@ -146,10 +152,3 @@ unblobber() {
   fi
 }
 
-linux_basic_identification_unblobber() {
-  local lFIRMWARE_PATH_CHECK="${1:-}"
-  if ! [[ -d "${lFIRMWARE_PATH_CHECK}" ]]; then
-    return
-  fi
-  LINUX_PATH_COUNTER_UNBLOB="$(find "${lFIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
-}

@@ -157,6 +157,7 @@ set_exclude()
 
 binary_architecture_threader() {
   local lBINARY="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
 
   local lD_FLAGS_CNT=""
   local lD_MACHINE="NA"
@@ -168,6 +169,9 @@ binary_architecture_threader() {
   lMD5SUM="${lMD5SUM/\ *}"
 
   if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
+    return
+  fi
+  if grep -q "${lMD5SUM}" "${P99_CSV_LOG}" 2>/dev/null; then
     return
   fi
   echo "${lMD5SUM}" >> "${TMP_DIR}/p99_md5sum_done.tmp"
@@ -206,11 +210,11 @@ binary_architecture_threader() {
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
 
-  write_csv_log "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}" &
+  write_csv_log_to_path "${P99_CSV_LOG}" "${lSOURCE_MODULE}" "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}" &
 }
 
 architecture_check() {
-  if [[ ${#ALL_FILES_ARR[@]} -eq 0 ]] ; then
+  if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] WARNING: Architecture auto detection and backend data population not possible\\n"
     return
   fi
@@ -239,19 +243,11 @@ architecture_check() {
     export D_END="NA"
     local lBINARY=""
     local D_FILE_OUTPUT=""
-    local lWAIT_PIDS_P99_ARR=()
 
-    # write_csv_log "FILE" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
-    # we use the ALL_FILES_ARR array which should have all files
-    for lBINARY in "${ALL_FILES_ARR[@]}" ; do
-      binary_architecture_threader "${lBINARY}" &
-      local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
-    done
-    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
-
-    sort -u -t';' -k8,8 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
+    # sort and make P99_CSV_LOG unique
+    sort -u -t';' -k9,9 -o "${P99_CSV_LOG}" "${P99_CSV_LOG}"
+    # this needs to be added to the first line
+    # write_csv_log_to_path "CSV log file" "SOURCE MODULE" "FILE" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
 
     lARCH_MIPS64_N32_CNT=$(grep -c "N32 MIPS64 rel2" "${P99_CSV_LOG}" || true)
     lARCH_MIPS64R2_CNT=$(grep -c "MIPS64 rel2" "${P99_CSV_LOG}" || true)
@@ -274,8 +270,8 @@ architecture_check() {
     lARCH_RISCV_CNT=$(grep -c "UCB RISC-V" "${P99_CSV_LOG}" || true)
     lARCH_QCOM_DSP6_CNT=$(grep -c "QUALCOMM DSP6" "${P99_CSV_LOG}" || true)
 
-    lD_END_BE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "MSB" || true)
-    lD_END_LE_CNT=$(cut -d ';' -f7 "${P99_CSV_LOG}" | grep -c "LSB" || true)
+    lD_END_BE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "MSB" || true)
+    lD_END_LE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "LSB" || true)
 
     if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture Count")")"
@@ -423,13 +419,14 @@ prepare_all_file_arrays() {
   export ALL_FILES_ARR=()
 
   # we exclude all the raw files from binwalk
-  readarray -t ALL_FILES_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! -name "*.raw")
+  # readarray -t ALL_FILES_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! -name "*.raw")
+  readarray -t ALL_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$")
 
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
-    local lFILE_ARR_RTOS=()
-    readarray -t lFILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f)
-    ALL_FILES_ARR+=( "${lFILE_ARR_RTOS[@]}" )
+    # local lFILE_ARR_RTOS=()
+    # readarray -t lFILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f)
+    # ALL_FILES_ARR+=( "${lFILE_ARR_RTOS[@]}" )
     ALL_FILES_ARR+=( "${lFIRMWARE_PATH}" )
   fi
 }
@@ -437,16 +434,17 @@ prepare_all_file_arrays() {
 prepare_file_arr() {
   local lFIRMWARE_PATH="${1:-}"
   echo ""
-  print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
+  print_output "[*] Unique files auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC}\\n"
 
   export FILE_ARR=()
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
-  readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
+  # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
+  readarray -t FILE_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}"| grep -v "\.raw$" || true)
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
-    readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
+    # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
-    FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
+    # FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "${lFIRMWARE_PATH}" )
   fi
   print_output "[*] Found ${ORANGE}${#FILE_ARR[@]}${NC} unique files."
@@ -474,8 +472,9 @@ prepare_binary_arr() {
   # readarray -t BINARIES < <( find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
-  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; grep "ELF\|PE32" | cut -d: -f1 || true)
-  # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF\|PE32" | cut -d: -f1' 2>/dev/null || true)
+  # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; grep "ELF\|PE32" | cut -d: -f1 || true)
+  # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep "ELF\|PE32" | cut -d: -f1 2>/dev/null || true)
+  readarray -t lBINARIES_TMP_ARR < <(grep ";ELF\|;PE32" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   if [[ -v lBINARIES_TMP_ARR[@] ]]; then
     for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
       if [[ -f "${lBINARY}" ]]; then
@@ -502,13 +501,16 @@ prepare_file_arr_limited() {
   fi
 
   echo ""
-  print_output "[*] Unique and limited file array generation for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
+  print_output "[*] Unique and limited file array generation for ${ORANGE}${lFIRMWARE_PATH}${NC}\\n"
 
-  readarray -t FILE_ARR_LIMITED < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
-    -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
-    -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
-    -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" -o -iname "*.bmp" -o -path "*/\.git/*" \) \
-    -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3-)
+  # readarray -t FILE_ARR_LIMITED < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
+  #  -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
+  #  -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
+  #  -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" -o -iname "*.bmp" -o -path "*/\.git/*" \) \
+  #  -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3-)
+
+  readarray -t FILE_ARR_LIMITED < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.udeb$\|\.deb$\|\.ipk$\|\.pdf$\\|\.php$\|\.txt$\|\.doc$\|\.rtf$\|\.docx\|\.htm$\|\.md5$\|\..sha1$\|\.torrent$\|\.png$\|\.svg$\|\.js$\|\.info$\|\.md$\|\.log$\|\.yml$\|\.bmp$\|\.git\/" | sort -u || true)
+
 }
 
 set_etc_paths()
@@ -576,14 +578,16 @@ detect_root_dir_helper() {
 
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
     # xargs threading is much faster. Big testcase firmware 9mins vs. 3mins
-    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % 2>/dev/null' | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
+    # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % 2>/dev/null' | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
 
     if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
         # now we have a result like this "/lib/ld-uClibc.so.0"
         # lets escape it
         lINTERPRETER_ESCAPED=$(echo "${lINTERPRETER_PATH}" | sed -e 's/\//\\\//g')
-        mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
+        # mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
+        mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true)
         for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
           # remove the interpreter path from the full path:
           lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
@@ -597,19 +601,8 @@ detect_root_dir_helper() {
       done
     fi
 
-    # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
-    for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-      if [[ -d "${lR_PATH}" ]]; then
-        ROOT_PATH+=( "${lR_PATH}" )
-        if [[ -z "${lMECHANISM}" ]]; then
-          lMECHANISM="dir names"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
-          lMECHANISM="${lMECHANISM} / dir names"
-        fi
-      fi
-    done
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
+    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/busybox" | cut -d ';' -f2 | sed -E 's/\/.?bin\/busybox.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )
@@ -620,8 +613,8 @@ detect_root_dir_helper() {
         fi
       fi
     done
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
-    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/bash//"' || true)
+    # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/bash" | cut -d ';' -f2 | sed -E 's/\/.?bin\/bash.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )
@@ -633,7 +626,7 @@ detect_root_dir_helper() {
       fi
     done
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/sh//"' || true)
-    mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/sh" | cut -d ';' -f2 | sed -E 's/\/.?bin\/sh.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )
@@ -647,6 +640,7 @@ detect_root_dir_helper() {
   fi
 
   mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
+  # currently not working: mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "/bin/\|/lib/\|/etc/\|/root/\|/dev/\|/opt/\|/proc/\|/lib64\|/boot/\|/home/" | cut -d ';' -f2 | grep "${lSEARCH_PATH}" | sort -u || true)
   for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
     lCNT=$(echo "${lR_PATH}" | awk '{print $1}')
     if [[ "${lCNT}" -lt 5 ]]; then

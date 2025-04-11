@@ -52,7 +52,7 @@ S08_submodule_bsd_package_parser() {
   local lPKG_MD5=""
 
   # mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
-  mapfile -t lPKG_ARCHIVES_ARR < <(grep "\.pkg;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lPKG_ARCHIVES_ARR < <(grep "\.pkg;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

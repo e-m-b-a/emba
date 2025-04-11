@@ -45,19 +45,18 @@ P50_binwalk_extractor() {
     return
   fi
 
-  local lFILES_EXT_BW=0
-  local lUNIQUE_FILES_BW=0
-  local lDIRS_EXT_BW=0
-  local lBINS_BW=0
+  local lFILES_BINWALK_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   module_title "Binwalk binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  export LINUX_PATH_COUNTER_BINWALK=0
-  export OUTPUT_DIR_BINWALK="${LOG_DIR}"/firmware/binwalk_extracted
+  local lLINUX_PATH_COUNTER_BINWALK=0
+  local lOUTPUT_DIR_BINWALK="${LOG_DIR}"/firmware/binwalk_extracted
 
   if [[ -f "${lFW_PATH_BINWALK}" ]]; then
-    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${OUTPUT_DIR_BINWALK}"
+    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${lOUTPUT_DIR_BINWALK}"
   fi
 
   print_ln
@@ -88,20 +87,28 @@ P50_binwalk_extractor() {
     tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
   fi
 
-  detect_root_dir_helper "${OUTPUT_DIR_BINWALK}"
+  detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
 
-  write_csv_log "FILES Binwalk" "UNIQUE FILES Binwalk" "directories Binwalk" "Binaries Binwalk" "LINUX_PATH_COUNTER Binwalk"
-  write_csv_log "${lFILES_EXT_BW}" "${lUNIQUE_FILES_BW}" "${lDIRS_EXT_BW}" "${lBINS_BW}" "${LINUX_PATH_COUNTER_BINWALK}"
+  write_csv_log "FILES Binwalk" "LINUX_PATH_COUNTER Binwalk"
+  write_csv_log "${#lFILES_BINWALK_ARR[@]}" "${lLINUX_PATH_COUNTER_BINWALK}"
 
-  module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_BW}"
+  module_end_log "${FUNCNAME[0]}" "${#lFILES_BINWALK_ARR[@]}"
 }
 
-linux_basic_identification_binwalk() {
+linux_basic_identification() {
   local lFIRMWARE_PATH_CHECK="${1:-}"
+  local lIDENTIFIER="${2:-}"
+  local lLINUX_PATH_COUNTER_BINWALK=0
+
   if ! [[ -d "${lFIRMWARE_PATH_CHECK}" ]]; then
     return
   fi
-  LINUX_PATH_COUNTER_BINWALK="$(find "${lFIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  if [[ -n "${lIDENTIFIER}" ]]; then
+    lLINUX_PATH_COUNTER_BINWALK="$(grep "${lIDENTIFIER}" "${P99_CSV_LOG}" | grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" || true)"
+  else
+    lLINUX_PATH_COUNTER_BINWALK="$(grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" "${P99_CSV_LOG}" || true)"
+  fi
+  echo "${lLINUX_PATH_COUNTER_BINWALK}"
 }
 
 remove_uprintable_paths() {

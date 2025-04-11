@@ -52,7 +52,7 @@ S09_firmware_base_version_check() {
   local lFILE_ARR_TMP=()
   # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
   export FILE_ARR=()
-  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -99,7 +99,7 @@ S09_firmware_base_version_check() {
     local lPKG_FILE=""
     for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
       lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
-      (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+      (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
     done
 
     print_output "[*] Waiting for grepping jobs" "no_log"
@@ -107,7 +107,7 @@ S09_firmware_base_version_check() {
     wait $(jobs -p) # nosemgrep
 
     sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt > "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
-    cut -d ';' -f1 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
+    cut -d ';' -f2 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
 
     # we have now all our filesystem bins in "${P99_CSV_LOG}"
     # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
@@ -753,7 +753,7 @@ bin_string_checker() {
     mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
     FILE_ARR=()
     for lMD5_SUM_MATCHED in "${lMD5_SUM_MATCHES_ARR[@]}"; do
-      lMATCHED_FNAME=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | cut -d ';' -f1 | head -1 || true)
+      lMATCHED_FNAME=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | cut -d ';' -f2 | head -1 || true)
       FILE_ARR+=("${lMATCHED_FNAME}")
       # print_output "[*] Matched ${lMATCHED_FNAME}" "no_log"
     done

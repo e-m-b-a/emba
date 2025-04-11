@@ -55,7 +55,7 @@ S16_ghidra_decompile_checks()
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   else
-    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f1 || true)
+    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
@@ -73,7 +73,7 @@ S16_ghidra_decompile_checks()
     lBIN_TO_CHECK="${lBIN_TO_CHECK#\.}"
 
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
-      lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+      lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -1 || true)
     fi
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       continue

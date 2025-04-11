@@ -22,7 +22,8 @@ export PRE_THREAD_ENA=0
 P17_gpg_decompress() {
   local lNEG_LOG=0
 
-  if [[ "${GPG_COMPRESS}" -eq 1 ]]; then
+  # deprecated module - binwalk is now able to extract these files
+  if [[ "${GPG_COMPRESS}" -eq 666 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "GPG compressed firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -31,7 +32,9 @@ P17_gpg_decompress() {
 
     gpg_decompress_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
 
-    lNEG_LOG=1
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+      lNEG_LOG=1
+    fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
@@ -39,6 +42,10 @@ P17_gpg_decompress() {
 gpg_decompress_extractor() {
   local lGPG_FILE_PATH_="${1:-}"
   local lEXTRACTION_FILE_="${2:-}"
+
+  local lFILES_GPG_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lGPG_FILE_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -56,10 +63,23 @@ gpg_decompress_extractor() {
     export FIRMWARE_PATH="${lEXTRACTION_FILE_}"
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     print_ln
-    print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
-    unblobber "${lEXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_gpg_extracted
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "GPG decompression" "${lGPG_FILE_PATH_}" "${lEXTRACTION_FILE_}" "1" "NA" "NA"
+    print_output "[*] Firmware file details: ${ORANGE}$(file -b "${lEXTRACTION_FILE_}")${NC}"
+    binwalker_matryoshka "${lEXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_gpg_extracted
+
+    mapfile -t lFILES_GPG_ARR < <(find "${LOG_DIR}/firmware/firmware_gpg_extracted" -type f ! -name "*.raw")
+    print_output "[*] Extracted ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files from GPG compressed file."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_GPG_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "P17_gpg_decompress" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+    write_csv_log "GPG decompression" "${lGPG_FILE_PATH_}" "${lEXTRACTION_FILE_}" "${#lFILES_GPG_ARR[@]}" "NA"
   else
     print_output "[-] Extraction of GPG compressed firmware file failed"
   fi
