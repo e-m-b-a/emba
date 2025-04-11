@@ -61,6 +61,7 @@ P50_binwalk_extractor() {
 
   print_ln
   if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
+    remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}"
     mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
   fi
 
@@ -84,7 +85,6 @@ P50_binwalk_extractor() {
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
     print_ln
     tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
-    print_ln
   fi
 
   detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
@@ -109,4 +109,21 @@ linux_basic_identification() {
     lLINUX_PATH_COUNTER_BINWALK="$(grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" "${P99_CSV_LOG}" || true)"
   fi
   echo "${lLINUX_PATH_COUNTER_BINWALK}"
+}
+
+remove_uprintable_paths() {
+  local lOUTPUT_DIR_BINWALK="${1:-}"
+
+  local lFIRMWARE_UNPRINT_FILES_ARR=()
+  local lFW_FILE=""
+
+  mapfile -t lFIRMWARE_UNPRINT_FILES_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -name '*[^[:print:]]*')
+  if [[ "${#lFIRMWARE_UNPRINT_FILES_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Unprintable characters detected in extracted files -> cleanup started"
+    for lFW_FILE in "${lFIRMWARE_UNPRINT_FILES_ARR[@]}"; do
+      print_output "[*] Cleanup of ${lFW_FILE} with unprintable characters"
+      print_output "[*] Moving ${lFW_FILE} to ${lFW_FILE//[![:print:]]/_}"
+      mv "${lFW_FILE}" "${lFW_FILE//[![:print:]]/_}" || true
+    done
+  fi
 }
