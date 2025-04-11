@@ -30,7 +30,9 @@ P21_buffalo_decryptor() {
 
     buffalo_enc_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
 
-    lNEG_LOG=1
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+      lNEG_LOG=1
+    fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
@@ -39,6 +41,10 @@ buffalo_enc_extractor() {
   local lBUFFALO_ENC_PATH_="${1:-}"
   local lEXTRACTION_FILE_="${2:-}"
   local lBUFFALO_FILE_CHECK=""
+
+  local lFILES_BUFFALO_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lBUFFALO_ENC_PATH_}" ]]; then
     print_output "[-] No file for decryption provided"
@@ -81,7 +87,7 @@ buffalo_enc_extractor() {
   print_ln
 
   if [[ -f "${lEXTRACTION_FILE_}" ]]; then
-    lBUFFALO_FILE_CHECK=$(file "${lEXTRACTION_FILE_}")
+    lBUFFALO_FILE_CHECK=$(file -b "${lEXTRACTION_FILE_}")
     if [[ "${lBUFFALO_FILE_CHECK}" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
       print_ln
       print_output "[+] Decrypted Buffalo firmware file to ${ORANGE}${lEXTRACTION_FILE_}${NC}"
@@ -89,8 +95,27 @@ buffalo_enc_extractor() {
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       print_ln
       print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
-      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-      write_csv_log "Buffalo decryptor" "${lBUFFALO_ENC_PATH_}" "${lEXTRACTION_FILE_}" "1" "NA" "NA"
+
+      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE/\.bin}_binwalk_extracted"
+
+      print_output "[*] Checking ${lEXTRACTION_FILE/\.bin}_binwalk_extracted for files and directories"
+      if [[ -d "${lEXTRACTION_FILE/\.bin}_binwalk_extracted" ]]; then
+        mapfile -t lFILES_BUFFALO_ARR < <(find "${lEXTRACTION_FILE/\.bin}_binwalk_extracted" -type f ! -name "*.raw")
+        print_ln
+        print_output "[*] Extracted ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files from the firmware image."
+        print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files ... could take some time" "no_log"
+      fi
+
+      for lBINARY in "${lFILES_BUFFALO_ARR[@]}" ; do
+        binary_architecture_threader "${lBINARY}" "P21_buffalo_decryptor" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      done
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+      write_csv_log "Buffalo decryptor" "${lBUFFALO_ENC_PATH_}" "${lEXTRACTION_FILE_}" "${#lFILES_BUFFALO_ARR[@]}" "NA"
       lBUFFALO_DECRYTED=1
       if [[ -z "${FW_VENDOR:-}" ]]; then
         export FW_VENDOR="BUFFALO"

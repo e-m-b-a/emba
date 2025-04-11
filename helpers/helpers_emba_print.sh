@@ -316,6 +316,21 @@ write_csv_log() {
   echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${lCSV_LOG}" || true
 }
 
+# for generating csv log file in somewhere else
+# $1: path with filename for csv log file
+# $2: source module
+# $@: array with csv items
+write_csv_log_to_path() {
+  local lCSV_LOG="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  shift 2
+  local lCSV_ITEMS=("$@")
+
+  # shellcheck disable=SC2005
+  echo "$(printf '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${lCSV_LOG}" || true
+}
+
+
 # For generating json log file in LOG_DIR/json_logs/<module_name>.json
 # Usually this is the json equivalent to the write_csv_log
 # We write to tmp files which we put together via write_json_module_log(), which is automatically called in module_end_log()

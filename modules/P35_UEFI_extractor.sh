@@ -58,21 +58,27 @@ P35_UEFI_extractor() {
       lEXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${lFW_NAME_}"_unblob_extracted
       unblobber "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
+      mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
+
+      print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image in Unblob mode."
+      print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
+
+      for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+        binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      done
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
       detect_root_dir_helper "${lEXTRACTION_DIR}"
       # detect_root_dir_helper sets RTOS to 1 if no Linux rootfs is found
       # we only further test for UEFI systems if we have not Linux rootfs detected
       if [[ -d "${lEXTRACTION_DIR}" && "${RTOS}" -eq 1 ]]; then
-        local lFILES_UEFI_UNBLOB=0
-        local lDIRS_UEFI_UNBLOB=0
-
-        lFILES_UEFI_UNBLOB=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
-        lDIRS_UEFI_UNBLOB=$(find "${lEXTRACTION_DIR}" -type d | wc -l)
-        print_output "[*] Extracted ${ORANGE}${lFILES_UEFI_UNBLOB}${NC} files and ${ORANGE}${lDIRS_UEFI_UNBLOB}${NC} directories from UEFI firmware image (with unblob)."
-
         # lets check for UEFI firmware
         local lTMP_UEFI_FILES_ARR=()
         local lUEFI_FILE=""
-        mapfile -t lTMP_UEFI_FILES_ARR < <(find "${lEXTRACTION_DIR}" -xdev -type f)
+        mapfile -t lTMP_UEFI_FILES_ARR < <(grep "^${FUNCNAME[0]};" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep "${lEXTRACTION_DIR}" | sort -u)
         for lUEFI_FILE in "${lTMP_UEFI_FILES_ARR[@]}"; do
           uefi_firmware_parser "${lUEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
@@ -93,20 +99,26 @@ P35_UEFI_extractor() {
       lEXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${lFW_NAME_}"_binwalk_extracted
       binwalker_matryoshka "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
+      mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
+
+      print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image in Binwalk mode."
+      print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
+
+      for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+        binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      done
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
       detect_root_dir_helper "${lEXTRACTION_DIR}"
       # detect_root_dir_helper sets RTOS to 1 if no Linux rootfs is found
       # we only further test for UEFI systems if we have not Linux rootfs detected
       if [[ -d "${lEXTRACTION_DIR}" && "${RTOS}" -eq 1 ]]; then
-        local lFILES_UEFI_BINWALK=0
-        local lDIRS_UEFI_BINWALK=0
-
-        lFILES_UEFI_BINWALK=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
-        lDIRS_UEFI_BINWALK=$(find "${lEXTRACTION_DIR}" -type d | wc -l)
-        print_output "[*] Extracted ${ORANGE}${lFILES_UEFI_BINWALK}${NC} files and ${ORANGE}${lDIRS_UEFI_BINWALK}${NC} directories from UEFI firmware image (with binwalk)."
-
         local lTMP_UEFI_FILES_ARR=()
         local lUEFI_FILE=""
-        mapfile -t lTMP_UEFI_FILES_ARR < <(find "${LOG_DIR}"/firmware -xdev -type f)
+        mapfile -t lTMP_UEFI_FILES_ARR < <(grep "^${FUNCNAME[0]};" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep "${lEXTRACTION_DIR}" | sort -u)
         for lUEFI_FILE in "${lTMP_UEFI_FILES_ARR[@]}"; do
           uefi_firmware_parser "${lUEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
@@ -121,14 +133,11 @@ P35_UEFI_extractor() {
       fi
     fi
 
-    if [[ "${FILES_UEFI}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       lNEG_LOG=1
     fi
-    if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
-      lNEG_LOG=1
-    fi
-    if [[ "${RTOS}" -eq 0 ]]; then
+    if [[ "${UEFI_VERIFIED}" -eq 1 || "${RTOS}" -eq 0 ]]; then
       lNEG_LOG=1
     fi
 
@@ -184,13 +193,22 @@ ami_extractor() {
     find "${lEXTRACTION_DIR_}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
     print_ln
 
-    FILES_UEFI=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-    lDIRS_UEFI=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
-    print_output "[*] Extracted ${ORANGE}${FILES_UEFI}${NC} files and ${ORANGE}${lDIRS_UEFI}${NC} directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "UEFI AMI extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UEFI}" "${lDIRS_UEFI}" "NA"
+    mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+    print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from the firmware image."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    if [[ "${FILES_UEFI}" -gt 5 ]]; then
+    for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "P35_UEFI_extractor" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+    write_csv_log "UEFI AMI extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UEFI}" "NA"
+
+    if [[ "${#lFILES_UEFI_ARR[@]}" -gt 5 ]]; then
       # with UEFI_VERIFIED=1 we do not run deep-extraction
       export UEFI_VERIFIED=1
     fi
@@ -257,12 +275,22 @@ uefi_extractor() {
   lNVARS=$(grep -c "NVAR entry" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
   lPE32_IMAGE=$(grep -c "PE32 image" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
   lDRIVER_COUNT=$(grep -c "DXE driver" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
-  EFI_ARCH=$(find "${lEXTRACTION_DIR_}" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
-  # FILES_UEFI=$(grep -c "File" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
-  lDIRS_UEFI=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
-  FILES_UEFI=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
 
-  print_output "[*] Extracted ${ORANGE}${FILES_UEFI}${NC} files and ${ORANGE}${lDIRS_UEFI}${NC} directories from UEFI firmware image."
+  mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+  EFI_ARCH=$(grep 'info.txt' "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -n 1)
+  EFI_ARCH=$(grep 'Machine type:' "${EFI_ARCH}" | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
+
+  print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image."
+  print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
+
+  for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+    binary_architecture_threader "${lBINARY}" "P35_UEFI_extractor" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+  done
+  wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
   print_output "[*] Found ${ORANGE}${lNVARS}${NC} NVARS and ${ORANGE}${lDRIVER_COUNT}${NC} drivers."
   if [[ -n "${EFI_ARCH}" ]]; then
     print_output "[*] Found ${ORANGE}${lPE32_IMAGE}${NC} PE32 images for architecture ${ORANGE}${EFI_ARCH}${NC} drivers."

@@ -57,8 +57,8 @@ S13_weak_func_check()
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
-      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
-      lBINARY="${lBINARY/;*}"
+      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
+      lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then

@@ -34,7 +34,7 @@ S20_shell_check()
   local lWAIT_PIDS_S20_ARR=()
 
   # mapfile -t lSH_SCRIPTS_ARR < <( find "${FIRMWARE_PATH}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "shell script, ASCII text executable" 2>/dev/null | cut -d: -f1' | sort -u || true )
-  mapfile -t lSH_SCRIPTS_ARR < <(grep "shell script, ASCII text executable" "${P99_CSV_LOG}" | sort -u || true)
+  mapfile -t lSH_SCRIPTS_ARR < <(grep "shell script, ASCII text executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
   if [[ ${SHELLCHECK} -eq 1 ]] ; then

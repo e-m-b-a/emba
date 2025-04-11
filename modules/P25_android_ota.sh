@@ -28,20 +28,22 @@ P25_android_ota() {
 
     android_ota_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ "${FILES_OTA}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+      lNEG_LOG=1
     fi
-    lNEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
 
 android_ota_extractor() {
-  local lOTA_INIT_PATH_="${1}"
-  local lEXTRACTION_DIR_="${2}"
-  local lDIRS_OTA=0
-  export FILES_OTA=0
+  local lOTA_INIT_PATH_="${1:-}"
+  local lEXTRACTION_DIR_="${2:-}"
+
+  local lFILES_OTA_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lOTA_INIT_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -52,19 +54,25 @@ android_ota_extractor() {
 
   hexdump -C "${lOTA_INIT_PATH_}" | head | tee -a "${LOG_FILE}" || true
 
-  if [[ -d "${EXT_DIR}"/payload_dumper ]]; then
-    print_ln
-    print_output "[*] Extracting Android OTA payload.bin file ..."
-    print_ln
+  print_ln
+  print_output "[*] Extracting Android OTA payload.bin file ..."
+  print_ln
 
-    python3 "${EXT_DIR}"/payload_dumper/payload_dumper.py --out "${lEXTRACTION_DIR_}" "${lOTA_INIT_PATH_}" | tee -a "${LOG_FILE}"
+  python3 "${EXT_DIR}"/payload_dumper/payload_dumper.py --out "${lEXTRACTION_DIR_}" "${lOTA_INIT_PATH_}" | tee -a "${LOG_FILE}"
 
-    FILES_OTA=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-    lDIRS_OTA=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
-    print_output "[*] Extracted ${ORANGE}${FILES_OTA}${NC} files and ${ORANGE}${lDIRS_OTA}${NC} directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "Android OTA extractor" "${lOTA_INIT_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_OTA}" "${lDIRS_OTA}" "via payload_dumper.py"
-  else
-    print_output "[-] Android OTA payload.bin extractor not found - check your installation"
-  fi
+  mapfile -t lFILES_OTA_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+
+  print_output "[*] Extracted ${ORANGE}${#lFILES_OTA_ARR[@]}${NC} files from the firmware image."
+  print_output "[*] Populating backend data for ${ORANGE}${#lFILES_OTA_ARR[@]}${NC} files ... could take some time" "no_log"
+
+  for lBINARY in "${lFILES_OTA_ARR[@]}" ; do
+    binary_architecture_threader "${lBINARY}" "P25_android_ota" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+  done
+  wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+  write_csv_log "Android OTA extractor" "${lOTA_INIT_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_OTA_ARR[@]}" "via payload_dumper.py"
 }

@@ -24,15 +24,16 @@ P10_vmdk_extractor() {
     module_log_init "${FUNCNAME[0]}"
     module_title "VMDK (Virtual Machine Disk) extractor"
     pre_module_reporter "${FUNCNAME[0]}"
+    local lNEG_LOG=0
     EXTRACTION_DIR="${LOG_DIR}"/firmware/vmdk_extractor/
 
     vmdk_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
-    if [[ "${VMDK_FILES}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+      lNEG_LOG=1
     fi
-    lNEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
@@ -43,7 +44,6 @@ vmdk_extractor() {
   local lMOUNT_DEV=""
   local lDEV_NAME=""
   local lTMP_VMDK_MNT="${TMP_DIR}/vmdk_mount_${RANDOM}"
-  local lVMDK_DIRS=0
   local lRET=0
   export VMDK_FILES=0
   local lVMDK_VIRT_FS_ARR=()
@@ -93,15 +93,24 @@ vmdk_extractor() {
   done
 
   if [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    VMDK_FILES=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-    lVMDK_DIRS=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
-  fi
+    local lVMDK_FILES_ARR=()
+    local lBINARY=""
+    local lWAIT_PIDS_P99_ARR=()
+    mapfile -t lVMDK_FILES_ARR < <(find "${lEXTRACTION_DIR_}" -type f)
 
-  if [[ "${VMDK_FILES}" -gt 0 ]]; then
-    print_ln
-    print_output "[*] Extracted ${ORANGE}${VMDK_FILES}${NC} files and ${ORANGE}${lVMDK_DIRS}${NC} directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "VMDK extractor" "${lVMDK_PATH_}" "${lEXTRACTION_DIR_}" "${VMDK_FILES}" "${lVMDK_DIRS}" "NA"
+    print_output "[*] Extracted ${ORANGE}${#lVMDK_FILES_ARR[@]}${NC} files from the firmware image."
+    print_output "[*] Populating backend data for ${ORANGE}${#lVMDK_FILES_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lVMDK_FILES_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "P10_vmdk_extractor" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+    write_csv_log "VMDK extractor" "${lVMDK_PATH_}" "${lEXTRACTION_DIR_}" "${#lVMDK_FILES_ARR[@]}" "NA"
     # currently unblob has issues with VMDKs. We need to disable it for this extraction process
     safe_echo 0 > "${TMP_DIR}"/unblob_disable.cfg
   fi

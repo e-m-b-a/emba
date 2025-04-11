@@ -45,55 +45,68 @@ P50_binwalk_extractor() {
     return
   fi
 
-  local lFILES_EXT_BW=0
-  local lUNIQUE_FILES_BW=0
-  local lDIRS_EXT_BW=0
-  local lBINS_BW=0
+  local lFILES_BINWALK_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   module_title "Binwalk binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  export LINUX_PATH_COUNTER_BINWALK=0
-  export OUTPUT_DIR_BINWALK="${LOG_DIR}"/firmware/binwalk_extracted
+  local lLINUX_PATH_COUNTER_BINWALK=0
+  local lOUTPUT_DIR_BINWALK="${LOG_DIR}"/firmware/binwalk_extracted
 
   if [[ -f "${lFW_PATH_BINWALK}" ]]; then
-    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${OUTPUT_DIR_BINWALK}"
+    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${lOUTPUT_DIR_BINWALK}"
   fi
 
-  if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
-    linux_basic_identification_binwalk "${OUTPUT_DIR_BINWALK}"
+  print_ln
+  if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
+    mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
+  fi
+
+  if [[ "${#lFILES_BINWALK_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Extracted ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_BINWALK_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+
+    lLINUX_PATH_COUNTER_BINWALK=$(linux_basic_identification "${lOUTPUT_DIR_BINWALK}" "${FUNCNAME[0]}")
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    sub_module_title "Firmware extraction details"
+    print_output "[*] ${ORANGE}Binwalk${NC} results:"
+    print_output "[*] Found ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
     print_ln
-    if [[ -d "${OUTPUT_DIR_BINWALK}" ]]; then
-      lFILES_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type f | wc -l )
-      lUNIQUE_FILES_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-      lDIRS_EXT_BW=$(find "${OUTPUT_DIR_BINWALK}" -xdev -type d | wc -l )
-      # lBINS_BW=$(find "${OUTPUT_DIR_BINWALK}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
-    fi
-
-    if [[ "${lBINS_BW}" -gt 0 ]] || [[ "${lFILES_EXT_BW}" -gt 0 ]]; then
-      sub_module_title "Firmware extraction details"
-      print_output "[*] ${ORANGE}Binwalk${NC} results:"
-      print_output "[*] Found ${ORANGE}${lFILES_EXT_BW}${NC} files (${ORANGE}${lUNIQUE_FILES_BW}${NC} unique files) and ${ORANGE}${lDIRS_EXT_BW}${NC} directories at all."
-      # print_output "[*] Found ${ORANGE}${lBINS_BW}${NC} binaries."
-      print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_BINWALK}${NC}."
-      print_ln
-      tree -sh "${OUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
-      print_ln
-    fi
+    tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
+    print_ln
   fi
 
-  detect_root_dir_helper "${OUTPUT_DIR_BINWALK}"
+  detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
 
-  write_csv_log "FILES Binwalk" "UNIQUE FILES Binwalk" "directories Binwalk" "Binaries Binwalk" "LINUX_PATH_COUNTER Binwalk"
-  write_csv_log "${lFILES_EXT_BW}" "${lUNIQUE_FILES_BW}" "${lDIRS_EXT_BW}" "${lBINS_BW}" "${LINUX_PATH_COUNTER_BINWALK}"
+  write_csv_log "FILES Binwalk" "LINUX_PATH_COUNTER Binwalk"
+  write_csv_log "${#lFILES_BINWALK_ARR[@]}" "${lLINUX_PATH_COUNTER_BINWALK}"
 
-  module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_BW}"
+  module_end_log "${FUNCNAME[0]}" "${#lFILES_BINWALK_ARR[@]}"
 }
 
-linux_basic_identification_binwalk() {
+linux_basic_identification() {
   local lFIRMWARE_PATH_CHECK="${1:-}"
+  local lIDENTIFIER="${2:-}"
+  local lLINUX_PATH_COUNTER_BINWALK=0
+
   if ! [[ -d "${lFIRMWARE_PATH_CHECK}" ]]; then
     return
   fi
-  LINUX_PATH_COUNTER_BINWALK="$(find "${lFIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  if [[ -n "${lIDENTIFIER}" ]]; then
+    lLINUX_PATH_COUNTER_BINWALK="$(grep "${lIDENTIFIER}" "${P99_CSV_LOG}" | grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" || true)"
+  else
+    lLINUX_PATH_COUNTER_BINWALK="$(grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" "${P99_CSV_LOG}" || true)"
+  fi
+  echo "${lLINUX_PATH_COUNTER_BINWALK}"
 }

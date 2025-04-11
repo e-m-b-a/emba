@@ -6,7 +6,7 @@
 name: trivy
 on:
   schedule:
-    - cron: '0 0 * * *' # do it every day
+    - cron: '0 0 * * 1' # run every Monday
   # push:
   #  branches:
   #    - '**'        # matches every branch

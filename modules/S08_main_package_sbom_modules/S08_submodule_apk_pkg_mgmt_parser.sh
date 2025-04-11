@@ -33,7 +33,7 @@ S08_submodule_apk_pkg_mgmt_parser() {
 
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -t lAPK_MGMT_STATUS_ARR < <(grep "apk/db/installed" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lAPK_MGMT_STATUS_ARR < <(grep "apk/db/installed" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ "${#lAPK_MGMT_STATUS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lAPK_MGMT_STATUS_ARR[@]}${NC} APK package management databases:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -167,7 +167,7 @@ apk_pkg_analysis_threader() {
   lAPP_LIST_FILE=$(grep "^R:" "${lAPK_PACKAGE_FILE_TMP}" || true)
   # get the list file path
   if [[ -n "${lAPP_LIST_FILE}" ]]; then
-    lAPP_LIST_FILE=$(grep "apk/packages/${lAPP_LIST_FILE/R:};" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+    lAPP_LIST_FILE=$(grep "apk/packages/${lAPP_LIST_FILE/R:};" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   fi
 
   # if we have the list file also we can add all the paths provided by the package

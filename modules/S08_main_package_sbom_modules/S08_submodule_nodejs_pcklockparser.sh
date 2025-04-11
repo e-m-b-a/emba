@@ -39,7 +39,7 @@ S08_submodule_node_js_package_lock_parser() {
   local lPKG_MD5=""
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "/package.*json;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "/package.*json;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} Node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

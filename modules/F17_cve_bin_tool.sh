@@ -84,7 +84,11 @@ F17_cve_bin_tool() {
     local lPROD=""
     local lVERS=""
 
-    mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n')
+    mapfile -t lMIN_IDENTIFIER < <(jq --raw-output '.properties[] | select(.name | test("minimal_identifier")) | .value' <<< "${lSBOM_ENTRY}" | tr -d "'\\\\" | tr ':' '\n' || true)
+    if [[ "${#lMIN_IDENTIFIER[@]}" -eq 0 ]]; then
+      print_error "[-] MIN_IDENTIFIER detection failed for ${lSBOM_ENTRY}"
+      continue
+    fi
     lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
     lPROD="${lMIN_IDENTIFIER[*]:2:1}"
     lVERS="${lMIN_IDENTIFIER[*]:3:1}"
@@ -157,8 +161,8 @@ F17_cve_bin_tool() {
       fi
     fi
 
-    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
-    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
+    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}" || print_error "[-] BOM_REF failed to extract from ${lSBOM_ENTRY}")
+    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}" || print_error "[-] ORIG_SOURCE failed to extract from ${lSBOM_ENTRY}")
 
     cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}" &
     local lTMP_PID="$!"

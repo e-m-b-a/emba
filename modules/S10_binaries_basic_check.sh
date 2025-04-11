@@ -52,7 +52,7 @@ S10_binaries_basic_check()
         done
         lCOUNTER=$((lCOUNTER+1))
       fi
-    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
     print_ln
     print_output "[*] Found ""${ORANGE}${lCOUNTER}${NC}"" binaries with interesting functions in ""${ORANGE}${lBIN_COUNT}${NC}"" files (vulnerable functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
