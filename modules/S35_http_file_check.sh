@@ -93,7 +93,7 @@ web_file_search()
   # mapfile -t lWEB_STUFF_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
   #  -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' \
   #  | sort -u -k1,1 | cut -d\  -f3)
-  mapfile -t lWEB_STUFF_ARR < <(grep ".htm;\|.html\|.cgi\|.asp\|.php\|.xml\|.rg" "${P99_CSV_LOG}" | sort -u || true)
+  mapfile -t lWEB_STUFF_ARR < <(grep ".htm;\|.html\|.cgi\|.asp\|.php\|.xml\|.rg" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ -v lWEB_STUFF_ARR[@] ]] ; then
     write_log "[+] Found web related files:" "${LOG_PATH_MODULE}"/web_file_search.txt

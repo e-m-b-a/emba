@@ -416,6 +416,10 @@ output_binaries() {
       lBINS_CHECKED_CNT=$(grep -a "\[\*\]\ Statistics:" "${S13_LOG}" | cut -d: -f3 || true)
   fi
 
+  if [[ "${lBIN_CANARY_CNT:-0}" -gt 0 || "${lBINS_RELRO_CNT:-0}" -gt 0 || "${lBIN_NX_CNT:-0}" -gt 0 || "${lBINS_PIE_CNT:-0}" -gt 0 || "${lBIN_STRIPPED_CNT:-0}" -gt 0 ]]; then
+    print_output "[*] Identified the following binary details:"
+  fi
+
   if [[ "${lBIN_CANARY_CNT:-0}" -gt 0 ]]; then
     lCANARY_PER=$(bc -l <<< "${lBIN_CANARY_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
     lCANARY_PER=$(/bin/printf "%.0f" "${lCANARY_PER}" 2>/dev/null || true)
