@@ -150,10 +150,10 @@ P55_unblob_extractor() {
       print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
       print_ln
       tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
+      detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
+      write_csv_log "FILES Binwalk recovery mode" "LINUX_PATH_COUNTER Binwalk"
+      write_csv_log "${#lFILES_BINWALK_ARR[@]}" "${lLINUX_PATH_COUNTER_BINWALK}"
     fi
-    detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
-    write_csv_log "FILES Binwalk recovery mode" "LINUX_PATH_COUNTER Binwalk"
-    write_csv_log "${#lFILES_BINWALK_ARR[@]}" "${lLINUX_PATH_COUNTER_BINWALK}"
   fi
 
   write_csv_log "FILES Unblob" "LINUX_PATH_COUNTER Unblob"
