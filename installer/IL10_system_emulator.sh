@@ -82,7 +82,7 @@ IL10_system_emulator() {
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-      download_file "uml-utilities.deb" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-1+b1_amd64.deb" "external/uml-utilities.deb"
+      download_file "uml-utilities.deb" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2_amd64.deb" "external/uml-utilities.deb"
       dpkg -i "external/uml-utilities.deb"
       rm -f "external/uml-utilities.deb"
 
