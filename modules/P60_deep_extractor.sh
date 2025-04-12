@@ -118,6 +118,12 @@ deep_extractor() {
   sub_module_title "Deep extraction mode"
   local lFILES_AFTER_DEEP=0
   local lFILES_BEFORE_DEEP=0
+
+  if [[ ! -f "${P99_CSV_LOG}" ]]; then
+    print_output "[-] No ${P99_CSV_LOG} log file created ... no deep extraction possible"
+    return
+  fi
+
   lFILES_BEFORE_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
 
   # if we run into the deep extraction mode we always do at least one extraction round:
