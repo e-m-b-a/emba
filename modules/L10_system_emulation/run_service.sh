@@ -101,7 +101,7 @@ if ("${EMBA_ETC}"); then
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
-        "${BUSYBOX}" ls -l ${_BINARY}
+        "${BUSYBOX}" ls -l "${_BINARY}"
       else
         "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${BINARY_NAME}${NC} already started ..."
       fi

@@ -124,7 +124,7 @@ P55_unblob_extractor() {
     local lFILES_BINWALK_ARR=()
 
     lOUTPUT_DIR_BINWALK="${lOUTPUT_DIR_UNBLOB//unblob/binwalk_recover}"
-    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${lOUTPUT_DIR_BINWALK}"
+    binwalker_matryoshka "${lFW_PATH_UNBLOB}" "${lOUTPUT_DIR_BINWALK}"
     if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
       remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}"
       mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
