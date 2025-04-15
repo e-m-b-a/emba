@@ -576,6 +576,11 @@ detect_root_dir_helper() {
   local lINTERPRETER_ESCAPED=""
   local lCNT=0
 
+  if [[ ! -f "${P99_CSV_LOG}" ]]; then
+    print_output "[-] No ${P99_CSV_LOG} log file created ... no root directory detection possible"
+    return
+  fi
+
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
     # xargs threading is much faster. Big testcase firmware 9mins vs. 3mins
     # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % 2>/dev/null' | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)

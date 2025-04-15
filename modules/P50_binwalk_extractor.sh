@@ -36,6 +36,19 @@ P50_binwalk_extractor() {
     return
   fi
 
+  # We have seen multiple issues in system emulation while using binwalk
+  # * unprintable chars in paths -> remediation in place
+  # * lost symlinks in different firmware extractions -> Todo: Issue
+  # * lost permissions of executables -> remediation in place
+  # Currently we disable binwalk here and switch automatically to unblob is main extractor while
+  # system emulation runs. If unblob fails we are going to try an additional extraction round with
+  # binwalk.
+  if [[ "${FULL_EMULATION}" -eq 1 ]]; then
+    print_output "[-] Binwalk v3 has issues with symbolic links and is disabled for system emulation"
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   # we do not rely on any EMBA extraction mechanism -> we use the original firmware file
   local lFW_PATH_BINWALK="${FIRMWARE_PATH_BAK}"
 

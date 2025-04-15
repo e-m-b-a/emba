@@ -35,6 +35,10 @@ POSSIBLE_EXES_ARR=( "${POSSIBLE_ELFS[@]}" "${POSSIBLE_SH[@]}" )
 for POSSIBLE_EXE in "${POSSIBLE_EXES_ARR[@]}"; do
   [[ -x "${POSSIBLE_EXE}" ]] && continue
   if [[ -f "${POSSIBLE_EXE}" ]]; then
+    if [[ "${POSSIBLE_EXE}" == *"carved.elf" ]]; then
+      rm "${POSSIBLE_EXE}"
+      continue
+    fi
     echo "[*] Processing executable $(basename "${POSSIBLE_EXE}") - chmod privileges"
     chmod +x "${POSSIBLE_EXE}"
   fi

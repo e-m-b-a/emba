@@ -37,7 +37,7 @@ S02_UEFI_FwHunt() {
     fwhunter "${FIRMWARE_PATH_BAK}"
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
       while read -r lFILE_DETAILS; do
-        lEXTRACTED_FILE="${lFILE_DETAILS/;*}"
+        lEXTRACTED_FILE=$(echo "${lFILE_DETAILS}" | cut -d ';' -f2)
         if [[ ${THREADED} -eq 1 ]]; then
           fwhunter "${lEXTRACTED_FILE}" &
           local lTMP_PID="$!"

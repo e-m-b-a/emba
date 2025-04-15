@@ -167,6 +167,7 @@ check_squid() {
   local lSQUID_PATHS_ARR=()
 
   while read -r lSQUID_FILE; do
+    lSQUID_FILE="$(echo "${lSQUID_FILE}" | cut -d ';' -f2)"
     print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lSQUID_FILE/;*}")${NC}"
     ((SQUID_VUL_CNT+=1))
   done < <(grep "squid" "${P99_CSV_LOG}" | grep ";ELF" || true)

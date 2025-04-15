@@ -38,7 +38,7 @@ S24_kernel_bin_identifier()
 
   # for lFILE in "${ALL_FILES_ARR[@]}" ; do
   while read -r lFILE; do
-    lFILE="${lFILE/;*}"
+    lFILE=$(echo "${lFILE}" | cut -d ';' -f2)
     local lK_ELF="NA"
     local lKCONFIG_EXTRACTED="NA"
     local lK_VER_CLEAN="NA"
