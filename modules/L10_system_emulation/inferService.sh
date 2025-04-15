@@ -52,7 +52,7 @@ done
 # we search for possible rc startup directories and iterate them later for possible rc startup scripts
 for RC_DIR in $("${BUSYBOX}" find / -type d -name "*rc.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${RC_DIR}" -type f); do
-    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp"; then
+    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init"; then
       if [ -e "${SERVICE}" ]; then
         if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
@@ -149,6 +149,8 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} -L eth0 -W eth0${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} -L eth0 -W eth0\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} 0 EMBA EMBA EMBA EMBA EMBA EMBA 00:48:12:31:10:50 EMBA${NC}"
+        "${BUSYBOX}" echo -e -n "${BINARY} 0 EMBA EMBA EMBA EMBA EMBA EMBA 00:48:12:31:10:50 EMBA\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${BINARY}" /firmadyne/service 2>/dev/null; then
