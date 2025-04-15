@@ -31,14 +31,14 @@ if [ -e /etc/manual.starter ]; then
 fi
 
 # we search for possible init startup directories and iterate them later for possible init scripts
-for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init.d*"); do
+for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*\.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${INIT_DIR}" -type f); do
     if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "factory\|dhcp\|reset\|halt\|shutdown"; then
       # do not use entries like factory.init or init.factory and so on
       continue
     fi
     # currently we only use some services for startup
-    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp"; then
+    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init"; then
       if [ -e "${SERVICE}" ]; then
         if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
