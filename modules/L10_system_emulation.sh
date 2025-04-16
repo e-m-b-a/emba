@@ -953,8 +953,7 @@ emulation_with_config() {
     # └─$ wc -l ~/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
     # 33 /home/m1k3/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
 
-    if [[ "${TCP}" == "asdf" ]]; then
-    # CHECK if [[ "${TCP}" != "ok" ]]; then
+    if [[ "${TCP}" != "ok" ]]; then
       local lTEMP_RUN_IPs_ARR=()
       local lTMP_IP=""
       # letz check if the system has configured some different IP address then expected
@@ -964,13 +963,13 @@ emulation_with_config() {
         grep -v "127.0.0.1" | grep -v "${IP_ADDRESS_}" | cut -d ':' -f2 | sort -u || true)
       for lTMP_IP in "${lTEMP_RUN_IPs_ARR[@]}"; do
         if [[ "${lTMP_IP}" != "${IP_ADDRESS_}" ]]; then
-          print_output "[!] WARNING: Detected IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${NC} to address ${ORANGE}${lTMP_IP}${NC}"
+          print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${NC} to address ${ORANGE}${lTMP_IP}${NC}"
           # we restart the emulation with the identified IP address for a maximum of one time
           if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
-            print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
-            lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
-            IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
-            emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
+            print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed but currently not executed"
+            # lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
+            # IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
+            # emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
           else
             print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed but ${ORANGE}not executed${NC}"
           fi
