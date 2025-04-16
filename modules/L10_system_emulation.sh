@@ -937,7 +937,7 @@ emulation_with_config() {
     rm "${TMP_DIR}"/online_stats.tmp || true
   fi
 
-  write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
+  write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lVLAN_ID}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
   stopping_emulation_process "${IMAGE_NAME}"
   cleanup_emulator "${IMAGE_NAME}"
 
@@ -945,6 +945,14 @@ emulation_with_config() {
     mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
     # if we have created our qemu log file and TCP is not ok we check for additional IP addresses and
     # rerun the emulation if a different IP address was found
+    # We have seen some unexpected side effects -> check this area again
+    # DIR600 before:
+    # └─$ wc -l ~/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+    # 5 /home/m1k3/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+    # DIR600 after:
+    # └─$ wc -l ~/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+    # 33 /home/m1k3/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+
     if [[ "${TCP}" != "ok" ]]; then
       local lTEMP_RUN_IPs_ARR=()
       local lTMP_IP=""
@@ -955,13 +963,13 @@ emulation_with_config() {
         grep -v "127.0.0.1" | grep -v "${IP_ADDRESS_}" | cut -d ':' -f2 | sort -u || true)
       for lTMP_IP in "${lTEMP_RUN_IPs_ARR[@]}"; do
         if [[ "${lTMP_IP}" != "${IP_ADDRESS_}" ]]; then
-          print_output "[!] WARNING: Detected IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${NC} to address ${ORANGE}${lTMP_IP}${NC}"
+          print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${NC} to address ${ORANGE}${lTMP_IP}${NC}"
           # we restart the emulation with the identified IP address for a maximum of one time
           if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
-            print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
-            lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
-            IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
-            emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
+            print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed but currently not executed"
+            # lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
+            # IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
+            # emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
           else
             print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed but ${ORANGE}not executed${NC}"
           fi
@@ -1846,6 +1854,7 @@ iterate_vlans() {
   local lNETWORK_MODE="${2:-}"
   local lNETWORK_DEVICE="${3:-}"
   local lIP_ADDRESS="${4:-}"
+  shift 4
   local lVLAN_INFOS_ARR=("$@")
 
   local lETH_INT_=""
@@ -2898,8 +2907,9 @@ write_results() {
   local lRESULT_SOURCE="${3:-}"
   local lNETWORK_MODE="${4:-}"
   local lETH_INT="${5:-}"
-  local lINIT_FILE="${6:-}"
-  local lNETWORK_DEVICE="${7:-}"
+  local lVLAN_ID="${6:-}"
+  local lINIT_FILE="${7:-}"
+  local lNETWORK_DEVICE="${8:-}"
 
   local lR_PATH_mod=""
   lR_PATH_mod="${lR_PATH/${LOG_DIR}/}"
@@ -2911,9 +2921,9 @@ write_results() {
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   lARCHIVE_PATH="$(echo "${lARCHIVE_PATH}" | rev | cut -d '/' -f1 | rev)"
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" > "${L10_SYS_EMU_RESULTS}"
+    write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
   fi
-  echo "${lFIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${L10_SYS_EMU_RESULTS}"
+  write_log "${lFIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 

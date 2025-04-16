@@ -38,7 +38,7 @@ for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*\.d*"); do
       continue
     fi
     # currently we only use some services for startup
-    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init"; then
+    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init\|event"; then
       if [ -e "${SERVICE}" ]; then
         if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
@@ -95,7 +95,7 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
   -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
   -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \
   -o -name "streamd" -type f -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f \
-  -o -name "pppoe-server" -type f -o -name "pppd" -type f -o -name "nvram_daemon" -type f); do
+  -o -name "pppoe-server" -type f -o -name "pppd" -type f -o -name "nvram_daemon" -type f -o -name "nvram" -type f); do
 
   if [ -x "${BINARY}" ]; then
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")

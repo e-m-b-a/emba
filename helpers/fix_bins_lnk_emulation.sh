@@ -68,6 +68,11 @@ if [[ -s "${ROOT_DIR}/busybox_applets.txt" ]]; then
     mkdir "${ROOT_DIR}"/bin
   fi
   while read -r BB_APPLET; do
+    if [[ "${BB_APPLET}" == "linuxrc" ]]; then
+      # we do not re-create linuxrc. If it is available we are fine, if not we do not care about it.
+      # Otherwise we are going to use it for booting up and this does not make sense if it is not already available.
+      continue
+    fi
     if [[ ! -f "${ROOT_DIR}/bin/${BB_APPLET}" ]] && [[ ! -L "${ROOT_DIR}/bin/${BB_APPLET}" ]]; then
       echo "[*] Re-creating BusyBox applet link for /bin/${BB_APPLET}"
       chroot "${ROOT_DIR}" "${BUSYBOX}" ln -s /bin/busybox /bin/"${BB_APPLET}"
