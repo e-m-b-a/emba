@@ -937,7 +937,7 @@ emulation_with_config() {
     rm "${TMP_DIR}"/online_stats.tmp || true
   fi
 
-  write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
+  write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lVLAN_ID}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
   stopping_emulation_process "${IMAGE_NAME}"
   cleanup_emulator "${IMAGE_NAME}"
 
@@ -1854,6 +1854,7 @@ iterate_vlans() {
   local lNETWORK_MODE="${2:-}"
   local lNETWORK_DEVICE="${3:-}"
   local lIP_ADDRESS="${4:-}"
+  shift 4
   local lVLAN_INFOS_ARR=("$@")
 
   local lETH_INT_=""
@@ -2906,8 +2907,9 @@ write_results() {
   local lRESULT_SOURCE="${3:-}"
   local lNETWORK_MODE="${4:-}"
   local lETH_INT="${5:-}"
-  local lINIT_FILE="${6:-}"
-  local lNETWORK_DEVICE="${7:-}"
+  local lVLAN_ID="${6:-}"
+  local lINIT_FILE="${7:-}"
+  local lNETWORK_DEVICE="${8:-}"
 
   local lR_PATH_mod=""
   lR_PATH_mod="${lR_PATH/${LOG_DIR}/}"
@@ -2919,9 +2921,9 @@ write_results() {
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   lARCHIVE_PATH="$(echo "${lARCHIVE_PATH}" | rev | cut -d '/' -f1 | rev)"
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" > "${L10_SYS_EMU_RESULTS}"
+    write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
   fi
-  echo "${lFIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${L10_SYS_EMU_RESULTS}"
+  write_log "${lFIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 
