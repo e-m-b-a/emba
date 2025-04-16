@@ -945,7 +945,16 @@ emulation_with_config() {
     mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
     # if we have created our qemu log file and TCP is not ok we check for additional IP addresses and
     # rerun the emulation if a different IP address was found
-    if [[ "${TCP}" != "ok" ]]; then
+    # We have seen some unexpected side effects -> check this area again
+    # DIR600 before:
+    # └─$ wc -l ~/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+    # 5 /home/m1k3/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+    # DIR600 after:
+    # └─$ wc -l ~/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+    # 33 /home/m1k3/firmware-analysis/emba_logs_dir600_bite/emulator_online_results.log
+
+    if [[ "${TCP}" == "asdf" ]]; then
+    # CHECK if [[ "${TCP}" != "ok" ]]; then
       local lTEMP_RUN_IPs_ARR=()
       local lTMP_IP=""
       # letz check if the system has configured some different IP address then expected
