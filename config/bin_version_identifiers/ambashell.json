@@ -4,19 +4,19 @@
       "normal"
    ],
    "licenses": [
-      "unknown\"^AmbaShell\\ Test\\ Command\\ \\[Version\\ [0-9]\\.[0-9]+(\\.[0-9]+)?\\]$\""
+      "unknown"
    ],
    "grep_commands": [
-      "\"sed -r 's/AmbaShell\\ Test\\ Command\\ \\[Version\\ ([0-9](\\.[0-9]+)+?)$/::ambashell:\\1/'\""
+      "\"^AmbaShell\\ Test\\ Command\\ \\[Version\\ [0-9]\\.[0-9]+(\\.[0-9]+)?\\]$\""
    ],
    "vendor_names": [
       "NA"
    ],
    "product_names": [
-      "NA"
+      "ambashell"
    ],
    "version_extraction": [
-      null
+      "\"sed -r 's/AmbaShell\\ Test\\ Command\\ \\[Version\\ ([0-9](\\.[0-9]+)+?)$/::ambashell:\\1/'\""
    ],
    "affected_paths": [
       "NA"
