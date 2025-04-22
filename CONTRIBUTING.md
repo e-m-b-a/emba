@@ -21,10 +21,6 @@ It also sketches the typical integration process of patches.
 - base patches on top of latest master or - if there are dependencies - on next
   (note: next is an integration branch that may change non-linearly)
 
-- add signed-off to all patches \[**required**]
-  - to certify the "Developer's Certificate of Origin", see below
-  - check with your employer when not working on your own!
-
 - test your code with shellcheck \[**required**] 
   - see the included [codechecker script](./check_project.sh)
   - shellcheck should not be disabled on areas with issues -> solve these problems before the PR
@@ -62,6 +58,9 @@ It also sketches the typical integration process of patches.
   - e.g., local lVARIABLE=""
   - Note: This will be enforced in the future!
 
+- Local referenced ([nameref](https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameters)) variables should always start with "lr"
+  - e.g., local lrVARIABLE="${1:-}"
+
 - Use parameters to functions
   - work with local variables inside the functions
   - do not rely on globals if not needed
@@ -81,47 +80,10 @@ It also sketches the typical integration process of patches.
 
 - Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](https://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). Using bash internals is faster as it does not fork, fopen and pipes the results back.
 
-- At least ["weak quoting"](https://wiki.bash-hackers.org/syntax/quoting#weak_quoting) is required - unquoted variable processing is not permitted
+- At least ["weak quoting"](https://flokoe.github.io/bash-hackers-wiki/syntax/quoting/#quotes-and-escaping) is required - unquoted variable processing is not permitted
 
 - Code tests: Use shellcheck and semgrep to test your code
 
 - Code tests: The included `./check_project.sh` script performs multiple coding checks automatically. It is highly recommend to run this script before initiating a PR.
 
 - Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct (new code has to be STRICT mode compatible and needs to pass shellcheck and semgrep tests).
-
-## 3) Developer's Certificate of Origin 1.1
-
-When signing-off a patch for this project like this
-
-    Signed-off-by: Random J Developer <random@developer.example.org>
-
-using your real name (no pseudonyms or anonymous contributions), you declare the
-following:
-
-    By making a contribution to this project, I certify that:
-
-        (a) The contribution was created in whole or in part by me and I
-            have the right to submit it under the open source license
-            indicated in the file; or
-
-        (b) The contribution is based upon previous work that, to the best
-            of my knowledge, is covered under an appropriate open source
-            license and I have the right under that license to submit that
-            work with modifications, whether created in whole or in part
-            by me, under the same open source license (unless I am
-            permitted to submit under a different license), as indicated
-            in the file; or
-
-        (c) The contribution was provided directly to me by some other
-            person who certified (a), (b) or (c) and I have not modified
-            it.
-
-        (d) I understand and agree that this project and the contribution
-            are public and that a record of the contribution (including all
-            personal information I submit with it, including my sign-off) is
-            maintained indefinitely and may be redistributed consistent with
-            this project or the open source license(s) involved.
-
-See also [here](https://www.kernel.org/doc/Documentation/process/submitting-patches.rst)
-(Section 11, "Sign your work") for further background on this process which was
-adopted from the Linux kernel.
