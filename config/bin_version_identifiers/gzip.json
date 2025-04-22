@@ -8,8 +8,10 @@
   "licenses": [
     "unknown"
   ],
+  "strict_grep_commands": [
+    "\"Version:\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\""
+  ],
   "grep_commands": [
-    "\"Version:\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"",
     "\"gzip\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"",
     "'\"^GZIP$\"&&\"^Written\\ by\\ Jean-loup\\ Gailly\\.$\"&&\"^Report\\ bugs\\ to\\ <bug-gzip@gnu\\.org>\\.$\"&&\"^[1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"'"
   ],

@@ -1,9 +1,9 @@
 ## Notes on the json configuration for version identification
 * identifier: a unique identifier for this version detection entry (this entry should match the filename of the json file)
 * parsing_mode: could be
-    * normal (static analysis)
-    * strict (needs also an affected_paths entry)
-    * multi_grep for multiple grep commands that must match
+  * normal (static analysis)
+  * strict (needs also an affected_paths entry)
+  * multi_grep for multiple grep commands that must match
 * licenses: one or mor matching licenses
 * grep_commands: grep commands that are executed for identification
 * vendor_names: one or multiple vendor names that are used for CVE identification
@@ -28,6 +28,9 @@
     "\"BusyBox\\ v[0-9](\\.[0-9]+)+?.*\\ multi-call\\ binary\"",
     "\"BusyBox\\ v[0-9](\\.[0-9]+)+?\\ \\([0-9]+-.*\\)\"",
     "\"^BusyBox\\ http\\ [0-9](\\.[0-9]+)+?$\""
+  ],
+  "live_grep_commands": [
+    "\"BusyBox\\ v[0-9](\\.[0-9]+)+?.*\\ Built-in\\ shell\""
   ],
   "vendor_names": [
     "busybox"

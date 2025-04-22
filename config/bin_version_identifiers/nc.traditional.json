@@ -6,7 +6,7 @@
    "licenses": [
       "unknown"
    ],
-   "grep_commands": [
+   "strict_grep_commands": [
       "\"\\[v[0-9]\\.[0-9]+-[0-9]+\\]$\""
    ],
    "vendor_names": [
@@ -19,6 +19,7 @@
       "\"sed -r 's/\\[v([0-9](\\.[0-9]+)+?(-[0-9]+)?)\\]$/::nc.traditional:\\1/'\""
    ],
    "affected_paths": [
-      "nc.traditional"
+      "nc.traditional",
+      "nc"
    ]
 }

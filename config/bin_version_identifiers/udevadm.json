@@ -6,7 +6,7 @@
    "licenses": [
       "unknown"
    ],
-   "grep_commands": [
+   "strict_grep_commands": [
       "\"^[0-9]{3}$\""
    ],
    "vendor_names": [

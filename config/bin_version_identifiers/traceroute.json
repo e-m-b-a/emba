@@ -8,16 +8,24 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"^Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+?\"",
-    "\"^Version\\ [0-9]\\.[0-9]+a[0-9]+\""
+    "\"^Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+?\""
   ],
-  "vendor_names": [],
+  "strict_grep_commands": [
+    "\"^Version\\ [0-9]\\.[0-9]+a[0-9]+\"",
+    "\"^[0-9]\\.[0-9]+\\.[0-9]+$\"",
+    "\"^[0-9]\\.[0-9]+a[0-9]+$\""
+  ],
+  "vendor_names": [
+    "traceroute_project"
+  ],
   "product_names": [
     "traceroute"
   ],
   "version_extraction": [
-    "\"sed -r 's/Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::traceroute:\\1/'\"",
-    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?).*/::traceroute:\\1/'\""
+    "\"sed -r 's/^([0-9](\\.[0-9]+\\.[0-9]+)+?)$/::traceroute:\\1/'\"",
+    "\"sed -r 's/^([0-9](\\.[0-9]+a[0-9]+)+?)$/::traceroute:\\1/'\"",
+    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?).*/::traceroute:\\1/'\"",
+    "\"sed -r 's/Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::traceroute:\\1/'\""
   ],
   "affected_paths": [
     "traceroute"

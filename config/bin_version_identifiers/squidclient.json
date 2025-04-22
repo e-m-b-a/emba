@@ -6,7 +6,7 @@
    "licenses": [
       "unknown"
    ],
-   "grep_commands": [
+   "strict_grep_commands": [
       "\"Version:\\ [0-9]\\.[0-9]\\.[0-9]\""
    ],
    "vendor_names": [

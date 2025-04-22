@@ -6,7 +6,7 @@
    "licenses": [
       "public-domain"
    ],
-   "grep_commands": [
+   "strict_grep_commands": [
       "\"^3\\.[0-9]+\\.[0-9]+$\""
    ],
    "vendor_names": [
@@ -19,6 +19,6 @@
       "\"sed -r 's/(3(\\.[0-9]+)+?)$/:sqlite:sqlite:\\1/'\""
    ],
    "affected_paths": [
-      "libsqlite3.so.0"
+      "libsqlite3.so.*"
    ]
 }

@@ -6,7 +6,7 @@
   "licenses": [
     "GPL-3.0-only"
   ],
-  "grep_commands": [
+  "strict_grep_commands": [
     "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$\"",
     "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+[a-z]$\""
   ],
@@ -21,6 +21,8 @@
     "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?[a-z]?)$/:samba:samba:\\1/'\""
   ],
   "affected_paths": [
-    "smbd"
+    "smbd",
+    "nmbd",
+    "smbpasswd"
   ]
 }

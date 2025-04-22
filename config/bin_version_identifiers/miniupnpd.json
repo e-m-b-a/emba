@@ -7,8 +7,10 @@
   "licenses": [
     "unknown"
   ],
+  "live_grep_commands": [
+    "\"MiniUPnP\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
   "grep_commands": [
-    "\"MiniUPnP\\ [0-9](\\.[0-9]+)+?\\ ",
     "\"^miniupnpd\\ [0-9](\\.[0-9]+)+?\\ "
   ],
   "vendor_names": [

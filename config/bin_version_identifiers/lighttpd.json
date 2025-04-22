@@ -8,13 +8,16 @@
     "BSD-3-Clause"
   ],
   "grep_commands": [
-    "\"^lighttpd [0-9](\\.[0-9]+)+?\"",
+    "\"^lighttpd\\ [0-9](\\.[0-9]+)+?\"",
     "\"^lighttpd-[0-9](\\.[0-9]+)+?\\ \\(.*\\)\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$\"",
     "\"^lighttpd-[0-9](\\.[0-9]+)+?\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$\"",
     "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel)?(-[0-9]+[A-Za-z]+)?.*\\ -\\ a\\ light\\ and\\ fast\\ webserver$\"",
-    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel-[0-9]+[A-Z])?$\"",
+    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?\\ .*\\ -\\ a\\ light\\ and\\ fast\\ webserver$\"",
     "\"^server\\ started\\ \\(lighttpd\\/[0-9](\\.[0-9]+)+?\\)$\"",
     "\"lighttpd-[0-9](\\.[0-9]+)+?$\""
+  ],
+  "live_grep_commands": [
+    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel-[0-9]+[A-Z])?$\""
   ],
   "vendor_names": [
     "lighttpd"
