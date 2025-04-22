@@ -1,0 +1,24 @@
+{
+  "identifier": "squid",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"Squid\\ Cache:\\ Version\\ [0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "squid-cache"
+  ],
+  "product_names": [
+    "squid"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/Squid\\ Cache:\\ Version\\ ([0-9](\\.[0-9]+)+?)$/:squid-cache:squid:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

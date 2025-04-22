@@ -1,0 +1,26 @@
+{
+  "identifier": "lua",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "MIT"
+  ],
+  "grep_commands": [
+    "\"^Lua\\ [0-9](\\.[0-9]+)+?\\ \\ Copyright\\ .*\"",
+    "\"^liblua\\.so\\.[0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "lua"
+  ],
+  "product_names": [
+    "lua"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/^Lua\\ ([0-9](\\.[0-9]+)+?)\\ \\ .*/:lua:lua:\\1/'\"",
+    "\"sed -r 's/liblua\\.so\\.([0-9](\\.[0-9]+)+?)$/:lua:lua:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

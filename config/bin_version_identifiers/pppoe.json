@@ -1,0 +1,24 @@
+{
+  "identifier": "pppoe",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"pppoe\\ version\\ [0-9](\\.[0-9]+)+?\""
+  ],
+  "vendor_names": [
+    "roaring_penguin"
+  ],
+  "product_names": [
+    "pppoe"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/pppoe\\ version\\ ([0-9](\\.[0-9]+)+?)$/:roaring_penguin:pppoe:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

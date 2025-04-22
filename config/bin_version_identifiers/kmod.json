@@ -1,0 +1,30 @@
+{
+  "identifier": "kmod",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"^depmod\\ (version\\ )?[0-9](\\.[0-9]+)+?$\"",
+    "\"^insmod\\ (version\\ )?[0-9](\\.[0-9]+)+?$\"",
+    "\"^lsmod\\ (version\\ )?[0-9](\\.[0-9]+)+?$\"",
+    "\"^modinfo\\ (version\\ )?[0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "kmod"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/depmod\\ (version\\ )?([0-9](\\.[0-9]+)+?)$/::kmod:\\2/'\"",
+    "\"sed -r 's/insmod\\ (version\\ )?([0-9](\\.[0-9]+)+?)$/::kmod:\\2/'\"",
+    "\"sed -r 's/lsmod\\ (version\\ )?([0-9](\\.[0-9]+)+?)$/::kmod:\\2/'\"",
+    "\"sed -r 's/modinfo\\ (version\\ )?([[0-9](\\.[0-9]+)+?)$/::kmod:\\2/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

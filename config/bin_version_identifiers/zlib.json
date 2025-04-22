@@ -1,0 +1,26 @@
+{
+  "identifier": "zlib",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "Zlib"
+  ],
+  "grep_commands": [
+    "\"^\\ unzip\\ [0-9]\\.([0-9]+)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*$\"",
+    "\"inflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark Adler\""
+  ],
+  "vendor_names": [
+    "zlib"
+  ],
+  "product_names": [
+    "zlib"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/\\ unzip\\ ([0-9])\\.([0-9])([0-9]*)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*/:zlib:zlib:\\1.\\2.\\3/'\"",
+    "\"sed -r 's/inflate\\ ([0-9](\\.[0-9]+)+?)\\ .*/:zlib:zlib:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "identifier": "afpd",
+  "parsing_mode": [
+    "live"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"^Netatalk\\ [0-9](\\.[0-9]+)+?\\ \\(name:\\ .*\\)$\""
+  ],
+  "vendor_names": [
+    "netatalk"
+  ],
+  "product_names": [
+    "afpd"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/Netatalk\\ ([0-9](\\.[0-9]+)+?)\\ .*/:netatalk:afpd:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "identifier": "strongswan",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "\"\\ strongSwan\\ [0-9](\\.[0-9]+)+?$\"",
+    "\"^ipsec _copyright strongSwan [0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "strongswan"
+  ],
+  "product_names": [
+    "strongswan"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/.*\\ strongSwan\\ ([0-9](\\.[0-9]+)+?)$/:strongswan:strongswan:\\1/'\"",
+    "\"sed -r 's/ipsec _copyright strongSwan ([0-9](\\.[0-9]+)+?)/:strongswan:strongswan:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

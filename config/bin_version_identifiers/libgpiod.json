@@ -1,0 +1,26 @@
+{
+  "identifier": "libgpiod",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "LGPL-2.1-only"
+  ],
+  "grep_commands": [
+    "\"^gpioinfo\\ \\(libgpiod\\)\\ [0-9](\\.[0-9]+)+?$\"",
+    "\"^gpiomon\\ \\(libgpiod\\)\\ [0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "libgpiod"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/gpioinfo\\ \\(libgpiod\\)\\ [0-9](\\.[0-9]+)+?)$/::libgpiod:\\1/'\"",
+    "\"sed -r 's/gpiomon\\ \\(libgpiod\\)\\ [0-9](\\.[0-9]+)+?)$/::libgpiod:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

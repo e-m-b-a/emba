@@ -1,0 +1,24 @@
+{
+   "identifier": "ld-musl-armhf.so.1",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknwon"
+   ],
+   "grep_commands": [
+      "\"^Version\\ [0-9](\\.[0-9]+)+?$\""
+   ],
+   "vendor_names": [
+      "musl-libc"
+   ],
+   "product_names": [
+      "musl"
+   ],
+   "version_extraction": [
+      "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/:musl-libc:musl:\\1/'\""
+   ],
+   "affected_paths": [
+      "ld-musl-armhf.so.1"
+   ]
+}

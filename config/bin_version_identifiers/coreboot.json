@@ -1,0 +1,24 @@
+{
+  "identifier": "coreboot",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "\"COREBOOT_VERSION: [0-9]\\.[0-9]+?(-[0-9]+)?(-[0-9a-z]+)?(-dirty)?\""
+  ],
+  "vendor_names": [
+    "coreboot"
+  ],
+  "product_names": [
+    "coreboot"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/COREBOOT_VERSION: ([0-9]\\.[0-9]+?(-[0-9]+)?(-[0-9a-z]+)?(-dirty)?)/:coreboot:coreboot:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

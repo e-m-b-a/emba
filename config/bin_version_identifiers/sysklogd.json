@@ -1,0 +1,24 @@
+{
+  "identifier": "sysklogd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "\"klogd\\ version\\ [0-9](\\.[0-9]+)+?\""
+  ],
+  "vendor_names": [
+    "sysklogd_project"
+  ],
+  "product_names": [
+    "sysklogd"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/klogd\\ version\\ ([0-9](\\.[0-9]+)+?).*/:sysklogd_project:sysklogd:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

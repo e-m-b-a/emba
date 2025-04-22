@@ -1,0 +1,27 @@
+{
+  "identifier": "traceroute",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "\"^Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+?\"",
+    "\"^Version\\ [0-9]\\.[0-9]+a[0-9]+\""
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "traceroute"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::traceroute:\\1/'\"",
+    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?).*/::traceroute:\\1/'\""
+  ],
+  "affected_paths": [
+    "traceroute"
+  ]
+}

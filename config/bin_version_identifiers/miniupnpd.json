@@ -1,0 +1,27 @@
+{
+  "identifier": "miniupnpd",
+  "parsing_mode": [
+    "live",
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"MiniUPnP\\ [0-9](\\.[0-9]+)+?\\ ",
+    "\"^miniupnpd\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "miniupnp_project"
+  ],
+  "product_names": [
+    "miniupnpd"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/MiniUPnP\\ ([0-9](\\.[0-9]+)+?)\\ .*/:miniupnp_project:miniupnpd:\\1/'\"",
+    "\"sed -r 's/^miniupnpd\\ ([0-9](\\.[0-9]+)+?)\\ .*/:miniupnp_project:miniupnpd:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "msmtp",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\"^msmtp version [0-9](\\.[0-9]+)+?$\""
+   ],
+   "vendor_names": [
+      "martin_lambers"
+   ],
+   "product_names": [
+      "msmtp"
+   ],
+   "version_extraction": [
+      "\"sed -r 's/^msmtp version ([0-9](\\.[0-9]+)+?)$/:martin_lambers:msmtp:\\1/'\""
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

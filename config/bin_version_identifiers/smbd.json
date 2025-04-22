@@ -1,0 +1,26 @@
+{
+  "identifier": "smbd",
+  "parsing_mode": [
+    "strict"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$\"",
+    "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+[a-z]$\""
+  ],
+  "vendor_names": [
+    "samba"
+  ],
+  "product_names": [
+    "samba"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/:samba:samba:\\1/'\"",
+    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?[a-z]?)$/:samba:samba:\\1/'\""
+  ],
+  "affected_paths": [
+    "smbd"
+  ]
+}

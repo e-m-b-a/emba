@@ -1,0 +1,24 @@
+{
+  "identifier": "sthttpd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "bsd-style"
+  ],
+  "grep_commands": [
+    "\"^sthttpd\\/[0-9](\\.[0-9]+)+?([a-z])?.*\""
+  ],
+  "vendor_names": [
+    "([0-9]+(\\.[0-9]+)+?([a-z])?).*"
+  ],
+  "product_names": [
+    "([0-9]+(\\.[0-9]+)+?([a-z])?).*"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:sthttpd_project:sthttpd:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

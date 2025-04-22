@@ -1,0 +1,24 @@
+{
+  "identifier": "lvm2",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"^lvmpolld\\ version:\\ [0-9](\\.[0-9]+)+?\""
+  ],
+  "vendor_names": [
+    "lvm"
+  ],
+  "product_names": [
+    "lvmpolld"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/lvmpolld\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmpolld:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

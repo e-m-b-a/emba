@@ -1,0 +1,24 @@
+{
+  "identifier": "mailsend",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"^mailsend\\ Version\\:\\ .*\\ v[0-9](\\.[0-9]+)+?([a-z][0-9]+)?$\""
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "mailsend"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/mailsend\\ Version:\\ .*\\ v([0-9](\\.[0-9]+)+?([a-z][0-9]+)?)$/::mailsend:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

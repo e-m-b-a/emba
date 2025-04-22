@@ -1,0 +1,28 @@
+{
+  "identifier": "dpkg",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "\"dpkg-divert\\ version\\ [0-9](\\.[0-9]+)+?\\ \"",
+    "\"dpkg-split\\ version\\ [0-9](\\.[0-9]+)+?\\ \"",
+    "\"dpkg-trigger\\ version\\ [0-9](\\.[0-9]+)+?\\ \""
+  ],
+  "vendor_names": [
+    "debian"
+  ],
+  "product_names": [
+    "dpkg"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/dpkg-divert\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:dpkg:\\1/'\"",
+    "\"sed -r 's/dpkg-split\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:dpkg:\\1/'\"",
+    "\"sed -r 's/dpkg-trigger\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:dpkg:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

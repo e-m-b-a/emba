@@ -1,0 +1,24 @@
+{
+  "identifier": "dbus-tools",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"dbus-run-session\\ [0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "freedesktop"
+  ],
+  "product_names": [
+    "dbus"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/dbus-run-session\\ ([0-9](\\.[0-9]+)+?)$/:freedesktop:dbus:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

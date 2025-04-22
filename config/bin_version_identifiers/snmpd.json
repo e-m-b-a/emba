@@ -1,0 +1,27 @@
+{
+  "identifier": "snmpd",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"^NET-SNMP\\ version:\\ [0-9](\\.[0-9]+)+?$\"",
+    "\"^Version:\\ \\ [0-9]\\.[0-9]+\\.[0-9]$\""
+  ],
+  "vendor_names": [
+    "net-snmp"
+  ],
+  "product_names": [
+    "net-snmp"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/NET-SNMP\\ version:\\ ([0-9](\\.[0-9]+)+?)$/:net-snmp:net-snmp:\\1/'\"",
+    "\"sed -r 's/Version:\\ \\ ([0-9](\\.[0-9]+)+?)$/:net-snmp:net-snmp:\\1/'\""
+  ],
+  "affected_paths": [
+    "snmpd"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "identifier": "memtester",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "proprietary"
+  ],
+  "grep_commands": [
+    "\"memtester\\ version\\ [5-9](\\.[0-9]+)+?\\ \""
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "memtester"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/memtester\\ version\\ ([5-9](\\.[0-9]+)+?)\\ /::memtester:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

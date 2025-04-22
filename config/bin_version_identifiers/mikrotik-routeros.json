@@ -1,0 +1,24 @@
+{
+   "identifier": "mikrotik-routeros",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      null
+   ],
+   "grep_commands": [
+      "\"MikroTik\\ routerOS\\ V[0-9]\\.[0-9]+\\ \\(c\\) [0-9]+-[0-9].*\""
+   ],
+   "vendor_names": [
+      "mikrotik"
+   ],
+   "product_names": [
+      "routeros"
+   ],
+   "version_extraction": [
+      "\"sed -r 's/.*MikroTik\\ routerOS\\ V([0-9]\\.[0-9]+)\\ .*/:mikrotik:routeros:\\1/'\""
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

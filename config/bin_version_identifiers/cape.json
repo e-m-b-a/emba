@@ -1,0 +1,24 @@
+{
+   "identifier": "cape",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\"^cape\\ [0-9](\\.[0-9])+?$\""
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "cape"
+   ],
+   "version_extraction": [
+      "\"sed -r 's/cape\\ ([0-9](\\.[0-9]+)+?)$/::cape:\\1/'\""
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

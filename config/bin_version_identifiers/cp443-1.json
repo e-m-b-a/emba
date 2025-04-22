@@ -1,0 +1,24 @@
+{
+  "identifier": "cp443-1",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "proprietary"
+  ],
+  "grep_commands": [
+    "\"^\\ Firmware\\ Update\\ V[0-9](\\.[0-9]+)+?\\ for\\ the\\ communication\\ processor\\ CP443-1$\""
+  ],
+  "vendor_names": [
+    "siemens"
+  ],
+  "product_names": [
+    "simatic_cp443-1_firmware"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/Firmware\\ Update\\ V([0-9]\\.[0-9]\\.[0-9]+)\\ for\\ the\\ communication\\ processor\\ CP443-1/:siemens:simatic_cp443-1_firmware:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

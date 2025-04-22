@@ -1,0 +1,24 @@
+{
+  "identifier": "mongodb",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"^db\\ version\\ v[0-9](\\.[0-9]+)+?$\""
+  ],
+  "vendor_names": [
+    "mongodb"
+  ],
+  "product_names": [
+    "mongodb"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/db\\ version\\ v([0-9](\\.[0-9]+)+?)$/:mongodb:mongodb:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

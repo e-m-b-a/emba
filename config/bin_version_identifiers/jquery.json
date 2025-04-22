@@ -1,0 +1,24 @@
+{
+  "identifier": "jquery",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "MIT"
+  ],
+  "grep_commands": [
+    "\"jQuery\\ v[0-9](\\.[0-9]+)+?\\ jquery\\.com\\ \""
+  ],
+  "vendor_names": [
+    "jquery"
+  ],
+  "product_names": [
+    "jquery"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/jQuery\\ v([0-9](\\.[0-9]+)+?)\\ .*/:jquery:jquery:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

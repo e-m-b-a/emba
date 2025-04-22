@@ -1,0 +1,24 @@
+{
+  "identifier": "perl",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-1.0-only OR Artistic-1.0-Perl"
+  ],
+  "grep_commands": [
+    "\"This\\ is\\ perl.*\\(v[0-9]\\.[0-9]+\\.[0-9]+\\)\\ built\""
+  ],
+  "vendor_names": [
+    "perl"
+  ],
+  "product_names": [
+    "perl"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/This\\ is\\ perl.*\\(v([0-9](\\.[0-9]+)+?)\\).*/:perl:perl:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

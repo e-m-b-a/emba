@@ -1,0 +1,27 @@
+{
+  "identifier": "udhcp",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "\"udhcp\\ [0-9](\\.[0-9]+)+?$\"",
+    "\"udhcpc\\ \\(v[0-9](\\.[0-9]+)+?(-pre)?\\)\\ started$\""
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "udhcp",
+    "udhcpc"
+  ],
+  "version_extraction": [
+    "\"sed -r 's/udhcp\\ ([0-9](\\.[0-9]+)+?)$/::udhcp:\\1/'\"",
+    "\"sed -r 's/udhcpc\\ \\(v([0-9](\\.[0-9]+)+?)(-pre)?\\)\\ .*/::udhcpc:\\1/'\""
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}
