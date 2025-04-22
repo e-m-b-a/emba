@@ -10,10 +10,10 @@
     "\"^sthttpd\\/[0-9](\\.[0-9]+)+?([a-z])?.*\""
   ],
   "vendor_names": [
-    "([0-9]+(\\.[0-9]+)+?([a-z])?).*"
+    "sthttpd_project"
   ],
   "product_names": [
-    "([0-9]+(\\.[0-9]+)+?([a-z])?).*"
+    "sthttpd"
   ],
   "version_extraction": [
     "\"sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:sthttpd_project:sthttpd:\\1/'\""

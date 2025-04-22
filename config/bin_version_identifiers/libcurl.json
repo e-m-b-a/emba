@@ -10,10 +10,10 @@
     "\"^libcurl\\/[0-9](\\.[0-9]+)+?$\""
   ],
   "vendor_names": [
-    "([0-9](\\.[0-9]+)+?)$"
+    "NA"
   ],
   "product_names": [
-    "([0-9](\\.[0-9]+)+?)$"
+    "libcurl"
   ],
   "version_extraction": [
     "\"sed -r 's/libcurl\\/([0-9](\\.[0-9]+)+?)$/::libcurl:\\1/'\""

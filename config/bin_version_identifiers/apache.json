@@ -10,10 +10,10 @@
       "\"^Server version: Apache/[0-9](\\.[0-9]+)+?\""
    ],
    "vendor_names": [
-      "([0-9](\\.[0-9]+)+?)"
+      "apache"
    ],
    "product_names": [
-      "([0-9](\\.[0-9]+)+?)"
+      "http_server"
    ],
    "version_extraction": [
       "\"sed -r 's/^Server version: Apache\\/([0-9](\\.[0-9]+)+?)/:apache:http_server:\\1/g'\""

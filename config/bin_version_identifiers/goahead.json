@@ -12,13 +12,11 @@
   ],
   "vendor_names": [
     "embedthis",
-    "goahead",
-    "runtime\\"
+    "goahead"
   ],
   "product_names": [
     "goahead",
-    "goahead_webserver",
-    "runtime\\"
+    "goahead_webserver"
   ],
   "version_extraction": [
     "\"sed -r 's/CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ ([0-9](\\.[0-9]+)+?(b[0-9]+)?)\\)\\ error\\!$/:goahead:goahead_webserver:\\1/'\"",
