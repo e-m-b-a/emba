@@ -11,9 +11,7 @@
     "\"^xfs_growfs\\ version\\ [0-9](\\.[0-9]+)+?$\"",
     "\"^xfs_repair\\ version\\ [0-9](\\.[0-9]+)+?$\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "xfsprogs"
   ],
@@ -22,7 +20,5 @@
     "\"sed -r 's/xfs_growfs\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'\"",
     "\"sed -r 's/xfs_repair\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

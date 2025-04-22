@@ -9,16 +9,12 @@
   "grep_commands": [
     "\"XLINK\\ v[0-9]+(\\.[0-9]+)+?\\ \""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "xlink"
   ],
   "version_extraction": [
     "\"sed -r 's/XLINK\\ v([0-9]+(\\.[0-9]+)+?)\\ .*/::xlink:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -20,7 +20,5 @@
     "\"sed -r 's/iproute2-ss(040823).*/:iproute2_project:iproute2:2\\.6\\.8-\\1/'\"",
     "\"sed -r 's/iproute2-ss([0-9]+).*/:iproute2_project:iproute2:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

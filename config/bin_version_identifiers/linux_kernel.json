@@ -24,7 +24,5 @@
     "\"sed -r 's/Linux\\ version\\ ([1-6](\\.[0-9]+)+?)$/:linux:linux_kernel:\\1/'\"",
     "\"sed -r 's/Linux\\ version\\ ([1-6](\\.[0-9]+)+?)\\ .*/:linux:linux_kernel:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

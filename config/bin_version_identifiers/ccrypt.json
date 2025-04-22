@@ -9,16 +9,12 @@
   "grep_commands": [
     "'\"^ccrypt$\"&&\"^\\%s\\ \\%s\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.$\"&&\"[0-9](\\.[0-9]+)+?\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "ccrypt"
   ],
   "version_extraction": [
     "\"sed -r 's/([0-9]+(\\.[0-9]+)+?)/::ccrypt:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

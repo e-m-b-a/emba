@@ -10,9 +10,7 @@
     "\"^igmpproxy\\ [0-9]+(\\.[0-9]+)+?$\"",
     "\"igmpproxy\\ versoin\\ [0-9](\\.[0-9])+?(\\ beta)?\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "igmpproxy"
   ],
@@ -20,7 +18,5 @@
     "\"sed -r 's/igmpproxy\\ ([0-9]+(\\.[0-9]+)+?)$/::igmpproxy:\\1/'\"",
     "\"sed -r 's/igmpproxy\\ versoin\\ ([0-9](\\.[0-9]+)+?).*$/::igmpproxy:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

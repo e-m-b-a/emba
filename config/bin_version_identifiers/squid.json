@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/Squid\\ Cache:\\ Version\\ ([0-9](\\.[0-9]+)+?)$/:squid-cache:squid:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

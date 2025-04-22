@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/jQuery\\ v([0-9](\\.[0-9]+)+?)\\ .*/:jquery:jquery:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

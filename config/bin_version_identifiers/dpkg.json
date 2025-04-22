@@ -22,7 +22,5 @@
     "\"sed -r 's/dpkg-split\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:dpkg:\\1/'\"",
     "\"sed -r 's/dpkg-trigger\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:dpkg:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/transmission-cli\\ ([0-9](\\.[0-9]+)+?)\\ .*/:transmission:transmissionbt:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -10,9 +10,7 @@
     "\"Sudo\\ version\\ [0-9](\\.[0-9]+)+?(p[0-9]+)?$\"",
     "\"\\/sudo-[0-9](\\.[0-9]+)+?(p[0-9]+)?\\/\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "sudo"
   ],
@@ -20,7 +18,5 @@
     "\"sed -r 's/Sudo\\ version\\ ([0-9](\\.[0-9]+)+?(p[0-9]+)?)$/::sudo:\\1/'\"",
     "\"sed -r 's/\\/sudo-([0-9](\\.[0-9]+)+?(p[0-9]+)?)\\//::sudo:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

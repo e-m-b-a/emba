@@ -20,7 +20,5 @@
     "\"sed -r 's/less\\ ([0-9]+)$/:gnu:less:\\1/'\"",
     "\"sed -r 's/less\\ ([0-9]+).*/:gnu:less:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

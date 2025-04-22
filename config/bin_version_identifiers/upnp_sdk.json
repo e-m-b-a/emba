@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/Portable\\ SDK\\ for\\ UPnP\\ devices\\ ([0-9](\\.[0-9]+)+?)\\ .*/:portable_sdk_for_upnp_project:portable_sdk_for_upnp:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -9,16 +9,12 @@
   "grep_commands": [
     "\"^Linux\\ Openswan\\ [0-9](\\.[0-9]+)+?$\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "openswan"
   ],
   "version_extraction": [
     "\"sed -r 's/Linux\\ Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -11,9 +11,7 @@
     "\"^Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+?\"",
     "\"^Version\\ [0-9]\\.[0-9]+a[0-9]+\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "traceroute"
   ],

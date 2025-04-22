@@ -22,7 +22,5 @@
     "\"sed -r 's/socat\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:dest-unreach:socat:\\1/'\"",
     "\"sed -r 's/socat\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:socat:socat:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

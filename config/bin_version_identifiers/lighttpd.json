@@ -29,7 +29,5 @@
     "\"sed -r 's/lighttpd\\/([0-9](\\.[0-9]+)+?).*/:lighttpd:lighttpd:\\1/'\"",
     "\"sed -r 's/server\\ started\\ \\(lighttpd\\/([0-9](\\.[0-9]+)+?)\\)$/:lighttpd:lighttpd:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

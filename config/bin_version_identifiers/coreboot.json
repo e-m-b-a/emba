@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/COREBOOT_VERSION: ([0-9]\\.[0-9]+?(-[0-9]+)?(-[0-9a-z]+)?(-dirty)?)/:coreboot:coreboot:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

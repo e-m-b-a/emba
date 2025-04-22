@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/Project-Id-Version:\\ gnutls\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gnutls:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -10,9 +10,7 @@
     "\"^ipsec\\ eroute\\ [0-9](\\.[0-9]+)+?$\"",
     "\"^ipsec\\ ranbits\\ [0-9](\\.[0-9]+)+?$\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "ipsec"
   ],
@@ -20,7 +18,5 @@
     "\"sed -r 's/ipsec\\ eroute\\ ([0-9](\\.[0-9]+)+?)$/::ipsec:\\1/'\"",
     "\"sed -r 's/ipsec\\ ranbits\\ ([0-9](\\.[0-9]+)+?)$/::ipsec:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -23,9 +23,7 @@
     "\"ubiupdatevol\\ [0-9]\\.[0-9]\\.[0-9]+$\"",
     "\"ubiupdatevol\\ version\\ [0-9](\\.[0-9]+)+?\\ -\\ a\\ tool\\ to\\ write\\ data\\ to\\ UBI\\ volumes\\.$\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "mtd-utils"
   ],
@@ -46,7 +44,5 @@
     "\"sed -r 's/ubiupdatevol\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'\"",
     "\"sed -r 's/ubiupdatevol\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/::mtd-utils:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

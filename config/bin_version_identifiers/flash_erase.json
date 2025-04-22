@@ -9,16 +9,12 @@
   "grep_commands": [
     "\"flash_erase\\ version\\ [0-9](\\.[0-9]+)+?\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "mtd-utils"
   ],
   "version_extraction": [
     "\"sed -r 's/flash_erase\\ version\\ ([0-9](\\.[0-9]+)+?).*/::mtd-utils:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

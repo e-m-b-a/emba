@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/X-Powered-By:\\ PHP\\/([0-9](\\.[0-9]+)+?)$/:php:php:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

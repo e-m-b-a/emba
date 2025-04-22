@@ -18,7 +18,5 @@
   "version_extraction": [
     "\"sed -r 's/ProFTPD\\ Version\\ ([0-9](\\.[0-9]+)+[a-zA-Z]?)$/:proftpd_project:proftpd:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

@@ -24,7 +24,5 @@
     "\"sed -r 's/VxWorks\\ operating\\ system\\ version\\ \\\"([0-9](\\.[0-9]+)+?)\\\"$/:windriver:vxworks:\\1/'\"",
     "\"sed -r 's/[Vv]xWorks\\ ([0-9])\\ (SR[0-9]+)$/:windriver:vxworks:\\1:sr\\2/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

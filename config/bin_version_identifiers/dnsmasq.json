@@ -10,9 +10,7 @@
     "\"^[dD]nsmasq\\ version\\ [0-9]\\.[0-9]+\"",
     "\"dnsmasq\\ [0-9]\\.[0-9]+$\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "dnsmasq"
   ],
@@ -20,7 +18,5 @@
     "\"sed -r 's/[dD]nsmasq\\ version\\ ([0-9](\\.[0-9]+)+?).*/::dnsmasq:\\1/'\"",
     "\"sed -r 's/dnsmasq\\ ([0-9](\\.[0-9]+)+?)$/::dnsmasq:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

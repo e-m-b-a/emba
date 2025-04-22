@@ -22,7 +22,5 @@
     "\"sed -r 's/systemd\\ ([0-9]+)$/:systemd_project:systemd:\\1/'\"",
     "\"sed -r 's/systemd\\ [0-9]{3}\\ \\(([0-9]{3}\\.[0-9]+).*\\)$/:systemd_project:systemd:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

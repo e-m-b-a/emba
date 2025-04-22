@@ -9,16 +9,12 @@
   "grep_commands": [
     "\"iwconfig\\ \\ Wireless-Tools\\ version\\ [0-9]+\""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "wireless_tools"
   ],
   "version_extraction": [
     "\"sed -r 's/iwconfig(\\ )+Wireless-Tools\\ version\\ ([0-9]+).*/::wireless_tools:\\2/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

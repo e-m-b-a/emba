@@ -24,6 +24,6 @@
     "\"sed -r 's/Bftpd\\ ([0-9](\\.[0-9]+)+?)$/:bftpd_project:bftpd:\\1/'\""
   ],
   "affected_paths": [
-    "NA"
+    "bftpd"
   ]
 }

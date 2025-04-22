@@ -24,7 +24,5 @@
     "\"sed -r 's/mandb\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\"",
     "\"sed -r 's/manpath\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }

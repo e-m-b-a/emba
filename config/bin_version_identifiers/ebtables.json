@@ -10,9 +10,7 @@
     "\"ebtables\\ v[0-9](\\.[0-9]+)+?-[0-9]\\ \"",
     "\"ebtables\\ v[0-9](\\.[0-9]+)+?-rc[0-9]\\ \""
   ],
-  "vendor_names": [
-    "NA"
-  ],
+  "vendor_names": [],
   "product_names": [
     "ebtables"
   ],
@@ -20,7 +18,5 @@
     "\"sed -r 's/ebtables\\ v([0-9](\\.[0-9]+)+?-[0-9])\\ .*/::ebtables:\\1/'\"",
     "\"sed -r 's/ebtables\\ v([0-9](\\.[0-9]+)+?-rc[0-9])\\ .*/::ebtables:\\1/'\""
   ],
-  "affected_paths": [
-    "NA"
-  ]
+  "affected_paths": []
 }
