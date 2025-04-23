@@ -10,6 +10,7 @@
   "grep_commands": [
     "\"BusyBox\\ v[0-9](\\.[0-9]+)+?.*\\ Built-in\\ shell\"",
     "\"BusyBox\\ v[0-9](\\.[0-9]+)+?.*\\ multi-call\\ binary\"",
+    "\"BusyBox\\ v[0-9](\\.[0-9]+)+?\\ \"",
     "\"BusyBox\\ v[0-9](\\.[0-9]+)+?\\ \\([0-9]+-.*\\)\""
   ],
   "vendor_names": [
@@ -23,7 +24,9 @@
     "\"sed -r 's/BusyBox\\ v([0-9](\\.[0-9]+)+?).*/:busybox:busybox:\\1/'\"",
     "\"sed -r 's/BusyBox\\ v([0-9](\\.[0-9]+)+?)\\ .*/:busybox:busybox:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [
     "\"^BusyBox\\ http\\ [0-9](\\.[0-9]+)+?$\""
   ],

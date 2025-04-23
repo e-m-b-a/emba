@@ -7,9 +7,12 @@
     "radvd-lic"
   ],
   "strict_grep_commands": [
+    "\"Version:\\ [0-9]\\.[0-9]+$\"",
     "\"Version:\\ [0-9]\\.[0-9]+\\.[0-9]+$\""
   ],
-  "vendor_names": [],
+  "vendor_names": [
+    "NA"
+  ],
   "product_names": [
     "radvd"
   ],

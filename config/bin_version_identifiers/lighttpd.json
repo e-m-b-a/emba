@@ -7,8 +7,14 @@
   "licenses": [
     "BSD-3-Clause"
   ],
-  "live_grep_commands": [
-    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel-[0-9]+[A-Z])?$\""
+  "grep_commands": [
+    "\"^lighttpd [0-9](\\.[0-9]+)+?\"",
+    "\"^lighttpd-[0-9](\\.[0-9]+)+?\\ \\(.*\\)\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$\"",
+    "\"^lighttpd-[0-9](\\.[0-9]+)+?\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$\"",
+    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel)?(-[0-9]+[A-Za-z]+)?.*\\ -\\ a\\ light\\ and\\ fast\\ webserver$\"",
+    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?\\ .*\\ -\\ a\\ light\\ and\\ fast\\ webserver$\"",
+    "\"^server\\ started\\ \\(lighttpd\\/[0-9](\\.[0-9]+)+?\\)$\"",
+    "\"lighttpd-[0-9](\\.[0-9]+)+?$\""
   ],
   "vendor_names": [
     "lighttpd"
@@ -21,16 +27,14 @@
     "\"sed -r 's/lighttpd-([0-9](\\.[0-9]+)+?)$/:lighttpd:lighttpd:\\1/'\"",
     "\"sed -r 's/lighttpd-([0-9](\\.[0-9]+)+?)\\ .*/:lighttpd:lighttpd:\\1/'\"",
     "\"sed -r 's/lighttpd\\/([0-9](\\.[0-9]+)+?).*/:lighttpd:lighttpd:\\1/'\"",
+    "\"sed -r 's/lighttpd\\/([0-9](\\.[0-9]+)+?)\\ .*/:lighttpd:lighttpd:\\1/'\"",
     "\"sed -r 's/server\\ started\\ \\(lighttpd\\/([0-9](\\.[0-9]+)+?)\\)$/:lighttpd:lighttpd:\\1/'\""
   ],
-  "affected_paths": [],
-  "grep_commands": [
-    "\"^lighttpd [0-9](\\.[0-9]+)+?\"",
-    "\"^lighttpd-[0-9](\\.[0-9]+)+?\\ \\(.*\\)\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$\"",
-    "\"^lighttpd-[0-9](\\.[0-9]+)+?\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$\"",
-    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel)?(-[0-9]+[A-Za-z]+)?.*\\ -\\ a\\ light\\ and\\ fast\\ webserver$\"",
-    "\"^server\\ started\\ \\(lighttpd\\/[0-9](\\.[0-9]+)+?\\)$\"",
-    "\"lighttpd-[0-9](\\.[0-9]+)+?$\""
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [
+    "\"^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel-[0-9]+[A-Z])?$\""
   ],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

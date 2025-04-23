@@ -24,9 +24,11 @@
     "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:gzip:gzip:\\1/'\"",
     "\"sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gzip:\\1/'\"",
     "\"sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/:gzip:gzip:\\1/'\"",
+    "\"sed -r 's/gzip\\ ([1-9](\\.[0-9]+)+?)$/:gnu:gzip:\\1/'\"",
     "\"sed -r 's/gzip\\ ([1-9](\\.[0-9]+)+?)$/:gzip:gzip:\\1/'\""
   ],
   "affected_paths": [
+    "NA",
     "gzip"
   ],
   "strict_grep_commands": [

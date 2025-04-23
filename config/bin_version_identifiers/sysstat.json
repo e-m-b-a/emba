@@ -10,15 +10,19 @@
     "\"^sysstat\\ version\\ [0-9]+(\\.[0-9]+)+?$\""
   ],
   "vendor_names": [
+    "sysstat",
     "sysstat_project"
   ],
   "product_names": [
     "sysstat"
   ],
   "version_extraction": [
+    "\"sed -r 's/sysstat\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:sysstat:sysstat:\\1/'\"",
     "\"sed -r 's/sysstat\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:sysstat_project:sysstat:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

@@ -10,15 +10,19 @@
     "\"^sthttpd\\/[0-9](\\.[0-9]+)+?([a-z])?.*\""
   ],
   "vendor_names": [
+    "open_source_development_team",
     "sthttpd_project"
   ],
   "product_names": [
     "sthttpd"
   ],
   "version_extraction": [
+    "\"sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:open_source_development_team:sthttpd:\\1/'\"",
     "\"sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:sthttpd_project:sthttpd:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

@@ -10,6 +10,7 @@
   "grep_commands": [
     "\"^liblogging-stdlog\\ version\\ [0-9](\\.[0-9]+)+?$\"",
     "\"^rsyslogd\\ [0-9](\\.[0-9]+)+?\\ runtime\\ debug\\ support\\ -\\ help\\ requested,\\ rsyslog\\ terminates$\"",
+    "\"rsyslogd\\ [0-9](\\.[0-9]+)+?,\\ compiled\\ with:$\"",
     "'\":\\ module\\ compiled\\ with\\ rsyslog\\ version\\ \\%s.$\"&&\"^[0-9]\\.[0-9]+(\\.[0-9]+)+?$\"'"
   ],
   "vendor_names": [
@@ -22,9 +23,12 @@
   "version_extraction": [
     "\"sed -r 's/([0-9](\\.[0-9]+)+?)/:rsyslog:rsyslogd:\\1/'\"",
     "\"sed -r 's/liblogging-stdlog\\ version\\ ([0-9](\\.[0-9]+)+?).*/:rsyslog:rsyslog:\\1/'\"",
+    "\"sed -r 's/rsyslogd\\ ([0-9](\\.[0-9]+)+?),\\ .*/:rsyslog:rsyslogd:\\1/'\"",
     "\"sed -r 's/rsyslogd\\ ([0-9](\\.[0-9]+)+?)\\ .*/:rsyslog:rsyslogd:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

@@ -21,7 +21,9 @@
     "\"sed -r 's/wpa_supplicant\\ v([0-9](\\.[0-9]+)+?).*/:w1.fi:wpa_supplicant:\\1/'\"",
     "\"sed -r 's/wpa_supplicant\\ v([0-9](\\.[0-9]+)+?).*/:wpa_supplicant:wpa_supplicant:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

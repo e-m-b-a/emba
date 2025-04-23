@@ -1,14 +1,14 @@
 {
   "identifier": "smbd",
   "parsing_mode": [
+    "multi_grep",
     "strict"
   ],
   "licenses": [
     "GPL-3.0-only"
   ],
-  "strict_grep_commands": [
-    "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$\"",
-    "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+[a-z]$\""
+  "grep_commands": [
+    "'\"^smbd version %s started.$\"&&\"^[2-5]\\.[0-9]+\\.[0-9]+$\"'"
   ],
   "vendor_names": [
     "samba"
@@ -17,13 +17,18 @@
     "samba"
   ],
   "version_extraction": [
+    "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:samba:samba:\\1/'\"",
     "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/:samba:samba:\\1/'\"",
     "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?[a-z]?)$/:samba:samba:\\1/'\""
   ],
   "affected_paths": [
+    "NA",
     "smbd"
   ],
-  "grep_commands": [],
+  "strict_grep_commands": [
+    "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$\"",
+    "\"^Version\\ [2-5]\\.[0-9]+\\.[0-9]+[a-z]$\""
+  ],
   "live_grep_commands": [],
   "zgrep_grep_commands": [],
   "emulation_only_grep_commands": []

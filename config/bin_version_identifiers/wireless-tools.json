@@ -10,15 +10,19 @@
     "\"Wireless-Tools\\ version\\ [0-9]+\""
   ],
   "vendor_names": [
+    "wireless_tools",
     "wireless_tools_project"
   ],
   "product_names": [
     "wireless_tools"
   ],
   "version_extraction": [
+    "\"sed -r 's/Wireless-Tools\\ version\\ ([0-9]+).*$/:wireless_tools:wireless_tools:\\1/'\"",
     "\"sed -r 's/Wireless-Tools\\ version\\ ([0-9]+).*$/:wireless_tools_project:wireless_tools:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

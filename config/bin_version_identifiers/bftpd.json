@@ -18,6 +18,7 @@
     "bftpd"
   ],
   "version_extraction": [
+    "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:bftpd:bftpd:\\1/'\"",
     "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:bftpd_project:bftpd:\\1/'\"",
     "\"sed -r 's/Bftpd\\ ([0-9](\\.[0-9]+)+?)$/:bftpd:bftpd:\\1/'\"",
     "\"sed -r 's/Bftpd\\ ([0-9](\\.[0-9]+)+?)$/:bftpd_project:bftpd:\\1/'\""

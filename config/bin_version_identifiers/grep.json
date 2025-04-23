@@ -7,7 +7,8 @@
     "GPL-3.0-only"
   ],
   "grep_commands": [
-    "\"GNU\\ grep\\ [0-9](\\.[0-9]+)+?\""
+    "\"GNU\\ grep\\ [0-9](\\.[0-9]+)+?\"",
+    "\"\\(GNU\\ grep\\)\\ [0-9](\\.[0-9]+)+?$\""
   ],
   "vendor_names": [
     "gnu"
@@ -16,9 +17,12 @@
     "grep"
   ],
   "version_extraction": [
-    "\"sed -r 's/GNU\\ grep\\ ([0-9](\\.[0-9]+)+?).*/:gnu:grep:\\1/'\""
+    "\"sed -r 's/GNU\\ grep\\ ([0-9](\\.[0-9]+)+?).*/:gnu:grep:\\1/'\"",
+    "\"sed -r 's/\\(GNU\\ grep\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:grep:\\1/'\""
   ],
-  "affected_paths": [],
+  "affected_paths": [
+    "NA"
+  ],
   "live_grep_commands": [],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],
