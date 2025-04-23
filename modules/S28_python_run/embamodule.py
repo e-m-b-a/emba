@@ -75,17 +75,15 @@ class EmbaModule():
     def __write_formatted_log(self, operator: str, text: str):
         lines = text.split('\n')
 
-        with open(self.logfile, "a") as log:
+        with open(self.logfile, "a", encoding="utf-8") as log:
             for line in lines:
                 log.write(f"[{operator}] {line}\n")
-
 
     def log(self, text: str):
         """
         Creates a log entry.
         Supports multiple lines.
-
-        Parameters:
+Parameters:
             text (str): The contents of the log entry.
         """
         self.__write_formatted_log(
@@ -120,6 +118,37 @@ class EmbaModule():
             f"{self.format.RED}!{self.format.NC}",
             description
         )
+
+
+def get_general_exception_block():
+    """
+    This function serves as a wrapper for an exception tuple
+    to enable PEP8 compliance while keeping the boilerplate code
+    in the actual python modules minimal.
+
+    Returns:
+        A tuple of all default exception types of Python
+    """
+    return (
+        ArithmeticError,
+        AssertionError,
+        AttributeError,
+        BufferError,
+        EOFError,
+        ImportError,
+        LookupError,
+        MemoryError,
+        NameError,
+        OSError,
+        ReferenceError,
+        RuntimeError,
+        StopAsyncIteration,
+        StopIteration,
+        SyntaxError,
+        SystemError,
+        TypeError,
+        ValueError
+    )
 
 
 def setup_module(argv: list, env: _Environ):

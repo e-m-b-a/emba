@@ -1,8 +1,4 @@
 #!/usr/bin/python3
-# pylint: disable=broad-exception-caught
-#   broad-exception-caught: The generic exception caught in 'main' is required
-#                           to handle any errors thrown by 'module_run'
-#                           independant of the type.
 """
 EMBA - EMBEDDED LINUX ANALYZER
 
@@ -23,8 +19,10 @@ Description: This python script serves as an example of a Python module.
 from sys import argv
 from os import environ
 from traceback import format_exc
-from embamodule import setup_module, shutdown_module
 from embaformatting import Format
+from embamodule import get_general_exception_block, \
+                       setup_module, \
+                       shutdown_module
 
 
 def module_run(module, env, fmt):
@@ -40,8 +38,10 @@ def module_run(module, env, fmt):
     module.add_finding("You look great today!")
 
     # Raise an exception.
-    # All exceptions, wether intentionally raised or not are automatically
+    # All exceptions, whether intentionally raised or not are automatically
     # formatted and written to the module log.
+    # DO NOT RAISE AN EXCEPTION OF UNSPECIFIED TYPE!
+    # - "raise Exception()" will fail
     raise ValueError("Dummy Exception")
 
 
@@ -56,7 +56,7 @@ def main():
     try:
         module_run(module, environ, fmt)
 
-    except Exception:
+    except get_general_exception_block():
         module.panic(format_exc())
 
     finally:
