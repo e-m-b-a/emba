@@ -171,7 +171,7 @@ binary_architecture_threader() {
   if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
     return
   fi
-  if grep -q "${lMD5SUM}" "${P99_CSV_LOG}" 2>/dev/null; then
+  if [[ -f "${P99_CSV_LOG}" ]] && grep -q "${lMD5SUM}" "${P99_CSV_LOG}" 2>/dev/null; then
     return
   fi
   echo "${lMD5SUM}" >> "${TMP_DIR}/p99_md5sum_done.tmp"

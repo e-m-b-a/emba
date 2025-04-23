@@ -75,7 +75,7 @@ P50_binwalk_extractor() {
   print_ln
   if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
     remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}"
-    mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
+    mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f)
   fi
 
   if [[ "${#lFILES_BINWALK_ARR[@]}" -gt 0 ]]; then
