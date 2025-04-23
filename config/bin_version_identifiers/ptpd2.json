@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"ptpd2\\ version\\ [0-9]\\.[0-9]+\\.[0-9]+\""
+      "ptpd2\\ version\\ [0-9]\\.[0-9]+\\.[0-9]+"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ptpd2"
    ],
    "version_extraction": [
-      "\"sed -r 's/ptpd2\\ version\\ ([0-9](\\.[0-9]+)+?)/::ptpd2:\\1/'\""
+      "sed -r 's/ptpd2\\ version\\ ([0-9](\\.[0-9]+)+?)/::ptpd2:\\1/'"
    ],
    "affected_paths": [
       "NA"

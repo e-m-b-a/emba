@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"info,\\ udhcp\\ client\\ \\(v[0-9](\\.[0-9]+)+?\\)\\ started\""
+      "info,\\ udhcp\\ client\\ \\(v[0-9](\\.[0-9]+)+?\\)\\ started"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "udhcp-client"
    ],
    "version_extraction": [
-      "\"sed -r 's/info,\\ udhcp\\ client\\ \\(v([0-9](\\.[0-9]+)+?)\\)\\ started.*/::udhcp-client:\\1/'\""
+      "sed -r 's/info,\\ udhcp\\ client\\ \\(v([0-9](\\.[0-9]+)+?)\\)\\ started.*/::udhcp-client:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^libdbus\\ [0-9](\\.[0-9]+)+?$\""
+      "^libdbus\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "freedesktop"
@@ -16,7 +16,7 @@
       "dbus"
    ],
    "version_extraction": [
-      "\"sed -r 's/libdbus\\ ([0-9](\\.[0-9]+)+?)$/:freedesktop:dbus:\\1/'\""
+      "sed -r 's/libdbus\\ ([0-9](\\.[0-9]+)+?)$/:freedesktop:dbus:\\1/'"
    ],
    "affected_paths": [
       "NA"

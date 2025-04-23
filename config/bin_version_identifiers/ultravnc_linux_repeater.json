@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^UltraVnc\\ Linux\\ Repeater\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "^UltraVnc\\ Linux\\ Repeater\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "ultravnc"
@@ -16,7 +16,7 @@
       "repeater"
    ],
    "version_extraction": [
-      "\"sed -r 's/UltraVnc\\ Linux\\ Repeater\\ version\\ ([0-9](\\.[0-9]+)+?)$/:ultravnc:repeater:\\1/'\""
+      "sed -r 's/UltraVnc\\ Linux\\ Repeater\\ version\\ ([0-9](\\.[0-9]+)+?)$/:ultravnc:repeater:\\1/'"
    ],
    "affected_paths": [
       "NA"

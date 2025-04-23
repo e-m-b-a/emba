@@ -7,10 +7,10 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"^mkfs\\.xfs\\ version\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"^xfs_db\\ version\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"^xfs_growfs\\ version\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"^xfs_repair\\ version\\ [0-9](\\.[0-9]+)+?$\""
+    "^mkfs\\.xfs\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "^xfs_db\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "^xfs_growfs\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "^xfs_repair\\ version\\ [0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "NA"
@@ -19,10 +19,10 @@
     "xfsprogs"
   ],
   "version_extraction": [
-    "\"sed -r 's/mkfs\\.xfs\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'\"",
-    "\"sed -r 's/xfs_db\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'\"",
-    "\"sed -r 's/xfs_growfs\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'\"",
-    "\"sed -r 's/xfs_repair\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'\""
+    "sed -r 's/mkfs\\.xfs\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'",
+    "sed -r 's/xfs_db\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'",
+    "sed -r 's/xfs_growfs\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'",
+    "sed -r 's/xfs_repair\\ version\\ ([0-9](\\.[0-9]+)+?)$/::xfsprogs:\\1/'"
   ],
   "affected_paths": [
     "NA"

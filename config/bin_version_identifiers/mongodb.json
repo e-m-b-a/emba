@@ -7,8 +7,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^MongoDB\\ shell\\ version\\ v[0-9](\\.[0-9]+)+?$\"",
-    "\"^db\\ version\\ v[0-9](\\.[0-9]+)+?$\""
+    "^MongoDB\\ shell\\ version\\ v[0-9](\\.[0-9]+)+?$",
+    "^db\\ version\\ v[0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "mongodb"
@@ -17,8 +17,8 @@
     "mongodb"
   ],
   "version_extraction": [
-    "\"sed -r 's/MongoDB\\ shell\\ version v([0-9](\\.[0-9]+)+?)$/:mongodb:mongodb:\\1/'\"",
-    "\"sed -r 's/db\\ version\\ v([0-9](\\.[0-9]+)+?)$/:mongodb:mongodb:\\1/'\""
+    "sed -r 's/MongoDB\\ shell\\ version v([0-9](\\.[0-9]+)+?)$/:mongodb:mongodb:\\1/'",
+    "sed -r 's/db\\ version\\ v([0-9](\\.[0-9]+)+?)$/:mongodb:mongodb:\\1/'"
   ],
   "affected_paths": [
     "NA"

@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"radclient:\\ [0-9]\\.[0-9]+\\.[0-9]+\\ built\\ on\\ \""
+      "radclient:\\ [0-9]\\.[0-9]+\\.[0-9]+\\ built\\ on\\ "
    ],
    "vendor_names": [
       "freeradius"
@@ -16,7 +16,7 @@
       "radclient"
    ],
    "version_extraction": [
-      "\"sed -r 's/radclient:\\ ([0-9](\\.[0-9]+)+?).*/:freeradius:radclient:\\1/'\""
+      "sed -r 's/radclient:\\ ([0-9](\\.[0-9]+)+?).*/:freeradius:radclient:\\1/'"
    ],
    "affected_paths": [
       "NA"

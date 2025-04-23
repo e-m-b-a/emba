@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"BCrelay\\ v[0-9](\\.[0-9]+)+?\""
+      "BCrelay\\ v[0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "bcrelay"
    ],
    "version_extraction": [
-      "\"sed -r 's/BCrelay\\ v([0-9](\\.[0-9]+)+?).*/::bcrelay:\\1/'\""
+      "sed -r 's/BCrelay\\ v([0-9](\\.[0-9]+)+?).*/::bcrelay:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"\\(GNU\\ gettext-runtime\\)\\ [0-9](\\.[0-9]+)+?$\""
+      "\\(GNU\\ gettext-runtime\\)\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "gnu"
@@ -16,7 +16,7 @@
       "gettext-runtime"
    ],
    "version_extraction": [
-      "\"sed -r 's/\\(GNU\\ gettext-runtime\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gettext-runtime:\\1/'\""
+      "sed -r 's/\\(GNU\\ gettext-runtime\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gettext-runtime:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"Tor\\ v[0-9](\\.[0-9]+)+?\\ .git\""
+      "Tor\\ v[0-9](\\.[0-9]+)+?\\ .git"
    ],
    "vendor_names": [
       "tor"
@@ -16,7 +16,7 @@
       "tor"
    ],
    "version_extraction": [
-      "\"sed -r 's/Tor\\ v([0-9](\\.[0-9]+)+?)\\ .*/:tor:tor:\\1/'\""
+      "sed -r 's/Tor\\ v([0-9](\\.[0-9]+)+?)\\ .*/:tor:tor:\\1/'"
    ],
    "affected_paths": [
       "NA"

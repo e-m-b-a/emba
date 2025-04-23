@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"jffs[0-9]?dump\\ [0-9](\\.[0-9]+)+?$\""
+      "jffs[0-9]?dump\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "mtd-utils"
    ],
    "version_extraction": [
-      "\"sed -r 's/jffs[0-9]?dump\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'\""
+      "sed -r 's/jffs[0-9]?dump\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'"
    ],
    "affected_paths": [
       "NA"

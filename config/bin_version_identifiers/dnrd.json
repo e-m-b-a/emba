@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"dnrd\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "dnrd\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "dnrd"
@@ -16,7 +16,7 @@
       "dnrd"
    ],
    "version_extraction": [
-      "\"sed -r 's/dnrd\\ version\\ ([0-9](\\.[0-9]+)+?)$/:dnrd:dnrd:\\1/'\""
+      "sed -r 's/dnrd\\ version\\ ([0-9](\\.[0-9]+)+?)$/:dnrd:dnrd:\\1/'"
    ],
    "affected_paths": [
       "NA"

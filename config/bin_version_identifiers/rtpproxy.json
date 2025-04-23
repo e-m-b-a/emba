@@ -7,7 +7,7 @@
       "unknown"
    ],
    "strict_grep_commands": [
-      "\"^Basic\\ version:\\ [0-9]+$\""
+      "^Basic\\ version:\\ [0-9]+$"
    ],
    "vendor_names": [
       "rtpproxy"
@@ -16,7 +16,7 @@
       "rtpproxy"
    ],
    "version_extraction": [
-      "\"sed -r 's/Basic\\ version:\\ ([0-9]+)$/:rtpproxy:rtpproxy:\\1/'\""
+      "sed -r 's/Basic\\ version:\\ ([0-9]+)$/:rtpproxy:rtpproxy:\\1/'"
    ],
    "affected_paths": [
       "rtpproxy"

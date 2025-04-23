@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^mkconfig\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "^mkconfig\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "mkconfig"
    ],
    "version_extraction": [
-      "\"sed -r 's/mkconfig\\ version\\ ([0-9](\\.[0-9]+)+?)$/::mkconfig:\\1/'\""
+      "sed -r 's/mkconfig\\ version\\ ([0-9](\\.[0-9]+)+?)$/::mkconfig:\\1/'"
    ],
    "affected_paths": [
       "NA"

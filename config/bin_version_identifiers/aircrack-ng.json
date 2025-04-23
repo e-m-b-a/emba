@@ -7,10 +7,10 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"^\\ \\ Air[a-z]*-ng\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ \"",
-    "\"^\\ \\ Packetforge-ng\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ \"",
-    "\"^\\ \\ ivsTools\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ \"",
-    "\"^\\ \\ makeivs-ng\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ \""
+    "^\\ \\ Air[a-z]*-ng\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ ",
+    "^\\ \\ Packetforge-ng\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ ",
+    "^\\ \\ ivsTools\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ ",
+    "^\\ \\ makeivs-ng\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ "
   ],
   "vendor_names": [
     "aircrack-ng"
@@ -19,10 +19,10 @@
     "aircrack-ng"
   ],
   "version_extraction": [
-    "\"sed -r 's/\\ \\ Air[a-z]*-ng\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'\"",
-    "\"sed -r 's/\\ \\ Packetforge-ng\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'\"",
-    "\"sed -r 's/\\ \\ ivsTools\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'\"",
-    "\"sed -r 's/\\ \\ makeivs-ng\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'\""
+    "sed -r 's/\\ \\ Air[a-z]*-ng\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'",
+    "sed -r 's/\\ \\ Packetforge-ng\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'",
+    "sed -r 's/\\ \\ ivsTools\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'",
+    "sed -r 's/\\ \\ makeivs-ng\\ ([0-9](\\.[0-9]+)+?)\\ .*/:aircrack-ng:aircrack-ng:\\1/'"
   ],
   "affected_paths": [
     "NA"

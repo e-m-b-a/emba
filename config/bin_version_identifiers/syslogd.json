@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^syslogd\\ v[0-9](\\.[0-9]+)+?$\""
+      "^syslogd\\ v[0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "rsyslogd"
@@ -16,7 +16,7 @@
       "rsyslogd"
    ],
    "version_extraction": [
-      "\"sed -r 's/syslogd\\ v([0-9](\\.[0-9]+)+?)$/:rsyslogd:rsyslogd:\\1/'\""
+      "sed -r 's/syslogd\\ v([0-9](\\.[0-9]+)+?)$/:rsyslogd:rsyslogd:\\1/'"
    ],
    "affected_paths": [
       "NA"

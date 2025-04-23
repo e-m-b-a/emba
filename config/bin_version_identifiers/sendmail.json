@@ -7,7 +7,7 @@
       "Sendmail"
    ],
    "grep_commands": [
-      "\"\\ This\\ is\\ Sendmail\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "\\ This\\ is\\ Sendmail\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "sendmail"
@@ -16,7 +16,7 @@
       "sendmail"
    ],
    "version_extraction": [
-      "\"sed -r 's/\\ This\\ is\\ Sendmail\\ version\\ ([0-9](\\.[0-9]+)+?)$/:sendmail:sendmail:\\1/'\""
+      "sed -r 's/\\ This\\ is\\ Sendmail\\ version\\ ([0-9](\\.[0-9]+)+?)$/:sendmail:sendmail:\\1/'"
    ],
    "affected_paths": [
       "NA"

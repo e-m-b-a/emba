@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^Xsupplicant\\ [0-9](\\.[0-9]+)+?$\""
+      "^Xsupplicant\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "xsupplicant"
@@ -16,7 +16,7 @@
       "xsupplicant"
    ],
    "version_extraction": [
-      "\"sed -r 's/Xsupplicant\\ ([0-9]+(\\.[0-9]+)+?)$/:xsupplicant:xsupplicant:\\1/'\""
+      "sed -r 's/Xsupplicant\\ ([0-9]+(\\.[0-9]+)+?)$/:xsupplicant:xsupplicant:\\1/'"
    ],
    "affected_paths": [
       "NA"

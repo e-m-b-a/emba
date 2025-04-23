@@ -7,7 +7,7 @@
       "GPL-2.0-or-later"
    ],
    "grep_commands": [
-      "\"^This\\ is\\ WiFiDog\\ version\\ [0-9]+(\\.[0-9]+)+?\""
+      "^This\\ is\\ WiFiDog\\ version\\ [0-9]+(\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "wifidog"
    ],
    "version_extraction": [
-      "\"sed -r 's/This\\ is\\ WiFiDog\\ version\\ ([0-9]+(\\.[0-9]+)+?)/::wifidog:\\1/'\""
+      "sed -r 's/This\\ is\\ WiFiDog\\ version\\ ([0-9]+(\\.[0-9]+)+?)/::wifidog:\\1/'"
    ],
    "affected_paths": [
       "NA"

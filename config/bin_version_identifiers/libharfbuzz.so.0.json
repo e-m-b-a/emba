@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "'\"^void hb_serialize_context_t::resolve_links()$\"&&\"^hb_blob_destroy$\"&&\"^[0-9]\\.[0-9](\\.[0-9]+)+?$\"'"
+      "'^void hb_serialize_context_t::resolve_links()$\"&&\"^hb_blob_destroy$\"&&\"^[0-9]\\.[0-9](\\.[0-9]+)+?$\"'"
    ],
    "vendor_names": [
       "harfbuzz_project"
@@ -16,7 +16,7 @@
       "harfbuzz"
    ],
    "version_extraction": [
-      "\"sed -r 's/^([0-9]\\.[0-9](\\.[0-9]+)+?)/:harfbuzz_project:harfbuzz:\\1/'\""
+      "sed -r 's/^([0-9]\\.[0-9](\\.[0-9]+)+?)/:harfbuzz_project:harfbuzz:\\1/'"
    ],
    "affected_paths": [
       "NA"

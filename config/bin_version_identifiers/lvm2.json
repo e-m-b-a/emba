@@ -7,8 +7,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^lvmetad\\ version:\\ [0-9](\\.[0-9]+)+?\"",
-    "\"^lvmpolld\\ version:\\ [0-9](\\.[0-9]+)+?\""
+    "^lvmetad\\ version:\\ [0-9](\\.[0-9]+)+?",
+    "^lvmpolld\\ version:\\ [0-9](\\.[0-9]+)+?"
   ],
   "vendor_names": [
     "lvm"
@@ -18,8 +18,8 @@
     "lvmpolld"
   ],
   "version_extraction": [
-    "\"sed -r 's/lvmetad\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmetad:\\1/'\"",
-    "\"sed -r 's/lvmpolld\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmpolld:\\1/'\""
+    "sed -r 's/lvmetad\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmetad:\\1/'",
+    "sed -r 's/lvmpolld\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmpolld:\\1/'"
   ],
   "affected_paths": [
     "NA"

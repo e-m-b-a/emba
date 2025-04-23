@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"rpcinfo\\ \\(.*\\)\\ [0-9](\\.[0-9]+)+?\""
+      "rpcinfo\\ \\(.*\\)\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "rpcinfo"
    ],
    "version_extraction": [
-      "\"sed -r 's/rpcinfo\\ \\(.*\\)\\ ([0-9](\\.[0-9]+)+?)/::rpcinfo:\\1/'\""
+      "sed -r 's/rpcinfo\\ \\(.*\\)\\ ([0-9](\\.[0-9]+)+?)/::rpcinfo:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"hostname\\ [0-9]\\.[0-9]+\""
+      "hostname\\ [0-9]\\.[0-9]+"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "hostname"
    ],
    "version_extraction": [
-      "\"sed -r 's/hostname\\ ([0-9](\\.[0-9]+)+?)/::hostname:\\1/'\""
+      "sed -r 's/hostname\\ ([0-9](\\.[0-9]+)+?)/::hostname:\\1/'"
    ],
    "affected_paths": [
       "NA"

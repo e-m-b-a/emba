@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "'\"^pyexpat$\"&&\"^Python\\ wrapper\\ for\\ Expat\\ parser\\.$\"&&\"^sqlite3_bind_parameter_index$\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
+      "'^pyexpat$\"&&\"^Python\\ wrapper\\ for\\ Expat\\ parser\\.$\"&&\"^sqlite3_bind_parameter_index$\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "pyexpat"
    ],
    "version_extraction": [
-      "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/::pyexpat:\\1/'\""
+      "sed -r 's/([0-9](\\.[0-9]+)+?)$/::pyexpat:\\1/'"
    ],
    "affected_paths": [
       "NA"

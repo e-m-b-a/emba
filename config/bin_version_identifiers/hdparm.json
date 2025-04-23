@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"hdparm\\ v[0-9](\\.[0-9]+)+?\""
+      "hdparm\\ v[0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "hdparm"
    ],
    "version_extraction": [
-      "\"sed -r 's/hdparm\\ v([0-9](\\.[0-9]+)+?).*/::hdparm:\\1/'\""
+      "sed -r 's/hdparm\\ v([0-9](\\.[0-9]+)+?).*/::hdparm:\\1/'"
    ],
    "affected_paths": [
       "NA"

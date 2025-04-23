@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"acpi\\ [0-9](\\.[0-9]+)+?$\""
+      "acpi\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "acpi"
    ],
    "version_extraction": [
-      "\"sed -r 's/acpi\\ ([0-9](\\.[0-9]+)+?)$/::acpi:\\1/'\""
+      "sed -r 's/acpi\\ ([0-9](\\.[0-9]+)+?)$/::acpi:\\1/'"
    ],
    "affected_paths": [
       "NA"

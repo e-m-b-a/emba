@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"ZipCloak\\ [0-9](\\.[0-9]+)+?\\ \""
+      "ZipCloak\\ [0-9](\\.[0-9]+)+?\\ "
    ],
    "vendor_names": [
       "info-zip"
@@ -16,7 +16,7 @@
       "zipcloak"
    ],
    "version_extraction": [
-      "\"sed -r 's/ZipCloak\\ ([0-9](\\.[0-9]+)+?)\\ /:info-zip:zipcloak:\\1/'\""
+      "sed -r 's/ZipCloak\\ ([0-9](\\.[0-9]+)+?)\\ /:info-zip:zipcloak:\\1/'"
    ],
    "affected_paths": [
       "NA"

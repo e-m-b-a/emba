@@ -7,8 +7,8 @@
     "proprietary"
   ],
   "grep_commands": [
-    "\"memtester\\ version\\ [0-4](\\.[0-9]+)+?\\ \"",
-    "\"memtester\\ version\\ [5-9](\\.[0-9]+)+?\\ \""
+    "memtester\\ version\\ [0-4](\\.[0-9]+)+?\\ ",
+    "memtester\\ version\\ [5-9](\\.[0-9]+)+?\\ "
   ],
   "vendor_names": [
     "NA"
@@ -17,8 +17,8 @@
     "memtester"
   ],
   "version_extraction": [
-    "\"sed -r 's/memtester\\ version\\ ([0-4](\\.[0-9]+)+?)\\ /::memtester:\\1/'\"",
-    "\"sed -r 's/memtester\\ version\\ ([5-9](\\.[0-9]+)+?)\\ /::memtester:\\1/'\""
+    "sed -r 's/memtester\\ version\\ ([0-4](\\.[0-9]+)+?)\\ /::memtester:\\1/'",
+    "sed -r 's/memtester\\ version\\ ([5-9](\\.[0-9]+)+?)\\ /::memtester:\\1/'"
   ],
   "affected_paths": [
     "NA"

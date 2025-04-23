@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^AmbaShell\\ Test\\ Command\\ \\[Version\\ [0-9]\\.[0-9]+(\\.[0-9]+)?\\]$\""
+      "^AmbaShell\\ Test\\ Command\\ \\[Version\\ [0-9]\\.[0-9]+(\\.[0-9]+)?\\]$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ambashell"
    ],
    "version_extraction": [
-      "\"sed -r 's/AmbaShell\\ Test\\ Command\\ \\[Version\\ ([0-9](\\.[0-9]+)+?)$/::ambashell:\\1/'\""
+      "sed -r 's/AmbaShell\\ Test\\ Command\\ \\[Version\\ ([0-9](\\.[0-9]+)+?)$/::ambashell:\\1/'"
    ],
    "affected_paths": [
       "NA"

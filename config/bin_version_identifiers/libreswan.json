@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"^Libreswan\\ [\\.0-9]+\""
+      "^Libreswan\\ [\\.0-9]+"
    ],
    "vendor_names": [
       "libreswan"
@@ -16,7 +16,7 @@
       "libreswan"
    ],
    "version_extraction": [
-      "\"sed -r 's/Libreswan\\ ([0-9](\\.[0-9]+)+?).*/:libreswan:libreswan:\\1/'\""
+      "sed -r 's/Libreswan\\ ([0-9](\\.[0-9]+)+?).*/:libreswan:libreswan:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"whiptail\\ \\(newt\\):\\ [0-9](\\.[0-9]+)+?\""
+      "whiptail\\ \\(newt\\):\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "whiptail"
    ],
    "version_extraction": [
-      "\"sed -r 's/whiptail\\ \\(newt\\):\\ ([0-9](\\.[0-9]+)+?)/::whiptail:\\1/'\""
+      "sed -r 's/whiptail\\ \\(newt\\):\\ ([0-9](\\.[0-9]+)+?)/::whiptail:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^version:\\ openser\\ [0-9](\\.[0-9]+)+?\\ \\([a-z]+\\/[a-z]+\\)$\""
+      "^version:\\ openser\\ [0-9](\\.[0-9]+)+?\\ \\([a-z]+\\/[a-z]+\\)$"
    ],
    "vendor_names": [
       "openser"
@@ -16,7 +16,7 @@
       "openser"
    ],
    "version_extraction": [
-      "\"sed -r 's/version:\\ openser\\ ([0-9]+(\\.[0-9]+)+?).*/:openser:openser:\\1/'\""
+      "sed -r 's/version:\\ openser\\ ([0-9]+(\\.[0-9]+)+?).*/:openser:openser:\\1/'"
    ],
    "affected_paths": [
       "NA"

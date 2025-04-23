@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"lrzsz.\\ [\\.rc0-9]+$\""
+      "lrzsz.\\ [\\.rc0-9]+$"
    ],
    "vendor_names": [
       "lrzsz_project"
@@ -16,7 +16,7 @@
       "lrzsz"
    ],
    "version_extraction": [
-      "\"sed -r 's/lrzsz.\\ ([\\.rc0-9]+)$/:lrzsz_project:lrzsz:\\1/'\""
+      "sed -r 's/lrzsz.\\ ([\\.rc0-9]+)$/:lrzsz_project:lrzsz:\\1/'"
    ],
    "affected_paths": [
       "NA"

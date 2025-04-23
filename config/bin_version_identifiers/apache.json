@@ -7,7 +7,7 @@
       "Apache-2.0"
    ],
    "grep_commands": [
-      "\"^Server version: Apache/[0-9](\\.[0-9]+)+?\""
+      "^Server version: Apache/[0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "apache"
@@ -16,7 +16,7 @@
       "http_server"
    ],
    "version_extraction": [
-      "\"sed -r 's/^Server version: Apache\\/([0-9](\\.[0-9]+)+?)/:apache:http_server:\\1/g'\""
+      "sed -r 's/^Server version: Apache\\/([0-9](\\.[0-9]+)+?)/:apache:http_server:\\1/g'"
    ],
    "affected_paths": [
       "NA"

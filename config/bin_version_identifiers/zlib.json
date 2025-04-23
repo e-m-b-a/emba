@@ -7,9 +7,9 @@
     "Zlib"
   ],
   "grep_commands": [
-    "\"^\\ unzip\\ [0-9]\\.([0-9]+)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*$\"",
-    "\"deflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark\\ Adler\"",
-    "\"inflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark Adler\""
+    "^\\ unzip\\ [0-9]\\.([0-9]+)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*$",
+    "deflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark\\ Adler",
+    "inflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark Adler"
   ],
   "vendor_names": [
     "zlib"
@@ -18,9 +18,9 @@
     "zlib"
   ],
   "version_extraction": [
-    "\"sed -r 's/\\ unzip\\ ([0-9])\\.([0-9])([0-9]*)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*/:zlib:zlib:\\1.\\2.\\3/'\"",
-    "\"sed -r 's/deflate\\ ([0-9](\\.[0-9]+)+?)\\ .*/:zlib:zlib:\\1/'\"",
-    "\"sed -r 's/inflate\\ ([0-9](\\.[0-9]+)+?)\\ .*/:zlib:zlib:\\1/'\""
+    "sed -r 's/\\ unzip\\ ([0-9])\\.([0-9])([0-9]*)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*/:zlib:zlib:\\1.\\2.\\3/'",
+    "sed -r 's/deflate\\ ([0-9](\\.[0-9]+)+?)\\ .*/:zlib:zlib:\\1/'",
+    "sed -r 's/inflate\\ ([0-9](\\.[0-9]+)+?)\\ .*/:zlib:zlib:\\1/'"
   ],
   "affected_paths": [
     "NA"

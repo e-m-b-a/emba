@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "'\"^libdev$\"&&\"libev:\\ loop\\ to\\ be\\ embedded\\ is\\ not\\ embeddable\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
+      "'^libdev$\"&&\"libev:\\ loop\\ to\\ be\\ embedded\\ is\\ not\\ embeddable\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "libdev"
    ],
    "version_extraction": [
-      "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/::libdev:\\1/'\""
+      "sed -r 's/([0-9](\\.[0-9]+)+?)$/::libdev:\\1/'"
    ],
    "affected_paths": [
       "NA"

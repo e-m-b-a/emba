@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^mbim-proxy\\ [0-9](\\.[0-9]+)+$\""
+      "^mbim-proxy\\ [0-9](\\.[0-9]+)+$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "mbim-proxy"
    ],
    "version_extraction": [
-      "\"sed -r 's/mbim-proxy\\ ([0-9](\\.[0-9]+)+?)$/::mbim-proxy:\\1/'\""
+      "sed -r 's/mbim-proxy\\ ([0-9](\\.[0-9]+)+?)$/::mbim-proxy:\\1/'"
    ],
    "affected_paths": [
       "NA"

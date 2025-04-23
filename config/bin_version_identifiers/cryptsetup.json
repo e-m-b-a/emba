@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"cryptsetup\\ [0-9](\\.[0-9]+)+?$\""
+      "cryptsetup\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "cryptsetup_project"
@@ -16,7 +16,7 @@
       "cryptsetup"
    ],
    "version_extraction": [
-      "\"sed -r 's/cryptsetup\\ ([0-9](\\.[0-9]+)+?)$/:cryptsetup_project:cryptsetup:\\1/'\""
+      "sed -r 's/cryptsetup\\ ([0-9](\\.[0-9]+)+?)$/:cryptsetup_project:cryptsetup:\\1/'"
    ],
    "affected_paths": [
       "NA"

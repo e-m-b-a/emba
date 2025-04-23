@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"Beceem\\ CSCM\\ Command\\ Line\\ Client\\ [0-9](\\.[0-9]+)+?\""
+      "Beceem\\ CSCM\\ Command\\ Line\\ Client\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "beceem"
    ],
    "version_extraction": [
-      "\"sed -r 's/Beceem\\ CSCM\\ Command\\ Line\\ Client\\ ([0-9](\\.[0-9]+)+?).*$/::beceem:\\1/'\""
+      "sed -r 's/Beceem\\ CSCM\\ Command\\ Line\\ Client\\ ([0-9](\\.[0-9]+)+?).*$/::beceem:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,8 +7,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"jfs_fscklog\\ version\\ [0-9](\\.[0-9]+)+?,\\ \"",
-    "\"jfs_tune\\ version\\ [0-9](\\.[0-9]+)+?,\\ \""
+    "jfs_fscklog\\ version\\ [0-9](\\.[0-9]+)+?,\\ ",
+    "jfs_tune\\ version\\ [0-9](\\.[0-9]+)+?,\\ "
   ],
   "vendor_names": [
     "NA"
@@ -17,8 +17,8 @@
     "jfsutils"
   ],
   "version_extraction": [
-    "\"sed -r 's/jfs_fscklog\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::jfsutils:\\1/'\"",
-    "\"sed -r 's/jfs_tune\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::jfsutils:\\1/'\""
+    "sed -r 's/jfs_fscklog\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::jfsutils:\\1/'",
+    "sed -r 's/jfs_tune\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::jfsutils:\\1/'"
   ],
   "affected_paths": [
     "NA"

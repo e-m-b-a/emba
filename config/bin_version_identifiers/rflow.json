@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"[0-9]\\.[0-9]+\\ Copyright\\ by\\ Nikki\\ Chumakov$\""
+      "[0-9]\\.[0-9]+\\ Copyright\\ by\\ Nikki\\ Chumakov$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "rflow"
    ],
    "version_extraction": [
-      "\"sed -r 's/([0-9](\\.[0-9]+)+?)\\ Copyright\\ by\\ Nikki\\ Chumakov$/::rflow:\\1/'\""
+      "sed -r 's/([0-9](\\.[0-9]+)+?)\\ Copyright\\ by\\ Nikki\\ Chumakov$/::rflow:\\1/'"
    ],
    "affected_paths": [
       "NA"

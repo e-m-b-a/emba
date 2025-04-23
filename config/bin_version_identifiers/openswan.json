@@ -7,8 +7,8 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"^Linux\\ Openswan\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"^Openswan\\ [0-9](\\.[0-9]+)+?$\""
+    "^Linux\\ Openswan\\ [0-9](\\.[0-9]+)+?$",
+    "^Openswan\\ [0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "NA"
@@ -17,8 +17,8 @@
     "openswan"
   ],
   "version_extraction": [
-    "\"sed -r 's/Linux\\ Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'\"",
-    "\"sed -r 's/Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'\""
+    "sed -r 's/Linux\\ Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'",
+    "sed -r 's/Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'"
   ],
   "affected_paths": [
     "NA"

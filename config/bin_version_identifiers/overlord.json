@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^overlord\\ [0-9](\\.[0-9]+)+?$\""
+      "^overlord\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "overlord"
    ],
    "version_extraction": [
-      "\"sed -r 's/overlord\\ ([0-9](\\.[0-9]+)+?)$/::overlord:\\1/'\""
+      "sed -r 's/overlord\\ ([0-9](\\.[0-9]+)+?)$/::overlord:\\1/'"
    ],
    "affected_paths": [
       "NA"

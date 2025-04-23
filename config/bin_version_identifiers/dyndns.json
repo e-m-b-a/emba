@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"DynDns\\ Update\\ v[0-9]\\.[0-9]+.*\\ AlphaNetworks,Inc\\.\""
+      "DynDns\\ Update\\ v[0-9]\\.[0-9]+.*\\ AlphaNetworks,Inc\\."
    ],
    "vendor_names": [
       "alphanetworks"
@@ -16,7 +16,7 @@
       "dyndns"
    ],
    "version_extraction": [
-      "\"sed -r 's/DynDns\\ Update\\ v([0-9](\\.[0-9]+)+?).*\\ AlphaNetworks.*/:alphanetworks:dyndns:\\1/'\""
+      "sed -r 's/DynDns\\ Update\\ v([0-9](\\.[0-9]+)+?).*\\ AlphaNetworks.*/:alphanetworks:dyndns:\\1/'"
    ],
    "affected_paths": [
       "NA"

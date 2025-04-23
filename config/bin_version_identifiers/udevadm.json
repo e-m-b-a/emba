@@ -7,7 +7,7 @@
       "unknown"
    ],
    "strict_grep_commands": [
-      "\"^[0-9]{3}$\""
+      "^[0-9]{3}$"
    ],
    "vendor_names": [
       "systemd_project"
@@ -16,7 +16,7 @@
       "systemd"
    ],
    "version_extraction": [
-      "\"sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'\""
+      "sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'"
    ],
    "affected_paths": [
       "udevadm"

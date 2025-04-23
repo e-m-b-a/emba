@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"trigger\\ version\\ [0-9]+$\""
+      "trigger\\ version\\ [0-9]+$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "trigger"
    ],
    "version_extraction": [
-      "\"sed -r 's/trigger\\ version\\ ([0-9]+)$/::trigger:\\1/'\""
+      "sed -r 's/trigger\\ version\\ ([0-9]+)$/::trigger:\\1/'"
    ],
    "affected_paths": [
       "NA"

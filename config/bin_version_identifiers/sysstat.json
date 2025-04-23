@@ -7,7 +7,7 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^sysstat\\ version\\ [0-9]+(\\.[0-9]+)+?$\""
+    "^sysstat\\ version\\ [0-9]+(\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "sysstat",
@@ -17,8 +17,8 @@
     "sysstat"
   ],
   "version_extraction": [
-    "\"sed -r 's/sysstat\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:sysstat:sysstat:\\1/'\"",
-    "\"sed -r 's/sysstat\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:sysstat_project:sysstat:\\1/'\""
+    "sed -r 's/sysstat\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:sysstat:sysstat:\\1/'",
+    "sed -r 's/sysstat\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:sysstat_project:sysstat:\\1/'"
   ],
   "affected_paths": [
     "NA"

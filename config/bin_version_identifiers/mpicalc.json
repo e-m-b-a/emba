@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"mpicalc\\ [0-9]\\.[0-9]+\""
+      "mpicalc\\ [0-9]\\.[0-9]+"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "mpicalc"
    ],
    "version_extraction": [
-      "\"sed -r 's/mpicalc\\ ([0-9](\\.[0-9]+)+?)/::mpicalc:\\1/'\""
+      "sed -r 's/mpicalc\\ ([0-9](\\.[0-9]+)+?)/::mpicalc:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,8 +7,8 @@
     "GPL-3.0-only"
   ],
   "grep_commands": [
-    "\"apt-Version\\ [0-9](\\.[0-9]+)+?\\ \"",
-    "\"apt\\ [0-9]+(\\.[0-9]+)+?\\ \""
+    "apt-Version\\ [0-9](\\.[0-9]+)+?\\ ",
+    "apt\\ [0-9]+(\\.[0-9]+)+?\\ "
   ],
   "vendor_names": [
     "debian"
@@ -17,8 +17,8 @@
     "apt"
   ],
   "version_extraction": [
-    "\"sed -r 's/apt-Version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:apt:\\1/'\"",
-    "\"sed -r 's/apt\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/:debian:apt:\\1/'\""
+    "sed -r 's/apt-Version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:debian:apt:\\1/'",
+    "sed -r 's/apt\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/:debian:apt:\\1/'"
   ],
   "affected_paths": [
     "NA"

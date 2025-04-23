@@ -7,7 +7,7 @@
       "unknwon"
    ],
    "strict_grep_commands": [
-      "\"^Version\\ [0-9](\\.[0-9]+)+?$\""
+      "^Version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "musl-libc"
@@ -16,7 +16,7 @@
       "musl"
    ],
    "version_extraction": [
-      "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/:musl-libc:musl:\\1/'\""
+      "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/:musl-libc:musl:\\1/'"
    ],
    "affected_paths": [
       "ld-musl-armhf.so.1"

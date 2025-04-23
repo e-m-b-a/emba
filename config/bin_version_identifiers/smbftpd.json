@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^SmbFTPD\\ Ver\\ [0-9]\\.[0-9]+$\""
+      "^SmbFTPD\\ Ver\\ [0-9]\\.[0-9]+$"
    ],
    "vendor_names": [
       "smbftpd"
@@ -16,7 +16,7 @@
       "smbftpd"
    ],
    "version_extraction": [
-      "\"sed -r 's/SmbFTPD\\ Ver\\ ([0-9](\\.[0-9]+)+?)$/:smbftpd:smbftpd:\\1/'\""
+      "sed -r 's/SmbFTPD\\ Ver\\ ([0-9](\\.[0-9]+)+?)$/:smbftpd:smbftpd:\\1/'"
    ],
    "affected_paths": [
       "NA"

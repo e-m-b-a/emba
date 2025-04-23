@@ -8,8 +8,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^udev-[0-9]\\.[0-9](\\.[0-9]+)+?$\"",
-    "\"^udevinfo,\\ version\\ [0-9]+$\""
+    "^udev-[0-9]\\.[0-9](\\.[0-9]+)+?$",
+    "^udevinfo,\\ version\\ [0-9]+$"
   ],
   "vendor_names": [
     "NA",
@@ -20,9 +20,9 @@
     "udevinfo"
   ],
   "version_extraction": [
-    "\"sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'\"",
-    "\"sed -r 's/udev-([0-9](\\.[0-9]+)+?)$/:systemd_project:systemd:\\1/'\"",
-    "\"sed -r 's/udevinfo,\\ version\\ ([0-9]+)$/::udevinfo:\\1/'\""
+    "sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'",
+    "sed -r 's/udev-([0-9](\\.[0-9]+)+?)$/:systemd_project:systemd:\\1/'",
+    "sed -r 's/udevinfo,\\ version\\ ([0-9]+)$/::udevinfo:\\1/'"
   ],
   "affected_paths": [
     "NA",
@@ -30,7 +30,7 @@
   ],
   "live_grep_commands": [],
   "strict_grep_commands": [
-    "\"^[0-9]{3}$\""
+    "^[0-9]{3}$"
   ],
   "zgrep_grep_commands": [],
   "emulation_only_grep_commands": []

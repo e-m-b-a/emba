@@ -7,8 +7,8 @@
     "LGPL-2.1-only"
   ],
   "grep_commands": [
-    "\"BRLTTY\\ [0-9]\\.[0-9]+\\ rev\\ BRLTTY-[0-9]\\.[0-9]+\\ \"",
-    "\"BRLTTY\\ [0-9]\\.[0-9]+\\.[0-9]+\\ rev\\ BRLTTY-[0-9]\\.[0-9]+\\.[0-9]+\\ \""
+    "BRLTTY\\ [0-9]\\.[0-9]+\\ rev\\ BRLTTY-[0-9]\\.[0-9]+\\ ",
+    "BRLTTY\\ [0-9]\\.[0-9]+\\.[0-9]+\\ rev\\ BRLTTY-[0-9]\\.[0-9]+\\.[0-9]+\\ "
   ],
   "vendor_names": [
     "mielke"
@@ -17,7 +17,7 @@
     "brltty"
   ],
   "version_extraction": [
-    "\"sed -r 's/BRLTTY\\ ([0-9](\\.[0-9]+)+?).*/:mielke:brltty:\\1/'\""
+    "sed -r 's/BRLTTY\\ ([0-9](\\.[0-9]+)+?).*/:mielke:brltty:\\1/'"
   ],
   "affected_paths": [
     "NA"

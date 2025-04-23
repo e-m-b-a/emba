@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"depmod\\ [0-9](\\.[0-9]+)+?\\ --\\ part\\ of\\ module-init-tools$\""
+      "depmod\\ [0-9](\\.[0-9]+)+?\\ --\\ part\\ of\\ module-init-tools$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "depmod"
    ],
    "version_extraction": [
-      "\"sed -r 's/depmod\\ ([0-9](\\.[0-9]+)+?)\\ .*/::depmod:\\1/'\""
+      "sed -r 's/depmod\\ ([0-9](\\.[0-9]+)+?)\\ .*/::depmod:\\1/'"
    ],
    "affected_paths": [
       "NA"

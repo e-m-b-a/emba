@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"stunnel\\ [0-9](\\.[0-9]+)+?\\ on\\ \""
+      "stunnel\\ [0-9](\\.[0-9]+)+?\\ on\\ "
    ],
    "vendor_names": [
       "stunnel"
@@ -16,7 +16,7 @@
       "stunnel"
    ],
    "version_extraction": [
-      "\"sed -r 's/stunnel\\ ([0-9](\\.[0-9]+)+?)\\ .*/:stunnel:stunnel:\\1/'\""
+      "sed -r 's/stunnel\\ ([0-9](\\.[0-9]+)+?)\\ .*/:stunnel:stunnel:\\1/'"
    ],
    "affected_paths": [
       "NA"

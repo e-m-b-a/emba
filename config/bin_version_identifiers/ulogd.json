@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^ulogd\\ Version\\ [0-9](\\.[0-9]+)+?$\""
+      "^ulogd\\ Version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ulogd"
    ],
    "version_extraction": [
-      "\"sed -r 's/ulogd\\ Version\\ ([0-9](\\.[0-9]+)+?)/::ulogd:\\1/'\""
+      "sed -r 's/ulogd\\ Version\\ ([0-9](\\.[0-9]+)+?)/::ulogd:\\1/'"
    ],
    "affected_paths": [
       "NA"

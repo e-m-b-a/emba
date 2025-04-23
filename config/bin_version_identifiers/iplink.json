@@ -7,7 +7,7 @@
       "commercial"
    ],
    "grep_commands": [
-      "\"^ipLink Version: [0-9]\\.[0-9]\\.[0-9]$\""
+      "^ipLink Version: [0-9]\\.[0-9]\\.[0-9]$"
    ],
    "vendor_names": [
       "ipcomm"
@@ -16,7 +16,7 @@
       "iplink"
    ],
    "version_extraction": [
-      "\"sed -r 's/ipLink\\ Version:\\ ([0-9](\\.[0-9]+)+?)$/:ipcomm:iplink:\\1/'\""
+      "sed -r 's/ipLink\\ Version:\\ ([0-9](\\.[0-9]+)+?)$/:ipcomm:iplink:\\1/'"
    ],
    "affected_paths": [
       "NA"

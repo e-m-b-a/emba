@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "\"^iotgoat\\ v[0-9]\\.[0-9]$\""
+      "^iotgoat\\ v[0-9]\\.[0-9]$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "iotgoat"
    ],
    "version_extraction": [
-      "\"sed -r 's/iotgoat\\ v([0-9](\\.[0-9]+)+?)$/::iotgoat:\\1/'\""
+      "sed -r 's/iotgoat\\ v([0-9](\\.[0-9]+)+?)$/::iotgoat:\\1/'"
    ],
    "affected_paths": [
       "NA"

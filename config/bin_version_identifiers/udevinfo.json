@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^udevinfo,\\ version\\ [0-9]+$\""
+      "^udevinfo,\\ version\\ [0-9]+$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "udevinfo"
    ],
    "version_extraction": [
-      "\"sed -r 's/udevinfo,\\ version\\ ([0-9]+)$/::udevinfo:\\1/'\""
+      "sed -r 's/udevinfo,\\ version\\ ([0-9]+)$/::udevinfo:\\1/'"
    ],
    "affected_paths": [
       "NA"

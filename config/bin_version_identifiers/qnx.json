@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"Welcome\\ to\\ QNX\\ Neutrino\\ [0-9](\\.[0-9]+)+?$\""
+      "Welcome\\ to\\ QNX\\ Neutrino\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "blackberry"
@@ -16,7 +16,7 @@
       "qnx_neutrino_rtos"
    ],
    "version_extraction": [
-      "\"sed -r 's/Welcome\\ to\\ QNX\\ Neutrino\\ ([0-9](\\.[0-9]+)+?)$/:blackberry:qnx_neutrino_rtos:\\1/'\""
+      "sed -r 's/Welcome\\ to\\ QNX\\ Neutrino\\ ([0-9](\\.[0-9]+)+?)$/:blackberry:qnx_neutrino_rtos:\\1/'"
    ],
    "affected_paths": [
       "NA"

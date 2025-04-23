@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"ucloud_v2\\ ver\\.[0-9]+\""
+      "ucloud_v2\\ ver\\.[0-9]+"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ucloud"
    ],
    "version_extraction": [
-      "\"sed -r 's/ucloud_v2\\ ver\\.([0-9]+).*/::ucloud:\\1/'\""
+      "sed -r 's/ucloud_v2\\ ver\\.([0-9]+).*/::ucloud:\\1/'"
    ],
    "affected_paths": [
       "NA"

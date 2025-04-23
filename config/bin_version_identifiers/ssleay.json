@@ -7,7 +7,7 @@
       "ssleay"
    ],
    "grep_commands": [
-      "\"part\\ of\\ SSLeay\\ [0-9]\\.[0-9]+\\.[0-9]+\\ [0-9]+-\""
+      "part\\ of\\ SSLeay\\ [0-9]\\.[0-9]+\\.[0-9]+\\ [0-9]+-"
    ],
    "vendor_names": [
       "ssleay"
@@ -16,7 +16,7 @@
       "ssleay"
    ],
    "version_extraction": [
-      "\"sed -r 's/part\\ of\\ SSLeay\\ ([0-9](\\.[0-9]+)+?)\\ .*/:ssleay:ssleay:\\1/'\""
+      "sed -r 's/part\\ of\\ SSLeay\\ ([0-9](\\.[0-9]+)+?)\\ .*/:ssleay:ssleay:\\1/'"
    ],
    "affected_paths": [
       "NA"

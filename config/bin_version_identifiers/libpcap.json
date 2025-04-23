@@ -7,7 +7,7 @@
       "BSD-3-Clause"
    ],
    "grep_commands": [
-      "\"^libpcap\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "^libpcap\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "tcpdump"
@@ -16,7 +16,7 @@
       "libpcap"
    ],
    "version_extraction": [
-      "\"sed -r 's/libpcap\\ version\\ ([0-9](\\.[0-9]+)+?)$/:tcpdump:libpcap:\\1/'\""
+      "sed -r 's/libpcap\\ version\\ ([0-9](\\.[0-9]+)+?)$/:tcpdump:libpcap:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^BIRD\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "^BIRD\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "bird"
    ],
    "version_extraction": [
-      "\"sed -r 's/BIRD\\ version\\ ([0-9](\\.[0-9]+)+?)$/::bird:\\1/'\""
+      "sed -r 's/BIRD\\ version\\ ([0-9](\\.[0-9]+)+?)$/::bird:\\1/'"
    ],
    "affected_paths": [
       "NA"

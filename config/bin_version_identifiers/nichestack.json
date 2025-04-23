@@ -7,7 +7,7 @@
       "proprietary"
    ],
    "grep_commands": [
-      "\"^Interniche\\ Stack\\ v[0-9](\\.[0-9]+)+$\""
+      "^Interniche\\ Stack\\ v[0-9](\\.[0-9]+)+$"
    ],
    "vendor_names": [
       "hcc-embedded"
@@ -16,7 +16,7 @@
       "nichestack"
    ],
    "version_extraction": [
-      "\"sed -r 's/Interniche\\ Stack\\ v([0-9](\\.[0-9]+)+?)$/:hcc-embedded:nichestack:\\1/'\""
+      "sed -r 's/Interniche\\ Stack\\ v([0-9](\\.[0-9]+)+?)$/:hcc-embedded:nichestack:\\1/'"
    ],
    "affected_paths": [
       "NA"

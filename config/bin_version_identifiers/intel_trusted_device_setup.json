@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^Intel\\(R\\)\\ Trusted\\ Device\\ Setup\\ Extension\\ Version\\ [0-9]+(\\.[0-9]+)+?$\""
+      "^Intel\\(R\\)\\ Trusted\\ Device\\ Setup\\ Extension\\ Version\\ [0-9]+(\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "intel"
@@ -16,7 +16,7 @@
       "trusted_device_setup"
    ],
    "version_extraction": [
-      "\"sed -r 's/Intel\\(R\\)\\ Trusted\\ Device\\ Setup\\ Extension\\ Version\\ ([0-9]+(\\.[0-9]+)+?)/:intel:trusted_device_setup:\\1/'\""
+      "sed -r 's/Intel\\(R\\)\\ Trusted\\ Device\\ Setup\\ Extension\\ Version\\ ([0-9]+(\\.[0-9]+)+?)/:intel:trusted_device_setup:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"radlogin\\.c,v\\ [0-9]\\.[0-9]+\\ [0-9]+\""
+      "radlogin\\.c,v\\ [0-9]\\.[0-9]+\\ [0-9]+"
    ],
    "vendor_names": [
       "iea_software"
@@ -16,7 +16,7 @@
       "radlogin"
    ],
    "version_extraction": [
-      "\"sed -r 's/radlogin\\.c,v\\ ([0-9](\\.[0-9]+)+?).*/:iea_software:radlogin:\\1/'\""
+      "sed -r 's/radlogin\\.c,v\\ ([0-9](\\.[0-9]+)+?).*/:iea_software:radlogin:\\1/'"
    ],
    "affected_paths": [
       "NA"

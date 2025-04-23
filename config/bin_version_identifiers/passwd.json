@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^update-passwd\\ [0-9][\\.0-9]+$\""
+      "^update-passwd\\ [0-9][\\.0-9]+$"
    ],
    "vendor_names": [
       "passwd"
@@ -16,7 +16,7 @@
       "passwd"
    ],
    "version_extraction": [
-      "\"sed -r 's/update-passwd\\ ([0-9](\\.[0-9]+)+?)$/:passwd:passwd:\\1/'\""
+      "sed -r 's/update-passwd\\ ([0-9](\\.[0-9]+)+?)$/:passwd:passwd:\\1/'"
    ],
    "affected_paths": [
       "NA"

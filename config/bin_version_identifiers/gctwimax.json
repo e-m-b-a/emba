@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"GCTwimax\\ [0-9](\\.[0-9])+?rc[0-9]\""
+      "GCTwimax\\ [0-9](\\.[0-9])+?rc[0-9]"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "gctwimax"
    ],
    "version_extraction": [
-      "\"sed -r 's/GCTwimax\\ ([0-9](\\.[0-9]+)+?(rc[0-9])?).*/::gctwimax:\\1/'\""
+      "sed -r 's/GCTwimax\\ ([0-9](\\.[0-9]+)+?(rc[0-9])?).*/::gctwimax:\\1/'"
    ],
    "affected_paths": [
       "NA"

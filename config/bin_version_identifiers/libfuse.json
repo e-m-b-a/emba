@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"FUSE\\ library\\ version:\\ [0-9](\\.[0-9]+)+?\""
+      "FUSE\\ library\\ version:\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "libfuse_project"
@@ -16,7 +16,7 @@
       "libfuse"
    ],
    "version_extraction": [
-      "\"sed -r 's/FUSE\\ library\\ version:\\ ([0-9](\\.[0-9]+)+?)/:libfuse_project:libfuse:\\1/'\""
+      "sed -r 's/FUSE\\ library\\ version:\\ ([0-9](\\.[0-9]+)+?)/:libfuse_project:libfuse:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^clear_console:\\ Version\\ [0-9]+(\\.[0-9]+)+?$\""
+      "^clear_console:\\ Version\\ [0-9]+(\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "clear_console"
    ],
    "version_extraction": [
-      "\"sed -r 's/clear_console:\\ Version\\ ([0-9]+(\\.[0-9]+)+?)$/::clear_console:\\1/'\""
+      "sed -r 's/clear_console:\\ Version\\ ([0-9]+(\\.[0-9]+)+?)$/::clear_console:\\1/'"
    ],
    "affected_paths": [
       "NA"

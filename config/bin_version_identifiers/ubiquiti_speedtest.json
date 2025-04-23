@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^Network\\ Speed\\ Tester\\ client\\ v[0-9](\\.[0-9]+)+?\\ \\(c\\)\\ Ubiquiti\\ Networks$\""
+      "^Network\\ Speed\\ Tester\\ client\\ v[0-9](\\.[0-9]+)+?\\ \\(c\\)\\ Ubiquiti\\ Networks$"
    ],
    "vendor_names": [
       "ubiquiti"
@@ -16,7 +16,7 @@
       "network_speed_tester"
    ],
    "version_extraction": [
-      "\"sed -r 's/Network\\ Speed\\ Tester\\ client\\ v([0-9](\\.[0-9]+)+?).*/:ubiquiti:network_speed_tester:\\1/'\""
+      "sed -r 's/Network\\ Speed\\ Tester\\ client\\ v([0-9](\\.[0-9]+)+?).*/:ubiquiti:network_speed_tester:\\1/'"
    ],
    "affected_paths": [
       "NA"

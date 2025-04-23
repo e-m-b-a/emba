@@ -7,8 +7,8 @@
     "curl"
   ],
   "grep_commands": [
-    "\"CLIENT\\ libcurl\\ [0-9](\\.[0-9]+)+?\"",
-    "\"^libcurl\\/[0-9](\\.[0-9]+)+?$\""
+    "CLIENT\\ libcurl\\ [0-9](\\.[0-9]+)+?",
+    "^libcurl\\/[0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "NA"
@@ -17,8 +17,8 @@
     "libcurl"
   ],
   "version_extraction": [
-    "\"sed -r 's/CLIENT\\ libcurl\\ ([0-9](\\.[0-9]+)+?).*/::libcurl:\\1/'\"",
-    "\"sed -r 's/libcurl\\/([0-9](\\.[0-9]+)+?)$/::libcurl:\\1/'\""
+    "sed -r 's/CLIENT\\ libcurl\\ ([0-9](\\.[0-9]+)+?).*/::libcurl:\\1/'",
+    "sed -r 's/libcurl\\/([0-9](\\.[0-9]+)+?)$/::libcurl:\\1/'"
   ],
   "affected_paths": [
     "NA"

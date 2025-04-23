@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^ProL2TP\\ v[\\.0-9]+\\ \""
+      "^ProL2TP\\ v[\\.0-9]+\\ "
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "prol2tp"
    ],
    "version_extraction": [
-      "\"sed -r 's/ProL2TP\\ v([0-9](\\.[0-9]+)+?)\\ .*/::prol2tp:\\1/'\""
+      "sed -r 's/ProL2TP\\ v([0-9](\\.[0-9]+)+?)\\ .*/::prol2tp:\\1/'"
    ],
    "affected_paths": [
       "NA"

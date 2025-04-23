@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"\\ bootlogd\\ [0-9](\\.[0-9]+)+?\\ \""
+      "\\ bootlogd\\ [0-9](\\.[0-9]+)+?\\ "
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "bootlogd"
    ],
    "version_extraction": [
-      "\"sed -r 's/\\ bootlogd\\ ([0-9](\\.[0-9]+)+?)\\ .*/::bootlogd:\\1/'\""
+      "sed -r 's/\\ bootlogd\\ ([0-9](\\.[0-9]+)+?)\\ .*/::bootlogd:\\1/'"
    ],
    "affected_paths": [
       "NA"

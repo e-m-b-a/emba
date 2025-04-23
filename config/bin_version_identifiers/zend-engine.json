@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"Zend\\ Engine\\ v[0-9](\\.[0-9]+)+?,\\ Copyright.*Technologies$\""
+      "Zend\\ Engine\\ v[0-9](\\.[0-9]+)+?,\\ Copyright.*Technologies$"
    ],
    "vendor_names": [
       "zend"
@@ -16,7 +16,7 @@
       "engine"
    ],
    "version_extraction": [
-      "\"sed -r 's/Zend\\ Engine\\ v([0-9](\\.[0-9]+)+?).*/:zend:engine:\\1/'\""
+      "sed -r 's/Zend\\ Engine\\ v([0-9](\\.[0-9]+)+?).*/:zend:engine:\\1/'"
    ],
    "affected_paths": [
       "NA"

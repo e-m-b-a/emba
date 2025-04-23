@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"visudo\\ version\\ [0-9](\\.[0-9]+)+?(p[0-9]+)?$\""
+      "visudo\\ version\\ [0-9](\\.[0-9]+)+?(p[0-9]+)?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "sudo"
    ],
    "version_extraction": [
-      "\"sed -r 's/visudo\\ version\\ ([0-9](\\.[0-9]+)+?(p[0-9]+)?)$/::sudo:\\1/'\""
+      "sed -r 's/visudo\\ version\\ ([0-9](\\.[0-9]+)+?(p[0-9]+)?)$/::sudo:\\1/'"
    ],
    "affected_paths": [
       "NA"

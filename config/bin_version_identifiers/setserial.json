@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"setserial\\ version\\ [0-9](\\.[0-9]+)+?,\\ [0-9]+-.*-20[0-9]+$\""
+      "setserial\\ version\\ [0-9](\\.[0-9]+)+?,\\ [0-9]+-.*-20[0-9]+$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "setserial"
    ],
    "version_extraction": [
-      "\"sed -r 's/setserial\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*$/::setserial:\\1/'\""
+      "sed -r 's/setserial\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*$/::setserial:\\1/'"
    ],
    "affected_paths": [
       "NA"

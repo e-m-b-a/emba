@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^ozKer\\ [0-9](\\.[0-9]+)+?(\\.ozker\\ build-[0-9]+)?$\""
+      "^ozKer\\ [0-9](\\.[0-9]+)+?(\\.ozker\\ build-[0-9]+)?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ozker"
    ],
    "version_extraction": [
-      "\"sed -r 's/ozker\\ ([0-9](\\.[0-9]+)+?).*/::ozker:\\1/'\""
+      "sed -r 's/ozker\\ ([0-9](\\.[0-9]+)+?).*/::ozker:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "GPL-3.0-only"
    ],
    "grep_commands": [
-      "\"GNU\\ Midnight\\ Commander\\ [0-9](\\.[0-9]+)+?\""
+      "GNU\\ Midnight\\ Commander\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "gnu"
@@ -16,7 +16,7 @@
       "midnight_commander"
    ],
    "version_extraction": [
-      "\"sed -r 's/GNU\\ Midnight\\ Commander\\ ([0-9](\\.[0-9]+)+?)/:gnu:midnight_commander:\\1/'\""
+      "sed -r 's/GNU\\ Midnight\\ Commander\\ ([0-9](\\.[0-9]+)+?)/:gnu:midnight_commander:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"watchdog\\ version\\ [0-9](\\.[0-9]+)+?,\\ usage\\:\""
+      "watchdog\\ version\\ [0-9](\\.[0-9]+)+?,\\ usage\\:"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "watchdog"
    ],
    "version_extraction": [
-      "\"sed -r 's/watchdog\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::watchdog:\\1/'\""
+      "sed -r 's/watchdog\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::watchdog:\\1/'"
    ],
    "affected_paths": [
       "NA"

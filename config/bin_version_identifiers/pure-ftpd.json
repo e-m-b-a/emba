@@ -7,7 +7,7 @@
     "ISC"
   ],
   "grep_commands": [
-    "\"pure-ftpd\\ v[0-9](\\.[0-9]+)+?\\ \\[privsep\\]$\""
+    "pure-ftpd\\ v[0-9](\\.[0-9]+)+?\\ \\[privsep\\]$"
   ],
   "vendor_names": [
     "pureftpd"
@@ -17,8 +17,8 @@
     "pureftpd"
   ],
   "version_extraction": [
-    "\"sed -r 's/pure-ftpd\\ v([0-9](\\.[0-9]+)+?).*/:pureftpd:pure-ftpd:\\1/'\"",
-    "\"sed -r 's/pure-ftpd\\ v([0-9](\\.[0-9]+)+?).*/:pureftpd:pureftpd:\\1/'\""
+    "sed -r 's/pure-ftpd\\ v([0-9](\\.[0-9]+)+?).*/:pureftpd:pure-ftpd:\\1/'",
+    "sed -r 's/pure-ftpd\\ v([0-9](\\.[0-9]+)+?).*/:pureftpd:pureftpd:\\1/'"
   ],
   "affected_paths": [
     "NA"

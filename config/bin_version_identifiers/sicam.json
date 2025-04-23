@@ -7,7 +7,7 @@
       "proprietary"
    ],
    "grep_commands": [
-      "\"7KG[0-9][0-9]x\\ V[0-9]+(\\.[0-9]+)+?\\ PCK\\ FILE$\""
+      "7KG[0-9][0-9]x\\ V[0-9]+(\\.[0-9]+)+?\\ PCK\\ FILE$"
    ],
    "vendor_names": [
       "siemens"
@@ -16,7 +16,7 @@
       "sicam_q100"
    ],
    "version_extraction": [
-      "\"sed -r 's/7KG[0-9][0-9]x\\ V([0-9]+(\\.[0-9]+)+?)\\ PCK\\ FILE/:siemens:sicam_q100:\\1/'\""
+      "sed -r 's/7KG[0-9][0-9]x\\ V([0-9]+(\\.[0-9]+)+?)\\ PCK\\ FILE/:siemens:sicam_q100:\\1/'"
    ],
    "affected_paths": [
       "NA"

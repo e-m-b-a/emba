@@ -7,8 +7,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^rngd\\ [0-9]$\"",
-    "\"^rngd\\ [0-9]\\.[0-9]+$\""
+    "^rngd\\ [0-9]$",
+    "^rngd\\ [0-9]\\.[0-9]+$"
   ],
   "vendor_names": [
     "NA"
@@ -17,8 +17,8 @@
     "rngd"
   ],
   "version_extraction": [
-    "\"sed -r 's/rngd\\ ([0-9]+)$/::rngd:\\1/'\"",
-    "\"sed -r 's/rngd\\ ([0-9]+\\.[0-9]+)$/::rngd:\\1/'\""
+    "sed -r 's/rngd\\ ([0-9]+)$/::rngd:\\1/'",
+    "sed -r 's/rngd\\ ([0-9]+\\.[0-9]+)$/::rngd:\\1/'"
   ],
   "affected_paths": [
     "NA"

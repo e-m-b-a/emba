@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^Version:\\ lldpd\\ [0-9](\\.[0-9]+)+$\""
+      "^Version:\\ lldpd\\ [0-9](\\.[0-9]+)+$"
    ],
    "vendor_names": [
       "lldpd_project"
@@ -16,7 +16,7 @@
       "lldpd"
    ],
    "version_extraction": [
-      "\"sed -r 's/Version:\\ lldpd\\ ([0-9](\\.[0-9]+)+?)$/:lldpd_project:lldpd:\\1/'\""
+      "sed -r 's/Version:\\ lldpd\\ ([0-9](\\.[0-9]+)+?)$/:lldpd_project:lldpd:\\1/'"
    ],
    "affected_paths": [
       "NA"

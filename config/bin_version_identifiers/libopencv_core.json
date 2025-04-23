@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "'\"^OpenCV\\(%s\\) Error: %s \\(%s\\) in %s, file %s, line %d$\"&&\"General\\ configuration\\ for\\ OpenCV\\ [0-9](\\.[0-9]+)+?\\ =+\"'"
+      "'^OpenCV\\(%s\\) Error: %s \\(%s\\) in %s, file %s, line %d$\"&&\"General\\ configuration\\ for\\ OpenCV\\ [0-9](\\.[0-9]+)+?\\ =+\"'"
    ],
    "vendor_names": [
       "opencv"
@@ -16,7 +16,7 @@
       "opencv"
    ],
    "version_extraction": [
-      "\"sed -r 's/^General configuration for OpenCV ([0-9]+\\.[0-9]+\\.[0-9]+) .*/:opencv:opencv:\\1/'\""
+      "sed -r 's/^General configuration for OpenCV ([0-9]+\\.[0-9]+\\.[0-9]+) .*/:opencv:opencv:\\1/'"
    ],
    "affected_paths": [
       "NA"

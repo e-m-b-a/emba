@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^inotifywatch\\ [0-9](\\.[0-9]+)+?$\""
+      "^inotifywatch\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "inotify"
@@ -16,7 +16,7 @@
       "inotify-tools"
    ],
    "version_extraction": [
-      "\"sed -r 's/inotifywatch\\ ([0-9](\\.[0-9]+)+?)$/:inotify:inotify-tools:\\1/'\""
+      "sed -r 's/inotifywatch\\ ([0-9](\\.[0-9]+)+?)$/:inotify:inotify-tools:\\1/'"
    ],
    "affected_paths": [
       "NA"

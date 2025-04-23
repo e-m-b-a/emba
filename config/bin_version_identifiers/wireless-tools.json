@@ -7,7 +7,7 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"Wireless-Tools\\ version\\ [0-9]+\""
+    "Wireless-Tools\\ version\\ [0-9]+"
   ],
   "vendor_names": [
     "wireless_tools",
@@ -17,8 +17,8 @@
     "wireless_tools"
   ],
   "version_extraction": [
-    "\"sed -r 's/Wireless-Tools\\ version\\ ([0-9]+).*$/:wireless_tools:wireless_tools:\\1/'\"",
-    "\"sed -r 's/Wireless-Tools\\ version\\ ([0-9]+).*$/:wireless_tools_project:wireless_tools:\\1/'\""
+    "sed -r 's/Wireless-Tools\\ version\\ ([0-9]+).*$/:wireless_tools:wireless_tools:\\1/'",
+    "sed -r 's/Wireless-Tools\\ version\\ ([0-9]+).*$/:wireless_tools_project:wireless_tools:\\1/'"
   ],
   "affected_paths": [
     "NA"

@@ -7,9 +7,9 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^Version:\\ ookla\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"^ookla-nano-c\\ -\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"^ookla\\ v[0-9](\\.[0-9]+)+?$\""
+    "^Version:\\ ookla\\ [0-9](\\.[0-9]+)+?$",
+    "^ookla-nano-c\\ -\\ [0-9](\\.[0-9]+)+?$",
+    "^ookla\\ v[0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "NA"
@@ -18,9 +18,9 @@
     "ookla"
   ],
   "version_extraction": [
-    "\"sed -r 's/Version:\\ ookla\\ ([0-9]+(\\.[0-9]+)+?)$/::ookla:\\1/'\"",
-    "\"sed -r 's/ookla-nano-c\\ -\\ ([0-9]+(\\.[0-9]+)+?)$/::ookla:\\1/'\"",
-    "\"sed -r 's/ookla\\ v([0-9]+(\\.[0-9]+)+?)$/::ookla:\\1/'\""
+    "sed -r 's/Version:\\ ookla\\ ([0-9]+(\\.[0-9]+)+?)$/::ookla:\\1/'",
+    "sed -r 's/ookla-nano-c\\ -\\ ([0-9]+(\\.[0-9]+)+?)$/::ookla:\\1/'",
+    "sed -r 's/ookla\\ v([0-9]+(\\.[0-9]+)+?)$/::ookla:\\1/'"
   ],
   "affected_paths": [
     "NA"

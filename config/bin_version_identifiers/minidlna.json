@@ -9,8 +9,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"^Starting\\ MiniDLNA\\ version\\ [0-9](\\.[0-9]+)+?\"",
-    "'\"MiniDLNA is already running. EXITING.\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
+    "'MiniDLNA is already running. EXITING.\"&&\"^[0-9](\\.[0-9]+)?+$\"'",
+    "^Starting\\ MiniDLNA\\ version\\ [0-9](\\.[0-9]+)+?"
   ],
   "vendor_names": [
     "minidlna_project"
@@ -19,15 +19,15 @@
     "minidlna"
   ],
   "version_extraction": [
-    "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:minidlna_project:minidlna:\\1/'\"",
-    "\"sed -r 's/MiniDLNA\\ ([0-9](\\.[0-9]+)+?)\\ .*/:minidlna_project:minidlna:\\1/'\"",
-    "\"sed -r 's/Starting\\ MiniDLNA\\ version\\ ([0-9](\\.[0-9]+)+?)/:minidlna_project:minidlna:\\1/'\""
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:minidlna_project:minidlna:\\1/'",
+    "sed -r 's/MiniDLNA\\ ([0-9](\\.[0-9]+)+?)\\ .*/:minidlna_project:minidlna:\\1/'",
+    "sed -r 's/Starting\\ MiniDLNA\\ version\\ ([0-9](\\.[0-9]+)+?)/:minidlna_project:minidlna:\\1/'"
   ],
   "affected_paths": [
     "NA"
   ],
   "live_grep_commands": [
-    "\"^MiniDLNA\\ [0-9](\\.[0-9]+)+?\\ \""
+    "^MiniDLNA\\ [0-9](\\.[0-9]+)+?\\ "
   ],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],

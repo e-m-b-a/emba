@@ -8,7 +8,7 @@
     "LGPL-2.1-or-later"
   ],
   "strict_grep_commands": [
-    "\"^[0-9]{3}$\""
+    "^[0-9]{3}$"
   ],
   "vendor_names": [
     "systemd_project"
@@ -17,18 +17,18 @@
     "systemd"
   ],
   "version_extraction": [
-    "\"sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'\"",
-    "\"sed -r 's/systemd v?([0-9.]+).*/:systemd_project:systemd:\\1/'\"",
-    "\"sed -r 's/systemd\\ ([0-9]+)$/:systemd_project:systemd:\\1/'\"",
-    "\"sed -r 's/systemd\\ [0-9]{3}\\ \\(([0-9]{3}\\.[0-9]+).*\\)$/:systemd_project:systemd:\\1/'\""
+    "sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'",
+    "sed -r 's/systemd v?([0-9.]+).*/:systemd_project:systemd:\\1/'",
+    "sed -r 's/systemd\\ ([0-9]+)$/:systemd_project:systemd:\\1/'",
+    "sed -r 's/systemd\\ [0-9]{3}\\ \\(([0-9]{3}\\.[0-9]+).*\\)$/:systemd_project:systemd:\\1/'"
   ],
   "affected_paths": [
     "systemd"
   ],
   "grep_commands": [
-    "\"^systemd [v0-9.-]+.* running in %ssystem mode \\(%s\\)$\"",
-    "\"^systemd\\ [0-9]{3}$\"",
-    "\"^systemd\\ [0-9]{3}\\ \\([0-9]{3}\\.[0-9].*\\)$\""
+    "^systemd [v0-9.-]+.* running in %ssystem mode \\(%s\\)$",
+    "^systemd\\ [0-9]{3}$",
+    "^systemd\\ [0-9]{3}\\ \\([0-9]{3}\\.[0-9].*\\)$"
   ],
   "live_grep_commands": [],
   "zgrep_grep_commands": [],

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "strict_grep_commands": [
-      "\"Version\\ [0-9]\\.[0-9]+([a-z])?$\""
+      "Version\\ [0-9]\\.[0-9]+([a-z])?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "pppoe-discovery"
    ],
    "version_extraction": [
-      "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?([a-z])?)$/::pppoe-discovery:\\1/'\""
+      "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?([a-z])?)$/::pppoe-discovery:\\1/'"
    ],
    "affected_paths": [
       "pppoe-discovery"

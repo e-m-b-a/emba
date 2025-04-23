@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "'\"^Fatal: program compiled against libxml %d using libxml %d$\"&&\"^2[0-9]{4}$\"'"
+      "'^Fatal: program compiled against libxml %d using libxml %d$\"&&\"^2[0-9]{4}$\"'"
    ],
    "vendor_names": [
       "xmlsoft"
@@ -16,7 +16,7 @@
       "libxml2"
    ],
    "version_extraction": [
-      "\"sed -r 's/^2([0-9]{2})([0-9]{2})$/:xmlsoft:libxml2:2.\\1.\\2/'\""
+      "sed -r 's/^2([0-9]{2})([0-9]{2})$/:xmlsoft:libxml2:2.\\1.\\2/'"
    ],
    "affected_paths": [
       "NA"

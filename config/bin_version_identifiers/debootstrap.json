@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"debootstrap\\ [0-9](\\.[0-9]+)+?$\""
+      "debootstrap\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "debootstrap"
    ],
    "version_extraction": [
-      "\"sed -r 's/debootstrap\\ ([0-9](\\.[0-9]+)+?)$/::debootstrap:\\1/'\""
+      "sed -r 's/debootstrap\\ ([0-9](\\.[0-9]+)+?)$/::debootstrap:\\1/'"
    ],
    "affected_paths": [
       "NA"

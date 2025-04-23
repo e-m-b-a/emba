@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"bgpd\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+$\""
+      "bgpd\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "bgpd"
    ],
    "version_extraction": [
-      "\"sed -r 's/bgpd\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::bgpd:\\1/'\""
+      "sed -r 's/bgpd\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::bgpd:\\1/'"
    ],
    "affected_paths": [
       "NA"

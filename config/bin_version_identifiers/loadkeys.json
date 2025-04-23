@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"loadkeys\\ version\\ [0-9](\\.[0-9]+)+?\""
+      "loadkeys\\ version\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "loadkeys"
    ],
    "version_extraction": [
-      "\"sed -r 's/loadkeys\\ version\\ ([0-9](\\.[0-9]+)+?)/::loadkeys:\\1/'\""
+      "sed -r 's/loadkeys\\ version\\ ([0-9](\\.[0-9]+)+?)/::loadkeys:\\1/'"
    ],
    "affected_paths": [
       "NA"

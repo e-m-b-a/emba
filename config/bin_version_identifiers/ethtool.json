@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"ethtool\\ version\\ [0-9](\\.[0-9]+)+?$\""
+      "ethtool\\ version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ethtool"
    ],
    "version_extraction": [
-      "\"sed -r 's/ethtool\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ethtool:\\1/'\""
+      "sed -r 's/ethtool\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ethtool:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"Suricata\\ [0-9](\\.[0-9]+)+?\""
+      "Suricata\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "suricata"
    ],
    "version_extraction": [
-      "\"sed -r 's/Suricata\\ ([0-9](\\.[0-9]+)+?).*/::suricata:\\1/'\""
+      "sed -r 's/Suricata\\ ([0-9](\\.[0-9]+)+?).*/::suricata:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^Binary\\ V[0-9](\\.[0-9]+)+?\\ \""
+      "^Binary\\ V[0-9](\\.[0-9]+)+?\\ "
    ],
    "vendor_names": [
       "binary_project"
@@ -16,7 +16,7 @@
       "binary"
    ],
    "version_extraction": [
-      "\"sed -r 's/Binary\\ V([0-9](\\.[0-9]+)+?)\\ .*/:binary_project:binary:\\1/'\""
+      "sed -r 's/Binary\\ V([0-9](\\.[0-9]+)+?)\\ .*/:binary_project:binary:\\1/'"
    ],
    "affected_paths": [
       "NA"

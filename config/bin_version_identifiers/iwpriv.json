@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"iwpriv\\ \\ \\ \\ Version\\ [0-9]+\""
+      "iwpriv\\ \\ \\ \\ Version\\ [0-9]+"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "wireless_tools"
    ],
    "version_extraction": [
-      "\"sed -r 's/iwpriv(\\ )+Version\\ ([0-9]+).*/::wireless_tools:\\2/'\""
+      "sed -r 's/iwpriv(\\ )+Version\\ ([0-9]+).*/::wireless_tools:\\2/'"
    ],
    "affected_paths": [
       "NA"

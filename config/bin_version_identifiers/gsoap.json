@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"gSOAP\\/[0-9](.[0-9]+)+?\""
+      "gSOAP\\/[0-9](.[0-9]+)+?"
    ],
    "vendor_names": [
       "genivia"
@@ -16,7 +16,7 @@
       "gsoap"
    ],
    "version_extraction": [
-      "\"sed -r 's/gSOAP\\/([0-9](\\.[0-9]+)+?).*/:genivia:gsoap:\\1/'\""
+      "sed -r 's/gSOAP\\/([0-9](\\.[0-9]+)+?).*/:genivia:gsoap:\\1/'"
    ],
    "affected_paths": [
       "NA"

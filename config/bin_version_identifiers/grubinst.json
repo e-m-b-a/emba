@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"grubinst\\ version\\ :\\ [0-9](\\.[0-9]+)+?$\""
+      "grubinst\\ version\\ :\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "grubinst"
    ],
    "version_extraction": [
-      "\"sed -r 's/grubinst\\ version\\ :\\ ([0-9](\\.[0-9]+)+?)$/::grubinst:\\1/'\""
+      "sed -r 's/grubinst\\ version\\ :\\ ([0-9](\\.[0-9]+)+?)$/::grubinst:\\1/'"
    ],
    "affected_paths": [
       "NA"

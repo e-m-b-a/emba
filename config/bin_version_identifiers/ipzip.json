@@ -7,7 +7,7 @@
       "commercial"
    ],
    "grep_commands": [
-      "\"^ipzip V[0-9]\\.[0-9]$\""
+      "^ipzip V[0-9]\\.[0-9]$"
    ],
    "vendor_names": [
       "ipcomm"
@@ -16,7 +16,7 @@
       "ipzip"
    ],
    "version_extraction": [
-      "\"sed -r 's/ipzip\\ V([0-9](\\.[0-9]+)+?)$/:ipcomm:ipzip:\\1/'\""
+      "sed -r 's/ipzip\\ V([0-9](\\.[0-9]+)+?)$/:ipcomm:ipzip:\\1/'"
    ],
    "affected_paths": [
       "NA"

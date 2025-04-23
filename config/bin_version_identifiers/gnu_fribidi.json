@@ -7,7 +7,7 @@
       "LGPL-2.1-only"
    ],
    "grep_commands": [
-      "\"^\\(GNU FriBidi\\) [0-9](\\.[0-9]+)+?$\""
+      "^\\(GNU FriBidi\\) [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "gnu"
@@ -16,7 +16,7 @@
       "fribidi"
    ],
    "version_extraction": [
-      "\"sed -r 's/^\\(GNU FriBidi\\) ([0-9](\\.[0-9]+)+?)$/:gnu:fribidi:\\1/'\""
+      "sed -r 's/^\\(GNU FriBidi\\) ([0-9](\\.[0-9]+)+?)$/:gnu:fribidi:\\1/'"
    ],
    "affected_paths": [
       "NA"

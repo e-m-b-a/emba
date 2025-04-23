@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^usbhid-dump [0-9]\\.[0-9]$\""
+      "^usbhid-dump [0-9]\\.[0-9]$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "usbhid"
    ],
    "version_extraction": [
-      "\"sed -r 's/usbhid-dump\\ ([0-9]+(\\.[0-9]+)+?)$/::usbhid:\\1/'\""
+      "sed -r 's/usbhid-dump\\ ([0-9]+(\\.[0-9]+)+?)$/::usbhid:\\1/'"
    ],
    "affected_paths": [
       "NA"

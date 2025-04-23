@@ -7,7 +7,7 @@
       "OLDAP-2.8"
    ],
    "grep_commands": [
-      "\"OpenLDAP:\\ ldap[a-z]+\\ [0-9](\\.[0-9]+)+?\\ \""
+      "OpenLDAP:\\ ldap[a-z]+\\ [0-9](\\.[0-9]+)+?\\ "
    ],
    "vendor_names": [
       "openldap"
@@ -16,7 +16,7 @@
       "openldap"
    ],
    "version_extraction": [
-      "\"sed -r 's/OpenLDAP:\\ ldap[a-z]+\\ ([0-9](\\.[0-9]+)+?)\\ .*/:openldap:openldap:\\1/'\""
+      "sed -r 's/OpenLDAP:\\ ldap[a-z]+\\ ([0-9](\\.[0-9]+)+?)\\ .*/:openldap:openldap:\\1/'"
    ],
    "affected_paths": [
       "NA"

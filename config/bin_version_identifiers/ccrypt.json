@@ -8,8 +8,8 @@
     "GPL-2.0-or-later"
   ],
   "grep_commands": [
-    "\"ccrypt\\ [0-9](\\.[0-9]+)+?\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.\"",
-    "'\"^ccrypt$\"&&\"^\\%s\\ \\%s\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.$\"&&\"[0-9](\\.[0-9]+)+?\""
+    "'^ccrypt$\"&&\"^\\%s\\ \\%s\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.$\"&&\"[0-9](\\.[0-9]+)+?\"",
+    "ccrypt\\ [0-9](\\.[0-9]+)+?\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\."
   ],
   "vendor_names": [
     "NA"
@@ -18,8 +18,8 @@
     "ccrypt"
   ],
   "version_extraction": [
-    "\"sed -r 's/([0-9]+(\\.[0-9]+)+?)/::ccrypt:\\1/'\"",
-    "\"sed -r 's/ccrypt\\ ([0-9]+(\\.[0-9]+)+?).*/::ccrypt:\\1/'\""
+    "sed -r 's/([0-9]+(\\.[0-9]+)+?)/::ccrypt:\\1/'",
+    "sed -r 's/ccrypt\\ ([0-9]+(\\.[0-9]+)+?).*/::ccrypt:\\1/'"
   ],
   "affected_paths": [
     "NA"

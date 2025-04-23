@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "\"nlohmann[0-9]+json_abi_v[1-3]+_[0-9]+(_[0-9])?\""
+      "nlohmann[0-9]+json_abi_v[1-3]+_[0-9]+(_[0-9])?"
    ],
    "vendor_names": [
       "nlohmann"
@@ -16,7 +16,7 @@
       "nlohmann"
    ],
    "version_extraction": [
-      "\"sed -r 's/nlohmann[0-9]+json_abi_v([1-3]+)_([0-9]+)_([0-9])?.*/:nlohmann:nlohmann:\\1\\.\\2.\\3/'\""
+      "sed -r 's/nlohmann[0-9]+json_abi_v([1-3]+)_([0-9]+)_([0-9])?.*/:nlohmann:nlohmann:\\1\\.\\2.\\3/'"
    ],
    "affected_paths": [
       "NA"

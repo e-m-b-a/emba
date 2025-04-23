@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^Keepalived\\ v[0-9](\\.[0-9]+)+a?\\ \""
+      "^Keepalived\\ v[0-9](\\.[0-9]+)+a?\\ "
    ],
    "vendor_names": [
       "keepalived"
@@ -16,7 +16,7 @@
       "keepalived"
    ],
    "version_extraction": [
-      "\"sed -r 's/Keepalived\\ v([0-9](\\.[0-9]+)+?)/:keepalived:keepalived:\\1/'\""
+      "sed -r 's/Keepalived\\ v([0-9](\\.[0-9]+)+?)/:keepalived:keepalived:\\1/'"
    ],
    "affected_paths": [
       "NA"

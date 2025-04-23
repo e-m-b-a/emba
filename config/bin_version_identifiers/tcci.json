@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^\\ tcci\\ version:\\ tcci\\ V[0-9](\\.[0-9]+)+?\\ \""
+      "^\\ tcci\\ version:\\ tcci\\ V[0-9](\\.[0-9]+)+?\\ "
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "tcci"
    ],
    "version_extraction": [
-      "\"sed -r 's/\\ tcci\\ version:\\ tcci\\ V([0-9](\\.[0-9]+)+?)\\ .*/::tcci:\\1/'\""
+      "sed -r 's/\\ tcci\\ version:\\ tcci\\ V([0-9](\\.[0-9]+)+?)\\ .*/::tcci:\\1/'"
    ],
    "affected_paths": [
       "NA"

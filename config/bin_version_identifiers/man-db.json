@@ -7,11 +7,11 @@
     "GPL-3.0-or-later"
   ],
   "grep_commands": [
-    "\"catman\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"globbing\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"lexgrog\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"mandb\\ [0-9](\\.[0-9]+)+?$\"",
-    "\"manpath\\ [0-9](\\.[0-9]+)+?$\""
+    "catman\\ [0-9](\\.[0-9]+)+?$",
+    "globbing\\ [0-9](\\.[0-9]+)+?$",
+    "lexgrog\\ [0-9](\\.[0-9]+)+?$",
+    "mandb\\ [0-9](\\.[0-9]+)+?$",
+    "manpath\\ [0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "man-db_project"
@@ -20,11 +20,11 @@
     "man-db"
   ],
   "version_extraction": [
-    "\"sed -r 's/catman\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\"",
-    "\"sed -r 's/globbing\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\"",
-    "\"sed -r 's/lexgrog\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\"",
-    "\"sed -r 's/mandb\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\"",
-    "\"sed -r 's/manpath\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'\""
+    "sed -r 's/catman\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'",
+    "sed -r 's/globbing\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'",
+    "sed -r 's/lexgrog\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'",
+    "sed -r 's/mandb\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'",
+    "sed -r 's/manpath\\ ([0-9](\\.[0-9]+)+?)$/:man-db_project:man-db:\\1/'"
   ],
   "affected_paths": [
     "NA"

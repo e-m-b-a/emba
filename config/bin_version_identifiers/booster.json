@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"BoosterMainFunction:305:\\ Version:\\ [0-9](\\.[0-9])+?\""
+      "BoosterMainFunction:305:\\ Version:\\ [0-9](\\.[0-9])+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "booster"
    ],
    "version_extraction": [
-      "\"sed -r 's/BoosterMainFunction:305:\\ Version:\\ ([0-9](\\.[0-9]+)+?).*/::booster:\\1/'\""
+      "sed -r 's/BoosterMainFunction:305:\\ Version:\\ ([0-9](\\.[0-9]+)+?).*/::booster:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,7 +7,7 @@
       "BSD-3-Clause"
    ],
    "grep_commands": [
-      "\"^tftp-hpa\\ [0-9](\\.[0-9]+)+?,\\ with\\ remap,\\ without\\ tcpwrappers$\""
+      "^tftp-hpa\\ [0-9](\\.[0-9]+)+?,\\ with\\ remap,\\ without\\ tcpwrappers$"
    ],
    "vendor_names": [
       "h_peter_anvin"
@@ -16,7 +16,7 @@
       "tftp-hpa"
    ],
    "version_extraction": [
-      "\"sed -r 's/tftp-hpa\\ ([0-9](\\.[0-9]+)+?),\\ .*/:h_peter_anvin:tftp-hpa:\\1/'\""
+      "sed -r 's/tftp-hpa\\ ([0-9](\\.[0-9]+)+?),\\ .*/:h_peter_anvin:tftp-hpa:\\1/'"
    ],
    "affected_paths": [
       "NA"

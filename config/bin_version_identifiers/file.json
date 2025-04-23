@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"file-[0-9](\\.[0-9]+)+?$\""
+      "file-[0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "file"
    ],
    "version_extraction": [
-      "\"sed -r 's/file-([0-9](\\.[0-9]+)+?)$/::file:\\1/'\""
+      "sed -r 's/file-([0-9](\\.[0-9]+)+?)$/::file:\\1/'"
    ],
    "affected_paths": [
       "NA"

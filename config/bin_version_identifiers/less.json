@@ -7,9 +7,9 @@
     "GPL-3.0-only AND BSD-2-Clause"
   ],
   "grep_commands": [
-    "\"^less\\ [0-9]+$\"",
-    "\"^less\\ [0-9]+\\ \"",
-    "\"lesskey\\ \\ version\\ [0-9]+$\""
+    "^less\\ [0-9]+$",
+    "^less\\ [0-9]+\\ ",
+    "lesskey\\ \\ version\\ [0-9]+$"
   ],
   "vendor_names": [
     "gnu"
@@ -18,9 +18,9 @@
     "less"
   ],
   "version_extraction": [
-    "\"sed -r 's/less\\ ([0-9]+)$/:gnu:less:\\1/'\"",
-    "\"sed -r 's/less\\ ([0-9]+).*/:gnu:less:\\1/'\"",
-    "\"sed -r 's/lesskey\\ \\ version\\ ([0-9]+)$/:gnu:less:\\1/'\""
+    "sed -r 's/less\\ ([0-9]+)$/:gnu:less:\\1/'",
+    "sed -r 's/less\\ ([0-9]+).*/:gnu:less:\\1/'",
+    "sed -r 's/lesskey\\ \\ version\\ ([0-9]+)$/:gnu:less:\\1/'"
   ],
   "affected_paths": [
     "NA"

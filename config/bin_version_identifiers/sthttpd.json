@@ -7,7 +7,7 @@
     "bsd-style"
   ],
   "grep_commands": [
-    "\"^sthttpd\\/[0-9](\\.[0-9]+)+?([a-z])?.*\""
+    "^sthttpd\\/[0-9](\\.[0-9]+)+?([a-z])?.*"
   ],
   "vendor_names": [
     "open_source_development_team",
@@ -17,8 +17,8 @@
     "sthttpd"
   ],
   "version_extraction": [
-    "\"sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:open_source_development_team:sthttpd:\\1/'\"",
-    "\"sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:sthttpd_project:sthttpd:\\1/'\""
+    "sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:open_source_development_team:sthttpd:\\1/'",
+    "sed -r 's/sthttpd\\/([0-9]+(\\.[0-9]+)+?([a-z])?).*/:sthttpd_project:sthttpd:\\1/'"
   ],
   "affected_paths": [
     "NA"

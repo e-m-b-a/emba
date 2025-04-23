@@ -7,8 +7,8 @@
     "unknown"
   ],
   "grep_commands": [
-    "\"D-Bus\\ [ a-zA-Z0-9]+\\ [0-9](\\.[0-9]+)+?\"",
-    "\"dbus-run-session\\ [0-9](\\.[0-9]+)+?$\""
+    "D-Bus\\ [ a-zA-Z0-9]+\\ [0-9](\\.[0-9]+)+?",
+    "dbus-run-session\\ [0-9](\\.[0-9]+)+?$"
   ],
   "vendor_names": [
     "freedesktop"
@@ -17,8 +17,8 @@
     "dbus"
   ],
   "version_extraction": [
-    "\"sed -r 's/D-Bus\\ .*\\ ([0-9](\\.[0-9]+)+?).*/:freedesktop:dbus:\\1/'\"",
-    "\"sed -r 's/dbus-run-session\\ ([0-9](\\.[0-9]+)+?)$/:freedesktop:dbus:\\1/'\""
+    "sed -r 's/D-Bus\\ .*\\ ([0-9](\\.[0-9]+)+?).*/:freedesktop:dbus:\\1/'",
+    "sed -r 's/dbus-run-session\\ ([0-9](\\.[0-9]+)+?)$/:freedesktop:dbus:\\1/'"
   ],
   "affected_paths": [
     "NA"

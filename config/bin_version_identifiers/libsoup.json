@@ -7,7 +7,7 @@
       "LGPL-2.0-or-later"
    ],
    "grep_commands": [
-      "\"^libsoup\\/[0-9](\\.[0-9]+)+?$\""
+      "^libsoup\\/[0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "libsoup"
    ],
    "version_extraction": [
-      "\"sed -r 's/^libsoup\\/([0-9](\\.[0-9]+)+?)$/::libsoup:\\1/'\""
+      "sed -r 's/^libsoup\\/([0-9](\\.[0-9]+)+?)$/::libsoup:\\1/'"
    ],
    "affected_paths": [
       "NA"

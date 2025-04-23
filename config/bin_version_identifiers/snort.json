@@ -7,7 +7,7 @@
     "GPL-2.0-only"
   ],
   "strict_grep_commands": [
-    "\"^Version\\ [0-9](\\.[0-9])+?\""
+    "^Version\\ [0-9](\\.[0-9])+?"
   ],
   "vendor_names": [
     "snort",
@@ -17,8 +17,8 @@
     "snort"
   ],
   "version_extraction": [
-    "\"sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)/:snort:snort:\\1/'\"",
-    "\"sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)/:sourcefire:snort:\\1/'\""
+    "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)/:snort:snort:\\1/'",
+    "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)/:sourcefire:snort:\\1/'"
   ],
   "affected_paths": [
     "snort"

@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"minicom\\ version\\ [0-9](\\.[0-9]+)+?\""
+      "minicom\\ version\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "minicom"
@@ -16,7 +16,7 @@
       "minicom"
    ],
    "version_extraction": [
-      "\"sed -r 's/minicom\\ version\\ ([0-9](\\.[0-9]+)+?)$/:minicom:minicom:\\1/'\""
+      "sed -r 's/minicom\\ version\\ ([0-9](\\.[0-9]+)+?)$/:minicom:minicom:\\1/'"
    ],
    "affected_paths": [
       "NA"

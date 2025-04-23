@@ -8,8 +8,8 @@
     "public-domain"
   ],
   "grep_commands": [
-    "\"SQLite\\ version\\ 3(\\.[0-9]+)+?\"",
-    "'\"^sqlite3_version$\"&&\"^sqlite3_bind_parameter_index$\"&&\"^3(\\.[0-9]+)?+$\"'"
+    "'^sqlite3_version$\"&&\"^sqlite3_bind_parameter_index$\"&&\"^3(\\.[0-9]+)?+$\"'",
+    "SQLite\\ version\\ 3(\\.[0-9]+)+?"
   ],
   "vendor_names": [
     "sqlite"
@@ -18,8 +18,8 @@
     "sqlite"
   ],
   "version_extraction": [
-    "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:sqlite:sqlite:\\1/'\"",
-    "\"sed -r 's/SQLite\\ version\\ (3(\\.[0-9]+)+?).*/:sqlite:sqlite:\\1/'\""
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:sqlite:sqlite:\\1/'",
+    "sed -r 's/SQLite\\ version\\ (3(\\.[0-9]+)+?).*/:sqlite:sqlite:\\1/'"
   ],
   "affected_paths": [
     "NA"

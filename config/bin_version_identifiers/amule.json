@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"aMuleD\\ [0-9](\\.[0-9]+)+?\\ compiled\\ with\\ \""
+      "aMuleD\\ [0-9](\\.[0-9]+)+?\\ compiled\\ with\\ "
    ],
    "vendor_names": [
       "amule"
@@ -16,7 +16,7 @@
       "amule"
    ],
    "version_extraction": [
-      "\"sed -r 's/aMuleD\\ ([0-9](\\.[0-9]+)+?)\\ .*/:amule:amule:\\1/'\""
+      "sed -r 's/aMuleD\\ ([0-9](\\.[0-9]+)+?)\\ .*/:amule:amule:\\1/'"
    ],
    "affected_paths": [
       "NA"

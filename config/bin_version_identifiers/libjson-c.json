@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "'\"^INTERNAL ERROR: _json_c_visit\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
+      "'^INTERNAL ERROR: _json_c_visit\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
    ],
    "vendor_names": [
       "json-c"
@@ -16,7 +16,7 @@
       "json-c"
    ],
    "version_extraction": [
-      "\"sed -r 's/([0-9](\\.[0-9]+)+?)$/:json-c:json-c:\\1/'\""
+      "sed -r 's/([0-9](\\.[0-9]+)+?)$/:json-c:json-c:\\1/'"
    ],
    "affected_paths": [
       "NA"

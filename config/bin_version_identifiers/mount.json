@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^mount:\\ mount-[0-9](\\.[0-9]+)+?([a-z])?$\""
+      "^mount:\\ mount-[0-9](\\.[0-9]+)+?([a-z])?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "mount"
    ],
    "version_extraction": [
-      "\"sed -r 's/mount:\\ mount-([0-9](\\.[0-9]+)+?([a-z])?)$/::mount:\\1/'\""
+      "sed -r 's/mount:\\ mount-([0-9](\\.[0-9]+)+?([a-z])?)$/::mount:\\1/'"
    ],
    "affected_paths": [
       "NA"

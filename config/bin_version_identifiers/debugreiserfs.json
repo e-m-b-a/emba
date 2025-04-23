@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"debugreiserfs\\ [0-9](\\.[0-9]+)+?$\""
+      "debugreiserfs\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "debugreiserfs"
    ],
    "version_extraction": [
-      "\"sed -r 's/debugreiserfs\\ ([0-9](\\.[0-9]+)+?)$/::debugreiserfs:\\1/'\""
+      "sed -r 's/debugreiserfs\\ ([0-9](\\.[0-9]+)+?)$/::debugreiserfs:\\1/'"
    ],
    "affected_paths": [
       "NA"

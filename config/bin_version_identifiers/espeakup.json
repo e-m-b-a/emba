@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"ESpeakup\\ [0-9](\\.[0-9]+)+?$\""
+      "ESpeakup\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "espeakup"
    ],
    "version_extraction": [
-      "\"sed -r 's/ESpeakup\\ ([0-9](\\.[0-9]+)+?)$/::espeakup:\\1/'\""
+      "sed -r 's/ESpeakup\\ ([0-9](\\.[0-9]+)+?)$/::espeakup:\\1/'"
    ],
    "affected_paths": [
       "NA"

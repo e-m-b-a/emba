@@ -7,16 +7,16 @@
     "OpenSSL OR Apache-2.0"
   ],
   "grep_commands": [
-    "\"^OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)$\"",
-    "\"^OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)\\ \"",
-    "\"^OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?-\"",
-    "\"^OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?\\ \"",
-    "\"^OpenSSL\\ [0-9](\\.[0-9]+)+?\\ \"",
-    "\"part of OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)$\"",
-    "\"part of OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)\\ \"",
-    "\"part of OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?-\"",
-    "\"part of OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?\\ \"",
-    "\"part of OpenSSL\\ [0-9](\\.[0-9]+)+?\\ \""
+    "^OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)$",
+    "^OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)\\ ",
+    "^OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?-",
+    "^OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?\\ ",
+    "^OpenSSL\\ [0-9](\\.[0-9]+)+?\\ ",
+    "part of OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)$",
+    "part of OpenSSL\\ [0-9](\\.[0-9]+)+?(-[a-z]+)\\ ",
+    "part of OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?-",
+    "part of OpenSSL\\ [0-9](\\.[0-9]+)+?([a-z]+)?\\ ",
+    "part of OpenSSL\\ [0-9](\\.[0-9]+)+?\\ "
   ],
   "vendor_names": [
     "openssl"
@@ -25,16 +25,16 @@
     "openssl"
   ],
   "version_extraction": [
-    "\"sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)-.*$/:openssl:openssl:\\1/'\"",
-    "\"sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)\\ .*$/:openssl:openssl:\\1/'\"",
-    "\"sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)$/:openssl:openssl:\\1\\2/'\"",
-    "\"sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)\\ .*$/:openssl:openssl:\\1\\2/'\"",
-    "\"sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?).*$/:openssl:openssl:\\1/'\"",
-    "\"sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)-.*$/:openssl:openssl:\\1/'\"",
-    "\"sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)\\ .*$/:openssl:openssl:\\1/'\"",
-    "\"sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)$/:openssl:openssl:\\1\\2/'\"",
-    "\"sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)\\ .*$/:openssl:openssl:\\1\\2/'\"",
-    "\"sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?).*$/:openssl:openssl:\\1/'\""
+    "sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)-.*$/:openssl:openssl:\\1/'",
+    "sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)\\ .*$/:openssl:openssl:\\1/'",
+    "sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)$/:openssl:openssl:\\1\\2/'",
+    "sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)\\ .*$/:openssl:openssl:\\1\\2/'",
+    "sed -r 's/.*OpenSSL\\ ([0-9](\\.[0-9]+)+?).*$/:openssl:openssl:\\1/'",
+    "sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)-.*$/:openssl:openssl:\\1/'",
+    "sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?([a-z]+)?)\\ .*$/:openssl:openssl:\\1/'",
+    "sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)$/:openssl:openssl:\\1\\2/'",
+    "sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?)((-[a-z]+)?)\\ .*$/:openssl:openssl:\\1\\2/'",
+    "sed -r 's/OpenSSL\\ ([0-9](\\.[0-9]+)+?).*$/:openssl:openssl:\\1/'"
   ],
   "affected_paths": [
     "NA"

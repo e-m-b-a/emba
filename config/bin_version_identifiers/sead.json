@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^sead\\ [0-9](\\.[0-9]+)+?\\ release$\""
+      "^sead\\ [0-9](\\.[0-9]+)+?\\ release$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "sead"
    ],
    "version_extraction": [
-      "\"sed -r 's/sead\\ ([0-9](\\.[0-9]+)+?)\\ .*/::sead:\\1/'\""
+      "sed -r 's/sead\\ ([0-9](\\.[0-9]+)+?)\\ .*/::sead:\\1/'"
    ],
    "affected_paths": [
       "NA"

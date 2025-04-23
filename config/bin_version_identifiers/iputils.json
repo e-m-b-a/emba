@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"iputils-s{,3}[0-9]+\""
+      "iputils-s{,3}[0-9]+"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "iputils"
    ],
    "version_extraction": [
-      "\"sed -r 's/iputils-s{,3}([0-9]+)$/::iputils:\\1/'\""
+      "sed -r 's/iputils-s{,3}([0-9]+)$/::iputils:\\1/'"
    ],
    "affected_paths": [
       "NA"

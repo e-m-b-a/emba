@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"localedef\\ \\(.*\\)\\ [0-9](\\.[0-9]+)+?\""
+      "localedef\\ \\(.*\\)\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "localedef"
    ],
    "version_extraction": [
-      "\"sed -r 's/localedef\\ \\(.*\\)\\ ([0-9](\\.[0-9]+)+?)/::localedef:\\1/'\""
+      "sed -r 's/localedef\\ \\(.*\\)\\ ([0-9](\\.[0-9]+)+?)/::localedef:\\1/'"
    ],
    "affected_paths": [
       "NA"

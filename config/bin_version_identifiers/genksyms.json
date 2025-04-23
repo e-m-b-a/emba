@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"genksyms\\ version\\ [0-9]\\.[0-9]+\\.[0-9]+$\""
+      "genksyms\\ version\\ [0-9]\\.[0-9]+\\.[0-9]+$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "genksyms"
    ],
    "version_extraction": [
-      "\"sed -r 's/genksyms\\ version\\ ([0-9](\\.[0-9]+)+?)$/::genksyms:\\1/'\""
+      "sed -r 's/genksyms\\ version\\ ([0-9](\\.[0-9]+)+?)$/::genksyms:\\1/'"
    ],
    "affected_paths": [
       "NA"

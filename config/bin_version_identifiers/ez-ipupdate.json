@@ -7,8 +7,8 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"[0-9](\\.[0-9]+)+?\\ -\\ $Id:\\ ez-ipupdate.c,v\\ [0-9]\\.[0-9]+\"",
-    "\"ez-ipupdate:\\ -\\ [0-9](\\.[0-9]+)+?\""
+    "[0-9](\\.[0-9]+)+?\\ -\\ $Id:\\ ez-ipupdate.c,v\\ [0-9]\\.[0-9]+",
+    "ez-ipupdate:\\ -\\ [0-9](\\.[0-9]+)+?"
   ],
   "vendor_names": [
     "NA"
@@ -17,8 +17,8 @@
     "ez-ipupdate"
   ],
   "version_extraction": [
-    "\"sed -r 's/([0-9](\\.[0-9]+)+?)\\ -\\ $Id:\\ ez-ipupdate.c,v\\ [0-9]\\.[0-9]+/::ez-ipupdate:\\1/'\"",
-    "\"sed -r 's/ez-ipupdate:\\ -\\ ([0-9](\\.[0-9]+)+?)/::ez-ipupdate:\\1/'\""
+    "sed -r 's/([0-9](\\.[0-9]+)+?)\\ -\\ $Id:\\ ez-ipupdate.c,v\\ [0-9]\\.[0-9]+/::ez-ipupdate:\\1/'",
+    "sed -r 's/ez-ipupdate:\\ -\\ ([0-9](\\.[0-9]+)+?)/::ez-ipupdate:\\1/'"
   ],
   "affected_paths": [
     "NA"

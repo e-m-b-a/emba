@@ -7,7 +7,7 @@
       "GPL-2.0-or-later"
    ],
    "grep_commands": [
-      "\"ifquery\\ version\\ [0-9](\\.[0-9]+)+?\""
+      "ifquery\\ version\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "ifquery"
    ],
    "version_extraction": [
-      "\"sed -r 's/ifquery\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ifquery:\\1/'\""
+      "sed -r 's/ifquery\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ifquery:\\1/'"
    ],
    "affected_paths": [
       "NA"

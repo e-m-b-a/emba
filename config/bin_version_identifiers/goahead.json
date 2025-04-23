@@ -7,8 +7,8 @@
     "commercial"
   ],
   "grep_commands": [
-    "\"^CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ [0-9](\\.[0-9])+?(b[0-9]+)?\\)\\ error\\!$\"",
-    "\"^goahead\\ \\ [0-9](\\.[0-9]+)+?\\ start$\""
+    "^CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ [0-9](\\.[0-9])+?(b[0-9]+)?\\)\\ error\\!$",
+    "^goahead\\ \\ [0-9](\\.[0-9]+)+?\\ start$"
   ],
   "vendor_names": [
     "embedthis",
@@ -19,10 +19,10 @@
     "goahead_webserver"
   ],
   "version_extraction": [
-    "\"sed -r 's/CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ ([0-9](\\.[0-9]+)+?(b[0-9]+)?)\\)\\ error\\!$/:embedthis:goahead:\\1/'\"",
-    "\"sed -r 's/CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ ([0-9](\\.[0-9]+)+?(b[0-9]+)?)\\)\\ error\\!$/:goahead:goahead_webserver:\\1/'\"",
-    "\"sed -r 's/goahead\\ \\ ([0-9](\\.[0-9]+)+?)\\ start$/:embedthis:goahead:\\1/'\"",
-    "\"sed -r 's/goahead\\ \\ ([0-9](\\.[0-9]+)+?)\\ start$/:goahead:goahead_webserver:\\1/'\""
+    "sed -r 's/CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ ([0-9](\\.[0-9]+)+?(b[0-9]+)?)\\)\\ error\\!$/:embedthis:goahead:\\1/'",
+    "sed -r 's/CONFIG_SET\\ \\(\\/runtime\\/VerInfo\\/Web,\\ ([0-9](\\.[0-9]+)+?(b[0-9]+)?)\\)\\ error\\!$/:goahead:goahead_webserver:\\1/'",
+    "sed -r 's/goahead\\ \\ ([0-9](\\.[0-9]+)+?)\\ start$/:embedthis:goahead:\\1/'",
+    "sed -r 's/goahead\\ \\ ([0-9](\\.[0-9]+)+?)\\ start$/:goahead:goahead_webserver:\\1/'"
   ],
   "affected_paths": [
     "NA"

@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"lspci\\ version\\ [0-9](\\.[0-9]+)+?\""
+      "lspci\\ version\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "pciutils"
    ],
    "version_extraction": [
-      "\"sed -r 's/lspci\\ version\\ ([0-9](\\.[0-9]+)+?)/::pciutils:\\1/'\""
+      "sed -r 's/lspci\\ version\\ ([0-9](\\.[0-9]+)+?)/::pciutils:\\1/'"
    ],
    "affected_paths": [
       "NA"

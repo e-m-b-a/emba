@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "\"expat_[0-9]\\.[0-9]+\\.[0-9]+$\""
+      "expat_[0-9]\\.[0-9]+\\.[0-9]+$"
    ],
    "vendor_names": [
       "libexpat_project"
@@ -16,7 +16,7 @@
       "libexpat"
    ],
    "version_extraction": [
-      "\"sed -r 's/expat_([0-9](\\.[0-9]+)+?)$/:libexpat_project:libexpat:\\1/'\""
+      "sed -r 's/expat_([0-9](\\.[0-9]+)+?)$/:libexpat_project:libexpat:\\1/'"
    ],
    "affected_paths": [
       "NA"

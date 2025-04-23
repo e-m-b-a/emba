@@ -7,7 +7,7 @@
       "GPL-3.0-only"
    ],
    "grep_commands": [
-      "'\"^xargs$\"&&\"^environment\\ is\\ too\\ large\\ for\\ exec$\"&&\"[0-9](\\.[0-9]+)+?\"'"
+      "'^xargs$\"&&\"^environment\\ is\\ too\\ large\\ for\\ exec$\"&&\"[0-9](\\.[0-9]+)+?\"'"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "xargs"
    ],
    "version_extraction": [
-      "\"sed -r 's/([0-9](\\.[0-9]+)+?)/::xargs:\\1/'\""
+      "sed -r 's/([0-9](\\.[0-9]+)+?)/::xargs:\\1/'"
    ],
    "affected_paths": [
       "NA"

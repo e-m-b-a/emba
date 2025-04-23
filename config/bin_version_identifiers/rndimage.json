@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"RNDIMGAE\\ v[0-9](\\.[0-9]+)+?\""
+      "RNDIMGAE\\ v[0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "rndimgae"
    ],
    "version_extraction": [
-      "\"sed -r 's/RNDIMGAE\\ v([0-9](\\.[0-9]+)+?).*/::rndimgae:\\1/'\""
+      "sed -r 's/RNDIMGAE\\ v([0-9](\\.[0-9]+)+?).*/::rndimgae:\\1/'"
    ],
    "affected_paths": [
       "NA"

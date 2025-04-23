@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"UPnP\\ ControlPoint\\ [0-9](\\.[0-9]+)+?\\ for\\ IGD\""
+      "UPnP\\ ControlPoint\\ [0-9](\\.[0-9]+)+?\\ for\\ IGD"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "upnp_controlpoint"
    ],
    "version_extraction": [
-      "\"sed -r 's/UPnP\\ ControlPoint\\ ([0-9](\\.[0-9]+)+?)\\ for\\ IGD/::upnp_controlpoint:\\1/'\""
+      "sed -r 's/UPnP\\ ControlPoint\\ ([0-9](\\.[0-9]+)+?)\\ for\\ IGD/::upnp_controlpoint:\\1/'"
    ],
    "affected_paths": [
       "NA"

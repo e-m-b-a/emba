@@ -7,8 +7,8 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "\"p910nd\\ Version\\ [0-9](\\.[0-9]+)+?\"",
-    "\"p910nd\\ Version\\ [0-9](\\.[0-9]+)+?\\ Copyright\\ \\(c\\)\\ [0-9]+-[0-9]+\\ Ken\\ Yap\\ and\\ others,\\ GPLv2\""
+    "p910nd\\ Version\\ [0-9](\\.[0-9]+)+?",
+    "p910nd\\ Version\\ [0-9](\\.[0-9]+)+?\\ Copyright\\ \\(c\\)\\ [0-9]+-[0-9]+\\ Ken\\ Yap\\ and\\ others,\\ GPLv2"
   ],
   "vendor_names": [
     "NA"
@@ -17,7 +17,7 @@
     "p910nd"
   ],
   "version_extraction": [
-    "\"sed -r 's/p910nd\\ Version\\ ([0-9](\\.[0-9]+)+?).*/::p910nd:\\1/'\""
+    "sed -r 's/p910nd\\ Version\\ ([0-9](\\.[0-9]+)+?).*/::p910nd:\\1/'"
   ],
   "affected_paths": [
     "NA"

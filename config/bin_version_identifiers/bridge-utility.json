@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^bridge\\ utility,\\ [0-9](\\.[0-9]+)+?$\""
+      "^bridge\\ utility,\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "bridge-utility"
    ],
    "version_extraction": [
-      "\"sed -r 's/bridge\\ utility,\\ ([0-9](\\.[0-9]+)+?)$/::bridge-utility:\\1/'\""
+      "sed -r 's/bridge\\ utility,\\ ([0-9](\\.[0-9]+)+?)$/::bridge-utility:\\1/'"
    ],
    "affected_paths": [
       "NA"

@@ -7,8 +7,8 @@
     "BSD-3-Clause"
   ],
   "grep_commands": [
-    "\"wpa_cli\\ v[0-9](\\.[0-9]+)+?$\"",
-    "\"wpa_cli\\ v[0-9](\\.[0-9]+)+?\\.x$\""
+    "wpa_cli\\ v[0-9](\\.[0-9]+)+?$",
+    "wpa_cli\\ v[0-9](\\.[0-9]+)+?\\.x$"
   ],
   "vendor_names": [
     "NA"
@@ -17,7 +17,7 @@
     "wpa_cli"
   ],
   "version_extraction": [
-    "\"sed -r 's/wpa_cli\\ v([0-9](\\.[0-9]+)+?).*/::wpa_cli:\\1/'\""
+    "sed -r 's/wpa_cli\\ v([0-9](\\.[0-9]+)+?).*/::wpa_cli:\\1/'"
   ],
   "affected_paths": [
     "NA"

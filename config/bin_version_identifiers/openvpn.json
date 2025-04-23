@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "\"^OpenVPN\\ [0-9](\\.[0-9]+)+?\\ \""
+      "^OpenVPN\\ [0-9](\\.[0-9]+)+?\\ "
    ],
    "vendor_names": [
       "openvpn"
@@ -16,7 +16,7 @@
       "openvpn"
    ],
    "version_extraction": [
-      "\"sed -r 's/OpenVPN\\ ([0-9](\\.[0-9]+)+?)\\ .*/:openvpn:openvpn:\\1/'\""
+      "sed -r 's/OpenVPN\\ ([0-9](\\.[0-9]+)+?)\\ .*/:openvpn:openvpn:\\1/'"
    ],
    "affected_paths": [
       "NA"

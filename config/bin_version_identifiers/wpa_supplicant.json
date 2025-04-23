@@ -7,8 +7,8 @@
     "BSD-3-Clause"
   ],
   "grep_commands": [
-    "\"^wpa_supplicant\\ v[0-9](\\.[0-9]+)+?(-devel)?$\"",
-    "\"^wpa_supplicant\\ v[0-9](\\.[0-9]+)+?\\.x$\""
+    "^wpa_supplicant\\ v[0-9](\\.[0-9]+)+?(-devel)?$",
+    "^wpa_supplicant\\ v[0-9](\\.[0-9]+)+?\\.x$"
   ],
   "vendor_names": [
     "w1.fi",
@@ -18,8 +18,8 @@
     "wpa_supplicant"
   ],
   "version_extraction": [
-    "\"sed -r 's/wpa_supplicant\\ v([0-9](\\.[0-9]+)+?).*/:w1.fi:wpa_supplicant:\\1/'\"",
-    "\"sed -r 's/wpa_supplicant\\ v([0-9](\\.[0-9]+)+?).*/:wpa_supplicant:wpa_supplicant:\\1/'\""
+    "sed -r 's/wpa_supplicant\\ v([0-9](\\.[0-9]+)+?).*/:w1.fi:wpa_supplicant:\\1/'",
+    "sed -r 's/wpa_supplicant\\ v([0-9](\\.[0-9]+)+?).*/:wpa_supplicant:wpa_supplicant:\\1/'"
   ],
   "affected_paths": [
     "NA"

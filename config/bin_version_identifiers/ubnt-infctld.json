@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"Multipurpose\\(mtik,\\ mcast\\)\\ control\\ daemon\\ v[0-9](\\.[0-9]+)+?\\ \\(c\\)\\ Ubiquiti$\""
+      "Multipurpose\\(mtik,\\ mcast\\)\\ control\\ daemon\\ v[0-9](\\.[0-9]+)+?\\ \\(c\\)\\ Ubiquiti$"
    ],
    "vendor_names": [
       "ubiquiti"
@@ -16,7 +16,7 @@
       "control_daemon"
    ],
    "version_extraction": [
-      "\"sed -r 's/Multipurpose\\(mtik,\\ mcast\\)\\ control\\ daemon\\ v([0-9](\\.[0-9]+)+?).*/:ubiquiti:control_daemon:\\1/'\""
+      "sed -r 's/Multipurpose\\(mtik,\\ mcast\\)\\ control\\ daemon\\ v([0-9](\\.[0-9]+)+?).*/:ubiquiti:control_daemon:\\1/'"
    ],
    "affected_paths": [
       "NA"

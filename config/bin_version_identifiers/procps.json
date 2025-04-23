@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"procps\\ version\\ [0-9](\\.[0-9]+)+?\""
+      "procps\\ version\\ [0-9](\\.[0-9]+)+?"
    ],
    "vendor_names": [
       "procps_project"
@@ -16,7 +16,7 @@
       "procps"
    ],
    "version_extraction": [
-      "\"sed -r 's/procps\\ version\\ ([0-9](\\.[0-9]+)+?)/:procps_project:procps:\\1/'\""
+      "sed -r 's/procps\\ version\\ ([0-9](\\.[0-9]+)+?)/:procps_project:procps:\\1/'"
    ],
    "affected_paths": [
       "NA"

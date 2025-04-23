@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "\"^LIBTIFF,\\ Version\\ [0-9](\\.[0-9]+)+?$\""
+      "^LIBTIFF,\\ Version\\ [0-9](\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "libtiff"
@@ -16,7 +16,7 @@
       "libtiff"
    ],
    "version_extraction": [
-      "\"sed -r 's/LIBTIFF,\\ Version\\ ([0-9](\\.[0-9]+)+?)$/:libtiff:libtiff:\\1/'\""
+      "sed -r 's/LIBTIFF,\\ Version\\ ([0-9](\\.[0-9]+)+?)$/:libtiff:libtiff:\\1/'"
    ],
    "affected_paths": [
       "NA"
