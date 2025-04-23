@@ -18,5 +18,9 @@
   "version_extraction": [
     "\"sed -r 's/libpng\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:greg_roelofs:libpng:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

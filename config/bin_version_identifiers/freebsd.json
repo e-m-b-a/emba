@@ -18,5 +18,9 @@
   "version_extraction": [
     "\"sed -r 's/FreeBSD\\ ([0-9]+(\\.[0-9]+)+?)-RELEASE-([a-z]([0-9]+))\\ $/:freebsd:freebsd:\\1:\\3/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

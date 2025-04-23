@@ -7,10 +7,6 @@
   "licenses": [
     "GPL-2.0-only"
   ],
-  "grep_commands": [],
-  "live_grep_commands": [
-    "\"^Bftpd\\ [0-9](\\.[0-9]+)+?$\""
-  ],
   "strict_grep_commands": [
     "\"^[0-9](\\.[0-9]+)+?$\""
   ],
@@ -28,5 +24,11 @@
   ],
   "affected_paths": [
     "bftpd"
-  ]
+  ],
+  "live_grep_commands": [
+    "\"^Bftpd\\ [0-9](\\.[0-9]+)+?$\""
+  ],
+  "grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

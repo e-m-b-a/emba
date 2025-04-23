@@ -16,5 +16,9 @@
   "version_extraction": [
     "\"sed -r 's/flash_erase\\ version\\ ([0-9](\\.[0-9]+)+?).*/::mtd-utils:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

@@ -24,5 +24,9 @@
     "\"sed -r 's/pppd\\ version\\ ([0-9](\\.[0-9]+)+?([a-c][0-9])?)\\ /:point-to-point_protocol_project:point-to-point_protocol:\\1/'\"",
     "\"sed -r 's/pppd\\ version\\ ([0-9](\\.[0-9]+)+?)(([a-c][0-9]+)?)$/:point-to-point_protocol_project:point-to-point_protocol:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

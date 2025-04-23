@@ -1,23 +1,23 @@
 {
-  "identifier": "inadyn",
+  "identifier": "radvdump",
   "parsing_mode": [
     "strict"
   ],
   "licenses": [
-    "GPL-2.0-only"
+    "radvd-lic"
   ],
   "strict_grep_commands": [
-    "\"Version:\\ [0-9]\\.[0-9]+-ADV$\""
+    "\"Version:\\ [0-9]\\.[0-9]+\\.[0-9]+$\""
   ],
   "vendor_names": [],
   "product_names": [
-    "inadyn"
+    "radvd"
   ],
   "version_extraction": [
-    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?(-ADV)?)$/::inadyn:\\1/'\""
+    "\"sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/::radvd:\\1/'\""
   ],
   "affected_paths": [
-    "inadyn"
+    "radvdump"
   ],
   "grep_commands": [],
   "live_grep_commands": [],

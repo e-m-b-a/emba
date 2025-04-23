@@ -20,5 +20,9 @@
     "\"sed -r 's/U-Boot\\ ([0-9]+(\\.[0-9]+)+?(rc[0-9]+)?).*/:denx:u-boot:\\1/'\"",
     "\"sed -r 's/mk.*image\\ version\\ ([0-9]+(\\.[0-9]+)+?).*/:denx:u-boot:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

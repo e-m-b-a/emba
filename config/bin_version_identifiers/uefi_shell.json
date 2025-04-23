@@ -20,5 +20,9 @@
     "\"sed -r 's/UEFI\\ SHELL\\ ([0-9]+\\.[0-9]+)\\ ([0-9]+\\.[0-9]+)\\ /::uefi_shell:\\1:\\2/'\"",
     "\"sed -r 's/\\*\\*\\*\\ UEFI\\ Shell\\ v([0-9]+\\.[0-9]+),\\ release\\ ([0-9]+\\.[0-9]+)\\ \\*\\*\\*/::uefi_shell:\\1:\\2/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

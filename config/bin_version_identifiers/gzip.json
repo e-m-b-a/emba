@@ -8,9 +8,6 @@
   "licenses": [
     "unknown"
   ],
-  "strict_grep_commands": [
-    "\"Version:\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\""
-  ],
   "grep_commands": [
     "\"gzip\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"",
     "'\"^GZIP$\"&&\"^Written\\ by\\ Jean-loup\\ Gailly\\.$\"&&\"^Report\\ bugs\\ to\\ <bug-gzip@gnu\\.org>\\.$\"&&\"^[1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"'"
@@ -31,5 +28,11 @@
   ],
   "affected_paths": [
     "gzip"
-  ]
+  ],
+  "strict_grep_commands": [
+    "\"Version:\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\""
+  ],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

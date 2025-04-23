@@ -1,14 +1,10 @@
 {
   "identifier": "mini_httpd",
   "parsing_mode": [
-    "normal",
     "live"
   ],
   "licenses": [
     "unknown"
-  ],
-  "grep_commands": [
-    "\"mini_httpd\\ [0-9](\\.[0-9]+)+?(\\ [0-9]+)?\""
   ],
   "live_grep_commands": [
     "\"mini_httpd\\ [0-9](\\.[0-9]+)+?(\\ [0-9]+)?\""
@@ -22,5 +18,9 @@
   "version_extraction": [
     "\"sed -r 's/mini_httpd\\ ([0-9](\\.[0-9]+)+?).*/:acme:mini_httpd:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

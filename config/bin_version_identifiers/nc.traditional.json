@@ -19,7 +19,6 @@
       "\"sed -r 's/\\[v([0-9](\\.[0-9]+)+?(-[0-9]+)?)\\]$/::nc.traditional:\\1/'\""
    ],
    "affected_paths": [
-      "nc.traditional",
-      "nc"
+      "nc.traditional"
    ]
 }

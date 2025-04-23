@@ -24,5 +24,9 @@
     "\"sed -r 's/Linux\\ version\\ ([1-6](\\.[0-9]+)+?)$/:linux:linux_kernel:\\1/'\"",
     "\"sed -r 's/Linux\\ version\\ ([1-6](\\.[0-9]+)+?)\\ .*/:linux:linux_kernel:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

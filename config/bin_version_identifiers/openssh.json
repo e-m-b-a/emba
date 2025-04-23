@@ -10,7 +10,6 @@
   ],
   "grep_commands": [
     "\"OpenSSH_[0-9](\\.[0-9]+)+?([a-z][0-9]+)?\\ \"",
-    "\"^OpenSSH_[0-9](\\.[0-9]+)+?([a-z][0-9]+)?$\"",
     "'\"^ssh_msg_recv: read: bad msg_len %u$\"&&\"^OpenSSH_[0-9.]+p[0-9]$\"'"
   ],
   "vendor_names": [
@@ -24,5 +23,11 @@
     "\"sed -r 's/OpenSSH_([0-9](\\.[0-9]+)+?([a-z][0-9]+)?)$/:openbsd:openssh:\\1/'\"",
     "\"sed -r 's/OpenSSH_([0-9](\\.[0-9]+)+?([a-z][0-9]+)?).*$/:openbsd:openssh:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "emulation_only_grep_commands": [
+    "\"^OpenSSH_[0-9](\\.[0-9]+)+?([a-z][0-9]+)?$\""
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": []
 }

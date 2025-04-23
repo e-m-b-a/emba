@@ -19,6 +19,6 @@
       "\"sed -r 's/(3(\\.[0-9]+)+?)$/:sqlite:sqlite:\\1/'\""
    ],
    "affected_paths": [
-      "libsqlite3.so.*"
+      "libsqlite3.so.0"
    ]
 }

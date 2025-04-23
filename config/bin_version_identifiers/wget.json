@@ -21,5 +21,9 @@
     "\"sed -r 's/([0-9](\\.[0-9]+)+?)/:gnu:wget:\\1/'\"",
     "\"sed -r 's/Wget\\ ([0-9](\\.[0-9]+)+?)\\ built\\ on.*/:gnu:wget:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

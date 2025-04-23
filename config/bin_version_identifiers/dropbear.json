@@ -17,9 +17,6 @@
     "\"^Dropbear\\ sshd\\ v20[0-9][0-9]\\.[0-9][0-9]$\"",
     "\"^Dropbear\\ v20[0-9][0-9]\\.[0-9][0-9]$\""
   ],
-  "live_grep_commands": [
-    "\"Dropbear\\ sshd\\ 20[0-9]+\\.[0-9]+\\ \\(protocol\\ 2\\.0\\)$\""
-  ],
   "vendor_names": [
     "dropbear_ssh_project"
   ],
@@ -36,5 +33,11 @@
     "\"sed -r 's/Dropbear\\ sshd\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'\"",
     "\"sed -r 's/Dropbear\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [
+    "\"Dropbear\\ sshd\\ 20[0-9]+\\.[0-9]+\\ \\(protocol\\ 2\\.0\\)$\""
+  ],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

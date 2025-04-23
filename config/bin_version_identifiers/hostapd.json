@@ -20,5 +20,9 @@
     "\"sed -r 's/hostapd\\ v([0-9](\\.[0-9]+)+?)(-devel)?$/:w1.fi:hostapd:\\1/'\"",
     "\"sed -r 's/hostapd\\ v([0-9](\\.[0-9]+)+?).*$/:w1.fi:hostapd:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

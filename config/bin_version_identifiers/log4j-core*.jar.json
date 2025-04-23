@@ -6,7 +6,7 @@
    "licenses": [
       "Apache-2.0"
    ],
-   "grep_commands": [
+   "zgrep_grep_commands": [
       "\"Log4jReleaseVersion\""
    ],
    "vendor_names": [

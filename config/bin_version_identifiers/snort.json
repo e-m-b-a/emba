@@ -20,5 +20,9 @@
   ],
   "affected_paths": [
     "snort"
-  ]
+  ],
+  "grep_commands": [],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

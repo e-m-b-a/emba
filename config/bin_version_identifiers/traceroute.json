@@ -10,24 +10,21 @@
   "grep_commands": [
     "\"^Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+?\""
   ],
-  "strict_grep_commands": [
-    "\"^Version\\ [0-9]\\.[0-9]+a[0-9]+\"",
-    "\"^[0-9]\\.[0-9]+\\.[0-9]+$\"",
-    "\"^[0-9]\\.[0-9]+a[0-9]+$\""
-  ],
-  "vendor_names": [
-    "traceroute_project"
-  ],
+  "vendor_names": [],
   "product_names": [
     "traceroute"
   ],
   "version_extraction": [
-    "\"sed -r 's/^([0-9](\\.[0-9]+\\.[0-9]+)+?)$/::traceroute:\\1/'\"",
-    "\"sed -r 's/^([0-9](\\.[0-9]+a[0-9]+)+?)$/::traceroute:\\1/'\"",
-    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?).*/::traceroute:\\1/'\"",
-    "\"sed -r 's/Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::traceroute:\\1/'\""
+    "\"sed -r 's/Modern\\ traceroute\\ for\\ Linux,\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::traceroute:\\1/'\"",
+    "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?).*/::traceroute:\\1/'\""
   ],
   "affected_paths": [
     "traceroute"
-  ]
+  ],
+  "strict_grep_commands": [
+    "\"^Version\\ [0-9]\\.[0-9]+a[0-9]+\""
+  ],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }

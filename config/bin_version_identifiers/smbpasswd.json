@@ -1,5 +1,5 @@
 {
-   "identifier": "nmbd",
+   "identifier": "smbpasswd",
    "parsing_mode": [
       "strict"
    ],
@@ -7,7 +7,7 @@
       "GPL-3.0-only"
    ],
    "strict_grep_commands": [
-      "\"Version\\ [0-9]\\.[0-9]\\.[0-9]+([a-z])?$\""
+      "\"Version\\ [0-9]\\.[0-9]+\\.[0-9]+\""
    ],
    "vendor_names": [
       "samba"
@@ -16,9 +16,9 @@
       "samba"
    ],
    "version_extraction": [
-      "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?([a-z])?)$/:samba:samba:\\1/'\""
+      "\"sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/:samba:samba:\\1/'\""
    ],
    "affected_paths": [
-      "nmbd"
+      "smbpasswd"
    ]
 }

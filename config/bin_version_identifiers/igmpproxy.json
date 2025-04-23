@@ -18,5 +18,9 @@
     "\"sed -r 's/igmpproxy\\ ([0-9]+(\\.[0-9]+)+?)$/::igmpproxy:\\1/'\"",
     "\"sed -r 's/igmpproxy\\ versoin\\ ([0-9](\\.[0-9]+)+?).*$/::igmpproxy:\\1/'\""
   ],
-  "affected_paths": []
+  "affected_paths": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
 }
