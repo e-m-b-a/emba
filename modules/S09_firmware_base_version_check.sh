@@ -209,9 +209,6 @@ S09_firmware_base_version_check() {
     local lZGREP_VERSION_IDENTIFIER_ARR=()
 
     mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${VERSION_JSON_CFG}")
-    #if ! [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* || "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
-    #  continue
-    #fi
     local lRULE_IDENTIFIER=""
     lRULE_IDENTIFIER=$(jq -r .identifier "${VERSION_JSON_CFG}")
     mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
