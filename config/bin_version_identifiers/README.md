@@ -1,10 +1,11 @@
 ## Notes on the json configuration for version identification
 * identifier: a unique identifier for this version detection entry (this entry should match the filename of the json file)
 * parsing_mode: could be
-  * normal (static analysis)
-  * strict (needs also an affected_paths entry)
-  * multi_grep for multiple grep commands that must match
-* licenses: one or mor matching licenses
+  * normal - static analysis (default mode)
+  * strict - needs also an affected_paths entry and these grep commands are only used on paths pattern
+  * live - used in system emulation engine only
+  * multi_grep - for multiple grep commands that must match
+* licenses: one or more matching licenses
 * grep_commands: grep commands that are executed for identification
 * vendor_names: one or multiple vendor names that are used for CVE identification
 * product_names: one or multiple product names that are used for CVE identification

@@ -24,6 +24,8 @@ P60_deep_extractor() {
 
   export DISK_SPACE_CRIT=0
   local lR_PATH=""
+  # dirty solution to know if have not run the extractor and we just re-created the P99 log
+  export NO_EXTRACTED=0
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   # If we already know it is a linux (RTOS -> 0) or it is UEFI (UEFI_VERIFIED -> 1) we do not need to run
@@ -53,9 +55,17 @@ P60_deep_extractor() {
   sub_module_title "Extraction results"
 
   mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
+  local llFILES_P99=0
+  if [[ -f "${P99_CSV_LOG}" ]]; then
+    lFILES_P99=$(wc -l "${P99_CSV_LOG}")
+    lFILES_P99="${lFILES_P99/\ *}"
+  fi
 
-  if [[ "${#lFILES_EXT_ARR[@]}" -gt 0 ]]; then
+  # we only do the P99 populating if we have done something with the deep extractor
+  # and we have now more files found as already known in P99
+  if [[ "${NO_EXTRACTED}" -eq 0 ]] && [[ "${#lFILES_EXT_ARR[@]}" -gt "${lFILES_P99}" ]]; then
     print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files."
+
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"
 
     for lBINARY in "${lFILES_EXT_ARR[@]}" ; do
@@ -134,12 +144,16 @@ deep_extractor() {
     done
     wait_for_pid "${lWAIT_PIDS_P60_ARR[@]}"
     detect_root_dir_helper "${LOG_DIR}/firmware"
+    if [[ ${RTOS} -eq 0 ]]; then
+      export NO_EXTRACTED=1
+      return
+    fi
   fi
 
   lFILES_BEFORE_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
 
   # if we run into the deep extraction mode we always do at least one extraction round:
-  if [[ "${DISK_SPACE_CRIT}" -eq 0 ]] && [[ "${DEEP_EXT_DEPTH:-4}" -gt 0 ]]; then
+  if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 0 ]]; then
     print_output "[*] Deep extraction - 1st round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 

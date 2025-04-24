@@ -41,7 +41,7 @@ S09_firmware_base_version_check() {
   write_csv_log "binary/file" "rule identifier" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
 
   export TYPE="static"
-  export VERSION_IDENTIFIER=""
+  local lVERSION_IDENTIFIER=""
   export WAIT_PIDS_S09=()
   export WAIT_PIDS_S09_1=()
   local lVERSIONS_DETECTED=""
@@ -103,7 +103,7 @@ S09_firmware_base_version_check() {
       (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
     done
 
-    print_output "[*] Waiting for grepping jobs" "no_log"
+    print_output "[*] Waiting for finishing the build process of known_system_pkg_files" "no_log"
     # shellcheck disable=SC2046
     wait $(jobs -p) # nosemgrep
 
@@ -141,6 +141,8 @@ S09_firmware_base_version_check() {
   else
     print_output "[*] No package manager updates for static analysis"
   fi
+
+  # lets start generating the strings from all our relevant binaries
   print_output "[*] Generate strings overview for static version analysis of ${ORANGE}${#FILE_ARR[@]}${NC} files ..."
   mkdir "${LOG_PATH_MODULE}"/strings_bins/ || true
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
@@ -199,7 +201,7 @@ S09_firmware_base_version_check() {
     if ! [[ "${lPARSING_MODE_ARR[*]}" == *"multi_grep"* || "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
       continue
     fi
-    print_output "[*] Testing ${lVERSION_JSON_CFG}" "no_log"
+    print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
     local lRULE_IDENTIFIER=""
     lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}")
     mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
@@ -286,9 +288,9 @@ S09_firmware_base_version_check() {
           if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
             continue
           fi
-          for VERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
-            # print_output "[*] Testing identifier ${VERSION_IDENTIFIER}"
-            lVERSION_IDENTIFIED=$(grep -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
+          for lVERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
+            # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER}"
+            lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
             if [[ -n ${lVERSION_IDENTIFIED} ]]; then
               print_ln "no_log"
               print_output "[+] Version information found ${RED}${lAPP_NAME} ${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - strict${GREEN})."
@@ -313,7 +315,6 @@ S09_firmware_base_version_check() {
         local lZGREP_BINS_ARR_TMP=()
         mapfile -t lZGREP_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
         lZGREP_BINS_ARR+=("${lZGREP_BINS_ARR_TMP[@]}")
-        grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true
       done
 
       for lBINARY_ENTRY in "${lZGREP_BINS_ARR[@]}"; do
@@ -321,13 +322,13 @@ S09_firmware_base_version_check() {
         if ! [[ -f "${lBINARY_PATH}" ]]; then
           continue
         fi
-        print_output "[*] lBINARY_ENTRY: ${lBINARY_ENTRY}" "no_log"
-        for VERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
-          print_output "[*] Testing zgrep identifier ${VERSION_IDENTIFIER} on binary ${lBINARY_PATH}"
-          lVERSION_IDENTIFIED=$(zgrep -h "${VERSION_IDENTIFIER}" "${lBINARY_PATH}" | sort -u || true)
+        # print_output "[*] lBINARY_ENTRY: ${lBINARY_ENTRY}" "no_log"
+        for lVERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
+          # print_output "[*] Testing zgrep identifier ${ORANGE}${lVERSION_IDENTIFIER}${NC} on binary ${ORANGE}${lBINARY_PATH}${NC}"
+          lVERSION_IDENTIFIED=$(zgrep -h "${lVERSION_IDENTIFIER}" "${lBINARY_PATH}" | sort -u || true)
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             lAPP_NAME="$(basename "${lBINARY_PATH}")"
-            print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBIN_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
+            print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
             if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
               continue 2
             fi
@@ -359,10 +360,10 @@ S09_firmware_base_version_check() {
           continue
         fi
 
-        for VERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-          # print_output "[*] Testing identifier ${VERSION_IDENTIFIER} for RTOS firmware" "no_log"
-          # lVERSION_IDENTIFIED=$(find "${FIRMWARE_PATH_BAK}" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
-          lVERSION_IDENTIFIED=$(grep -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
+        for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+          # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER} for RTOS firmware" "no_log"
+          # lVERSION_IDENTIFIED=$(find "${FIRMWARE_PATH_BAK}" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
+          lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in original firmware file (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - firmware${GREEN})."
@@ -681,6 +682,7 @@ build_cpe_identifier() {
 generate_strings() {
   local lBINARY_PATH="${1:-}"
 
+  local lBIN_DATA_ARR=()
   local lBIN_FILE=""
   local lMD5_SUM=""
   local lBIN_NAME_REAL=""
@@ -690,7 +692,8 @@ generate_strings() {
     return
   fi
 
-  lBIN_FILE=$(file -b "${lBINARY_PATH}" || true)
+  mapfile -t lBIN_DATA_ARR < <(grep ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n')
+  lBIN_FILE="${lBIN_DATA_ARR[@]:8:1}"
 
   # Just in case we need to create SBOM entries for every file
   if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
@@ -704,8 +707,7 @@ generate_strings() {
     return
   fi
 
-  lMD5_SUM="$(md5sum "${lBINARY_PATH}")"
-  lMD5_SUM="${lMD5_SUM/\ *}"
+  lMD5_SUM="${lBIN_DATA_ARR[@]:9:1}"
   lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
   lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
@@ -727,7 +729,7 @@ bin_string_checker() {
   local -n lrCSV_REGEX_ARR="${6:-}"
   local -n lrPARSING_MODE_ARR="${7:-}"
 
-  # load VERSION_IDENTIFIER string into array for multi_grep handling
+  # load lVERSION_IDENTIFIER string into array for multi_grep handling
   local lVERSION_IDENTIFIERS_ARR=()
   # remove the ' from the multi_grep identifiers:
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\'}"
@@ -752,11 +754,11 @@ bin_string_checker() {
     # if we have a match we can extract the md5sum from our path and use this to get the complete pathname from p99-csv log
     # this pathname ist finally used for the FILE_ARR which is then used for further analysis
     local lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIERS_ARR[0]}"
-    if [[ "${lVERSION_IDENTIFIER_first_elem: 0:1}" == '"' ]]; then
+    if [[ "${lVERSION_IDENTIFIER_first_elem: -1}" == '"' ]]; then
       lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIER_first_elem#\"}"
       lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIER_first_elem%\"}"
     fi
-    print_output "[*] Testing ${lVERSION_IDENTIFIER} from ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
+    # print_output "[*] Testing ${ORANGE}${lVERSION_IDENTIFIER_first_elem}${NC} from ${ORANGE}${lVERSION_IDENTIFIERS_ARR[*]}${NC}" "no_log"
     mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER_first_elem}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
     for lMD5_SUM_MATCHED in "${lMD5_SUM_MATCHES_ARR[@]}"; do
       lMATCHED_FILE_DATA=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | head -1 || true)
@@ -769,23 +771,27 @@ bin_string_checker() {
     return
   fi
 
-  print_output "[*] Testing version identifier ${lVERSION_IDENTIFIERS_ARR[*]} against ${#lFILE_DATA_ARR[@]} files" "no_log"
+  # print_output "[*] Testing version identifier ${ORANGE}${lVERSION_IDENTIFIERS_ARR[*]}${NC} against ${ORANGE}${#lFILE_DATA_ARR[@]} files${NC}" "no_log"
 
   for lBINARY_DATA in "${lFILE_DATA_ARR[@]}"; do
-    lBINARY_PATH="$(echo "${lBINARY_DATA}" | cut -d ';' -f2)"
+    local lBIN_DATA_ARR=()
+    local lBINARY_PATH=""
+    local lBIN_NAME_REAL=""
+    local lBIN_FILE=""
+
+    mapfile -t lBIN_DATA_ARR < <(echo "${lBINARY_DATA}" | tr ';' '\n')
+    lBINARY_PATH="${lBIN_DATA_ARR[@]:2:1}"
     if [[ ! -f "${lBINARY_PATH}" ]]; then
-      print_output "[*] Binary ${lBINARY_PATH} not found - Not testing for versions"
+      print_output "[-] Binary ${lBINARY_PATH} not found - Not testing for versions"
       continue
     fi
-    lMD5_SUM="$(echo "${lBINARY_DATA}" | cut -d ';' -f9)"
-    local lBIN_NAME_REAL=""
+
     lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
-    local lBIN_FILE=""
-    # lBIN_FILE=$(file -b "${lBINARY_PATH}" || true)
-    lBIN_FILE="$(echo "${lBINARY_DATA}" | cut -d ';' -f8)"
+    lBIN_FILE="${lBIN_DATA_ARR[@]:8:1}"
     if [[ "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* ]]; then
       continue
     fi
+    lMD5_SUM="${lBIN_DATA_ARR[@]:9:1}"
     local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
     if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
       # print_output "[-] Warning: Strings for bin ${lBINARY_PATH} not found"
@@ -793,20 +799,20 @@ bin_string_checker() {
     fi
     local CONFIDENCE_LEVEL=3
 
-    print_output "[*] Testing ${lBINARY_PATH}" "no_log"
+    # print_output "[*] Testing ${lBINARY_PATH}" "no_log"
     for (( j=0; j<${#lVERSION_IDENTIFIERS_ARR[@]}; j++ )); do
-      local VERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR["${j}"]}"
+      local lVERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR["${j}"]}"
       local lVERSION_IDENTIFIED=""
-      [[ -z "${VERSION_IDENTIFIER}" ]] && continue
+      [[ -z "${lVERSION_IDENTIFIER}" ]] && continue
       # this is a workaround to handle the new multi_grep
-      if [[ "${VERSION_IDENTIFIER: 0:1}" == '"' ]]; then
-        VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
-        VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+      if [[ "${lVERSION_IDENTIFIER: -1}" == '"' ]]; then
+        lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"}"
+        lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
       fi
       if [[ ${RTOS} -eq 0 ]]; then
         if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]] ; then
-          # print_output "[*] Testing $lBINARY_PATH with version identifier ${VERSION_IDENTIFIER}" "no_log"
-          lVERSION_IDENTIFIED=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
+          # print_output "[*] Testing $lBINARY_PATH with version identifier ${lVERSION_IDENTIFIER}" "no_log"
+          lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
@@ -829,12 +835,12 @@ bin_string_checker() {
           fi
           # this is for all other "non-text" stuff -> this gets a very low confidence rating
           # the false positive rate is higher
-          lVERSION_IDENTIFIED=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
+          lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
-              print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in file ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
+              print_output "[+] Found sub identifier ${ORANGE}${lVERSION_IDENTIFIER}${GREEN} in file ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
               continue
             fi
             print_ln "no_log"
@@ -848,13 +854,13 @@ bin_string_checker() {
         fi
       else
         # this is RTOS mode
-        # echo "Testing $lBINARY_PATH - $VERSION_IDENTIFIER"
-        lVERSION_IDENTIFIED=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
+        # echo "Testing $lBINARY_PATH - $lVERSION_IDENTIFIER"
+        lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
             # we found the first identifier and now we need to check the other identifiers also
-            print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
+            print_output "[+] Found sub identifier ${ORANGE}${lVERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
             continue
           fi
           print_ln "no_log"
