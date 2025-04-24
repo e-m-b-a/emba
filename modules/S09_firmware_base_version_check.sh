@@ -47,6 +47,7 @@ S09_firmware_base_version_check() {
   local lVERSIONS_DETECTED=""
   local lVERSION_IDENTIFIER_CFG_PATH="${CONFIG_DIR}"/bin_version_identifiers
   local lVERSION_IDENTIFIER_CFG_ARR=()
+  local lVERSION_JSON_CFG=""
   mapfile -t lVERSION_IDENTIFIER_CFG_ARR < <(find "${lVERSION_IDENTIFIER_CFG_PATH}" -name "*.json")
 
   local lFILE_ARR_TMP=()
@@ -169,36 +170,22 @@ S09_firmware_base_version_check() {
   print_ln
 
   lOS_IDENTIFIED=$(distri_check)
-  for VERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
+  for lVERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
     print_dot
 
-    # export LIC=""
     local lAPP_NAME=""
     local lAPP_VERS=""
     local lAPP_MAINT=""
     local lBIN_PATH=""
     export CSV_REGEX=""
-    local lBIN=""
 
     local lSHA512_CHECKSUM=""
     local lSHA256_CHECKSUM=""
     local lPURL_IDENTIFIER="NA"
     export PACKAGING_SYSTEM="static_bin_analysis"
     local lVERSION_IDENTIFIED=""
-
     local lBIN_DEPS_ARR=()
     local lBIN_DEPENDENCY=""
-
-    # lSTRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
-    # LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
-    # lAPP_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
-    # CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
-    # VERSION_IDENTIFIER="$(safe_echo "${VERSION_LINE}" | cut -d\; -f4)"
-    # if [[ "${VERSION_IDENTIFIER: 0:1}" == '"' ]]; then
-    #   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
-    #   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
-    # fi
-
     local lPARSING_MODE_ARR=()
     local lLICENSES_ARR=()
     local lPRODUCT_NAME_ARR=()
@@ -208,23 +195,23 @@ S09_firmware_base_version_check() {
     local lSTRICT_VERSION_IDENTIFIER_ARR=()
     local lZGREP_VERSION_IDENTIFIER_ARR=()
 
-    mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${VERSION_JSON_CFG}")
+    mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
     local lRULE_IDENTIFIER=""
-    lRULE_IDENTIFIER=$(jq -r .identifier "${VERSION_JSON_CFG}")
-    mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
-    mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+    lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}")
+    mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+    mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     # shellcheck disable=SC2034
-    mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+    mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     # shellcheck disable=SC2034
-    mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+    mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     if [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* ]]; then
-      mapfile -t lSTRICT_VERSION_IDENTIFIER_ARR < <(jq -r .strict_grep_commands[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+      mapfile -t lSTRICT_VERSION_IDENTIFIER_ARR < <(jq -r .strict_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     fi
     if [[ "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
-      mapfile -t lZGREP_VERSION_IDENTIFIER_ARR < <(jq -r .zgrep_grep_commands[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+      mapfile -t lZGREP_VERSION_IDENTIFIER_ARR < <(jq -r .zgrep_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     fi
-    mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
-    mapfile -t lAFFECTED_PATHS_ARR < <(jq -r .affected_paths[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+    mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+    mapfile -t lAFFECTED_PATHS_ARR < <(jq -r .affected_paths[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     # echo "Testing ${lRULE_IDENTIFIER} ..."
     # echo "lPARSING_MODE_ARR: ${lPARSING_MODE_ARR[*]}"
     # echo "lLICENSES_ARR: ${lLICENSES_ARR[*]}"
@@ -513,7 +500,7 @@ version_parsing_logging() {
       local lBIN_DEPS_ARR=()
       local lBIN_DEPENDENCY=""
       # now we can create the dependencies based on ldd
-      mapfile -t lBIN_DEPS_ARR < <(ldd "${lBINARY_PATH}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+      mapfile -t lBIN_DEPS_ARR < <(ldd "${lBINARY_PATH}" 2>&1 | grep -v "not a dynamic executable" | awk '{print $1}' || true)
       for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
         lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
       done
@@ -538,6 +525,8 @@ version_parsing_logging() {
   done
 }
 
+# we create the final_bins.txt file which includes the binaries for further analysis
+# Addtionally, it creates the unhandled files SBOM json entries
 build_final_bins_threader() {
   local lFILE="${1:-}"
   local lBIN_FILE="${2:-}"
@@ -557,6 +546,7 @@ build_final_bins_threader() {
   if [[ "${lBIN_FILE}" != *"ELF"* && "${SBOM_UNTRACKED_FILES}" -lt 2 ]]; then
     return
   fi
+
   # lets generate sbom entries for all files that are not handled by package manager
   # with this in place we can add this information later on to the SBOM (if this is really needed)
 
@@ -586,7 +576,7 @@ build_final_bins_threader() {
   # build the dependencies based on linker details
   if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
     # now we can create the dependencies based on ldd
-    mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+    mapfile -t lBIN_DEPS_ARR < <(ldd "${lFILE}" 2>&1 | grep -v "not a dynamic executable" | awk '{print $1}' || true)
     for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
       lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
     done
@@ -597,7 +587,7 @@ build_final_bins_threader() {
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
   if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL}"; then
-    print_output "[*] Already found results for ${lAPP_NAME:-NA} / ${lAPP_VERS:-NA}" "no_log"
+    # print_output "[*] Already found results for ${lAPP_NAME:-NA} / ${lAPP_VERS:-NA}" "no_log"
     return
   fi
 
@@ -685,22 +675,22 @@ build_cpe_identifier() {
 }
 
 generate_strings() {
-  local lBIN="${1:-}"
+  local lBINARY_PATH="${1:-}"
 
   local lBIN_FILE=""
   local lMD5_SUM=""
   local lBIN_NAME_REAL=""
   local lSTRINGS_OUTPUT=""
 
-  if ! [[ -f "${lBIN}" ]]; then
+  if ! [[ -f "${lBINARY_PATH}" ]]; then
     return
   fi
 
-  lBIN_FILE=$(file -b "${lBIN}" || true)
+  lBIN_FILE=$(file -b "${lBINARY_PATH}" || true)
 
   # Just in case we need to create SBOM entries for every file
   if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
-    build_final_bins_threader "${lBIN}" "${lBIN_FILE}" &
+    build_final_bins_threader "${lBINARY_PATH}" "${lBIN_FILE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
@@ -710,12 +700,12 @@ generate_strings() {
     return
   fi
 
-  lMD5_SUM="$(md5sum "${lBIN}")"
+  lMD5_SUM="$(md5sum "${lBINARY_PATH}")"
   lMD5_SUM="${lMD5_SUM/\ *}"
-  lBIN_NAME_REAL="$(basename "${lBIN}")"
+  lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
   lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-    strings "${lBIN}" | uniq > "${lSTRINGS_OUTPUT}" || true
+    strings "${lBINARY_PATH}" | uniq > "${lSTRINGS_OUTPUT}" || true
   fi
 }
 
@@ -742,7 +732,6 @@ bin_string_checker() {
   local IFS='&&'
   IFS='&&' read -r -a lVERSION_IDENTIFIERS_ARR <<< "${lVERSION_IDENTIFIER}"
 
-  local lBIN=""
   local lPURL_IDENTIFIER="NA"
   local lOS_IDENTIFIED=""
   local lMD5_SUM=""
@@ -795,7 +784,7 @@ bin_string_checker() {
     fi
     local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
     if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-      # print_output "[-] Warning: Strings for bin ${lBIN} not found"
+      # print_output "[-] Warning: Strings for bin ${lBINARY_PATH} not found"
       continue
     fi
     local CONFIDENCE_LEVEL=3
