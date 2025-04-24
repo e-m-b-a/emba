@@ -462,7 +462,7 @@ version_parsing_logging() {
     lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
     lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
 
-    if [[ "${lCSV_RULE}" != *":"* ]]; then
+    if [[ "${lCSV_RULE}" != *":"*":"*":"* ]]; then
       # our csv rule not working ... continue with the next rule
       print_output "[*] CSV_REGEX (${lCSV_REGEX}) was not working for this version ... testing next regex" "no_log"
       continue
