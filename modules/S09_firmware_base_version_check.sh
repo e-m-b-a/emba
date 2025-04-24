@@ -196,6 +196,10 @@ S09_firmware_base_version_check() {
     local lZGREP_VERSION_IDENTIFIER_ARR=()
 
     mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
+    if ! [[ "${lPARSING_MODE_ARR[*]}" == *"multi_grep"* || "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
+      continue
+    fi
+    print_output "[*] Testing ${lVERSION_JSON_CFG}" "no_log"
     local lRULE_IDENTIFIER=""
     lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}")
     mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
@@ -752,7 +756,7 @@ bin_string_checker() {
       lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIER_first_elem#\"}"
       lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIER_first_elem%\"}"
     fi
-    # print_output "[*] Testing ${lVERSION_IDENTIFIER} from ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
+    print_output "[*] Testing ${lVERSION_IDENTIFIER} from ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
     mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER_first_elem}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
     for lMD5_SUM_MATCHED in "${lMD5_SUM_MATCHES_ARR[@]}"; do
       lMATCHED_FILE_DATA=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | head -1 || true)

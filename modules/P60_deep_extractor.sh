@@ -119,9 +119,21 @@ deep_extractor() {
   local lFILES_AFTER_DEEP=0
   local lFILES_BEFORE_DEEP=0
 
+  local lFILES_DEEP_PRE_ARR=()
+  local lBINARY=""
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
-    print_output "[-] No ${P99_CSV_LOG} log file created ... no deep extraction possible"
-    return
+    print_output "[-] No ${P99_CSV_LOG} log file available ... trying to create it now"
+    mapfile -t lFILES_DEEP_PRE_ARR < <(find "${LOG_DIR}/firmware" -type f)
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DEEP_PRE_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_DEEP_PRE_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P60_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P60_ARR[@]}"
+    detect_root_dir_helper "${LOG_DIR}/firmware"
   fi
 
   lFILES_BEFORE_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
