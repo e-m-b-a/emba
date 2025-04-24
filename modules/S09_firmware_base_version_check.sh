@@ -37,8 +37,6 @@ S09_firmware_base_version_check() {
     return
   fi
 
-  local lEXTRACTOR_LOG="${LOG_DIR}"/p55_unblob_extractor/unblob_firmware.log
-
   print_output "[*] Static version detection running ..." "no_log" | tr -d "\n"
   write_csv_log "binary/file" "rule identifier" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
 
@@ -218,7 +216,9 @@ S09_firmware_base_version_check() {
     lRULE_IDENTIFIER=$(jq -r .identifier "${VERSION_JSON_CFG}")
     mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
     mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+    # shellcheck disable=SC2034
     mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
+    # shellcheck disable=SC2034
     mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
     if [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* ]]; then
       mapfile -t lSTRICT_VERSION_IDENTIFIER_ARR < <(jq -r .strict_grep_commands[] "${VERSION_JSON_CFG}" 2>/dev/null || true)
@@ -393,16 +393,15 @@ S09_firmware_base_version_check() {
       # The following area is responsible to check all binaries against our version database:
 
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
-      if [[ "${THREADED}" -eq 1 ]]; then
-        # this will burn the CPU but in most cases the time of testing is cut into half
-        # TODO: change to local vars via parameters - this is ugly as hell!
-        bin_string_checker "${lPARSING_MODE_ARR[@]}" &
+      # this will burn the CPU but in most cases the time of testing is cut into half
+      # TODO: change to local vars via parameters - this is ugly as hell!
+      local lVERSION_IDENTIFIER=""
+      for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+        bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         WAIT_PIDS_S09+=( "${lTMP_PID}" )
-      else
-        bin_string_checker "${lPARSING_MODE_ARR[@]}"
-      fi
+      done
 
       print_dot
     fi
@@ -434,10 +433,11 @@ version_parsing_logging() {
   local lVERSION_IDENTIFIED="${1:-}"
   local lBINARY_ENTRY="${2:-}"
   local lRULE_IDENTIFIER="${3:-}"
-  local -n lrVENDOR_NAME_ARR="${4:-}"
-  local -n lrPRODUCT_NAME_ARR="${5:-}"
-  local -n lrLICENSES_ARR="${6:-}"
-  local -n lrCSV_REGEX_ARR="${7:-}"
+  local -n lrVENDOR_NAME_ARR_ref="${4:-}"
+  local -n lrPRODUCT_NAME_ARR_ref="${5:-}"
+  local -n lrLICENSES_ARR_ref="${6:-}"
+  # shellcheck disable=SC2034
+  local -n lrCSV_REGEX_ARR_ref="${7:-}"
 
   local lMD5_SUM=""
   local lBINARY_PATH=""
@@ -472,7 +472,7 @@ version_parsing_logging() {
     fi
     print_output "[*] Parsing CSV_RULE: ${lCSV_RULE} - lAPP_MAINT: ${lAPP_MAINT} - lAPP_NAME: ${lAPP_NAME} - lAPP_VERS: ${lAPP_VERS}" "no_log"
 
-    write_csv_log "${lBINARY_PATH}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lrLICENSES_ARR[*]}" "${TYPE}"
+    write_csv_log "${lBINARY_PATH}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lrLICENSES_ARR_ref[*]}" "${TYPE}"
     check_for_s08_csv_log "${S08_CSV_LOG}"
 
     lSHA256_CHECKSUM="$(sha256sum "${lBINARY_PATH}" | awk '{print $1}')"
@@ -484,12 +484,12 @@ version_parsing_logging() {
 
     if [[ -z "${lAPP_MAINT}" ]]; then
       # if we have no vendor/maintainer we are going to set it to the first entry of our config
-      lAPP_MAINT="${lrVENDOR_NAME_ARR[0]}"
+      lAPP_MAINT="${lrVENDOR_NAME_ARR_ref[0]}"
     fi
     if [[ -z "${lAPP_NAME}" ]]; then
       # if we have no product_name we are going to set it to the first entry of our config
       # This should not happen but we will need some functionality like this in the future
-      lAPP_NAME="${lrPRODUCT_NAME_ARR[0]}"
+      lAPP_NAME="${lrPRODUCT_NAME_ARR_ref[0]}"
       lCSV_RULE="::${lAPP_NAME}:${lAPP_VERS}"
     fi
 
@@ -504,10 +504,10 @@ version_parsing_logging() {
     lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
 
     # lets store the vendor names and product names for later vulnerability identification
-    for lPNAME in "${lrPRODUCT_NAME_ARR[@]}"; do
+    for lPNAME in "${lrPRODUCT_NAME_ARR_ref[@]}"; do
       lPROP_ARRAY_INIT_ARR+=( "product_name:${lPNAME}" )
     done
-    for lVENDOR in "${lrVENDOR_NAME_ARR[@]}"; do
+    for lVENDOR in "${lrVENDOR_NAME_ARR_ref[@]}"; do
       lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lVENDOR}" )
     done
     lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${CONFIDENCE_LEVEL}")" )
@@ -534,9 +534,9 @@ version_parsing_logging() {
     fi
 
     # create component entry - this allows adding entries very flexible:
-    build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLICENSES_ARR[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+    build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lrLICENSES_ARR_ref[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
-    write_log "${PACKAGING_SYSTEM};${lBINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE:-NA};${lLICENSES_ARR[*]};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
+    write_log "${PACKAGING_SYSTEM};${lBINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE:-NA};${lrLICENSES_ARR_ref[*]};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
     # we continue with the next binary -> set return as marker to get the knowledge in the caller
     return 0
   done
@@ -723,16 +723,28 @@ generate_strings() {
   fi
 }
 
+
+# bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
 bin_string_checker() {
-  local lPARSING_MODE_ARR="$@"
-  local lVERSION_IDENTIFIERS_ARR=()
-  VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
-  VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
+  local lVERSION_IDENTIFIER="${1:-}"
+  local lRULE_IDENTIFIER="${2:-}"
+  # shellcheck disable=SC2034
+  local -n lrVENDOR_NAME_ARR="${3:-}"
+  # shellcheck disable=SC2034
+  local -n lrPRODUCT_NAME_ARR="${4:-}"
+  # shellcheck disable=SC2034
+  local -n lrLICENSES_ARR="${5:-}"
+  local -n lrCSV_REGEX_ARR="${6:-}"
+  local -n lrPARSING_MODE_ARR="${7:-}"
 
   # load VERSION_IDENTIFIER string into array for multi_grep handling
+  local lVERSION_IDENTIFIERS_ARR=()
+  # remove the ' from the multi_grep identifiers:
+  lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\'}"
+  lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#\'}"
   # nosemgrep
   local IFS='&&'
-  IFS='&&' read -r -a lVERSION_IDENTIFIERS_ARR <<< "${VERSION_IDENTIFIER}"
+  IFS='&&' read -r -a lVERSION_IDENTIFIERS_ARR <<< "${lVERSION_IDENTIFIER}"
 
   local lBIN=""
   local lPURL_IDENTIFIER="NA"
@@ -740,60 +752,59 @@ bin_string_checker() {
   local lMD5_SUM=""
   local lMD5_SUM_MATCHES_ARR=()
   local lMD5_SUM_MATCHED=""
-  local lMATCHED_FNAME=""
+  local lMATCHED_FILE_DATA=""
   local lBIN_DEPS_ARR=()
   local lBIN_DEPENDENCY=""
-
-  # print_output "[*] Testing ${#FILE_ARR[@]} binaries against identifier ${VERSION_IDENTIFIER} -> ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
+  local lFILE_DATA_ARR=()
 
   lOS_IDENTIFIED=$(distri_check)
   if [[ -d "${LOG_PATH_MODULE}"/strings_bins ]] && [[ -v lVERSION_IDENTIFIERS_ARR[0] ]]; then
     # we always check for the first entry (also on multi greps) against all our generated strings.
     # if we have a match we can extract the md5sum from our path and use this to get the complete pathname from p99-csv log
-    # this pathname ist finally used for hte FILE_ARR which is then used for further analysis
-    local lVERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR[0]}"
-    if [[ "${lVERSION_IDENTIFIER: 0:1}" == '"' ]]; then
-      lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"}"
-      lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
+    # this pathname ist finally used for the FILE_ARR which is then used for further analysis
+    local lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIERS_ARR[0]}"
+    if [[ "${lVERSION_IDENTIFIER_first_elem: 0:1}" == '"' ]]; then
+      lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIER_first_elem#\"}"
+      lVERSION_IDENTIFIER_first_elem="${lVERSION_IDENTIFIER_first_elem%\"}"
     fi
     # print_output "[*] Testing ${lVERSION_IDENTIFIER} from ${lVERSION_IDENTIFIERS_ARR[*]}" "no_log"
-    mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
-    FILE_ARR=()
+    mapfile -t lMD5_SUM_MATCHES_ARR < <(grep -a -o -E -l -r "${lVERSION_IDENTIFIER_first_elem}" "${LOG_PATH_MODULE}"/strings_bins | rev | cut -d '/' -f 1 | rev | cut -d '_' -f2 | sort -u || true)
     for lMD5_SUM_MATCHED in "${lMD5_SUM_MATCHES_ARR[@]}"; do
-      lMATCHED_FNAME=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | cut -d ';' -f2 | head -1 || true)
-      FILE_ARR+=("${lMATCHED_FNAME}")
-      # print_output "[*] Matched ${lMATCHED_FNAME}" "no_log"
+      lMATCHED_FILE_DATA=$(grep ";${lMD5_SUM_MATCHED};" "${P99_CSV_LOG}" | head -1 || true)
+      lFILE_DATA_ARR+=("${lMATCHED_FILE_DATA}")
+      # print_output "[*] Matched ${lMATCHED_FILE_DATA}" "no_log"
     done
-
-    if [[ "${#FILE_ARR[@]}" -eq 0 ]]; then
-      return
-    fi
+  fi
+  if [[ "${#lFILE_DATA_ARR[@]}" -eq 0 ]]; then
+    # print_output "[-] No file array created for ${lVERSION_IDENTIFIER}" "no_log"
+    return
   fi
 
-  # print_output "[*] Testing version identifier ${lVERSION_IDENTIFIERS_ARR[*]} against ${#FILE_ARR[@]} files" "no_log"
+  print_output "[*] Testing version identifier ${lVERSION_IDENTIFIERS_ARR[*]} against ${#lFILE_DATA_ARR[@]} files" "no_log"
 
-  for lBIN in "${FILE_ARR[@]}"; do
-    if [[ ! -f "${lBIN}" ]]; then
-      print_output "[*] Binary ${lBIN} not found - Not testing for versions"
+  for lBINARY_DATA in "${lFILE_DATA_ARR[@]}"; do
+    lBINARY_PATH="$(echo "${lBINARY_DATA}" | cut -d ';' -f2)"
+    if [[ ! -f "${lBINARY_PATH}" ]]; then
+      print_output "[*] Binary ${lBINARY_PATH} not found - Not testing for versions"
       continue
     fi
-    lMD5_SUM="$(md5sum "${lBIN}")"
-    lMD5_SUM="${lMD5_SUM/\ *}"
+    lMD5_SUM="$(echo "${lBINARY_DATA}" | cut -d ';' -f9)"
     local lBIN_NAME_REAL=""
-    BIN_NAME_REAL="$(basename "${lBIN}")"
+    lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
     local lBIN_FILE=""
-    lBIN_FILE=$(file -b "${lBIN}" || true)
+    # lBIN_FILE=$(file -b "${lBINARY_PATH}" || true)
+    lBIN_FILE="$(echo "${lBINARY_DATA}" | cut -d ';' -f8)"
     if [[ "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* ]]; then
       continue
     fi
-    local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${BIN_NAME_REAL}".txt
+    local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
     if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
       # print_output "[-] Warning: Strings for bin ${lBIN} not found"
       continue
     fi
     local CONFIDENCE_LEVEL=3
 
-    # print_output "[*] Testing $lBIN" "no_log"
+    print_output "[*] Testing ${lBINARY_PATH}" "no_log"
     for (( j=0; j<${#lVERSION_IDENTIFIERS_ARR[@]}; j++ )); do
       local VERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR["${j}"]}"
       local lVERSION_IDENTIFIED=""
@@ -805,72 +816,25 @@ bin_string_checker() {
       fi
       if [[ ${RTOS} -eq 0 ]]; then
         if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]] ; then
-          # print_output "[*] Testing $lBIN with version identifier ${VERSION_IDENTIFIER}" "no_log"
+          # print_output "[*] Testing $lBINARY_PATH with version identifier ${VERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
-              print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBIN}${GREEN}" "no_log"
+              print_output "[+] Found sub identifier ${ORANGE}${lVERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
               continue
             fi
             print_ln "no_log"
-            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBIN}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
-            lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${CSV_REGEX}")
-            lCSV_RULE="${lCSV_RULE//\ }"
-            write_csv_log "${lBIN}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lLICENSES_ARR[*]}" "${TYPE}"
-            check_for_s08_csv_log "${S08_CSV_LOG}"
+            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
 
-            lMD5_CHECKSUM="$(md5sum "${lBIN}" | awk '{print $1}')"
-            lSHA256_CHECKSUM="$(sha256sum "${lBIN}" | awk '{print $1}')"
-            lSHA512_CHECKSUM="$(sha512sum "${lBIN}" | awk '{print $1}')"
-
-            lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
-            lBIN_ARCH=${lBIN_ARCH#\ }
-
-            lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-            lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
-
-            lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
-            lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-            lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
-
-            # add source file path information to our properties array:
-            local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "source_path:${lBIN}" )
-            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-            lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
-            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_IDENTIFIED}" )
-            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${CONFIDENCE_LEVEL}")" )
-
-            # build the dependencies based on linker details
-            if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
-              # now we can create the dependencies based on ldd
-              mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
-                lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
-              done
+            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
+              # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+              continue 2
             fi
-
-            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-            # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${lBIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL}"; then
-              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-              continue
-            fi
-
-            # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLICENSES_ARR[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
-
-            write_log "${PACKAGING_SYSTEM};${lBIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE};${lLICENSES_ARR[*]};maintainer unknown;${lBIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
-            # we test the next binary
-            continue 2
           fi
         else
-          if [[ "${lPARSING_MODE_ARR[@]}" == "multi_grep" ]]; then
+          if [[ "${lrPARSING_MODE_ARR[*]}" == *"multi_grep"* ]]; then
             # we do not test multi_grep on other things then ELF files!
             continue
           fi
@@ -881,129 +845,36 @@ bin_string_checker() {
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
-              print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in file ${ORANGE}${lBIN}${GREEN}" "no_log"
+              print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in file ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
               continue
             fi
             print_ln "no_log"
-            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in file ${ORANGE}$(print_path "${lBIN}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
-            lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${CSV_REGEX}")
-            lCSV_RULE="${lCSV_RULE//\ }"
-            write_csv_log "${lBIN}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lLICENSES_ARR[*]}" "${TYPE}"
-            check_for_s08_csv_log "${S08_CSV_LOG}"
+            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in file ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
 
-            lMD5_CHECKSUM="$(md5sum "${lBIN}" | awk '{print $1}')"
-            lSHA256_CHECKSUM="$(sha256sum "${lBIN}" | awk '{print $1}')"
-            lSHA512_CHECKSUM="$(sha512sum "${lBIN}" | awk '{print $1}')"
-            lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-            lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
-            lBIN_ARCH=${lBIN_ARCH#\ }
-            lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
-
-            lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
-            lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-            lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
-
-            local lCONFIDENCE_LEVEL=1
-
-            # add source file path information to our properties array:
-            local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "source_path:${lBIN}" )
-            lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-            lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
-            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_IDENTIFIED}" )
-            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
-
-            # build the dependencies based on linker details
-            if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
-              # now we can create the dependencies based on ldd
-              mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-              for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
-                lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
-              done
+            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
+              # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+              continue 2
             fi
-
-            build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-            # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-            # final array with all hash values
-            if ! build_sbom_json_hashes_arr "${lBIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
-              print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-              continue
-            fi
-
-            # create component entry - this allows adding entries very flexible:
-            build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLICENSES_ARR[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
-
-            write_log "${PACKAGING_SYSTEM};${lBIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE};${lLICENSES_ARR[*]};maintainer unknown;${lBIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
-            continue 2
           fi
         fi
       else
         # this is RTOS mode
-        # echo "Testing $lBIN - $VERSION_IDENTIFIER"
+        # echo "Testing $lBINARY_PATH - $VERSION_IDENTIFIER"
         lVERSION_IDENTIFIED=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
             # we found the first identifier and now we need to check the other identifiers also
-            print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBIN}${GREEN}" "no_log"
+            print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
             continue
           fi
           print_ln "no_log"
-          print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBIN}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
-          lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${CSV_REGEX}")
-          lCSV_RULE="${lCSV_RULE//\ }"
-          write_csv_log "${lBIN}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lLICENSES_ARR[*]}" "${TYPE}"
-          check_for_s08_csv_log "${S08_CSV_LOG}"
+          print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
 
-          lMD5_CHECKSUM="$(md5sum "${lBIN}" | awk '{print $1}')"
-          lSHA256_CHECKSUM="$(sha256sum "${lBIN}" | awk '{print $1}')"
-          lSHA512_CHECKSUM="$(sha512sum "${lBIN}" | awk '{print $1}')"
-          lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-          lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
-          lBIN_ARCH=${lBIN_ARCH#\ }
-          lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
-
-          lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
-          lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-          lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
-
-          local lCONFIDENCE_LEVEL=1
-
-          # add source file path information to our properties array:
-          local lPROP_ARRAY_INIT_ARR=()
-          lPROP_ARRAY_INIT_ARR+=( "source_path:${lBIN}" )
-          lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-          lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
-          lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_IDENTIFIED}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
-          lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${lCONFIDENCE_LEVEL}")" )
-
-          # build the dependencies based on linker details
-          if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
-            # now we can create the dependencies based on ldd
-            mapfile -t lBIN_DEPS_ARR < <(ldd "${lBIN}" | grep -v "not a dynamic executable" | awk '{print $1}' || true)
-            for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
-              lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
-            done
+          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
+            # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+            continue 2
           fi
-
-          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-          # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lBIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${lCONFIDENCE_LEVEL}"; then
-            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-            continue
-          fi
-
-          # create component entry - this allows adding entries very flexible:
-          build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLICENSES_ARR[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
-
-          write_log "${PACKAGING_SYSTEM};${lBIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE};${lLICENSES_ARR[*]};maintainer unknown;${lBIN_FILE};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
-          # we test the next binary
-          continue 2
         fi
       fi
       continue 2
