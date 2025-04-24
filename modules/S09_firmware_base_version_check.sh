@@ -343,7 +343,6 @@ S09_firmware_base_version_check() {
           fi
         done
       done
- 
       print_dot
     fi
 
@@ -538,7 +537,7 @@ version_parsing_logging() {
     return 0
   done
 }
- 
+
 build_final_bins_threader() {
   local lFILE="${1:-}"
   local lBIN_FILE="${2:-}"
