@@ -48,7 +48,6 @@ S08_main_package_sbom() {
       print_output "[*] SBOM - starting ${lS08_MODULE}" "no_log"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
@@ -75,7 +74,7 @@ build_dependency_tree() {
   local lSBOM_COMPONENT_FILES_ARR=()
   local lSBOM_COMP=""
 
-  local lWAIT_PIDS_S08_ARR=()
+  local lWAIT_PIDS_S08_DEP_ARR=()
 
   mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json")
 
@@ -84,11 +83,10 @@ build_dependency_tree() {
     # to speed up the dep tree we are working threaded for every componentfile and write into dedicated json files
     # "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json which we can put together in f15
     create_comp_dep_tree_threader "${lSBOM_COMP}" &
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR
+    lWAIT_PIDS_S08_DEP_ARR+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_DEP_ARR
   done
-  wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
+  wait_for_pid "${lWAIT_PIDS_S08_DEP_ARR[@]}"
 
   if [[ -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
     print_output "[+] SBOM dependency results" "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
@@ -183,12 +181,12 @@ clean_package_details() {
   lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\;\#\%\/\<\>\(\)\]])}
   lCLEAN_ME_UP=${lCLEAN_ME_UP##+( )}
   lCLEAN_ME_UP=${lCLEAN_ME_UP%%+( )}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+(_)/_}
   # Turn off extended globbing
   shopt -u extglob
   lCLEAN_ME_UP=${lCLEAN_ME_UP,,}
   lCLEAN_ME_UP=${lCLEAN_ME_UP//,/\.}
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//+(_)/_}
   echo "${lCLEAN_ME_UP}"
 }
 
