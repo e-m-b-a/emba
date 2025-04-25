@@ -52,7 +52,6 @@ P60_deep_extractor() {
     return
   fi
 
-  sub_module_title "Extraction results"
 
   mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
   local lFILES_P99=0
@@ -64,6 +63,8 @@ P60_deep_extractor() {
   # we only do the P99 populating if we have done something with the deep extractor
   # and we have now more files found as already known in P99
   if [[ "${NO_EXTRACTED}" -eq 0 ]] && [[ "${#lFILES_EXT_ARR[@]}" -gt "${lFILES_P99}" ]]; then
+    sub_module_title "Extraction results"
+
     print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files."
 
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"

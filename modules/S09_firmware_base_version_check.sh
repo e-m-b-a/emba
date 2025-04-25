@@ -96,7 +96,7 @@ S09_firmware_base_version_check() {
   fi
 
   if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
-    print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array ${ORANGE}${#FILE_ARR[@]}${NC}" "${LOG_PATH_MODULE}/pkg_known_files.txt"
+    print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array with ${ORANGE}${#FILE_ARR[@]}${NC} entries." "${LOG_PATH_MODULE}/pkg_known_files.txt"
     local lPKG_FILE=""
     for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
       lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
@@ -197,10 +197,7 @@ S09_firmware_base_version_check() {
     local lZGREP_VERSION_IDENTIFIER_ARR=()
 
     mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
-    if ! [[ "${lPARSING_MODE_ARR[*]}" == *"multi_grep"* || "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
-      continue
-    fi
-    print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
+    # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
     local lRULE_IDENTIFIER=""
     lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}")
     mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
