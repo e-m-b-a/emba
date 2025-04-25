@@ -109,18 +109,26 @@ S08_submodule_java_archives_parser() {
       lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "java" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
       local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-      # for the dependencies we can check for pom.xml
       local lPOM_XML=""
       lPOM_XML=$(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
       if [[ -n "${lPOM_XML}" ]]; then
-        write_log "[*] Found pom.xml metadata in ${lJAVA_ARCHIVE}. Analysis is currently not supported" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | tee -a "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_log "[*] Please open an issue at https://github.com/e-m-b-a/emba/issues and provide the Java package" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        # We could do something like the following
-          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
-          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
-          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
-        # With a usefull java package we are going to implement this mechanism
+        lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\))
+        if [[ -z "${lAPP_VERS_POM_XML}" ]]; then
+          # for the dependencies we can check for pom.xml
+          write_log "============================================"
+          write_log "[*] Found pom.xml metadata in ${lJAVA_ARCHIVE}. Further dependency analysis is currently not supported" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_log "[*] Please open an issue at https://github.com/e-m-b-a/emba/issues and provide the Java package" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_log "[*] Further details:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" >> "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          # We could do something like the following to extract the dependencies
+            # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
+            # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
+            # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
+        elif [[ -z "${lAPP_VERS}" ]]; then
+          # if we have extracted some version from pom.xml and we have not extracted something from META-INF/MANIFEST.MF
+          # then we are going to use the pom.xml version
+          lAPP_VERS="${lAPP_VERS_POM_XML}"
+        fi
       fi
 
       # add the python requirement path information to our properties array:

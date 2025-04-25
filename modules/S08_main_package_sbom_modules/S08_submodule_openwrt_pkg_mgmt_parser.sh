@@ -58,6 +58,9 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      if ! [[ -f "${lPACKAGE_FILE}" ]]; then
+        print_output "[-] WARNING: ${FUNCNAME[0]} - package file ${lPACKAGE_FILE} not available ... skipping"
+      fi
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
