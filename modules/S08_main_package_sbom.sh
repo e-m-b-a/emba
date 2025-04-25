@@ -180,7 +180,7 @@ clean_package_details() {
   lCLEAN_ME_UP=${lCLEAN_ME_UP/\"}
   # Turn on extended globbing
   shopt -s extglob
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\%\/\<\>\(\)\]])}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\;\#\%\/\<\>\(\)\]])}
   lCLEAN_ME_UP=${lCLEAN_ME_UP##+( )}
   lCLEAN_ME_UP=${lCLEAN_ME_UP%%+( )}
   # Turn off extended globbing
@@ -188,6 +188,7 @@ clean_package_details() {
   lCLEAN_ME_UP=${lCLEAN_ME_UP,,}
   lCLEAN_ME_UP=${lCLEAN_ME_UP//,/\.}
   lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+(_)/_}
   echo "${lCLEAN_ME_UP}"
 }
 

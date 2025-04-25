@@ -74,14 +74,14 @@ S08_submodule_java_archives_parser() {
       # the complete naming in the manifest files is a big mess
       # probably we need some dictionary to parse the names somehow and generate something
       # that is usable for CVE queries
-      lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" || true)
+      lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" | head -1 || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
 
-      lAPP_LIC=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "License" || true)
+      lAPP_LIC=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "License" | head -1 || true)
       lAPP_LIC=${lAPP_LIC/*:\ /}
       lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
-      lAPP_VENDOR_CLEAR=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Vendor: " | sort -u || true)
+      lAPP_VENDOR_CLEAR=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Vendor: " | sort -u | head -1 || true)
       lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR#*:\ }
       lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR//[![:print:]]/}
       lAPP_VENDOR=$(clean_package_details "${lAPP_VENDOR_CLEAR}")
@@ -89,7 +89,7 @@ S08_submodule_java_archives_parser() {
       # e.g.: The Apache Software Foundation -> apache
 
       # we check for the deprecated vendor id:
-      lAPP_VENDOR_ID=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Vendor-Id: " | sort -u || true)
+      lAPP_VENDOR_ID=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Vendor-Id: " | sort -u | head -1 || true)
       lAPP_VENDOR_ID=${lAPP_VENDOR_ID#*:\ }
       # we have seen some vendor ids like org.apache.shiro -> should end up in apache:shiro:version
       lAPP_VENDOR_ID=${lAPP_VENDOR_ID#org\.}
@@ -98,21 +98,21 @@ S08_submodule_java_archives_parser() {
       lAPP_VENDOR_ID=$(clean_package_details "${lAPP_VENDOR_ID}")
 
       # alternative package names
-      lIMPLEMENT_TITLE=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Title" || true)
+      lIMPLEMENT_TITLE=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Title" | head -1 || true)
       lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE#*:\ }
       lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE//\ }
       lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE//::/_}
       lIMPLEMENT_TITLE=$(clean_package_details "${lIMPLEMENT_TITLE}")
-      lBUNDLE_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Name:" || true)
+      lBUNDLE_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Name:" | head -1 || true)
       lBUNDLE_NAME=${lBUNDLE_NAME#*:\ }
       lBUNDLE_NAME=${lBUNDLE_NAME//::/_}
       lBUNDLE_NAME=$(clean_package_details "${lBUNDLE_NAME}")
 
-      lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" || true)
+      lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" | head -1 || true)
       lAPP_VERS=${lAPP_VERS#*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
-      lAPP_VERS_ALT=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Version" || true)
+      lAPP_VERS_ALT=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Version" | head -1 || true)
       lAPP_VERS_ALT=${lAPP_VERS_ALT#*:\ }
       lAPP_VERS_ALT=$(clean_package_details "${lAPP_VERS_ALT}")
       lAPP_VERS_ALT=$(clean_package_versions "${lAPP_VERS_ALT}")
