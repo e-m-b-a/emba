@@ -112,7 +112,7 @@ S08_submodule_java_archives_parser() {
       local lPOM_XML=""
       lPOM_XML=$(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
       if [[ -n "${lPOM_XML}" ]]; then
-        lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\))
+        lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\) 2>/dev/null)
         if [[ -z "${lAPP_VERS_POM_XML}" ]]; then
           # for the dependencies we can check for pom.xml
           write_log "============================================"
