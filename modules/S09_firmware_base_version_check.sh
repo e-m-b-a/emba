@@ -178,7 +178,6 @@ S09_firmware_base_version_check() {
     local lAPP_NAME=""
     local lAPP_VERS=""
     local lAPP_MAINT=""
-    local lBIN_PATH=""
     export CSV_REGEX=""
 
     local lSHA512_CHECKSUM=""
@@ -693,7 +692,7 @@ generate_strings() {
   fi
 
   mapfile -t lBIN_DATA_ARR < <(grep ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n')
-  lBIN_FILE="${lBIN_DATA_ARR[@]:8:1}"
+  lBIN_FILE="${lBIN_DATA_ARR[7]}"
 
   # Just in case we need to create SBOM entries for every file
   if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
@@ -707,7 +706,7 @@ generate_strings() {
     return
   fi
 
-  lMD5_SUM="${lBIN_DATA_ARR[@]:9:1}"
+  lMD5_SUM="${lBIN_DATA_ARR[8]}"
   lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
   lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
@@ -726,6 +725,7 @@ bin_string_checker() {
   local -n lrPRODUCT_NAME_ARR="${4:-}"
   # shellcheck disable=SC2034
   local -n lrLICENSES_ARR="${5:-}"
+  # shellcheck disable=SC2034
   local -n lrCSV_REGEX_ARR="${6:-}"
   local -n lrPARSING_MODE_ARR="${7:-}"
 
@@ -780,18 +780,18 @@ bin_string_checker() {
     local lBIN_FILE=""
 
     mapfile -t lBIN_DATA_ARR < <(echo "${lBINARY_DATA}" | tr ';' '\n')
-    lBINARY_PATH="${lBIN_DATA_ARR[@]:2:1}"
+    lBINARY_PATH="${lBIN_DATA_ARR[1]}"
     if [[ ! -f "${lBINARY_PATH}" ]]; then
       print_output "[-] Binary ${lBINARY_PATH} not found - Not testing for versions"
       continue
     fi
 
     lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
-    lBIN_FILE="${lBIN_DATA_ARR[@]:8:1}"
+    lBIN_FILE="${lBIN_DATA_ARR[7]}"
     if [[ "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* ]]; then
       continue
     fi
-    lMD5_SUM="${lBIN_DATA_ARR[@]:9:1}"
+    lMD5_SUM="${lBIN_DATA_ARR[8]}"
     local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
     if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
       # print_output "[-] Warning: Strings for bin ${lBINARY_PATH} not found"
