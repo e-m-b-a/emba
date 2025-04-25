@@ -326,9 +326,9 @@ S09_firmware_base_version_check() {
         for lVERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
           # print_output "[*] Testing zgrep identifier ${ORANGE}${lVERSION_IDENTIFIER}${NC} on binary ${ORANGE}${lBINARY_PATH}${NC}"
           lVERSION_IDENTIFIED=$(zgrep -h "${lVERSION_IDENTIFIER}" "${lBINARY_PATH}" | sort -u || true)
+          lVERSION_IDENTIFIED="${lVERSION_IDENTIFIED//[![:print:]]/}"
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-            lAPP_NAME="$(basename "${lBINARY_PATH}")"
-            print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
+            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
             if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
               continue 2
             fi
@@ -444,7 +444,7 @@ version_parsing_logging() {
   lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
   lMD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
 
-  for lCSV_REGEX in "${lrCSV_REGEX_ARR[@]}"; do
+  for lCSV_REGEX in "${lrCSV_REGEX_ARR_ref[@]}"; do
     lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${lCSV_REGEX}")
     lCSV_RULE="${lCSV_RULE//\ }"
 
