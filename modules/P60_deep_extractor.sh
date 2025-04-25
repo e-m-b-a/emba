@@ -55,7 +55,7 @@ P60_deep_extractor() {
   sub_module_title "Extraction results"
 
   mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
-  local llFILES_P99=0
+  local lFILES_P99=0
   if [[ -f "${P99_CSV_LOG}" ]]; then
     lFILES_P99=$(wc -l "${P99_CSV_LOG}")
     lFILES_P99="${lFILES_P99/\ *}"
