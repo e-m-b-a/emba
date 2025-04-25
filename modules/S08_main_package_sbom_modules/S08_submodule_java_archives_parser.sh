@@ -82,7 +82,7 @@ S08_submodule_java_archives_parser() {
       lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
       lAPP_VENDOR_CLEAR=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Vendor: " | sort -u || true)
-      lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR#*:\ /}
+      lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR#*:\ }
       lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR//[![:print:]]/}
       lAPP_VENDOR=$(clean_package_details "${lAPP_VENDOR_CLEAR}")
       # we need some translation:
@@ -90,7 +90,7 @@ S08_submodule_java_archives_parser() {
 
       # we check for the deprecated vendor id:
       lAPP_VENDOR_ID=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Vendor-Id: " | sort -u || true)
-      lAPP_VENDOR_ID=${lAPP_VENDOR_ID#*:\ /}
+      lAPP_VENDOR_ID=${lAPP_VENDOR_ID#*:\ }
       # we have seen some vendor ids like org.apache.shiro -> should end up in apache:shiro:version
       lAPP_VENDOR_ID=${lAPP_VENDOR_ID#org\.}
       lAPP_VENDOR_ID=${lAPP_VENDOR_ID#com\.}
@@ -99,20 +99,20 @@ S08_submodule_java_archives_parser() {
 
       # alternative package names
       lIMPLEMENT_TITLE=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Title" || true)
-      lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE#*:\ /}
+      lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE#*:\ }
       lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE//\ }
       lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE//::/_}
       lIMPLEMENT_TITLE=$(clean_package_details "${lIMPLEMENT_TITLE}")
       lBUNDLE_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Name:" || true)
-      lBUNDLE_NAME=${lBUNDLE_NAME#*:\ /}
+      lBUNDLE_NAME=${lBUNDLE_NAME#*:\ }
       lBUNDLE_NAME=$(clean_package_details "${lBUNDLE_NAME}")
 
       lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" || true)
-      lAPP_VERS=${lAPP_VERS#*:\ /}
+      lAPP_VERS=${lAPP_VERS#*:\ }
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
       lAPP_VERS_ALT=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Version" || true)
-      lAPP_VERS_ALT=${lAPP_VERS_ALT#*:\ /}
+      lAPP_VERS_ALT=${lAPP_VERS_ALT#*:\ }
       lAPP_VERS_ALT=$(clean_package_details "${lAPP_VERS_ALT}")
       lAPP_VERS_ALT=$(clean_package_versions "${lAPP_VERS_ALT}")
 
