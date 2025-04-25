@@ -105,6 +105,7 @@ S08_submodule_java_archives_parser() {
       lIMPLEMENT_TITLE=$(clean_package_details "${lIMPLEMENT_TITLE}")
       lBUNDLE_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Name:" || true)
       lBUNDLE_NAME=${lBUNDLE_NAME#*:\ }
+      lBUNDLE_NAME=${lBUNDLE_NAME//::/_}
       lBUNDLE_NAME=$(clean_package_details "${lBUNDLE_NAME}")
 
       lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" || true)
@@ -121,17 +122,17 @@ S08_submodule_java_archives_parser() {
       lSHA512_CHECKSUM="$(sha512sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
 
       if [[ -z "${lAPP_NAME}" && -n "${lIMPLEMENT_TITLE}" ]]; then
-        print_output "[*] Using lIMPLEMENT_TITLE (${lIMPLEMENT_TITLE}) as name for ${lJAVA_ARCHIVE}" "no_log"
+        # print_output "[*] Using lIMPLEMENT_TITLE (${lIMPLEMENT_TITLE}) as name for ${lJAVA_ARCHIVE}" "no_log"
         # in case APP_NAME is not set but we have an lIMPLEMENT_TITLE we use this
         lAPP_NAME="${lIMPLEMENT_TITLE}"
       fi
       if [[ -z "${lAPP_NAME}" && -n "${lBUNDLE_NAME}" ]]; then
-        print_output "[*] Using lBUNDLE_NAME (${lBUNDLE_NAME}) as name for ${lJAVA_ARCHIVE}" "no_log"
+        # print_output "[*] Using lBUNDLE_NAME (${lBUNDLE_NAME}) as name for ${lJAVA_ARCHIVE}" "no_log"
         # in case APP_NAME is not set but we have an lIMPLEMENT_TITLE we use this
         lAPP_NAME="${lBUNDLE_NAME}"
       fi
       if [[ -z "${lAPP_VERS}" && -n "${lAPP_VERS_ALT}" ]]; then
-        print_output "[*] Using lAPP_VERS_ALT (${lAPP_VERS_ALT}) as version for ${lJAVA_ARCHIVE}" "no_log"
+        # print_output "[*] Using lAPP_VERS_ALT (${lAPP_VERS_ALT}) as version for ${lJAVA_ARCHIVE}" "no_log"
         # in case APP_NAME is not set but we have an lIMPLEMENT_TITLE we use this
         lAPP_VERS="${lAPP_VERS_ALT}"
       fi
@@ -168,11 +169,11 @@ S08_submodule_java_archives_parser() {
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       # if we have a vendor id but no app_vendor we are going to use the deprecated id:
       if [[ -z "${lAPP_VENDOR}" && -n "${lAPP_VENDOR_ID}" ]]; then
-        print_output "[*] Using lAPP_VENDOR_ID (${lAPP_VENDOR_ID}) as vendor for ${lJAVA_ARCHIVE}" "no_log"
+        # print_output "[*] Using lAPP_VENDOR_ID (${lAPP_VENDOR_ID}) as vendor for ${lJAVA_ARCHIVE}" "no_log"
         lAPP_VENDOR="${lAPP_VENDOR_ID}"
       fi
       if [[ -z "${lAPP_NAME}" && -z "${lAPP_LIC}" && -z "${lIMPLEMENT_TITLE}" && -z "${lAPP_VERS}" && -z "${lBUNDLE_NAME}" ]]; then
-        print_output "[-] skipping ... lJAVA_ARCHIVE: ${lJAVA_ARCHIVE} // lAPP_NAME: ${lAPP_NAME} / lAPP_LIC: ${lAPP_LIC} / lIMPLEMENT_TITLE: ${lIMPLEMENT_TITLE} / lAPP_VERS: ${lAPP_VERS} / lBUNDLE_NAME: ${lBUNDLE_NAME}" "no_log"
+        # print_output "[-] skipping ... lJAVA_ARCHIVE: ${lJAVA_ARCHIVE} // lAPP_NAME: ${lAPP_NAME} / lAPP_LIC: ${lAPP_LIC} / lIMPLEMENT_TITLE: ${lIMPLEMENT_TITLE} / lAPP_VERS: ${lAPP_VERS} / lBUNDLE_NAME: ${lBUNDLE_NAME}" "no_log"
         continue
       fi
       lAPP_VERS="${lAPP_VERS/\.release}"
