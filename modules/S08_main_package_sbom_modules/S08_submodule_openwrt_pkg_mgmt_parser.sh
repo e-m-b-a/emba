@@ -58,6 +58,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      # echo "lPACKAGE_FILE: ${lPACKAGE_FILE}"
       if ! [[ -f "${lPACKAGE_FILE}" ]]; then
         print_output "[-] WARNING: ${FUNCNAME[0]} - package file ${lPACKAGE_FILE} not available ... skipping"
       fi
@@ -118,6 +119,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
 
         # if we have the list file also we can add all the paths provided by the package
         if [[ -f "${lPACKAGE_FILE/\.control/\.list}" ]]; then
+          # echo "lPACKAGE_FILE: ${lPACKAGE_FILE} / ${lPACKAGE_FILE/\.control/\.list}"
           local lPKG_LIST_ENTRY=""
           local lCNT=0
           while IFS= read -r lPKG_LIST_ENTRY; do
@@ -128,7 +130,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
               lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
               break
             fi
-          done < "${lPACKAGE_FILE/control/list}"
+          done < "${lPACKAGE_FILE/\.control/\.list}"
         fi
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
