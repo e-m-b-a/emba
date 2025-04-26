@@ -121,18 +121,18 @@ S09_firmware_base_version_check() {
     if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
       print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
       print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
+      print_output "[*] Generating analysis file array ..." "no_log"
       export FILE_ARR=()
       for lFILE in "${lFILE_ARR_TMP[@]}"; do
         if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
           # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
           continue
+        elif grep "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty"; then
+          # extract the stored file details and match it against some patterns we do not further process:
+          continue
         fi
-
         # print_output "$(indent "$(orange "${lFILE}")")"
-        lBIN_FILE="$(file -b "${lFILE}")"
-        if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* ]]; then
-          FILE_ARR+=( "${lFILE}" )
-        fi
+        FILE_ARR+=( "${lFILE}" )
       done
       print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
     else
@@ -199,7 +199,7 @@ S09_firmware_base_version_check() {
     mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
     # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
     local lRULE_IDENTIFIER=""
-    lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}")
+    lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
     mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     # shellcheck disable=SC2034
@@ -239,7 +239,10 @@ S09_firmware_base_version_check() {
           fi
         fi
       done
+      # as the package manager is handling most of the static detection we can do more runs in parallel in such a case
+      MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
     fi
+    print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
 
     if [[ -f "${S09_CSV_LOG}" ]]; then
       # this should prevent double checking - if a version identifier was already successful we do not need to
@@ -318,7 +321,6 @@ S09_firmware_base_version_check() {
         if ! [[ -f "${lBINARY_PATH}" ]]; then
           continue
         fi
-        # print_output "[*] lBINARY_ENTRY: ${lBINARY_ENTRY}" "no_log"
         for lVERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
           # print_output "[*] Testing zgrep identifier ${ORANGE}${lVERSION_IDENTIFIER}${NC} on binary ${ORANGE}${lBINARY_PATH}${NC}"
           lVERSION_IDENTIFIED=$(zgrep -h "${lVERSION_IDENTIFIER}" "${lBINARY_PATH}" | sort -u || true)
@@ -381,6 +383,7 @@ S09_firmware_base_version_check() {
       # TODO: change to local vars via parameters - this is ugly as hell!
       local lVERSION_IDENTIFIER=""
       for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+        # print_output "[*] Calling with ${lVERSION_IDENTIFIER}" "no_log"
         bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
@@ -808,7 +811,7 @@ bin_string_checker() {
       fi
       if [[ ${RTOS} -eq 0 ]]; then
         if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]] ; then
-          # print_output "[*] Testing $lBINARY_PATH with version identifier ${lVERSION_IDENTIFIER}" "no_log"
+          # print_output "[*] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then

@@ -9,7 +9,7 @@
   "grep_commands": [
     "VxWorks[0-9](\\.[0-9]+)+?$",
     "VxWorks\\ [0-9](\\.[0-9]+)+?\\ SMP",
-    "VxWorks\\ operating\\ system\\ version\\ \\[0-9](\\.[0-9]+)+?\\\"",
+    "VxWorks\\ operating\\ system\\ version\\ \\[0-9](\\.[0-9]+)+?",
     "^VxWorks\\ [0-9](\\.[0-9]+)+?$",
     "vxWorks\\ [0-9]\\ SR[0-9]+$"
   ],
