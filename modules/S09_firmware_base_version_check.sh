@@ -240,7 +240,7 @@ S09_firmware_base_version_check() {
         fi
       done
       # as the package manager is handling most of the static detection we can do more runs in parallel in such a case
-      MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
+      local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
     fi
     print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
 

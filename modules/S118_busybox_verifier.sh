@@ -53,7 +53,7 @@ S118_busybox_verifier()
   # if don't get our version details from S116/S115 we need to fallback to s09
   if [[ "${#lBB_VERSIONS_ARR[@]}" -eq 0 ]]; then
     if [[ -f "${S09_CSV_LOG}" ]]; then
-      mapfile -t lBB_VERSIONS_ARR < <(grep ";busybox;" "${S09_CSV_LOG}" | cut -d\; -f1,4 | sort -u || true)
+      mapfile -t lBB_VERSIONS_ARR < <(grep ";busybox;" "${S09_CSV_LOG}" | cut -d\; -f1,5 | sort -u || true)
     fi
   fi
 
@@ -134,6 +134,7 @@ S118_busybox_verifier()
       continue
     fi
 
+    # rewrite our minimal version to an array ":vendor:product:version"
     mapfile -t lBB_VERSION_ARR < <(echo "${lBB_VERSION}" | tr ':' '\n')
     lBB_VERSION_DONE_ARR+=( "${lBB_VERSION}" )
 
