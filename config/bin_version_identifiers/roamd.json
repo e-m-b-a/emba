@@ -1,0 +1,24 @@
+{
+   "identifier": "roamd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^roamd\\ version\\ [0-9]+(\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "roamd"
+   ],
+   "version_extraction": [
+      "sed -r 's/roamd\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/::roamd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

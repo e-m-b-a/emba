@@ -1,0 +1,30 @@
+{
+  "identifier": "jquery",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "MIT"
+  ],
+  "grep_commands": [
+    "jQuery\\ JavaScript\\ Library\\ v[0-9](\\.[0-9]+)+?",
+    "jQuery\\ v[0-9](\\.[0-9]+)+?\\ jquery\\.com\\ "
+  ],
+  "vendor_names": [
+    "jquery"
+  ],
+  "product_names": [
+    "jquery"
+  ],
+  "version_extraction": [
+    "sed -r 's/jQuery\\ JavaScript\\ Library\\ v([0-9](\\.[0-9]+)+?)$/:jquery:jquery:\\1/'",
+    "sed -r 's/jQuery\\ v([0-9](\\.[0-9]+)+?)\\ .*/:jquery:jquery:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

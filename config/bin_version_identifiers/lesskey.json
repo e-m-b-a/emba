@@ -1,0 +1,24 @@
+{
+   "identifier": "lesskey",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "lesskey\\ \\ version\\ [0-9]+$"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "less"
+   ],
+   "version_extraction": [
+      "sed -r 's/lesskey\\ \\ version\\ ([0-9]+)$/:gnu:less:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

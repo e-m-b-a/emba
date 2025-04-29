@@ -1,0 +1,24 @@
+{
+   "identifier": "kbd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\\ from\\ kbd\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "kbd-project"
+   ],
+   "product_names": [
+      "kbd"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\ from\\ kbd\\ ([0-9](\\.[0-9]+)+?).*/:kbd-project:kbd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

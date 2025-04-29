@@ -1,0 +1,33 @@
+{
+  "identifier": "isc-dhcpd",
+  "parsing_mode": [
+    "no_static"
+  ],
+  "licenses": [
+    "ISC"
+  ],
+  "emulation_only_grep_commands": [
+    "Internet\\ Systems\\ Consortium\\ DHCP\\ Server\\ [0-9](\\.[0-9]+)+?([a-z][0-9])?$",
+    "isc-dhcpd-[0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "isc"
+  ],
+  "product_names": [
+    "dhcp",
+    "dhcpd"
+  ],
+  "version_extraction": [
+    "sed -r 's/Internet\\ Systems\\ Consortium\\ DHCP\\ Server\\ ([0-9](\\.[0-9]+)+?([a-z][0-9])?)$/:isc:dhcp:\\1/'",
+    "sed -r 's/Internet\\ Systems\\ Consortium\\ DHCP\\ Server\\ ([0-9](\\.[0-9]+)+?([a-z][0-9])?)$/:isc:dhcpd:\\1/'",
+    "sed -r 's/isc-dhcpd-([0-9](\\.[0-9]+)+?)$/:isc:dhcp:\\1/'",
+    "sed -r 's/isc-dhcpd-([0-9](\\.[0-9]+)+?)$/:isc:dhcpd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "grep_commands": [],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": []
+}

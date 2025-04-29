@@ -1,0 +1,24 @@
+{
+   "identifier": "upnp_igd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "UPnP\\ ControlPoint\\ [0-9](\\.[0-9]+)+?\\ for\\ IGD"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "upnp_controlpoint"
+   ],
+   "version_extraction": [
+      "sed -r 's/UPnP\\ ControlPoint\\ ([0-9](\\.[0-9]+)+?)\\ for\\ IGD/::upnp_controlpoint:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

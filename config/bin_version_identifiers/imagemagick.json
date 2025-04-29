@@ -1,0 +1,24 @@
+{
+   "identifier": "imagemagick",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "imagemagick-lic"
+   ],
+   "grep_commands": [
+      "^Version:\\ ImageMagick\\ [0-9](\\.[0-9]+)+?(-[0-9]+)?\\ "
+   ],
+   "vendor_names": [
+      "imagemagick"
+   ],
+   "product_names": [
+      "imagemagick"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version:\\ ImageMagick\\ ([0-9](\\.[0-9]+)+?(-[0-9]+)?)\\ /:imagemagick:imagemagick:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

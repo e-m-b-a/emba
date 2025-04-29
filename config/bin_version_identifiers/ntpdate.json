@@ -1,0 +1,24 @@
+{
+   "identifier": "ntpdate",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ntpdate\\ [0-9](\\.[0-9]+)+?([a-z][0-9]+)?"
+   ],
+   "vendor_names": [
+      "ntp"
+   ],
+   "product_names": [
+      "ntp"
+   ],
+   "version_extraction": [
+      "sed -r 's/ntpdate\\ ([0-9](\\.[0-9]+)+?)([a-z][0-9]+)?$/:ntp:ntp:\\1:\\3/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

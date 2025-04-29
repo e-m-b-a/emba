@@ -1,0 +1,24 @@
+{
+   "identifier": "inotifywait",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^inotifywait\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "inotify"
+   ],
+   "product_names": [
+      "inotify-tools"
+   ],
+   "version_extraction": [
+      "sed -r 's/inotifywait\\ ([0-9](\\.[0-9]+)+?)$/:inotify:inotify-tools:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

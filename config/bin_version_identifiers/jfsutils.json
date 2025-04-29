@@ -1,0 +1,30 @@
+{
+  "identifier": "jfsutils",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "jfs_fscklog\\ version\\ [0-9](\\.[0-9]+)+?,\\ ",
+    "jfs_tune\\ version\\ [0-9](\\.[0-9]+)+?,\\ "
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "jfsutils"
+  ],
+  "version_extraction": [
+    "sed -r 's/jfs_fscklog\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::jfsutils:\\1/'",
+    "sed -r 's/jfs_tune\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/::jfsutils:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

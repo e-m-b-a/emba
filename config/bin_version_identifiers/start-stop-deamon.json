@@ -1,0 +1,24 @@
+{
+   "identifier": "start-stop-deamon",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^start-stop-daemon\\ [0-9][\\.0-9]+\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "start-stop-daemon"
+   ],
+   "version_extraction": [
+      "sed -r 's/start-stop-daemon\\ ([0-9](\\.[0-9]+)+?)\\ .*/::start-stop-daemon:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

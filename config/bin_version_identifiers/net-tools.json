@@ -1,0 +1,24 @@
+{
+   "identifier": "net-tools",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "net-tools\\ [0-9]\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "net-tools"
+   ],
+   "version_extraction": [
+      "sed -r 's/net-tools\\ ([0-9](\\.[0-9]+)+?)/::net-tools:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

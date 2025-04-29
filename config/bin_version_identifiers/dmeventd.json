@@ -1,0 +1,24 @@
+{
+   "identifier": "dmeventd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^dmeventd\\ version:\\ [0-9]\\.[0-9]+\\.[0-9]+\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "dmeventd"
+   ],
+   "version_extraction": [
+      "sed -r 's/dmeventd\\ version:\\ ([0-9](\\.[0-9]+)+?)/::dmeventd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

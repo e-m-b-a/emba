@@ -1,0 +1,24 @@
+{
+   "identifier": "avahi-autoipd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "LGPL-2.0-or-later"
+   ],
+   "grep_commands": [
+      "^avahi-[a-z]+\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "avahi"
+   ],
+   "product_names": [
+      "avahi"
+   ],
+   "version_extraction": [
+      "sed -r 's/avahi-[a-z]+\\ ([0-9](\\.[0-9]+)+?)$/:avahi:avahi:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

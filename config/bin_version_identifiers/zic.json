@@ -1,0 +1,24 @@
+{
+   "identifier": "zic",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "zic\\.c.*[0-9](\\.[0-9]+)+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "zic"
+   ],
+   "version_extraction": [
+      "sed -r 's/.*zic\\.c.*([0-9]\\.[0-9]+?)$/::zic:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

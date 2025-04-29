@@ -1,0 +1,24 @@
+{
+   "identifier": "smidump",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^smidump\\ [0-9][\\.0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "smidump"
+   ],
+   "version_extraction": [
+      "sed -r 's/smidump\\ ([0-9](\\.[0-9]+)+?)/::smidump:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

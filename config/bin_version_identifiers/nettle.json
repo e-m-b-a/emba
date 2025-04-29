@@ -1,0 +1,24 @@
+{
+   "identifier": "nettle",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "nettle-hash\\ \\(nettle\\ [0-9](\\.[0-9]+)+?\\)$"
+   ],
+   "vendor_names": [
+      "nettle_project"
+   ],
+   "product_names": [
+      "nettle"
+   ],
+   "version_extraction": [
+      "sed -r 's/nettle-hash\\ \\(nettle\\ ([0-9](\\.[0-9]+)+?)\\)$/:nettle_project:nettle:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

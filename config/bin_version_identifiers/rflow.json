@@ -1,0 +1,24 @@
+{
+   "identifier": "rflow",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "[0-9]\\.[0-9]+\\ Copyright\\ by\\ Nikki\\ Chumakov$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "rflow"
+   ],
+   "version_extraction": [
+      "sed -r 's/([0-9](\\.[0-9]+)+?)\\ Copyright\\ by\\ Nikki\\ Chumakov$/::rflow:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

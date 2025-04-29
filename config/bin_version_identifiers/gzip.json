@@ -1,0 +1,40 @@
+{
+  "identifier": "gzip",
+  "parsing_mode": [
+    "multi_grep",
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "'^GZIP$\"&&\"^Written\\ by\\ Jean-loup\\ Gailly\\.$\"&&\"^Report\\ bugs\\ to\\ <bug-gzip@gnu\\.org>\\.$\"&&\"^[1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"'",
+    "gzip\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$"
+  ],
+  "vendor_names": [
+    "gnu",
+    "gzip"
+  ],
+  "product_names": [
+    "gzip"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:gnu:gzip:\\1/'",
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:gzip:gzip:\\1/'",
+    "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gzip:\\1/'",
+    "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/:gzip:gzip:\\1/'",
+    "sed -r 's/gzip\\ ([1-9](\\.[0-9]+)+?)$/:gnu:gzip:\\1/'",
+    "sed -r 's/gzip\\ ([1-9](\\.[0-9]+)+?)$/:gzip:gzip:\\1/'"
+  ],
+  "affected_paths": [
+    "NA",
+    "gzip"
+  ],
+  "strict_grep_commands": [
+    "Version:\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$"
+  ],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,30 @@
+{
+  "identifier": "redis_cli",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "BSD-3-Clause"
+  ],
+  "grep_commands": [
+    "^redis-cli\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "redis",
+    "redislabs"
+  ],
+  "product_names": [
+    "redis"
+  ],
+  "version_extraction": [
+    "sed -r 's/redis-cli\\ ([0-9](\\.[0-9]+)+?).*/:redis:redis:\\1/'",
+    "sed -r 's/redis-cli\\ ([0-9](\\.[0-9]+)+?).*/:redislabs:redis:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

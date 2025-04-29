@@ -1,0 +1,24 @@
+{
+   "identifier": "wimaxd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "Beceem\\ CM\\ Server\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "beceem"
+   ],
+   "version_extraction": [
+      "sed -r 's/Beceem\\ CM\\ Server\\ ([0-9](\\.[0-9]+)+?).*$/::beceem:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

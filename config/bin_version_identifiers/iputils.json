@@ -1,0 +1,24 @@
+{
+   "identifier": "iputils",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "iputils-s{,3}[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "iputils"
+   ],
+   "version_extraction": [
+      "sed -r 's/iputils-s{,3}([0-9]+)$/::iputils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

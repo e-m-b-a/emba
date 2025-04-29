@@ -1,0 +1,24 @@
+{
+   "identifier": "sudoreplay",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "sudoreplay\\ version\\ [0-9](\\.[0-9]+)+?(p[0-9]+)?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "sudo"
+   ],
+   "version_extraction": [
+      "sed -r 's/sudoreplay\\ version\\ ([0-9](\\.[0-9]+)+?(p[0-9]+)?)$/::sudo:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,30 @@
+{
+  "identifier": "mailsend",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^mailsend\\ Version\\:\\ .*\\ v[0-9](\\.[0-9]+)+?([a-z][0-9]+)?$",
+    "mailsend\\ v[0-9](\\.[0-9]+)+?([a-z][0-9]+)?$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "mailsend"
+  ],
+  "version_extraction": [
+    "sed -r 's/mailsend\\ Version:\\ .*\\ v([0-9](\\.[0-9]+)+?([a-z][0-9]+)?)$/::mailsend:\\1/'",
+    "sed -r 's/mailsend\\ v([0-9](\\.[0-9]+)+?([a-z][0-9]+)?)$/::mailsend:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

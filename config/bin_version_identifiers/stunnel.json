@@ -1,0 +1,24 @@
+{
+   "identifier": "stunnel",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "stunnel\\ [0-9](\\.[0-9]+)+?\\ on\\ "
+   ],
+   "vendor_names": [
+      "stunnel"
+   ],
+   "product_names": [
+      "stunnel"
+   ],
+   "version_extraction": [
+      "sed -r 's/stunnel\\ ([0-9](\\.[0-9]+)+?)\\ .*/:stunnel:stunnel:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

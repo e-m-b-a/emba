@@ -1,0 +1,24 @@
+{
+   "identifier": "libiec61850",
+   "parsing_mode": [
+      "multi_grep"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "'^libiec61850\"&&\"^[1-2]+\\.[0-7]+(\\.[0-9]+)?$\"'"
+   ],
+   "vendor_names": [
+      "mz-automation"
+   ],
+   "product_names": [
+      "libiec61850"
+   ],
+   "version_extraction": [
+      "sed -r 's/([1-2]+\\.[0-7]+(\\.[0-9]+)?)$/:mz-automation:libiec61850:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

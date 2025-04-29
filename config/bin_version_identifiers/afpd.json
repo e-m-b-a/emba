@@ -1,0 +1,32 @@
+{
+  "identifier": "afpd",
+  "parsing_mode": [
+    "live",
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^afpd\\ [0-9](\\.[0-9]+)+?\\ -\\ Apple\\ Filing\\ Protocol\\ \\(AFP\\)\\ daemon\\ of\\ Netatalk$"
+  ],
+  "vendor_names": [
+    "netatalk"
+  ],
+  "product_names": [
+    "afpd"
+  ],
+  "version_extraction": [
+    "sed -r 's/Netatalk\\ ([0-9](\\.[0-9]+)+?)\\ .*/:netatalk:afpd:\\1/'",
+    "sed -r 's/afpd\\ ([0-9](\\.[0-9]+)+?)\\ .*\\ Netatalk$/:netatalk:afpd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [
+    "^Netatalk\\ [0-9](\\.[0-9]+)+?\\ \\(name:\\ .*\\)$"
+  ],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

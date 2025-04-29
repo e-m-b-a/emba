@@ -1,0 +1,30 @@
+{
+  "identifier": "gnu_groff",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "\\(GNU\\ groff\\)\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "^GNU\\ refer\\ \\(groff\\)\\ version\\ [0-9]+(\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "groff"
+  ],
+  "version_extraction": [
+    "sed -r 's/GNU\\ refer\\ \\(groff\\)\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:gnu:groff:\\1/'",
+    "sed -r 's/\\(GNU\\ groff\\)\\ version\\ ([0-9](\\.[0-9]+)+?)$/:gnu:groff:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

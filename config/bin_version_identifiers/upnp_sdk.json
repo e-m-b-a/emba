@@ -1,0 +1,30 @@
+{
+  "identifier": "upnp_sdk",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "Intel\\ SDK\\ for\\ UPnP\\ devices\\ \\/[0-9](\\.[0-9]+)+?$",
+    "Portable\\ SDK\\ for\\ UPnP\\ devices\\ [0-9](\\.[0-9]+)+?\\ .*"
+  ],
+  "vendor_names": [
+    "portable_sdk_for_upnp_project"
+  ],
+  "product_names": [
+    "portable_sdk_for_upnp"
+  ],
+  "version_extraction": [
+    "sed -r 's/Intel\\ SDK\\ for\\ UPnP\\ devices\\ \\/([0-9](\\.[0-9]+)+?)$/:portable_sdk_for_upnp_project:portable_sdk_for_upnp:\\1/'",
+    "sed -r 's/Portable\\ SDK\\ for\\ UPnP\\ devices\\ ([0-9](\\.[0-9]+)+?)\\ .*/:portable_sdk_for_upnp_project:portable_sdk_for_upnp:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

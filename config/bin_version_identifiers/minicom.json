@@ -1,0 +1,24 @@
+{
+   "identifier": "minicom",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "minicom\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "minicom"
+   ],
+   "product_names": [
+      "minicom"
+   ],
+   "version_extraction": [
+      "sed -r 's/minicom\\ version\\ ([0-9](\\.[0-9]+)+?)$/:minicom:minicom:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

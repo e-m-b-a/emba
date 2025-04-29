@@ -1,0 +1,31 @@
+{
+  "identifier": "lvm2",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^lvmetad\\ version:\\ [0-9](\\.[0-9]+)+?",
+    "^lvmpolld\\ version:\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "lvm"
+  ],
+  "product_names": [
+    "lvmetad",
+    "lvmpolld"
+  ],
+  "version_extraction": [
+    "sed -r 's/lvmetad\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmetad:\\1/'",
+    "sed -r 's/lvmpolld\\ version:\\ ([0-9](\\.[0-9]+)+?)/:lvm:lvmpolld:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

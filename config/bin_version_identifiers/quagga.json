@@ -1,0 +1,30 @@
+{
+  "identifier": "quagga",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "^(ldpd|linkd)\\ version\\ 0\\.9[\\.0-9]+$",
+    "^Hello,\\ this\\ is\\ Quagga\\ \\(version\\ [0-9](\\.[0-9]+)+?\\)\\.$"
+  ],
+  "vendor_names": [
+    "quagga"
+  ],
+  "product_names": [
+    "quagga"
+  ],
+  "version_extraction": [
+    "sed -r 's/(ldpd|linkd)\\ version\\ ([0-9](\\.[0-9]+)+?)$/:quagga:quagga:\\1/'",
+    "sed -r 's/Hello,\\ this\\ is\\ Quagga\\ \\(version\\ ([0-9](\\.[0-9]+)+?)\\)\\.$/:quagga:quagga:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

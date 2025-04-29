@@ -1,0 +1,24 @@
+{
+   "identifier": "eeprog",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-or-later"
+   ],
+   "grep_commands": [
+      "eeprog\\ [0-9](\\.[0-9]+)+?,\\ a\\ [0-9]+Cxx\\ EEPROM\\ reader/writer$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "eeprog"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\eeprog\\ ([0-9](\\.[0-9]+)+?),\\ .*/::eeprog:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

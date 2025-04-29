@@ -1,0 +1,24 @@
+{
+   "identifier": "apstats",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "apstats\\ v[0-9](\\.[0-9]+)+?:\\ Display\\ Access\\ Point\\ Statistics\\."
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "apstats"
+   ],
+   "version_extraction": [
+      "sed -r 's/apstats\\ v([0-9](\\.[0-9]+)+?):\\ .*/::apstats:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

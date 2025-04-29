@@ -1,0 +1,24 @@
+{
+   "identifier": "ulogd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ulogd\\ Version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ulogd"
+   ],
+   "version_extraction": [
+      "sed -r 's/ulogd\\ Version\\ ([0-9](\\.[0-9]+)+?)/::ulogd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

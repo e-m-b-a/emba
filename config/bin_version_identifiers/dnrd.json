@@ -1,0 +1,24 @@
+{
+   "identifier": "dnrd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "dnrd\\ version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "dnrd"
+   ],
+   "product_names": [
+      "dnrd"
+   ],
+   "version_extraction": [
+      "sed -r 's/dnrd\\ version\\ ([0-9](\\.[0-9]+)+?)$/:dnrd:dnrd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

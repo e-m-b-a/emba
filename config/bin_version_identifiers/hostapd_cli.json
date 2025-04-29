@@ -1,0 +1,24 @@
+{
+   "identifier": "hostapd_cli",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "hostapd_cli\\ v[0-9](\\.[0-9]+)+?\\.x$"
+   ],
+   "vendor_names": [
+      "w1.fi"
+   ],
+   "product_names": [
+      "hostapd"
+   ],
+   "version_extraction": [
+      "sed -r 's/hostapd_cli\\ v([0-9](\\.[0-9]+)+?).*$/:w1.fi:hostapd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

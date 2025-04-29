@@ -1,0 +1,24 @@
+{
+   "identifier": "chrony",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^chrony[cd]\\ \\(chrony\\)\\ version\\ [0-9]\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "tuxfamily"
+   ],
+   "product_names": [
+      "chrony"
+   ],
+   "version_extraction": [
+      "sed -r 's/chrony[cd]\\ \\(chrony\\)\\ version\\ ([0-9]+(\\.[0-9]+)+?)/:tuxfamily:chrony:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

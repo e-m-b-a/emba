@@ -1,0 +1,24 @@
+{
+   "identifier": "blkid",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^blkid\\ [0-9](\\.[0-9]+)+?\\ \\(.*\\)$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "blkid"
+   ],
+   "version_extraction": [
+      "sed -r 's/blkid\\ ([0-9](\\.[0-9]+)+?)\\ .*/::blkid:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

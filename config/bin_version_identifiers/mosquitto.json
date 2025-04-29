@@ -1,0 +1,24 @@
+{
+   "identifier": "mosquitto",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "EPL-2.0"
+   ],
+   "grep_commands": [
+      "^mosquitto\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "eclipse"
+   ],
+   "product_names": [
+      "mosquitto"
+   ],
+   "version_extraction": [
+      "sed -r 's/mosquitto\\ version\\ ([0-9](\\.[0-9]+)+?).*/:eclipse:mosquitto:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

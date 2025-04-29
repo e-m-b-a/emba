@@ -1,0 +1,37 @@
+{
+  "identifier": "tcpdump",
+  "parsing_mode": [
+    "multi_grep",
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "BSD-3-Clause"
+  ],
+  "strict_grep_commands": [
+    "^[2-9]\\.[0-9]+\\.[0-9]+$"
+  ],
+  "vendor_names": [
+    "tcpdump"
+  ],
+  "product_names": [
+    "tcpdump"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:tcpdump:tcpdump:\\1/'",
+    "sed -r 's/([0-9](\\.[0-9]+)+?)/:tcpdump:tcpdump:\\1/'",
+    "sed -r 's/tcpdump\\ version\\ ([0-9](\\.[0-9]+)+?)$/:tcpdump:tcpdump:\\1/'",
+    "sed -r 's/tcpdump\\.([0-9](\\.[0-9]+)+?)\\ version/:tcpdump:tcpdump:\\1/'"
+  ],
+  "affected_paths": [
+    "tcpdump"
+  ],
+  "grep_commands": [
+    "'^dump\"&&\"^\\[\\ -T\\ type\\ \\]\\ \\[\\ --version\\ \\]\\ \\[\\ -V\\ file\\ \\]$\"&&\"^[2-9](\\.[0-9]+)+?$\"'",
+    "^tcpdump\\ version\\ [2-9](\\.[0-9]+)+?$",
+    "tcpdump\\.[2-9](\\.[0-9]+)+?\\ version"
+  ],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

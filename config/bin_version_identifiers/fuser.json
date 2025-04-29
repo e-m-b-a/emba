@@ -1,0 +1,24 @@
+{
+   "identifier": "fuser",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "fuser\\ \\(PSmisc\\)\\ [0-9]+(\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "fuser"
+   ],
+   "version_extraction": [
+      "sed -r 's/fuser\\ \\(PSmisc\\)\\ ([0-9]+(\\.[0-9]+)+?)/::fuser:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

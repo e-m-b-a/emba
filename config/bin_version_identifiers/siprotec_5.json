@@ -1,0 +1,30 @@
+{
+  "identifier": "siprotec_5",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "proprietary"
+  ],
+  "grep_commands": [
+    "FWAOS_V[0-9]+.[0-9]+.[0-9]+.[0-9]+$"
+  ],
+  "vendor_names": [
+    "siemens"
+  ],
+  "product_names": [
+    "siprotec_5",
+    "siprotec_5_firmware"
+  ],
+  "version_extraction": [
+    "sed -r 's/FWAOS_V([0-9]+(\\.[0-9]+)+?)$/:siemens:siprotec_5:\\1/'",
+    "sed -r 's/FWAOS_V([0-9]+(\\.[0-9]+)+?)$/:siemens:siprotec_5_firmware:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

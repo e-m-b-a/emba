@@ -1,0 +1,34 @@
+{
+  "identifier": "pppoe",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "pppoe\\ version\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "NA",
+    "roaring_penguin"
+  ],
+  "product_names": [
+    "pppoe",
+    "pppoe-discovery"
+  ],
+  "version_extraction": [
+    "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?([a-z])?)$/::pppoe-discovery:\\1/'",
+    "sed -r 's/pppoe\\ version\\ ([0-9](\\.[0-9]+)+?)$/:roaring_penguin:pppoe:\\1/'"
+  ],
+  "affected_paths": [
+    "pppoe-discovery"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [
+    "Version\\ [0-9]\\.[0-9]+([a-z])?$"
+  ],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

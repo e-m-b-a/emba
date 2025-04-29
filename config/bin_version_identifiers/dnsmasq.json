@@ -1,0 +1,32 @@
+{
+  "identifier": "dnsmasq",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "^[dD]nsmasq\\ version\\ [0-9]\\.[0-9]+",
+    "dnsmasq-[0-9]\\.[0-9]+$",
+    "dnsmasq\\ [0-9]\\.[0-9]+$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "dnsmasq"
+  ],
+  "version_extraction": [
+    "sed -r 's/[dD]nsmasq\\ version\\ ([0-9](\\.[0-9]+)+?).*/::dnsmasq:\\1/'",
+    "sed -r 's/dnsmasq-([0-9](\\.[0-9]+)+?)$/::dnsmasq:\\1/'",
+    "sed -r 's/dnsmasq\\ ([0-9](\\.[0-9]+)+?)$/::dnsmasq:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

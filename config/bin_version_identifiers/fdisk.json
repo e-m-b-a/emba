@@ -1,0 +1,24 @@
+{
+   "identifier": "fdisk",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "^fdisk\\ v[0-9](\\.[0-9]+)+?([a-z])?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "fdisk"
+   ],
+   "version_extraction": [
+      "sed -r 's/fdisk\\ v([0-9](\\.[0-9]+)+?([a-z])?)$/::fdisk:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

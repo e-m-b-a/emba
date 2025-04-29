@@ -1,0 +1,32 @@
+{
+  "identifier": "u-boot",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "Compiled\\ with\\ U-Boot\\ [0-9]+(\\.[0-9]+)+?(rc[0-9]+)?",
+    "U-Boot\\ [0-9]+(\\.[0-9]+)+?(\\ )?",
+    "^mk(env)?image\\ version\\ 20[0-9]+\\.[0-9]+"
+  ],
+  "vendor_names": [
+    "denx"
+  ],
+  "product_names": [
+    "u-boot"
+  ],
+  "version_extraction": [
+    "sed -r 's/Compiled\\ with\\ U-Boot\\ ([0-9]+(\\.[0-9]+)+?(rc[0-9]+)?)/:denx:u-boot:\\1/'",
+    "sed -r 's/U-Boot\\ ([0-9]+(\\.[0-9]+)+?(rc[0-9]+)?).*/:denx:u-boot:\\1/'",
+    "sed -r 's/mk.*image\\ version\\ ([0-9]+(\\.[0-9]+)+?).*/:denx:u-boot:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,33 @@
+{
+  "identifier": "7-zip",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "7-Zip\\ [0-9]\\.[0-9]+\\ \\ Copyright\\ \\(c\\)\\ .*\\ Igor\\ Pavlov\\ \\ ",
+    "^p7zip\\ Version\\ [0-9]+(\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "7-zip",
+    "igor_pavlov"
+  ],
+  "product_names": [
+    "7-zip",
+    "p7zip"
+  ],
+  "version_extraction": [
+    "sed -r 's/7-Zip\\ ([0-9](\\.[0-9]+)+?)\\ .*/:7-zip:7-zip:\\1/'",
+    "sed -r 's/7-Zip\\ ([0-9](\\.[0-9]+)+?)\\ .*/:igor_pavlov:7-zip:\\1/'",
+    "sed -r 's/p7zip\\ Version\\ ([0-9]+(\\.[0-9]+)+?).*/:7-zip:p7zip:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

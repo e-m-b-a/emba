@@ -1,0 +1,24 @@
+{
+   "identifier": "dhtest",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "dhtest\\ version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "dhtest"
+   ],
+   "version_extraction": [
+      "sed -r 's/dhtest\\ version\\ ([0-9](\\.[0-9]+)+?)$/::dhtest:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "haserl",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^This\\ is\\ haserl\\ version\\ [0-9](\\.[0-9]+)+?\\ \\(http\\:\\/\\/haserl\\.sourceforge\\.net\\)$"
+   ],
+   "vendor_names": [
+      "haserl_project"
+   ],
+   "product_names": [
+      "haserl"
+   ],
+   "version_extraction": [
+      "sed -r 's/This\\ is\\ haserl\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:haserl_project:haserl:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

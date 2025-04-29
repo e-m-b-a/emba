@@ -1,0 +1,24 @@
+{
+   "identifier": "coova",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "^coova-chilli\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "coova-chilli"
+   ],
+   "version_extraction": [
+      "sed -r 's/coova-chilli\\ ([0-9](\\.[0-9]+)+?)$/::coova-chilli:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "rtpproxy",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "^Basic\\ version:\\ [0-9]+$"
+   ],
+   "vendor_names": [
+      "rtpproxy"
+   ],
+   "product_names": [
+      "rtpproxy"
+   ],
+   "version_extraction": [
+      "sed -r 's/Basic\\ version:\\ ([0-9]+)$/:rtpproxy:rtpproxy:\\1/'"
+   ],
+   "affected_paths": [
+      "rtpproxy"
+   ]
+}

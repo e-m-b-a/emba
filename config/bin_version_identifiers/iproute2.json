@@ -1,0 +1,32 @@
+{
+  "identifier": "iproute2",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "\\ iproute2-[0-9]+(\\.[0-9]+)+?$",
+    "iproute2-ss(040823)",
+    "iproute2-ss[0-9]+"
+  ],
+  "vendor_names": [
+    "iproute2_project"
+  ],
+  "product_names": [
+    "iproute2"
+  ],
+  "version_extraction": [
+    "sed -r 's/\\ iproute2-([0-9]+(\\.[0-9]+)+?)$/:iproute2_project:iproute2:\\1/'",
+    "sed -r 's/iproute2-ss(040823).*/:iproute2_project:iproute2:2\\.6\\.8-\\1/'",
+    "sed -r 's/iproute2-ss([0-9]+).*/:iproute2_project:iproute2:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

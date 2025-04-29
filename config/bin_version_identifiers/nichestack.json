@@ -1,0 +1,24 @@
+{
+   "identifier": "nichestack",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "proprietary"
+   ],
+   "grep_commands": [
+      "^Interniche\\ Stack\\ v[0-9](\\.[0-9]+)+$"
+   ],
+   "vendor_names": [
+      "hcc-embedded"
+   ],
+   "product_names": [
+      "nichestack"
+   ],
+   "version_extraction": [
+      "sed -r 's/Interniche\\ Stack\\ v([0-9](\\.[0-9]+)+?)$/:hcc-embedded:nichestack:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

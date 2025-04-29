@@ -1,0 +1,30 @@
+{
+  "identifier": "curl",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "curl"
+  ],
+  "grep_commands": [
+    "^curl\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "curl",
+    "daniel_stenberg"
+  ],
+  "product_names": [
+    "curl"
+  ],
+  "version_extraction": [
+    "sed -r 's/curl\\ ([0-9](\\.[0-9]+)+?).*/:curl:curl:\\1/'",
+    "sed -r 's/curl\\ ([0-9](\\.[0-9]+)+?).*/:daniel_stenberg:curl:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

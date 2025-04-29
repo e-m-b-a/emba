@@ -1,0 +1,24 @@
+{
+   "identifier": "jcpd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^jcpd\\ version\\ [0-9](\\.[0-9]+)+?\\ \\(JCP\\ Ver\\ [0-9](\\.[0-9]+)+?\\)\\ started$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "jcpd"
+   ],
+   "version_extraction": [
+      "sed -r 's/jcpd\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/::jcpd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

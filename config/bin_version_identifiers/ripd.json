@@ -1,0 +1,30 @@
+{
+  "identifier": "ripd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "^ripd\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "^ripd\\ version\\ [\\.0-9]+a?"
+  ],
+  "vendor_names": [
+    "quagga"
+  ],
+  "product_names": [
+    "quagga"
+  ],
+  "version_extraction": [
+    "sed -r 's/ripd\\ version\\ ([0-9](\\.[0-9]+)+?)$/:quagga:quagga:\\1/'",
+    "sed -r 's/ripd\\ version\\ ([0-9](\\.[0-9]+)+?)/:quagga:quagga:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

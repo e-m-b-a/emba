@@ -1,0 +1,30 @@
+{
+  "identifier": "transmissionbt",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only or GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "^Transmission\\ [0-9]+(\\.[0-9]+)+?\\ \\(\\)\\ \\ http\\:\\/\\/www\\.transmissionbt\\.com\\/$",
+    "^transmission-cli\\ [0-9]\\.[0-9]+\\ \\([0-9]+\\)$"
+  ],
+  "vendor_names": [
+    "transmission"
+  ],
+  "product_names": [
+    "transmissionbt"
+  ],
+  "version_extraction": [
+    "sed -r 's/Transmission\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/:transmission:transmissionbt:\\1/'",
+    "sed -r 's/transmission-cli\\ ([0-9](\\.[0-9]+)+?)\\ .*/:transmission:transmissionbt:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

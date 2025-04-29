@@ -1,0 +1,24 @@
+{
+   "identifier": "libwolfssl.so",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "strict_grep_commands": [
+      "^[0-9]\\.[0-9](\\.[0-9])+?$"
+   ],
+   "vendor_names": [
+      "wolfssl"
+   ],
+   "product_names": [
+      "wolfssl"
+   ],
+   "version_extraction": [
+      "sed -r 's/([0-9](\\.[0-9]+)+?)$/:wolfssl:wolfssl:\\1/'"
+   ],
+   "affected_paths": [
+      "libwolfssl.so"
+   ]
+}

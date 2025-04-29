@@ -671,7 +671,7 @@ print_help()
   echo -e "${CYAN}""-P""${NC}""                Overwrite auto MAX_MODS (maximum modules in parallel) configuration"
   echo -e "${CYAN}""-T""${NC}""                Overwrite auto MAX_MOD_THREADS (maximum threads per module) configuration"
   echo -e "\\nDeveloper options"
-  echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection"
+  echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection (deprecated)"
   echo -e "${CYAN}""-S""${NC}""                STRICT mode - developer option to improve code quality (not enabled by default)"
 #  echo -e "${CYAN}""-i""${NC}""                EMBA internally used for container identification (do not use it as cli parameter)"
   echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automaticially, even if it is not empty"

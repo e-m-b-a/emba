@@ -1,0 +1,24 @@
+{
+   "identifier": "logd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^logd\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "logd"
+   ],
+   "version_extraction": [
+      "sed -r 's/logd\\ version\\ ([0-9](\\.[0-9]+)+?).*/::logd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

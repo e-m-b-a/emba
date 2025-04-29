@@ -1,0 +1,24 @@
+{
+   "identifier": "zipnote",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ZipNote\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "info-zip"
+   ],
+   "product_names": [
+      "zipnote"
+   ],
+   "version_extraction": [
+      "sed -r 's/ZipNote\\ ([0-9](\\.[0-9]+)+?)\\ /:info-zip:zipnote:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

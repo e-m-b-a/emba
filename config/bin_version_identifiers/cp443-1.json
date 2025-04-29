@@ -1,0 +1,30 @@
+{
+  "identifier": "cp443-1",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "proprietary"
+  ],
+  "grep_commands": [
+    "^\\ Firmware\\ Update\\ V[0-9](\\.[0-9]+)+?\\ for\\ the\\ communication\\ processor\\ CP443-1$",
+    "^\\@\\(\\#1\\)\\ CP443-1\\ GX20\\ V\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "siemens"
+  ],
+  "product_names": [
+    "simatic_cp443-1_firmware"
+  ],
+  "version_extraction": [
+    "sed -r 's/Firmware\\ Update\\ V([0-9]\\.[0-9]\\.[0-9]+)\\ for\\ the\\ communication\\ processor\\ CP443-1/:siemens:simatic_cp443-1_firmware:\\1/'",
+    "sed -r 's/\\@\\(\\#1\\)\\ CP443-1\\ GX20\\ v\\ ([0-9]\\.[0-9]\\.[0-9]).*/:siemens:simatic_cp443-1_firmware:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

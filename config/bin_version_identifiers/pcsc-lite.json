@@ -1,0 +1,24 @@
+{
+   "identifier": "pcsc-lite",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "^pcsc-lite\\ version\\ [0-9](\\.[0-9]+)+?\\.$"
+   ],
+   "vendor_names": [
+      "muscle"
+   ],
+   "product_names": [
+      "pcsc-lite"
+   ],
+   "version_extraction": [
+      "sed -r 's/pcsc-lite\\ version\\ ([0-9](\\.[0-9]+)+?).*/:muscle:pcsc-lite:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

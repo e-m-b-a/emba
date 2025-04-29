@@ -1,0 +1,30 @@
+{
+  "identifier": "l2tpd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "l2tpd\\ Version\\ [0-9](\\.[0-9]+)+?(-rtn)?\\ Copyright\\ [0-9]+\\ Roaring\\ Penguin\\ Software\\ Inc\\.",
+    "l2tpd\\ version\\ [0-9](\\.[0-9]+)+?\\ started\\ on\\ "
+  ],
+  "vendor_names": [
+    "roaring_penguin"
+  ],
+  "product_names": [
+    "l2tpd"
+  ],
+  "version_extraction": [
+    "sed -r 's/l2tpd\\ Version\\ ([0-9](\\.[0-9]+)+?).*/:roaring_penguin:l2tpd:\\1/'",
+    "sed -r 's/l2tpd\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:roaring_penguin:l2tpd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

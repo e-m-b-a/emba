@@ -1,0 +1,24 @@
+{
+   "identifier": "netstat-nat",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "^Version\\ [0-9]\\.[0-9]\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "netstat-nat"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)/::netstat-nat:\\1/'"
+   ],
+   "affected_paths": [
+      "netstat-nat"
+   ]
+}

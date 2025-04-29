@@ -1,0 +1,24 @@
+{
+   "identifier": "loadkeys",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "loadkeys\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "loadkeys"
+   ],
+   "version_extraction": [
+      "sed -r 's/loadkeys\\ version\\ ([0-9](\\.[0-9]+)+?)/::loadkeys:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

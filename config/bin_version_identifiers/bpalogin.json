@@ -1,0 +1,29 @@
+{
+  "identifier": "bpalogin",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "BPALogin\\ v[0-9](\\.[0-9])+?\\ -\\ portable\\ BigPond\\ Broadband\\ login\\ client$",
+    "^BPALogin\\ v[0-9](\\.[0-9]+)+?\\ -\\ lightweight\\ portable\\ BIDS2\\ login\\ client$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "bpalogin"
+  ],
+  "version_extraction": [
+    "sed -r 's/BPALogin\\ v([0-9](\\.[0-9]+)+?)\\ .*/::bpalogin:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "mount",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^mount:\\ mount-[0-9](\\.[0-9]+)+?([a-z])?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "mount"
+   ],
+   "version_extraction": [
+      "sed -r 's/mount:\\ mount-([0-9](\\.[0-9]+)+?([a-z])?)$/::mount:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

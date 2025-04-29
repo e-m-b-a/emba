@@ -1,0 +1,24 @@
+{
+   "identifier": "ntpdc",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ntpdc\\ .*\\ Ver\\.\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "ntp"
+   ],
+   "product_names": [
+      "ntp"
+   ],
+   "version_extraction": [
+      "sed -r 's/ntpdc\\ .*\\ Ver\\.\\ ([0-9](\\.[0-9]+)+?)/:ntp:ntp:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

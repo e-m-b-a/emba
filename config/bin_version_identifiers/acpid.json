@@ -1,0 +1,24 @@
+{
+   "identifier": "acpid",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "acpid-[0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "acpid"
+   ],
+   "version_extraction": [
+      "sed -r 's/acpid-([0-9](\\.[0-9]+)+?)$/::acpid:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

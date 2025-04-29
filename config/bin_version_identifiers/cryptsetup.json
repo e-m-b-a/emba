@@ -1,0 +1,24 @@
+{
+   "identifier": "cryptsetup",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "cryptsetup\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "cryptsetup_project"
+   ],
+   "product_names": [
+      "cryptsetup"
+   ],
+   "version_extraction": [
+      "sed -r 's/cryptsetup\\ ([0-9](\\.[0-9]+)+?)$/:cryptsetup_project:cryptsetup:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

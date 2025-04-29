@@ -1,0 +1,24 @@
+{
+   "identifier": "netio",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "NETIO\\ -\\ Network\\ Throughput\\ Benchmark,\\ Version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "netio"
+   ],
+   "version_extraction": [
+      "sed -r 's/NETIO\\ -\\ Network\\ Throughput\\ Benchmark,\\ Version\\ ([0-9](\\.[0-9]+)+?).*/::netio:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

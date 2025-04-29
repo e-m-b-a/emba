@@ -1,0 +1,24 @@
+{
+   "identifier": "arptables",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "arptables\\ v[0-9](\\.[0-9]+)+?-[0-9]:\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "arptables"
+   ],
+   "version_extraction": [
+      "sed -r 's/arptables\\ v([0-9](\\.[0-9]+)+?-[0-9]):\\ /::arptables:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

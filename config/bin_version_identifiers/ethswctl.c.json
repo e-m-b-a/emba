@@ -1,0 +1,24 @@
+{
+   "identifier": "ethswctl.c",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ethswctl\\.c:v[0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ethswctl"
+   ],
+   "version_extraction": [
+      "sed -r 's/ethswctl\\.c:v([0-9](\\.[0-9]+)+?).*/::ethswctl:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "usbhid-dump",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^usbhid-dump [0-9]\\.[0-9]$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "usbhid"
+   ],
+   "version_extraction": [
+      "sed -r 's/usbhid-dump\\ ([0-9]+(\\.[0-9]+)+?)$/::usbhid:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "opkg",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "opkg\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "opkg"
+   ],
+   "version_extraction": [
+      "sed -r 's/opkg\\ version\\ ([0-9](\\.[0-9]+)+?)/::opkg:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

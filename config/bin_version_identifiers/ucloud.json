@@ -1,0 +1,24 @@
+{
+   "identifier": "ucloud",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ucloud_v2\\ ver\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ucloud"
+   ],
+   "version_extraction": [
+      "sed -r 's/ucloud_v2\\ ver\\.([0-9]+).*/::ucloud:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

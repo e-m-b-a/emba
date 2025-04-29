@@ -1,0 +1,24 @@
+{
+   "identifier": "babeld",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "MIT"
+   ],
+   "grep_commands": [
+      "^babeld\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "babeld"
+   ],
+   "version_extraction": [
+      "sed -r 's/babeld\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::babeld:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

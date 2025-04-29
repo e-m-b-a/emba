@@ -1,0 +1,24 @@
+{
+   "identifier": "util-linux-ng",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-or-later"
+   ],
+   "grep_commands": [
+      "util-linux-ng\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "util-linux-ng"
+   ],
+   "version_extraction": [
+      "sed -r 's/util-linux-ng\\ ([0-9](\\.[0-9]+)+?)$/::util-linux-ng:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

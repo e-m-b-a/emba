@@ -1,0 +1,24 @@
+{
+   "identifier": "smtpclient",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "This\\ is\\ SMTPclient\\ Version\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "smtpclient"
+   ],
+   "version_extraction": [
+      "sed -r 's/This\\ is\\ SMTPclient\\ Version\\ ([0-9](\\.[0-9]+)+?)\\ .*/::smtpclient:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

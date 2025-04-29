@@ -1,0 +1,39 @@
+{
+  "identifier": "squid",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "SquidGuard:\\ [0-9]\\.[0-9]\\ Berkeley\\ DB\\ [0-9]\\.[0-9]\\.[0-9]+",
+    "Squid\\ Cache:\\ Version\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "NA",
+    "squid-cache",
+    "squidguard"
+  ],
+  "product_names": [
+    "squid",
+    "squidclient",
+    "squidguard"
+  ],
+  "version_extraction": [
+    "sed -r 's/SquidGuard:\\ ([0-9](\\.[0-9]+)+?)\\ .*/:squidguard:squidguard:\\1/'",
+    "sed -r 's/Squid\\ Cache:\\ Version\\ ([0-9](\\.[0-9]+)+?)$/:squid-cache:squid:\\1/'",
+    "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)/::squidclient:\\1/'"
+  ],
+  "affected_paths": [
+    "NA",
+    "squidclient"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [
+    "Version:\\ [0-9]\\.[0-9]\\.[0-9]"
+  ],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

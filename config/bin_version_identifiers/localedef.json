@@ -1,0 +1,24 @@
+{
+   "identifier": "localedef",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "localedef\\ \\(.*\\)\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "localedef"
+   ],
+   "version_extraction": [
+      "sed -r 's/localedef\\ \\(.*\\)\\ ([0-9](\\.[0-9]+)+?)/::localedef:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

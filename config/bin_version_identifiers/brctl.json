@@ -1,0 +1,24 @@
+{
+   "identifier": "brctl",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^brctl,\\ [0-9](\\.[0-9])+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "brctl"
+   ],
+   "version_extraction": [
+      "sed -r 's/brctl,\\ ([0-9](\\.[0-9]+)+?)$/::brctl:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

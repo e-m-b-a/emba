@@ -1,0 +1,30 @@
+{
+  "identifier": "bash",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "[Bb]ash,\\ version\\ [0-9](\\.[0-9]+)+?",
+    "[Bb]ash.*version\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "bash"
+  ],
+  "version_extraction": [
+    "sed -r 's/[Bb]ash,\\ version\\ ([0-9](\\.[0-9]+)+?).*/:gnu:bash:\\1/'",
+    "sed -r 's/[Bb]ash.*version\\ ([0-9](\\.[0-9]+)+?).*/:gnu:bash:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

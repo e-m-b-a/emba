@@ -1,0 +1,30 @@
+{
+  "identifier": "perl",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-1.0-only OR Artistic-1.0-Perl"
+  ],
+  "grep_commands": [
+    "This\\ is\\ perl.*\\(v[0-9]\\.[0-9]+\\.[0-9]+\\)\\ built",
+    "This\\ is\\ perl\\ [0-9],\\ version\\ [0-9]+,\\ subversion\\ [0-9]+.*built"
+  ],
+  "vendor_names": [
+    "perl"
+  ],
+  "product_names": [
+    "perl"
+  ],
+  "version_extraction": [
+    "sed -r 's/This\\ is\\ perl.*\\(v([0-9](\\.[0-9]+)+?)\\).*/:perl:perl:\\1/'",
+    "sed -r 's/This\\ is\\ perl\\ ([0-9]+),\\ version\\ ([0-9]+),\\ subversion\\ ([0-9]+).*/:perl:perl:\\1\\.\\2\\.\\3/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "yat2m",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "yat2m\\ [0-9]\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "yat2m"
+   ],
+   "version_extraction": [
+      "sed -r 's/yat2m\\ ([0-9](\\.[0-9]+)+?)$/::yat2m:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

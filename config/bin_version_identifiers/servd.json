@@ -1,0 +1,24 @@
+{
+   "identifier": "servd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "servd\\ version\\ [0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "servd"
+   ],
+   "version_extraction": [
+      "sed -r 's/servd\\ version\\ ([0-9]+)$/::servd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

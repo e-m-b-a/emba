@@ -1,0 +1,24 @@
+{
+   "identifier": "buildroot",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "getconf\\ \\(Buildroot\\)\\ [0-9]\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "buildroot"
+   ],
+   "product_names": [
+      "buildroot"
+   ],
+   "version_extraction": [
+      "sed -r 's/.*\\(Buildroot\\)\\ ([0-9](\\.[0-9]+)+?)/:buildroot:buildroot:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

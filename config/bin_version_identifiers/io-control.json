@@ -1,0 +1,24 @@
+{
+   "identifier": "io-control",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "FUSE\\ library\\ version:\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "fuse"
+   ],
+   "product_names": [
+      "fuse"
+   ],
+   "version_extraction": [
+      "sed -r 's/FUSE\\ library\\ version:\\ ([0-9](\\.[0-9]+)+?).*/:fuse:fuse:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

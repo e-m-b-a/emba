@@ -1,0 +1,24 @@
+{
+   "identifier": "dyndns",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "DynDns\\ Update\\ v[0-9]\\.[0-9]+.*\\ AlphaNetworks,Inc\\."
+   ],
+   "vendor_names": [
+      "alphanetworks"
+   ],
+   "product_names": [
+      "dyndns"
+   ],
+   "version_extraction": [
+      "sed -r 's/DynDns\\ Update\\ v([0-9](\\.[0-9]+)+?).*\\ AlphaNetworks.*/:alphanetworks:dyndns:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

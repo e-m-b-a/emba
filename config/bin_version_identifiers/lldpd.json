@@ -1,0 +1,24 @@
+{
+   "identifier": "lldpd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^Version:\\ lldpd\\ [0-9](\\.[0-9]+)+$"
+   ],
+   "vendor_names": [
+      "lldpd_project"
+   ],
+   "product_names": [
+      "lldpd"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version:\\ lldpd\\ ([0-9](\\.[0-9]+)+?)$/:lldpd_project:lldpd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

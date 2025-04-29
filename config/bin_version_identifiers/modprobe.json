@@ -1,0 +1,24 @@
+{
+   "identifier": "modprobe",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "modprobe\\ [0-9](\\.[0-9]+)+?\\ --\\ part\\ of\\ module-init-tools$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "modprobe"
+   ],
+   "version_extraction": [
+      "sed -r 's/modprobe\\ ([0-9](\\.[0-9]+)+?)\\ .*/::modprobe:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

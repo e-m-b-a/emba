@@ -1,0 +1,24 @@
+{
+   "identifier": "chillispot",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^chillispot\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "chillispot"
+   ],
+   "version_extraction": [
+      "sed -r 's/chillispot\\ ([0-9]+(\\.[0-9]+)+?).*/::chillispot:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

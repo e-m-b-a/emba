@@ -1,0 +1,24 @@
+{
+   "identifier": "btrfs",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^Btrfs\\ Btrfs\\ v[0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "btrfs"
+   ],
+   "version_extraction": [
+      "sed -r 's/Btrfs\\ Btrfs\\ v([0-9](\\.[0-9]+)+?).*/::btrfs:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

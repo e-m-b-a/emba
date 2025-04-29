@@ -1,0 +1,24 @@
+{
+   "identifier": "sdptool",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "sdptool\\ -\\ SDP\\ tool\\ v[0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "sdptool"
+   ],
+   "version_extraction": [
+      "sed -r 's/sdptool\\ -\\ SDP\\ tool\\ v([0-9](\\.[0-9]+)+?)$/::sdptool:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

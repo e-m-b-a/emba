@@ -1,0 +1,36 @@
+{
+  "identifier": "pppd",
+  "parsing_mode": [
+    "multi_grep",
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "'pppd\\ %s\\ started\\ by\\ %s,\\ uid\\ %d\"&&\"^[1-3](\\.[0-9]+)+?([a-c][0-9])?$\"'",
+    "pppd\\ version\\ [1-3](\\.[0-9]+)+?([a-c][0-9])?$",
+    "pppd\\ version\\ [1-3](\\.[0-9]+)+?([a-c][0-9])?\\ ",
+    "pppd\\.so\\.[1-3](\\.[0-9]+)+?([a-c][0-9])?$"
+  ],
+  "vendor_names": [
+    "point-to-point_protocol_project"
+  ],
+  "product_names": [
+    "point-to-point_protocol"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?([a-c][0-9])?)$/:point-to-point_protocol_project:point-to-point_protocol:\\1/'",
+    "sed -r 's/pppd\\ version\\ ([0-9](\\.[0-9]+)+?([a-c][0-9])?)$/:point-to-point_protocol_project:point-to-point_protocol:\\1/'",
+    "sed -r 's/pppd\\ version\\ ([0-9](\\.[0-9]+)+?([a-c][0-9])?)\\ /:point-to-point_protocol_project:point-to-point_protocol:\\1/'",
+    "sed -r 's/pppd\\ version\\ ([0-9](\\.[0-9]+)+?)(([a-c][0-9]+)?)$/:point-to-point_protocol_project:point-to-point_protocol:\\1/'",
+    "sed -r 's/pppd\\.so\\.([0-9](\\.[0-9]+)+?([a-c][0-9])?)$/:point-to-point_protocol_project:point-to-point_protocol:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

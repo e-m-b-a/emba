@@ -1,0 +1,24 @@
+{
+   "identifier": "dosfsck",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "dosfsck\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "dosfstools_project"
+   ],
+   "product_names": [
+      "dosfstools"
+   ],
+   "version_extraction": [
+      "sed -r 's/dosfsck\\ ([0-9](\\.[0-9]+)+?).*/:dosfstools_project:dosfstools:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

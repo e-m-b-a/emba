@@ -1,0 +1,24 @@
+{
+   "identifier": "gsoap",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "gSOAP\\/[0-9](.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "genivia"
+   ],
+   "product_names": [
+      "gsoap"
+   ],
+   "version_extraction": [
+      "sed -r 's/gSOAP\\/([0-9](\\.[0-9]+)+?).*/:genivia:gsoap:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

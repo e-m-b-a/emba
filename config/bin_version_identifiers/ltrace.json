@@ -1,0 +1,24 @@
+{
+   "identifier": "ltrace",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ltrace\\ version\\ [0-9](\\.[0-9]+)+?\\.$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ltrace"
+   ],
+   "version_extraction": [
+      "sed -r 's/ltrace\\ version\\ ([0-9](\\.[0-9]+)+?)\\.$/::ltrace:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

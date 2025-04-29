@@ -1,0 +1,24 @@
+{
+   "identifier": "tor",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "Tor\\ v[0-9](\\.[0-9]+)+?\\ .git"
+   ],
+   "vendor_names": [
+      "tor"
+   ],
+   "product_names": [
+      "tor"
+   ],
+   "version_extraction": [
+      "sed -r 's/Tor\\ v([0-9](\\.[0-9]+)+?)\\ .*/:tor:tor:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

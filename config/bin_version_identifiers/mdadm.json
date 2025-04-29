@@ -1,0 +1,24 @@
+{
+   "identifier": "mdadm",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^mdadm\\ -\\ v[0-9](\\.[0-9]+)+?\\ -\\ "
+   ],
+   "vendor_names": [
+      "mdadm_project"
+   ],
+   "product_names": [
+      "mdadm"
+   ],
+   "version_extraction": [
+      "sed -r 's/mdadm\\ -\\ v([0-9](\\.[0-9]+)+?)\\ .*/:mdadm_project:mdadm:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

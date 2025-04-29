@@ -1,0 +1,30 @@
+{
+  "identifier": "boa",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-1.0-or-later"
+  ],
+  "grep_commands": [
+    "Boa\\ HTTPd\\ [0-9](\\.[0-9]+)+?(rc[0-9]+)?"
+  ],
+  "vendor_names": [
+    "boa"
+  ],
+  "product_names": [
+    "boa",
+    "boa_webserver"
+  ],
+  "version_extraction": [
+    "sed -r 's/Boa\\ HTTPd\\ ([0-9](\\.[0-9]+)+?(rc[0-9]+)?)/:boa:boa:\\1/'",
+    "sed -r 's/Boa\\ HTTPd\\ ([0-9](\\.[0-9]+)+?(rc[0-9]+)?)/:boa:boa_webserver:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

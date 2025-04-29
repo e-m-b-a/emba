@@ -1,0 +1,24 @@
+{
+   "identifier": "dpiclass",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "dpiclass\\ [0-9]\\.[0-9]\\.[0-9]\\ \\(c\\)\\ 20[0-9][0-9]\\ NETDUMA\\ Software$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "dpiclass"
+   ],
+   "version_extraction": [
+      "sed -r 's/dpiclass\\ ([0-9](\\.[0-9]+)+?).*/::dpiclass:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

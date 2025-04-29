@@ -1,0 +1,24 @@
+{
+   "identifier": "ncurses",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "X11"
+   ],
+   "grep_commands": [
+      "ncurses\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "ncurses"
+   ],
+   "version_extraction": [
+      "sed -r 's/ncurses\\ ([0-9](\\.[0-9]+)+?).*/:gnu:ncurses:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

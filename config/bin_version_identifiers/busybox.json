@@ -1,0 +1,36 @@
+{
+  "identifier": "busybox",
+  "parsing_mode": [
+    "live",
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "BusyBox\\ v[0-9](\\.[0-9]+)+?.*\\ Built-in\\ shell",
+    "BusyBox\\ v[0-9](\\.[0-9]+)+?.*\\ multi-call\\ binary",
+    "BusyBox\\ v[0-9](\\.[0-9]+)+?\\ ",
+    "BusyBox\\ v[0-9](\\.[0-9]+)+?\\ \\([0-9]+-.*\\)"
+  ],
+  "vendor_names": [
+    "busybox"
+  ],
+  "product_names": [
+    "busybox"
+  ],
+  "version_extraction": [
+    "sed -r 's/BusyBox\\ http\\ ([0-9](\\.[0-9]+)+?)$/:busybox:busybox:\\1/'",
+    "sed -r 's/BusyBox\\ v([0-9](\\.[0-9]+)+?).*/:busybox:busybox:\\1/'",
+    "sed -r 's/BusyBox\\ v([0-9](\\.[0-9]+)+?)\\ .*/:busybox:busybox:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [
+    "^BusyBox\\ http\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

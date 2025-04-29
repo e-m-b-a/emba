@@ -1,0 +1,24 @@
+{
+   "identifier": "pt_chown",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "pt_chown\\ \\(.*\\)\\ [0-9]\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ptchown"
+   ],
+   "version_extraction": [
+      "sed -r 's/pt_chown\\ \\(.*\\)\\ ([0-9](\\.[0-9]+)+?)/::ptchown:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

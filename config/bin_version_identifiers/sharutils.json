@@ -1,0 +1,24 @@
+{
+   "identifier": "sharutils",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\\(GNU\\ sharutils\\)\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "sharutils"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\(GNU\\ sharutils\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:sharutils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

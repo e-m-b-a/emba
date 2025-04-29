@@ -1,0 +1,24 @@
+{
+   "identifier": "utmdaemon",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "version\\ [0-9]\\.[0-9]+(-beta)?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "utmdaemon"
+   ],
+   "version_extraction": [
+      "sed -r 's/version\\ ([0-9](\\.[0-9]+)+?).*/::utmdaemon:\\1/'"
+   ],
+   "affected_paths": [
+      "utmdaemon"
+   ]
+}

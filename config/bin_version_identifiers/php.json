@@ -1,0 +1,30 @@
+{
+  "identifier": "php",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "PHP-3.01"
+  ],
+  "grep_commands": [
+    "^PHP\\ [0-9]\\.[0-9]+([0-9]+)+?$",
+    "^X-Powered-By:\\ PHP\\/[0-9]\\.[0-9]+(\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "php"
+  ],
+  "product_names": [
+    "php"
+  ],
+  "version_extraction": [
+    "sed -r 's/PHP\\ ([0-9](\\.[0-9]+)+?)$/:php:php:\\1/'",
+    "sed -r 's/X-Powered-By:\\ PHP\\/([0-9](\\.[0-9]+)+?)$/:php:php:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

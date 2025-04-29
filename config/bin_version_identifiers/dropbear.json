@@ -1,0 +1,46 @@
+{
+  "identifier": "dropbear",
+  "parsing_mode": [
+    "live",
+    "normal"
+  ],
+  "licenses": [
+    "MIT"
+  ],
+  "grep_commands": [
+    "Dropbear\\ SSH\\ multi-purpose\\ v[0-9]+\\.[0-9]+",
+    "Dropbear\\ sshd\\ [0-9]\\.[0-9]+$",
+    "Dropbear\\ sshd\\ v[0-9]+\\.[0-9]+$",
+    "^Dropbear\\ SSH\\ multi-purpose\\ v20[0-9][0-9]\\.[0-9]+$",
+    "^Dropbear\\ client\\ [0-9]\\.[0-9]+$",
+    "^Dropbear\\ multi-purpose\\ version\\ 20[0-9][0-9]\\.[0-9][0-9]$",
+    "^Dropbear\\ multi-purpose\\ version\\ [0-9]\\.[0-9]+$",
+    "^Dropbear\\ sshd\\ v20[0-9][0-9]\\.[0-9][0-9]$",
+    "^Dropbear\\ v20[0-9][0-9]\\.[0-9][0-9]$"
+  ],
+  "vendor_names": [
+    "dropbear_ssh_project"
+  ],
+  "product_names": [
+    "dropbear_ssh"
+  ],
+  "version_extraction": [
+    "sed -r 's/Dropbear\\ SSH\\ multi-purpose\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ SSH\\ multi-purpose\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ client\\ ([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ multi-purpose\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ sshd\\ (20[0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ sshd\\ ([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ sshd\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [
+    "Dropbear\\ sshd\\ 20[0-9]+\\.[0-9]+\\ \\(protocol\\ 2\\.0\\)$"
+  ],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

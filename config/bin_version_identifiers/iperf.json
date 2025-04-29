@@ -1,0 +1,24 @@
+{
+   "identifier": "iperf",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "iperf\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "iperf"
+   ],
+   "version_extraction": [
+      "sed -r 's/iperf\\ version\\ ([0-9](\\.[0-9]+)+?).*/::iperf:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

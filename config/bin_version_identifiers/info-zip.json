@@ -1,0 +1,43 @@
+{
+  "identifier": "info-zip",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "Info-ZIP"
+  ],
+  "grep_commands": [
+    "UnZip\\ [0-9](\\.[0-9]+)+?\\ of\\ .*\\ by\\ Debian\\.\\ Original\\ by\\ Info-ZIP\\.",
+    "UnZip\\ [0-9](\\.[0-9]+)+?\\ of\\ [0-9]+\\ .*\\ [0-9]+,\\ by\\ Info-ZIP\\.\\ \\ Maintained\\ by\\ C\\.\\ Spieler\\.\\ \\ Send",
+    "ZipCloak\\ [0-9](\\.[0-9]+)+?\\ .*,\\ by Info-ZIP",
+    "ZipInfo\\ [0-9](\\.[0-9]+)+?\\ of\\ .*\\ by\\ Greg\\ Roelofs\\ and\\ the\\ Info-ZIP\\ group\\.",
+    "ZipNote\\ [0-9](\\.[0-9]+)+?\\ .*,\\ by Info-ZIP",
+    "Zip\\ [0-9](\\.[0-9]+)+?\\ .*,\\ by Info-ZIP",
+    "\\([a-z]+\\ UnZip\\),\\ version\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "info-zip"
+  ],
+  "product_names": [
+    "unzip",
+    "zip",
+    "zipcloak",
+    "zipnote"
+  ],
+  "version_extraction": [
+    "sed -r 's/UnZip\\ ([0-9](\\.[0-9]+)+?).*/:info-zip:unzip:\\1/'",
+    "sed -r 's/UnZip\\ ([0-9](\\.[0-9]+)+?)\\ .*/:info-zip:unzip:\\1/'",
+    "sed -r 's/ZipCloak\\ ([0-9](\\.[0-9]+)+?).*/:info-zip:zipcloak:\\1/'",
+    "sed -r 's/ZipInfo\\ ([0-9](\\.[0-9]+)+?).*/:info-zip:zip:\\1/'",
+    "sed -r 's/ZipNote\\ ([0-9](\\.[0-9]+)+?).*/:info-zip:zipnote:\\1/'",
+    "sed -r 's/Zip\\ ([0-9](\\.[0-9]+)+?).*/:info-zip:zip:\\1/'",
+    "sed -r 's/\\([a-z]+\\ UnZip\\),\\ version\\ ([0-9](\\.[0-9]+)+?)/:info-zip:unzip:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

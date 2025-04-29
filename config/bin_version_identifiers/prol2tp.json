@@ -1,0 +1,24 @@
+{
+   "identifier": "prol2tp",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ProL2TP\\ v[\\.0-9]+\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "prol2tp"
+   ],
+   "version_extraction": [
+      "sed -r 's/ProL2TP\\ v([0-9](\\.[0-9]+)+?)\\ .*/::prol2tp:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

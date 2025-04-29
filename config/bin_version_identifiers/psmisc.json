@@ -1,0 +1,24 @@
+{
+   "identifier": "psmisc",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "PSmisc.\\ [0-9]+(\\.[0-9]+)+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "psmisc"
+   ],
+   "version_extraction": [
+      "sed -r 's/PSmisc.\\ ([0-9]+(\\.[0-9]+)+?)$/::psmisc:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

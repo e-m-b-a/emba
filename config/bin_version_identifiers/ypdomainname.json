@@ -1,0 +1,24 @@
+{
+   "identifier": "ypdomainname",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "hostname\\ [0-9]\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "hostname"
+   ],
+   "version_extraction": [
+      "sed -r 's/hostname\\ ([0-9](\\.[0-9]+)+?)/::hostname:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

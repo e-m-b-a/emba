@@ -1,0 +1,24 @@
+{
+   "identifier": "qdiscman",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^qdiscman\\ [0-9](\\.[0-9]+)+?\\ release$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "qdiscman"
+   ],
+   "version_extraction": [
+      "sed -r 's/qdiscman\\ ([0-9](\\.[0-9]+)+?)$/::qdiscman:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

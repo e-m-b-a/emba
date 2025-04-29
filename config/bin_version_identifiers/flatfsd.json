@@ -1,0 +1,24 @@
+{
+   "identifier": "flatfsd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "flatfsd\\ [0-9](\\.[0-9])+?mtd"
+   ],
+   "vendor_names": [
+      "uclinux"
+   ],
+   "product_names": [
+      "flatfsd"
+   ],
+   "version_extraction": [
+      "sed -r 's/flatfsd\\ ([0-9](\\.[0-9]+)+?)mtd/:uclinux:flatfsd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

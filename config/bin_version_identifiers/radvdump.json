@@ -1,0 +1,29 @@
+{
+  "identifier": "radvdump",
+  "parsing_mode": [
+    "strict"
+  ],
+  "licenses": [
+    "radvd-lic"
+  ],
+  "strict_grep_commands": [
+    "Version:\\ [0-9]\\.[0-9]+$",
+    "Version:\\ [0-9]\\.[0-9]+\\.[0-9]+$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "radvd"
+  ],
+  "version_extraction": [
+    "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/::radvd:\\1/'"
+  ],
+  "affected_paths": [
+    "radvdump"
+  ],
+  "grep_commands": [],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

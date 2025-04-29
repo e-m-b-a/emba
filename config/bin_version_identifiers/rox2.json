@@ -1,0 +1,24 @@
+{
+   "identifier": "rox2",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "User-Agent: Siemens Canada Limited - ROX2 - [0-9](\\.[0-9]+)?+$"
+   ],
+   "vendor_names": [
+      "siemens"
+   ],
+   "product_names": [
+      "ruggedcom_rox"
+   ],
+   "version_extraction": [
+      "sed -r 's/User-Agent: Siemens Canada Limited - ROX2 - ([0-9](\\.[0-9]+)+?)$/:siemens:ruggedcom_rox:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

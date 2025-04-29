@@ -1,0 +1,44 @@
+{
+  "identifier": "ntp",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^ntp-keygen\\ [0-9](\\.[0-9]+)+?",
+    "^ntpdc\\ .*\\ Ver\\.\\ [0-9](\\.[0-9]+)+?$",
+    "ntp[a-z]+\\ -\\ .*\\ NTP\\ query\\ program\\ -\\ Ver\\.\\ [0-9](\\.[0-9]+)+?([a-z][0-9]+)?$",
+    "ntp[dpq]\\ [0-9](\\.[0-9]+)+?(p[0-9]+)?$",
+    "ntpd\\ -\\ NTP\\ daemon\\ program\\ -\\ Ver\\.\\ [0-9](\\.[0-9]+)+?([a-z][0-9]+)?$",
+    "ntpd\\ [0-9](\\.[0-9]+)+?(p[0-9]+)?\\ for\\ ",
+    "ntpd\\ [0-9](\\.[0-9]+)+?\\ ",
+    "ntpdate\\ [0-9](\\.[0-9]+)+?([a-z][0-9]+)?"
+  ],
+  "vendor_names": [
+    "NA",
+    "ntp"
+  ],
+  "product_names": [
+    "ntp",
+    "ntp-keygen"
+  ],
+  "version_extraction": [
+    "sed -r 's/ntp-keygen\\ ([0-9](\\.[0-9]+)+?).*/::ntp-keygen:\\1/'",
+    "sed -r 's/ntp[a-z]+\\ -\\ .*\\ NTP\\ query\\ program\\ -\\ Ver\\.\\ ([0-9](\\.[0-9]+)+?)([a-z][0-9]+)?/:ntp:ntp:\\1:\\3/'",
+    "sed -r 's/ntp[dpq]\\ ([0-9](\\.[0-9]+)+?)+(p[0-9]+)?$/:ntp:ntp:\\1:\\3/'",
+    "sed -r 's/ntpd\\ ([0-9](\\.[0-9]+)+?)(p[0-9]+)?.*/:ntp:ntp:\\1:\\3/'",
+    "sed -r 's/ntpd\\ ([0-9](\\.[0-9]+)+?)/:ntp:ntp:\\1/'",
+    "sed -r 's/ntpd\\ -\\ NTP\\ daemon\\ program\\ -\\ Ver\\.\\ ([0-9](\\.[0-9]+)+?)([a-z][0-9]+)?$/:ntp:ntp:\\1:\\3/'",
+    "sed -r 's/ntpdate\\ ([0-9](\\.[0-9]+)+?)([a-z][0-9]+)?$/:ntp:ntp:\\1:\\3/'",
+    "sed -r 's/ntpdc\\ .*\\ Ver\\.\\ ([0-9](\\.[0-9]+)+?)/:ntp:ntp:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

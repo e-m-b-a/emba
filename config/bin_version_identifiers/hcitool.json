@@ -1,0 +1,24 @@
+{
+   "identifier": "hcitool",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "hcitool\\ -\\ HCI\\ Tool\\ ver\\ [0-9]+(\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "bluez_project"
+   ],
+   "product_names": [
+      "hcitool"
+   ],
+   "version_extraction": [
+      "sed -r 's/hcitool\\ -\\ HCI\\ Tool\\ ver\\ ([0-9]+(\\.[0-9]+)+?)$/:bluez_project:hcitool:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

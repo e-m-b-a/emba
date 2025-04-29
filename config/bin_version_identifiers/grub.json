@@ -1,0 +1,30 @@
+{
+  "identifier": "grub",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "\\ \\(GRUB\\)\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "grub",
+    "grub2"
+  ],
+  "version_extraction": [
+    "sed -r 's/\\ \\(GRUB\\)\\ ([0-9](\\.[0-9]+)+?).*/:gnu:grub:\\1/'",
+    "sed -r 's/\\ \\(GRUB\\)\\ 2((\\.[0-9]+)+?).*/:gnu:grub2:2\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

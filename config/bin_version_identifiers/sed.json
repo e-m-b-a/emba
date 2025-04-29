@@ -1,0 +1,30 @@
+{
+  "identifier": "sed",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "GNU\\ sed\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "\\(GNU\\ sed\\)\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "sed"
+  ],
+  "version_extraction": [
+    "sed -r 's/GNU\\ sed\\ version\\ ([0-9](\\.[0-9]+)+?)$/:gnu:sed:\\1/'",
+    "sed -r 's/\\(GNU\\ sed\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:sed:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

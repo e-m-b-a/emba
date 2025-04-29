@@ -1,0 +1,30 @@
+{
+  "identifier": "mkfs.jffs2",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "mkfs\\.jffs2.*revision\\ [0-9]\\.[0-9]+$",
+    "mkfs\\.jffs2\\ revision\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "mtd-utils"
+  ],
+  "version_extraction": [
+    "sed -r 's/mkfs\\.jffs[0-9].*revision\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/mkfs\\.jffs[0-9]\\ revision\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

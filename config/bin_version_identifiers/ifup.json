@@ -1,0 +1,24 @@
+{
+   "identifier": "ifup",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-or-later"
+   ],
+   "grep_commands": [
+      "ifup\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ifupdown"
+   ],
+   "version_extraction": [
+      "sed -r 's/ifup\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ifupdown:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

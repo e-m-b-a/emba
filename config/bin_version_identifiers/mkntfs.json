@@ -1,0 +1,24 @@
+{
+   "identifier": "mkntfs",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "mkntfs\\ (v)?[0-9]+(\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ntfsprogs"
+   ],
+   "version_extraction": [
+      "sed -r 's/mkntfs\\ v?([0-9]+(\\.[0-9]+)+?).*/::ntfsprogs:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

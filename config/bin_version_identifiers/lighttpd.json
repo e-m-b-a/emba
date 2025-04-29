@@ -1,0 +1,42 @@
+{
+  "identifier": "lighttpd",
+  "parsing_mode": [
+    "live",
+    "normal"
+  ],
+  "licenses": [
+    "BSD-3-Clause"
+  ],
+  "grep_commands": [
+    "^lighttpd [0-9](\\.[0-9]+)+?",
+    "^lighttpd-[0-9](\\.[0-9]+)+?\\ \\(.*\\)\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$",
+    "^lighttpd-[0-9](\\.[0-9]+)+?\\ \\-\\ a\\ light\\ and\\ fast\\ webserver$",
+    "^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel)?(-[0-9]+[A-Za-z]+)?.*\\ -\\ a\\ light\\ and\\ fast\\ webserver$",
+    "^lighttpd\\/[0-9](\\.[0-9]+)+?\\ .*\\ -\\ a\\ light\\ and\\ fast\\ webserver$",
+    "^server\\ started\\ \\(lighttpd\\/[0-9](\\.[0-9]+)+?\\)$",
+    "lighttpd-[0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "lighttpd"
+  ],
+  "product_names": [
+    "lighttpd"
+  ],
+  "version_extraction": [
+    "sed -r 's/lighttpd ([0-9](\\.[0-9]+)+?)/:lighttpd:lighttpd:\\1/'",
+    "sed -r 's/lighttpd-([0-9](\\.[0-9]+)+?)$/:lighttpd:lighttpd:\\1/'",
+    "sed -r 's/lighttpd-([0-9](\\.[0-9]+)+?)\\ .*/:lighttpd:lighttpd:\\1/'",
+    "sed -r 's/lighttpd\\/([0-9](\\.[0-9]+)+?).*/:lighttpd:lighttpd:\\1/'",
+    "sed -r 's/lighttpd\\/([0-9](\\.[0-9]+)+?)\\ .*/:lighttpd:lighttpd:\\1/'",
+    "sed -r 's/server\\ started\\ \\(lighttpd\\/([0-9](\\.[0-9]+)+?)\\)$/:lighttpd:lighttpd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [
+    "^lighttpd\\/[0-9](\\.[0-9]+)+?(-devel-[0-9]+[A-Z])?$"
+  ],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}
