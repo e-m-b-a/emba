@@ -73,8 +73,6 @@ lighttpd_binary_analysis() {
   local lOS_IDENTIFIED=""
   export PACKAGING_SYSTEM="static_lighttpd_analysis"
 
-  lOS_IDENTIFIED=$(distri_check)
-
   if [[ -d "${SBOM_LOG_PATH}" ]]; then
     mapfile -t lLIGHT_SBOMs_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 ! -name "*unhandled_file*" -name "*lighttpd*.json")
   fi
