@@ -70,7 +70,6 @@ lighttpd_binary_analysis() {
   local lLIGHT_BIN=""
   local lLIGHT_SBOMs_ARR=()
 
-  local lOS_IDENTIFIED=""
   export PACKAGING_SYSTEM="static_lighttpd_analysis"
 
   if [[ -d "${SBOM_LOG_PATH}" ]]; then
