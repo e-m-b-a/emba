@@ -127,7 +127,8 @@ F17_cve_bin_tool() {
       cp "${S36_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] lighttpd CVE log copy process failed"
       cp "${S36_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] lighttpd CVE log copy process failed"
       if [[ -f  "${S36_LOG_DIR}/vuln_summary.txt" ]]; then
-        cat "${S36_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+        lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPROD}.*:.*${lVERS}.*:" "${S36_LOG_DIR}"/vuln_summary.txt || true)
+        echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
       local lBIN_LOG=""
       lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPROD}_${lVERS}_finished.txt" | sort -u | head -1)

@@ -17,7 +17,7 @@
 # Description:  Iterates through a list with regex identifiers of version details
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and
 #               checks if these fit on a binary in the firmware.
-#               The version configuration file is stored in config/bin_version_strings.cfg
+#               The version configuration files are stored in config/bin_version_identifiers
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1

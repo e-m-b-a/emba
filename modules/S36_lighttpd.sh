@@ -20,7 +20,7 @@
 #               https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_SSL
 #               https://redmine.lighttpd.net/projects/lighttpd/repository/14/revisions/master/entry/doc/config/lighttpd.conf
 #               The module results should be reviewed in details. There are probably a lot of cases
-#               which we are currently not handling correct.
+#               which we are currently not handling correct. Please report such issues!
 
 
 S36_lighttpd() {
@@ -31,19 +31,25 @@ S36_lighttpd() {
   local lNEG_LOG=0
   local lLIGHTTP_CFG_ARR=()
   local lLIGHTTP_BIN_ARR=()
+  local lCFG_DATA=""
   local lCFG_FILE=""
+  export LIGHT_VERSIONS_ARR=()
 
-  readarray -t lLIGHTTP_CFG_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*conf*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
-  readarray -t lLIGHTTP_BIN_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -iname 'lighttpd' -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" 2>/dev/null | grep "ELF" | cut -d ':' -f1' | sort -u || true)
+  readarray -t lLIGHTTP_CFG_ARR < <( grep ".*lighttp.*conf.*" "${P99_CSV_LOG}" | sort -u || true)
+  readarray -t lLIGHTTP_BIN_ARR < <( grep "lighttpd.*ELF" "${P99_CSV_LOG}"| sort -u || true)
 
   if [[ ${#lLIGHTTP_BIN_ARR[@]} -gt 0 ]] ; then
     lighttpd_binary_analysis "${lLIGHTTP_BIN_ARR[@]}"
-    # -> sets LIGHT_VERSIONS array
+    # -> populates LIGHT_VERSIONS_ARR array which is used for some config analysis
+    local lNEG_LOG=1
+  else
+    print_output "[-] No Lighttpd binary files found"
   fi
 
   if [[ ${#lLIGHTTP_CFG_ARR[@]} -gt 0 ]] ; then
-    for lCFG_FILE in "${lLIGHTTP_CFG_ARR[@]}" ; do
-      lighttpd_config_analysis "${lCFG_FILE}" "${LIGHT_VERSIONS[@]}"
+    for lCFG_DATA in "${lLIGHTTP_CFG_ARR[@]}" ; do
+      lCFG_FILE=$(echo "${lCFG_DATA}" | cut -d ';' -f2 || true)
+      lighttpd_config_analysis "${lCFG_FILE}" "${LIGHT_VERSIONS_ARR[@]}"
       write_csv_log "Lighttpd web server configuration file" "$(basename "${lCFG_FILE}")" "${lCFG_FILE}"
       local lNEG_LOG=1
     done
@@ -57,115 +63,96 @@ S36_lighttpd() {
 lighttpd_binary_analysis() {
   sub_module_title "Lighttpd binary analysis"
   local lLIGHTTP_BIN_ARR=("${@}")
-  export LIGHT_VERSIONS=()
   local lLIGHT_VER=""
-  local lVERSION_LINE=""
-  local lCSV_REGEX=""
-  local lLIC=""
-  local lVERSION_FINDER=""
   local lVERSION_IDENTIFIER=""
   local lVULNERABLE_FUNCTIONS_VAR=""
   local lVULNERABLE_FUNCTIONS_ARR=()
   local lLIGHT_BIN=""
-  local lCSV_RULE=""
+  local lLIGHT_SBOMs_ARR=()
 
   local lOS_IDENTIFIED=""
-  local lBIN_ARCH=""
-  local lAPP_NAME=""
-  local lAPP_MAINT=""
-  local lAPP_VERS=""
-  local lPURL_IDENTIFIER=""
-  local lCPE_IDENTIFIER=""
-  local lPACKAGING_SYSTEM="static_lighttpd_analysis"
+  export PACKAGING_SYSTEM="static_lighttpd_analysis"
 
   lOS_IDENTIFIED=$(distri_check)
 
-  if [[ -f "${S09_CSV_LOG}" ]] && grep -q "lighttpd" "${S09_CSV_LOG}"; then
-    # if we already have results from s09 we just use them
-    mapfile -t LIGHT_VERSIONS < <(grep "lighttpd" "${S09_CSV_LOG}" | cut -d\; -f4 | sort -u || true)
-  else
-    # most of the time we run through the lighttpd version identifiers and check them against the lighttpd binaries
-    while read -r lVERSION_LINE; do
-      if safe_echo "${lVERSION_LINE}" | grep -v -q "^[^#*/;]"; then
-        continue
-      fi
-      if safe_echo "${lVERSION_LINE}" | grep -q ";no_static;"; then
-        continue
-      fi
-      if safe_echo "${lVERSION_LINE}" | grep -q ";live;"; then
-        continue
-      fi
-
-      lCSV_REGEX="$(echo "${lVERSION_LINE}" | cut -d\; -f5)"
-      lLIC="$(safe_echo "${lVERSION_LINE}" | cut -d\; -f3)"
-      lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_LINE}" | cut -d\; -f4)"
-      lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"}"
-      lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
-
-      for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}" ; do
-        lVERSION_FINDER=$(strings "${lLIGHT_BIN}" | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
-        if [[ -n ${lVERSION_FINDER} ]]; then
-          print_ln "no_log"
-          print_output "[+] Version information found ${RED}${lVERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lLIGHT_BIN}")${GREEN} (license: ${ORANGE}${lLIC}${GREEN}) (${ORANGE}static${GREEN})."
-          lCSV_RULE=$(get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}")
-          LIGHT_VERSIONS+=( "${lCSV_RULE}" )
-
-          lMD5_CHECKSUM="$(md5sum "${lLIGHT_BIN}" | awk '{print $1}')"
-          lSHA256_CHECKSUM="$(sha256sum "${lLIGHT_BIN}" | awk '{print $1}')"
-          lSHA512_CHECKSUM="$(sha512sum "${lLIGHT_BIN}" | awk '{print $1}')"
-
-          lBIN_ARCH=$(file -b "${lLIGHT_BIN}" | cut -d ',' -f2)
-          lBIN_ARCH=${lBIN_ARCH#\ }
-          lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-          lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
-          lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
-          lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-          lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
-
-          # add source file path information to our properties array:
-          local lPROP_ARRAY_INIT_ARR=()
-          lPROP_ARRAY_INIT_ARR+=( "source_path:${lLIGHT_BIN}" )
-          lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-          lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_FINDER}" )
-          lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
-
-          build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-          # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-          # final array with all hash values
-          if ! build_sbom_json_hashes_arr "${lLIGHT_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}"; then
-            print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-            continue
-          fi
-
-          # create component entry - this allows adding entries very flexible:
-          build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lLIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
-
-          check_for_s08_csv_log "${S08_CSV_LOG}"
-          write_log "${lPACKAGING_SYSTEM};${lLIGHT_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIER:-NA};${lCSV_RULE:-NA};${lLIC:-NA};${lAPP_MAINT:-NA};${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
-          continue
-        fi
-      done
-    done < <(grep "^lighttpd" "${CONFIG_DIR}"/bin_version_strings.cfg)
+  if [[ -d "${SBOM_LOG_PATH}" ]]; then
+    mapfile -t lLIGHT_SBOMs_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 ! -name "*unhandled_file*" -name "*lighttpd*.json")
   fi
-  eval "LIGHT_VERSIONS=($(for i in "${LIGHT_VERSIONS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
-  if [[ ${#LIGHT_VERSIONS[@]} -gt 0 ]] ; then
-    print_ln
-    # lets do a quick vulnerability check on our lighttpd version
-    for lLIGHT_VER in "${LIGHT_VERSIONS[@]}"; do
-      for lLIGH_JSON in "${SBOM_LOG_PATH}"/*lighttpd*.json; do
-        lVERS=$(jq -r '.version' "${lLIGH_JSON}" || true)
-        if [[ "${lVERS}" != "${lLIGHT_VER/*:}" ]]; then
-          continue
+  # backup mode:
+  if [[ "${#lLIGHT_SBOMs_ARR[@]}" -eq 0 ]]; then
+    local lBINARY_DATA=""
+    for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
+      lLIGHT_BIN="$(echo "${lBINARY_DATA}" | cut -d ';' -f2)"
+      if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
+        # skip binwalk raw files
+        continue
+      fi
+
+      local lVERSION_JSON_CFG="${CONFIG_DIR}"/bin_version_identifiers/lighttpd.json
+      local lVERSION_IDENTIFIER_ARR=()
+      local lVERSION_IDENTIFIER=""
+      if [[ -z "${lBINARY_DATA}" ]]; then
+        # we have not found our binary as ELF
+        continue
+      fi
+
+      # extract the grep commands for our version identification
+      mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+      for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+        lVERSION_IDENTIFIED=$(strings "${lLIGHT_BIN}" | grep -a -E "${lVERSION_IDENTIFIER}" | sort -u | head -1 || true)
+        if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+          export TYPE="static"
+          mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+
+          print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lLIGHT_BIN}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})."
+
+          local lRULE_IDENTIFIER=""
+          local lLICENSES_ARR=()
+          local lPRODUCT_NAME_ARR=()
+          local lVENDOR_NAME_ARR=()
+          local lCSV_REGEX_ARR=()
+
+          # lets build the data we need for version_parsing_logging
+          lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
+          # shellcheck disable=SC2034
+          mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+          # shellcheck disable=SC2034
+          mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+          # shellcheck disable=SC2034
+          mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+
+          export CONFIDENCE_LEVEL=3
+
+          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+            # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+            continue 2
+          fi
         fi
-        local lBOM_REF=""
-        lBOM_REF=$(jq -r '."bom-ref"' "${lLIGH_JSON}" || true)
-        local lORIG_SOURCE="lighttpd_static"
-        local lVENDOR="lighttpd"
-        local lPROD="lighttpd"
-        cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lVERS}" "${lORIG_SOURCE}"
       done
+    done
+  fi
+
+  if [[ -d "${SBOM_LOG_PATH}" ]]; then
+    mapfile -t lLIGHT_SBOMs_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 ! -name "*unhandled_file*" -name "*lighttpd*.json")
+  fi
+  if [[ "${#lLIGHT_SBOMs_ARR[@]}" -gt 0 ]]; then
+    # lets do a quick vulnerability check on our lighttpd version
+    for lLIGHT_SBOM_JSON in "${lLIGHT_SBOMs_ARR[@]}"; do
+      local lLIGHT_VERSION=""
+      lLIGHT_VERSION=$(jq -r .version "${lLIGHT_SBOM_JSON}" || print_error "[-] S36 - lighttpd version extraction failed for ${lLIGHT_SBOM_JSON}")
+      local lLIGHT_PRODUCT=""
+      lLIGHT_PRODUCT=$(jq -r .name "${lLIGHT_SBOM_JSON}")
+      lLIGHT_PRODUCT=${lLIGHT_PRODUCT,,}
+      local lLIGHT_VENDOR=""
+      lLIGHT_VENDOR=$(jq -r .supplier.name "${lLIGHT_SBOM_JSON}")
+      lLIGHT_VENDOR=${lLIGHT_VENDOR,,}
+      local lORIG_SOURCE="${PACKAGING_SYSTEM}"
+      local lBOM_REF=""
+      lBOM_REF=$(jq -r '."bom-ref"' "${lLIGHT_SBOM_JSON}" || true)
+      print_output "[*] CVE analysis for ${lBOM_REF} - ${lLIGHT_VENDOR} - ${lLIGHT_PRODUCT} - ${lLIGHT_VERSION} - ${lORIG_SOURCE}" "no_log"
+      LIGHT_VERSIONS_ARR+=("${lLIGHT_VERSION}")
+      cve_bin_tool_threader "${lBOM_REF}" "${lLIGHT_VENDOR}" "${lLIGHT_PRODUCT}" "${lLIGHT_VERSION}" "${lORIG_SOURCE}"
     done
   fi
 
@@ -173,6 +160,7 @@ lighttpd_binary_analysis() {
   print_ln
   print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
   for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}" ; do
+    lLIGHT_BIN="$(echo "${lLIGHT_BIN}" | cut -d ';' -f2)"
     print_output "$("${EXT_DIR}"/checksec --file="${lLIGHT_BIN}" || true)"
   done
 
@@ -182,7 +170,12 @@ lighttpd_binary_analysis() {
   # nosemgrep
   local IFS=" "
   IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$( echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
-  for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}" ; do
+  for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
+    lLIGHT_BIN="$(echo "${lBINARY_DATA}" | cut -d ';' -f2)"
+    if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
+      # skip binwalk raw files
+      continue
+    fi
     if ( file "${lLIGHT_BIN}" | grep -q "x86-64" ) ; then
       function_check_x86_64 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif ( file "${lLIGHT_BIN}" | grep -q "Intel 80386" ) ; then
@@ -297,7 +290,6 @@ lighttpd_config_analysis() {
     if grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
       if [[ ${#lLIGHT_VERSIONS_ARR[@]} -gt 0 ]] ; then
         for lLIGHT_VER in "${lLIGHT_VERSIONS_ARR[@]}"; do
-          lLIGHT_VER="${lLIGHT_VER/*:/}"
           if [[ "$(version "${lLIGHT_VER}")" -lt "$(version "1.4.68")" ]]; then
             print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not mitigating the BEAST attack (CVE-2009-3555) via ssl.disable-client-renegotiation.${NC}"
             print_output "$(indent "$(orange "$(grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#" || true)")")"
@@ -325,7 +317,6 @@ lighttpd_config_analysis() {
         fi
 
         for lLIGHT_VER in "${lLIGHT_VERSIONS_ARR[@]}"; do
-          lLIGHT_VER="${lLIGHT_VER/*:/}"
           if [[ "$(version "${lLIGHT_VER}")" -le "$(version "1.4.35")" ]]; then
             print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not mitigating the POODLE attack (CVE-2014-3566) via disabled SSLv3 ciphers.${NC}"
             print_output "[*] Note that SSLv3 is automatically disabled on lighttpd since version ${ORANGE}1.4.36${NC}"
