@@ -583,12 +583,12 @@ log_bin_hardening() {
     # #1 - the full binary path
     # #2 - stripped binary path from cut_path()
     # #3 - only binary name - weakest mechanism
-    if [[ "$(grep "${lBIN}" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+    if [[ "$(grep "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
       # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}${lBIN}${NC}"
-      lBIN_PROT=$(grep "${lBIN}" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    elif [[ "$(grep "$(cut_path "${lBIN}")" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+      lBIN_PROT=$(grep "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    elif [[ "$(grep "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
       # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}$(cut_path ${lBIN})${NC}"
-      lBIN_PROT=$(grep "$(cut_path "${lBIN}")" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+      lBIN_PROT=$(grep "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
     else
       # print_output "[*] Binary protection state of ${GREEN}${lNAME}${NC} / ${lBIN}"
       lBIN_PROT=$(grep '/'"${lNAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)

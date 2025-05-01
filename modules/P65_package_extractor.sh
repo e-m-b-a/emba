@@ -32,11 +32,11 @@ P65_package_extractor() {
   local lDISK_SPACE_CRIT=0
   local lNEG_LOG=0
   export FILES_PRE_PACKAGE=0
-  local lFILES_POST_PACKAGE=0
+  local lFILES_POST_PACKAGE_ARR=()
   export WAIT_PIDS_P20=()
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 && "${RTOS}" -eq 0 ]]; then
-    FILES_PRE_PACKAGE=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
+    FILES_PRE_PACKAGE=$(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw" | wc -l)
     if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
       deb_extractor
     else
@@ -66,29 +66,31 @@ P65_package_extractor() {
       lDISK_SPACE_CRIT=1
     fi
 
-    lFILES_POST_PACKAGE=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
+    mapfile -t lFILES_POST_PACKAGE_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
 
-    if [[ "${lFILES_POST_PACKAGE}" -gt "${FILES_PRE_PACKAGE}" ]]; then
+    if [[ "${#lFILES_POST_PACKAGE_ARR[@]}" -gt "${FILES_PRE_PACKAGE}" ]]; then
       sub_module_title "Firmware package extraction details"
-      mapfile -t lFILES_PAK_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
+      print_ln
+      print_output "[*] Found ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files."
 
-      for lBINARY in "${lFILES_PAK_ARR[@]}" ; do
+      print_output "[*] Adjusting the backend with ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files ... take a break" "no_log"
+
+      for lBINARY in "${lFILES_POST_PACKAGE_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
       done
-      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
       local lLINUX_PATH_COUNTER_PCK=0
       lLINUX_PATH_COUNTER_PCK=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
 
-      print_ln
-      print_output "[*] Found ${ORANGE}${#lFILES_PAK_ARR[@]}${NC} files."
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
       print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_PCK}${NC}."
       print_ln
       tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
-      print_output "[*] Before package extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after package extraction we have now ${ORANGE}${lFILES_POST_PACKAGE}${NC} files extracted."
+      print_output "[*] Before package extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after package extraction we have now ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files extracted."
       lNEG_LOG=1
     fi
   else

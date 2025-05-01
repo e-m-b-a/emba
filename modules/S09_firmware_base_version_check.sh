@@ -17,7 +17,7 @@
 # Description:  Iterates through a list with regex identifiers of version details
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and
 #               checks if these fit on a binary in the firmware.
-#               The version configuration file is stored in config/bin_version_strings.cfg
+#               The version configuration files are stored in config/bin_version_identifiers
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
@@ -242,7 +242,7 @@ S09_firmware_base_version_check() {
       # as the package manager is handling most of the static detection we can do more runs in parallel in such a case
       local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
     fi
-    print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
+    # print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
 
     if [[ -f "${S09_CSV_LOG}" ]]; then
       # this should prevent double checking - if a version identifier was already successful we do not need to
@@ -467,7 +467,7 @@ version_parsing_logging() {
     lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
     lBIN_ARCH=$(echo "${lBIN_FILE_DETAILS}" | cut -d ',' -f2)
     lBIN_ARCH=${lBIN_ARCH#\ }
-    lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH}")
+    lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED:-NA}" "${lBIN_ARCH}")
 
     if [[ -z "${lAPP_MAINT}" ]]; then
       # if we have no vendor/maintainer we are going to set it to the first entry of our config
@@ -746,10 +746,10 @@ bin_string_checker() {
   local lMATCHED_FILE_DATA=""
   local lBIN_DEPS_ARR=()
   local lBIN_DEPENDENCY=""
-  local lFILE_DATA_ARR=()
 
   lOS_IDENTIFIED=$(distri_check)
   if [[ -d "${LOG_PATH_MODULE}"/strings_bins ]] && [[ -v lVERSION_IDENTIFIERS_ARR[0] ]]; then
+    local lFILE_DATA_ARR=()
     # we always check for the first entry (also on multi greps) against all our generated strings.
     # if we have a match we can extract the md5sum from our path and use this to get the complete pathname from p99-csv log
     # this pathname ist finally used for the FILE_ARR which is then used for further analysis
