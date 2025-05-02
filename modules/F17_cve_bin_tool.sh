@@ -83,6 +83,7 @@ F17_cve_bin_tool() {
     local lPRODUCT_ARR=()
     local lPRODUCT_VERSION=""
     local lPRODUCT_NAME=""
+    lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
 
     # extract all our possible vendor names and product names:
     mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<< "${lSBOM_ENTRY}")
@@ -90,9 +91,11 @@ F17_cve_bin_tool() {
       lVENDOR_ARR+=("NOTDEFINED")
     fi
     mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<< "${lSBOM_ENTRY}")
+    if [[ "${#lPRODUCT_ARR[@]}" -eq 0 ]]; then
+      lPRODUCT_ARR+=("${lPRODUCT_NAME}")
+    fi
 
     lPRODUCT_VERSION=$(jq --raw-output '.version' <<< "${lSBOM_ENTRY}")
-    lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
 
     # avoid duplicates
     if (grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
@@ -266,6 +269,9 @@ sbom_preprocessing_threader() {
     lVENDOR_ARR+=("NOTDEFINED")
   fi
   mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<< "${lSBOM_ENTRY}")
+  if [[ "${#lPRODUCT_ARR[@]}" -eq 0 ]]; then
+    lPRODUCT_ARR+=("${lPRODUCT_NAME}")
+  fi
 
   lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
   local lANCHOR=""

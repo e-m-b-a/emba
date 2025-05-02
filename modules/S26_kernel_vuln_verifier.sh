@@ -32,13 +32,14 @@ S26_kernel_vuln_verifier()
   # lKERNEL_ARCH_PATH is the directory where we store all the kernels
   local lKERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
   local lWAIT_PIDS_S26_ARR=()
-  export NEG_LOG=0
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
     print_output "[-] Missing directory for kernel sources ... exit module now"
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
     return
   fi
+
+  export VULN_CNT=1
 
   # we wait until the s24 module is finished and hopefully shows us a kernel version
   module_wait "S24_kernel_bin_identifier"
@@ -266,14 +267,11 @@ S26_kernel_vuln_verifier()
 
     sub_module_title "Linux kernel vulnerability verification"
 
-    export VULN_CNT=1
-
     print_output "[*] Checking vulnerabilities for kernel version ${ORANGE}${lK_VERSION}${NC}" "" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
     print_ln
 
     local lVULN=""
     for lVULN in "${lALL_KVULNS_ARR[@]}"; do
-      NEG_LOG=1
       vuln_checker_threader "${lVULN}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -314,7 +312,7 @@ S26_kernel_vuln_verifier()
     fi
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  module_end_log "${FUNCNAME[0]}" "${VULN_CNT}"
 }
 
 vuln_checker_threader() {
@@ -596,8 +594,6 @@ final_log_kernel_vulns() {
 
   find "${LOG_PATH_MODULE}" -maxdepth 1 -name "symbols_uniq.split.*" -delete || true
   find "${LOG_PATH_MODULE}" -maxdepth 1 -name "symbols_uniq.split_gpl.*" -delete || true
-
-  NEG_LOG=1
 
   local lVULN=""
   local lSYM_USAGE_VERIFIED=0
