@@ -167,6 +167,9 @@ binary_architecture_threader() {
   local lMD5SUM=""
   lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
   lMD5SUM="${lMD5SUM/\ *}"
+  if [[ "${lBINARY}" == *".raw" ]]; then
+    return
+  fi
 
   if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
     return

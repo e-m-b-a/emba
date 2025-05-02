@@ -48,7 +48,7 @@ S09_firmware_base_version_check() {
   local lVERSION_IDENTIFIER_CFG_PATH="${CONFIG_DIR}"/bin_version_identifiers
   local lVERSION_IDENTIFIER_CFG_ARR=()
   local lVERSION_JSON_CFG=""
-  mapfile -t lVERSION_IDENTIFIER_CFG_ARR < <(find "${lVERSION_IDENTIFIER_CFG_PATH}" -name "*.json")
+  mapfile -t lVERSION_IDENTIFIER_CFG_ARR < <(find "${lVERSION_IDENTIFIER_CFG_PATH}" -name "*.json" | sort)
 
   local lFILE_ARR_TMP=()
   # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
@@ -353,27 +353,25 @@ S09_firmware_base_version_check() {
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
           generate_strings "${FIRMWARE_PATH_BAK}"
         fi
-        if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-          print_output "[*] WARNING: No strings file detected for ${lSTRINGS_OUTPUT}" "no_log"
-          continue
-        fi
-
-        for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-          # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER} for RTOS firmware" "no_log"
-          # lVERSION_IDENTIFIED=$(find "${FIRMWARE_PATH_BAK}" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
-          lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
-          if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-            print_ln "no_log"
-            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in original firmware file (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - firmware${GREEN})."
-            # this is a little hack to get the original firmware look like a typical EMBA P99 entry
-            lBIN_FILE_DETAILS=$(file -b "${FIRMWARE_PATH_BAK}")
-            lBINARY_ENTRY="S09_tmp_entry_for_RTOS_detection;${FIRMWARE_PATH_BAK};3;4;5;6;7;${lBIN_FILE_DETAILS};${lMD5_SUM}"
-            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
-              # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
-              break
+        # if we were able to generate the strings we can now analyse these strings
+        # if no strings available ... go ahead and test all the bins against our identifiers
+        if [[ -f "${lSTRINGS_OUTPUT}" ]]; then
+          for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+            # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER} for RTOS firmware" "no_log"
+            lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
+            if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+              print_ln "no_log"
+              print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in original firmware file (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - firmware${GREEN})."
+              # this is a little hack to get the original firmware look like a typical EMBA P99 entry
+              lBIN_FILE_DETAILS=$(file -b "${FIRMWARE_PATH_BAK}")
+              lBINARY_ENTRY="S09_tmp_entry_for_RTOS_detection;${FIRMWARE_PATH_BAK};3;4;5;6;7;${lBIN_FILE_DETAILS};${lMD5_SUM}"
+              if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+                # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+                break
+              fi
             fi
-          fi
-        done
+          done
+        fi
       fi
 
       # The following area is responsible to check all binaries against our version database:
@@ -691,7 +689,11 @@ generate_strings() {
     return
   fi
 
-  mapfile -t lBIN_DATA_ARR < <(grep ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n')
+  mapfile -t lBIN_DATA_ARR < <(grep ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n' || true)
+
+  if [[ "${#lBIN_DATA_ARR[@]}" -lt 7 ]]; then
+    return
+  fi
   lBIN_FILE="${lBIN_DATA_ARR[7]}"
 
   # Just in case we need to create SBOM entries for every file
