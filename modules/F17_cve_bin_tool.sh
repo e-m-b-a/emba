@@ -91,18 +91,14 @@ F17_cve_bin_tool() {
     fi
     mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<< "${lSBOM_ENTRY}")
 
-
-    # lVENDOR="${lMIN_IDENTIFIER[*]:1:1}"
-    # lPROD="${lMIN_IDENTIFIER[*]:2:1}"
-    # lVERS="${lMIN_IDENTIFIER[*]:3:1}"
     lPRODUCT_VERSION=$(jq --raw-output '.version' <<< "${lSBOM_ENTRY}")
     lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
 
     # avoid duplicates
-    if (grep -q "${lVENDOR_ARR[*]};${lPRODUCT_ARR[*]};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
+    if (grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
       continue
     fi
-    echo "${lVENDOR_ARR[*]};${lPRODUCT_ARR[*]};${lPRODUCT_VERSION}" >> "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
+    echo "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" >> "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
 
     # BusyBox verification module handling - we already have all the data from s118. Now we just copy these details
     if [[ "${lPRODUCT_NAME}" == "busybox" ]] && [[ -s "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
@@ -320,9 +316,9 @@ cve_bin_tool_threader() {
   # real    398.48s
   # with metric
   # real    1363.45s
-#  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
-#    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
-#  fi
+  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
+    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
+  fi
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
@@ -406,9 +402,9 @@ cve_bin_tool_threader() {
   write_log "\\n-----------------------------------------------------------------\\n" "${lBIN_LOG}"
 
   # we can now delete the temp log file
-  #if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" ]]; then
-    # rm "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true
-  #fi
+  if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" ]]; then
+    rm "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true
+  fi
 
   # now, lets write the main f20 log file with the results of the current binary:
   if [[ -f "${lBIN_LOG}" ]]; then

@@ -59,7 +59,7 @@ It also sketches the typical integration process of patches.
   - Note: This will be enforced in the future!
 
 - Local referenced ([nameref](https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameters)) variables should always start with "lr"
-  - e.g., local lrVARIABLE="${1:-}"
+  - e.g., local -n lrVARIABLE="${1:-}"
 
 - Use parameters to functions
   - work with local variables inside the functions
