@@ -320,14 +320,18 @@ get_busybox_applets_emu() {
 
 get_cve_busybox_data() {
   local lBB_SBOM_JSON="${1:-}"
-  local lBB_VERSION=""
-  lBB_VERSION=$(jq -r .version "${lBB_SBOM_JSON}")
-  local lBB_PRODUCT=""
-  lBB_PRODUCT=$(jq -r .name "${lBB_SBOM_JSON}")
-  lBB_PRODUCT=${lBB_PRODUCT,,}
-  local lBB_VENDOR=""
-  lBB_VENDOR=$(jq -r .supplier.name "${lBB_SBOM_JSON}")
-  lBB_VENDOR=${lBB_VENDOR,,}
+  local lVENDOR_ARR=()
+  local lPRODUCT_ARR=()
+  local lPRODUCT_VERSION=""
+
+  mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' "${lBB_SBOM_JSON}")
+  if [[ "${#lVENDOR_ARR[@]}" -eq 0 ]]; then
+    lVENDOR_ARR+=("NOTDEFINED")
+  fi
+  # shellcheck disable=SC2034
+  mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' "${lBB_SBOM_JSON}")
+
+  lPRODUCT_VERSION=$(jq --raw-output '.version' "${lBB_SBOM_JSON}")
 
   local lVULN_CNT=""
   local lWAIT_PIDS_S118_ARR=()
@@ -337,12 +341,15 @@ get_cve_busybox_data() {
   local lORIG_SOURCE="bb_verified"
 
   sub_module_title "BusyBox - Version based vulnerability detection"
-  # print_output "${lBOM_REF} - ${lBB_VENDOR} - ${lBB_PRODUCT} - ${lBB_VERSION} - ${lORIG_SOURCE}"
 
-  cve_bin_tool_threader "${lBOM_REF}" "${lBB_VENDOR}" "${lBB_PRODUCT}" "${lBB_VERSION}" "${lORIG_SOURCE}"
+  cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR
 
   if [[ -f "${CVE_DETAILS_PATH}" ]]; then
     lVULN_CNT="$(wc -l "${CVE_DETAILS_PATH}" | awk '{print $1}')"
+    if [[ "${lVULN_CNT}" -gt 0 ]]; then
+      # remove the first csv line
+      lVULN_CNT=$((lVULN_CNT-1))
+    fi
 
     # lets create a more beautifull log for the report:
     local lCVE_LINE_ENTRY=""
