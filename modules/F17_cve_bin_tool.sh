@@ -272,7 +272,7 @@ sbom_preprocessing_threader() {
   lANCHOR="${lPRODUCT_ARR[0]}_${lPRODUCT_VERSION}"
   lANCHOR="cve_${lANCHOR:0:20}"
 
-  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[*]//\\n}${NC} - vendor ${ORANGE}${lVENDOR_ARR[*]//\\n}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
+  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[*]//(\'\\n)}${NC} - vendor ${ORANGE}${lVENDOR_ARR[*]//(\'\\n)}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 
   echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 }
@@ -299,7 +299,9 @@ cve_bin_tool_threader() {
     print_output "[-] No tmp vendor/product file for ${lrVENDOR_ARR[*]}/${lrPRODUCT_ARR[*]} for cve-bin-tool generated"
     return
   fi
-  lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
+  lPRODUCT_NAME="${lrPRODUCT_ARR[0]}"
+  lPRODUCT_NAME="${lPRODUCT_NAME#\'}"
+  lPRODUCT_NAME="${lPRODUCT_NAME%\'}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/cve_sum/" ]]; then
     mkdir "${LOG_PATH_MODULE}/cve_sum/"
@@ -370,12 +372,11 @@ cve_bin_tool_threader() {
   if [[ "${lPRODUCT_NAME}" == "busybox" ]]; then
     local lBB_VERIFIED=0
     if [[ -f "${S118_CSV_LOG}" ]]; then
-      lBB_VERIFIED=$(grep -c ":busybox:" "${S118_CSV_LOG}" || true)
+      lBB_VERIFIED=$(grep -c ":busybox:.*;CVE-" "${S118_CSV_LOG}" || true)
       if [[ "${lBB_VERIFIED}" -gt 0 ]]; then
         lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION} (${lBB_VERIFIED})"
       fi
     fi
-
   fi
 
   if [[ "${lEXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
