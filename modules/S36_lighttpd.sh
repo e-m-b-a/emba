@@ -136,20 +136,28 @@ lighttpd_binary_analysis() {
   if [[ "${#lLIGHT_SBOMs_ARR[@]}" -gt 0 ]]; then
     # lets do a quick vulnerability check on our lighttpd version
     for lLIGHT_SBOM_JSON in "${lLIGHT_SBOMs_ARR[@]}"; do
-      local lLIGHT_VERSION=""
-      lLIGHT_VERSION=$(jq -r .version "${lLIGHT_SBOM_JSON}" || print_error "[-] S36 - lighttpd version extraction failed for ${lLIGHT_SBOM_JSON}")
-      local lLIGHT_PRODUCT=""
-      lLIGHT_PRODUCT=$(jq -r .name "${lLIGHT_SBOM_JSON}")
-      lLIGHT_PRODUCT=${lLIGHT_PRODUCT,,}
-      local lLIGHT_VENDOR=""
-      lLIGHT_VENDOR=$(jq -r .supplier.name "${lLIGHT_SBOM_JSON}")
-      lLIGHT_VENDOR=${lLIGHT_VENDOR,,}
+      local lPRODUCT_VERSION=""
+      local lPRODUCT_NAME=""
+      local lVENDOR_ARR=()
+      local lPRODUCT_ARR=()
+      lPRODUCT_VERSION=$(jq --raw-output '.version' "${lLIGHT_SBOM_JSON}" || print_error "[-] S36 - lighttpd version extraction failed for ${lLIGHT_SBOM_JSON}")
       local lORIG_SOURCE="${PACKAGING_SYSTEM}"
       local lBOM_REF=""
       lBOM_REF=$(jq -r '."bom-ref"' "${lLIGHT_SBOM_JSON}" || true)
-      print_output "[*] CVE analysis for ${lBOM_REF} - ${lLIGHT_VENDOR} - ${lLIGHT_PRODUCT} - ${lLIGHT_VERSION} - ${lORIG_SOURCE}" "no_log"
-      LIGHT_VERSIONS_ARR+=("${lLIGHT_VERSION}")
-      cve_bin_tool_threader "${lBOM_REF}" "${lLIGHT_VENDOR}" "${lLIGHT_PRODUCT}" "${lLIGHT_VERSION}" "${lORIG_SOURCE}"
+      # print_output "[*] CVE analysis for ${lBOM_REF} - ${lLIGHT_VENDOR} - ${lLIGHT_PRODUCT} - ${lPRODUCT_VERSION} - ${lORIG_SOURCE}" "no_log"
+
+      mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' "${lLIGHT_SBOM_JSON}")
+      if [[ "${#lVENDOR_ARR[@]}" -eq 0 ]]; then
+        lVENDOR_ARR+=("NOTDEFINED")
+      fi
+      # shellcheck disable=SC2034
+      mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' "${lLIGHT_SBOM_JSON}")
+
+      # shellcheck disable=SC2034
+      lPRODUCT_NAME=$(jq --raw-output '.name' "${lLIGHT_SBOM_JSON}")
+
+      cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR
+      LIGHT_VERSIONS_ARR+=("${lPRODUCT_VERSION}")
     done
   fi
 
