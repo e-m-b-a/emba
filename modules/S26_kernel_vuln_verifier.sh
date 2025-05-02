@@ -157,9 +157,10 @@ S26_kernel_vuln_verifier()
     if ! lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/linux_kernel_linux_kernel_*.json | sort -u | head -1); then
       local lBOM_REF="INVALID"
     fi
-    local lPROD="linux_kernel"
-    local lVENDOR="linux"
-    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lK_VERSION}.csv"
+    local lPRODUCT_ARR=("linux_kernel")
+    # shellcheck disable=SC2034
+    local lVENDOR_ARR=("linux")
+    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_ARR[0]}_${lK_VERSION}.csv"
 
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
@@ -215,7 +216,7 @@ S26_kernel_vuln_verifier()
     if ! grep -q "cve-bin-tool database preparation finshed" "${TMP_DIR}/tmp_state_data.log"; then
       print_error "[-] cve-bin-tool database not prepared - cve analysis probably not working"
     fi
-    cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lK_VERSION}" "kernel_verification"
+    cve_bin_tool_threader "${lBOM_REF}" "${lK_VERSION}" "${lORIG_SOURCE:-kernel_verification}" lVENDOR_ARR lPRODUCT_ARR
 
     export SYMBOLS_CNT=0
 
