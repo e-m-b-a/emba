@@ -41,6 +41,9 @@ F10_license_summary() {
       lPRODUCT=$(jq -r .name "${lSBOM_FILE}")
       lVERSION=$(jq -r .version "${lSBOM_FILE}")
       mapfile -t lLICENSE_ARR < <(jq -r '.licenses[]?.license.name' "${lSBOM_FILE}")
+      if [[ "${#lLICENSE_ARR[@]}" -eq 0 ]]; then
+        lLICENSE_ARR+=("No license identified")
+      fi
       lBINARY=$(jq -r '.properties[]? | select(.name | test("source_path")) | .value' "${lSBOM_FILE}")
       lBINARY="${lBINARY#\'}"
       lBINARY="${lBINARY%\'}"

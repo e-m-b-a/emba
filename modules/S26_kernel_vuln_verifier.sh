@@ -32,13 +32,14 @@ S26_kernel_vuln_verifier()
   # lKERNEL_ARCH_PATH is the directory where we store all the kernels
   local lKERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
   local lWAIT_PIDS_S26_ARR=()
-  export NEG_LOG=0
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
     print_output "[-] Missing directory for kernel sources ... exit module now"
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
     return
   fi
+
+  export VULN_CNT=1
 
   # we wait until the s24 module is finished and hopefully shows us a kernel version
   module_wait "S24_kernel_bin_identifier"
@@ -157,9 +158,10 @@ S26_kernel_vuln_verifier()
     if ! lBOM_REF=$(jq -r '."bom-ref"' "${SBOM_LOG_PATH}"/linux_kernel_linux_kernel_*.json | sort -u | head -1); then
       local lBOM_REF="INVALID"
     fi
-    local lPROD="linux_kernel"
-    local lVENDOR="linux"
-    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lK_VERSION}.csv"
+    local lPRODUCT_ARR=("linux_kernel")
+    # shellcheck disable=SC2034
+    local lVENDOR_ARR=("linux")
+    local lCVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_ARR[0]}_${lK_VERSION}.csv"
 
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
@@ -215,7 +217,7 @@ S26_kernel_vuln_verifier()
     if ! grep -q "cve-bin-tool database preparation finshed" "${TMP_DIR}/tmp_state_data.log"; then
       print_error "[-] cve-bin-tool database not prepared - cve analysis probably not working"
     fi
-    cve_bin_tool_threader "${lBOM_REF}" "${lVENDOR}" "${lPROD}" "${lK_VERSION}" "kernel_verification"
+    cve_bin_tool_threader "${lBOM_REF}" "${lK_VERSION}" "${lORIG_SOURCE:-kernel_verification}" lVENDOR_ARR lPRODUCT_ARR
 
     export SYMBOLS_CNT=0
 
@@ -265,14 +267,11 @@ S26_kernel_vuln_verifier()
 
     sub_module_title "Linux kernel vulnerability verification"
 
-    export VULN_CNT=1
-
     print_output "[*] Checking vulnerabilities for kernel version ${ORANGE}${lK_VERSION}${NC}" "" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
     print_ln
 
     local lVULN=""
     for lVULN in "${lALL_KVULNS_ARR[@]}"; do
-      NEG_LOG=1
       vuln_checker_threader "${lVULN}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -313,7 +312,7 @@ S26_kernel_vuln_verifier()
     fi
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  module_end_log "${FUNCNAME[0]}" "${VULN_CNT}"
 }
 
 vuln_checker_threader() {
@@ -595,8 +594,6 @@ final_log_kernel_vulns() {
 
   find "${LOG_PATH_MODULE}" -maxdepth 1 -name "symbols_uniq.split.*" -delete || true
   find "${LOG_PATH_MODULE}" -maxdepth 1 -name "symbols_uniq.split_gpl.*" -delete || true
-
-  NEG_LOG=1
 
   local lVULN=""
   local lSYM_USAGE_VERIFIED=0
