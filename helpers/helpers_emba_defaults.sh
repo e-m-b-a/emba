@@ -212,6 +212,8 @@ set_log_paths() {
   export S06_CSV_LOG="${CSV_DIR}/s06_distribution_identification.csv"
   export S08_CSV_LOG="${CSV_DIR}/s08_package_mgmt_extractor.csv"
   export S09_CSV_LOG="${CSV_DIR}/s09_firmware_base_version_check.csv"
+  export S09_LOG="${LOG_DIR}/s09_firmware_base_version_check.txt"
+  export S09_LOG_DIR="${S09_LOG/\.txt/\/}"
   export S12_LOG="${LOG_DIR}/s12_binary_protection.txt"
   export S12_CSV_LOG="${CSV_DIR}/s12_binary_protection.csv"
   export S13_LOG="${LOG_DIR}/s13_weak_func_check.txt"

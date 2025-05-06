@@ -144,9 +144,8 @@ S09_firmware_base_version_check() {
 
   # lets start generating the strings from all our relevant binaries
   print_output "[*] Generate strings overview for static version analysis of ${ORANGE}${#FILE_ARR[@]}${NC} files ..."
-  mkdir "${LOG_PATH_MODULE}"/strings_bins/ || true
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
-    mkdir "${LOG_PATH_MODULE}"/strings_bins || true
+    mkdir "${LOG_PATH_MODULE}"/strings_bins || true 2>/dev/null
   fi
   export WAIT_PIDS_S09_ARR_tmp=()
   for lBIN in "${FILE_ARR[@]}"; do
@@ -425,7 +424,7 @@ version_parsing_logging() {
   local -n lrCSV_REGEX_ARR_ref="${7:-}"
 
   local lMD5_SUM=""
-  local lBINARY_PATH=""
+  local lBINARY_PATH="NA"
   local lCSV_REGEX=""
   local lCSV_RULE=""
   local lAPP_MAINT=""
@@ -437,9 +436,11 @@ version_parsing_logging() {
   local lBIN_ARCH=""
   local lPURL_IDENTIFIER=""
 
-  lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
-  lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
-  lMD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
+  if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
+    lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
+    lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
+    lMD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
+  fi
 
   for lCSV_REGEX in "${lrCSV_REGEX_ARR_ref[@]}"; do
     lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${lCSV_REGEX}")
@@ -460,11 +461,13 @@ version_parsing_logging() {
     write_csv_log "${lBINARY_PATH}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lrLICENSES_ARR_ref[*]}" "${TYPE}"
     check_for_s08_csv_log "${S08_CSV_LOG}"
 
-    lSHA256_CHECKSUM="$(sha256sum "${lBINARY_PATH}" | awk '{print $1}')"
-    lSHA512_CHECKSUM="$(sha512sum "${lBINARY_PATH}" | awk '{print $1}')"
+    if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
+      lSHA256_CHECKSUM="$(sha256sum "${lBINARY_PATH}" | awk '{print $1}')"
+      lSHA512_CHECKSUM="$(sha512sum "${lBINARY_PATH}" | awk '{print $1}')"
+      lBIN_ARCH=$(echo "${lBIN_FILE_DETAILS}" | cut -d ',' -f2)
+      lBIN_ARCH=${lBIN_ARCH#\ }
+    fi
     lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
-    lBIN_ARCH=$(echo "${lBIN_FILE_DETAILS}" | cut -d ',' -f2)
-    lBIN_ARCH=${lBIN_ARCH#\ }
     lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED:-NA}" "${lBIN_ARCH}")
 
     if [[ -z "${lAPP_MAINT}" ]]; then
@@ -480,9 +483,11 @@ version_parsing_logging() {
 
     # add source file path information to our properties array:
     local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lBINARY_PATH}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE_DETAILS}" )
+    if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lBINARY_PATH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE_DETAILS}" )
+    fi
     lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_IDENTIFIED}" )
 
     # minimal identifier is deprecated and will be replaced in the future
@@ -498,7 +503,7 @@ version_parsing_logging() {
     lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${CONFIDENCE_LEVEL}")" )
 
     # build the dependencies based on linker details
-    if [[ "${lBIN_FILE_DETAILS}" == *"dynamically linked"* ]]; then
+    if [[ "${lBIN_FILE_DETAILS:-NA}" == *"dynamically linked"* ]]; then
       local lBIN_DEPS_ARR=()
       local lBIN_DEPENDENCY=""
       # now we can create the dependencies based on ldd
@@ -510,12 +515,14 @@ version_parsing_logging() {
 
     build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lBINARY_PATH}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL}"; then
-      print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-      # we continue with the next binary -> set return value as marker to get the knowledge in the caller
-      return 0
+    if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lBINARY_PATH:-NA}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        # we continue with the next binary -> set return value as marker to get the knowledge in the caller
+        return 0
+      fi
     fi
 
     # create component entry - this allows adding entries very flexible:
@@ -692,11 +699,13 @@ generate_strings() {
   mapfile -t lBIN_DATA_ARR < <(grep ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n' || true)
 
   if [[ "${#lBIN_DATA_ARR[@]}" -lt 7 ]]; then
+    # we have no entry in our P99 csv file! Should we create one now?
     return
   fi
   lBIN_FILE="${lBIN_DATA_ARR[7]}"
 
   # Just in case we need to create SBOM entries for every file
+  # This is configured via the scanning profiles
   if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
     build_final_bins_threader "${lBINARY_PATH}" "${lBIN_FILE}" &
     local lTMP_PID="$!"
