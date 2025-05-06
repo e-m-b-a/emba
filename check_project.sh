@@ -54,9 +54,11 @@ MODULES_TO_CHECK_ARR_COMMENT=()
 MODULES_TO_CHECK_ARR_GREP=()
 MODULES_TO_CHECK_ARR_COPYRIGHT=()
 MODULES_TO_CHECK_ARR_FCT_SPACE=()
+MODULES_TO_CHECK_ARR_JSON=()
 CNT_VAR_CHECKER_ISSUES=0
 
 import_config_scripts() {
+  HELPERS=()
   mapfile -t HELPERS < <(find "${CONF_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${HELPERS[@]}"; do
     if (file "${LINE}" | grep -q "shell script"); then
@@ -67,6 +69,7 @@ import_config_scripts() {
 }
 
 import_helper() {
+  HELPERS=()
   mapfile -t HELPERS < <(find "${HELP_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${HELPERS[@]}"; do
     if (file "${LINE}" | grep -q "shell script"); then
@@ -77,11 +80,23 @@ import_helper() {
 }
 
 import_reporting_templates() {
+  REP_TEMP=()
   mapfile -t REP_TEMP < <(find "${REP_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${REP_TEMP[@]}"; do
     if (file "${LINE}" | grep -q "shell script"); then
       echo "${LINE}"
       SOURCES+=("${LINE}")
+    fi
+  done
+}
+
+import_json() {
+  JSON_FILES=()
+  mapfile -t JSON_FILES < <(find "${CONF_DIR}" -iname "*.json" 2>/dev/null)
+  for LINE in "${JSON_FILES[@]}"; do
+    if (file "${LINE}" | grep -q "json"); then
+      echo "${LINE}"
+      JSON_SOURCES+=("${LINE}")
     fi
   done
 }
@@ -123,7 +138,6 @@ import_emba_main() {
   done
 }
 
-
 dockerchecker() {
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA docker-files check""${NC}"
   echo -e "${BOLD}""=================================================================""${NC}"
@@ -152,6 +166,7 @@ check() {
   import_config_scripts
   import_reporting_templates
   import_module
+  import_json
 
   echo -e "\\n""${GREEN}""Check all source for correct tab usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
@@ -218,6 +233,17 @@ check() {
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
       MODULES_TO_CHECK_ARR_SEMGREP+=("${SOURCE}")
+    fi
+  done
+
+  echo -e "\\n""${GREEN}""Check JSON with json_pp:""${NC}""\\n"
+  for SOURCE in "${JSON_SOURCES[@]}"; do
+    echo -e "\\n""${GREEN}""Check ${ORANGE}permission${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if (json_pp "${SOURCE}" &> /dev/null); then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
+    else
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_JSON+=("${SOURCE}")
     fi
   done
 
@@ -312,11 +338,21 @@ summary() {
   else
     echo -e "\\n""${GREEN}""==> Found no problems with variable scope definition""${NC}""\\n"
   fi
+  if [[ "${#MODULES_TO_CHECK_ARR_JSON[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
+    echo -e "Modules to check (invalid json file): ${#MODULES_TO_CHECK_ARR_JSON[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_JSON[@]}"; do
+      echo -e "${ORANGE}${BOLD}==> FIX JSON: ""${MODULE}""${NC}"
+    done
+  else
+    echo -e "\\n""${GREEN}""==> Found no invalid json files""${NC}""\\n"
+  fi
+
 }
 
 # check that all tools are installed
 check_tools() {
-  TOOLS=("semgrep" "shellcheck")
+  TOOLS=("semgrep" "shellcheck" "json_pp")
   for TOOL in "${TOOLS[@]}";do
     if ! command -v "${TOOL}" > /dev/null ; then
       echo -e "\\n""${RED}""${TOOL} is not installed correctly""${NC}""\\n"
@@ -451,6 +487,6 @@ if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[
   [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]] || \
-  [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
+  [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_JSON[@]}" -gt 0 ]]; then
   exit 1
 fi
