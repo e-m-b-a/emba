@@ -211,34 +211,33 @@ l15_version_detector_threader() {
 
   local lVERSION_IDENTIFIED=""
 
-    mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
-    # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
-    local lRULE_IDENTIFIER=""
-    lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
-    local lLICENSES_ARR=()
-    mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    local lPRODUCT_NAME_ARR=()
-    # shellcheck disable=SC2034
-    mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    local lVENDOR_NAME_ARR=()
-    # shellcheck disable=SC2034
-    mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    local lCSV_REGEX_ARR=()
-    # shellcheck disable=SC2034
-    mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    local lVERSION_IDENTIFIER_ARR=()
-    mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
+  local lRULE_IDENTIFIER=""
+  lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
+  local lLICENSES_ARR=()
+  mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lPRODUCT_NAME_ARR=()
+  # shellcheck disable=SC2034
+  mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lVENDOR_NAME_ARR=()
+  # shellcheck disable=SC2034
+  mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lCSV_REGEX_ARR=()
+  # shellcheck disable=SC2034
+  mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lVERSION_IDENTIFIER_ARR=()
+  mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
 
-    for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-      lVERSION_IDENTIFIED=$(echo "${lSERVICE}" | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
-      if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-        print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${GREEN} in emulated service ${ORANGE}${lSERVICE}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${lTYPE}${GREEN})."
-        export TYPE="${lTYPE}"
-        PACKAGING_SYSTEM="system_emulation"
-        if version_parsing_logging "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
-          # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next service -> return"
-          return
-        fi
+  for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+    lVERSION_IDENTIFIED=$(echo "${lSERVICE}" | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
+    if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+      print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${GREEN} in emulated service ${ORANGE}${lSERVICE}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${lTYPE}${GREEN})."
+      export TYPE="${lTYPE}"
+      export PACKAGING_SYSTEM="system_emulation"
+      if version_parsing_logging "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+        # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next service -> return"
+        return
       fi
-    done
+    fi
+  done
 }
