@@ -90,7 +90,7 @@ S24_kernel_bin_identifier()
     # shellcheck disable=SC2034
     mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
     mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    
+
     for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
       lVERSION_IDENTIFIED=$(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}"| sort -u || true)
 
