@@ -238,8 +238,8 @@ check() {
 
   echo -e "\\n""${GREEN}""Check JSON with json_pp:""${NC}""\\n"
   for SOURCE in "${JSON_SOURCES[@]}"; do
-    echo -e "\\n""${GREEN}""Check ${ORANGE}permission${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    if (json_pp "${SOURCE}" &> /dev/null); then
+    echo -e "\\n""${GREEN}""Check ${ORANGE}json validity${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if (json_pp < "${SOURCE}" &> /dev/null); then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
