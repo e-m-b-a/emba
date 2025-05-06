@@ -261,7 +261,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )
-  if [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
+  if [[ -v HASHES_ARR ]] && [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
     lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
   fi
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
@@ -340,7 +340,7 @@ distri_check() {
 
   # currently this is a weak check via /etc/os-release
   # Todo: If this check failes we can use further tests like lsb-release or motd
-  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release")
+  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release" || true)
   for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
     lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}" || true)
     lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}

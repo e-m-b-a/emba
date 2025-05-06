@@ -23,6 +23,7 @@ IF17_cve_bin_tool() {
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] ; then
       print_tool_info "gsutil"
+      print_tool_info "libjson-pp-perl"
       print_pip_info "protobuf"
       # print_pip_info "cve_bin_tool"
       print_git_info "cve-bin-tool" "https://github.com/EMBA-support-repos/cve-bin-tool.git" "cve-bin-tool"

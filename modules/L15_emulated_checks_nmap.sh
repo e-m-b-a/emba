@@ -21,6 +21,7 @@ L15_emulated_checks_nmap() {
 
   local lMODULE_END=0
   export NMAP_PORTS_SERVICES_ARR=()
+  export CONFIDENCE_LEVEL=3
 
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -161,12 +162,17 @@ check_live_nmap_basic() {
 
   if [[ "${#lNMAP_SERVICES_ARR[@]}" -gt 0 ]]; then
     print_ln
+    local lWAIT_PIDS_L15_ARR=()
     for lSERVICE in "${lNMAP_SERVICES_ARR[@]}"; do
       if ! echo "${lSERVICE}" | grep -q "[0-9]"; then
         continue
       fi
-      l15_version_detector "${lSERVICE}" "${lTYPE}"
+      l15_version_detector "${lSERVICE}" "${lTYPE}" &
+      local lTMP_PID="$!"
+      lWAIT_PIDS_L15_ARR+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_L15_ARR
     done
+    wait_for_pid "${lWAIT_PIDS_L15_ARR[@]}"
   fi
 
   print_ln
@@ -177,53 +183,61 @@ l15_version_detector() {
   local lSERVICE="${1:-}"
   local lTYPE="${2:-}"
 
-  local lVERSION_LINE=""
-  local lSTRICT=""
-  local lIDENTIFIER=""
-  local lLIC=""
-  local lCSV_REGEX=""
-  local lCSV_RULE=""
+  local lVERSION_IDENTIFIER_ARR=()
   local lVERSION_IDENTIFIER=""
-  local lVERSION_FINDER=""
 
   print_output "[*] Testing detected service ${ORANGE}${lSERVICE}${NC}" "no_log"
 
-  local lVERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
+  local lVERSION_IDENTIFIER_CFG_PATH="${CONFIG_DIR}"/bin_version_identifiers
+  local lVERSION_IDENTIFIER_CFG_ARR=()
+  local lVERSION_JSON_CFG=""
+  local lWAIT_PIDS_L15_ARR_02=()
+  mapfile -t lVERSION_IDENTIFIER_CFG_ARR < <(find "${lVERSION_IDENTIFIER_CFG_PATH}" -name "*.json")
 
-  while read -r lVERSION_LINE; do
-    if echo "${lVERSION_LINE}" | grep -v -q "^[^#*/;]"; then
-      continue
-    fi
-    if echo "${lVERSION_LINE}" | grep -q "no_static"; then
-      continue
-    fi
-
-    lSTRICT="$(echo "${lVERSION_LINE}" | cut -d\; -f2)"
-    lIDENTIFIER="$(echo "${lVERSION_LINE}" | cut -d\; -f1)"
-
-    if [[ ${lSTRICT} == *"strict"* ]]; then
-      continue
-    elif [[ ${lSTRICT} == "zgrep" ]]; then
-      continue
-    fi
-
-    lLIC="$(echo "${lVERSION_LINE}" | cut -d\; -f3)"
-    lCSV_REGEX="$(echo "${lVERSION_LINE}" | cut -d\; -f5)"
-    # lVERSION_IDENTIFIER="$(echo "${lVERSION_LINE}" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
-    lVERSION_IDENTIFIER="$(echo "${lVERSION_LINE}" | cut -d\; -f4)"
-    lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"}"
-    lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
-
-    lVERSION_FINDER=$(echo "${lSERVICE}" | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
-    if [[ -n ${lVERSION_FINDER} ]]; then
-      print_output "[+] Version information found ${RED}""${lVERSION_FINDER}""${NC}${GREEN} in ${lTYPE} log."
-      # use get_csv_rule from s09:
-      lCSV_RULE=$(get_csv_rule "${lVERSION_FINDER}" "${lCSV_REGEX}")
-      # get rid of ; which destroys our csv:
-      lVERSION_FINDER="${lVERSION_FINDER/;}"
-      write_csv_log "---" "${lIDENTIFIER}" "${lVERSION_FINDER}" "${lCSV_RULE}" "${lLIC}" "${lTYPE}"
-      continue
-    fi
-  done  < "${lVERSION_IDENTIFIER_CFG}"
+  for lVERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
+    l15_version_detector_threader "${lVERSION_JSON_CFG}" "${lSERVICE}" "${lTYPE}" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    WAIT_PIDS_L15_ARR_02+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_L15_ARR_02
+  done
+  wait_for_pid "${lWAIT_PIDS_L15_ARR_02[@]}"
 }
 
+l15_version_detector_threader() {
+  local lVERSION_JSON_CFG="${1:-}"
+  local lSERVICE="${2:-}"
+  local lTYPE="${3:-}"
+
+  local lVERSION_IDENTIFIED=""
+
+  # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
+  local lRULE_IDENTIFIER=""
+  lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
+  local lLICENSES_ARR=()
+  mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lPRODUCT_NAME_ARR=()
+  # shellcheck disable=SC2034
+  mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lVENDOR_NAME_ARR=()
+  # shellcheck disable=SC2034
+  mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lCSV_REGEX_ARR=()
+  # shellcheck disable=SC2034
+  mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  local lVERSION_IDENTIFIER_ARR=()
+  mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+
+  for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+    lVERSION_IDENTIFIED=$(echo "${lSERVICE}" | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
+    if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+      print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${GREEN} in emulated service ${ORANGE}${lSERVICE}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${lTYPE}${GREEN})."
+      export TYPE="${lTYPE}"
+      export PACKAGING_SYSTEM="system_emulation"
+      if version_parsing_logging "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+        # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next service -> return"
+        return
+      fi
+    fi
+  done
+}
