@@ -1,7 +1,7 @@
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:1.5.2b
+    image: embeddedanalyzer/emba:1.5.2c
     container_name: emba
     read_only: false
     # all pre-checker mount modules need privileged mode
