@@ -174,8 +174,9 @@ create_comp_dep_tree_threader() {
 clean_package_details() {
   local lCLEAN_ME_UP="${1}"
 
-  lCLEAN_ME_UP=$(safe_echo "${lCLEAN_ME_UP}" | tr -dc '[:print:]')
-  lCLEAN_ME_UP=${lCLEAN_ME_UP/\"}
+  lCLEAN_ME_UP=$(safe_echo "${lCLEAN_ME_UP}")
+  lCLEAN_ME_UP="${lCLEAN_ME_UP//[![:print:]]/}"
+  lCLEAN_ME_UP="${lCLEAN_ME_UP/\"}"
   # Turn on extended globbing
   shopt -s extglob
   lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\;\#\%\/\<\>\(\)\]])}
@@ -206,7 +207,6 @@ clean_package_versions() {
   lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
   lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/:[0-9]:/:/g')
   lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/^[0-9]://g')
-  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | tr -dc '[:print:]')
   lSTRIPPED_VERSION=${lSTRIPPED_VERSION//,/\.}
-  echo "${lSTRIPPED_VERSION}"
+  echo "${lSTRIPPED_VERSION//[![:print:]]/}"
 }
