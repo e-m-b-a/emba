@@ -428,14 +428,9 @@ module_analyzer() {
       # get the binary data from P99 log for further processing
       local lBINARY_DATA=""
       local lVERSION_JSON_CFG="${CONFIG_DIR}"/bin_version_identifiers/linux_kernel.json
-      local lVERSION_IDENTIFIER_ARR=()
       local lVERSION_IDENTIFIED="${KV_ARR[*]}"
 
       lBINARY_DATA=$(grep ";${lKMODULE};" "${P99_CSV_LOG}" | head -1 || true)
-      if [[ -z ${lBINARY_DATA} ]]; then
-        # we have not found our binary as ELF
-        continue
-      fi
 
       local lRULE_IDENTIFIER=""
       local lLICENSES_ARR=()
@@ -447,6 +442,7 @@ module_analyzer() {
       lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
       # ensure we later have the knowledge that this is from the kernel+module area
       lRULE_IDENTIFIER+="+module"
+      # shellcheck disable=SC2034
       mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
       # shellcheck disable=SC2034
       mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
@@ -460,7 +456,7 @@ module_analyzer() {
 
       if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
         # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
-        continue 2
+        return
       fi
     fi
   elif [[ "${lKMODULE}" == *".o" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
