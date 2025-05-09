@@ -150,7 +150,10 @@ populate_karrays() {
   # if we have found a kernel version in binary kernel:
   if [[ -f "${S24_CSV_LOG}" ]]; then
     while IFS=";" read -r lK_VER; do
-      lK_VER="$(echo "${lK_VER}" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
+      shopt -s extglob
+      lK_VER="${lK_VER//Linux\ version\ /}"
+      lK_VER="${lK_VER//+([\(\)\#])/}"
+      shopt -u extglob
 
       demess_kv_version "${lK_VER}"
 
