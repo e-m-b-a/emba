@@ -211,7 +211,8 @@ dlink_image_sign() {
 get_csv_rule_distri() {
   # this is a temp solution. If this list grows we are going to solve it via a configuration file
   local lVERSION_IDENTIFIER="${1:-}"
-  lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER,,}" | tr -dc '[:print:]')"
+  lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER,,}")"
+  lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER//[![:print:]]/}"
 
   ### handle versions of linux distributions:
   # debian 9 (stretch) - installer build 20170615+deb9u5
@@ -260,6 +261,6 @@ get_csv_rule_distri() {
     lRES="${lVERSION_IDENTIFIER//[^:]}"
   done
 
-  lCSV_RULE="$(safe_echo "${lVERSION_IDENTIFIER}" | tr -dc '[:print:]')"
-  echo "${lCSV_RULE}"
+  lCSV_RULE="$(safe_echo "${lVERSION_IDENTIFIER}")"
+  echo "${lCSV_RULE//[![:print:]]/}"
 }

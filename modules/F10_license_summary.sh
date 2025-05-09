@@ -39,6 +39,9 @@ F10_license_summary() {
     for lSBOM_FILE in "${lSBOMs_ARR[@]}"; do
 
       lPRODUCT=$(jq -r .name "${lSBOM_FILE}")
+      if [[ -z "${lPRODUCT}" ]]; then
+        continue
+      fi
       lVERSION=$(jq -r .version "${lSBOM_FILE}")
       mapfile -t lLICENSE_ARR < <(jq -r '.licenses[]?.license.name' "${lSBOM_FILE}")
       if [[ "${#lLICENSE_ARR[@]}" -eq 0 ]]; then

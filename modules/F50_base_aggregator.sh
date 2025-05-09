@@ -1007,7 +1007,7 @@ os_detector() {
   #### The following check is based on the results of the aggregator:
   if [[ -f "${F17_LOG_DIR}"/vuln_summary.txt ]]; then
     for lOS_TO_CHECK in "${lOS_TO_CHECK_ARR[@]}"; do
-      mapfile -t lSYSTEM_VERSION_ARR < <(grep "Component details" "${F17_LOG_DIR}"/vuln_summary.txt | grep "${lOS_TO_CHECK}" | cut -d ':' -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
+      mapfile -t lSYSTEM_VERSION_ARR < <(grep -E "Component details:( )+.*${lOS_TO_CHECK}.*:" "${F17_LOG_DIR}"/vuln_summary.txt | cut -d ':' -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
       if [[ "${#lSYSTEM_VERSION_ARR[@]}" -gt 0 ]]; then
         if [[ "${lOS_TO_CHECK}" == "kernel" ]]; then
           SYSTEM="Linux"
@@ -1092,7 +1092,7 @@ os_kernel_module_detect() {
 
 print_os() {
   local lSYSTEM="${1:-}"
-  lSYSTEM=$(echo "${lSYSTEM}" | tr -dc '[:print:]')
+  lSYSTEM="${lSYSTEM//[![:print:]]/}"
 
   if [[ ${VERIFIED} -eq 1 ]]; then
     print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"

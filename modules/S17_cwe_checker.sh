@@ -117,7 +117,7 @@ cwe_check() {
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
     if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now." "no_log"
+      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
       print_output "[*] For complete analysis enable FULL_TEST." "no_log"
       break
     fi

@@ -709,7 +709,6 @@ generate_strings() {
   if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
     build_final_bins_threader "${lBINARY_PATH}" "${lBIN_FILE}" &
     local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
   fi
 
@@ -724,7 +723,6 @@ generate_strings() {
     strings "${lBINARY_PATH}" | uniq > "${lSTRINGS_OUTPUT}" || true
   fi
 }
-
 
 # bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
 bin_string_checker() {
