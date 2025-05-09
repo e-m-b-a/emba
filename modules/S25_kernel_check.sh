@@ -115,6 +115,20 @@ populate_karrays() {
     KERNEL_DESC+=( "$(modinfo "${lK_MODULE}" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' | sort -u || true)" )
   done
 
+  # we also extract the kernel version from the /lib/modules/<Kernel version>/ path
+  local lKERNEL_MODULES_PATHS_ARR=()
+  local lPATH_TO_CHECK=""
+
+  mapfile -t lKERNEL_MODULES_PATHS_ARR < <(grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  for lPATH_TO_CHECK in "${lKERNEL_MODULES_PATHS_ARR[@]}" ; do
+    # we remove the complete path in front of the possible kernel version:
+    # asdf/bla/root-dir/lib/modules/ -> gets removed
+    lPATH_TO_CHECK="${lPATH_TO_CHECK/*\/lib\/modules\//}"
+    if [[ "${lK_VERSION_ARR[*]}" != *"${lPATH_TO_CHECK}"* ]]; then
+      KERNEL_VERSION+=("${lPATH_TO_CHECK}")
+    fi
+  done
+
   for lVER in "${KERNEL_VERSION[@]}" ; do
     demess_kv_version "${lVER}"
 
@@ -190,17 +204,19 @@ demess_kv_version() {
       continue
     fi
 
-    lKV=$(echo "${lVER}" | tr "-" " ")
-    lKV=$(echo "${lKV}" | tr "+" " ")
-    lKV=$(echo "${lKV}" | tr "_" " ")
-    lKV=$(echo "${lKV}" | tr "/" " ")
-    # the first field is the real kernel version:
-    lKV=$(echo "${lKV}" | cut -d\  -f1)
+    # split dirty things on space
+    shopt -s extglob
+    lKV="${lVER//+([-+_\/\ ])/\ }"
+    shopt -u extglob
 
-    while echo "${lKV}" | grep -q '[a-zA-Z]'; do
+    # the first field is usually the real kernel version:
+    lKV="${lKV/\ *}"
+
+    while [[ "${lKV}" =~ [a-zA-Z] ]]; do
       lKV="${lKV::-1}"
     done
-    KV_ARR=("${KV_ARR[@]}" "${lKV}")
+
+    KV_ARR+=("${lKV}")
   done
 }
 
@@ -335,6 +351,9 @@ module_analyzer() {
     lK_VERSION=${lK_VERSION/vermagic:\ }
     lK_VERSION=$(clean_package_details "${lK_VERSION}")
     demess_kv_version "${lK_VERSION}"
+    # => we make a nice KV_ARR with the one version only
+    # this means we can further proceed with ${KV_ARR[*]} to access
+    # the complete version
 
     lMOD_VERSION=$(modinfo "${lKMODULE}" | grep "^version:" || true)
     lMOD_VERSION=${lMOD_VERSION/version:\ }
@@ -406,35 +425,42 @@ module_analyzer() {
     fi
 
     if [[ "${#KV_ARR[@]}" -gt 0 ]]; then
-      # ensure we do not log the kernel multiple times
-      local lPACKAGING_SYSTEM="linux_kernel+module"
-      local lK_AUTHOR="linux"
-      local lLICENSE="GPL-2.0-only"
-      # we can rewrite the APP_NAME as we also log the source_path from where we know the exact source of this kernel entry
-      local lAPP_NAME="linux_kernel"
+      # get the binary data from P99 log for further processing
+      local lBINARY_DATA=""
+      local lVERSION_JSON_CFG="${CONFIG_DIR}"/bin_version_identifiers/linux_kernel.json
+      local lVERSION_IDENTIFIER_ARR=()
+      local lVERSION_IDENTIFIED="${KV_ARR[*]}"
 
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
-      lPURL_IDENTIFIER=$(build_generic_purl ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
+      lBINARY_DATA=$(grep ";${lKMODULE};" "${P99_CSV_LOG}" | head -1 || true)
+      if [[ -z ${lBINARY_DATA} ]]; then
+        # we have not found our binary as ELF
+        continue
+      fi
 
-      # add source file path information to our properties array:
-      local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:" )
-      lPROP_ARRAY_INIT_ARR+=( "module_version_details:${lK_VERSION,,}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      local lRULE_IDENTIFIER=""
+      local lLICENSES_ARR=()
+      local lPRODUCT_NAME_ARR=()
+      local lVENDOR_NAME_ARR=()
+      local lCSV_REGEX_ARR=()
 
-      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+      # lets build the data we need for version_parsing_logging
+      lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
+      # ensure we later have the knowledge that this is from the kernel+module area
+      lRULE_IDENTIFIER+="+module"
+      mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+      # shellcheck disable=SC2034
+      mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+      # shellcheck disable=SC2034
+      mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+      # shellcheck disable=SC2034
+      mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
 
-      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-      # final array with all hash values
-      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${KV_ARR[*]}" "no_log"
-      else
-        # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-        write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+      export TYPE="static"
+      export CONFIDENCE_LEVEL=3
+
+      if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+        # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+        continue 2
       fi
     fi
   elif [[ "${lKMODULE}" == *".o" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
