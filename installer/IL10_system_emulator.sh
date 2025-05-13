@@ -33,7 +33,7 @@ IL10_system_emulator() {
     # print_tool_info "uml-utilities" 1
     # print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-1+b1_amd64.deb" "external/uml-utilities.deb"
     print_tool_info "libfuse2t64" 1
-    print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2_amd64.deb" "external/uml-utilities.deb"
+    print_file_info "uml-utilities.deb" "uml-utilities" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2.1_amd64.deb" "external/uml-utilities.deb"
     print_tool_info "util-linux" 1
     print_tool_info "vlan" 1
     print_tool_info "qemu-utils" 1
@@ -67,6 +67,7 @@ IL10_system_emulator() {
     print_file_info "strace.zip" "strace for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
     print_file_info "Linux-Kernel-v4.1.52.zip" "Linux Kernel v4.1.52 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.52.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip"
     print_file_info "Linux-Kernel-v4.1.17.zip" "Linux Kernel v4.1.17 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
+    print_file_info "Linux-Kernel-v4.14.336.zip" "Linux Kernel v4.14.336 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -82,7 +83,7 @@ IL10_system_emulator() {
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-      download_file "uml-utilities.deb" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2_amd64.deb" "external/uml-utilities.deb"
+      download_file "uml-utilities.deb" "http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2.1_amd64.deb" "external/uml-utilities.deb"
       dpkg -i "external/uml-utilities.deb"
       rm -f "external/uml-utilities.deb"
 
@@ -96,6 +97,7 @@ IL10_system_emulator() {
       download_file "strace.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
       download_file "Linux-Kernel-v4.1.52.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.52.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip"
       download_file "Linux-Kernel-v4.1.17.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
+      download_file "Linux-Kernel-v4.14.336.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
 
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/busybox.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/console.zip
@@ -107,6 +109,7 @@ IL10_system_emulator() {
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/strace.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip
+      unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip
 
       rm external/EMBA_Live_bins/*.zip
 
