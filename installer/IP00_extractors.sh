@@ -36,6 +36,8 @@ IP00_extractors(){
     print_pip_info "python-lzo"
     # vmdk extractor:
     print_tool_info "guestfs-tools" 1
+    # payload_dumper:
+    print_pip_info "fsspec"
     # Buffalo decryptor
     print_file_info "buffalo-enc.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-enc.c" "external/buffalo-enc.c"
     print_file_info "buffalo-lib.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.c"
