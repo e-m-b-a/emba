@@ -67,6 +67,7 @@ IL10_system_emulator() {
     print_file_info "strace.zip" "strace for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
     print_file_info "Linux-Kernel-v4.1.52.zip" "Linux Kernel v4.1.52 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.52.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip"
     print_file_info "Linux-Kernel-v4.1.17.zip" "Linux Kernel v4.1.17 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
+    print_file_info "Linux-Kernel-v4.14.336.zip" "Linux Kernel v4.14.336 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -96,6 +97,7 @@ IL10_system_emulator() {
       download_file "strace.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
       download_file "Linux-Kernel-v4.1.52.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.52.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip"
       download_file "Linux-Kernel-v4.1.17.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
+      download_file "Linux-Kernel-v4.14.336.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
 
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/busybox.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/console.zip
@@ -107,6 +109,7 @@ IL10_system_emulator() {
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/strace.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip
+      unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip
 
       rm external/EMBA_Live_bins/*.zip
 
