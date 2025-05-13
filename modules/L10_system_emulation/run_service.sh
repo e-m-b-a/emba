@@ -124,6 +124,7 @@ if ("${EMBA_ETC}"); then
       # Do this only if we have some network_type configuration which means we are not in the network discovery mode
       # None means we are in network discovery mode
       ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
+      # /firmadyne/network_config_state is filled from modules/L10_system_emulation/network.sh
       if [ "${ACTION}" != "None" ] && [ -f /firmadyne/network_config_state ]; then
         IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
         if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then

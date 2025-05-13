@@ -132,7 +132,6 @@ if ("${EMBA_NET}"); then
     fi
   fi
 
-  "${BUSYBOX}" sleep 15
   "${BUSYBOX}" echo "[*] Current network configuration:"
   "${BUSYBOX}" ifconfig -a
   "${BUSYBOX}" echo "network config done" > /firmadyne/network_config_state
