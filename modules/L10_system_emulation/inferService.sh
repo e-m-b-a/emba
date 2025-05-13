@@ -31,35 +31,34 @@ if [ -e /etc/manual.starter ]; then
 fi
 
 # we search for possible init startup directories and iterate them later for possible init scripts
+# the /firmadyne/startup_service are only tried to startup once during bootup
 for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*\.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${INIT_DIR}" -type f); do
-    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "factory\|dhcp\|reset\|halt\|shutdown"; then
-      # do not use entries like factory.init or init.factory and so on
-      continue
-    fi
     # currently we only use some services for startup
-    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init\|event"; then
+    # if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init\|event"; then
+    # if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|telnet\|ssh\|snmp"; then
       if [ -e "${SERVICE}" ]; then
-        if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+        if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/startup_service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
-          "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+          "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/startup_service
         fi
       fi
-    fi
+    # fi
   done
 done
 
 # we search for possible rc startup directories and iterate them later for possible rc startup scripts
+# the /firmadyne/startup_service are only tried to startup once during bootup
 for RC_DIR in $("${BUSYBOX}" find / -type d -name "*rc.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${RC_DIR}" -type f); do
-    if "${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" grep -q "http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init"; then
+    # if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|telnet\|ssh\|snmp"; then
       if [ -e "${SERVICE}" ]; then
-        if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+        if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/startup_service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
-          "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+          "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/startup_service
         fi
       fi
-    fi
+    # fi
   done
 done
 

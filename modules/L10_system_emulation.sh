@@ -446,6 +446,10 @@ create_emulation_filesystem() {
     cp "${MODULE_SUB_PATH}/network.sh" "${MNT_POINT}/firmadyne/network.sh" || true
     chmod a+x "${MNT_POINT}/firmadyne/network.sh"
 
+    # init_service.sh
+    cp "${MODULE_SUB_PATH}/init_service.sh" "${MNT_POINT}/firmadyne/init_service.sh" || true
+    chmod a+x "${MNT_POINT}/firmadyne/init_service.sh"
+
     # run_service.sh
     cp "${MODULE_SUB_PATH}/run_service.sh" "${MNT_POINT}/firmadyne/run_service.sh" || true
     chmod a+x "${MNT_POINT}/firmadyne/run_service.sh"
@@ -614,9 +618,7 @@ main_emulation() {
 
       # just in case there is an exit in the init -> comment it
       sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
-
     fi
-
 
     # Beside the check of init we also try to find other mounts for further filesystems
     # probably we need to tweak this further to also find mounts in binaries - strings?!?
@@ -635,6 +637,7 @@ main_emulation() {
     if (grep -q "preInit.sh" "${MNT_POINT}""${lINIT_FILE}"); then
       # if have our own backup init script we need to remove our own entries now
       sed -i -r 's/(.*preInit.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's/(.*init_service.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
       sed -i -r 's/(.*network.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
       sed -i -r 's/(.*run_service.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
     fi
@@ -642,6 +645,14 @@ main_emulation() {
     if [[ "${lINIT_OUT}" != *"preInit.sh" ]]; then
       if ! (grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
         echo "/firmadyne/preInit.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
+      fi
+    fi
+    if ! ( grep -q "/firmadyne/init_service.sh" "${lINIT_OUT}"); then
+      if [[ -f "${MNT_POINT}/firmadyne/startup_service" ]]; then
+        while read -r lSERVICE_NAME; do
+          print_output "[*] Created init service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
+        done < "${MNT_POINT}/firmadyne/startup_service"
+        echo "/firmadyne/init_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the init_service entry to ${lINIT_OUT}"
       fi
     fi
 
@@ -1506,11 +1517,11 @@ get_networking_details_emulation() {
     if [[ -v lPORTS_ARR[@] ]]; then
       for lPORT in "${lPORTS_ARR[@]}"; do
         lSERVICE_NAME=$(strip_color_codes "$(echo "${lPORT}" | sed -e 's/.*\((.*)\).*/\1/g' | tr -d "(" | tr -d ")")")
-        lSERVICE_NAME=$(echo "${lSERVICE_NAME}" | tr -dc '[:print:]')
+        lSERVICE_NAME="${lSERVICE_NAME//[![:print:]]/}"
         lTCP_PORT=$(strip_color_codes "$(echo "${lPORT}" | grep "SOCK_STREAM" | sed 's/.*SOCK_STREAM,\ //' | sort -u | cut -d: -f2)" || true)
-        lTCP_PORT=$(echo "${lTCP_PORT}" | tr -dc '[:print:]')
+        lTCP_PORT="${lTCP_PORT//[![:print:]]/}"
         lUDP_PORT=$(strip_color_codes "$(echo "${lPORT}" | grep "SOCK_DGRAM" | sed 's/.*SOCK_DGRAM,\ //' | sort -u | cut -d: -f2)" || true)
-        lUDP_PORT=$(echo "${lUDP_PORT}" | tr -dc '[:print:]')
+        lUDP_PORT="${lUDP_PORT//[![:print:]]/}"
 
         if [[ "${lTCP_PORT}" =~ [0-9]+ ]]; then
           print_output "[*] Detected TCP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${lTCP_PORT}${NC}"
@@ -1590,7 +1601,8 @@ get_networking_details_emulation() {
         print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC}"
         DETECTED_IP=1
         # get the network device from our interface candidate
-        lNETWORK_DEVICE="$(echo "${lINTERFACE_CAND}" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | tr -dc '[:print:]' || true)"
+        lNETWORK_DEVICE="$(echo "${lINTERFACE_CAND}" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 || true)"
+        lNETWORK_DEVICE="${lNETWORK_DEVICE//[![:print:]]/}"
         # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
@@ -2049,6 +2061,13 @@ write_network_config_to_filesystem() {
 
     # as we have the filesytem mounted right before the final run we can link libnvram now
     link_libnvram_so "${MNT_POINT}" "dbg"
+
+    # if we have a /firmadyne/network_config_state from a previous emulation run we need to remove it
+    # before the next emulation testrun
+    # This file is an indiator that the initial network config was done and we can start checking
+    # the network config during emulation
+    rm "${MNT_POINT}"/firmadyne/network_config_state 2>/dev/null || true
+
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
@@ -2469,7 +2488,10 @@ check_online_stat() {
     write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
     # this is just for the nice logfile
-    ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
+    if ! ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}"; then
+      print_output "[-] Warning: System was already available but it does not respond to ping anymore."
+      print_output "[-] Probably the IP address of the system has changed."
+    fi
     print_ln
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
 
@@ -2478,14 +2500,14 @@ check_online_stat() {
       if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -gt 0 ]]; then
         local lNMAP_INIT_LOG="${ARCHIVE_PATH}"/"${lNMAP_LOG/\.txt/\.${RANDOM}\.init}"
         cp "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${lNMAP_INIT_LOG}"
-        print_output "[+] Already dedected running network services via Nmap ... further detection active"
+        print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
         write_link "${lNMAP_INIT_LOG}"
         print_ln
       fi
-      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
+      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
-      [[ "${lCNT}" -gt 5 ]] && break
+      [[ "${lCNT}" -gt 10 ]] && break
       lCNT=$((lCNT+1))
     done
 
@@ -2746,7 +2768,7 @@ write_script_exec() {
       # shellcheck disable=SC2001
       lCOMMAND=$(echo "${lCOMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
       # shellcheck disable=SC2001
-      lCOMMAND=$(echo "${lCOMMAND}" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
+      lCOMMAND=$(echo "${lCOMMAND}" | sed "s|\"${LOG_PATH_MODULE:-}\"|\.|g")
     fi
 
     echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
@@ -2923,7 +2945,7 @@ write_results() {
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
   fi
-  write_log "${lFIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
+  write_log "${lFIRMWARE_PATH_orig:-NA};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 
