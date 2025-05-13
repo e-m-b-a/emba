@@ -63,6 +63,7 @@ IP00_extractors(){
         pip_install "bsdiff4"
         pip_install "python-lzo>=1.14"
         pip_install "pycryptodome"
+        pip_install "fsspec"
 
         if ! [[ -d external/payload_dumper ]]; then
           git clone https://github.com/EMBA-support-repos/payload_dumper.git external/payload_dumper
