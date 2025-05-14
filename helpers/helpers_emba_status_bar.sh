@@ -426,6 +426,9 @@ remove_status_bar() {
   fi
 
   sleep 1
+  if check_emba_ended; then
+    exit
+  fi
   local lRM_STR=""
   lLINE_POS="$(( lLINES - 6 ))"
   # lRM_STR="\e[""${lLINE_POS}"";1f\e[0J\e[;r\e[""${lLINE_POS}"";1f"

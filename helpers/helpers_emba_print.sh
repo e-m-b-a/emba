@@ -925,6 +925,9 @@ print_notification() {
 
   until [[ -f "${lNOTIFICATION_LOCATION}" ]]; do
     sleep 1
+    if check_emba_ended; then
+      exit
+    fi
   done
 
   local lCURRENT=""

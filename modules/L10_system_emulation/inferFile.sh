@@ -100,7 +100,7 @@ for entry in "${arr_prio[@]}"; do
 done
 if [ -s /firmadyne/init_tmp ]; then
   while read -r entry; do
-    if ! grep -q "${entry}" /firmadyne/init; then
+    if ! "${BUSYBOX}" grep -q "${entry}" /firmadyne/init; then
       "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
     fi
   done < /firmadyne/init_tmp

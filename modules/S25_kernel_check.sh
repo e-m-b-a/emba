@@ -115,6 +115,22 @@ populate_karrays() {
     KERNEL_DESC+=( "$(modinfo "${lK_MODULE}" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' | sort -u || true)" )
   done
 
+  # we also extract the kernel version from the /lib/modules/<Kernel version>/ path
+  local lKERNEL_MODULES_PATHS_ARR=()
+  local lPATH_TO_CHECK=""
+
+  mapfile -t lKERNEL_MODULES_PATHS_ARR < <(grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  for lPATH_TO_CHECK in "${lKERNEL_MODULES_PATHS_ARR[@]}" ; do
+    # we remove the complete path in front of the possible kernel version:
+    # asdf/bla/root-dir/lib/modules/ -> gets removed
+    lPATH_TO_CHECK="${lPATH_TO_CHECK/*\/lib\/modules\//}"
+    if [[ "${lK_VERSION_ARR[*]}" != *"${lPATH_TO_CHECK}"* ]]; then
+      # we currently do not care about additional parts of a path
+      # This is later handled during cleanup
+      KERNEL_VERSION+=("${lPATH_TO_CHECK}")
+    fi
+  done
+
   for lVER in "${KERNEL_VERSION[@]}" ; do
     demess_kv_version "${lVER}"
 
@@ -136,7 +152,10 @@ populate_karrays() {
   # if we have found a kernel version in binary kernel:
   if [[ -f "${S24_CSV_LOG}" ]]; then
     while IFS=";" read -r lK_VER; do
-      lK_VER="$(echo "${lK_VER}" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
+      shopt -s extglob
+      lK_VER="${lK_VER//Linux\ version\ /}"
+      lK_VER="${lK_VER//+([\(\)\#])/}"
+      shopt -u extglob
 
       demess_kv_version "${lK_VER}"
 
@@ -190,17 +209,19 @@ demess_kv_version() {
       continue
     fi
 
-    lKV=$(echo "${lVER}" | tr "-" " ")
-    lKV=$(echo "${lKV}" | tr "+" " ")
-    lKV=$(echo "${lKV}" | tr "_" " ")
-    lKV=$(echo "${lKV}" | tr "/" " ")
-    # the first field is the real kernel version:
-    lKV=$(echo "${lKV}" | cut -d\  -f1)
+    # split dirty things on space
+    shopt -s extglob
+    lKV="${lVER//+([-+_\/\ ])/\ }"
+    shopt -u extglob
 
-    while echo "${lKV}" | grep -q '[a-zA-Z]'; do
+    # the first field is usually the real kernel version:
+    lKV="${lKV/\ *}"
+
+    while [[ "${lKV}" =~ [a-zA-Z] ]]; do
       lKV="${lKV::-1}"
     done
-    KV_ARR=("${KV_ARR[@]}" "${lKV}")
+
+    KV_ARR+=("${lKV}")
   done
 }
 
@@ -278,15 +299,9 @@ analyze_kernel_module() {
       continue
     fi
     VERIFIED_KERNEL_MODULES=$((VERIFIED_KERNEL_MODULES+1))
-    # modinfos can run in parallel:
-    if [[ "${THREADED}" -eq 1 ]]; then
-      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
-      local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
-    else
-      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}"
-    fi
+    module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
   done
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S25_ARR[@]}"
@@ -335,6 +350,15 @@ module_analyzer() {
     lK_VERSION=${lK_VERSION/vermagic:\ }
     lK_VERSION=$(clean_package_details "${lK_VERSION}")
     demess_kv_version "${lK_VERSION}"
+    # => we make a nice KV_ARR with the one version only
+    # this means we can further proceed with ${KV_ARR[*]} to access
+    # the complete version
+
+    # Just in case we have no kernel version extracted from the module
+    # we can use the original array of kernel versions:
+    if [[ "${#KV_ARR[@]}" -eq 0 && "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
+      KV_ARR+=("${KERNEL_VERSION[0]}")
+    fi
 
     lMOD_VERSION=$(modinfo "${lKMODULE}" | grep "^version:" || true)
     lMOD_VERSION=${lMOD_VERSION/version:\ }
@@ -407,11 +431,11 @@ module_analyzer() {
 
     if [[ "${#KV_ARR[@]}" -gt 0 ]]; then
       # ensure we do not log the kernel multiple times
-      local lPACKAGING_SYSTEM="linux_kernel+module"
       local lK_AUTHOR="linux"
       local lLICENSE="GPL-2.0-only"
       # we can rewrite the APP_NAME as we also log the source_path from where we know the exact source of this kernel entry
       local lAPP_NAME="linux_kernel"
+      local lPACKAGING_SYSTEM="${lAPP_NAME}+module"
 
       lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
       lPURL_IDENTIFIER=$(build_generic_purl ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
@@ -434,7 +458,7 @@ module_analyzer() {
       else
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-        write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
+        write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};${lLICENSE};kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
       fi
     fi
   elif [[ "${lKMODULE}" == *".o" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
