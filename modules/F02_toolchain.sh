@@ -104,7 +104,9 @@ F02_toolchain() {
       write_link "s24"
       lNEG_LOG=1
     done
-    print_ln
+    if [[ -n "${lK_RELEASE_DATE}" ]]; then
+      print_ln
+    fi
   elif [[ "${#lKERNEL_V_ARR_S25[@]}" -gt 0 ]]; then
     for lKERNEL_V in "${lKERNEL_V_ARR_S25[@]}"; do
       if [[ -z "${lKERNEL_V}" ]]; then
