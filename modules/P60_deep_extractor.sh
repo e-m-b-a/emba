@@ -105,26 +105,6 @@ check_disk_space() {
   DISK_SPACE=$(du -hm "${FIRMWARE_PATH_CP}" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1 || true)
 }
 
-disk_space_protection() {
-  local lSEARCHER="${1:-}"
-  local lDDISK="${LOG_DIR}"
-  local lFREE_SPACE=""
-
-  check_disk_space
-  lFREE_SPACE=$(df --output=avail "${lDDISK}" | awk 'NR==2')
-  if [[ "${lFREE_SPACE}" -lt 100000 ]] || [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
-    print_ln "no_log"
-    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-    print_output "[!] $(print_date) - Ending extraction processes" "main"
-    pgrep -a -f "binwalk.*${lSEARCHER}.*" || true
-    pkill -f ".*binwalk.*${lSEARCHER}.*" || true
-    pkill -f ".*extract\.py.*${lSEARCHER}.*" || true
-    # PID is from wait_for_extractor
-    kill -9 "${PID}" 2>/dev/null || true
-    DISK_SPACE_CRIT=1
-  fi
-}
-
 deep_extractor() {
   sub_module_title "Deep extraction mode"
   local lFILES_AFTER_DEEP=0
@@ -135,6 +115,9 @@ deep_extractor() {
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] No ${P99_CSV_LOG} log file available ... trying to create it now"
     mapfile -t lFILES_DEEP_PRE_ARR < <(find "${LOG_DIR}/firmware" -type f)
+    if [[ -f "${FIRMWARE_PATH}" ]]; then
+      lFILES_DEEP_PRE_ARR+=("${FIRMWARE_PATH}")
+    fi
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DEEP_PRE_ARR[@]}${NC} files ... could take some time" "no_log"
 
     for lBINARY in "${lFILES_DEEP_PRE_ARR[@]}" ; do
@@ -332,24 +315,3 @@ deeper_extractor_threader() {
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_P60[@]}"
 }
 
-wait_for_extractor() {
-  export OUTPUT_DIR="${FIRMWARE_PATH_CP}"
-  local lSEARCHER=""
-  lSEARCHER=$(basename "${FIRMWARE_PATH}")
-
-  # this is not solid and we probably have to adjust it in the future
-  # but for now it works
-  lSEARCHER="$(safe_echo "${lSEARCHER}" | tr "(" "." | tr ")" ".")"
-
-  for PID in "${WAIT_PIDS[@]}"; do
-    local lrunning=1
-    while [[ ${lrunning} -eq 1 ]]; do
-      print_dot
-      if ! pgrep -v grep | grep -q "${PID}"; then
-        lrunning=0
-      fi
-      disk_space_protection "${lSEARCHER}"
-      sleep 1
-    done
-  done
-}

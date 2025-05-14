@@ -232,7 +232,7 @@ uefi_extractor() {
   local lNVARS=0
   local lPE32_IMAGE=0
   local lDRIVER_COUNT=0
-  export EFI_ARCH=""
+  local lEFI_ARCH=""
 
   if ! [[ -f "${lFIRMWARE_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -277,8 +277,6 @@ uefi_extractor() {
   lDRIVER_COUNT=$(grep -c "DXE driver" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
 
   mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
-  EFI_ARCH=$(grep 'info.txt' "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -n 1)
-  EFI_ARCH=$(grep 'Machine type:' "${EFI_ARCH}" | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
 
   print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
@@ -286,16 +284,17 @@ uefi_extractor() {
   for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
     binary_architecture_threader "${lBINARY}" "P35_UEFI_extractor" &
     local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
+  lEFI_ARCH=$(find "${lEXTRACTION_DIR_}" -name "info.txt" -exec grep "Machine type" {} \; | sort -u | sed -E 's/Machine\ type\:\ //g' | head -n 1)
+
   print_output "[*] Found ${ORANGE}${lNVARS}${NC} NVARS and ${ORANGE}${lDRIVER_COUNT}${NC} drivers."
-  if [[ -n "${EFI_ARCH}" ]]; then
-    print_output "[*] Found ${ORANGE}${lPE32_IMAGE}${NC} PE32 images for architecture ${ORANGE}${EFI_ARCH}${NC} drivers."
-    print_output "[+] Possible architecture details found (${ORANGE}UEFI Extractor${GREEN}): ${ORANGE}${EFI_ARCH}${NC}"
-    backup_var "EFI_ARCH" "${EFI_ARCH}"
+  if [[ -n "${lEFI_ARCH}" ]]; then
+    print_output "[*] Found ${ORANGE}${lPE32_IMAGE}${NC} PE32 images for architecture ${ORANGE}${lEFI_ARCH}${NC} drivers."
+    print_output "[+] Possible architecture details found (${ORANGE}UEFI Extractor${GREEN}): ${ORANGE}${lEFI_ARCH}${NC}"
+    backup_var "EFI_ARCH" "${lEFI_ARCH}"
     if [[ "${FILES_UEFI}" -gt 0 ]] && [[ "${lDIRS_UEFI}" -gt 0 ]]; then
       # with UEFI_VERIFIED=1 we do not run deep-extraction
       export UEFI_VERIFIED=1
@@ -305,5 +304,5 @@ uefi_extractor() {
   print_ln
 
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "UEFI architecture"
-  write_csv_log "UEFITool extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UEFI}" "${lDIRS_UEFI}" "${EFI_ARCH}"
+  write_csv_log "UEFITool extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UEFI}" "${lDIRS_UEFI}" "${lEFI_ARCH}"
 }
