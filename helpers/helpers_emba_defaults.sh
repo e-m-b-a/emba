@@ -32,6 +32,7 @@ set_defaults() {
   export MAX_EXT_CHECK_BINS=20
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
+  export DEEP_EXTRACTOR="unblob"  # binwalk/unblob
   export DEEP_EXT_DEPTH=4
   export FACT_EXTRACTOR=0
   export FIRMWARE=0

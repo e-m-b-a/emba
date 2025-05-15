@@ -38,6 +38,12 @@ P60_deep_extractor() {
   module_title "Binary firmware deep extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  local lFILES_P99_BEFORE=0
+  if [[ -f "${P99_CSV_LOG}" ]]; then
+    lFILES_P99_BEFORE=$(wc -l "${P99_CSV_LOG}")
+    lFILES_P99_BEFORE="${lFILES_P99/\ *}"
+  fi
+
   check_disk_space
   if ! [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
     deep_extractor
@@ -51,7 +57,6 @@ P60_deep_extractor() {
     module_end_log "${FUNCNAME[0]}" 1
     return
   fi
-
 
   mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
   local lFILES_P99=0
@@ -83,6 +88,7 @@ P60_deep_extractor() {
     print_ln
     print_output "[*] Found ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files at all."
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
+    print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_P99_BEFORE}${NC} files, after deep extraction we have now ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files extracted."
 
     tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
 
@@ -170,10 +176,6 @@ deep_extractor() {
     deeper_extractor_helper
     detect_root_dir_helper "${FIRMWARE_PATH_CP}"
   fi
-
-  lFILES_AFTER_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
-
-  print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_BEFORE_DEEP}${NC} files, after deep extraction we have now ${ORANGE}${lFILES_AFTER_DEEP}${NC} files extracted."
 }
 
 deeper_extractor_helper() {
@@ -188,12 +190,11 @@ deeper_extractor_helper() {
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
+    MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
     deeper_extractor_threader "${lFILE_TMP}" &
     lBIN_PID="$!"
-    disown "${lBIN_PID}" 2> /dev/null || true
     lWAIT_PIDS_P60_init+=( "${lBIN_PID}" )
-    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_P60_init
-    MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
+    max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_P60_init
   done
   wait_for_pid "${lWAIT_PIDS_P60_init[@]}"
 }
@@ -216,15 +217,12 @@ deeper_extractor_threader() {
   if [[ "${VMDK_DETECTED}" -eq 1 ]]; then
     vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted" &
     lBIN_PID="$!"
-    disown "${lBIN_PID}" 2> /dev/null || true
     lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     # now handled via unblob
     # elif [[ "${UBI_IMAGE}" -eq 1 ]]; then
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted"
@@ -234,8 +232,6 @@ deeper_extractor_threader() {
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted"
@@ -245,8 +241,6 @@ deeper_extractor_threader() {
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted"
@@ -254,15 +248,12 @@ deeper_extractor_threader() {
     elif [[ "${EXT_IMAGE}" -eq 1 ]]; then
       ext_extractor "${lFILE_TMP}" "${lFILE_TMP}_ext_extracted" &
       lBIN_PID="$!"
-      disown "${lBIN_PID}" 2> /dev/null || true
       lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     # now handled via unblob
     # elif [[ "${ENGENIUS_ENC_DETECTED}" -ne 0 ]]; then
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted"
@@ -270,43 +261,43 @@ deeper_extractor_threader() {
     elif [[ "${BSD_UFS}" -ne 0 ]]; then
         ufs_extractor "${lFILE_TMP}" "${lFILE_TMP}_bsd_ufs_extracted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     elif [[ "${ANDROID_OTA}" -ne 0 ]]; then
         android_ota_extractor "${lFILE_TMP}" "${lFILE_TMP}_android_ota_extracted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     elif [[ "${OPENSSL_ENC_DETECTED}" -ne 0 ]]; then
         foscam_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_foscam_enc_extracted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     elif [[ "${BUFFALO_ENC_DETECTED}" -ne 0 ]]; then
         buffalo_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_buffalo_enc_extracted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     elif [[ "${ZYXEL_ZIP}" -ne 0 ]]; then
         zyxel_zip_extractor "${lFILE_TMP}" "${lFILE_TMP}_zyxel_enc_extracted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     elif [[ "${QCOW_DETECTED}" -ne 0 ]]; then
         qcow_extractor "${lFILE_TMP}" "${lFILE_TMP}_qemu_qcow_extracted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     elif [[ "${BMC_ENC_DETECTED}" -ne 0 ]]; then
         bmc_extractor "${lFILE_TMP}" "${lFILE_TMP}_bmc_decrypted" &
         lBIN_PID="$!"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     else
-      # default case to Unblob
-      unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 1 &
-      lBIN_PID="$!"
-      disown "${lBIN_PID}" 2> /dev/null || true
+      # configure the extractor to use in the default configuration file
+      # or via scanning profile
+      # EMBA usually uses unblob as default for the deep extractor
+      if [[ "${DEEP_EXTRACTOR}" == "binwalk" ]]; then
+        binwalker_matryoshka "${lFILE_TMP}" "${lFILE_TMP}_binwalk_extracted" &
+        lBIN_PID="$!"
+      else
+        # default case to Unblob
+        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 1 &
+        lBIN_PID="$!"
+      fi
       lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     fi
 
