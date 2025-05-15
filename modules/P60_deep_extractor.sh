@@ -138,8 +138,6 @@ deep_extractor() {
     fi
   fi
 
-  lFILES_BEFORE_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
-
   # if we run into the deep extraction mode we always do at least one extraction round:
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 0 ]]; then
     print_output "[*] Deep extraction - 1st round"
