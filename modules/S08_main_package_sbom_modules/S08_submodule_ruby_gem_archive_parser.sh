@@ -96,7 +96,6 @@ S08_submodule_ruby_gem_archive_parser() {
 
       lAPP_LIC="NA"
       # lAPP_LIC=$(grep '^licenses' "${TMP_DIR}"/gems/metadata || true)
-      # lAPP_LIC=$(safe_echo "${lAPP_LIC}" | tr -dc '[:print:]')
 
       # grep -A1 "^version: " metadata | grep "[0-9]\."
       lAPP_VERS=$(grep -A1 '^version' "${TMP_DIR}"/gems/metadata | grep "[0-9]" || true)

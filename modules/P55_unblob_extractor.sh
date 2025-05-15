@@ -165,7 +165,7 @@ P55_unblob_extractor() {
 unblobber() {
   local lFIRMWARE_PATH="${1:-}"
   local lOUTPUT_DIR_UNBLOB="${2:-}"
-  local lVERBOSE="${3:-1}"
+  local lVERBOSE="${3:-0}"
   local lUNBLOB_BIN="unblob"
   local lTIMEOUT="300m"
 

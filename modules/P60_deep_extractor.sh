@@ -38,6 +38,12 @@ P60_deep_extractor() {
   module_title "Binary firmware deep extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  local lFILES_P99_BEFORE=0
+  if [[ -f "${P99_CSV_LOG}" ]]; then
+    lFILES_P99_BEFORE=$(wc -l "${P99_CSV_LOG}")
+    lFILES_P99_BEFORE="${lFILES_P99_BEFORE/\ *}"
+  fi
+
   check_disk_space
   if ! [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
     deep_extractor
@@ -51,7 +57,6 @@ P60_deep_extractor() {
     module_end_log "${FUNCNAME[0]}" 1
     return
   fi
-
 
   mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
   local lFILES_P99=0
@@ -83,6 +88,7 @@ P60_deep_extractor() {
     print_ln
     print_output "[*] Found ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files at all."
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
+    print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_P99_BEFORE}${NC} files, after deep extraction we have now ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files extracted."
 
     tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
 
@@ -105,36 +111,17 @@ check_disk_space() {
   DISK_SPACE=$(du -hm "${FIRMWARE_PATH_CP}" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1 || true)
 }
 
-disk_space_protection() {
-  local lSEARCHER="${1:-}"
-  local lDDISK="${LOG_DIR}"
-  local lFREE_SPACE=""
-
-  check_disk_space
-  lFREE_SPACE=$(df --output=avail "${lDDISK}" | awk 'NR==2')
-  if [[ "${lFREE_SPACE}" -lt 100000 ]] || [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
-    print_ln "no_log"
-    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-    print_output "[!] $(print_date) - Ending extraction processes" "main"
-    pgrep -a -f "binwalk.*${lSEARCHER}.*" || true
-    pkill -f ".*binwalk.*${lSEARCHER}.*" || true
-    pkill -f ".*extract\.py.*${lSEARCHER}.*" || true
-    # PID is from wait_for_extractor
-    kill -9 "${PID}" 2>/dev/null || true
-    DISK_SPACE_CRIT=1
-  fi
-}
-
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  local lFILES_AFTER_DEEP=0
-  local lFILES_BEFORE_DEEP=0
 
   local lFILES_DEEP_PRE_ARR=()
   local lBINARY=""
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] No ${P99_CSV_LOG} log file available ... trying to create it now"
     mapfile -t lFILES_DEEP_PRE_ARR < <(find "${LOG_DIR}/firmware" -type f)
+    if [[ -f "${FIRMWARE_PATH}" ]]; then
+      lFILES_DEEP_PRE_ARR+=("${FIRMWARE_PATH}")
+    fi
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DEEP_PRE_ARR[@]}${NC} files ... could take some time" "no_log"
 
     for lBINARY in "${lFILES_DEEP_PRE_ARR[@]}" ; do
@@ -150,8 +137,6 @@ deep_extractor() {
       return
     fi
   fi
-
-  lFILES_BEFORE_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
 
   # if we run into the deep extraction mode we always do at least one extraction round:
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 0 ]]; then
@@ -187,10 +172,6 @@ deep_extractor() {
     deeper_extractor_helper
     detect_root_dir_helper "${FIRMWARE_PATH_CP}"
   fi
-
-  lFILES_AFTER_DEEP=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')
-
-  print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_BEFORE_DEEP}${NC} files, after deep extraction we have now ${ORANGE}${lFILES_AFTER_DEEP}${NC} files extracted."
 }
 
 deeper_extractor_helper() {
@@ -199,47 +180,44 @@ deeper_extractor_helper() {
   local lFILE_DETAILS=""
   local lBIN_PID=""
   local lWAIT_PIDS_P60=()
-  local lFREE_SPACE=""
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
-
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
-    lFILE_DETAILS=$(file -b "${lFILE_TMP}")
-    if [[ "${lFILE_DETAILS}" == *"text"* ]]; then
-      continue
-    fi
-
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
-    # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
-    # already extracted stuff is ignored
-
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
+    MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
+    deeper_extractor_threader "${lFILE_TMP}" &
+    lBIN_PID="$!"
+    lWAIT_PIDS_P60_init+=( "${lBIN_PID}" )
+    max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_P60_init
+  done
+  wait_for_pid "${lWAIT_PIDS_P60_init[@]}"
+}
 
-    print_output "[*] Details of file: ${ORANGE}${lFILE_TMP}${NC}"
-    print_output "$(indent "$(orange "${lFILE_DETAILS}")")"
-    print_output "$(indent "$(orange "$(md5sum "${lFILE_TMP}")")")"
+deeper_extractor_threader() {
+  local lFILE_TMP="${1:-}"
+  lFILE_DETAILS=$(file -b "${lFILE_TMP}")
+  if [[ "${lFILE_DETAILS}" == *"text"* ]]; then
+    return
+  fi
 
-    # do a quick check if EMBA should handle the file or we give it to unblob:
-    # fw_bin_detector is a function from p02
-    fw_bin_detector "${lFILE_TMP}"
+  print_output "[*] Details of file: ${ORANGE}${lFILE_TMP}${NC}"
+  print_output "$(indent "$(orange "${lFILE_DETAILS}")")"
+  print_output "$(indent "$(orange "$(md5sum "${lFILE_TMP}")")")"
 
-    if [[ "${VMDK_DETECTED}" -eq 1 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
-        vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted" &
-        lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted"
-      fi
+  # do a quick check if EMBA should handle the file or we give it to unblob:
+  # fw_bin_detector is a function from p02
+  fw_bin_detector "${lFILE_TMP}"
+
+  if [[ "${VMDK_DETECTED}" -eq 1 ]]; then
+    vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted" &
+    lBIN_PID="$!"
+    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     # now handled via unblob
     # elif [[ "${UBI_IMAGE}" -eq 1 ]]; then
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted"
@@ -249,8 +227,6 @@ deeper_extractor_helper() {
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted"
@@ -260,158 +236,68 @@ deeper_extractor_helper() {
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted"
     #  fi
     elif [[ "${EXT_IMAGE}" -eq 1 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
-        ext_extractor "${lFILE_TMP}" "${lFILE_TMP}_ext_extracted" &
-        lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        ext_extractor "${lFILE_TMP}" "${lFILE_TMP}_ext_extracted"
-      fi
+      ext_extractor "${lFILE_TMP}" "${lFILE_TMP}_ext_extracted" &
+      lBIN_PID="$!"
+      lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     # now handled via unblob
     # elif [[ "${ENGENIUS_ENC_DETECTED}" -ne 0 ]]; then
     #  if [[ "${THREADED}" -eq 1 ]]; then
     #    engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted" &
     #    lBIN_PID="$!"
-    #    store_kill_pids "${lBIN_PID}"
-    #    disown "${lBIN_PID}" 2> /dev/null || true
     #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     #  else
     #    engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted"
     #  fi
     elif [[ "${BSD_UFS}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         ufs_extractor "${lFILE_TMP}" "${lFILE_TMP}_bsd_ufs_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        ufs_extractor "${lFILE_TMP}" "${lFILE_TMP}_bsd_ufs_extracted"
-      fi
     elif [[ "${ANDROID_OTA}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         android_ota_extractor "${lFILE_TMP}" "${lFILE_TMP}_android_ota_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        android_ota_extractor "${lFILE_TMP}" "${lFILE_TMP}_android_ota_extracted"
-      fi
     elif [[ "${OPENSSL_ENC_DETECTED}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         foscam_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_foscam_enc_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        foscam_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_foscam_enc_extracted"
-      fi
     elif [[ "${BUFFALO_ENC_DETECTED}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         buffalo_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_buffalo_enc_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        buffalo_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_buffalo_enc_extracted"
-      fi
     elif [[ "${ZYXEL_ZIP}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         zyxel_zip_extractor "${lFILE_TMP}" "${lFILE_TMP}_zyxel_enc_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        zyxel_zip_extractor "${lFILE_TMP}" "${lFILE_TMP}_zyxel_enc_extracted"
-      fi
     elif [[ "${QCOW_DETECTED}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         qcow_extractor "${lFILE_TMP}" "${lFILE_TMP}_qemu_qcow_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        qcow_extractor "${lFILE_TMP}" "${lFILE_TMP}_qemu_qcow_extracted"
-      fi
     elif [[ "${BMC_ENC_DETECTED}" -ne 0 ]]; then
-      if [[ "${THREADED}" -eq 1 ]]; then
         bmc_extractor "${lFILE_TMP}" "${lFILE_TMP}_bmc_decrypted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
         lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-      else
-        bmc_extractor "${lFILE_TMP}" "${lFILE_TMP}_qemu_bmc_decrypted"
-      fi
     else
-      # default case to Unblob
-      if [[ "${THREADED}" -eq 1 ]]; then
-        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 1 &
+      # configure the extractor to use in the default configuration file
+      # or via scanning profile
+      # EMBA usually uses unblob as default for the deep extractor
+      if [[ "${DEEP_EXTRACTOR}" == "binwalk" ]]; then
+        binwalker_matryoshka "${lFILE_TMP}" "${lFILE_TMP}_binwalk_extracted" &
         lBIN_PID="$!"
-        store_kill_pids "${lBIN_PID}"
-        disown "${lBIN_PID}" 2> /dev/null || true
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
       else
-        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 1
+        # default case to Unblob
+        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 0 &
+        lBIN_PID="$!"
       fi
+      lWAIT_PIDS_P60+=( "${lBIN_PID}" )
     fi
 
-    MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
-    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_P60
-
-    check_disk_space
-
-    lFREE_SPACE=$(df --output=avail "${LOG_DIR}" | awk 'NR==2')
-    if [[ "${lFREE_SPACE}" -lt 100000 ]]; then
-      # this should stop the complete EMBA test in the future - currenlty it is work in progress
-      print_output "[!] $(print_date) - The system is running out of disk space ${ORANGE}${lFREE_SPACE}${NC}" "main"
-      print_output "[!] $(print_date) - Ending EMBA firmware analysis processes" "main"
-      cleaner 1
-      exit
-    elif [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
-      # this stops the deep extractor but not EMBA
-      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(print_date) - Ending extraction processes" "main"
-      DISK_SPACE_CRIT=1
-      break
-    fi
-  done
+  max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_P60
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_P60[@]}"
 }
 
-wait_for_extractor() {
-  export OUTPUT_DIR="${FIRMWARE_PATH_CP}"
-  local lSEARCHER=""
-  lSEARCHER=$(basename "${FIRMWARE_PATH}")
-
-  # this is not solid and we probably have to adjust it in the future
-  # but for now it works
-  lSEARCHER="$(safe_echo "${lSEARCHER}" | tr "(" "." | tr ")" ".")"
-
-  for PID in "${WAIT_PIDS[@]}"; do
-    local lrunning=1
-    while [[ ${lrunning} -eq 1 ]]; do
-      print_dot
-      if ! pgrep -v grep | grep -q "${PID}"; then
-        lrunning=0
-      fi
-      disk_space_protection "${lSEARCHER}"
-      sleep 1
-    done
-  done
-}
