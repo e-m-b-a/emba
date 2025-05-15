@@ -295,7 +295,7 @@ deeper_extractor_threader() {
         lBIN_PID="$!"
       else
         # default case to Unblob
-        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 1 &
+        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 0 &
         lBIN_PID="$!"
       fi
       lWAIT_PIDS_P60+=( "${lBIN_PID}" )
