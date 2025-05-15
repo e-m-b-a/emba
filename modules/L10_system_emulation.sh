@@ -1072,6 +1072,9 @@ handle_fs_mounts() {
   local lFS_MOUNT=""
 
   for lFS_MOUNT in "${lFS_MOUNTS_ARR[@]}"; do
+    if [[ -z "${lFS_MOUNT}" ]]; then
+      continue
+    fi
     local lMOUNT_PT=""
     local lMOUNT_FS=""
     local lFS_FIND=""
