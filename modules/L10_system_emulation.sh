@@ -1948,11 +1948,11 @@ setup_network_emulation() {
 
   # a br interface with a number ... eg br0, br1 ... but no br-lan interface
   if [[ "${lNETWORK_DEVICE}" == *"br"* ]] && [[ "${lNETWORK_DEVICE}" == *[0-9]* ]]; then
-    BR_NUM=$(echo "${lNETWORK_DEVICE}" | sed -e "s/br//")
+    BR_NUM="${lNETWORK_DEVICE/br}"
     BR_NUM="${BR_NUM//[![:print:]]/}"
   fi
   if [[ "${lETH_INT}" == *"eth"* ]]; then
-    ETH_NUM=$(echo "${lETH_INT}" | sed -e "s/eth//")
+    ETH_NUM="${lETH_INT/eth}"
     ETH_NUM="${ETH_NUM//[![:print:]]/}"
   fi
 

@@ -126,6 +126,7 @@ if ("${EMBA_ETC}"); then
       ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
       # /firmadyne/network_config_state is filled from modules/L10_system_emulation/network.sh
       if [ "${ACTION}" != "None" ] && [ -f /firmadyne/network_config_state ]; then
+        # shellcheck disable=SC2016
         IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
         if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
           "${BUSYBOX}" echo -e "${ORANGE}[*] WARNING: Looks as we lost our network configuration -> reconfiguration starting now ...${NC}"
