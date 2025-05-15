@@ -104,7 +104,9 @@ F02_toolchain() {
       write_link "s24"
       lNEG_LOG=1
     done
-    print_ln
+    if [[ -n "${lK_RELEASE_DATE}" ]]; then
+      print_ln
+    fi
   elif [[ "${#lKERNEL_V_ARR_S25[@]}" -gt 0 ]]; then
     for lKERNEL_V in "${lKERNEL_V_ARR_S25[@]}"; do
       if [[ -z "${lKERNEL_V}" ]]; then
@@ -138,7 +140,7 @@ F02_toolchain() {
       mapfile -t lGCC_VERSION_ARR < <(echo "${lKERNEL_STR}" | grep -o -i -E "gcc version [0-9](\.[0-9]+)+?" | sort -u || true)
       mapfile -t lGCC_VERSION_1_ARR < <(echo "${lKERNEL_STR}" | grep -o -E "GCC [0-9](\.[0-9]+)+?" | sort -u || true)
       lGCC_VERSION_ARR=( "${lGCC_VERSION_ARR[@]}" "${lGCC_VERSION_1_ARR[@]}")
-      eval "lGCC_VERSION_ARR=($(for i in "${lGCC_VERSION_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+      lGCC_VERSION_ARR=("$(printf "%s\n" "${lGCC_VERSION_ARR[@]}" | sort -u)")
 
       if [[ "${#lGCC_VERSION_ARR[@]}" -gt 0 ]]; then
         for lGCC_VERSION in "${lGCC_VERSION_ARR[@]}"; do

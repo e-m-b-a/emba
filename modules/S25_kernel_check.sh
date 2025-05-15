@@ -125,6 +125,8 @@ populate_karrays() {
     # asdf/bla/root-dir/lib/modules/ -> gets removed
     lPATH_TO_CHECK="${lPATH_TO_CHECK/*\/lib\/modules\//}"
     if [[ "${lK_VERSION_ARR[*]}" != *"${lPATH_TO_CHECK}"* ]]; then
+      # we currently do not care about additional parts of a path
+      # This is later handled during cleanup
       KERNEL_VERSION+=("${lPATH_TO_CHECK}")
     fi
   done
@@ -297,15 +299,9 @@ analyze_kernel_module() {
       continue
     fi
     VERIFIED_KERNEL_MODULES=$((VERIFIED_KERNEL_MODULES+1))
-    # modinfos can run in parallel:
-    if [[ "${THREADED}" -eq 1 ]]; then
-      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
-      local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
-    else
-      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}"
-    fi
+    module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
   done
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S25_ARR[@]}"
@@ -357,6 +353,12 @@ module_analyzer() {
     # => we make a nice KV_ARR with the one version only
     # this means we can further proceed with ${KV_ARR[*]} to access
     # the complete version
+
+    # Just in case we have no kernel version extracted from the module
+    # we can use the original array of kernel versions:
+    if [[ "${#KV_ARR[@]}" -eq 0 && "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
+      KV_ARR+=("${KERNEL_VERSION[0]}")
+    fi
 
     lMOD_VERSION=$(modinfo "${lKMODULE}" | grep "^version:" || true)
     lMOD_VERSION=${lMOD_VERSION/version:\ }
