@@ -1618,7 +1618,7 @@ get_networking_details_emulation() {
                 # lBRIDGE_INT -> br_add_if[PID: 494 (brctl)]: br:br0 dev:eth0.1
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
                 # lNETWORK_DEVICE -> br0
-                lBRIDGE_INT="$(echo "${lBRIDGE_INT}" | tr -dc '[:print:]')"
+                lBRIDGE_INT="${lBRIDGE_INT//[![:print:]]/}"
                 print_output "[*] Testing bridge interface: ${ORANGE}${lBRIDGE_INT}${NC}" "no_log"
                 lVLAN_ID="NONE"
                 # the lBRIDGE_INT entry also includes our lNETWORK_DEVICE ... eg br:br0 dev:eth1.1
@@ -1634,14 +1634,16 @@ get_networking_details_emulation() {
                 fi
                 # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
                 # extract the eth1 from dev:eth1
-                lETH_INT="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                lETH_INT="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2)"
+                lETH_INT="${lETH_INT//[![:print:]]/}"
                 # do we have vlans?
                 if [[ -v lVLAN_INFOS[@] ]]; then
                   iterate_vlans "${lETH_INT}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${IP_ADDRESS_}" "${lVLAN_INFOS[@]}"
                 fi
                 if echo "${lBRIDGE_INT}" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
                   # we have a vlan entry in our lBRIDGE_INT entry br:br0 dev:eth1.1:
-                  lVLAN_ID="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
+                  lVLAN_ID="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f2)"
+                  lVLAN_ID="${lVLAN_ID//[![:print:]]/}"
                 fi
                 if [[ -v lVLAN_HW_INFO_DEV[@] ]]; then
                   # lets store the current details before we do this VLAN iteration
@@ -1650,7 +1652,7 @@ get_networking_details_emulation() {
                   # we check all these entries now and generate additional configurations for further evaluation
                   for lETH_INT in "${lVLAN_HW_INFO_DEV[@]}"; do
                     # if we found multiple interfaces belonging to a vlan we need to store all of them:
-                    lETH_INT=$(echo "${lETH_INT}" | tr -dc '[:print:]')
+                    lETH_INT="${lETH_INT//[![:print:]]/}"
                     lVLAN_ID=$(grep -a -o -E "adding VLAN [0-9] to HW filter on device ${lETH_INT}" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $3}' | sort -u)
                     # initial entry with possible vlan information
                     l_NW_ENTRY_PRIO=$((5+lADJUST_PRIO))
@@ -1680,7 +1682,8 @@ get_networking_details_emulation() {
                   store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
                 fi
                 # if we have found that the br entry has for eg an ethX interface, we now check for the real br interface entry -> lNETWORK_DEVICE
-                lNETWORK_DEVICE="$(echo "${lBRIDGE_INT}" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                lNETWORK_DEVICE="$(echo "${lBRIDGE_INT}" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2)"
+                lNETWORK_DEVICE="${lETH_INT//[![:print:]]/}"
                 l_NW_ENTRY_PRIO=$((4+lADJUST_PRIO))
                 store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE:-br0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-0}" "${lNETWORK_MODE:-bridge}" "${l_NW_ENTRY_PRIO}"
               done
@@ -1703,7 +1706,8 @@ get_networking_details_emulation() {
             if echo "${lNETWORK_DEVICE}" | grep -q -E "[0-9]\.[0-9]"; then
               # now we know that there is a vlan number - extract the vlan number now:
               l_NW_ENTRY_PRIO=$((4+lADJUST_PRIO))
-              lVLAN_ID="$(echo "${lNETWORK_DEVICE}" | cut -d. -f2 | grep -E "[0-9]+" | tr -dc '[:print:]')"
+              lVLAN_ID="$(echo "${lNETWORK_DEVICE}" | cut -d. -f2 | grep -E "[0-9]+")"
+              lVLAN_ID="${lVLAN_ID//[![:print:]]/}"
             elif [[ -v lVLAN_INFOS[@] ]]; then
               lETH_INT="${lNETWORK_DEVICE/\.*}"
               iterate_vlans "${lETH_INT}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${IP_ADDRESS_}" "${lVLAN_INFOS[@]}"
@@ -1773,14 +1777,17 @@ get_networking_details_emulation() {
         # lBRIDGE_INT -> br_add_if[PID: 494 (brctl)]: br:br0 dev:eth0.1
         # lNETWORK_DEVICE -> br0
         print_output "[*] Possible bridge interface candidate detected: ${ORANGE}${lBRIDGE_INT}${NC}"
-        lETH_INT="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
-        lNETWORK_DEVICE="$(echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
+        lETH_INT="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 || true)"
+        lETH_INT="${lETH_INT//[![:print:]]/}"
+        lNETWORK_DEVICE="$(echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 || true)"
+        lNETWORK_DEVICE="${lNETWORK_DEVICE//[![:print:]]/}"
         IP_ADDRESS_="192.168.0.1"
         lNETWORK_MODE="bridge"
         if echo "${lBRIDGE_INT}" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
           # we have a vlan entry:
           # lVLAN_ID="$(echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
-          lVLAN_ID="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
+          lVLAN_ID="$(echo "${lBRIDGE_INT}" | grep -o "dev:.*" | cut -d. -f2 || true)"
+          lVLAN_ID="${lVLAN_ID//[![:print:]]/}"
         else
           lVLAN_ID="NONE"
           if [[ -v lVLAN_INFOS[@] ]]; then
@@ -1888,7 +1895,8 @@ iterate_vlans() {
     if [[ "${lVLAN_DEV}" == *"${lETH_INT}"* ]]; then
       print_output "[*] Possible matching VLAN details detected: ${ORANGE}${lVLAN_INFO}${NC}"
       l_NW_ENTRY_PRIO=5
-      lVLAN_ID=$(echo "${lVLAN_INFO}" | sed "s/.*vlan_id://" | grep -E -o "[0-9]+" | tr -dc '[:print:]')
+      lVLAN_ID=$(echo "${lVLAN_INFO}" | sed "s/.*vlan_id://" | grep -E -o "[0-9]+" )
+      lVLAN_ID="${lVLAN_ID//[![:print:]]/}"
     else
       l_NW_ENTRY_PRIO=2
       lVLAN_ID="NONE"
@@ -1908,7 +1916,7 @@ iterate_vlans() {
       mapfile -t lETH_INTS_ARR < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u)
       for lETH_INT_ in "${lETH_INTS_ARR[@]}"; do
         # if we found multiple interfaces belonging to a vlan we need to store all of them:
-        lETH_INT_=$(echo "${lETH_INT_}" | tr -dc '[:print:]')
+        lETH_INT_="${lETH_INT_//[![:print:]]/}"
         l_NW_ENTRY_PRIO=4
         store_interface_details "${lIP_ADDRESS}" "${lNETWORK_DEVICE}" "${lETH_INT_}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
       done
@@ -1940,10 +1948,12 @@ setup_network_emulation() {
 
   # a br interface with a number ... eg br0, br1 ... but no br-lan interface
   if [[ "${lNETWORK_DEVICE}" == *"br"* ]] && [[ "${lNETWORK_DEVICE}" == *[0-9]* ]]; then
-    BR_NUM=$(echo "${lNETWORK_DEVICE}" | sed -e "s/br//" | tr -dc '[:print:]')
+    BR_NUM=$(echo "${lNETWORK_DEVICE}" | sed -e "s/br//")
+    BR_NUM="${BR_NUM//[![:print:]]/}"
   fi
   if [[ "${lETH_INT}" == *"eth"* ]]; then
-    ETH_NUM=$(echo "${lETH_INT}" | sed -e "s/eth//" | tr -dc '[:print:]')
+    ETH_NUM=$(echo "${lETH_INT}" | sed -e "s/eth//")
+    ETH_NUM="${ETH_NUM//[![:print:]]/}"
   fi
 
   # used for generating startup scripts for offline analysis
@@ -2161,7 +2171,8 @@ nvram_searcher_emulation() {
     lNVRAM_KEY=""
     # check https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/inferDefault.py
     echo "${lNVRAM_ENTRY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.tmp
-    lNVRAM_KEY=$(echo "${lNVRAM_ENTRY}" | tr -dc '[:print:]' | tr -s '[:blank:]')
+    lNVRAM_KEY=$(echo "${lNVRAM_ENTRY}" | tr -s '[:blank:]')
+    lNVRAM_KEY="${lNVRAM_KEY//[![:print:]]/}"
     if [[ "${lNVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#lNVRAM_KEY}" -gt 3 ]]; then
       # print_output "[*] NVRAM access detected: $ORANGE$NVRAM_KEY$NC"
       if grep -q "${lNVRAM_KEY}" "${lNVRAM_FILE_TMP}" 2>/dev/null; then
