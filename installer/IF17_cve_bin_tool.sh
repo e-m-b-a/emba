@@ -52,6 +52,10 @@ IF17_cve_bin_tool() {
         python3 external/cve-bin-tool/cve_bin_tool/cli.py --update now || true
         python3 external/cve-bin-tool/cve_bin_tool/cli.py --export external/cve-bin-tool/cve-database.db || true
         rm -r "${HOME}"/.cache/cve-bin-tool
+        if ! [[ -f external/cve-bin-tool/cve-database.db ]]; then
+          echo "ERROR: Could not build cve-bin-tool database"
+          exit 1
+        fi
         # cp -pr "${HOME}"/.cache/cve-bin-tool ./external/cve-bin-tool/cache_cve-bin-tool
       ;;
     esac

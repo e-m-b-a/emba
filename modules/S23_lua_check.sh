@@ -83,7 +83,7 @@ s23_luaseccheck() {
        | sed 's/.*cgilua.QUERY.//' | grep -o -E "^[[:alnum:]]+" | grep -v "^local$" | sort -u || true)
 
     for lENTRY in "${lQUERY_ENTRIES_ARR[@]}"; do
-      lENTRY="$(echo "${lENTRY}" | tr -dc '[:print:]')"
+      lENTRY="${lENTRY//[![:print:]]/}"
       [[ -z "${lENTRY}" ]] && continue
       ! [[ "${lENTRY}" =~ ^[a-zA-Z0-9_-]+$ ]] && continue
 

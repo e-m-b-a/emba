@@ -144,6 +144,9 @@ build_sbom_json_hashes_arr() {
         write_log "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
         jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
+        if ! [[ -f "${lDUP_CHECK_FILE/\.json/\.tmp}" ]]; then
+          continue
+        fi
 
         # with the following check we find out if we have the same version or some extended version
         # on the 2nd case we also add this different version to the properties
