@@ -41,7 +41,7 @@ P60_deep_extractor() {
   local lFILES_P99_BEFORE=0
   if [[ -f "${P99_CSV_LOG}" ]]; then
     lFILES_P99_BEFORE=$(wc -l "${P99_CSV_LOG}")
-    lFILES_P99_BEFORE="${lFILES_P99/\ *}"
+    lFILES_P99_BEFORE="${lFILES_P99_BEFORE/\ *}"
   fi
 
   check_disk_space
