@@ -1554,9 +1554,9 @@ get_networking_details_emulation() {
     if [[ -v lBRIDGE_INTERFACES[@] ]]; then
       # eval "lBRIDGE_INTERFACES=($(for i in "${lBRIDGE_INTERFACES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
       lBRIDGE_INTERFACES=("$(printf "%s\n" "${lBRIDGE_INTERFACES[@]}" | sort -u)")
+      print_ln
     fi
 
-    print_ln
     for lINTERFACE_CAND in "${lINTERFACE_CANDIDATES[@]}"; do
       print_output "[*] Possible interface candidate detected: ${ORANGE}${lINTERFACE_CAND}${NC}"
       # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
