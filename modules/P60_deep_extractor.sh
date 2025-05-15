@@ -113,8 +113,6 @@ check_disk_space() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  local lFILES_AFTER_DEEP=0
-  local lFILES_BEFORE_DEEP=0
 
   local lFILES_DEEP_PRE_ARR=()
   local lBINARY=""
@@ -184,7 +182,6 @@ deeper_extractor_helper() {
   local lFILE_DETAILS=""
   local lBIN_PID=""
   local lWAIT_PIDS_P60=()
-  local lFREE_SPACE=""
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
