@@ -631,7 +631,7 @@ main_emulation() {
     local lFS_MOUNTS_ARR=()
     lFS_MOUNTS_ARR=( "${lFS_MOUNTS_INIT_ARR[@]}" "${lFS_MOUNTS_FS_ARR[@]}" )
     # eval "lFS_MOUNTS_ARR=($(for i in "${lFS_MOUNTS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    lFS_MOUNTS_ARR=("$(printf "%s\n" "${lFS_MOUNTS_ARR[@]}" | sort -u)")
+    lFS_MOUNTS_ARR=($(printf "%s\n" "${lFS_MOUNTS_ARR[@]}" | sort -u))
 
     handle_fs_mounts "${lINIT_FILE}" "${lFS_MOUNTS_ARR[@]}"
 
@@ -837,7 +837,7 @@ main_emulation() {
       local lIPS_INT_VLAN_TMP=()
 
       # eval "IPS_INT_VLAN=($(for i in "${IPS_INT_VLAN[@]}" ; do echo "\"${i}\"" ; done | sort -u -r))"
-      IPS_INT_VLAN=("$(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u)")
+      IPS_INT_VLAN=($(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u -r))
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
@@ -1140,7 +1140,7 @@ handle_fs_mounts() {
     done
 
     # eval "lNEWPATH_ARR=($(for i in "${lNEWPATH_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    lNEWPATH_ARR=("$(printf "%s\n" "${lNEWPATH_ARR[@]}" | sort -u)")
+    lNEWPATH_ARR=($(printf "%s\n" "${lNEWPATH_ARR[@]}" | sort -u))
 
     for lN_PATH in "${lNEWPATH_ARR[@]}"; do
       if [[ -z "${lN_PATH}" ]]; then
@@ -1543,11 +1543,11 @@ get_networking_details_emulation() {
     fi
 
     # eval "SERVICES_STARTUP=($(for i in "${SERVICES_STARTUP[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    SERVICES_STARTUP=("$(printf "%s\n" "${SERVICES_STARTUP[@]}" | sort -u)")
+    SERVICES_STARTUP=($(printf "%s\n" "${SERVICES_STARTUP[@]}" | sort -u))
     # eval "UDP_SERVICES_STARTUP=($(for i in "${UDP_SERVICES_STARTUP[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    UDP_SERVICES_STARTUP=("$(printf "%s\n" "${UDP_SERVICES_STARTUP[@]}" | sort -u)")
+    UDP_SERVICES_STARTUP=($(printf "%s\n" "${UDP_SERVICES_STARTUP[@]}" | sort -u))
     # eval "TCP_SERVICES_STARTUP=($(for i in "${TCP_SERVICES_STARTUP[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    TCP_SERVICES_STARTUP=("$(printf "%s\n" "${TCP_SERVICES_STARTUP[@]}" | sort -u)")
+    TCP_SERVICES_STARTUP=($(printf "%s\n" "${TCP_SERVICES_STARTUP[@]}" | sort -u))
 
     for lVLAN_INFO in "${lVLAN_INFOS[@]}"; do
       # register_vlan_dev[PID: 128 (vconfig)]: dev:eth1.1 vlan_id:1
@@ -1556,7 +1556,7 @@ get_networking_details_emulation() {
 
     if [[ -v lBRIDGE_INTERFACES[@] ]]; then
       # eval "lBRIDGE_INTERFACES=($(for i in "${lBRIDGE_INTERFACES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-      lBRIDGE_INTERFACES=("$(printf "%s\n" "${lBRIDGE_INTERFACES[@]}" | sort -u)")
+      lBRIDGE_INTERFACES=($(printf "%s\n" "${lBRIDGE_INTERFACES[@]}" | sort -u))
       print_ln
     fi
 
@@ -2054,7 +2054,7 @@ write_network_config_to_filesystem() {
     # if there were missing files found -> we try to fix this now
     if [[ -v MISSING_FILES[@] ]]; then
       # eval "MISSING_FILES=($(for i in "${MISSING_FILES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-      MISSING_FILES=("$(printf "%s\n" "${MISSING_FILES[@]}" | sort -u)")
+      MISSING_FILES=($(printf "%s\n" "${MISSING_FILES[@]}" | sort -u))
 
       for lFILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
         print_output "[*] Checking for missing area ${ORANGE}${lFILE_PATH_MISSING}${NC} in filesystem ..."
@@ -2555,26 +2555,30 @@ check_online_stat() {
       # rewrite our array into a nice string for printing it
       if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
         printf -v lTCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
-        lTCP_SERV_STARTUP=${lTCP_SERV//\ /,}
+        # # replace \n and ' ' with ,
+        lTCP_SERV_STARTUP=${lTCP_SERV//+([$'\n'\ ])/,}
         print_output "[*] TCP Services detected via startup: ${ORANGE}${lTCP_SERV_STARTUP}${NC}"
       fi
       # rewrite our array into a nice string for printing it
       if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
         printf -v lUDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
-        lUDP_SERV_STARTUP=${lUDP_SERV//\ /,}
+        # lUDP_SERV_STARTUP=${lUDP_SERV//\ /,}
+        lUDP_SERV_STARTUP=${lUDP_SERV//+([$'\n'\ ])/,}
         print_output "[*] UDP Services detected via startup: ${ORANGE}${lUDP_SERV_STARTUP}${NC}"
       fi
 
       # rewrite our array into a nice string for printing it
       if [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
         printf -v lTCP_SERV "%s " "${lTCP_SERV_NETSTAT_ARR[@]}"
-        lTCP_SERV_NETSTAT=${lTCP_SERV//\ /,}
+        # lTCP_SERV_NETSTAT=${lTCP_SERV//\ /,}
+        lTCP_SERV_NETSTAT=${lTCP_SERV//+([$'\n'\ ])/,}
         print_output "[*] TCP Services detected via netstat: ${ORANGE}${lTCP_SERV_NETSTAT}${NC}"
       fi
       # rewrite our array into a nice string for printing it
       if [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
         printf -v lUDP_SERV "%s " "${lUDP_SERV_NETSTAT_ARR[@]}"
-        lUDP_SERV_NETSTAT=${lUDP_SERV//\ /,}
+        # lUDP_SERV_NETSTAT=${lUDP_SERV//\ /,}
+        lUDP_SERV_NETSTAT=${lUDP_SERV//+([$'\n'\ ])/,}
         print_output "[*] UDP Services detected via netstat: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
       fi
       print_ln
@@ -2583,22 +2587,25 @@ check_online_stat() {
       lTCP_SERV_ARR=( "${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" )
       lUDP_SERV_ARR=( "${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" )
       # eval "lTCP_SERV_ARR=($(for i in "${lTCP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-      lTCP_SERV_ARR=("$(printf "%s\n" "${lTCP_SERV_ARR[@]}" | sort -u)")
       # eval "lUDP_SERV_ARR=($(for i in "${lUDP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-      lUDP_SERV_ARR=("$(printf "%s\n" "${lUDP_SERV_ARR[@]}" | sort -u)")
+      lTCP_SERV_ARR=($(printf "%s\n" "${lTCP_SERV_ARR[@]}" | sort -u))
+      lUDP_SERV_ARR=($(printf "%s\n" "${lUDP_SERV_ARR[@]}" | sort -u))
       if [[ -v lTCP_SERV_ARR[@] ]]; then
-        printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
-        lTCP_SERV=${lTCP_SERV//\ /,}
+        # printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
+        # lTCP_SERV=${lTCP_SERV//\ /,}
+        lTCP_SERV="${lTCP_SERV_ARR[*]//$'\n'/,}"
         # print_output "[*] TCP Services detected: $ORANGE$lTCP_SERV$NC"
       fi
       if [[ -v lUDP_SERV_ARR[@] ]]; then
-        printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
-        lUDP_SERV=${lUDP_SERV//\ /,}
+        # printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
+        # lUDP_SERV=${lUDP_SERV//\ /,}
+        lUDP_SERV="${lUDP_SERV_ARR[*]//$'\n'/,}"
         # print_output "[*] UDP Services detected: $ORANGE$lUDP_SERV$NC"
       fi
 
       lUDP_SERV="U:""${lUDP_SERV}"
       lTCP_SERV="T:""${lTCP_SERV}"
+      # remove the last ',' ... 123,234,345, -> 123,234,345
       lTCP_SERV="${lTCP_SERV%,}"
       lUDP_SERV="${lUDP_SERV%,}"
 

@@ -27,6 +27,7 @@ if [ -e /etc/manual.starter ]; then
   if ! "${BUSYBOX}" grep -q "/etc/manual.starter" /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}manual starter service${NC}"
     "${BUSYBOX}" echo -e -n "/etc/manual.starter\n" >> /firmadyne/service
+    "${BUSYBOX}" chmod +x /etc/manual.starter
   fi
 fi
 
@@ -41,6 +42,7 @@ for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*\.d*"); do
         if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/startup_service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service starter for ${ORANGE}${SERVICE} service${NC}"
           "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/startup_service
+          "${BUSYBOX}" chmod +x "${SERVICE}"
         fi
       fi
     # fi
@@ -56,6 +58,7 @@ for RC_DIR in $("${BUSYBOX}" find / -type d -name "*rc.d*"); do
         if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/startup_service 2>/dev/null; then
           "${BUSYBOX}" echo -e "[*] Writing EMBA service starter for ${ORANGE}${SERVICE} service${NC}"
           "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/startup_service
+          "${BUSYBOX}" chmod +x "${SERVICE}"
         fi
       fi
     # fi
@@ -66,6 +69,7 @@ if [ -e /bin/boa ]; then
   if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}/bin/boa${NC}"
     "${BUSYBOX}" echo -e -n "/bin/boa\n" >> /firmadyne/service
+    "${BUSYBOX}" chmod +x /bin/boa
     for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
       # extract the directory index from config and search for it in the filesystem - this is needed to start boa with the correct
       # web root directory
