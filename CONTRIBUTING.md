@@ -82,7 +82,7 @@ It also sketches the typical integration process of patches.
 
 - At least ["weak quoting"](https://flokoe.github.io/bash-hackers-wiki/syntax/quoting/#quotes-and-escaping) is required - unquoted variable processing is not permitted
 
-- To make an array unique we prefer using the printf methode instead of the eval methode: `lARRAY=("$(printf "%s\n" "${lARRAY[@]}" | sort -u)")`
+- To make an array unique we prefer using the printf methode instead of the eval methode: `lARRAY=($(printf "%s\n" "${lARRAY[@]}" | sort -u))`
 
 - Ensure you are only working with printable characters (avoid using tr): `lVARIABLE=${lVARIABLE//[![:print:]]/}`
 

@@ -181,7 +181,7 @@ populate_karrays() {
   done | sort -u))"
 
   # eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"${i}}\"" ; done | sort -u))"
-  KERNEL_DESC=("$(printf "%s\n" "${KERNEL_DESC[@]}" | sort -u)")
+  mapfile -t KERNEL_DESC < <(printf "%s\n" "${KERNEL_DESC[@]}" | sort -u)
 
   # if we have no kernel version identified -> we try to identify a possible identifier in the path:
   if [[ "${#lKERNEL_VERSION_ARR[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
