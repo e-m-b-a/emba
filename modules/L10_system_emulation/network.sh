@@ -21,9 +21,8 @@ NC="\033[0m"
 
 if ("${EMBA_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
-  "${BUSYBOX}" sleep 10
-
   "${BUSYBOX}" echo -e "[*] Starting network configuration lo - ${ORANGE}${IP_LOOP}${NC}"
+
   "${BUSYBOX}" ifconfig lo "${IP_LOOP}"
   # "${BUSYBOX}" route add "${IP_LOOP}"
   "${BUSYBOX}" route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
@@ -133,21 +132,7 @@ if ("${EMBA_NET}"); then
     fi
   fi
 
-  "${BUSYBOX}" sleep 30
   "${BUSYBOX}" echo "[*] Current network configuration:"
   "${BUSYBOX}" ifconfig -a
-
-  # netgear TL-WR841HP_V2_151124
-  while (true); do
-    if "${BUSYBOX}" which iptables; then
-      if [ "$(iptables -L | "${BUSYBOX}" grep -c "^ACCEPT\|^DROP")" -gt 0 ]; then
-        "${BUSYBOX}" echo "[*] Flushing iptables ..."
-        iptables -L
-        iptables flush 2>/dev/null || true
-        iptables -F 2>/dev/null || true
-        iptables -P 2>/dev/null INPUT ACCEPT || true
-      fi
-    fi
-    "${BUSYBOX}" sleep 5
-  done
+  "${BUSYBOX}" echo "network config done" > /firmadyne/network_config_state
 fi

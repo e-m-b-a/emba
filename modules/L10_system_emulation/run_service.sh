@@ -107,6 +107,32 @@ if ("${EMBA_ETC}"); then
       else
         "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${BINARY_NAME}${NC} already started ..."
       fi
+
+      # ensure we flush all iptables rules regularly
+      # netgear TL-WR841HP_V2_151124
+      if "${BUSYBOX}" which iptables; then
+        if [ "$(iptables -L | "${BUSYBOX}" grep -c "^ACCEPT\|^DROP")" -gt 0 ]; then
+          "${BUSYBOX}" echo "[*] Flushing iptables ..."
+          iptables -L
+          iptables flush 2>/dev/null || true
+          iptables -F 2>/dev/null || true
+          iptables -P 2>/dev/null INPUT ACCEPT || true
+        fi
+      fi
+
+      # finally check if we have a configured IP address or something weird happened and we lost our ip configuration
+      # Do this only if we have some network_type configuration which means we are not in the network discovery mode
+      # None means we are in network discovery mode
+      ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
+      # /firmadyne/network_config_state is filled from modules/L10_system_emulation/network.sh
+      if [ "${ACTION}" != "None" ] && [ -f /firmadyne/network_config_state ]; then
+        # shellcheck disable=SC2016
+        IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+        if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
+          "${BUSYBOX}" echo -e "${ORANGE}[*] WARNING: Looks as we lost our network configuration -> reconfiguration starting now ...${NC}"
+          /firmadyne/network.sh
+        fi
+      fi
     done < "/firmadyne/service"
   done
 fi
