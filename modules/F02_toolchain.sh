@@ -140,7 +140,7 @@ F02_toolchain() {
       mapfile -t lGCC_VERSION_ARR < <(echo "${lKERNEL_STR}" | grep -o -i -E "gcc version [0-9](\.[0-9]+)+?" | sort -u || true)
       mapfile -t lGCC_VERSION_1_ARR < <(echo "${lKERNEL_STR}" | grep -o -E "GCC [0-9](\.[0-9]+)+?" | sort -u || true)
       lGCC_VERSION_ARR=( "${lGCC_VERSION_ARR[@]}" "${lGCC_VERSION_1_ARR[@]}")
-      lGCC_VERSION_ARR=("$(printf "%s\n" "${lGCC_VERSION_ARR[@]}" | sort -u)")
+      mapfile -t lGCC_VERSION_ARR < <(printf "%s\n" "${lGCC_VERSION_ARR[@]}" | sort -u)
 
       if [[ "${#lGCC_VERSION_ARR[@]}" -gt 0 ]]; then
         for lGCC_VERSION in "${lGCC_VERSION_ARR[@]}"; do

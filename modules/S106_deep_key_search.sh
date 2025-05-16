@@ -101,7 +101,7 @@ deep_key_reporter() {
     if [[ "${#lOCC_ARR[@]}" -gt 0 ]] ; then
       print_ln
       print_output "[*] Occurences of pattern:"
-      SORTED_OCC_LIST=("$(printf '%s\n' "${lOCC_ARR[@]}" | sort -r --version-sort)")
+      mapfile -t SORTED_OCC_LIST < <(printf '%s\n' "${lOCC_ARR[@]}" | sort -r --version-sort)
       if [[ "${#SORTED_OCC_LIST[@]}" -gt 0 ]]; then
         for lOCC_ENTRY in "${SORTED_OCC_LIST[@]}"; do
           print_output "$( indent "$(orange "${lOCC_ENTRY}" )")""\n"
