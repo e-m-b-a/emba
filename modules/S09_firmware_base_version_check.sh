@@ -693,16 +693,19 @@ generate_strings() {
   local lSTRINGS_OUTPUT=""
 
   if ! [[ -f "${lBINARY_PATH}" ]]; then
+    # print_output "[*] No ${lBINARY_PATH} found ... return"
     return
   fi
 
-  mapfile -t lBIN_DATA_ARR < <(grep ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n' || true)
+  mapfile -t lBIN_DATA_ARR < <(grep -F ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n' || true)
 
   if [[ "${#lBIN_DATA_ARR[@]}" -lt 7 ]]; then
+    # print_output "[*] No ${lBINARY_PATH} in P99 csv found ... return"
     # we have no entry in our P99 csv file! Should we create one now?
     return
   fi
   lBIN_FILE="${lBIN_DATA_ARR[7]}"
+  # print_output "[*] ${lBIN_FILE} for ${lBINARY_PATH} found .."
 
   # Just in case we need to create SBOM entries for every file
   # This is configured via the scanning profiles
@@ -720,6 +723,7 @@ generate_strings() {
   lBIN_NAME_REAL="$(basename "${lBINARY_PATH}")"
   lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
+    # print_output "[*] Generating strings for ${lBINARY_PATH} ..."
     strings "${lBINARY_PATH}" | uniq > "${lSTRINGS_OUTPUT}" || true
   fi
 }
