@@ -975,7 +975,7 @@ emulation_with_config() {
           # check every ip address for our used interfaces (ethX/brX)
           # if we find a typical used interface with the changed IP address we will check it again
           if (grep -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
-            print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${NC} to address ${ORANGE}${lTMP_IP}${NC}"
+            print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${MAGENTA} to address ${ORANGE}${lTMP_IP}${NC}"
             # we restart the emulation with the identified IP address for a maximum of one time
             if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
               print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
@@ -983,7 +983,7 @@ emulation_with_config() {
               IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
               emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
             else
-              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed but ${ORANGE}not executed${NC}"
+              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed but ${ORANGE}not executed${NC}"
             fi
           fi
         fi
@@ -2552,6 +2552,7 @@ check_online_stat() {
 
       # write all services into a one liner for output:
       print_ln
+      shopt -s extglob
       # rewrite our array into a nice string for printing it
       if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
         printf -v lTCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
@@ -2591,15 +2592,15 @@ check_online_stat() {
       mapfile -t lTCP_SERV_ARR < <(printf "%s\n" "${lTCP_SERV_ARR[@]}" | sort -u)
       mapfile -t lUDP_SERV_ARR < <(printf "%s\n" "${lUDP_SERV_ARR[@]}" | sort -u)
       if [[ -v lTCP_SERV_ARR[@] ]]; then
-        # printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
+        printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
         # lTCP_SERV=${lTCP_SERV//\ /,}
-        lTCP_SERV="${lTCP_SERV_ARR[*]//$'\n'/,}"
+        lTCP_SERV="${lTCP_SERV//+([$'\n'\ ])/,}"
         # print_output "[*] TCP Services detected: $ORANGE$lTCP_SERV$NC"
       fi
       if [[ -v lUDP_SERV_ARR[@] ]]; then
-        # printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
+        printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
         # lUDP_SERV=${lUDP_SERV//\ /,}
-        lUDP_SERV="${lUDP_SERV_ARR[*]//$'\n'/,}"
+        lUDP_SERV="${lUDP_SERV//+([$'\n'\ ])/,}"
         # print_output "[*] UDP Services detected: $ORANGE$lUDP_SERV$NC"
       fi
 
@@ -2608,6 +2609,7 @@ check_online_stat() {
       # remove the last ',' ... 123,234,345, -> 123,234,345
       lTCP_SERV="${lTCP_SERV%,}"
       lUDP_SERV="${lUDP_SERV%,}"
+      shopt -u extglob
 
       if [[ "${lTCP_SERV}" =~ ^T:[0-9].* ]]; then
         print_output "[*] Detected TCP services ${ORANGE}${lTCP_SERV}${NC}"
