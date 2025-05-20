@@ -154,7 +154,6 @@ S09_firmware_base_version_check() {
     fi
     generate_strings "${lBIN}" &
     local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_1+=( "${lTMP_PID}" )
     max_pids_protection $(( MAX_MOD_THREADS*2 )) WAIT_PIDS_S09_1
   done
@@ -166,8 +165,29 @@ S09_firmware_base_version_check() {
   print_ln
 
   lOS_IDENTIFIED=$(distri_check)
+  local WAIT_PIDS_S09_main=()
   for lVERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
+    S09_identifier_threadings "${lVERSION_JSON_CFG}" "${lOS_IDENTIFIED}" &
+    local lTMP_PID="$!"
+    WAIT_PIDS_S09_main+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" WAIT_PIDS_S09_main
     print_dot
+  done
+
+  print_dot
+
+  if [[ "${THREADED}" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S09_main[@]}"
+    wait_for_pid "${WAIT_PIDS_S09_ARR_tmp[@]}"
+  fi
+
+  lVERSIONS_DETECTED=$(grep -c "Version information found" "${LOG_FILE}" || true)
+
+  module_end_log "${FUNCNAME[0]}" "${lVERSIONS_DETECTED}"
+}
+
+S09_identifier_threadings() {
+  local lVERSION_JSON_CFG="${1:-}"
 
     local lAPP_NAME=""
     local lAPP_VERS=""
@@ -224,12 +244,14 @@ S09_firmware_base_version_check() {
         if [[ -s "${LOG_PATH_MODULE}"/debian_known_packages.txt ]]; then
           if grep -q "^${lPRODUCT_NAME}" "${LOG_PATH_MODULE}"/debian_known_packages.txt; then
             print_output "[*] Static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME} already covered by debian package manager" "no_log"
-            continue 2
+            # continue 2
+            return
           fi
         elif [[ -s "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
           if grep -q "^${lPRODUCT_NAME}" "${LOG_PATH_MODULE}"/openwrt_known_packages.txt; then
             print_output "[*] Static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}  already covered by OpenWRT package manager" "no_log"
-            continue 2
+            # continue 2
+            return
           fi
         fi
       done
@@ -241,7 +263,8 @@ S09_firmware_base_version_check() {
       # test the other identifiers. In threaded mode this usually does not decrease testing speed.
       if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${lRULE_IDENTIFIER}$")" -gt 0 ]]; then
         print_output "[*] Already identified component for identifier ${lRULE_IDENTIFIER} ... skipping further tests" "no_log"
-        continue
+        # continue
+        return
       fi
     fi
 
@@ -254,7 +277,7 @@ S09_firmware_base_version_check() {
       local lBINARY_PATH=""
       local lBIN_FILE_DETAILS=""
 
-      [[ "${RTOS}" -eq 1 ]] && continue
+      [[ "${RTOS}" -eq 1 ]] && return
 
       # we create an array with testing candidates based on the paths from the json configuration
       for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
@@ -376,26 +399,16 @@ S09_firmware_base_version_check() {
         # print_output "[*] Calling with ${lVERSION_IDENTIFIER}" "no_log"
         bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
         local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
         WAIT_PIDS_S09+=( "${lTMP_PID}" )
-        # echo "WAIT_PIDS_S09: ${#WAIT_PIDS_S09[@]} / max: $((3*MAX_MOD_THREADS))"
-        max_pids_protection $(( MAX_MOD_THREADS *3 )) WAIT_PIDS_S09
+        # echo "WAIT_PIDS_S09: ${#WAIT_PIDS_S09[@]} / max: ${MAX_MOD_THREADS})"
+        max_pids_protection "${MAX_MOD_THREADS}" WAIT_PIDS_S09
       done
       print_dot
     fi
-  done
 
-  print_dot
-
-  if [[ "${THREADED}" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S09[@]}"
-    wait_for_pid "${WAIT_PIDS_S09_ARR_tmp[@]}"
-  fi
-
-  lVERSIONS_DETECTED=$(grep -c "Version information found" "${LOG_FILE}" || true)
-
-  module_end_log "${FUNCNAME[0]}" "${lVERSIONS_DETECTED}"
+  wait_for_pid "${WAIT_PIDS_S09[@]}"
 }
+
 
 version_parsing_logging() {
   local lVERSION_IDENTIFIED="${1:-}"
