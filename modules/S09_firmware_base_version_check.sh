@@ -156,12 +156,7 @@ S09_firmware_base_version_check() {
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     WAIT_PIDS_S09_1+=( "${lTMP_PID}" )
-    if [[ "${#WAIT_PIDS_S09_1[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-      recover_wait_pids WAIT_PIDS_S09_1
-      if [[ "${#WAIT_PIDS_S09_1[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-        max_pids_protection $(( "${MAX_MOD_THREADS}"*3 )) WAIT_PIDS_S09_1
-      fi
-    fi
+    max_pids_protection $(( MAX_MOD_THREADS*2 )) WAIT_PIDS_S09_1
   done
 
   print_output "[*] Waiting for strings generator" "no_log"
@@ -238,8 +233,6 @@ S09_firmware_base_version_check() {
           fi
         fi
       done
-      # as the package manager is handling most of the static detection we can do more runs in parallel in such a case
-      local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
     fi
     # print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
 
@@ -385,20 +378,11 @@ S09_firmware_base_version_check() {
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         WAIT_PIDS_S09+=( "${lTMP_PID}" )
+        # echo "WAIT_PIDS_S09: ${#WAIT_PIDS_S09[@]} / max: $((3*MAX_MOD_THREADS))"
+        max_pids_protection $(( MAX_MOD_THREADS *3 )) WAIT_PIDS_S09
       done
-
       print_dot
     fi
-
-    if [[ "${THREADED}" -eq 1 ]]; then
-      if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-        recover_wait_pids WAIT_PIDS_S09
-        if [[ "${#WAIT_PIDS_S09[@]}" -gt "${MAX_MOD_THREADS}" ]]; then
-          max_pids_protection $(( "${MAX_MOD_THREADS}"*2 )) WAIT_PIDS_S09
-        fi
-      fi
-    fi
-
   done
 
   print_dot
@@ -888,23 +872,5 @@ bin_string_checker() {
       continue 2
     done
   done
-}
-
-recover_wait_pids() {
-  local -n lrWAIT_PIDS_ARR=${1:-}
-  local lTEMP_PIDS_ARR=()
-  local lPID=""
-  # check for really running PIDs and re-create the array
-  for lPID in "${lrWAIT_PIDS_ARR[@]}"; do
-    # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
-    if [[ -e /proc/"${lPID}" ]]; then
-      lTEMP_PIDS_ARR+=( "${lPID}" )
-    fi
-  done
-  # print_output "[!] S09 - really running pids: ${#lTEMP_PIDS_ARR[@]}"
-
-  # recreate the array with the current running PIDS
-  lrWAIT_PIDS_ARR=()
-  lrWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
 }
 

@@ -59,11 +59,12 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
-  local lMAX_PIDS_="${1:-}"
+  local lMAX_PIDS_="${1}"
   local -n lrWAIT_PIDS_ARR=${2:-}
 
   local lPID=""
 
+  # echo "INTRO - checking pids #${#lrWAIT_PIDS_ARR[@]} / max: ${lMAX_PIDS_}"
   while [[ ${#lrWAIT_PIDS_ARR[@]} -gt "${lMAX_PIDS_}" ]]; do
     local lTEMP_PIDS_ARR=()
     # check for really running PIDs and re-create the array
@@ -86,6 +87,7 @@ max_pids_protection() {
     lrWAIT_PIDS_ARR=()
     lrWAIT_PIDS_ARR=("${lTEMP_PIDS_ARR[@]}")
     print_dot
+    # echo "checking pids #${#lrWAIT_PIDS_ARR[@]} / ${#lTEMP_PIDS_ARR[@]} / max: ${lMAX_PIDS_}"
   done
 }
 
