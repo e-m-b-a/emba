@@ -65,81 +65,85 @@ S09_firmware_base_version_check() {
   # 4 -> high
   export CONFIDENCE_LEVEL=3
 
-  print_output "[*] Checking for common package manager environments to optimize static version detection"
-  # Debian:
-  find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
-  # the extracted packages are used to further limit the static tests
-  find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/debian_known_packages.txt || true
-  # OpenWRT
-  find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
-  find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
-  # Todo: rpm
-  # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
-  # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
-  # get all packages in array and run through them to extract all paths
-  # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
+  if [[ " ${MODULES_EXPORTED[*]} " == *S08* ]]; then
+    print_output "[*] Checking for common package manager environments to optimize static version detection"
+    # Debian:
+    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
+    # the extracted packages are used to further limit the static tests
+    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/debian_known_packages.txt || true
+    # OpenWRT
+    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
+    # Todo: rpm
+    # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
+    # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
+    # get all packages in array and run through them to extract all paths
+    # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
 
-  if [[ -f "${LOG_PATH_MODULE}"/debian_known_files.txt ]]; then
-    cat "${LOG_PATH_MODULE}"/debian_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
-  fi
-  if [[ -f "${LOG_PATH_MODULE}"/openwrt_known_files.txt ]]; then
-    cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
-  fi
-  if [[ -f "${LOG_PATH_MODULE}"/rpm_known_files.txt ]]; then
-    cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
-  fi
+    if [[ -f "${LOG_PATH_MODULE}"/debian_known_files.txt ]]; then
+      cat "${LOG_PATH_MODULE}"/debian_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
+    if [[ -f "${LOG_PATH_MODULE}"/openwrt_known_files.txt ]]; then
+      cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
+    if [[ -f "${LOG_PATH_MODULE}"/rpm_known_files.txt ]]; then
+      cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
 
-  if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
-    # sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
-    sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
-    mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
-  fi
+    if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
+      # sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+      sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
+      mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
+    fi
 
-  if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
-    print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array with ${ORANGE}${#FILE_ARR[@]}${NC} entries." "${LOG_PATH_MODULE}/pkg_known_files.txt"
-    local lPKG_FILE=""
-    for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
-      lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
-      (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
-    done
-
-    print_output "[*] Waiting for finishing the build process of known_system_pkg_files" "no_log"
-    # shellcheck disable=SC2046
-    wait $(jobs -p) # nosemgrep
-
-    sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt > "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
-    cut -d ';' -f2 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
-
-    # we have now all our filesystem bins in "${P99_CSV_LOG}"
-    # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
-    # now we just need to do a diff on them and we should have only the non matching files
-    comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
-    mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
-
-    local lINIT_FILES_CNT=0
-    lINIT_FILES_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
-    if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
-      print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
-      print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
-      print_output "[*] Generating analysis file array ..." "no_log"
-      export FILE_ARR=()
-      for lFILE in "${lFILE_ARR_TMP[@]}"; do
-        if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
-          # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
-          continue
-        elif grep "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty"; then
-          # extract the stored file details and match it against some patterns we do not further process:
-          continue
-        fi
-        # print_output "$(indent "$(orange "${lFILE}")")"
-        FILE_ARR+=( "${lFILE}" )
+    if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
+      print_output "[*] Found package manager with ${ORANGE}${#lFILE_ARR_PKG[@]}${NC} package files - testing against a limited file array with ${ORANGE}${#FILE_ARR[@]}${NC} entries." "${LOG_PATH_MODULE}/pkg_known_files.txt"
+      local lPKG_FILE=""
+      for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
+        lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
+        (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
       done
-      print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
+
+      print_output "[*] Waiting for finishing the build process of known_system_pkg_files" "no_log"
+      # shellcheck disable=SC2046
+      wait $(jobs -p) # nosemgrep
+
+      sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt > "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
+      cut -d ';' -f2 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
+
+      # we have now all our filesystem bins in "${P99_CSV_LOG}"
+      # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
+      # now we just need to do a diff on them and we should have only the non matching files
+      comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
+      mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
+
+      local lINIT_FILES_CNT=0
+      lINIT_FILES_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
+      if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
+        print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
+        print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
+        print_output "[*] Generating analysis file array ..." "no_log"
+        export FILE_ARR=()
+        for lFILE in "${lFILE_ARR_TMP[@]}"; do
+          if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
+            # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
+            continue
+          elif grep "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty"; then
+            # extract the stored file details and match it against some patterns we do not further process:
+            continue
+          fi
+          # print_output "$(indent "$(orange "${lFILE}")")"
+          FILE_ARR+=( "${lFILE}" )
+        done
+        print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
+      else
+        print_output "[*] No package manager updates for static analysis"
+      fi
     else
       print_output "[*] No package manager updates for static analysis"
     fi
   else
-    print_output "[*] No package manager updates for static analysis"
+    print_output "[*] Info: No SBOM package manager analysis modules enabled"
   fi
 
   # lets start generating the strings from all our relevant binaries
