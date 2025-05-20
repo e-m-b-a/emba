@@ -59,7 +59,7 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
-  local lMAX_PIDS_="${1}"
+  local lMAX_PIDS_="${1:-}"
   local -n lrWAIT_PIDS_ARR=${2:-}
 
   local lPID=""

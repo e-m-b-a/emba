@@ -567,8 +567,8 @@ dependency_check()
     print_output "[*] Necessary utils on system:" "no_log"
 
     check_dep_tool "docker"
-    check_dep_tool "inotifywait"
-    check_dep_tool "notify-send"
+    check_dep_tool_warning "inotifywait"
+    check_dep_tool_warning "notify-send"
   fi
 
   #######################################################################################
