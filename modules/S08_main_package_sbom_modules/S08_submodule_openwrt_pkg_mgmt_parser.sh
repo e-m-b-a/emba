@@ -75,24 +75,25 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
         lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
 
-        lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' || true)
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' || true)
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- || true)
         lAPP_MAINT=${lAPP_MAINT#\ }
+        lAPP_MAINT=${lAPP_MAINT//[![:print:]]/}
         # lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         # lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
-        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- || true)
         lAPP_DESC=${lAPP_DESC#\ }
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
-        mapfile -t lAPP_DEPS_ARR < <(grep "^Depends: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' | tr ',' '\n' | sort -u || true)
+        mapfile -t lAPP_DEPS_ARR < <(grep "^Depends: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr ',' '\n' | sort -u || true)
 
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
@@ -113,6 +114,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
 
         if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
           for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+            lAPP_DEP=${lAPP_DEP//[![:print:]]/}
             lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
           done
         fi
