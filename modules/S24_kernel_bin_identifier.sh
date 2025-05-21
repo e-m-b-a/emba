@@ -175,7 +175,7 @@ binary_kernel_check_threader() {
       if [[ ! -f "${lFILE_PATH}".elf ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
         if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
           # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
-          #continue 2
+          # continue 2
           return
         fi
       fi
@@ -248,7 +248,6 @@ binary_kernel_check_threader() {
     fi
   done
 }
-
 
 extract_kconfig() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
