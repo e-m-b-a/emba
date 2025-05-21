@@ -56,7 +56,7 @@ P35_UEFI_extractor() {
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
       # do a second round with unblob
       lEXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${lFW_NAME_}"_unblob_extracted
-      unblobber "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
+      unblobber "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}" 0
 
       mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
 

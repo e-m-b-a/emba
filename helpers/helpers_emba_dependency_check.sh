@@ -53,6 +53,26 @@ check_dep_tool() {
   fi
 }
 
+# check_dep_tool but only warn if not available
+# EMBA will be able to work without the dependency
+# $1=Tool title and command
+# $2=Tool command, but only if set
+check_dep_tool_warning() {
+  local lTOOL_NAME="${1:-}"
+  if [[ -n "${2:-}" ]] ; then
+    local lTOOL_COMMAND="${2:-}"
+  else
+    local lTOOL_COMMAND="${1:-}"
+  fi
+  print_output "    ""${lTOOL_NAME}"" - \\c" "no_log"
+  if ! command -v "${lTOOL_COMMAND}" > /dev/null ; then
+    echo -e "${ORANGE}""not ok""${NC}"
+    echo -e "${ORANGE}""    Missing ""${lTOOL_NAME}"" - check your installation""${NC}"
+  else
+    echo -e "${GREEN}""ok""${NC}"
+  fi
+}
+
 check_dep_port() {
   local lTOOL_NAME="${1:-}"
   local lPORT_NR="${2:-}"
@@ -547,8 +567,8 @@ dependency_check()
     print_output "[*] Necessary utils on system:" "no_log"
 
     check_dep_tool "docker"
-    check_dep_tool "inotifywait"
-    check_dep_tool "notify-send"
+    check_dep_tool_warning "inotifywait"
+    check_dep_tool_warning "notify-send"
   fi
 
   #######################################################################################

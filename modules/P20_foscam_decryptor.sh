@@ -171,7 +171,7 @@ foscam_ubi_extractor() {
     # ensure we have some extracted ubifs:
     lUBI_FS_TARGET=$(find "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}" -name ubifs)
     if [[ -f "${lUBI_FS_TARGET}" ]]; then
-      # unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 1
+      # unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 0
       binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
 
       print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"

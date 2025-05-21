@@ -80,7 +80,7 @@ P55_unblob_extractor() {
   local lOUTPUT_DIR_UNBLOB="${LOG_DIR}"/firmware/unblob_extracted
 
   if [[ -f "${lFW_PATH_UNBLOB}" ]]; then
-    unblobber "${lFW_PATH_UNBLOB}" "${lOUTPUT_DIR_UNBLOB}"
+    unblobber "${lFW_PATH_UNBLOB}" "${lOUTPUT_DIR_UNBLOB}" 0
   fi
 
   if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then

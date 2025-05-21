@@ -73,7 +73,7 @@ S16_ghidra_decompile_checks()
     lBIN_TO_CHECK="${lBIN_TO_CHECK#\.}"
 
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
-      lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -1 || true)
+      lBIN_TO_CHECK=$(grep -F "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -1 || true)
     fi
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       continue
