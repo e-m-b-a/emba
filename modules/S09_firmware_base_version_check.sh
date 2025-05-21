@@ -101,7 +101,7 @@ S09_firmware_base_version_check() {
       local lPKG_FILE=""
       for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
         lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
-        (grep -E "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+        (grep -F "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
       done
 
       print_output "[*] Waiting for finishing the build process of known_system_pkg_files" "no_log"
@@ -128,7 +128,7 @@ S09_firmware_base_version_check() {
           if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
             # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
             continue
-          elif grep "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty\|Git\ pack"; then
+          elif grep -F "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty\|Git\ pack"; then
             # extract the stored file details and match it against some patterns we do not further process:
             continue
           fi
