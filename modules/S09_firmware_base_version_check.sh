@@ -193,222 +193,222 @@ S09_firmware_base_version_check() {
 S09_identifier_threadings() {
   local lVERSION_JSON_CFG="${1:-}"
 
-    local lAPP_NAME=""
-    local lAPP_VERS=""
-    local lAPP_MAINT=""
-    export CSV_REGEX=""
+  local lAPP_NAME=""
+  local lAPP_VERS=""
+  local lAPP_MAINT=""
+  export CSV_REGEX=""
 
-    local lSHA512_CHECKSUM=""
-    local lSHA256_CHECKSUM=""
-    local lPURL_IDENTIFIER="NA"
-    export PACKAGING_SYSTEM="static_bin_analysis"
-    local lVERSION_IDENTIFIED=""
-    local lBIN_DEPS_ARR=()
-    local lBIN_DEPENDENCY=""
-    local lPARSING_MODE_ARR=()
-    local lLICENSES_ARR=()
-    local lPRODUCT_NAME_ARR=()
-    local lVENDOR_NAME_ARR=()
-    local lCSV_REGEX_ARR=()
-    local lVERSION_IDENTIFIER_ARR=()
-    local lSTRICT_VERSION_IDENTIFIER_ARR=()
-    local lZGREP_VERSION_IDENTIFIER_ARR=()
+  local lSHA512_CHECKSUM=""
+  local lSHA256_CHECKSUM=""
+  local lPURL_IDENTIFIER="NA"
+  export PACKAGING_SYSTEM="static_bin_analysis"
+  local lVERSION_IDENTIFIED=""
+  local lBIN_DEPS_ARR=()
+  local lBIN_DEPENDENCY=""
+  local lPARSING_MODE_ARR=()
+  local lLICENSES_ARR=()
+  local lPRODUCT_NAME_ARR=()
+  local lVENDOR_NAME_ARR=()
+  local lCSV_REGEX_ARR=()
+  local lVERSION_IDENTIFIER_ARR=()
+  local lSTRICT_VERSION_IDENTIFIER_ARR=()
+  local lZGREP_VERSION_IDENTIFIER_ARR=()
 
-    mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
-    # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
-    local lRULE_IDENTIFIER=""
-    lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
-    mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    # shellcheck disable=SC2034
-    mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    # shellcheck disable=SC2034
-    mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    if [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* ]]; then
-      mapfile -t lSTRICT_VERSION_IDENTIFIER_ARR < <(jq -r .strict_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    fi
-    if [[ "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
-      mapfile -t lZGREP_VERSION_IDENTIFIER_ARR < <(jq -r .zgrep_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    fi
-    mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    mapfile -t lAFFECTED_PATHS_ARR < <(jq -r .affected_paths[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
-    # echo "Testing ${lRULE_IDENTIFIER} ..."
-    # echo "lPARSING_MODE_ARR: ${lPARSING_MODE_ARR[*]}"
-    # echo "lLICENSES_ARR: ${lLICENSES_ARR[*]}"
-    # echo "lPRODUCT_NAME_ARR: ${lPRODUCT_NAME_ARR[*]}"
-    # echo "lCSV_REGEX_ARR: ${lCSV_REGEX_ARR[*]}"
-    # echo "lVERSION_IDENTIFIER_ARR: ${lVERSION_IDENTIFIER_ARR[*]}"
-    # echo "lAFFECTED_PATHS_ARR: ${lAFFECTED_PATHS_ARR[*]}"
+  mapfile -t lPARSING_MODE_ARR < <(jq -r .parsing_mode[] "${lVERSION_JSON_CFG}")
+  # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
+  local lRULE_IDENTIFIER=""
+  lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
+  mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  # shellcheck disable=SC2034
+  mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  # shellcheck disable=SC2034
+  mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  if [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* ]]; then
+    mapfile -t lSTRICT_VERSION_IDENTIFIER_ARR < <(jq -r .strict_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  fi
+  if [[ "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
+    mapfile -t lZGREP_VERSION_IDENTIFIER_ARR < <(jq -r .zgrep_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  fi
+  mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  mapfile -t lAFFECTED_PATHS_ARR < <(jq -r .affected_paths[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  # echo "Testing ${lRULE_IDENTIFIER} ..."
+  # echo "lPARSING_MODE_ARR: ${lPARSING_MODE_ARR[*]}"
+  # echo "lLICENSES_ARR: ${lLICENSES_ARR[*]}"
+  # echo "lPRODUCT_NAME_ARR: ${lPRODUCT_NAME_ARR[*]}"
+  # echo "lCSV_REGEX_ARR: ${lCSV_REGEX_ARR[*]}"
+  # echo "lVERSION_IDENTIFIER_ARR: ${lVERSION_IDENTIFIER_ARR[*]}"
+  # echo "lAFFECTED_PATHS_ARR: ${lAFFECTED_PATHS_ARR[*]}"
 
-    # Todo: handle rpm based systems
-    if [[ -f "${LOG_PATH_MODULE}"/debian_known_packages.txt || -f "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
-      # Check all the product names that are configured in our json against the known files
-      # if we have a match we can skip this detection and move on with the next json rule file
-      for lPRODUCT_NAME in "${lPRODUCT_NAME_ARR[@]}"; do
-        if [[ -s "${LOG_PATH_MODULE}"/debian_known_packages.txt ]]; then
-          if grep -q "^${lPRODUCT_NAME}" "${LOG_PATH_MODULE}"/debian_known_packages.txt; then
-            print_output "[*] Static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME} already covered by debian package manager" "no_log"
-            # continue 2
-            return
-          fi
-        elif [[ -s "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
-          if grep -q "^${lPRODUCT_NAME}" "${LOG_PATH_MODULE}"/openwrt_known_packages.txt; then
-            print_output "[*] Static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}  already covered by OpenWRT package manager" "no_log"
-            # continue 2
-            return
-          fi
+  # Todo: handle rpm based systems
+  if [[ -f "${LOG_PATH_MODULE}"/debian_known_packages.txt || -f "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
+    # Check all the product names that are configured in our json against the known files
+    # if we have a match we can skip this detection and move on with the next json rule file
+    for lPRODUCT_NAME in "${lPRODUCT_NAME_ARR[@]}"; do
+      if [[ -s "${LOG_PATH_MODULE}"/debian_known_packages.txt ]]; then
+        if grep -q "^${lPRODUCT_NAME}" "${LOG_PATH_MODULE}"/debian_known_packages.txt; then
+          print_output "[*] Static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME} already covered by debian package manager" "no_log"
+          # continue 2
+          return
         fi
-      done
-    fi
-    # print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
-
-    if [[ -f "${S09_CSV_LOG}" ]]; then
-      # this should prevent double checking - if a version identifier was already successful we do not need to
-      # test the other identifiers. In threaded mode this usually does not decrease testing speed.
-      if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${lRULE_IDENTIFIER}$")" -gt 0 ]]; then
-        print_output "[*] Already identified component for identifier ${lRULE_IDENTIFIER} ... skipping further tests" "no_log"
-        # continue
-        return
+      elif [[ -s "${LOG_PATH_MODULE}"/openwrt_known_packages.txt ]]; then
+        if grep -q "^${lPRODUCT_NAME}" "${LOG_PATH_MODULE}"/openwrt_known_packages.txt; then
+          print_output "[*] Static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}  already covered by OpenWRT package manager" "no_log"
+          # continue 2
+          return
+        fi
       fi
+    done
+  fi
+  # print_output "[*] Testing static rule for identifier ${lRULE_IDENTIFIER} - product name ${lPRODUCT_NAME}" "no_log"
+
+  if [[ -f "${S09_CSV_LOG}" ]]; then
+    # this should prevent double checking - if a version identifier was already successful we do not need to
+    # test the other identifiers. In threaded mode this usually does not decrease testing speed.
+    if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${lRULE_IDENTIFIER}$")" -gt 0 ]]; then
+      print_output "[*] Already identified component for identifier ${lRULE_IDENTIFIER} ... skipping further tests" "no_log"
+      # continue
+      return
     fi
+  fi
 
-    if [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* ]]; then
-      # strict mode
-      #   use the defined regex only on a binary with path/name from lAFFECTED_PATHS_ARR
-      local lSTRICT_BINS_ARR=()
-      local lBIN_ARCH=""
-      local lBINARY_ENTRY=""
-      local lBINARY_PATH=""
-      local lBIN_FILE_DETAILS=""
+  if [[ "${lPARSING_MODE_ARR[*]}" == *"strict"* ]]; then
+    # strict mode
+    #   use the defined regex only on a binary with path/name from lAFFECTED_PATHS_ARR
+    local lSTRICT_BINS_ARR=()
+    local lBIN_ARCH=""
+    local lBINARY_ENTRY=""
+    local lBINARY_PATH=""
+    local lBIN_FILE_DETAILS=""
 
-      [[ "${RTOS}" -eq 1 ]] && return
+    [[ "${RTOS}" -eq 1 ]] && return
 
-      # we create an array with testing candidates based on the paths from the json configuration
-      for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
-        local lSTRICT_BINS_ARR_TMP=()
-        mapfile -t lSTRICT_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
-        lSTRICT_BINS_ARR+=("${lSTRICT_BINS_ARR_TMP[@]}")
-      done
+    # we create an array with testing candidates based on the paths from the json configuration
+    for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
+      local lSTRICT_BINS_ARR_TMP=()
+      mapfile -t lSTRICT_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
+      lSTRICT_BINS_ARR+=("${lSTRICT_BINS_ARR_TMP[@]}")
+    done
 
-      # before moving on we need to ensure our strings files are generated:
-      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
+    # before moving on we need to ensure our strings files are generated:
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
 
-      for lBINARY_ENTRY in "${lSTRICT_BINS_ARR[@]}"; do
-        # as the STRICT_BINS array could also include other files we have to check for ELF files now
-        # This information is already stored in P99_CSV_LOG and in our lBINARY_ENTRY details
-        lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
-        if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]] ; then
-          # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
-          MD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
-          lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
-          lAPP_NAME="$(basename "${lBINARY_PATH}")"
-          local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
-          if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-            continue
-          fi
-          for lVERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
-            # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER}"
-            lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
-            if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-              print_ln "no_log"
-              print_output "[+] Version information found ${RED}${lAPP_NAME} ${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - strict${GREEN})."
-              if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
-                # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
-                continue 2
-              fi
-            fi
-          done
-        fi
-      done
-      print_dot
-    fi
-
-    if [[ "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
-      # zgrep mode:
-      #   search for files configured in json config
-      #   use zgrep regex via zgrep on these files
-
-      # we create an array with testing candidates based on the paths from the json configuration
-      for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
-        local lZGREP_BINS_ARR_TMP=()
-        mapfile -t lZGREP_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
-        lZGREP_BINS_ARR+=("${lZGREP_BINS_ARR_TMP[@]}")
-      done
-
-      for lBINARY_ENTRY in "${lZGREP_BINS_ARR[@]}"; do
+    for lBINARY_ENTRY in "${lSTRICT_BINS_ARR[@]}"; do
+      # as the STRICT_BINS array could also include other files we have to check for ELF files now
+      # This information is already stored in P99_CSV_LOG and in our lBINARY_ENTRY details
+      lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
+      if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]] ; then
+        # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
+        MD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
         lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
-        if ! [[ -f "${lBINARY_PATH}" ]]; then
+        lAPP_NAME="$(basename "${lBINARY_PATH}")"
+        local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
+        if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
           continue
         fi
-        for lVERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
-          # print_output "[*] Testing zgrep identifier ${ORANGE}${lVERSION_IDENTIFIER}${NC} on binary ${ORANGE}${lBINARY_PATH}${NC}"
-          lVERSION_IDENTIFIED=$(zgrep -h "${lVERSION_IDENTIFIER}" "${lBINARY_PATH}" | sort -u || true)
-          lVERSION_IDENTIFIED="${lVERSION_IDENTIFIED//[![:print:]]/}"
+        for lVERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
+          # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER}"
+          lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
+            print_ln "no_log"
+            print_output "[+] Version information found ${RED}${lAPP_NAME} ${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - strict${GREEN})."
             if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+              # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
               continue 2
             fi
           fi
         done
-      done
-      print_dot
-    fi
-
-    # This is the default mode!
-    if [[ "${lPARSING_MODE_ARR[*]}" == *"normal"* ]]; then
-      print_dot
-      # print_output "[*] FIRMWARE: ${FIRMWARE} / RTOS: ${RTOS} / FIRMWARE_PATH: ${FIRMWARE_PATH} / FIRMWARE_PATH_BAK: ${FIRMWARE_PATH_BAK}" "no_log"
-
-      # original firmware file:
-      if [[ ${RTOS} -eq 1 ]]; then
-        # in RTOS mode we also test the original firmware file
-
-        lMD5_SUM=$(md5sum "${FIRMWARE_PATH_BAK}")
-        lMD5_SUM="${lMD5_SUM/\ *}"
-        lAPP_NAME="$(basename "${FIRMWARE_PATH_BAK}")"
-        local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lAPP_NAME}".txt
-        # generate strings output if not already available:
-        if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-          generate_strings "${FIRMWARE_PATH_BAK}"
-        fi
-        # if we were able to generate the strings we can now analyse these strings
-        # if no strings available ... go ahead and test all the bins against our identifiers
-        if [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-          for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-            # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER} for RTOS firmware" "no_log"
-            lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
-            if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-              print_ln "no_log"
-              print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in original firmware file (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - firmware${GREEN})."
-              # this is a little hack to get the original firmware look like a typical EMBA P99 entry
-              lBIN_FILE_DETAILS=$(file -b "${FIRMWARE_PATH_BAK}")
-              lBINARY_ENTRY="S09_tmp_entry_for_RTOS_detection;${FIRMWARE_PATH_BAK};3;4;5;6;7;${lBIN_FILE_DETAILS};${lMD5_SUM}"
-              if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
-                # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
-                break
-              fi
-            fi
-          done
-        fi
       fi
+    done
+    print_dot
+  fi
 
-      # The following area is responsible to check all binaries against our version database:
+  if [[ "${lPARSING_MODE_ARR[*]}" == *"zgrep"* ]]; then
+    # zgrep mode:
+    #   search for files configured in json config
+    #   use zgrep regex via zgrep on these files
 
-      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
-      # this will burn the CPU but in most cases the time of testing is cut into half
-      # TODO: change to local vars via parameters - this is ugly as hell!
-      local lVERSION_IDENTIFIER=""
-      for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-        # print_output "[*] Calling with ${lVERSION_IDENTIFIER}" "no_log"
-        bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
-        local lTMP_PID="$!"
-        WAIT_PIDS_S09+=( "${lTMP_PID}" )
-        # echo "WAIT_PIDS_S09: ${#WAIT_PIDS_S09[@]} / max: ${MAX_MOD_THREADS})"
-        max_pids_protection "${MAX_MOD_THREADS}" WAIT_PIDS_S09
+    # we create an array with testing candidates based on the paths from the json configuration
+    for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
+      local lZGREP_BINS_ARR_TMP=()
+      mapfile -t lZGREP_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
+      lZGREP_BINS_ARR+=("${lZGREP_BINS_ARR_TMP[@]}")
+    done
+
+    for lBINARY_ENTRY in "${lZGREP_BINS_ARR[@]}"; do
+      lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
+      if ! [[ -f "${lBINARY_PATH}" ]]; then
+        continue
+      fi
+      for lVERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
+        # print_output "[*] Testing zgrep identifier ${ORANGE}${lVERSION_IDENTIFIER}${NC} on binary ${ORANGE}${lBINARY_PATH}${NC}"
+        lVERSION_IDENTIFIED=$(zgrep -h "${lVERSION_IDENTIFIER}" "${lBINARY_PATH}" | sort -u || true)
+        lVERSION_IDENTIFIED="${lVERSION_IDENTIFIED//[![:print:]]/}"
+        if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+          print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
+          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+            continue 2
+          fi
+        fi
       done
-      print_dot
+    done
+    print_dot
+  fi
+
+  # This is the default mode!
+  if [[ "${lPARSING_MODE_ARR[*]}" == *"normal"* ]]; then
+    print_dot
+    # print_output "[*] FIRMWARE: ${FIRMWARE} / RTOS: ${RTOS} / FIRMWARE_PATH: ${FIRMWARE_PATH} / FIRMWARE_PATH_BAK: ${FIRMWARE_PATH_BAK}" "no_log"
+
+    # original firmware file:
+    if [[ ${RTOS} -eq 1 ]]; then
+      # in RTOS mode we also test the original firmware file
+
+      lMD5_SUM=$(md5sum "${FIRMWARE_PATH_BAK}")
+      lMD5_SUM="${lMD5_SUM/\ *}"
+      lAPP_NAME="$(basename "${FIRMWARE_PATH_BAK}")"
+      local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lAPP_NAME}".txt
+      # generate strings output if not already available:
+      if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
+        generate_strings "${FIRMWARE_PATH_BAK}"
+      fi
+      # if we were able to generate the strings we can now analyse these strings
+      # if no strings available ... go ahead and test all the bins against our identifiers
+      if [[ -f "${lSTRINGS_OUTPUT}" ]]; then
+        for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+          # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER} for RTOS firmware" "no_log"
+          lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
+          if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+            print_ln "no_log"
+            print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in original firmware file (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - firmware${GREEN})."
+            # this is a little hack to get the original firmware look like a typical EMBA P99 entry
+            lBIN_FILE_DETAILS=$(file -b "${FIRMWARE_PATH_BAK}")
+            lBINARY_ENTRY="S09_tmp_entry_for_RTOS_detection;${FIRMWARE_PATH_BAK};3;4;5;6;7;${lBIN_FILE_DETAILS};${lMD5_SUM}"
+            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+              # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+              break
+            fi
+          fi
+        done
+      fi
     fi
+
+    # The following area is responsible to check all binaries against our version database:
+
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
+    # this will burn the CPU but in most cases the time of testing is cut into half
+    # TODO: change to local vars via parameters - this is ugly as hell!
+    local lVERSION_IDENTIFIER=""
+    for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+      # print_output "[*] Calling with ${lVERSION_IDENTIFIER}" "no_log"
+      bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
+      local lTMP_PID="$!"
+      WAIT_PIDS_S09+=( "${lTMP_PID}" )
+      # echo "WAIT_PIDS_S09: ${#WAIT_PIDS_S09[@]} / max: ${MAX_MOD_THREADS})"
+      max_pids_protection "${MAX_MOD_THREADS}" WAIT_PIDS_S09
+    done
+    print_dot
+  fi
 
   wait_for_pid "${WAIT_PIDS_S09[@]}"
 }
