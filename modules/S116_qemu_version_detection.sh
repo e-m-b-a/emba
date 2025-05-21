@@ -23,6 +23,10 @@ S116_qemu_version_detection() {
   # emulation result confidence level:
   export CONFIDENCE_LEVEL=3
 
+  if [[ "${QEMULATION}" -eq 0 ]]; then
+    module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+  fi
+
   if [[ "${RTOS}" -eq 0 ]]; then
     module_title "Identified software components - via usermode emulation."
     pre_module_reporter "${FUNCNAME[0]}"

@@ -501,7 +501,7 @@ version_parsing_logging() {
     for lVENDOR in "${lrVENDOR_NAME_ARR_ref[@]}"; do
       lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lVENDOR}" )
     done
-    lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${CONFIDENCE_LEVEL}")" )
+    lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${CONFIDENCE_LEVEL:-0}")" )
 
     # build the dependencies based on linker details
     if [[ "${lBIN_FILE_DETAILS:-NA}" == *"dynamically linked"* ]]; then
@@ -519,7 +519,7 @@ version_parsing_logging() {
     if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
-      if ! build_sbom_json_hashes_arr "${lBINARY_PATH:-NA}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL}"; then
+      if ! build_sbom_json_hashes_arr "${lBINARY_PATH:-NA}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${PACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL:-0}"; then
         print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
         # we continue with the next binary -> set return value as marker to get the knowledge in the caller
         return 0
@@ -596,7 +596,7 @@ build_final_bins_threader() {
 
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
-  if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL}"; then
+  if ! build_sbom_json_hashes_arr "${lFILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "${CONFIDENCE_LEVEL:-0}"; then
     # print_output "[*] Already found results for ${lAPP_NAME:-NA} / ${lAPP_VERS:-NA}" "no_log"
     return
   fi
