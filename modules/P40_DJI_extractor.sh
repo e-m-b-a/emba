@@ -335,7 +335,7 @@ dji_xv4_firmware_extractor() {
   for lXV4_EXTRACED_FILE in "${lXV4_EXTRACTEDFILES_ARR[@]}"; do
     lXV4_EXTRACED_FILE_NAME=$(basename "${lXV4_EXTRACED_FILE}")
     lEXTRACTION_DIR_tmp="${lEXTRACTION_DIR}"/dji_xv4_extraction_"${lXV4_EXTRACED_FILE_NAME}"_unblob_extracted
-    unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}"
+    unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}" 0
   done
 
   mapfile -t lFILES_DJI_XV4_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")

@@ -65,7 +65,7 @@ zyxel_zip_extractor() {
     return
   fi
 
-  unblobber "${lRI_FILE_}" "${lEXTRACTION_DIR_}"
+  unblobber "${lRI_FILE_}" "${lEXTRACTION_DIR_}" 0
   print_ln
 
   if command -v jchroot > /dev/null; then
@@ -159,7 +159,7 @@ zyxel_zip_extractor() {
           print_output "[+] Found valid ${ORANGE}compress.img${GREEN} and extract it now"
           # extract the path to compress.img
           lCOMPRESS_IMG=$(echo "${lCOMPRESS_IMG}" | cut -d ';' -f2)
-          unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted"
+          unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" 0
           local lFILES_ZYXEL_ARR=()
           mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" -type f ! -name "*.raw")
 
