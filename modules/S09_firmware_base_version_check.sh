@@ -53,7 +53,7 @@ S09_firmware_base_version_check() {
   local lFILE_ARR_TMP=()
   # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
   export FILE_ARR=()
-  mapfile -t FILE_ARR < <(grep -v "\/\.git\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  mapfile -t FILE_ARR < <(grep -v "\/\.git\|Git\ pack\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -128,7 +128,7 @@ S09_firmware_base_version_check() {
           if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
             # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
             continue
-          elif grep "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty"; then
+          elif grep "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty\|Git\ pack"; then
             # extract the stored file details and match it against some patterns we do not further process:
             continue
           fi
@@ -413,7 +413,6 @@ S09_identifier_threadings() {
   wait_for_pid "${WAIT_PIDS_S09[@]}"
 }
 
-
 version_parsing_logging() {
   local lVERSION_IDENTIFIED="${1:-}"
   local lBINARY_ENTRY="${2:-}"
@@ -546,7 +545,7 @@ build_final_bins_threader() {
     return
   fi
 
-  if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* ]]; then
+  if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* && "${lBIN_FILE}" != *"Git pack"* ]]; then
     echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
   fi
 
@@ -716,7 +715,7 @@ generate_strings() {
     WAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
   fi
 
-  if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* ]]; then
+  if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* || "${lBIN_FILE}" != *"Git pack"* ]]; then
     return
   fi
 
