@@ -25,6 +25,7 @@ S116_qemu_version_detection() {
 
   if [[ "${QEMULATION}" -eq 0 ]]; then
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+    return
   fi
 
   if [[ "${RTOS}" -eq 0 ]]; then
