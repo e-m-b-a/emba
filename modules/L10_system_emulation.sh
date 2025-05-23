@@ -836,7 +836,7 @@ main_emulation() {
       local lNW_ENTRY_PRIO=0
       local lIPS_INT_VLAN_TMP=()
 
-      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u -t ';' -k 1,1r -k 5,5)
+      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u -t ';' -k 1,1r -k 5,5n)
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
