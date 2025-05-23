@@ -26,13 +26,12 @@ S24_kernel_bin_identifier()
 
   local lNEG_LOG=0
   local lFILE_PATH=""
-  local lK_VER=""
   local lK_INITS_ARR=()
   local lK_INIT=""
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
-  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
+  # write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
   local lWAIT_PIDS_S24_main=()
   # just in case s09 has not already created the strings output directory
@@ -226,10 +225,10 @@ binary_kernel_check_threader() {
               if [[ "${lCFG_CNT}" -lt 50 ]]; then
                 lKCONFIG_EXTRACTED="NA"
               fi
-              write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE_PATH}" "${lBIN_FILE:-NA}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
+              write_csv_log "${lFILE_PATH}" "${lK_VER_CLEAN}" "${lBIN_FILE:-NA}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
             done
           else
-            write_csv_log "${lK_VER}" "${lK_VER_CLEAN}" "${lFILE_PATH}" "${lBIN_FILE:-NA}" "NA" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
+            write_csv_log "${lFILE_PATH}" "${lK_VER_CLEAN}" "${lBIN_FILE:-NA}" "NA" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
           fi
         done
       fi
