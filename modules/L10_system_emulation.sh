@@ -1541,11 +1541,8 @@ get_networking_details_emulation() {
       done
     fi
 
-    # eval "SERVICES_STARTUP=($(for i in "${SERVICES_STARTUP[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
     mapfile -t SERVICES_STARTUP < <(printf "%s\n" "${SERVICES_STARTUP[@]}" | sort -u)
-    # eval "UDP_SERVICES_STARTUP=($(for i in "${UDP_SERVICES_STARTUP[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
     mapfile -t UDP_SERVICES_STARTUP < <(printf "%s\n" "${UDP_SERVICES_STARTUP[@]}" | sort -u)
-    # eval "TCP_SERVICES_STARTUP=($(for i in "${TCP_SERVICES_STARTUP[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
     mapfile -t TCP_SERVICES_STARTUP < <(printf "%s\n" "${TCP_SERVICES_STARTUP[@]}" | sort -u)
 
     for lVLAN_INFO in "${lVLAN_INFOS[@]}"; do
@@ -2553,16 +2550,15 @@ check_online_stat() {
       print_ln
       shopt -s extglob
       # rewrite our array into a nice string for printing it
-      if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
+      if [[ "${#TCP_SERVICES_STARTUP[@]}" -gt 0 ]]; then
         printf -v lTCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
         # # replace \n and ' ' with ,
         lTCP_SERV_STARTUP=${lTCP_SERV//+([$'\n'\ ])/,}
         print_output "[*] TCP Services detected via startup: ${ORANGE}${lTCP_SERV_STARTUP}${NC}"
       fi
       # rewrite our array into a nice string for printing it
-      if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
+      if [[ "${#UDP_SERVICES_STARTUP[@]}" -gt 0 ]]; then
         printf -v lUDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
-        # lUDP_SERV_STARTUP=${lUDP_SERV//\ /,}
         lUDP_SERV_STARTUP=${lUDP_SERV//+([$'\n'\ ])/,}
         print_output "[*] UDP Services detected via startup: ${ORANGE}${lUDP_SERV_STARTUP}${NC}"
       fi
@@ -2570,14 +2566,12 @@ check_online_stat() {
       # rewrite our array into a nice string for printing it
       if [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
         printf -v lTCP_SERV "%s " "${lTCP_SERV_NETSTAT_ARR[@]}"
-        # lTCP_SERV_NETSTAT=${lTCP_SERV//\ /,}
         lTCP_SERV_NETSTAT=${lTCP_SERV//+([$'\n'\ ])/,}
         print_output "[*] TCP Services detected via netstat: ${ORANGE}${lTCP_SERV_NETSTAT}${NC}"
       fi
       # rewrite our array into a nice string for printing it
       if [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
         printf -v lUDP_SERV "%s " "${lUDP_SERV_NETSTAT_ARR[@]}"
-        # lUDP_SERV_NETSTAT=${lUDP_SERV//\ /,}
         lUDP_SERV_NETSTAT=${lUDP_SERV//+([$'\n'\ ])/,}
         print_output "[*] UDP Services detected via netstat: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
       fi
@@ -2586,19 +2580,15 @@ check_online_stat() {
       # work with this:
       lTCP_SERV_ARR=( "${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" )
       lUDP_SERV_ARR=( "${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" )
-      # eval "lTCP_SERV_ARR=($(for i in "${lTCP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-      # eval "lUDP_SERV_ARR=($(for i in "${lUDP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
       mapfile -t lTCP_SERV_ARR < <(printf "%s\n" "${lTCP_SERV_ARR[@]}" | sort -u)
       mapfile -t lUDP_SERV_ARR < <(printf "%s\n" "${lUDP_SERV_ARR[@]}" | sort -u)
       if [[ -v lTCP_SERV_ARR[@] ]]; then
         printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
-        # lTCP_SERV=${lTCP_SERV//\ /,}
         lTCP_SERV="${lTCP_SERV//+([$'\n'\ ])/,}"
         # print_output "[*] TCP Services detected: $ORANGE$lTCP_SERV$NC"
       fi
       if [[ -v lUDP_SERV_ARR[@] ]]; then
         printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
-        # lUDP_SERV=${lUDP_SERV//\ /,}
         lUDP_SERV="${lUDP_SERV//+([$'\n'\ ])/,}"
         # print_output "[*] UDP Services detected: $ORANGE$lUDP_SERV$NC"
       fi

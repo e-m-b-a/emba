@@ -485,8 +485,8 @@ make_web_screenshot() {
 
   sub_module_title "Starting screenshot for ${ORANGE}${lIP_}:${lPORT_}${NC}"
 
-  # Todo: Download not fully working
-  timeout --preserve-status --signal SIGINT 20 sudo -u linuxbrew xvfb-run --server-args="-screen 0, 1024x768x24" cutycapt --insecure --url="${lIP_}":"${lPORT_}" --out="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png || true
+  # timeout --preserve-status --signal SIGINT 20 sudo -u linuxbrew xvfb-run --server-args="-screen 0, 1024x768x24" cutycapt --insecure --url="${lIP_}":"${lPORT_}" --out="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png || true
+  timeout --preserve-status --signal SIGINT 20 "${EXT_DIR}"/chrome-headless-shell/linux-136.0.7103.113/chrome-headless-shell-linux64/chrome-headless-shell --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lIP_}":"${lPORT_}"
 
   if [[ -f "${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png ]]; then
     print_output "[*] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
