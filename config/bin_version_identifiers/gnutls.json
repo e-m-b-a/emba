@@ -1,0 +1,30 @@
+{
+  "identifier": "gnutls",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "LGPL-2.1-or-later"
+  ],
+  "grep_commands": [
+    "Enabled\\ GnuTLS\\ [0-9](\\.[0-9]+)+?\\ logging\\.\\.\\.",
+    "Project-Id-Version:\\ gnutls\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "gnutls"
+  ],
+  "version_extraction": [
+    "sed -r 's/Enabled\\ GnuTLS\\ ([0-9](\\.[0-9]+)+?)\\ .*/:gnu:gnutls:\\1/'",
+    "sed -r 's/Project-Id-Version:\\ gnutls\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gnutls:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

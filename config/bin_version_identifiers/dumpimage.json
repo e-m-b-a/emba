@@ -1,0 +1,24 @@
+{
+   "identifier": "dumpimage",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-or-later"
+   ],
+   "grep_commands": [
+      "^dumpimage\\ version\\ 20[0-9]+(\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "uboot"
+   ],
+   "product_names": [
+      "dumpimage"
+   ],
+   "version_extraction": [
+      "sed -r 's/dumpimage\\ version\\ ([0-9]+(\\.[0-9]+)+?).*/:uboot:dumpimage:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "ntp-keygen",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ntp-keygen\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ntp-keygen"
+   ],
+   "version_extraction": [
+      "sed -r 's/ntp-keygen\\ ([0-9](\\.[0-9]+)+?).*/::ntp-keygen:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

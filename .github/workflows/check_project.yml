@@ -20,8 +20,8 @@ jobs:
     - name: Checkout Branch
       uses: actions/checkout@v2
     - name: Install dependencies for check script
-      run: |
-        sudo apt-get install -y shellcheck python3-pip flake8
+      run: 
+        sudo apt-get install -y shellcheck python3-pip libjson-pp-perl flake8
         PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install -U requests
         PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install semgrep
         PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install prospector

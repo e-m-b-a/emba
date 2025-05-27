@@ -1,0 +1,31 @@
+{
+  "identifier": "sqlite3",
+  "parsing_mode": [
+    "multi_grep",
+    "normal"
+  ],
+  "licenses": [
+    "public-domain"
+  ],
+  "grep_commands": [
+    "'^sqlite3_version$\"&&\"^sqlite3_bind_parameter_index$\"&&\"^3(\\.[0-9]+)?+$\"'",
+    "SQLite\\ version\\ 3(\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "sqlite"
+  ],
+  "product_names": [
+    "sqlite"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:sqlite:sqlite:\\1/'",
+    "sed -r 's/SQLite\\ version\\ (3(\\.[0-9]+)+?).*/:sqlite:sqlite:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

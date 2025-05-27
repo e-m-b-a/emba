@@ -33,7 +33,7 @@ S22_php_check()
   export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
-    mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+    mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
     write_csv_log "Script path" "PHP issue" "source (e.g. semgrep)" "common linux file"
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
@@ -60,6 +60,10 @@ s22_phpinfo_check() {
   for lPHPINFO in "${lPHP_SCRIPTS_ARR[@]}" ; do
     if grep -E "extension_loaded\('ionCube Loader" "${lPHPINFO}"; then
       print_output "[-] Warning: ionCube protected PHP file detected ${ORANGE}${lPHPINFO}${NC}"
+      continue
+    fi
+    if grep -E "return sg_load\('" "${lPHPINFO}"; then
+      print_output "[-] Warning: SourceGuardian protected PHP file detected ${ORANGE}${lPHPINFO}${NC}"
       continue
     fi
     if grep -q "phpinfo()" "${lPHPINFO}"; then
@@ -164,7 +168,7 @@ s22_vuln_check_caller() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S22_ARR+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S22_ARR[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S22_ARR
       continue
     else
       s22_vuln_check "${lPHP_SCRIPT}"

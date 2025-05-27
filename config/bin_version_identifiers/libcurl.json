@@ -1,0 +1,30 @@
+{
+  "identifier": "libcurl",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "curl"
+  ],
+  "grep_commands": [
+    "CLIENT\\ libcurl\\ [0-9](\\.[0-9]+)+?",
+    "^libcurl\\/[0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "libcurl"
+  ],
+  "version_extraction": [
+    "sed -r 's/CLIENT\\ libcurl\\ ([0-9](\\.[0-9]+)+?).*/::libcurl:\\1/'",
+    "sed -r 's/libcurl\\/([0-9](\\.[0-9]+)+?)$/::libcurl:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

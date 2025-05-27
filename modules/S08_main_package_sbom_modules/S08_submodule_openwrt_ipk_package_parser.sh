@@ -50,7 +50,7 @@ S08_submodule_openwrt_ipk_package_parser() {
   local lPKG_MD5=""
   local lPOS_RES=0
 
-  mapfile -t lIPK_ARCHIVES_ARR < <(grep "\.ipk;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lIPK_ARCHIVES_ARR < <(grep "\.ipk;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lIPK_ARCHIVES_ARR[@]}${NC} OpenWRT ipk files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -68,7 +68,7 @@ S08_submodule_openwrt_ipk_package_parser() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
       lPOS_RES=1
     done
 
@@ -218,7 +218,7 @@ ipk_package_parser_threader() {
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
   if ! build_sbom_json_hashes_arr "${lIPK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
     return
   fi
 

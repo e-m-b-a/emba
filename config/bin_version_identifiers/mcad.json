@@ -1,0 +1,24 @@
+{
+   "identifier": "mcad",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "Management\\ Console\\ Agent\\ v[0-9]\\.[0-9]+\\ \\(c\\)\\ Ubiquiti\\ Networks,\\ Inc\\.$"
+   ],
+   "vendor_names": [
+      "ubiquiti"
+   ],
+   "product_names": [
+      "console_agent"
+   ],
+   "version_extraction": [
+      "sed -r 's/Management\\ Console\\ Agent\\ v([0-9](\\.[0-9]+)+?)\\ .*/:ubiquiti:console_agent:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

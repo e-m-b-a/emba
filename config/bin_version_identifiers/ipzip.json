@@ -1,0 +1,24 @@
+{
+   "identifier": "ipzip",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "commercial"
+   ],
+   "grep_commands": [
+      "^ipzip V[0-9]\\.[0-9]$"
+   ],
+   "vendor_names": [
+      "ipcomm"
+   ],
+   "product_names": [
+      "ipzip"
+   ],
+   "version_extraction": [
+      "sed -r 's/ipzip\\ V([0-9](\\.[0-9]+)+?)$/:ipcomm:ipzip:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

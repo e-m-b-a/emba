@@ -1,0 +1,24 @@
+{
+   "identifier": "ozker",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ozKer\\ [0-9](\\.[0-9]+)+?(\\.ozker\\ build-[0-9]+)?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ozker"
+   ],
+   "version_extraction": [
+      "sed -r 's/ozker\\ ([0-9](\\.[0-9]+)+?).*/::ozker:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

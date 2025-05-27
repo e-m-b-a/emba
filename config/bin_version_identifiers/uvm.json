@@ -1,0 +1,24 @@
+{
+   "identifier": "uvm",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "UVM\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "uvm"
+   ],
+   "version_extraction": [
+      "sed -r 's/UVM\\ ([0-9](\\.[0-9]+)+?)$/::uvm:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

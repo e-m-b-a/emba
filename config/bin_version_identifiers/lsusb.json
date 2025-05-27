@@ -1,0 +1,24 @@
+{
+   "identifier": "lsusb",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "lsusb\\ \\(usbutils\\)\\ [0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "usbutils"
+   ],
+   "version_extraction": [
+      "sed -r 's/lsusb\\ \\(usbutils\\)\\ ([0-9]+)/::usbutils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

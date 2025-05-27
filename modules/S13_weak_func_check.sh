@@ -57,8 +57,8 @@ S13_weak_func_check()
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
-      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f7)"
-      lBINARY="${lBINARY/;*}"
+      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
+      lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then
@@ -138,7 +138,7 @@ S13_weak_func_check()
         fi
       fi
       if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S13_ARR[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S13_ARR
       fi
     done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
@@ -583,12 +583,12 @@ log_bin_hardening() {
     # #1 - the full binary path
     # #2 - stripped binary path from cut_path()
     # #3 - only binary name - weakest mechanism
-    if [[ "$(grep "${lBIN}" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+    if [[ "$(grep "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
       # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}${lBIN}${NC}"
-      lBIN_PROT=$(grep "${lBIN}" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    elif [[ "$(grep "$(cut_path "${lBIN}")" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+      lBIN_PROT=$(grep "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    elif [[ "$(grep "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
       # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}$(cut_path ${lBIN})${NC}"
-      lBIN_PROT=$(grep "$(cut_path "${lBIN}")" "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+      lBIN_PROT=$(grep "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
     else
       # print_output "[*] Binary protection state of ${GREEN}${lNAME}${NC} / ${lBIN}"
       lBIN_PROT=$(grep '/'"${lNAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)

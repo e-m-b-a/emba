@@ -1,0 +1,30 @@
+{
+  "identifier": "pcre",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^pcre[a-z]+\\ version\\ [0-9](\\.[0-9]+)+?\\ 20[0-9]+-[0-9]+-[0-9]+$"
+  ],
+  "vendor_names": [
+    "pcre",
+    "perl"
+  ],
+  "product_names": [
+    "pcre"
+  ],
+  "version_extraction": [
+    "sed -r 's/pcre[a-z]+\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:pcre:pcre:\\1/'",
+    "sed -r 's/pcre[a-z]+\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:perl:pcre:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

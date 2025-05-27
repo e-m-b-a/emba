@@ -1,0 +1,30 @@
+{
+  "identifier": "pptp",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^pptp-linux\\ version [0-9](\\.[0-9]+)+?$",
+    "^pptp\\ version\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "pptp"
+  ],
+  "version_extraction": [
+    "sed -r 's/pptp-linux\\ version\\ ([0-9](\\.[0-9]+)+?)$/::pptp:\\1/'",
+    "sed -r 's/pptp\\ version\\ ([0-9](\\.[0-9]+)+?)$/::pptp:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

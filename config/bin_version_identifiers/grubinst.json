@@ -1,0 +1,24 @@
+{
+   "identifier": "grubinst",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "grubinst\\ version\\ :\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "grubinst"
+   ],
+   "version_extraction": [
+      "sed -r 's/grubinst\\ version\\ :\\ ([0-9](\\.[0-9]+)+?)$/::grubinst:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

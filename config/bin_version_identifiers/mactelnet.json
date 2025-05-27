@@ -1,0 +1,24 @@
+{
+   "identifier": "mactelnet",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "MAC-Telnet\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "mac-telnet_project"
+   ],
+   "product_names": [
+      "mac-telnet"
+   ],
+   "version_extraction": [
+      "sed -r 's/MAC-Telnet\\ ([0-9](\\.[0-9]+)+?).*/:mac-telnet_project:mac-telnet:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

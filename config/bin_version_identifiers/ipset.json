@@ -1,0 +1,30 @@
+{
+  "identifier": "ipset",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^ipset\\ v[0-9](\\.[0-9]+)+?$",
+    "ipset\\ v[0-9](\\.[0-9]+)+?,\\ protocol\\ version:\\ [0-9]"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "ipset"
+  ],
+  "version_extraction": [
+    "sed -r 's/ipset\\ v([0-9](\\.[0-9]+)+?)$/::ipset:\\1/'",
+    "sed -r 's/ipset\\ v([0-9](\\.[0-9]+)+?).*/::ipset:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

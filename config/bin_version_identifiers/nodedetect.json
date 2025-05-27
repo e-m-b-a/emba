@@ -1,0 +1,24 @@
+{
+   "identifier": "nodedetect",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^nodedetect\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "nodedetect"
+   ],
+   "version_extraction": [
+      "sed -r 's/nodedetect\\ ([0-9](\\.[0-9]+)+?)$/::nodedetect:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

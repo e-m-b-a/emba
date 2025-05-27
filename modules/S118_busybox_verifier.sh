@@ -24,91 +24,74 @@ S118_busybox_verifier()
   pre_module_reporter "${FUNCNAME[0]}"
   local lNEG_LOG=0
 
-  local lBB_VERSIONS_ARR=()
   local lBB_BINS_ARR=()
   local lBB_VERSION=""
   local lBB_BIN=""
-  local lBB_ENTRY=""
-  local lVERSION_IDENTIFIER=""
-  local lMD5_CHECKSUM="NA"
-  local lSHA256_CHECKSUM="NA"
-  local lSHA512_CHECKSUM="NA"
-  local lAPP_LIC="GPL-2.0-only"
-  local lAPP_MAINT=""
-  local lAPP_VERS=""
-  local lBIN_FILE=""
-  local lBIN_ARCH=""
-  local lPACKAGING_SYSTEM="static_busybox_analysis"
-  local lCPE_IDENTIFIER=""
-  local lPURL_IDENTIFIER=""
+  export PACKAGING_SYSTEM="bb_verified"
   local lBB_RESULT_FILE=""
+  local lBB_SBOMs_ARR=()
 
   module_wait "S116_qemu_version_detection"
   module_wait "S09_firmware_base_version_check"
 
-  if [[ -f "${S116_CSV_LOG}" ]]; then
-    mapfile -t lBB_VERSIONS_ARR < <(grep ";busybox;" "${S116_CSV_LOG}" | cut -d\; -f1,4 | sort -u || true)
+  if [[ -d "${SBOM_LOG_PATH}" ]]; then
+    mapfile -t lBB_SBOMs_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -name "*busybox_*.json")
   fi
 
-  # if don't get our version details from S116/S115 we need to fallback to s09
-  if [[ "${#lBB_VERSIONS_ARR[@]}" -eq 0 ]]; then
-    if [[ -f "${S09_CSV_LOG}" ]]; then
-      mapfile -t lBB_VERSIONS_ARR < <(grep ";busybox;" "${S09_CSV_LOG}" | cut -d\; -f1,4 | sort -u || true)
-    fi
-  fi
-
-  # finally we search manually for the version
-  if [[ "${#lBB_VERSIONS_ARR[@]}" -eq 0 ]]; then
+  # if we have no results already we can try to search manually now
+  # this usually happens if s09 and s115/116 is disabled
+  # This mode is a backup mode
+  if [[ "${#lBB_SBOMs_ARR[@]}" -eq 0 ]]; then
     # first grep is for identification of possible binary files:
-    mapfile -t lBB_BINS_ARR < <(grep -l -a -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" "${LOG_DIR}"/firmware -r 2>/dev/null || true)
+    mapfile -t lBB_BINS_ARR < <(grep -l -a -E "BusyBox" "${LOG_DIR}"/firmware -r 2>/dev/null || true)
+
     for lBB_BIN in "${lBB_BINS_ARR[@]}"; do
-      lBIN_FILE=$(file -b "${lBB_BIN}")
-      if ! [[ "${lBIN_FILE}" == *"ELF"* ]]; then
+      if [[ "${lBB_BIN}" == *".raw" ]]; then
+        # skip binwalk raw files
         continue
       fi
-      # now modify the version identifier to use it also for our CVE identification
-      lVERSION_IDENTIFIER=$(strings "${lBB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/:busybox:busybox:\1/' | sort -u | head -1 || true)
-      # build the needed array
-      lBB_VERSIONS_ARR+=( "${lBB_BIN};${lVERSION_IDENTIFIER}" )
-
-      check_for_s08_csv_log "${S08_CSV_LOG}"
-
-      lMD5_CHECKSUM="$(md5sum "${lBB_BIN}" | awk '{print $1}')"
-      lSHA256_CHECKSUM="$(sha256sum "${lBB_BIN}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${lBB_BIN}" | awk '{print $1}')"
-      lCPE_IDENTIFIER=$(build_cpe_identifier "${lVERSION_IDENTIFIER}")
-      lOS_IDENTIFIED=$(distri_check)
-
-      lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
-      lBIN_ARCH=${lBIN_ARCH#\ }
-      lPURL_IDENTIFIER=$(build_generic_purl "${lVERSION_IDENTIFIER}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
-
-      lAPP_MAINT=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f2)
-      lAPP_NAME=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f3)
-      lAPP_VERS=$(echo "${lVERSION_IDENTIFIER}" | cut -d ':' -f4-5)
-
-      # add source file path information to our properties array:
-      local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lBB_BIN}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lVERSION_IDENTIFIER}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
-
-      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-      # final array with all hash values
-      if ! build_sbom_json_hashes_arr "${lBB_BIN}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+      # get the binary data from P99 log for further processing
+      local lBINARY_DATA=""
+      local lVERSION_JSON_CFG="${CONFIG_DIR}"/bin_version_identifiers/busybox.json
+      local lVERSION_IDENTIFIER_ARR=()
+      local lVERSION_IDENTIFIER=""
+      lBINARY_DATA=$(grep ";${lBB_BIN};.*ELF" "${P99_CSV_LOG}" | head -1 || true)
+      if [[ -z ${lBINARY_DATA} ]]; then
+        # we have not found our binary as ELF
         continue
       fi
 
-      # create component entry - this allows adding entries very flexible:
-      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
+      # extract the grep commands for our version identification
+      mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+      for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
+        lVERSION_IDENTIFIED=$(strings "${lBB_BIN}" | grep -a -E "${lVERSION_IDENTIFIER}" | sort -u | head -1 || true)
+        if [[ -n ${lVERSION_IDENTIFIED} ]]; then
+          local lRULE_IDENTIFIER=""
+          local lLICENSES_ARR=()
+          local lPRODUCT_NAME_ARR=()
+          local lVENDOR_NAME_ARR=()
+          local lCSV_REGEX_ARR=()
 
-      write_log "static_busybox_analysis;${lBB_BIN:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};$(basename "${lBB_BIN}");NA;${lVERSION_IDENTIFIER:-NA};GPL-2.0-only;maintainer unknown;unknown;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
-      print_output "[*] Found busybox binary - ${lBB_BIN} - ${lVERSION_IDENTIFIER:-NA} - GPL-2.0-only" "no_log"
+          # lets build the data we need for version_parsing_logging
+          lRULE_IDENTIFIER=$(jq -r .identifier "${lVERSION_JSON_CFG}" || print_error "[-] Error in parsing ${lVERSION_JSON_CFG}")
+          mapfile -t lLICENSES_ARR < <(jq -r .licenses[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+          # shellcheck disable=SC2034
+          mapfile -t lPRODUCT_NAME_ARR < <(jq -r .product_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+          # shellcheck disable=SC2034
+          mapfile -t lVENDOR_NAME_ARR < <(jq -r .vendor_names[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+          # shellcheck disable=SC2034
+          mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+
+          export TYPE="static"
+          export CONFIDENCE_LEVEL=3
+
+          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+            # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+            continue 2
+          fi
+        fi
+        print_output "[*] Found busybox binary - ${lBB_BIN} - ${lVERSION_IDENTIFIED:-NA} - ${lLICENSES_ARR[*]}" "no_log"
+      done
     done
   fi
 
@@ -117,55 +100,77 @@ S118_busybox_verifier()
     return
   fi
 
-  for lBB_ENTRY in "${lBB_VERSIONS_ARR[@]}"; do
+  local lBB_VERSION_DONE_ARR=()
+  mapfile -t lBB_SBOMs_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 ! -name "*unhandled_file*" -name "*busybox_*.json")
+  for lBB_SBOM_JSON in "${lBB_SBOMs_ARR[@]}"; do
     export BB_VERIFIED_APPLETS=()
-    local lBB_VERSION="${lBB_ENTRY/*;}"
-    local lBB_BIN="${lBB_ENTRY/;*}"
-    local lBB_VERSION_tmp="${lBB_VERSION#:}"
-    local lBB_VERSION_tmp="${lBB_VERSION_tmp//:/_}"
-    export CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/${lBB_VERSION_tmp}.txt"
+    local lBB_VERSION=""
+    lBB_VERSION=$(jq -r .version "${lBB_SBOM_JSON}" || print_error "[-] S118 - BB version extraction failed for ${lBB_SBOM_JSON}")
+    local lBB_PRODUCT=""
+    lBB_PRODUCT=$(jq -r .name "${lBB_SBOM_JSON}")
+    lBB_PRODUCT=${lBB_PRODUCT,,}
+    local lBB_VENDOR=""
+    lBB_VENDOR=$(jq -r .supplier.name "${lBB_SBOM_JSON}")
+    lBB_VENDOR=${lBB_VENDOR,,}
+
+    local lBB_BIN=""
+    lBB_BIN="$(jq -r '.properties[]? | select(.name | test("source_path")) | .value' "${lBB_SBOM_JSON}")"
+    lBB_BIN="${lBB_BIN#\'}"
+    lBB_BIN="${lBB_BIN%\'}"
+    if ! [[ -f "${lBB_BIN}" ]]; then
+      continue
+    fi
     local lALL_BB_VULNS_ARR=()
     local lBB_APPLET=""
     local lSUMMARY=""
     local lWAIT_PIDS_S118_ARR=()
 
-    if [[ -f "${S118_CSV_LOG}" ]] && tail -n +2 "${S118_CSV_LOG}" | cut -d\; -f1 | grep -q "${lBB_VERSION}"; then
+    if [[ "${lBB_VERSION_DONE_ARR[*]}" == *"${lBB_VERSION}"* ]]; then
       # we already tested this version and ensure we do not duplicate this check
       continue
     fi
 
-    get_cve_busybox_data "${lBB_VERSION}"
+    # rewrite our minimal version to an array ":vendor:product:version"
+    print_output "[*] Testing busybox version :${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION} - ${lBB_SBOM_JSON}" "no_log"
+    lBB_VERSION_DONE_ARR+=( "${lBB_VERSION}" )
+
+    local lBOM_REF=""
+    lBOM_REF=$(jq -r '."bom-ref"' "${lBB_SBOM_JSON}" || true)
+    local lORIG_SOURCE="bb_verified"
+    export CVE_DETAILS_PATH="${LOG_PATH_MODULE}/${lBOM_REF}_${lBB_PRODUCT}_${lBB_VERSION}.csv"
+
+    get_cve_busybox_data "${lBB_SBOM_JSON}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then
-      print_output "[-] No CVE details generated ... check for further BusyBox version"
+      print_output "[-] No CVE details generated (${lBOM_REF}_${lBB_PRODUCT}_${lBB_VERSION}.csv) ... check for further BusyBox version"
       continue
     fi
 
-    get_busybox_applets_emu "${lBB_VERSION}"
-    get_busybox_applets_stat "${lBB_VERSION}" "${lBB_BIN}"
+    get_busybox_applets_emu ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}"
+    get_busybox_applets_stat ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}" "${lBB_BIN}"
 
-    if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}_stat.txt" ]]; then
-      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}_stat.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}.tmp"
+    if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_stat.txt" ]]; then
+      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_stat.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp"
     fi
-    if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}_emu.txt" ]]; then
-      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}_emu.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}.tmp"
-    fi
-
-    if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}.tmp" ]]; then
-      mapfile -t BB_VERIFIED_APPLETS < <(sort -u "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}.tmp")
-      rm "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION/*:/}.tmp" || true
+    if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_emu.txt" ]]; then
+      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_emu.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp"
     fi
 
-    print_output "[*] Create CVE vulnerabilities array for BusyBox version ${ORANGE}${lBB_VERSION}${NC} ..." "no_log"
-    mapfile -t lALL_BB_VULNS_ARR < "${CVE_DETAILS_PATH}"
+    if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" ]]; then
+      mapfile -t BB_VERIFIED_APPLETS < <(sort -u "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp")
+      rm "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" || true
+    fi
+
+    print_output "[*] Create CVE vulnerabilities array for BusyBox version ${ORANGE}:${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}${NC} ..." "no_log"
+    mapfile -t lALL_BB_VULNS_ARR < <(tail -n+2 "${CVE_DETAILS_PATH}")
 
     if [[ "${#lALL_BB_VULNS_ARR[@]}" -eq 0 ]] || [[ "${#BB_VERIFIED_APPLETS[@]}" -eq 0 ]]; then
-      print_output "[-] No BusyBox vulnerability or applets found for ${ORANGE}${lBB_VERSION}${NC}"
+      print_output "[-] No BusyBox vulnerability or applets found for ${ORANGE}:${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}${NC}"
       continue
     fi
 
     print_ln
-    sub_module_title "BusyBox - Vulnerability verification - ${lBB_VERSION}"
+    sub_module_title "BusyBox - Vulnerability verification - :${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}"
     print_output "[+] Extracted ${ORANGE}${#lALL_BB_VULNS_ARR[@]}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
     print_ln
 
@@ -173,7 +178,7 @@ S118_busybox_verifier()
     write_csv_log "BusyBox VERSION" "BusyBox APPLET" "Verified CVE" "CNT all CVEs" "CVE Summary"
     for VULN in "${lALL_BB_VULNS_ARR[@]}"; do
       lVULN_CNT=$((lVULN_CNT+1))
-      busybox_vuln_testing_threader "${VULN}" "${lVULN_CNT}" "${#lALL_BB_VULNS_ARR[@]}" "${lBB_VERSION}" &
+      busybox_vuln_testing_threader "${VULN}" "${lVULN_CNT}" "${#lALL_BB_VULNS_ARR[@]}" ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S118_ARR+=( "${lTMP_PID}" )
@@ -188,6 +193,35 @@ S118_busybox_verifier()
     fi
   done
 
+  # fix the CVE log file and add the verified vulnerabilities:
+  if [[ -f "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
+    # extract the verified CVEs:
+    mapfile -t lVERIFIED_BB_VULNS_ARR < <(grep -E -o ";CVE-[0-9]+-[0-9]+;" "${S118_CSV_LOG}" 2>/dev/null || true)
+    if [[ "${#lVERIFIED_BB_VULNS_ARR[@]}" -gt 0 ]]; then
+      local lTMP_CVE_ENTRY=""
+      # get the CVEs part of vuln_summary.txt
+      lTMP_CVE_ENTRY=$(grep -o -E ":\s+CVEs:\ [0-9]+\s+:" "${LOG_PATH_MODULE}/vuln_summary.txt" | sort -u || true)
+      # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
+      lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/')
+      # ensure we have the right length -> :  CVEs: 1234 (123)  :
+      lTMP_CVE_ENTRY=$(printf '%s%*s' "${lTMP_CVE_ENTRY%:}" "$((22-"${#lTMP_CVE_ENTRY}"))" ":")
+
+      # final replacement in file:
+      sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt" || print_error "[-] BusyBox verification module - final replacement failed for ${lTMP_CVE_ENTRY}"
+
+      # now add the (V) entry to every verified vulnerability
+      for lVERIFIED_BB_CVE in "${lVERIFIED_BB_VULNS_ARR[@]}"; do
+        lVERIFIED_BB_CVE="${lVERIFIED_BB_CVE//;}"
+        local lV_ENTRY="(V)"
+        # ensure we have the correct length
+        # shellcheck disable=SC2183
+        lV_ENTRY=$(printf '%s%*s' "${lV_ENTRY}" "$((19-"${#lVERIFIED_BB_CVE}"-"${#lV_ENTRY}"))")
+        sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 '"${lV_ENTRY}"'/' "${S118_LOG_DIR}/cve_sum/"*_finished.txt || true
+      done
+    fi
+    lNEG_LOG=1
+  fi
+
   if [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
     rm -r "${LOG_PATH_MODULE}/tmp" || true
   fi
@@ -201,14 +235,16 @@ busybox_vuln_testing_threader() {
   local lALL_BB_VULNS_ARR_SIZE="${3:-}"
   local lBB_VERSION="${4:-}"
 
-  CVE=$(echo "${VULN}" | cut -d: -f1)
+  # print_output "[*] VULN: ${VULN}"
+  CVE=$(echo "${VULN}" | cut -d, -f5)
   local LOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${CVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
-    mkdir "${LOG_PATH_MODULE}/tmp" || true
+    mkdir "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
   fi
 
-  lSUMMARY="$(echo "${VULN}" | cut -d: -f6-)"
+  lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${CVE%-*}/${CVE:0:11}"*"xx/${CVE}.json" 2>/dev/null || true)
+  # print_output "[*] ${CVE} - ${lSUMMARY}"
   print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${lALL_BB_VULNS_ARR_SIZE}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
 
   for lBB_APPLET in "${BB_VERIFIED_APPLETS[@]}"; do
@@ -216,7 +252,8 @@ busybox_vuln_testing_threader() {
     if [[ "${lBB_APPLET}" == "which" ]] && [[ "${lSUMMARY}" == *"\,\ ${lBB_APPLET}\ "* ]]; then
       continue
     fi
-    if [[ "${lSUMMARY}" == *" ${lBB_APPLET}\ "* ]]; then
+    # print_output "[*] Testing applet ${lBB_APPLET} against Summary: ${lSUMMARY}"
+    if [[ "${lSUMMARY}" == *" ${lBB_APPLET} "* ]]; then
       write_log "[+] Verified BusyBox vulnerability ${ORANGE}${CVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}" "${LOG_FILE_BB_MODULE}"
       echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${LOG_FILE_BB_MODULE}"
       write_csv_log "${lBB_VERSION}" "${lBB_APPLET}" "${CVE}" "${lALL_BB_VULNS_ARR_SIZE}" "${lSUMMARY}"
@@ -282,19 +319,37 @@ get_busybox_applets_emu() {
 }
 
 get_cve_busybox_data() {
-  local lBB_VERSION="${1:-}"
+  local lBB_SBOM_JSON="${1:-}"
+  local lVENDOR_ARR=()
+  local lPRODUCT_ARR=()
+  local lPRODUCT_VERSION=""
+
+  mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' "${lBB_SBOM_JSON}")
+  if [[ "${#lVENDOR_ARR[@]}" -eq 0 ]]; then
+    lVENDOR_ARR+=("NOTDEFINED")
+  fi
+  # shellcheck disable=SC2034
+  mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' "${lBB_SBOM_JSON}")
+
+  lPRODUCT_VERSION=$(jq --raw-output '.version' "${lBB_SBOM_JSON}")
 
   local lVULN_CNT=""
-  export F20_DEEP=0
   local lWAIT_PIDS_S118_ARR=()
+
+  local lBOM_REF=""
+  lBOM_REF=$(jq -r '."bom-ref"' "${lBB_SBOM_JSON}" || true)
+  local lORIG_SOURCE="bb_verified"
 
   sub_module_title "BusyBox - Version based vulnerability detection"
 
-  prepare_cve_search_module
-  cve_db_lookup_version "${lBB_VERSION}"
+  cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR
 
   if [[ -f "${CVE_DETAILS_PATH}" ]]; then
     lVULN_CNT="$(wc -l "${CVE_DETAILS_PATH}" | awk '{print $1}')"
+    if [[ "${lVULN_CNT}" -gt 0 ]]; then
+      # remove the first csv line
+      lVULN_CNT=$((lVULN_CNT-1))
+    fi
 
     # lets create a more beautifull log for the report:
     local lCVE_LINE_ENTRY=""
@@ -307,29 +362,34 @@ get_cve_busybox_data() {
 
     wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
 
-    print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+    for lCVE_NICE_REPORT in "${CVE_DETAILS_PATH/.csv/_CVE-}"*; do
+      cat "${lCVE_NICE_REPORT}" >> "${CVE_DETAILS_PATH/.csv/_nice.txt}"
+      rm "${lCVE_NICE_REPORT}" >/dev/null || true
+    done
+
+    print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.csv/_nice.txt}"
   fi
 }
 
 get_cve_busybox_data_threader() {
   local lCVE_LINE_ENTRY="${1:-}"
+  # print_output "[*] lCVE_LINE_ENTRY: ${lCVE_LINE_ENTRY}"
 
   local lCVE_ID=""
-  local lCVSS_V2=""
   local lCVSS_V3=""
   local lFIRST_EPSS=""
   local lCVE_SUMMARY=""
 
-  lCVE_ID="${lCVE_LINE_ENTRY/:*}"
-  lCVSS_V2=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f2)
-  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f3)
-  lFIRST_EPSS=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f5)
-  lCVE_SUMMARY=$(echo "${lCVE_LINE_ENTRY}" | cut -d: -f6-)
+  lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f5)
+  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f7)
+  lFIRST_EPSS="$(get_epss_data "${lCVE_ID}")"
+  lFIRST_EPSS="${lFIRST_EPSS/\;*}"
+  lCVE_SUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
+  # print_output "[*] ${lCVE_ID} - ${lCVSS_V3} - ${lFIRST_EPSS} - ${lCVE_SUMMARY}"
 
-  write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-  write_log "$(indent "CVSSv2: ${ORANGE}${lCVSS_V2}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-  write_log "$(indent "CVSSv3: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-  write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-  write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
-  write_log "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
+  write_log "${ORANGE}${lCVE_ID}:${NC}" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "$(indent "CVSS: ${ORANGE}${lCVSS_V3}${NC}")" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "$(indent "FIRST EPSS: ${ORANGE}${lFIRST_EPSS}${NC}")" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "$(indent "Summary: ${ORANGE}${lCVE_SUMMARY}${NC}")" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
+  write_log "" "${CVE_DETAILS_PATH/.csv/_${lCVE_ID}_nice.txt}"
 }

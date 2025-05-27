@@ -1,0 +1,24 @@
+{
+   "identifier": "cups",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^cups\\ BJNP\\ backend\\ -\\ version\\ [0-9]\\.[0-9]$"
+   ],
+   "vendor_names": [
+      "cups"
+   ],
+   "product_names": [
+      "cups"
+   ],
+   "version_extraction": [
+      "sed -r 's/cups\\ BJNP\\ backend\\ -\\ version\\ ([0-9](\\.[0-9]+)+?)$/:cups:cups:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

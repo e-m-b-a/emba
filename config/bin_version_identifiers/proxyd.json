@@ -1,0 +1,24 @@
+{
+   "identifier": "proxyd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^proxyd\\ VERSION\\ [0-9]\\.[0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "proxyd"
+   ],
+   "version_extraction": [
+      "sed -r 's/proxyd\\ VERSION\\ ([0-9](\\.[0-9]+)+?)$/::proxyd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

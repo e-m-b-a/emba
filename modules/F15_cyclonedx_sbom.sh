@@ -67,9 +67,10 @@ F15_cyclonedx_sbom() {
     fi
 
     # EMBA details for the SBOM
-    local lSBOM_TOOL="EMBA Binary analysis environment"
+    local lSBOM_TOOL="EMBA binary analysis environment"
     local lSBOM_TOOL_VERS=""
     lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
+    local lEMBA_URLS_ARR=("https://github.com/e-m-b-a/emba")
 
     local lTOOL_COMP_ARR=()
     lTOOL_COMP_ARR+=( type="application" )
@@ -79,7 +80,7 @@ F15_cyclonedx_sbom() {
       lSBOM_TOOL_VERS+="-$(cat "${INVOCATION_PATH}"/.git/refs/heads/master)"
     fi
     lTOOL_COMP_ARR+=( version="${lSBOM_TOOL_VERS}" )
-    lTOOL_COMP_ARR+=( description="EMBA firmware analyzer - https://github.com/e-m-b-a/emba" )
+    lTOOL_COMP_ARR+=( description="EMBA firmware analyzer - ${lEMBA_URLS_ARR[*]}" )
 
     # the following removes the duplicate untracked files that are handled from an other SBOM entry
     if [[ -s "${SBOM_LOG_PATH}"/duplicates_to_delete.txt ]]; then
@@ -95,7 +96,6 @@ F15_cyclonedx_sbom() {
     lFW_COMPONENT_DATA_ARR+=( name="${lFW_PATH}" )
     lFW_COMPONENT_DATA_ARR+=( type="${lFW_TYPE}" )
     lFW_COMPONENT_DATA_ARR+=( bom-ref="$(uuidgen)" )
-    [[ -n "${FW_VENDOR}" ]] && lFW_COMPONENT_DATA_ARR+=( "supplier=$(jo -n name="${FW_VENDOR}")" )
 
     # generate hashes for the firmware itself:
     if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
@@ -108,7 +108,7 @@ F15_cyclonedx_sbom() {
     mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" -not -name "unhandled_file_*" | sort -u)
     if [[ "${SBOM_UNTRACKED_FILES}" -gt 0 ]]; then
       mapfile -t lCOMP_FILES_ARR_UNHANDLED < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "unhandled_file_*.json" | sort -u)
-     lCOMP_FILES_ARR+=("${lCOMP_FILES_ARR_UNHANDLED[@]}")
+      lCOMP_FILES_ARR+=("${lCOMP_FILES_ARR_UNHANDLED[@]}")
     fi
 
     # as we can have so many components that everything goes b00m we need to build the
@@ -124,17 +124,19 @@ F15_cyclonedx_sbom() {
 
       if [[ -s "${lCOMP_FILE}" ]]; then
         if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
+          # before adding the new component we need to check that this is not our first entry (after the initial [) and for a ','
+          # if it is not found we need to add it now
+          if [[ "$(tail -c1 "${SBOM_LOG_PATH}/sbom_components_tmp.json")" != '[' ]] && [[ "$(tail -n1 "${SBOM_LOG_PATH}/sbom_components_tmp.json")" != ',' ]]; then
+             echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+          fi
           cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
         else
-          print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
+          print_error "[-] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
           continue
         fi
       else
-        print_output "[!] WARNING: SBOM component ${lCOMP_FILE} failed to decode"
+        print_error "[-] WARNING: SBOM component ${lCOMP_FILE} failed to decode"
         continue
-      fi
-      if [[ $((lCOMP_FILE_ID+1)) -lt "${#lCOMP_FILES_ARR[@]}" ]]; then
-        echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
       fi
     done
     echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
@@ -175,7 +177,11 @@ F15_cyclonedx_sbom() {
         tools="$(jo \
           components="$(jo -a "$(jo -n "${lTOOL_COMP_ARR[@]}")")")" \
         component="$(jo -n \
-          "${lFW_COMPONENT_DATA_ARR[@]}")")" \
+          "${lFW_COMPONENT_DATA_ARR[@]}")" \
+        supplier="$(jo -n \
+          name="${FW_VENDOR:-EMBA binary analyzer}" url="$(jo -a "${lEMBA_URLS_ARR[@]}")")" \
+        lifecycles="$(jo -a \
+          "$(jo phase="${SBOM_LIFECYCLE_PHASE}")")")" \
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
       vulnerabilities="[]" \

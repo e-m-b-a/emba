@@ -1,0 +1,24 @@
+{
+   "identifier": "iwlist",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "iwlist\\ \\ \\ \\ Wireless-Tools\\ version\\ [0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "wireless_tools"
+   ],
+   "version_extraction": [
+      "sed -r 's/iwlist(\\ )+Wireless-Tools\\ version\\ ([0-9]+).*/::wireless_tools:\\2/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

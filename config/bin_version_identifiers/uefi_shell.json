@@ -1,0 +1,34 @@
+{
+  "identifier": "uefi_shell",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "bsd-style"
+  ],
+  "grep_commands": [
+    "UEFI\\ SHELL\\ [0-9]+\\.[0-9]+\\ [0-9]+[A-Z][0-9]+\\ ",
+    "UEFI\\ SHELL\\ [0-9]+\\.[0-9]+\\ [0-9]+\\.[0-9]+\\ ",
+    "\\*\\*\\*\\ UEFI\\ Shell\\ v[0-9]+\\.[0-9]+,\\ release\\ [0-9]+[A-Z][0-9]+\\ \\*\\*\\*",
+    "\\*\\*\\*\\ UEFI\\ Shell\\ v[0-9]+\\.[0-9]+,\\ release\\ [0-9]+\\.[0-9]+\\ \\*\\*\\*"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "uefi_shell"
+  ],
+  "version_extraction": [
+    "sed -r 's/UEFI\\ SHELL\\ ([0-9]+\\.[0-9]+)\\ ([0-9]+[A-Z][0-9]+)\\ /::uefi_shell:\\1:\\2/'",
+    "sed -r 's/UEFI\\ SHELL\\ ([0-9]+\\.[0-9]+)\\ ([0-9]+\\.[0-9]+)\\ /::uefi_shell:\\1:\\2/'",
+    "sed -r 's/\\*\\*\\*\\ UEFI\\ Shell\\ v([0-9]+\\.[0-9]+),\\ release\\ ([0-9]+[A-Z][0-9]+)\\ \\*\\*\\*/::uefi_shell:\\1:\\2/'",
+    "sed -r 's/\\*\\*\\*\\ UEFI\\ Shell\\ v([0-9]+\\.[0-9]+),\\ release\\ ([0-9]+\\.[0-9]+)\\ \\*\\*\\*/::uefi_shell:\\1:\\2/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

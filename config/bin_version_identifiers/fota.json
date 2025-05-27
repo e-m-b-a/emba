@@ -1,0 +1,30 @@
+{
+  "identifier": "fota",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^fota\\ client\\ version:\\ [0-9](\\.[0-9]+)+?\\.$",
+    "^fota\\ tz\\ client\\ version:\\ [0-9](\\.[0-9]+)+?\\.$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "fota_client"
+  ],
+  "version_extraction": [
+    "sed -r 's/fota\\ client\\ version\\:\\ ([0-9](\\.[0-9]+)+)?\\.$/::fota_client:\\1/'",
+    "sed -r 's/fota\\ tz\\ client\\ version\\:\\ ([0-9](\\.[0-9]+)+?)\\.$/::fota_client:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

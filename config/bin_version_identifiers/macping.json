@@ -1,0 +1,24 @@
+{
+   "identifier": "macping",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "MAC-Ping\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "mac-ping"
+   ],
+   "version_extraction": [
+      "sed -r 's/MAC-Ping\\ ([0-9](\\.[0-9]+)+?).*/::mac-ping:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

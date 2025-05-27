@@ -36,7 +36,7 @@ P99_prepare_analyzer() {
   local lNEG_LOG=1
 
   export LINUX_PATH_COUNTER=0
-  LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER="$(linux_basic_identification "${LOG_DIR}/firmware")"
 
   # we have a linux:
   if [[ ${LINUX_PATH_COUNTER} -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
@@ -49,6 +49,25 @@ P99_prepare_analyzer() {
   print_output "[*] Quick check for Linux operating-system"
   check_firmware
 
+  # The following code is just in case we have not already created our P99_CSV_LOG file
+  local lFILES_ARR=()
+  local lBINARY=""
+  if [[ ! -f "${P99_CSV_LOG}" ]]; then
+    print_output "[-] INFO: No ${P99_CSV_LOG} log file available ... trying to create it now"
+    mapfile -t lFILES_ARR < <(find "${LOG_DIR}/firmware" -type f)
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+  fi
+
+  # do we need this. We should check it and remove the complete code
+  # as we rely on P99_CSV_LOG
   prepare_all_file_arrays "${FIRMWARE_PATH}"
 
   if [[ ${KERNEL} -eq 0 ]] ; then
@@ -82,6 +101,9 @@ P99_prepare_analyzer() {
     if [[ -f "${LOG_DIR}"/p07_windows_exe_extract.txt ]]; then
       write_link "p07"
     fi
+  elif grep -q "Identified Android APK package - performing APK checks" "${P02_LOG}"; then
+    print_output "[+] Android APK package detected"
+    write_link "p02"
   elif [[ "${RTOS}" -eq 1 ]]; then
     print_output "[*] Possible RTOS system detected"
   fi

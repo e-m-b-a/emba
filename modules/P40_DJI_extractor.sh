@@ -67,13 +67,10 @@ P40_DJI_extractor() {
     fi
   fi
 
-  if [[ -d "${lEXTRACTION_DIR:-}" ]]; then
+  if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
     local lFILES_DJI=0
-    local lDIRS_DJI=0
-
-    lFILES_DJI=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
-    lDIRS_DJI=$(find "${lEXTRACTION_DIR}" -type d | wc -l)
-    print_output "[*] Extracted ${ORANGE}${lFILES_DJI}${NC} files and ${ORANGE}${lDIRS_DJI}${NC} directories from DJI drone firmware image."
+    lFILES_DJI=$(grep -c "^${FUNCNAME[0]};" "${P99_CSV_LOG}")
+    print_output "[*] Extracted ${ORANGE}${lFILES_DJI}${NC} files from DJI drone firmware image."
     lNEG_LOG=1
   fi
 
@@ -95,7 +92,6 @@ dji_imah_firmware_extractor() {
   local lDJI_FILE=""
   local lDJI_KEY=""
   local lFNAME=""
-  local lEFILE=""
   local lFILES_EXT_KEY_ARR=()
   local lFILE_EXT_KEY=""
   local lDJI_KEYS_ARR=()
@@ -113,6 +109,14 @@ dji_imah_firmware_extractor() {
   if [[ -f "${lFIRMWARE_PATH}" ]]; then
     # usually we have a tar file that we need to extract first:
     unblobber "${FIRMWARE_PATH_BAK}" "${lEXTRACTION_DIR}" 0
+    mapfile -t lFILES_UNBLOB_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
+    for lBINARY in "${lFILES_UNBLOB_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
     # just in case unblob was already able to extract our rootfs:
     detect_root_dir_helper "${lEXTRACTION_DIR}"
     if [[ "${RTOS}" -ne 1 ]]; then
@@ -121,10 +125,10 @@ dji_imah_firmware_extractor() {
       print_output "[+] Found some Linux filesytem - stopping extraction module"
       return
     fi
-    mapfile -t lDJI_FILE_ARR < <(find "${lEXTRACTION_DIR}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
+    mapfile -t lDJI_FILE_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw" -exec du -h {} + | sort -r -h | awk '{print $2}')
   else
     # if we have the tar file already extracted to lFIRMWARE_PATH, we can use this directory
-    mapfile -t lDJI_FILE_ARR < <(find "${lFIRMWARE_PATH}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
+    mapfile -t lDJI_FILE_ARR < <(find "${lFIRMWARE_PATH}" -type f ! -name "*.raw" -exec du -h {} + | sort -r -h | awk '{print $2}')
   fi
 
   for lDJI_FILE in "${lDJI_FILE_ARR[@]}"; do
@@ -198,8 +202,21 @@ dji_imah_firmware_extractor() {
       mapfile -t lFILES_EXT_KEY_ARR < <(find "${lEXTRACTION_DIR}" -type f -wholename "*dji_prak_${lFNAME}_${lDJI_KEY}*" ! -size 0 || true)
       if [[ "${#lFILES_EXT_KEY_ARR[@]}" -gt 0 ]]; then
         print_ln "no_log"
+        mapfile -t lFILES_DJI_ARR < <(find "${lEXTRACTION_DIR}" -type f -wholename "*dji_prak_${lFNAME}_${lDJI_KEY}*")
+        print_output "[*] Extracted ${ORANGE}${#lFILES_DJI_ARR[@]}${NC} files."
+        print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DJI_ARR[@]}${NC} files ... could take some time" "no_log"
+
+        print_ln "no_log"
         print_output "[+] Decrypted firmware files:"
-        find "${lEXTRACTION_DIR}" -type f -wholename "*dji_prak_${lFNAME}_${lDJI_KEY}*" ! -size 0 -ls | tee -a "${LOG_FILE}" || true
+        for lBINARY in "${lFILES_DJI_ARR[@]}" ; do
+          # shellcheck disable=SC2010
+          ls -1lh "${lBINARY}" | grep -v "total [0-9]" | tee -a "${LOG_FILE}" || true
+          binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
+          local lTMP_PID="$!"
+          store_kill_pids "${lTMP_PID}"
+          lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        done
+        wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
       else
         # no files extracted -> try next key
         continue
@@ -215,19 +232,29 @@ dji_imah_firmware_extractor() {
             continue
           fi
           print_ln
-          local lOUTPUT_DIR_UNBLOB="${lFILE_EXT_KEY}"_unblob
-          unblobber "${lFILE_EXT_KEY}" "${lOUTPUT_DIR_UNBLOB}" 0
-          mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%"')
+          local lOUTPUT_DIR="${lFILE_EXT_KEY}"_unblob
+          local lBINARY=""
+          local lWAIT_PIDS_P99_ARR=()
+          local lUB_EXTRACTED_FILES_ARR=()
+          unblobber "${lFILE_EXT_KEY}" "${lOUTPUT_DIR}" 0
+
+          # mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%"')
+          mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR}" -type f ! -name "*.raw")
+
           if [[ "${#lUB_EXTRACTED_FILES_ARR[@]}" -gt 0 ]]; then
-            sub_module_title "Extraction results of $(basename "${lFILE_EXT_KEY}")"
-            print_output "[+] Extracted the following ${ORANGE}${#lUB_EXTRACTED_FILES_ARR[@]}${GREEN} files from ${ORANGE}${lFILE_EXT_KEY}${GREEN}:"
-            print_ln
-            for lEFILE in "${lUB_EXTRACTED_FILES_ARR[@]}"; do
-              print_output "[+] DJI firmware file extracted: $(orange "$(print_path "${lEFILE}")")"
-            done
             # can we just stop now or are there firmware update files with more data in it?
             print_ln
             print_output "[*] Extracted ${ORANGE}${#lUB_EXTRACTED_FILES_ARR[@]}${NC} files from ${ORANGE}$(basename "${lFILE_EXT_KEY}")${NC}." "no_log"
+            print_output "[*] Populating backend data for ${ORANGE}${#lUB_EXTRACTED_FILES_ARR[@]}${NC} files ... could take some time" "no_log"
+
+            for lBINARY in "${lUB_EXTRACTED_FILES_ARR[@]}" ; do
+              binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
+              local lTMP_PID="$!"
+              store_kill_pids "${lTMP_PID}"
+              lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+            done
+            wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
             if [[ "${#lUB_EXTRACTED_FILES_ARR[@]}" -gt 100 ]]; then
               print_output "[*] Stopping extraction process now." "no_log"
               export DJI_DETECTED=1
@@ -237,7 +264,7 @@ dji_imah_firmware_extractor() {
             # This could increase the extraction speed a lot!
             # continue 3
           else
-            rm -r "${lOUTPUT_DIR_UNBLOB}" || true
+            rm -r "${lOUTPUT_DIR}" || true
           fi
         fi
       done
@@ -266,6 +293,9 @@ dji_xv4_firmware_extractor() {
   local lXV4_EXTRACTEDFILES_ARR=()
   local lXV4_EXTRACED_FILE=""
   local lEXTRACTION_DIR_tmp=""
+  local lFILES_DJI_XV4_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lFIRMWARE_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -305,10 +335,22 @@ dji_xv4_firmware_extractor() {
   for lXV4_EXTRACED_FILE in "${lXV4_EXTRACTEDFILES_ARR[@]}"; do
     lXV4_EXTRACED_FILE_NAME=$(basename "${lXV4_EXTRACED_FILE}")
     lEXTRACTION_DIR_tmp="${lEXTRACTION_DIR}"/dji_xv4_extraction_"${lXV4_EXTRACED_FILE_NAME}"_unblob_extracted
-    unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}"
+    unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}" 0
   done
 
-  detect_root_dir_helper "${lEXTRACTION_DIR}"
+  mapfile -t lFILES_DJI_XV4_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+  print_output "[*] Extracted ${ORANGE}${#lFILES_DJI_XV4_ARR[@]}${NC} files from ${ORANGE}${lFIRMWARE_NAME_}${NC}." "no_log"
+  print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DJI_XV4_ARR[@]}${NC} files ... could take some time" "no_log"
+
+  for lBINARY in "${lFILES_DJI_XV4_ARR[@]}" ; do
+    binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+  done
+  wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+  detect_root_dir_helper "${lEXTRACTION_DIR_}"
   if [[ "${RTOS}" -ne 1 ]]; then
     # if we have already found a Linux filesytem we do not need to walk through the rest of the module
     # this means that unblob was already able to extract a Linux filesystem

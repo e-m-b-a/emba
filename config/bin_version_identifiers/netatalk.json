@@ -1,0 +1,24 @@
+{
+   "identifier": "netatalk",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "^cnid_dbd\\ \\(Netatalk\\ [0-9](\\.[0-9]+)+?\\)$"
+   ],
+   "vendor_names": [
+      "netatalk"
+   ],
+   "product_names": [
+      "netatalk"
+   ],
+   "version_extraction": [
+      "sed -r 's/cnid_dbd\\ \\(Netatalk\\ ([0-9](\\.[0-9]+)+?)\\)$/:netatalk:netatalk:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

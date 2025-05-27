@@ -34,7 +34,7 @@ S08_submodule_python_requirements_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lPY_REQUIREMENTS_ARR < <(grep "requirements.*\.txt" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lPY_REQUIREMENTS_ARR < <(grep "requirements.*\.txt" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -73,7 +73,7 @@ S08_submodule_python_requirements_parser() {
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
 
         lPOS_RES=1
       done < "${lPY_REQ_FILE}"
@@ -174,7 +174,7 @@ python_requirements_threader() {
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
   if ! build_sbom_json_hashes_arr "${lPY_REQ_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
     return
   fi
 

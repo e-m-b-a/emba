@@ -1,0 +1,24 @@
+{
+   "identifier": "espeakup",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ESpeakup\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "espeakup"
+   ],
+   "version_extraction": [
+      "sed -r 's/ESpeakup\\ ([0-9](\\.[0-9]+)+?)$/::espeakup:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

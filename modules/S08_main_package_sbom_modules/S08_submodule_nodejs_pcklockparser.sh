@@ -39,7 +39,7 @@ S08_submodule_node_js_package_lock_parser() {
   local lPKG_MD5=""
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "/package.*json;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "/package.*json;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} Node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -66,7 +66,8 @@ S08_submodule_node_js_package_lock_parser() {
         continue
       fi
 
-      jq -r '.packages | keys[] as $k | "\($k);\(.[$k] | "\(.version);\(.license);\(.integrity);\(.dependencies)")"' "${lNODE_LCK_ARCHIVE}" > "${TMP_DIR}/node.lock.tmp" || true
+      jq -r '"\(.name);\(.version);\(.license);\(.integrity);\(.dependencies)"' "${lNODE_LCK_ARCHIVE}" > "${TMP_DIR}/node.lock.tmp" || true
+      jq -r '.packages | keys[] as $k | "\($k);\(.[$k] | "\(.version);\(.license);\(.integrity);\(.dependencies)")"' "${lNODE_LCK_ARCHIVE}" >> "${TMP_DIR}/node.lock.tmp" || true
 
       # shellcheck disable=SC2034
       while IFS=";" read -r lAPP_NAME lAPP_VERS lAPP_LIC lAPP_CHECKSUM lAPP_DEPS; do
@@ -74,7 +75,7 @@ S08_submodule_node_js_package_lock_parser() {
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR_LCK[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
         lPOS_RES=1
       done < "${TMP_DIR}/node.lock.tmp"
       wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"
@@ -154,7 +155,7 @@ node_js_package_lock_threader() {
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
   if ! build_sbom_json_hashes_arr "${lNODE_LCK_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-    print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+    write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
     return
   fi
 

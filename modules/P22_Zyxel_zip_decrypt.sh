@@ -33,7 +33,9 @@ P22_Zyxel_zip_decrypt() {
 
     zyxel_zip_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    lNEG_LOG=1
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+      lNEG_LOG=1
+    fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
@@ -48,6 +50,9 @@ zyxel_zip_extractor() {
   local lZLD_BINS_ARR=()
   local lZLD_BIN=""
   local lCOMPRESS_IMG=""
+  local lFILES_ZYXEL_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   sub_module_title "Zyxel protected ZIP firmware extractor"
 
@@ -60,7 +65,7 @@ zyxel_zip_extractor() {
     return
   fi
 
-  unblobber "${lRI_FILE_}" "${lEXTRACTION_DIR_}"
+  unblobber "${lRI_FILE_}" "${lEXTRACTION_DIR_}" 0
   print_ln
 
   if command -v jchroot > /dev/null; then
@@ -77,8 +82,6 @@ zyxel_zip_extractor() {
   lRI_FILE_BIN="$(basename -s .ri "${lRI_FILE_}")".bin
 
   for lZLD_BIN in "${lZLD_BINS_ARR[@]}"; do
-    local lFILES_ZYXEL=0
-    local lDIRS_ZYXEL=0
     local lZIP_KEY=""
     print_output "[*] Checking ${ORANGE}${lZLD_BIN}${NC}"
 
@@ -129,28 +132,48 @@ zyxel_zip_extractor() {
 
         7z x -p"${lZIP_KEY}" -o"${lEXTRACTION_DIR_}"/firmware_zyxel_extracted "${lRI_FILE_BIN_PATH}" || true
 
-        lFILES_ZYXEL=$(find "${lEXTRACTION_DIR_}"/firmware_zyxel_extracted -type f | wc -l)
-        lDIRS_ZYXEL=$(find "${lEXTRACTION_DIR_}"/firmware_zyxel_extracted -type d | wc -l)
+        mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted" -type f ! -name "*.raw")
 
         print_ln
-        print_output "[*] Zyxel 1st stage - Extracted ${ORANGE}${lFILES_ZYXEL}${NC} files and ${ORANGE}${lDIRS_ZYXEL}${NC} directories from the firmware image."
-        write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-        write_csv_log "Zyxel extractor" "${lRI_FILE_BIN_PATH}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted" "${lFILES_ZYXEL}" "${lDIRS_ZYXEL}" "NA"
+        print_output "[*] Zyxel 1st stage - Extracted ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files from the firmware image."
+        print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files ... could take some time" "no_log"
+        for lBINARY in "${lFILES_ZYXEL_ARR[@]}" ; do
+          binary_architecture_threader "${lBINARY}" "P22_Zyxel_zip_decrypt" &
+          local lTMP_PID="$!"
+          store_kill_pids "${lTMP_PID}"
+          lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        done
+        wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+        write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+        write_csv_log "Zyxel extractor" "${lRI_FILE_BIN_PATH}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted" "${#lFILES_ZYXEL_ARR[@]}" "NA"
       else
         print_output "[-] No ZIP key detected -> no further processing possible"
       fi
 
       # if it was possible to extract something with the key:
-      if [[ "${lFILES_ZYXEL}" -gt 0 ]]; then
+      if [[ "${#lFILES_ZYXEL_ARR[@]}" -gt 0 ]]; then
         # compress.img ist the firmware -> letz search for it
-        lCOMPRESS_IMG=$(find "${lEXTRACTION_DIR_}"/firmware_zyxel_extracted -type f -name compress.img | sort -u)
-        if [[ $(file "${lCOMPRESS_IMG}") == *"Squashfs"* ]]; then
+        lCOMPRESS_IMG=$(grep "compress.img;" "${P99_CSV_LOG}" | sort -u)
+        if [[ "${lCOMPRESS_IMG}" == *"Squashfs"* ]]; then
           print_output "[+] Found valid ${ORANGE}compress.img${GREEN} and extract it now"
-          unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted"
-          lFILES_ZYXEL=$(find "${lEXTRACTION_DIR_}"/firmware_zyxel_extracted/compress_img_extracted -type f | wc -l)
-          lDIRS_ZYXEL=$(find "${lEXTRACTION_DIR_}"/firmware_zyxel_extracted/compress_img_extracted -type d | wc -l)
-          print_output "[*] Zyxel 2nd stage - Extracted ${ORANGE}${lFILES_ZYXEL}${NC} files and ${ORANGE}${lDIRS_ZYXEL}${NC} directories from the firmware image."
-          write_csv_log "Zyxel extractor" "${lRI_FILE_BIN_PATH}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" "${lFILES_ZYXEL}" "${lDIRS_ZYXEL}" "NA"
+          # extract the path to compress.img
+          lCOMPRESS_IMG=$(echo "${lCOMPRESS_IMG}" | cut -d ';' -f2)
+          unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" 0
+          local lFILES_ZYXEL_ARR=()
+          mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" -type f ! -name "*.raw")
+
+          print_output "[*] Zyxel 2nd stage - Extracted ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files from the firmware image."
+          print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files ... could take some time" "no_log"
+          for lBINARY in "${lFILES_ZYXEL_ARR[@]}" ; do
+            binary_architecture_threader "${lBINARY}" "P22_Zyxel_zip_decrypt" &
+            local lTMP_PID="$!"
+            store_kill_pids "${lTMP_PID}"
+            lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+          done
+          wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+          write_csv_log "Zyxel extractor" "${lRI_FILE_BIN_PATH}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" "${#lFILES_ZYXEL_ARR[@]}" "NA"
           export FIRMWARE_PATH="${LOG_DIR}"/firmware/
           backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
           print_ln

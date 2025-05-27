@@ -1,0 +1,24 @@
+{
+   "identifier": "squidguard",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "SquidGuard:\\ [0-9]\\.[0-9]\\ Berkeley\\ DB\\ [0-9]\\.[0-9]\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "squidguard"
+   ],
+   "product_names": [
+      "squidguard"
+   ],
+   "version_extraction": [
+      "sed -r 's/SquidGuard:\\ ([0-9](\\.[0-9]+)+?)\\ .*/:squidguard:squidguard:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

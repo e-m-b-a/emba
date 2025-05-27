@@ -1,0 +1,29 @@
+{
+  "identifier": "wpa_cli",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "BSD-3-Clause"
+  ],
+  "grep_commands": [
+    "wpa_cli\\ v[0-9](\\.[0-9]+)+?$",
+    "wpa_cli\\ v[0-9](\\.[0-9]+)+?\\.x$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "wpa_cli"
+  ],
+  "version_extraction": [
+    "sed -r 's/wpa_cli\\ v([0-9](\\.[0-9]+)+?).*/::wpa_cli:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

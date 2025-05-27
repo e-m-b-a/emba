@@ -38,9 +38,15 @@ SBOM_MAX_FILE_LOG=500
 
 export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
 
+# VEX is created by module F17 -> enable it here
+# export SELECT_MODULES+=( "F17" "F50" )
+
+# VEX metrics (check for KEV, Exploits, EPSS)
+export VEX_METRICS=0
+
 # with user-mode emulation enabled (QEMULATION=1):
 export QEMULATION=0
-# export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "S115" "S116" "F15" )
+export SELECT_MODULES+=( "S115" "S116" )
 
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
 # that should not be used
@@ -61,6 +67,11 @@ S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
 S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
 S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
 S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
+S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
+S08_MODULES_ARR+=( "S08_submodule_perl_cpan_parser" )
+S08_MODULES_ARR+=( "S08_submodule_php_composer_lock" )
+S08_MODULES_ARR+=( "S08_submodule_python_pipfile_lock" )
+S08_MODULES_ARR+=( "S08_submodule_apk_pkg_mgmt_parser" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0

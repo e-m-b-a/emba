@@ -1,0 +1,24 @@
+{
+   "identifier": "squidclient",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "Version:\\ [0-9]\\.[0-9]\\.[0-9]"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "squidclient"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)/::squidclient:\\1/'"
+   ],
+   "affected_paths": [
+      "squidclient"
+   ]
+}

@@ -25,6 +25,7 @@ S08_main_package_sbom() {
   local lWAIT_PIDS_S08_ARR=()
   local lOS_IDENTIFIED=""
   local lS08_SUBMODULE_PATH="${MOD_DIR}/S08_main_package_sbom_modules"
+  export S08_DUPLICATES_LOG="${LOG_PATH_MODULE}/SBOM_duplicates.log"
   local lS08_SUBMODULES_FILES_ARR=()
   local lS08_SUBMODULE=""
 
@@ -47,7 +48,6 @@ S08_main_package_sbom() {
       print_output "[*] SBOM - starting ${lS08_MODULE}" "no_log"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
@@ -74,7 +74,7 @@ build_dependency_tree() {
   local lSBOM_COMPONENT_FILES_ARR=()
   local lSBOM_COMP=""
 
-  local lWAIT_PIDS_S08_ARR=()
+  local lWAIT_PIDS_S08_DEP_ARR=()
 
   mapfile -t lSBOM_COMPONENT_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json")
 
@@ -83,11 +83,10 @@ build_dependency_tree() {
     # to speed up the dep tree we are working threaded for every componentfile and write into dedicated json files
     # "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json which we can put together in f15
     create_comp_dep_tree_threader "${lSBOM_COMP}" &
-    store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
-    max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S08_ARR[@]}"
+    lWAIT_PIDS_S08_DEP_ARR+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_DEP_ARR
   done
-  wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
+  wait_for_pid "${lWAIT_PIDS_S08_DEP_ARR[@]}"
 
   if [[ -d "${SBOM_LOG_PATH}/SBOM_deps" ]]; then
     print_output "[+] SBOM dependency results" "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
@@ -139,6 +138,7 @@ create_comp_dep_tree_threader() {
   # now we check every dependency for the current component
   for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
     # lets extract the name of the dependency
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP//\'}"
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
     lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
 
@@ -174,18 +174,20 @@ create_comp_dep_tree_threader() {
 clean_package_details() {
   local lCLEAN_ME_UP="${1}"
 
-  lCLEAN_ME_UP=$(safe_echo "${lCLEAN_ME_UP}" | tr -dc '[:print:]')
-  lCLEAN_ME_UP=${lCLEAN_ME_UP/\"}
+  lCLEAN_ME_UP=$(safe_echo "${lCLEAN_ME_UP}")
+  lCLEAN_ME_UP="${lCLEAN_ME_UP//[![:print:]]/}"
+  lCLEAN_ME_UP="${lCLEAN_ME_UP/\"}"
   # Turn on extended globbing
   shopt -s extglob
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\/\<\>\(\)\]])}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\;\#\%\/\<\>\(\)\]])}
   lCLEAN_ME_UP=${lCLEAN_ME_UP##+( )}
   lCLEAN_ME_UP=${lCLEAN_ME_UP%%+( )}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+(_)/_}
   # Turn off extended globbing
   shopt -u extglob
   lCLEAN_ME_UP=${lCLEAN_ME_UP,,}
   lCLEAN_ME_UP=${lCLEAN_ME_UP//,/\.}
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}
   echo "${lCLEAN_ME_UP}"
 }
 
@@ -205,7 +207,6 @@ clean_package_versions() {
   lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
   lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/:[0-9]:/:/g')
   lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | sed -r 's/^[0-9]://g')
-  lSTRIPPED_VERSION=$(safe_echo "${lSTRIPPED_VERSION}" | tr -dc '[:print:]')
   lSTRIPPED_VERSION=${lSTRIPPED_VERSION//,/\.}
-  echo "${lSTRIPPED_VERSION}"
+  echo "${lSTRIPPED_VERSION//[![:print:]]/}"
 }

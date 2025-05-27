@@ -1,0 +1,24 @@
+{
+   "identifier": "bc",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-or-later"
+   ],
+   "grep_commands": [
+      "^bc\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "bc"
+   ],
+   "version_extraction": [
+      "sed -r 's/bc\\ ([0-9](\\.[0-9]+)+?)/::bc:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

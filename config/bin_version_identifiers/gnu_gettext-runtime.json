@@ -1,0 +1,24 @@
+{
+   "identifier": "gnu_gettext-runtime",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\\(GNU\\ gettext-runtime\\)\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "gettext-runtime"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\(GNU\\ gettext-runtime\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gettext-runtime:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "e2fsck",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "e2fsck\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "e2fsprogs"
+   ],
+   "version_extraction": [
+      "sed -r 's/e2fsck\\ ([0-9](\\.[0-9]+)+?).*/::e2fsprogs:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

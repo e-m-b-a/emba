@@ -1,0 +1,24 @@
+{
+   "identifier": "nc.traditional",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "\\[v[0-9]\\.[0-9]+-[0-9]+\\]$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "nc.traditional"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\[v([0-9](\\.[0-9]+)+?(-[0-9]+)?)\\]$/::nc.traditional:\\1/'"
+   ],
+   "affected_paths": [
+      "nc.traditional"
+   ]
+}

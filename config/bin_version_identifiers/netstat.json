@@ -1,0 +1,33 @@
+{
+  "identifier": "netstat",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "netstat\\ [0-9]\\.[0-9]+"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "netstat",
+    "netstat-nat"
+  ],
+  "version_extraction": [
+    "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)/::netstat-nat:\\1/'",
+    "sed -r 's/netstat\\ ([0-9](\\.[0-9]+)+?)/::netstat:\\1/'"
+  ],
+  "affected_paths": [
+    "netstat-nat"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [
+    "^Version\\ [0-9]\\.[0-9]\\.[0-9]+$"
+  ],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

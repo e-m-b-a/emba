@@ -1,0 +1,31 @@
+{
+  "identifier": "ccrypt",
+  "parsing_mode": [
+    "multi_grep",
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-or-later"
+  ],
+  "grep_commands": [
+    "'^ccrypt$\"&&\"^\\%s\\ \\%s\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.$\"&&\"[0-9](\\.[0-9]+)+?\"",
+    "ccrypt\\ [0-9](\\.[0-9]+)+?\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\."
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "ccrypt"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9]+(\\.[0-9]+)+?)/::ccrypt:\\1/'",
+    "sed -r 's/ccrypt\\ ([0-9]+(\\.[0-9]+)+?).*/::ccrypt:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

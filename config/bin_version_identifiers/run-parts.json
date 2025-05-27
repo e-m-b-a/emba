@@ -1,0 +1,24 @@
+{
+   "identifier": "run-parts",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "run-parts\\ program,\\ version\\ [\\.0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "run-parts"
+   ],
+   "version_extraction": [
+      "sed -r 's/run-parts\\ program,\\ version\\ ([0-9](\\.[0-9]+)+?)$/::run-parts:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

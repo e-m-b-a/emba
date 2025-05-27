@@ -86,6 +86,10 @@ build_sbom_json_hashes_arr() {
   local lDUP_CHECK_NAME=""
   local lDUP_CHECK_VERS=""
 
+  if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
+    mkdir "${SBOM_LOG_PATH}" 2>/dev/null || true
+  fi
+
   # hashes of the source file that is currently tested:
   lMD5_CHECKSUM="$(md5sum "${lBINARY}" | awk '{print $1}')"
   lSHA256_CHECKSUM="$(sha256sum "${lBINARY}" | awk '{print $1}')"
@@ -108,7 +112,7 @@ build_sbom_json_hashes_arr() {
   # we check all SBOM results for the same file hash and afterwards for name and version
   # if all are matching this is duplicate and we do not need to log it
   # we return 1 if we already found something and the caller needs to handle it
-  if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" ]]; then
+  if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" && "${lAPP_VERS}" != "null" ]]; then
     # first check is for same hash, same name, same version:
     if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"; then
       # if we have found some sbom log file with the matching sha512 checksum, we then check if
@@ -127,6 +131,7 @@ build_sbom_json_hashes_arr() {
     # this results in the need to merge the new path of the binary into the already available component json
     # mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "${lPACKAGING_SYSTEM:-*}_${lAPP_NAME}_*" || true)
     mapfile -t lDUP_CHECK_FILE_ARR < <(find "${SBOM_LOG_PATH}" -type f -name "*_${lAPP_NAME}_*.json" || true)
+    # print_output "[*] Duplicate check for ${lAPP_NAME} - ${lAPP_VERS} reached - ${lDUP_CHECK_FILE_ARR[*]}"
     for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
       # write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
       lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
@@ -139,6 +144,9 @@ build_sbom_json_hashes_arr() {
         write_log "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
         jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
+        if ! [[ -f "${lDUP_CHECK_FILE/\.json/\.tmp}" ]]; then
+          continue
+        fi
 
         # with the following check we find out if we have the same version or some extended version
         # on the 2nd case we also add this different version to the properties
@@ -191,6 +199,7 @@ build_sbom_json_component_arr() {
   local lAPP_TYPE="${2:-}"
   local lAPP_NAME="${3:-}"
   local lAPP_VERS="${4:-}"
+  # lAPP_MAINT is used as supplier
   local lAPP_MAINT="${5:-}"
   local lAPP_LIC="${6:-}"
   local lCPE_IDENTIFIER="${7:-}"
@@ -202,8 +211,11 @@ build_sbom_json_component_arr() {
 
   local lAPP_LIC_ARR=()
 
+  # detected component is always required
+  local lAPP_SCOPE="required"
+
   if [[ -n "${lAPP_MAINT}" ]] && { [[ "${lAPP_MAINT}" == "NA" ]] || [[ "${lAPP_MAINT}" == "-" ]]; }; then
-    lAPP_MAINT=""
+    lAPP_MAINT="Unknown"
   fi
   [[ -n "${lAPP_MAINT}" ]] && lAPP_MAINT=$(translate_vendor "${lAPP_MAINT}")
 
@@ -235,8 +247,10 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "type=${lAPP_TYPE}" )
   lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
   lCOMPONENT_ARR+=( "-s" "version=${lAPP_VERS}" )
-  lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
-  # lCOMPONENT_ARR+=( "supplier=${lAPP_MAINT}" )
+  if [[ -n "${lAPP_MAINT}" ]]; then
+    lCOMPONENT_ARR+=( "supplier=$(jo name="${lAPP_MAINT}")" )
+    # lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
+  fi
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
   if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
@@ -246,10 +260,11 @@ build_sbom_json_component_arr() {
     lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
     rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
   fi
+  lCOMPONENT_ARR+=( "scope=${lAPP_SCOPE}" )
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )
-  if [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
+  if [[ -v HASHES_ARR ]] && [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
     lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
   fi
   lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
@@ -328,7 +343,7 @@ distri_check() {
 
   # currently this is a weak check via /etc/os-release
   # Todo: If this check failes we can use further tests like lsb-release or motd
-  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release")
+  mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release" || true)
   for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
     lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}" || true)
     lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}

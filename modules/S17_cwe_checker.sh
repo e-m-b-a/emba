@@ -70,7 +70,7 @@ cwe_check() {
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
     # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
   else
-    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f1 || true)
+    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f2 || true)
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
@@ -87,7 +87,7 @@ cwe_check() {
     [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
     lBIN_TO_CHECK="${lBIN_TO_CHECK#\.}"
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
-      lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u | head -1 || true)
+      lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -1 || true)
     fi
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       continue
@@ -110,15 +110,14 @@ cwe_check() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S17+=( "${lTMP_PID}" )
-
-      max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
+      max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S17
     else
       cwe_checker_threaded "${lBIN_TO_CHECK}"
     fi
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
     if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now." "no_log"
+      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
       print_output "[*] For complete analysis enable FULL_TEST." "no_log"
       break
     fi

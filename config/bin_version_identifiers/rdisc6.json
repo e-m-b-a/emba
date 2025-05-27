@@ -1,0 +1,24 @@
+{
+   "identifier": "rdisc6",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ndisc6\\:\\ IPv6\\ Neighbor\\/Router\\ Discovery\\ userland\\ tool\\ [0-9](\\.[0-9])+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ndisc6"
+   ],
+   "version_extraction": [
+      "sed -r 's/ndisc6\\:\\ IPv6\\ Neighbor\\/Router\\ Discovery\\ userland\\ tool\\ ([0-9](\\.[0-9]+)+?)\\ .*/::ndisc6:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

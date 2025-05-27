@@ -1,0 +1,24 @@
+{
+   "identifier": "ngrep",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^ngrep:\\ V[0-9]\\.[0-9]+,\\ \\$Revision\\:\\ [0-9]+\\.[0-9]+\\ \\$$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ngrep"
+   ],
+   "version_extraction": [
+      "sed -r 's/ngrep:\\ V([0-9](\\.[0-9]+)+?),\\ .*/::ngrep:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

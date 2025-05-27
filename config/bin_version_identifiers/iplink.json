@@ -1,0 +1,24 @@
+{
+   "identifier": "iplink",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "commercial"
+   ],
+   "grep_commands": [
+      "^ipLink Version: [0-9]\\.[0-9]\\.[0-9]$"
+   ],
+   "vendor_names": [
+      "ipcomm"
+   ],
+   "product_names": [
+      "iplink"
+   ],
+   "version_extraction": [
+      "sed -r 's/ipLink\\ Version:\\ ([0-9](\\.[0-9]+)+?)$/:ipcomm:iplink:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

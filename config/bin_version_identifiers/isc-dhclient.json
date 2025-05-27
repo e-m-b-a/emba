@@ -1,0 +1,34 @@
+{
+  "identifier": "isc-dhclient",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "ISC"
+  ],
+  "grep_commands": [
+    "Internet\\ Systems\\ Consortium\\ DHCP\\ Client\\ [0-9](\\.[0-9]+)+?([a-z][0-9])?$",
+    "isc-dhclient-[0-9](\\.[0-9]+)+?$",
+    "isc-dhclient-[0-9](\\.[0-9]+)+?-([ABPabp]|rc|RC)[0-3]$",
+    "isc-dhclient-[0-9](\\.[0-9]+)+?-ESV-R[0-9]$"
+  ],
+  "vendor_names": [
+    "isc"
+  ],
+  "product_names": [
+    "dhcp_client"
+  ],
+  "version_extraction": [
+    "sed -r 's/Internet\\ Systems\\ Consortium\\ DHCP\\ Client\\ ([0-9](\\.[0-9]+)+?([a-z][0-9])?)$/:isc:dhcp_client:\\1/'",
+    "sed -r 's/isc-dhclient-([0-9](\\.[0-9]+)+?(-([ABPabp]|rc|RC)[0-3])?)$/:isc:dhcp_client:\\1/'",
+    "sed -r 's/isc-dhclient-([0-9](\\.[0-9]+)+?(-ESV-R[0-9])?)$/:isc:dhcp_client:\\1/'",
+    "sed -r 's/isc-dhclient-([0-9](\\.[0-9]+)+?)$/:isc:dhcp_client:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "xxd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "xxd\\ V[0-9]\\.[0-9]+.*by\\ Juergen\\ Weigert$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "xxd"
+   ],
+   "version_extraction": [
+      "sed -r 's/xxd\\ V([0-9]+(\\.[0-9]+)+?).*/::xxd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

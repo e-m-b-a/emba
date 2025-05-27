@@ -1,0 +1,24 @@
+{
+   "identifier": "openldap",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "OLDAP-2.8"
+   ],
+   "grep_commands": [
+      "OpenLDAP:\\ ldap[a-z]+\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "openldap"
+   ],
+   "product_names": [
+      "openldap"
+   ],
+   "version_extraction": [
+      "sed -r 's/OpenLDAP:\\ ldap[a-z]+\\ ([0-9](\\.[0-9]+)+?)\\ .*/:openldap:openldap:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

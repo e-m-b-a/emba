@@ -1,0 +1,24 @@
+{
+   "identifier": "delphi",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^Embarcadero Delphi for Win32 compiler version [0-9]+\\.[0-9]\\ \\([0-9]+\\.[0-9]\\.[0-9]+\\.[0-9]+\\)$"
+   ],
+   "vendor_names": [
+      "embarcadero"
+   ],
+   "product_names": [
+      "embarcadero_delphi_xe6"
+   ],
+   "version_extraction": [
+      "sed -r 's/^Embarcadero Delphi for Win32 compiler version [0-9]+\\.[0-9]\\ \\(([0-9]+\\.[0-9]\\.[0-9]+\\.[0-9]+)\\)$/:embarcadero:embarcadero_delphi_xe6:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

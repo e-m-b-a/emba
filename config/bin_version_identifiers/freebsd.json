@@ -1,0 +1,30 @@
+{
+  "identifier": "freebsd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "BSD-2-Clause"
+  ],
+  "grep_commands": [
+    "FreeBSD\\ [0-9]+(\\.[0-9])+?-RELEASE-p[0-9]\\ ",
+    "FreeBSD\\ [0-9]+(\\.[0-9])+?-RELEASE\\ "
+  ],
+  "vendor_names": [
+    "freebsd"
+  ],
+  "product_names": [
+    "freebsd"
+  ],
+  "version_extraction": [
+    "sed -r 's/FreeBSD\\ ([0-9]+(\\.[0-9]+)+?)-RELEASE-([a-z]([0-9]+))\\ $/:freebsd:freebsd:\\1:\\3/'",
+    "sed -r 's/FreeBSD\\ ([0-9]+(\\.[0-9]+)+?)-RELEASE\\ $/:freebsd:freebsd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

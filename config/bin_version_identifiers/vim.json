@@ -1,0 +1,30 @@
+{
+  "identifier": "vim",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "Vim"
+  ],
+  "grep_commands": [
+    "VIM\\ -\\ Vi\\ IMproved\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "vim",
+    "vim_development_group"
+  ],
+  "product_names": [
+    "vim"
+  ],
+  "version_extraction": [
+    "sed -r 's/VIM\\ -\\ Vi\\ IMproved\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/:vim:vim:\\1/'",
+    "sed -r 's/VIM\\ -\\ Vi\\ IMproved\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/:vim_development_group:vim:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "gpg",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "gpg.*\\(GnuPG\\)\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "gnupg"
+   ],
+   "product_names": [
+      "gnupg"
+   ],
+   "version_extraction": [
+      "sed -r 's/gpg.*\\(GnuPG\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnupg:gnupg:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "bird",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^BIRD\\ version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "bird"
+   ],
+   "version_extraction": [
+      "sed -r 's/BIRD\\ version\\ ([0-9](\\.[0-9]+)+?)$/::bird:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

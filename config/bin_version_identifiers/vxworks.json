@@ -1,0 +1,36 @@
+{
+  "identifier": "vxworks",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "Proprietary"
+  ],
+  "grep_commands": [
+    "VxWorks[0-9](\\.[0-9]+)+?$",
+    "VxWorks\\ [0-9](\\.[0-9]+)+?\\ SMP",
+    "VxWorks\\ operating\\ system\\ version\\ \\[0-9](\\.[0-9]+)+?",
+    "^VxWorks\\ [0-9](\\.[0-9]+)+?$",
+    "vxWorks\\ [0-9]\\ SR[0-9]+$"
+  ],
+  "vendor_names": [
+    "windriver"
+  ],
+  "product_names": [
+    "vxworks"
+  ],
+  "version_extraction": [
+    "sed -r 's/VxWorks([0-9](\\.[0-9]+)+?)$/:windriver:vxworks:\\1/'",
+    "sed -r 's/VxWorks\\ ([0-9](\\.[0-9]+)+).*/:windriver:vxworks:\\1/'",
+    "sed -r 's/VxWorks\\ ([0-9](\\.[0-9]+)+?)$/:windriver:vxworks:\\1/'",
+    "sed -r 's/VxWorks\\ operating\\ system\\ version\\ \\([0-9](\\.[0-9]+)+?)\\\"$/:windriver:vxworks:\\1/'\"",
+    "sed -r 's/[Vv]xWorks\\ ([0-9])\\ (SR[0-9]+)$/:windriver:vxworks:\\1:sr\\2/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

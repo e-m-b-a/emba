@@ -1,0 +1,24 @@
+{
+   "identifier": "openrc",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\\ \\(OpenRC\\)\\ [0-9](\\.[0-9]+)+?([a-z][0-9]+)?$"
+   ],
+   "vendor_names": [
+      "openrc_project"
+   ],
+   "product_names": [
+      "openrc"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\ \\(OpenRC\\)\\ ([0-9]+(\\.[0-9]+)+?([a-z][0-9]+)?)$/:openrc_project:openrc:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

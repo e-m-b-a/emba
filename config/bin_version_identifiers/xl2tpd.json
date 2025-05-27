@@ -1,0 +1,32 @@
+{
+  "identifier": "xl2tpd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "xl2tpd\\ server\\ version\\ xl2tpd-[0-9](\\.[0-9]+)+?$",
+    "xl2tpd\\ version:\\ \\ xl2tpd-[0-9](\\.[0-9]+)+?$",
+    "xl2tpd\\ version\\ xl2tpd-[0-9](\\.[0-9]+)+?\\ started"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "xl2tpd"
+  ],
+  "version_extraction": [
+    "sed -r 's/xl2tpd\\ server\\ version\\ xl2tpd-([0-9](\\.[0-9]+)+?)$/::xl2tpd:\\1/'",
+    "sed -r 's/xl2tpd\\ version:\\ \\ xl2tpd-([0-9](\\.[0-9]+)+?)$/::xl2tpd:\\1/'",
+    "sed -r 's/xl2tpd\\ version\\ xl2tpd-([0-9](\\.[0-9]+)+?)\\ started.*$/::xl2tpd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

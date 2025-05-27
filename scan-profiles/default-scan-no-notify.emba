@@ -31,7 +31,7 @@ export DISABLE_DOTS=1
 # it in the default profile.
 export BINARY_EXTENDED=1
 
-export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" "S17_cwe_checker" )
+export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" "S17_cwe_checker" "F20_vul_aggregator" )
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

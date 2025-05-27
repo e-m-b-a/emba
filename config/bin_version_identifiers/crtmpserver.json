@@ -1,0 +1,24 @@
+{
+   "identifier": "crtmpserver",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "C++\\ RTMP\\ Server\\ .*\\ version\\ v[0-9](\\.[0-9])+?\\ r\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "crtmpserver"
+   ],
+   "version_extraction": [
+      "sed -r 's/C++\\ RTMP\\ Server\\ .*\\ version\\ v([0-9]+(\\.[0-9]+)+?).*/::crtmpserver:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

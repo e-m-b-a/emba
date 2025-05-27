@@ -1,0 +1,24 @@
+{
+   "identifier": "libjpeg",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "BSD-3-Clause AND IJG AND Zlib"
+   ],
+   "grep_commands": [
+      "Independent\\ JPEG\\ Group.s\\ CJPEG,\\ version\\ [0-9][a-z]\\ \\ [0-9]+-[A-Za-z]+-[0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "libjpeg"
+   ],
+   "version_extraction": [
+      "sed -r 's/Independent\\ JPEG\\ Group.s\\ CJPEG,\\ version\\ ([0-9][a-z])\\ .*/::libjpeg:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "asterisk",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "^Asterisk\\ [0-9]+\\.[0-9](\\.[0-9]+)+?,\\ Copyright"
+   ],
+   "vendor_names": [
+      "digium"
+   ],
+   "product_names": [
+      "asterisk"
+   ],
+   "version_extraction": [
+      "sed -r 's/Asterisk\\ ([0-9]+(\\.[0-9]+)+?),\\ .*/:digium:asterisk:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

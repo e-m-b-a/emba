@@ -10,7 +10,7 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # do it every day
+    - cron: '0 0 * * */2' # do it every 2nd day
 
 
 jobs:

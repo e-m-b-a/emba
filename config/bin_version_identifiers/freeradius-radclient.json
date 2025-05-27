@@ -1,0 +1,24 @@
+{
+   "identifier": "freeradius-radclient",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "radclient:\\ [0-9]\\.[0-9]+\\.[0-9]+\\ built\\ on\\ "
+   ],
+   "vendor_names": [
+      "freeradius"
+   ],
+   "product_names": [
+      "radclient"
+   ],
+   "version_extraction": [
+      "sed -r 's/radclient:\\ ([0-9](\\.[0-9]+)+?).*/:freeradius:radclient:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

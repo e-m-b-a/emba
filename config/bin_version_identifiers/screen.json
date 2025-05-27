@@ -1,0 +1,24 @@
+{
+   "identifier": "screen",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "^Screen\\ version\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "screen"
+   ],
+   "version_extraction": [
+      "sed -r 's/Screen\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:gnu:screen:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

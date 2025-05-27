@@ -1,0 +1,24 @@
+{
+   "identifier": "conntrack",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "conntrack\\ v[0-9](\\.[0-9]+)+?\\ \\(conntrack-tools\\)"
+   ],
+   "vendor_names": [
+      "netfilter"
+   ],
+   "product_names": [
+      "conntrack-tools"
+   ],
+   "version_extraction": [
+      "sed -r 's/conntrack\\ v([0-9](\\.[0-9]+)+?).*/:netfilter:conntrack-tools:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

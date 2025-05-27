@@ -1,0 +1,24 @@
+{
+   "identifier": "gnu_inetutils",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "\\(GNU\\ inetutils\\)\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "inetutils"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\(GNU\\ inetutils\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:inetutils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

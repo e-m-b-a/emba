@@ -44,6 +44,10 @@ if ("${EMBA_BOOT}"); then
     # sysinit entry is the one to look for
     # shellcheck disable=SC2016
     for STARTUP_FILE in $("${BUSYBOX}" grep "^:.*sysinit:" "${FILE}" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u); do
+      if "${BUSYBOX}" echo "${STARTUP_FILE}" | "${BUSYBOX}" grep -q "\.raw$"; then
+        # skip binwalk raw files
+        continue
+      fi
       "${BUSYBOX}" echo "[*] Found possible startup file ${STARTUP_FILE}"
       arr+=("${STARTUP_FILE}")
       #if [ -e "${STARTUP_FILE}" ]; then
@@ -96,7 +100,7 @@ for entry in "${arr_prio[@]}"; do
 done
 if [ -s /firmadyne/init_tmp ]; then
   while read -r entry; do
-    if ! grep -q "${entry}" /firmadyne/init; then
+    if ! "${BUSYBOX}" grep -q "${entry}" /firmadyne/init; then
       "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
     fi
   done < /firmadyne/init_tmp

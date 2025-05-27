@@ -1,0 +1,24 @@
+{
+   "identifier": "udevinfo",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^udevinfo,\\ version\\ [0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "udevinfo"
+   ],
+   "version_extraction": [
+      "sed -r 's/udevinfo,\\ version\\ ([0-9]+)$/::udevinfo:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

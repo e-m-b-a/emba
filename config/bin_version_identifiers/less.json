@@ -1,0 +1,32 @@
+{
+  "identifier": "less",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only AND BSD-2-Clause"
+  ],
+  "grep_commands": [
+    "^less\\ [0-9]+$",
+    "^less\\ [0-9]+\\ ",
+    "lesskey\\ \\ version\\ [0-9]+$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "less"
+  ],
+  "version_extraction": [
+    "sed -r 's/less\\ ([0-9]+)$/:gnu:less:\\1/'",
+    "sed -r 's/less\\ ([0-9]+).*/:gnu:less:\\1/'",
+    "sed -r 's/lesskey\\ \\ version\\ ([0-9]+)$/:gnu:less:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

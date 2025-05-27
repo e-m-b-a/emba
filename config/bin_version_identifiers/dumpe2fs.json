@@ -1,0 +1,24 @@
+{
+   "identifier": "dumpe2fs",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "dumpe2fs\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "e2fsprogs"
+   ],
+   "version_extraction": [
+      "sed -r 's/dumpe2fs\\ ([0-9](\\.[0-9]+)+?).*/::e2fsprogs:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

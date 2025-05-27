@@ -1,0 +1,36 @@
+{
+  "identifier": "linux_kernel",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "Linux\\ kernel\\ version\\ [1-6]\\.[0-9]+\\.[0-9]+$",
+    "Linux\\ kernel\\ version\\ [1-6]\\.[0-9]+\\.[0-9]+(\\ )?",
+    "Linux\\ version\\ [1-6]\\.[0-9]+\\.[0-9]+$",
+    "Linux\\ version\\ [1-6]\\.[0-9]+\\.[0-9]+(\\ )?",
+    "^Linux-[1-6]\\.[0-9]+\\.[0-9]+"
+  ],
+  "vendor_names": [
+    "linux"
+  ],
+  "product_names": [
+    "linux_kernel"
+  ],
+  "version_extraction": [
+    "sed -r 's/Linux-([1-6](\\.[0-9]+)+?).*/:linux:linux_kernel:\\1/'",
+    "sed -r 's/Linux\\ kernel\\ version\\ ([1-6](\\.[0-9]+)+?)$/:linux:linux_kernel:\\1/'",
+    "sed -r 's/Linux\\ kernel\\ version\\ ([1-6](\\.[0-9]+)+?).*/:linux:linux_kernel:\\1/'",
+    "sed -r 's/Linux\\ version\\ ([1-6](\\.[0-9]+)+?)$/:linux:linux_kernel:\\1/'",
+    "sed -r 's/Linux\\ version\\ ([1-6](\\.[0-9]+)+?).*/:linux:linux_kernel:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

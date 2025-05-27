@@ -1,0 +1,24 @@
+{
+   "identifier": "lsof",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "lsof"
+   ],
+   "grep_commands": [
+      "lsof\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "lsof"
+   ],
+   "version_extraction": [
+      "sed -r 's/lsof\\ ([0-9](\\.[0-9]+)+?)$/::lsof:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

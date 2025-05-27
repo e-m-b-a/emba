@@ -34,10 +34,16 @@ kernel_downloader() {
   # we wait until the s24 module is finished and hopefully shows us a kernel version
   while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
     sleep 1
+    if check_emba_ended; then
+      exit
+    fi
   done
   if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
     while [[ $(grep -c S24_kernel_bin_identifier "${LOG_DIR}"/"${MAIN_LOG_FILE}") -lt 2 ]]; do
       sleep 1
+      if check_emba_ended; then
+        exit
+      fi
     done
   fi
 

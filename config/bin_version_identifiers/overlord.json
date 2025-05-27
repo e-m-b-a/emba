@@ -1,0 +1,24 @@
+{
+   "identifier": "overlord",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^overlord\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "overlord"
+   ],
+   "version_extraction": [
+      "sed -r 's/overlord\\ ([0-9](\\.[0-9]+)+?)$/::overlord:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

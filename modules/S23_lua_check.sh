@@ -40,7 +40,7 @@ S23_lua_check()
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S23_ARR[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S23_ARR
       continue
     else
       s23_luacheck "${lLUA_SCRIPT}"
@@ -83,7 +83,7 @@ s23_luaseccheck() {
        | sed 's/.*cgilua.QUERY.//' | grep -o -E "^[[:alnum:]]+" | grep -v "^local$" | sort -u || true)
 
     for lENTRY in "${lQUERY_ENTRIES_ARR[@]}"; do
-      lENTRY="$(echo "${lENTRY}" | tr -dc '[:print:]')"
+      lENTRY="${lENTRY//[![:print:]]/}"
       [[ -z "${lENTRY}" ]] && continue
       ! [[ "${lENTRY}" =~ ^[a-zA-Z0-9_-]+$ ]] && continue
 

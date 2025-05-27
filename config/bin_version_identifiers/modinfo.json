@@ -1,0 +1,24 @@
+{
+   "identifier": "modinfo",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "modinfo\\ [0-9](\\.[0-9]+)+?\\ --\\ part\\ of\\ module-init-tools$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "modinfo"
+   ],
+   "version_extraction": [
+      "sed -r 's/modinfo\\ ([0-9](\\.[0-9]+)+?)\\ .*/::modinfo:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

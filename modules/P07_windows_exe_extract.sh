@@ -128,7 +128,7 @@ P07_windows_exe_extract() {
 
     exe_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ "${FILES_EXE}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -142,8 +142,6 @@ exe_extractor() {
 
   local lFIRMWARE_PATH="${1:-}"
   local lEXTRACTION_DIR="${2:-}"
-  export FILES_EXE=0
-  local lDIRS_EXE=0
   local lFIRMWARE_NAME=""
 
   if ! [[ -f "${lFIRMWARE_PATH}" ]]; then
@@ -161,17 +159,47 @@ exe_extractor() {
 
   if [[ -s "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log ]]; then
     cat "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log >> "${LOG_FILE}"
+
+    # Error handling. If we have errors on exe extraction we try binwalk
+    if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
+      print_ln
+      print_output "[*] Windows exe extraction error detected -> using binwalk as fallback extraction mechanism"
+      binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
+
+      print_ln
+      print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR%\/}_binwalk${NC}) as base directory:"
+      find "${lEXTRACTION_DIR%\/}_binwalk" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+    else
+      print_ln
+      print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
+      find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+    fi
   fi
 
   print_ln
-  print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
-  find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
-  print_ln
 
-  FILES_EXE=$(find "${lEXTRACTION_DIR}" -type f | wc -l)
-  lDIRS_EXE=$(find "${lEXTRACTION_DIR}" -type d | wc -l)
-  print_output "[*] Extracted ${ORANGE}${FILES_EXE}${NC} files and ${ORANGE}${lDIRS_EXE}${NC} directories from the Windows executable."
-  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-  write_csv_log "EXE extractor" "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR}" "${FILES_EXE}" "${lDIRS_EXE}" "NA"
+  local lFILES_EXE_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
+
+  mapfile -t lFILES_EXE_ARR < <(find "${lEXTRACTION_DIR}" -type f)
+  if [[ -d "${lEXTRACTION_DIR%\/}_binwalk" ]]; then
+    local lFILES_EXE_ARR_2=()
+    mapfile -t lFILES_EXE_ARR_2 < <(find "${lEXTRACTION_DIR%\/}_binwalk" -type f ! -name "*.raw")
+    lFILES_EXE_ARR=( "${lFILES_EXE_ARR[@]}" "${lFILES_EXE_ARR_2[@]}" )
+  fi
+
+  print_output "[*] Extracted ${ORANGE}${#lFILES_EXE_ARR[@]}${NC} files from the Windows executable."
+  print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXE_ARR[@]}${NC} files ... could take some time" "no_log"
+  for lBINARY in "${lFILES_EXE_ARR[@]}"; do
+    binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+  done
+  wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+  write_csv_log "EXE extractor" "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR}" "${#lFILES_EXE_ARR[@]}" "NA"
   print_ln
 }

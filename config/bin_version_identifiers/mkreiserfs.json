@@ -1,0 +1,24 @@
+{
+   "identifier": "mkreiserfs",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "mkreiserfs\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "reiserfsck"
+   ],
+   "version_extraction": [
+      "sed -r 's/mkreiserfs\\ ([0-9](\\.[0-9]+)+?)$/::reiserfsck:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,33 @@
+{
+  "identifier": "inadyn",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "^Inadyn\\ version\\ [0-9]+(\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "inadyn"
+  ],
+  "version_extraction": [
+    "sed -r 's/Inadyn\\ version\\ ([0-9]+(\\.[0-9]+)+?)/::inadyn:\\1/'",
+    "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?(-ADV)?)$/::inadyn:\\1/'"
+  ],
+  "affected_paths": [
+    "NA",
+    "inadyn"
+  ],
+  "strict_grep_commands": [
+    "Version:\\ [0-9]\\.[0-9]+-ADV$"
+  ],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

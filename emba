@@ -172,7 +172,7 @@ run_modules() {
             local lMOD_PID="$!"
             store_kill_pids "${lMOD_PID}"
             WAIT_PIDS+=( "${lMOD_PID}" )
-            max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+            max_pids_protection "${MAX_MODS}" WAIT_PIDS
           else
             "${lMODULE_MAIN}"
           fi
@@ -245,7 +245,7 @@ run_modules() {
               local lMOD_PID="$!"
               store_kill_pids "${lMOD_PID}"
               WAIT_PIDS+=( "${lMOD_PID}" )
-              max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+              max_pids_protection "${MAX_MODS}" WAIT_PIDS
             else
               "${lMODULE_MAIN}"
             fi
@@ -321,7 +321,7 @@ run_modules() {
                 local lMOD_PID="$!"
                 store_kill_pids "${lMOD_PID}"
                 WAIT_PIDS+=( "${lMOD_PID}" )
-                max_pids_protection "${MAX_MODS}" "${WAIT_PIDS[@]}"
+                max_pids_protection "${MAX_MODS}" WAIT_PIDS
               else
                 "${lMODULE_MAIN}"
               fi
@@ -725,36 +725,36 @@ main() {
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       # check dependencies mode:
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       if [[ $? -ne ${D_RETURN} ]]; then
         D_RETURN=1
       fi
     elif [[ "${DIFF_MODE}" -gt 0 ]]; then
       FIRMWARE_PATH1="$(abs_path "${FIRMWARE_PATH1}")"
       # firmware diff mode - needs two firmware files:
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run -v "${FIRMWARE_PATH1}":/firmware2 --rm emba -c './emba -l /logs -f /firmware -o /firmware2 -i "$@"' _ "${ARGUMENTS[@]}"
+      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run -v "${FIRMWARE_PATH1}":/firmware2 --rm emba -c './emba -l /logs -f /firmware -o /firmware2 -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
     else
       print_ln "no_log"
       welcome
       # default EMBA analysis mode:
       local lQUEST_CONTAINER_=""
-      lQUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
       print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
 
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then
         # EMBA container starts in the foreground and we can see all the logs
-        EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
         D_RETURN=$?
       else
         # EMBA container starts in the background
         print_output "[*] $(print_date) - EMBA main container starting and detaching.\\n" "no_log"
         local lMAIN_CONTAINER_=""
-        lMAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        lMAIN_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
         export MAIN_CONTAINER="${lMAIN_CONTAINER_}"
 
         print_output "[+] $(print_date) - EMBA main container ${lMAIN_CONTAINER_} started and detached." "no_log"

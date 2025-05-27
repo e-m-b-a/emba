@@ -53,6 +53,26 @@ check_dep_tool() {
   fi
 }
 
+# check_dep_tool but only warn if not available
+# EMBA will be able to work without the dependency
+# $1=Tool title and command
+# $2=Tool command, but only if set
+check_dep_tool_warning() {
+  local lTOOL_NAME="${1:-}"
+  if [[ -n "${2:-}" ]] ; then
+    local lTOOL_COMMAND="${2:-}"
+  else
+    local lTOOL_COMMAND="${1:-}"
+  fi
+  print_output "    ""${lTOOL_NAME}"" - \\c" "no_log"
+  if ! command -v "${lTOOL_COMMAND}" > /dev/null ; then
+    echo -e "${ORANGE}""not ok""${NC}"
+    echo -e "${ORANGE}""    Missing ""${lTOOL_NAME}"" - check your installation""${NC}"
+  else
+    echo -e "${GREEN}""ok""${NC}"
+  fi
+}
+
 check_dep_port() {
   local lTOOL_NAME="${1:-}"
   local lPORT_NR="${2:-}"
@@ -134,7 +154,7 @@ check_nvd_db() {
   local lREMOTE_HASH="${1:-}"
   local lLOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]] ; then
-    lLOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
+    [[ -f "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main ]] && lLOCAL_HASH="$(head "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
 
     if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    CVE database version - ${GREEN}ok${NC}"
@@ -148,7 +168,7 @@ check_epss_db() {
   local lREMOTE_HASH="${1:-}"
   local lLOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/EPSS-data ]] ; then
-    lLOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
+    [[ -f "${EXT_DIR}"/EPSS-data/.git/refs/heads/main ]] && lLOCAL_HASH="$(head "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
 
     if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
       echo -e "    EPSS database version - ${GREEN}ok${NC}"
@@ -162,7 +182,7 @@ check_git_hash() {
   local lREMOTE_HASH="${1:-}"
   local lLOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    lLOCAL_HASH="$(head .git/refs/heads/master)"
+    [[ -f .git/refs/heads/master ]] && lLOCAL_HASH="$(head .git/refs/heads/master)"
     # lLOCAL_HASH="$(git describe --always)"
 
     if [[ "${lREMOTE_HASH}" == "${lLOCAL_HASH}" ]]; then
@@ -215,6 +235,37 @@ check_docker_version() {
     echo -e "    Docker-compose EMBA image version - ${ORANGE}Updates available (docker base image v${lLOCAL_DOCKER_VERS} required)${NC}"
     DEP_ERROR=1
   fi
+}
+
+preparing_cve_bin_tool() {
+  print_output "    Preparing cve-bin-tool ..." "no_log"
+  [[ ! -d "${HOME}"/.cache/cve-bin-tool ]] && mkdir "${HOME}"/.cache/cve-bin-tool
+
+  # this is a health check of the cve-bin-tool with our database
+
+  local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  # first: import the database
+  if [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
+    print_output "[*] Importing CVE config from EMBA config directory" "no_log"
+    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" >/dev/null || true
+  elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
+    print_output "[*] Importing CVE config from EMBA docker external directory" "no_log"
+    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" >/dev/null || true
+  fi
+
+  # 2nd: check the database
+  write_log "product,vendor,version" "${TMP_DIR}/cve_bin_tool_health_check.csv"
+  write_log "busybox,busybox,1.14.1" "${TMP_DIR}/cve_bin_tool_health_check.csv"
+  python3 "${lCVE_BIN_TOOL}" -i "${TMP_DIR}/cve_bin_tool_health_check.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${TMP_DIR}/cve_bin_tool_health_check_results" >/dev/null || true
+
+  if [[ -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv" ]]; then
+    echo "cve-bin-tool database preparation finshed" >> "${TMP_DIR}/tmp_state_data.log"
+    print_output "[+] cve-bin-tool database preparation finished" "no_log"
+    rm -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv"
+  else
+    print_output "[-] cve-bin-tool database preparation failed - No CVE queries possible" "no_log"
+  fi
+  [[ -f "${TMP_DIR}/cve_bin_tool_health_check.csv" ]] && rm -f "${TMP_DIR}/cve_bin_tool_health_check.csv"
 }
 
 dependency_check()
@@ -385,7 +436,7 @@ dependency_check()
   # Some other nice features like restarting the mongod will not work without root privs.
   if [[ "${QEMULATION}" -eq 1 && "${EUID}" -ne 0 ]] || [[ "${USE_DOCKER}" -eq 1 && "${EUID}" -ne 0 ]] || [[ "${FULL_EMULATION}" -eq 1 && "${EUID}" -ne 0 ]]; then
     if [[ "${QEMULATION}" -eq 1 && "${USE_DOCKER}" -eq 0 ]] || [[ "${FULL_EMULATION}" -eq 1 && "${USE_DOCKER}" -eq 0 ]]; then
-      print_output "    user permission - emulation mode - \\c" "no_log"
+      print_output "    User permission - emulation mode - \\c" "no_log"
       echo -e "${RED}""not ok""${NC}"
       echo -e "${RED}""    With emulation enabled this script needs root privileges""${NC}"
       DEP_EXIT=1
@@ -429,7 +480,7 @@ dependency_check()
   fi
 
   # Check for ./config
-  print_output "    configuration directory - \\c" "no_log"
+  print_output "    Configuration directory - \\c" "no_log"
   if ! [[ -d "${CONFIG_DIR}" ]] ; then
     echo -e "${RED}""not ok""${NC}"
     echo -e "${RED}""    Missing configuration directory - check your installation""${NC}"
@@ -450,11 +501,20 @@ dependency_check()
     fi
   fi
 
-  if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
-    check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
-  fi
   # Python virtual environment in external directory
   check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
+
+  if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
+    check_dep_file "NVD CVE database in JSON format" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+  fi
+
+  print_output "    SQLite CVE database update in config directory - \\c" "no_log"
+  if [[ ! -f "${CONFIG_DIR}/cve-database.db" ]]; then
+    echo -e "${ORANGE}""not ok""${NC}"
+    echo -e "${ORANGE}""    Missing SQLite CVE database updates - Check update instructions""${NC}"
+  else
+    echo -e "${GREEN}""ok""${NC}"
+  fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
     print_ln "no_log"
@@ -507,8 +567,8 @@ dependency_check()
     print_output "[*] Necessary utils on system:" "no_log"
 
     check_dep_tool "docker"
-    check_dep_tool "inotifywait"
-    check_dep_tool "notify-send"
+    check_dep_tool_warning "inotifywait"
+    check_dep_tool_warning "notify-send"
   fi
 
   #######################################################################################
@@ -537,292 +597,18 @@ dependency_check()
     fi
   fi
 
-  #######################################################################################
-  # Check system tools
-  #######################################################################################
-  if [[ "${USE_DOCKER}" -eq 0 ]] ; then
-    print_ln "no_log"
-    print_output "[*] Necessary utils on system:" "no_log"
+  if [[ "${USE_DOCKER}" -eq 0  && "${CONTAINER_NUMBER}" -ne 2 ]]; then
+    check_dep_file "cve-bin-tool" "${EXT_DIR}""/cve-bin-tool/cve_bin_tool/cli.py"
+    preparing_cve_bin_tool &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
 
-    local lSYSTEM_TOOLS_ARR=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" \
-      "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" \
-      "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" \
-      "seq" "sleep" "sort" "strings" "tee" "touch" "tr" "uniq" "unzip" "wc")
-    local lSYS_TOOL=""
+    # prepare /root/.local and /root/.config directory for cwe_checker
+    # and ensure r2 plugin dir is preserved
+    prepare_docker_home_dir
 
-    for lSYS_TOOL in "${lSYSTEM_TOOLS_ARR[@]}" ; do
-      check_dep_tool "${lSYS_TOOL}"
-      if [[ "${lSYS_TOOL}" == "bash" ]] ; then
-        # using bash higher than v4
-        print_output "    bash (version): ""${BASH_VERSINFO[0]}"" - \\c" "no_log"
-        if ! [[ "${BASH_VERSINFO[0]}" -gt 3 ]] ; then
-          echo -e "${RED}""not ok""${NC}"
-          echo -e "${RED}""    Upgrade your bash to version 4 or higher""${NC}"
-          DEP_ERROR=1
-        else
-          echo -e "${GREEN}""ok""${NC}"
-        fi
-      fi
-    done
-
-    #######################################################################################
-    # Check external tools
-    #######################################################################################
-
-    print_ln "no_log"
-    print_output "[*] External utils:" "no_log"
-
-    # bc
-    check_dep_tool "bc"
-
-    # tree
-    check_dep_tool "tree"
-
-    # unzip
-    check_dep_tool "unzip"
-
-    # 7zip
-    check_dep_tool "7z"
-
-    # we should check all the dependencies if they are needed in our quest container:
-    if [[ "${CONTAINER_NUMBER}" -ne 2 ]]; then
-      # jchroot - https://github.com/vincentbernat/jchroot
-      check_dep_tool "jchroot"
-
-      # mkimage (uboot)
-      check_dep_tool "uboot mkimage" "mkimage"
-
-      # binwalk
-      if command -v binwalk > /dev/null ; then
-        export BINWALK_BIN=("$(which binwalk)")
-        check_dep_tool "binwalk"
-      else
-        export BINWALK_BIN=(""${EXT_DIR}"/binwalk/target/release/binwalk")
-        check_dep_file "binwalk extractor" "${BINWALK_BIN[@]}"
-        local lBINWALK_VER=""
-        lBINWALK_VER=$("${BINWALK_BIN[@]}" -V 2>&1 | grep "[Bb]inwalk " | cut -d+ -f1 | awk '{print $2}' || true)
-        if ! [ "$(version "${lBINWALK_VER}")" -ge "$(version "3.0.0")" ]; then
-          echo -e "${ORANGE}""    binwalk version ${lBINWALK_VER} - not optimal""${NC}"
-          echo -e "${ORANGE}""    Upgrade your binwalk to version 3.0.0 or higher""${NC}"
-        fi
-        # if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
-        #   mkdir -p "${HOME}"/.config/binwalk/modules/
-        # fi
-        print_output "    cpu_rec - \\c" "no_log"
-        if [[ -d "${EXT_DIR}"/cpu_rec/ ]]; then
-          # cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
-          # cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
-          echo -e "${GREEN}""ok""${NC}"
-        else
-          echo -e "${RED}""not ok""${NC}"
-          # DEP_ERROR=1
-        fi
-      fi
-      export MPLCONFIGDIR="${TMP_DIR}"
-
-      check_dep_tool "unblob"
-      local lUNBLOB_VER=""
-      if command -v unblob > /dev/null ; then
-        lUNBLOB_VER=$(unblob --version 2>&1 || true)
-        if ! [ "$(version "${lUNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
-          echo -e "${RED}""    Unblob version ${lUNBLOB_VER} - not supported""${NC}"
-          echo -e "${RED}""    Upgrade your unblob installation to version 23.8.11 or higher""${NC}"
-          DEP_ERROR=1
-        fi
-      fi
-
-      check_dep_tool "unrar" "unrar"
-
-      # jtr
-      check_dep_tool "john"
-
-      # jo - json builder
-      check_dep_tool "jo"
-
-      # pixd
-      check_dep_file "pixd visualizer" "${EXT_DIR}""/pixde"
-
-      # php iniscan
-      check_dep_file "PHP iniscan" "${EXT_DIR}""/iniscan/vendor/bin/iniscan"
-
-      # pixd image
-      check_dep_file "pixd image renderer" "${EXT_DIR}""/pixd_png.py"
-
-      # progpilot for php code checks
-      check_dep_file "progpilot php ini checker" "${EXT_DIR}""/progpilot"
-
-      # luacheck - lua linter
-      check_dep_tool "luacheck"
-
-      # APKHunt for android apk analysis
-      check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
-
-      # rpm for checking package management system
-      check_dep_tool "rpm"
-
-      # patool extractor - https://wummel.github.io/patool/
-      check_dep_tool "patool"
-
-      # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
-      check_dep_file "EnGenius decryptor" "${EXT_DIR}""/engenius-decrypt.py"
-
-      # Android payload.bin extractor
-      check_dep_file "Android payload.bin extractor" "${EXT_DIR}""/payload_dumper/payload_dumper.py"
-
-      check_dep_file "Buffalo decryptor" "${EXT_DIR}""/buffalo-enc.elf"
-
-      check_dep_tool "ubireader image extractor" "ubireader_extract_images"
-      check_dep_tool "ubireader file extractor" "ubireader_extract_files"
-
-      # UEFI
-      check_dep_tool "UEFI Firmware parser" "uefi-firmware-parser"
-      check_dep_file "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
-      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/biosutilities/ami_pfat_extract.py"
-      check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
-
-      # ensure this check is not running as github action:
-      # "${CONFIG_DIR}"/gh_action is created from the installer
-      if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
-        check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
-      fi
-      # CVE searchsploit
-      check_dep_tool "CVE Searchsploit" "cve_searchsploit"
-
-      check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
-      check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
-      check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
-
-      # checksec
-      check_dep_file "checksec script" "${EXT_DIR}""/checksec"
-
-      # sshdcc
-      check_dep_file "sshdcc script" "${EXT_DIR}""/sshdcc"
-
-      # sudo-parser.pl
-      check_dep_file "sudo-parser script" "${EXT_DIR}""/sudo-parser.pl"
-
-      # BMC firmware decryptor - https://github.com/c0d3z3r0/smcbmc
-      check_dep_file "BMC decryptor" "${EXT_DIR}""/smcbmc/smcbmc.py"
-
-      # sh3llcheck - I know it's a typo, but this particular tool nags about it
-      check_dep_tool "shellcheck script" "shellcheck"
-
-      # fdtdump (device tree compiler)
-      export DTBDUMP=""
-      local lDTBDUMP_M=""
-      lDTBDUMP_M="$(check_dep_tool "fdtdump" "fdtdump")"
-      if echo "${lDTBDUMP_M}" | grep -q "not ok" ; then
-        DTBDUMP=0
-      else
-        DTBDUMP=1
-      fi
-      echo -e "${lDTBDUMP_M}"
-
-      # linux-exploit-suggester.sh script
-      check_dep_file "linux-exploit-suggester.sh script" "${EXT_DIR}""/linux-exploit-suggester.sh"
-
-      # objdump
-      export OBJDUMP="${EXT_DIR}""/objdump"
-      check_dep_file "objdump disassembler" "${OBJDUMP}"
-
-      # radare2
-      check_dep_tool "radare2" "r2"
-
-      check_dep_file "Identify capabilities in executable files" "${EXT_DIR}/capa"
-
-      # bandit python security tester
-      check_dep_tool "bandit - python vulnerability scanner" "bandit"
-
-      # qemu
-      check_dep_tool "qemu-[ARCH]-static" "qemu-mips-static"
-
-      # yara
-      check_dep_tool "yara"
-
-      # exiftool for windows binary analysis
-      check_dep_tool "exiftool"
-
-      # ssdeep
-      check_dep_tool "ssdeep"
-
-      # cyclonedx - converting csv sbom to json sbom
-      if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
-        export PATH=${PATH}:/home/linuxbrew/.linuxbrew/bin/
-      fi
-      if [[ -d "/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/" ]]; then
-        # check this - currently cyclone is installed in this dir in our docker image:
-        export PATH=${PATH}:/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/
-      fi
-      check_dep_tool "cyclonedx"
-
-      check_dep_file "vmlinux-to-elf" "${EXT_DIR}""/vmlinux-to-elf/vmlinux-to-elf"
-
-      if function_exists S108_stacs_password_search; then
-        # stacs - https://github.com/stacscan/stacs
-        check_dep_tool "STACS hash detection" "stacs"
-      fi
-
-      # Full system emulation modules (L*)
-      if [[ "${FULL_EMULATION}" -eq 1 ]]; then
-        check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
-        check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
-        check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
-        check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
-        check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
-        check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
-        # check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
-        check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
-        # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
-        # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
-
-        # check only some of the needed files
-        check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console/console.x86el"
-        check_dep_file "gdb.*" "${EXT_DIR}""/EMBA_Live_bins/gdb/gdb.mipseb"
-        check_dep_file "gdbserver.*" "${EXT_DIR}""/EMBA_Live_bins/gdbserver/gdbserver.mipseb"
-        check_dep_file "netcat.*" "${EXT_DIR}""/EMBA_Live_bins/netcat/netcat.mipseb"
-        check_dep_file "strace.*" "${EXT_DIR}""/EMBA_Live_bins/strace/strace.armelhf"
-        check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox-v${L10_BB_VER}/busybox.mipsel"
-        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram/libnvram_dbg.so.armel_musl_1.2.5"
-        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_dbg.so.mipsel_musl_1.1.24"
-        check_dep_file "Linux kernel v${L10_KERNEL_V_LONG} for MIPS architecture" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.mipsel.4"
-        check_dep_file "Linux kernel v${L10_KERNEL_V_LONG} for ARM architecture" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.armel"
-
-        check_dep_file "fixImage.sh" "${MOD_DIR}""/L10_system_emulation/fixImage.sh"
-        check_dep_file "preInit.sh" "${MOD_DIR}""/L10_system_emulation/preInit.sh"
-        check_dep_file "inferFile.sh" "${MOD_DIR}""/L10_system_emulation/inferFile.sh"
-        check_dep_file "inferService.sh" "${MOD_DIR}""/L10_system_emulation/inferService.sh"
-
-        check_dep_file "TestSSL.sh installation" "${EXT_DIR}""/testssl.sh/testssl.sh"
-        check_dep_file "Nikto web server analyzer" "${EXT_DIR}""/nikto/program/nikto.pl"
-        check_dep_tool "Cutycapt screenshot tool" "cutycapt"
-        check_dep_tool "snmp-check tool" "snmp-check"
-        check_dep_tool "Nmap portscanner" "nmap"
-        check_dep_tool "hping3" "hping3"
-        check_dep_tool "ping" "ping"
-        check_dep_tool "Metasploit framework" "msfconsole"
-        # This port is used by our Qemu installation and should not be used by another process.
-        # This check is not a blocker for the test. It is checked again by the emulation module:
-        # this function is defined in the system emulation helper file
-        check_emulation_port "Running Qemu network service" "2001"
-        # Port 4321 is used for Qemu telnet access and should be available
-        check_emulation_port "Running Qemu telnet service" "4321"
-      fi
-
-      if [[ -d "${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC" ]]; then
-        export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
-      elif [[ -d "${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC" ]]; then
-        export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC"
-      fi
-      check_dep_file "GHIDRA" "${GHIDRA_PATH}""/ghidraRun"
-
-      # prepare /root/.local and /root/.config directory for cwe_checker
-      # and ensure r2 plugin dir is preserved
-      prepare_docker_home_dir
-
-      if [[ -d "${HOME}"/.cargo/bin ]]; then
-        export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
-      fi
-      check_dep_tool "CWE Checker" "cwe_checker"
+    if [[ -d "${HOME}"/.cargo/bin ]]; then
+      export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
     fi
   fi
 

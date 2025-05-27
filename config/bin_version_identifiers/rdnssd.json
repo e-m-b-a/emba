@@ -1,0 +1,24 @@
+{
+   "identifier": "rdnssd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "rdnssd\\:\\ IPv6\\ Recursive\\ DNS\\ Server\\ discovery\\ Daemon\\ [0-9](\\.[0-9])+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "rdnssd"
+   ],
+   "version_extraction": [
+      "sed -r 's/rdnssd\\:\\ IPv6\\ Recursive\\ DNS\\ Server\\ discovery\\ Daemon\\ ([0-9](\\.[0-9]+)+?)\\ .*/::rdnssd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

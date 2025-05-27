@@ -1,0 +1,24 @@
+{
+   "identifier": "nginx",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "BSD-2-Clause"
+   ],
+   "grep_commands": [
+      "^nginx\\ version:\\ nginx\\/[0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "nginx"
+   ],
+   "version_extraction": [
+      "sed -r 's/nginx\\ version:\\ nginx\\/([0-9](\\.[0-9]+)+?)$/::nginx:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

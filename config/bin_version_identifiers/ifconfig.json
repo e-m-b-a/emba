@@ -1,0 +1,24 @@
+{
+   "identifier": "ifconfig",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ifconfig\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ifconfig"
+   ],
+   "version_extraction": [
+      "sed -r 's/ifconfig\\ ([0-9](\\.[0-9]+)+?).*$/::ifconfig:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

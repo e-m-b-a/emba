@@ -30,11 +30,11 @@ P14_ext_mounter() {
 
     ext_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ "${FILES_EXT_MOUNT}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+      lNEG_LOG=1
     fi
-    lNEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
 }
@@ -43,8 +43,9 @@ ext_extractor() {
   local lEXT_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_EXT_MOUNT="${TMP_DIR}""/ext_mount_${RANDOM}"
-  local lDIRS_EXT_MOUNT=0
-  export FILES_EXT_MOUNT=0
+  local lFILES_EXT_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lEXT_PATH_}" ]]; then
     print_output "[-] No file for decryption provided"
@@ -66,11 +67,20 @@ ext_extractor() {
     print_ln
     print_output "[*] Unmounting ${ORANGE}${lTMP_EXT_MOUNT}${NC} directory"
 
-    FILES_EXT_MOUNT=$(find "${lEXTRACTION_DIR_}" -type f | wc -l)
-    lDIRS_EXT_MOUNT=$(find "${lEXTRACTION_DIR_}" -type d | wc -l)
-    print_output "[*] Extracted ${ORANGE}${FILES_EXT_MOUNT}${NC} files and ${ORANGE}${lDIRS_EXT_MOUNT}${NC} directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "EXT filesystem extractor" "${lEXT_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_EXT_MOUNT}" "${lDIRS_EXT_MOUNT}" "NA"
+    mapfile -t lFILES_EXT_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+    print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files from the EXT filesystem."
+    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"
+
+    for lBINARY in "${lFILES_EXT_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "P14_ext_mounter" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+    write_csv_log "EXT filesystem extractor" "${lEXT_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_EXT_ARR[@]}" "NA"
     umount "${lTMP_EXT_MOUNT}" || true
   fi
   rm -r "${lTMP_EXT_MOUNT}"

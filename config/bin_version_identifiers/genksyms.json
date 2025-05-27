@@ -1,0 +1,24 @@
+{
+   "identifier": "genksyms",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "genksyms\\ version\\ [0-9]\\.[0-9]+\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "genksyms"
+   ],
+   "version_extraction": [
+      "sed -r 's/genksyms\\ version\\ ([0-9](\\.[0-9]+)+?)$/::genksyms:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

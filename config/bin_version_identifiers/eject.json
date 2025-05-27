@@ -1,0 +1,24 @@
+{
+   "identifier": "eject",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "[Ee]ject\\ Version\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "eject"
+   ],
+   "product_names": [
+      "eject"
+   ],
+   "version_extraction": [
+      "sed -r 's/[Ee]ject\\ Version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:eject:eject:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

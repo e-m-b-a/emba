@@ -1,0 +1,24 @@
+{
+   "identifier": "blockman",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^blockman\\ [0-9](\\.[0-9]+)+?\\.blockman\\ build-[0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "blockman"
+   ],
+   "version_extraction": [
+      "sed -r 's/blockman\\ ([0-9](\\.[0-9]+)+?)\\..*/::blockman:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,30 @@
+{
+  "identifier": "nano",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "GNU\\ nano,\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "GNU\\ nano,\\ version\\ [0-9](\\.[0-9]+)+?\\ \\(compiled\\ .*\\)$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "nano"
+  ],
+  "version_extraction": [
+    "sed -r 's/GNU\\ nano,\\ version\\ ([0-9](\\.[0-9]+)+?)$/:gnu:nano:\\1/'",
+    "sed -r 's/GNU\\ nano,\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/:gnu:nano:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

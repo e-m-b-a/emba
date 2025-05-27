@@ -310,7 +310,10 @@ if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; 
   export DOCKER_COMPOSE=("docker" "compose")
 elif command -v docker-compose > /dev/null ; then
   echo -e "\n${ORANGE}""${BOLD}""WARNING: Old docker-compose installation found""${NC}"
-  echo -e "${ORANGE}""${BOLD}""It is recommend to remove the current installation and restart the EMBA installation afterwards!""${NC}"
+  echo -e "${ORANGE}""${BOLD}""It is recommend to remove the current docker installation and restart the EMBA installation afterwards!""${NC}"
+  echo -e "${ORANGE}Please check the installed docker packages the following way: dpkg -l | grep docker.${NC}"
+  echo -e "${ORANGE}Afterwards it can be cleaned up via apt-get the following way:${NC}"
+  echo -e "${ORANGE}$ sudo apt-get remove docker docker-compose docker.io python3-docker${NC}"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   export DOCKER_COMPOSE=("docker-compose")
   # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
@@ -339,6 +342,15 @@ if command -v docker > /dev/null; then
       read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
     fi
   fi
+fi
+
+# if DOCKER_COMPOSE is not set we are in trouble
+if ! [[ -v DOCKER_COMPOSE[@] ]]; then
+  echo -e "\n${ORANGE}""${BOLD}""WARNING: No docker installation performed""${NC}"
+  echo -e "${ORANGE}If you are running into installation issues please check your docker installation${NC}"
+  echo -e "${ORANGE}and ensure the docker and docker compose command are available in your system path.${NC}"
+  echo ""
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 fi
 
 # initial installation of the host environment:
@@ -395,6 +407,8 @@ if [[ "${CVE_SEARCH}" -ne 1 ]] || [[ "${DOCKER_SETUP}" -ne 1 ]] || [[ "${IN_DOCK
   IL10_system_emulator
 
   IL15_emulated_checks_init
+
+  IF17_cve_bin_tool
 
   IF50_aggregator_common
 fi

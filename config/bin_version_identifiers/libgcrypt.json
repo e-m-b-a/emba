@@ -1,0 +1,34 @@
+{
+  "identifier": "libgcrypt",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "LGPL-2.1-or-later"
+  ],
+  "grep_commands": [
+    "[Ll]ibgcrypt\\ [0-9](\\.[0-9]+)+?$",
+    "[Ll]ibgcrypt\\ [0-9](\\.[0-9]+)+?(-[a-z]+)?$",
+    "[Ll]ibgcrypt\\ [0-9](\\.[0-9]+)+?\\ ",
+    "^This\\ is\\ Libgcrypt\\ [0-9]\\.([0-9]+)+?\\ -\\ The\\ GNU\\ Crypto\\ Library$"
+  ],
+  "vendor_names": [
+    "gnupg"
+  ],
+  "product_names": [
+    "libgcrypt"
+  ],
+  "version_extraction": [
+    "sed -r 's/This\\ is\\ [Ll]ibgcrypt\\ ([0-9](\\.[0-9]+)+?)\\ .*/:gnupg:libgcrypt:\\1/'",
+    "sed -r 's/[Ll]ibgcrypt\\ ([0-9](\\.[0-9]+)+?(-[a-z]+)?)$/:gnupg:libgcrypt:\\1/'",
+    "sed -r 's/[Ll]ibgcrypt\\ ([0-9](\\.[0-9]+)+?)$/:gnupg:libgcrypt:\\1/'",
+    "sed -r 's/[Ll]ibgcrypt\\ ([0-9](\\.[0-9]+)+?)\\ .*/:gnupg:libgcrypt:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

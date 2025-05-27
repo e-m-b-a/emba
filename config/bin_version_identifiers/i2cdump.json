@@ -1,0 +1,24 @@
+{
+   "identifier": "i2cdump",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "i2cdump\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "i2c-tools"
+   ],
+   "version_extraction": [
+      "sed -r 's/i2cdump\\ version\\ ([0-9](\\.[0-9]+)+?).*$/::i2c-tools:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

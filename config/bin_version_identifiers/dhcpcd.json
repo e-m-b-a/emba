@@ -1,0 +1,24 @@
+{
+   "identifier": "dhcpcd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "DHCP\\ Client\\ Daemon\\ v\\.[0-9](\\.[0-9]+)+?(-p[0-9]+)?"
+   ],
+   "vendor_names": [
+      "dhcpcd_project"
+   ],
+   "product_names": [
+      "dhcpcd"
+   ],
+   "version_extraction": [
+      "sed -r 's/DHCP\\ Client\\ Daemon\\ v\\.([0-9](\\.[0-9]+)+?(-p[0-9]+)?).*/:dhcpcd_project:dhcpcd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

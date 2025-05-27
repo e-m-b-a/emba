@@ -1,0 +1,24 @@
+{
+   "identifier": "bgpd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "bgpd\\ [Vv]ersion\\ [0-9]+(\\.[0-9]+)+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "bgpd"
+   ],
+   "version_extraction": [
+      "sed -r 's/bgpd\\ [Vv]ersion\\ ([0-9]+(\\.[0-9]+)+?)$/::bgpd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,78 @@
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2025 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+#
+# Author(s): Michael Messner
+#
+# Description: This is a default SBOM profile. You can Use it as a template for your own profiles
+#              or start emba with "-p sbom-default.emba" to use it
+
+export FORMAT_LOG=1
+export THREADED=1
+export SHORT_PATH=1
+export HTML=1
+
+# multiple sbom only optimisations
+SBOM_MINIMAL=1
+# we can include all files that are not tracked by the main packaging system into the SBOM
+# disable/enable this to (not) include all files from filesystem which are not handled
+# from the package management system
+# Value 1 for ELF files only
+# Value 2 for all files
+SBOM_UNTRACKED_FILES=1
+
+# if no deep extraction is needed it can be disabled here - sometimes useful for
+# non Linux stuff like sources or Windows exe (could be also configured via -q parameter)
+DISABLE_DEEP=1
+
+# DEEP_EXT_DEPTH -> max rounds of deep extractor 1 to 4
+DEEP_EXT_DEPTH=1
+# change this to something smaller to not report all the files
+SBOM_MAX_FILE_LOG=500
+
+# main SBOM modules
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
+
+# SBOM with user-mode emulation enabled (QEMULATION=1):
+export QEMULATION=1
+export SELECT_MODULES+=( "S115" "S116" )
+
+# enable VEX for vulnerability checks
+export SELECT_MODULES+=( "F17" "F50" )
+# VEX metrics (check for KEV, Exploits, EPSS)
+export VEX_METRICS=1
+
+# enable silent mode and status bar
+export DISABLE_STATUS_BAR=0
+export SILENT=1
+
+# No notifications via the desktop notification system
+export DISABLE_NOTIFICATIONS=1
+
+# No need for status dots
+export DISABLE_DOTS=1
+
+# we output the profile only at the beginning - outside the docker environment
+if [[ $IN_DOCKER -ne 1 ]] ; then
+  print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
+  print_output "$(indent "$(orange "Activate multi threading")")" "no_log"
+  print_output "$(indent "$(orange "Prints only relative paths")")" "no_log"
+  print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
+  if [[ "$USE_DOCKER" -ne 1 ]]; then
+    print_output "$(indent "$(orange "Enables automated qemu emulation tests (WARNING this module could harm your host!)")")" "no_log"
+  else
+    print_output "$(indent "$(orange "Enables automated qemu emulation tests")")" "no_log"
+  fi
+  print_output "$(indent "$(orange "Runs EMBA in docker container")")" "no_log"
+  print_output "$(indent "$(orange "Enabled EMBA module via profile")")" "no_log"
+  for MODULE_ in "${SELECT_MODULES[@]}"; do
+    print_output "$(indent "$(orange "Enabled module: $MODULE_")")" "no_log"
+  done
+  export USE_DOCKER=1
+fi

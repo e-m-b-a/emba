@@ -1,0 +1,24 @@
+{
+   "identifier": "ischroot",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ischroot,\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ischroot"
+   ],
+   "version_extraction": [
+      "sed -r 's/ischroot,\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ischroot:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "apparmor",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "^AppArmor\\ parser\\ version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "apparmor"
+   ],
+   "version_extraction": [
+      "sed -r 's/AppArmor\\ parser\\ version\\ ([0-9](\\.[0-9]+)+?)$/::apparmor:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

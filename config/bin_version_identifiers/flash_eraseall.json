@@ -1,0 +1,24 @@
+{
+   "identifier": "flash_eraseall",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "flash_eraseall\\ \\$Revision:\\ [0-9](\\.[0-9]+)+?\\ \\$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "mtd-utils"
+   ],
+   "version_extraction": [
+      "sed -r 's/flash_eraseall\\ \\$Revision:\\ ([0-9](\\.[0-9]+)+?).*/::mtd-utils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "trigger",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "trigger\\ version\\ [0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "trigger"
+   ],
+   "version_extraction": [
+      "sed -r 's/trigger\\ version\\ ([0-9]+)$/::trigger:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

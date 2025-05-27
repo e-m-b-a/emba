@@ -1,0 +1,24 @@
+{
+   "identifier": "embedthis",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^Embedthis\\ Appweb\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "embedthis"
+   ],
+   "product_names": [
+      "appweb"
+   ],
+   "version_extraction": [
+      "sed -r 's/Embedthis\\ Appweb\\ ([0-9](\\.[0-9]+)+?).*/:embedthis:appweb:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

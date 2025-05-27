@@ -1,0 +1,24 @@
+{
+   "identifier": "p0f",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^---\\ p0f\\ [0-9]\\.[0-9]+[a-z]\\ by\\ Michal\\ Zalewski\\ <lcamtuf@coredump\\.cx>\\ ---$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "p0f"
+   ],
+   "version_extraction": [
+      "sed -r 's/---\\ p0f\\ ([0-9](\\.[0-9]+)+?([a-z]+)?).*$/::p0f:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

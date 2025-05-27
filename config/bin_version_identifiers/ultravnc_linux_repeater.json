@@ -1,0 +1,24 @@
+{
+   "identifier": "ultravnc_linux_repeater",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^UltraVnc\\ Linux\\ Repeater\\ version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "ultravnc"
+   ],
+   "product_names": [
+      "repeater"
+   ],
+   "version_extraction": [
+      "sed -r 's/UltraVnc\\ Linux\\ Repeater\\ version\\ ([0-9](\\.[0-9]+)+?)$/:ultravnc:repeater:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

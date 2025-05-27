@@ -1,0 +1,30 @@
+{
+  "identifier": "iwconfig",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "iwconfig\\ \\ Version\\ [0-9]+$",
+    "iwconfig\\ \\ Wireless-Tools\\ version\\ [0-9]+"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "wireless_tools"
+  ],
+  "version_extraction": [
+    "sed -r 's/iwconfig(\\ )+Version\\ ([0-9]+)$/::wireless_tools:\\2/'",
+    "sed -r 's/iwconfig(\\ )+Wireless-Tools\\ version\\ ([0-9]+).*/::wireless_tools:\\2/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

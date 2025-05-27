@@ -1,0 +1,24 @@
+{
+   "identifier": "inno_setup",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^Inno\\ Setup\\ Messages\\ \\([0-9]\\.[0-9]\\.[0-9]\\)\\ \\(u\\)"
+   ],
+   "vendor_names": [
+      "jrsoftware"
+   ],
+   "product_names": [
+      "inno_setup"
+   ],
+   "version_extraction": [
+      "sed -r 's/^Inno\\ Setup\\ Messages\\ \\(([0-9]\\.[0-9]\\.[0-9])\\)\\ \\(u\\)/:jrsoftware:inno_setup:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

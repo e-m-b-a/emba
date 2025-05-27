@@ -72,7 +72,7 @@ I120_cwe_checker() {
         #   # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
         #   sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
         # fi
-        # rm external/ghidra.zip
+        rm external/ghidra.zip
 
         # further Ghidra installation stuff:
         mkdir external/ghidra_scripts

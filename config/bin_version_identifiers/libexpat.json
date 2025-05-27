@@ -1,0 +1,24 @@
+{
+   "identifier": "libexpat",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "MIT"
+   ],
+   "grep_commands": [
+      "expat_[0-9]\\.[0-9]+\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "libexpat_project"
+   ],
+   "product_names": [
+      "libexpat"
+   ],
+   "version_extraction": [
+      "sed -r 's/expat_([0-9](\\.[0-9]+)+?)$/:libexpat_project:libexpat:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

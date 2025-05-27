@@ -1,0 +1,24 @@
+{
+   "identifier": "unix2dos",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "bsd-style"
+   ],
+   "grep_commands": [
+      "unix2dos\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "unix2dos"
+   ],
+   "version_extraction": [
+      "sed -r 's/unix2dos\\ ([0-9]+(\\.[0-9]+)+?)/::unix2dos:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

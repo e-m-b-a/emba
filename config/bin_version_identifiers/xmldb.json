@@ -1,0 +1,24 @@
+{
+   "identifier": "xmldb",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "xmldb(c)?\\ version\\ [0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "xmldb"
+   ],
+   "version_extraction": [
+      "sed -r 's/.*xmldbc?\\ version\\ ([0-9]+).*/::xmldb:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

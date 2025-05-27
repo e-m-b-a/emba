@@ -1,0 +1,24 @@
+{
+   "identifier": "rsync",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^rsync\\ \\ version\\ [0-9](\\.[0-9]+)+?\\ \\ protocol\\ version\\ [0-9]+$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "rsync"
+   ],
+   "version_extraction": [
+      "sed -r 's/rsync\\ \\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/::rsync:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

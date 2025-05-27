@@ -1,0 +1,24 @@
+{
+   "identifier": "modem",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "Version\\ [0-9]\\.[0-9]+\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "modem"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)$/::modem:\\1/'"
+   ],
+   "affected_paths": [
+      "modem"
+   ]
+}

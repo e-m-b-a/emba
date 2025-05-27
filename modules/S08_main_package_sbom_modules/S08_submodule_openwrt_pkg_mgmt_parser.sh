@@ -44,7 +44,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(grep "opkg/info/.*.control" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(grep "opkg/info/.*.control" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -58,6 +58,10 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+      # echo "lPACKAGE_FILE: ${lPACKAGE_FILE}"
+      if ! [[ -f "${lPACKAGE_FILE}" ]]; then
+        print_output "[-] WARNING: ${FUNCNAME[0]} - package file ${lPACKAGE_FILE} not available ... skipping"
+      fi
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
@@ -71,24 +75,25 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
         lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
         lSHA512_CHECKSUM="$(sha512sum "${lPACKAGE_FILE}" | awk '{print $1}')"
 
-        lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' || true)
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
-        lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' | tr -dc '[:print:]' || true)
+        lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' || true)
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_MAINT=$(grep "^Maintainer: " "${lPACKAGE_FILE}" | cut -d ':' -f2- || true)
         lAPP_MAINT=${lAPP_MAINT#\ }
-        lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
-        lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
+        lAPP_MAINT=${lAPP_MAINT//[![:print:]]/}
+        # lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
+        # lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
-        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' || true)
+        lAPP_DESC=$(grep "^Description: " "${lPACKAGE_FILE}" | cut -d ':' -f2- || true)
         lAPP_DESC=${lAPP_DESC#\ }
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
-        mapfile -t lAPP_DEPS_ARR < <(grep "^Depends: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr -dc '[:print:]' | tr ',' '\n' | sort -u || true)
+        mapfile -t lAPP_DEPS_ARR < <(grep "^Depends: " "${lPACKAGE_FILE}" | cut -d ':' -f2- | tr ',' '\n' | sort -u || true)
 
         lAPP_VENDOR="${lAPP_NAME}"
         lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
@@ -109,12 +114,14 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
 
         if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
           for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
+            lAPP_DEP=${lAPP_DEP//[![:print:]]/}
             lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
           done
         fi
 
         # if we have the list file also we can add all the paths provided by the package
         if [[ -f "${lPACKAGE_FILE/\.control/\.list}" ]]; then
+          # echo "lPACKAGE_FILE: ${lPACKAGE_FILE} / ${lPACKAGE_FILE/\.control/\.list}"
           local lPKG_LIST_ENTRY=""
           local lCNT=0
           while IFS= read -r lPKG_LIST_ENTRY; do
@@ -125,7 +132,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
               lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
               break
             fi
-          done < "${lPACKAGE_FILE/control/list}"
+          done < "${lPACKAGE_FILE/\.control/\.list}"
         fi
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
@@ -133,7 +140,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
         if ! build_sbom_json_hashes_arr "${lPACKAGE_FILE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-          print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+          write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
           continue
         fi
 

@@ -1,0 +1,31 @@
+{
+  "identifier": "libtasn",
+  "parsing_mode": [
+    "multi_grep"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "'LIBTASN1 ERROR:\"&&\"^[0-9](\\.[0-9]+)?+$\"'",
+    "'LIBTASN1 ERROR:&&\"^[0-9](\\.[0-9]+)?+$\"'"
+  ],
+  "vendor_names": [
+    "free_software_foundation_inc.",
+    "gnu"
+  ],
+  "product_names": [
+    "libtasn1"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:free_software_foundation_inc.:libtasn1:\\1/'",
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:gnu:libtasn1:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

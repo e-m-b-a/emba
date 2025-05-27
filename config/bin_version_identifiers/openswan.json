@@ -1,0 +1,30 @@
+{
+  "identifier": "openswan",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "^Linux\\ Openswan\\ [0-9](\\.[0-9]+)+?$",
+    "^Openswan\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "openswan"
+  ],
+  "version_extraction": [
+    "sed -r 's/Linux\\ Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'",
+    "sed -r 's/Openswan\\ ([0-9](\\.[0-9]+)+?)$/::openswan:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

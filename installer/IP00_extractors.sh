@@ -22,7 +22,6 @@ IP00_extractors(){
 
     print_tool_info "python3-pip" 1
     print_tool_info "patool" 1
-    print_pip_info "protobuf"
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
@@ -37,12 +36,15 @@ IP00_extractors(){
     print_pip_info "python-lzo"
     # vmdk extractor:
     print_tool_info "guestfs-tools" 1
+    # payload_dumper:
+    print_pip_info "fsspec"
     # Buffalo decryptor
     print_file_info "buffalo-enc.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-enc.c" "external/buffalo-enc.c"
     print_file_info "buffalo-lib.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.c"
     print_file_info "buffalo-lib.h" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.h"
     print_tool_info "gcc" 1
     print_tool_info "libc6-dev" 1
+    print_tool_info "mtd-utils" 1
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -58,10 +60,10 @@ IP00_extractors(){
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip_install "setuptools" "-U"
         pip_install "wheel" "-U"
-        pip_install "protobuf"
         pip_install "bsdiff4"
         pip_install "python-lzo>=1.14"
         pip_install "pycryptodome"
+        pip_install "fsspec"
 
         if ! [[ -d external/payload_dumper ]]; then
           git clone https://github.com/EMBA-support-repos/payload_dumper.git external/payload_dumper

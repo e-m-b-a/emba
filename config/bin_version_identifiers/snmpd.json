@@ -1,0 +1,35 @@
+{
+  "identifier": "snmpd",
+  "parsing_mode": [
+    "normal",
+    "strict"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "NET-SNMP\\ version:\\ \\ [0-9](\\.[0-9]+)+?$",
+    "^NET-SNMP\\ version:\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "net-snmp"
+  ],
+  "product_names": [
+    "net-snmp"
+  ],
+  "version_extraction": [
+    "sed -r 's/NET-SNMP\\ version:\\ ([0-9](\\.[0-9]+)+?)$/:net-snmp:net-snmp:\\1/'",
+    "sed -r 's/NET-SNMP\\ version:\\ \\ ([0-9](\\.[0-9]+)+?)$/:net-snmp:net-snmp:\\1/'",
+    "sed -r 's/Version:\\ \\ ([0-9](\\.[0-9]+)+?)$/:net-snmp:net-snmp:\\1/'"
+  ],
+  "affected_paths": [
+    "NA",
+    "snmpd"
+  ],
+  "strict_grep_commands": [
+    "^Version:\\ \\ [0-9]\\.[0-9]+\\.[0-9]$"
+  ],
+  "live_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

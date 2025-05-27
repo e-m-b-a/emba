@@ -19,8 +19,8 @@
 
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=0
-  export EMBA_VERSION="1.5.1"
+  export RELEASE=1
+  export EMBA_VERSION="1.5.2"
 
   export CLEANED=0              # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
@@ -32,6 +32,7 @@ set_defaults() {
   export MAX_EXT_CHECK_BINS=20
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
+  export DEEP_EXTRACTOR="unblob"  # binwalk/unblob
   export DEEP_EXT_DEPTH=4
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
@@ -73,8 +74,12 @@ set_defaults() {
   export L10_DEBUG_MODE=0
   export FULL_EMULATION=0       # full system emulation - set it via command line parameter -Q
   export QEMULATION=0           # user-mode emulation - set it via command line parameter -E
+  # some processes are running long and logging a lot
+  # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
+  export QEMU_KILL_SIZE="10M"
   # export L10_KERNEL_V_LONG="4.1.17"
-  export L10_KERNEL_V_LONG="4.1.52"
+  # export L10_KERNEL_V_LONG="4.1.52"
+  export L10_KERNEL_V_LONG="4.14.336"
   export L10_BB_VER="1.36.1"
   export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
                                 # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
@@ -116,6 +121,7 @@ set_defaults() {
   if [[ -f "${CONFIG_DIR}"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="${CONFIG_DIR}"/msf_cve-db.txt
   fi
+  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
   if [[ -f "${CONFIG_DIR}"/trickest_cve-db.txt ]]; then
     export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi
@@ -149,7 +155,6 @@ set_defaults() {
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   export Q_MOD_PID=""
-  export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
   export UEFI_VERIFIED=0
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
@@ -160,6 +165,10 @@ set_defaults() {
   export SBOM_MAX_FILE_LOG=200
   export SBOM_MINIMAL=0
   export SBOM_UNTRACKED_FILES=1
+  export VEX_METRICS=1
+  # usually we test firmware that is already out in the field
+  # if this changes this option can be adjusted in the scanning profile
+  export SBOM_LIFECYCLE_PHASE="operations"
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
@@ -181,10 +190,16 @@ set_defaults() {
   S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
   S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
   S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_perl_cpan_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_php_composer_lock" )
+  S08_MODULES_ARR+=( "S08_submodule_python_pipfile_lock" )
+  S08_MODULES_ARR+=( "S08_submodule_apk_pkg_mgmt_parser" )
 }
 
 set_log_paths() {
   export SBOM_LOG_PATH="${LOG_DIR}/SBOM"
+  export P02_LOG="${LOG_DIR}/p02_firmware_bin_file_check.txt"
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export P55_LOG="${LOG_DIR}/p55_unblob_extractor.txt"
@@ -199,6 +214,8 @@ set_log_paths() {
   export S06_CSV_LOG="${CSV_DIR}/s06_distribution_identification.csv"
   export S08_CSV_LOG="${CSV_DIR}/s08_package_mgmt_extractor.csv"
   export S09_CSV_LOG="${CSV_DIR}/s09_firmware_base_version_check.csv"
+  export S09_LOG="${LOG_DIR}/s09_firmware_base_version_check.txt"
+  export S09_LOG_DIR="${S09_LOG/\.txt/\/}"
   export S12_LOG="${LOG_DIR}/s12_binary_protection.txt"
   export S12_CSV_LOG="${CSV_DIR}/s12_binary_protection.csv"
   export S13_LOG="${LOG_DIR}/s13_weak_func_check.txt"
@@ -221,6 +238,8 @@ set_log_paths() {
   export S26_LOG="${LOG_DIR}/s26_kernel_vuln_verifier.txt"
   export S26_LOG_DIR="${S26_LOG/\.txt/\/}"
   export S30_LOG="${LOG_DIR}/s30_version_vulnerability_check.txt"
+  export S36_LOG="${LOG_DIR}/s36_lighttpd.txt"
+  export S36_LOG_DIR="${S36_LOG/\.txt/\/}"
   export S36_CSV_LOG="${CSV_DIR}/s36_lighttpd.csv"
   export S40_LOG="${LOG_DIR}/s40_weak_perm_check.txt"
   export S45_LOG="${LOG_DIR}/s45_pass_file_check.txt"
@@ -236,6 +255,8 @@ set_log_paths() {
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
+  export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"
+  export S118_LOG_DIR="${S118_LOG/\.txt/\/}"
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
   export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
@@ -245,11 +266,8 @@ set_log_paths() {
   export L25_LOG="${LOG_DIR}/l25_web_checks.txt"
   export L25_CSV_LOG="${CSV_DIR}/l25_web_checks.csv"
   export L35_CSV_LOG="${CSV_DIR}/l35_metasploit_check.csv"
-  export F20_LOG="${LOG_DIR}/f20_vul_aggregator.txt"
-  export F20_CSV_LOG="${CSV_DIR}/f20_vul_aggregator.csv"
-  export F20_LOG_DIR="${F20_LOG/\.txt/\/}"
-  export F20_EXPLOITS_LOG="${F20_LOG_DIR}/exploits-overview.txt"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
+  export F17_LOG_DIR="${LOG_DIR}/f17_cve_bin_tool"
   export F50_CSV_LOG="${CSV_DIR}/f50_base_aggregator.csv"
 }

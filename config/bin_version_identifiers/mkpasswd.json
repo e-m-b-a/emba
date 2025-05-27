@@ -1,0 +1,24 @@
+{
+   "identifier": "mkpasswd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "mkpasswd\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "mkpasswd"
+   ],
+   "version_extraction": [
+      "sed -r 's/mkpasswd\\ ([0-9](\\.[0-9]+)+?).*/::mkpasswd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

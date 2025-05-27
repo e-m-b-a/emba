@@ -1,0 +1,24 @@
+{
+   "identifier": "xsupplicant",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^Xsupplicant\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "xsupplicant"
+   ],
+   "product_names": [
+      "xsupplicant"
+   ],
+   "version_extraction": [
+      "sed -r 's/Xsupplicant\\ ([0-9]+(\\.[0-9]+)+?)$/:xsupplicant:xsupplicant:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

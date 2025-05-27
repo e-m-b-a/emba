@@ -1,0 +1,24 @@
+{
+   "identifier": "libnghttp2",
+   "parsing_mode": [
+      "multi_grep"
+   ],
+   "licenses": [
+      "MIT"
+   ],
+   "grep_commands": [
+      "'^stream->state == NGHTTP2_STREAM_IDLE$\"&&\"^[0-9](\\.[0-9]+)?+$\"'"
+   ],
+   "vendor_names": [
+      "nghttp2"
+   ],
+   "product_names": [
+      "nghttp2"
+   ],
+   "version_extraction": [
+      "sed -r 's/([0-9](\\.[0-9]+)+?)$/:nghttp2:nghttp2:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

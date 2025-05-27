@@ -1,0 +1,24 @@
+{
+   "identifier": "ucd-snmpd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "bsd-style"
+   ],
+   "grep_commands": [
+      "UCD-snmp\\ version:\\ \\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "ucd-snmp"
+   ],
+   "product_names": [
+      "ucd-snmp"
+   ],
+   "version_extraction": [
+      "sed -r 's/UCD-snmp\\ version:\\ \\ ([0-9]+(\\.[0-9]+)+?)$/:ucd-snmp:ucd-snmp:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

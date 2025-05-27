@@ -1,0 +1,24 @@
+{
+   "identifier": "nmcli",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "nmcli\\ tool,\\ version\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "nmcli"
+   ],
+   "version_extraction": [
+      "sed -r 's/nmcli\\ tool,\\ version\\ ([0-9](\\.[0-9]+)+?)$/::nmcli:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

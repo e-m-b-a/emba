@@ -1,0 +1,24 @@
+{
+   "identifier": "picocom",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^picocom\\ v[0-9]\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "picocom_project"
+   ],
+   "product_names": [
+      "picocom"
+   ],
+   "version_extraction": [
+      "sed -r 's/picocom\\ v([0-9](\\.[0-9]+)+?)$/:picocom_project:picocom:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

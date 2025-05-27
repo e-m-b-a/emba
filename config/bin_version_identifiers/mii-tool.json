@@ -1,0 +1,24 @@
+{
+   "identifier": "mii-tool",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "mii-tool\\.c\\ [0-9]\\.[0-9]+\\ .*\\ \\(David\\ Hinds\\)"
+   ],
+   "vendor_names": [
+      "net-tools"
+   ],
+   "product_names": [
+      "mii-tool"
+   ],
+   "version_extraction": [
+      "sed -r 's/mii-tool\\.c\\ ([0-9](\\.[0-9]+)+?)\\ .*/:net-tools:mii-tool:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

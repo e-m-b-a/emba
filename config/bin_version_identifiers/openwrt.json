@@ -1,0 +1,24 @@
+{
+   "identifier": "openwrt",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "gpl"
+   ],
+   "grep_commands": [
+      "(OpenWrt)\\ ([0-9]+\\.[0-9]+\\.[0-9])\\ (r[0-9]+\\-)([a-z0-9]+).*"
+   ],
+   "vendor_names": [
+      "openwrt"
+   ],
+   "product_names": [
+      "openwrt"
+   ],
+   "version_extraction": [
+      "sed -r 's/(OpenWrt)\\ ([0-9]+\\.[0-9]+\\.[0-9])\\ (r[0-9]+\\-)([a-z0-9]+).*/:openwrt:openwrt:\\2/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

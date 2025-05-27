@@ -1,0 +1,30 @@
+{
+  "identifier": "ripngd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "^ripngd\\ version\\ [0-9](\\.[0-9]+)+?([a-z])?\\ ",
+    "^ripngd\\ version\\ [\\.0-9]+$"
+  ],
+  "vendor_names": [
+    "quagga"
+  ],
+  "product_names": [
+    "quagga"
+  ],
+  "version_extraction": [
+    "sed -r 's/ripngd\\ version\\ ([0-9](\\.[0-9]+)+?)$/:quagga:quagga:\\1/'",
+    "sed -r 's/ripngd\\ version\\ ([0-9](\\.[0-9]+)+?[a-z]?)\\.*/:quagga:quagga:\\1:\\2/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

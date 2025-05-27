@@ -1,0 +1,30 @@
+{
+  "identifier": "gdbserver",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "^GNU\\ gdbserver\\ [0-9](\\.[0-9]+)+?$",
+    "^GNU\\ gdbserver\\ \\(GDB\\)\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "gdb"
+  ],
+  "version_extraction": [
+    "sed -r 's/GNU\\ gdbserver\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gdb:\\1/'",
+    "sed -r 's/GNU\\ gdbserver\\ \\(GDB\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:gdb:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

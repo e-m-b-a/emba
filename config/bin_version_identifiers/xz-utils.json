@@ -1,0 +1,24 @@
+{
+   "identifier": "xz-utils",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\\(XZ\\ Utils\\)\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "xz-utils"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\(XZ\\ Utils\\)\\ ([0-9](\\.[0-9]+)+?)$/::xz-utils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

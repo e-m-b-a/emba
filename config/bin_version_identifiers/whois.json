@@ -1,0 +1,24 @@
+{
+   "identifier": "whois",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "Version\\ [0-9]\\.[0-9]+\\.[0-9]+"
+   ],
+   "vendor_names": [
+      "whois"
+   ],
+   "product_names": [
+      "whois"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?)/:whois:whois:\\1/'"
+   ],
+   "affected_paths": [
+      "whois"
+   ]
+}

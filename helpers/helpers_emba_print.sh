@@ -316,6 +316,21 @@ write_csv_log() {
   echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${lCSV_LOG}" || true
 }
 
+# for generating csv log file in somewhere else
+# $1: path with filename for csv log file
+# $2: source module
+# $@: array with csv items
+write_csv_log_to_path() {
+  local lCSV_LOG="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  shift 2
+  local lCSV_ITEMS=("$@")
+
+  # shellcheck disable=SC2005
+  echo "$(printf '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${lCSV_LOG}" || true
+}
+
+
 # For generating json log file in LOG_DIR/json_logs/<module_name>.json
 # Usually this is the json equivalent to the write_csv_log
 # We write to tmp files which we put together via write_json_module_log(), which is automatically called in module_end_log()
@@ -334,7 +349,7 @@ write_json_module_log_entry() {
 # This function collects all temp json files from LOG_PATH_MODULE and puts all temp json files together to a complete json log file
 write_json_module_log() {
   local lJSON_TMP_FILES_ARR=()
-  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u)
+  mapfile -t lJSON_TMP_FILES_ARR < <(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" | sort -u || true)
   if [[ "${#lJSON_TMP_FILES_ARR[@]}" -eq 0 ]]; then
     return
   fi
@@ -349,11 +364,11 @@ write_json_module_log() {
       if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
         cat "${lCOMP_FILE}" >> "${lJSON_LOG}"
       else
-        print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
+        print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
         continue
       fi
     else
-      print_output "[!] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
+      print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to decode"
       continue
     fi
     if [[ $((lCOMP_FILE_ID+1)) -lt "${#lJSON_TMP_FILES_ARR[@]}" ]]; then
@@ -364,7 +379,7 @@ write_json_module_log() {
 
   # as our json is not beautifull we remove all \n and further formatting should be done via jq
   tr -d '\n' < "${lJSON_LOG}" > "${lJSON_LOG/\.tmp/\.json}"
-  find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete
+  find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete || true
   rm "${lJSON_LOG}" || true
 }
 
@@ -656,7 +671,7 @@ print_help()
   echo -e "${CYAN}""-P""${NC}""                Overwrite auto MAX_MODS (maximum modules in parallel) configuration"
   echo -e "${CYAN}""-T""${NC}""                Overwrite auto MAX_MOD_THREADS (maximum threads per module) configuration"
   echo -e "\\nDeveloper options"
-  echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection"
+  echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection (deprecated)"
   echo -e "${CYAN}""-S""${NC}""                STRICT mode - developer option to improve code quality (not enabled by default)"
 #  echo -e "${CYAN}""-i""${NC}""                EMBA internally used for container identification (do not use it as cli parameter)"
   echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automaticially, even if it is not empty"
@@ -910,6 +925,9 @@ print_notification() {
 
   until [[ -f "${lNOTIFICATION_LOCATION}" ]]; do
     sleep 1
+    if check_emba_ended; then
+      exit
+    fi
   done
 
   local lCURRENT=""
@@ -983,7 +1001,7 @@ secure_sleep() {
     sleep 10
     lCUR_SLEEP_TIME=$((lCUR_SLEEP_TIME + 10))
     if check_emba_ended; then
-      return
+      exit
     fi
   done
 }

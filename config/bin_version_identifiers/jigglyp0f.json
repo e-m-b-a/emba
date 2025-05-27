@@ -1,0 +1,24 @@
+{
+   "identifier": "jigglyp0f",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^jigglyp0f\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "jigglyp0f"
+   ],
+   "version_extraction": [
+      "sed -r 's/jigglyp0f\\ ([0-9](\\.[0-9]+)+?)$/::jigglyp0f:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

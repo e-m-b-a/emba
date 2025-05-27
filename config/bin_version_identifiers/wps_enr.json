@@ -1,0 +1,24 @@
+{
+   "identifier": "wps_enr",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "^Version:\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "wps_enr"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version:\\ ([0-9](\\.[0-9]+)+?)$/::wps_enr:\\1/'"
+   ],
+   "affected_paths": [
+      "wps_enr"
+   ]
+}

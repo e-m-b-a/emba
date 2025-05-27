@@ -59,8 +59,7 @@ S06_distribution_identification()
           continue
         fi
       fi
-      # mapfile -t lFOUND_FILES_ARR < <(find "${FIRMWARE_PATH}" -xdev -iwholename "*${lSEARCH_FILE}" || true)
-      mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+      mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
@@ -69,12 +68,14 @@ S06_distribution_identification()
           lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
           lFILE_QUOTED=$(escape_echo "${lFILE}")
           lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
+          lOUT1="${lOUT1//\'}"
+          # print_output "lCONFIG: ${lCONFIG}"
           # print_output "lPATTERN: ${lPATTERN}"
           # print_output "SED command: ${lSED_COMMAND}"
           # print_output "FILE: ${lFILE_QUOTED}"
           # print_output "identified before: ${lOUT1}"
           lOUT1=$(echo "${lOUT1}" | sort -u | tr '\n' ' ')
-          lOUT1=$(echo "${lOUT1}" | tr -d '"')
+          lOUT1="${lOUT1//\"}"
           # print_output "identified mod: ${lOUT1}"
           if [[ -n "${lSED_COMMAND}" ]]; then
             lIDENTIFIER=$(echo "${lOUT1}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
@@ -178,7 +179,7 @@ dlink_image_sign() {
   local lDLINK_FW_VER_tmp=""
 
   # mapfile -t lDLINK_BUILDVER_ARR < <(find "${FIRMWARE_PATH}" -xdev -path "*config/buildver")
-  mapfile -t lDLINK_BUILDVER_ARR < <(grep "config/buildver;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lDLINK_BUILDVER_ARR < <(grep "config/buildver;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lDLINK_BVER in "${lDLINK_BUILDVER_ARR[@]}"; do
     DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "${lDLINK_BVER/;*}" || true)
     if ! [[ "${DLINK_FW_VER}" =~ ^v.* ]]; then
@@ -190,7 +191,7 @@ dlink_image_sign() {
   local lDLINK_BUILDREV_ARR=()
   # probably we can use this in the future. Currently there is no need for it:
   # mapfile -t lDLINK_BUILDREV_ARR < <(find "${FIRMWARE_PATH}" -xdev -path "*config/buildrev")
-  mapfile -t lDLINK_BUILDREV_ARR < <(grep "config/buildrev;" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  mapfile -t lDLINK_BUILDREV_ARR < <(grep "config/buildrev;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lDLINK_BREV in "${lDLINK_BUILDREV_ARR[@]}"; do
     lDLINK_FW_VER_tmp=$(grep -E "^[A-Z][0-9]+" "${lDLINK_BREV}" || true)
     # -> B01
@@ -210,7 +211,8 @@ dlink_image_sign() {
 get_csv_rule_distri() {
   # this is a temp solution. If this list grows we are going to solve it via a configuration file
   local lVERSION_IDENTIFIER="${1:-}"
-  lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER,,}" | tr -dc '[:print:]')"
+  lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER,,}")"
+  lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER//[![:print:]]/}"
 
   ### handle versions of linux distributions:
   # debian 9 (stretch) - installer build 20170615+deb9u5
@@ -259,6 +261,6 @@ get_csv_rule_distri() {
     lRES="${lVERSION_IDENTIFIER//[^:]}"
   done
 
-  lCSV_RULE="$(safe_echo "${lVERSION_IDENTIFIER}" | tr -dc '[:print:]')"
-  echo "${lCSV_RULE}"
+  lCSV_RULE="$(safe_echo "${lVERSION_IDENTIFIER}")"
+  echo "${lCSV_RULE//[![:print:]]/}"
 }

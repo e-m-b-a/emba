@@ -1,0 +1,24 @@
+{
+   "identifier": "rngtest",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^rngtest\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "rngtest"
+   ],
+   "version_extraction": [
+      "sed -r 's/rngtest\\ ([0-9](\\.[0-9]+)+?)$/::rngtest:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

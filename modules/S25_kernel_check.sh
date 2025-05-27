@@ -115,6 +115,22 @@ populate_karrays() {
     KERNEL_DESC+=( "$(modinfo "${lK_MODULE}" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' | sort -u || true)" )
   done
 
+  # we also extract the kernel version from the /lib/modules/<Kernel version>/ path
+  local lKERNEL_MODULES_PATHS_ARR=()
+  local lPATH_TO_CHECK=""
+
+  mapfile -t lKERNEL_MODULES_PATHS_ARR < <(grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  for lPATH_TO_CHECK in "${lKERNEL_MODULES_PATHS_ARR[@]}" ; do
+    # we remove the complete path in front of the possible kernel version:
+    # asdf/bla/root-dir/lib/modules/ -> gets removed
+    lPATH_TO_CHECK="${lPATH_TO_CHECK/*\/lib\/modules\//}"
+    if [[ "${lK_VERSION_ARR[*]}" != *"${lPATH_TO_CHECK}"* ]]; then
+      # we currently do not care about additional parts of a path
+      # This is later handled during cleanup
+      KERNEL_VERSION+=("${lPATH_TO_CHECK}")
+    fi
+  done
+
   for lVER in "${KERNEL_VERSION[@]}" ; do
     demess_kv_version "${lVER}"
 
@@ -136,7 +152,10 @@ populate_karrays() {
   # if we have found a kernel version in binary kernel:
   if [[ -f "${S24_CSV_LOG}" ]]; then
     while IFS=";" read -r lK_VER; do
-      lK_VER="$(echo "${lK_VER}" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
+      shopt -s extglob
+      lK_VER="${lK_VER//Linux\ version\ /}"
+      lK_VER="${lK_VER//+([\(\)\#])/}"
+      shopt -u extglob
 
       demess_kv_version "${lK_VER}"
 
@@ -161,7 +180,8 @@ populate_karrays() {
     echo "\"${i}\"" ;
   done | sort -u))"
 
-  eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"${i}}\"" ; done | sort -u))"
+  # eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"${i}}\"" ; done | sort -u))"
+  mapfile -t KERNEL_DESC < <(printf "%s\n" "${KERNEL_DESC[@]}" | sort -u)
 
   # if we have no kernel version identified -> we try to identify a possible identifier in the path:
   if [[ "${#lKERNEL_VERSION_ARR[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
@@ -190,17 +210,19 @@ demess_kv_version() {
       continue
     fi
 
-    lKV=$(echo "${lVER}" | tr "-" " ")
-    lKV=$(echo "${lKV}" | tr "+" " ")
-    lKV=$(echo "${lKV}" | tr "_" " ")
-    lKV=$(echo "${lKV}" | tr "/" " ")
-    # the first field is the real kernel version:
-    lKV=$(echo "${lKV}" | cut -d\  -f1)
+    # split dirty things on space
+    shopt -s extglob
+    lKV="${lVER//+([-+_\/\ ])/\ }"
+    shopt -u extglob
 
-    while echo "${lKV}" | grep -q '[a-zA-Z]'; do
+    # the first field is usually the real kernel version:
+    lKV="${lKV/\ *}"
+
+    while [[ "${lKV}" =~ [a-zA-Z] ]]; do
       lKV="${lKV::-1}"
     done
-    KV_ARR=("${KV_ARR[@]}" "${lKV}")
+
+    KV_ARR+=("${lKV}")
   done
 }
 
@@ -278,15 +300,9 @@ analyze_kernel_module() {
       continue
     fi
     VERIFIED_KERNEL_MODULES=$((VERIFIED_KERNEL_MODULES+1))
-    # modinfos can run in parallel:
-    if [[ "${THREADED}" -eq 1 ]]; then
-      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
-      local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
-    else
-      module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}"
-    fi
+    module_analyzer "${lKMODULE}" "${lOS_IDENTIFIED}" &
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S25_ARR+=( "${lTMP_PID}" )
   done
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S25_ARR[@]}"
@@ -335,6 +351,15 @@ module_analyzer() {
     lK_VERSION=${lK_VERSION/vermagic:\ }
     lK_VERSION=$(clean_package_details "${lK_VERSION}")
     demess_kv_version "${lK_VERSION}"
+    # => we make a nice KV_ARR with the one version only
+    # this means we can further proceed with ${KV_ARR[*]} to access
+    # the complete version
+
+    # Just in case we have no kernel version extracted from the module
+    # we can use the original array of kernel versions:
+    if [[ "${#KV_ARR[@]}" -eq 0 && "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
+      KV_ARR+=("${KERNEL_VERSION[0]}")
+    fi
 
     lMOD_VERSION=$(modinfo "${lKMODULE}" | grep "^version:" || true)
     lMOD_VERSION=${lMOD_VERSION/version:\ }
@@ -345,6 +370,7 @@ module_analyzer() {
 
     lK_AUTHOR=$(modinfo "${lKMODULE}" | grep "^author:" || true)
     lK_AUTHOR="${lK_AUTHOR//author:\ }"
+    lK_AUTHOR="${lK_AUTHOR//Maintainer:\ }"
     lK_AUTHOR="$(echo "${lK_AUTHOR}" | tr '\n' '-')"
     lK_AUTHOR=$(clean_package_details "${lK_AUTHOR}")
 
@@ -375,63 +401,67 @@ module_analyzer() {
       print_output "[*] Found kernel module ""${NC}""$(orange "$(print_path "${lKMODULE}")")"" - ${ORANGE}""License ${lLICENSE}""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
 
-    # we log to our sbom log with the kernel module details
-    # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
-    check_for_s08_csv_log "${S08_CSV_LOG}"
+    # we log to our sbom log with the kernel module details only if we have some module version detected
+    if [[ -n "${lMOD_VERSION}" ]]; then
+      # we store the kernel version (lVERSION:-NA) and the kernel module version (lMOD_VERSION:-NA)
+      check_for_s08_csv_log "${S08_CSV_LOG}"
 
-    local lPACKAGING_SYSTEM="kernel_module"
-    # add source file path information to our properties array:
-    local lPROP_ARRAY_INIT_ARR=()
-    lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
-    lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
-    lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
-    lPROP_ARRAY_INIT_ARR+=( "dependency:linux_kernel" )
-
-    build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
-
-    # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
-    # final array with all hash values
-    if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-      print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
-    else
-      # create component entry - this allows adding entries very flexible:
-      build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
-    fi
-
-    write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
-
-    # ensure we do not log the kernel multiple times
-    if ! grep -q "linux_kernel;.*;:linux:linux_kernel:${KV_ARR[*]};" "${S08_CSV_LOG}";then
-      local lPACKAGING_SYSTEM="linux_kernel+module"
-      local lK_AUTHOR="linux"
-      local lLICENSE="GPL-2.0-only"
-
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:linux:linux_kernel:${KV_ARR[*]}:*:*:*:*:*:*"
-      lPURL_IDENTIFIER=$(build_generic_purl ":linux:linux_kernel:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
-
-      local lPACKAGING_SYSTEM="linux_kernel"
+      local lPACKAGING_SYSTEM="kernel_module"
       # add source file path information to our properties array:
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
       lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${lMOD_VERSION}:" )
+      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      lPROP_ARRAY_INIT_ARR+=( "dependency:linux_kernel" )
+
+      build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
+
+      # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
+      # final array with all hash values
+      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${lMOD_VERSION}" "no_log"
+      else
+        # create component entry - this allows adding entries very flexible:
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lMOD_VERSION:-NA}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+      fi
+
+      write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME};${lMOD_VERSION:-NA};NA;${lLICENSE};${lK_AUTHOR};${lK_ARCH};CPE not available;PURL not available;${SBOM_COMP_BOM_REF:-NA};Linux kernel module - ${lAPP_NAME} - description: ${lK_DESC:-NA}" "${S08_CSV_LOG}"
+    fi
+
+    if [[ "${#KV_ARR[@]}" -gt 0 ]]; then
+      # ensure we do not log the kernel multiple times
+      local lK_AUTHOR="linux"
+      local lLICENSE="GPL-2.0-only"
+      # we can rewrite the APP_NAME as we also log the source_path from where we know the exact source of this kernel entry
+      local lAPP_NAME="linux_kernel"
+      local lPACKAGING_SYSTEM="${lAPP_NAME}+module"
+
+      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
+      lPURL_IDENTIFIER=$(build_generic_purl ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
+
+      # add source file path information to our properties array:
+      local lPROP_ARRAY_INIT_ARR=()
+      lPROP_ARRAY_INIT_ARR+=( "source_path:${lKMODULE}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lK_ARCH}" )
+      lPROP_ARRAY_INIT_ARR+=( "source_details:${lK_FILE_OUT}" )
+      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier::${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:" )
+      lPROP_ARRAY_INIT_ARR+=( "module_version_details:${lK_VERSION,,}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
-      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+      if ! build_sbom_json_hashes_arr "${lKMODULE}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lPACKAGING_SYSTEM:-NA}"; then
+        print_output "[*] Already found results for ${lAPP_NAME} / ${KV_ARR[*]}" "no_log"
       else
         # create component entry - this allows adding entries very flexible:
-        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lK_VERSION,,}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+        build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${KV_ARR[*]}" "${lK_AUTHOR:-NA}" "${lLICENSE:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lK_DESC:-NA}"
+        write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};${lLICENSE};kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
       fi
-
-      write_log "${lPACKAGING_SYSTEM};${lKMODULE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};linux_kernel:${lAPP_NAME};${lK_VERSION,,};:linux:linux_kernel:${KV_ARR[*]};GPL-2.0-only;kernel.org;${lK_ARCH};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};Detected via Linux kernel module - ${lAPP_NAME}" "${S08_CSV_LOG}"
     fi
-
   elif [[ "${lKMODULE}" == *".o" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     print_output "[-] No support for .o kernel modules - ${ORANGE}${lKMODULE}${NC}" "no_log"
   fi

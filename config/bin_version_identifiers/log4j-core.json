@@ -1,0 +1,24 @@
+{
+   "identifier": "log4j-core.jar",
+   "parsing_mode": [
+      "zgrep"
+   ],
+   "licenses": [
+      "Apache-2.0"
+   ],
+   "zgrep_grep_commands": [
+      "Log4jReleaseVersion:\\ [0-9]\\.[0-9]"
+   ],
+   "vendor_names": [
+      "apache"
+   ],
+   "product_names": [
+      "log4j"
+   ],
+   "version_extraction": [
+      "sed -r 's/Log4jReleaseVersion:\\ ([0-9](\\.[0-9]+)+?)/:apache:log4j:\\1/'"
+   ],
+   "affected_paths": [
+      "log4j-core"
+   ]
+}

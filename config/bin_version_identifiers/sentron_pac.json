@@ -1,0 +1,37 @@
+{
+  "identifier": "sentron_pac",
+  "parsing_mode": [
+    "multi_grep"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "'^PAC2200$\"&&\"^Siemens AG$\"&&\"^V[0-9](\\.[0-9]+)+?$\"'",
+    "'^PAC3200$&&\"^Siemens AG$\"&&\"^V[0-9](\\.[0-9]+)+?$\"'",
+    "'^PAC4200$\"&&\"^Siemens AG$\"&&\"^V[0-9](\\.[0-9]+)+?$\"'",
+    "'^PAC[0-9]+$\"&&\"^Siemens AG$\"&&\"^V[0-9](\\.[0-9]+)+?$\"'"
+  ],
+  "vendor_names": [
+    "siemens"
+  ],
+  "product_names": [
+    "sentron_pac",
+    "sentron_pac2200",
+    "sentron_pac3200",
+    "sentron_pac4200"
+  ],
+  "version_extraction": [
+    "sed -r 's/V([0-9](\\.[0-9]+)+?)$/:siemens:sentron_pac2200:\\1/'",
+    "sed -r 's/V([0-9](\\.[0-9]+)+?)$/:siemens:sentron_pac3200:\\1/'",
+    "sed -r 's/V([0-9](\\.[0-9]+)+?)$/:siemens:sentron_pac4200:\\1/'",
+    "sed -r 's/V([0-9](\\.[0-9]+)+?)$/:siemens:sentron_pac:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "mtr",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "^mtr\\ [0-9]\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "mtr"
+   ],
+   "product_names": [
+      "mtr"
+   ],
+   "version_extraction": [
+      "sed -r 's/mtr\\ ([0-9](\\.[0-9]+)+?)$/:mtr:mtr:\\1/'"
+   ],
+   "affected_paths": [
+      "mtr"
+   ]
+}

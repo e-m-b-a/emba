@@ -1,0 +1,35 @@
+{
+  "identifier": "bftpd",
+  "parsing_mode": [
+    "live",
+    "strict"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "strict_grep_commands": [
+    "^[0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "bftpd",
+    "bftpd_project"
+  ],
+  "product_names": [
+    "bftpd"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:bftpd:bftpd:\\1/'",
+    "sed -r 's/([0-9](\\.[0-9]+)+?)$/:bftpd_project:bftpd:\\1/'",
+    "sed -r 's/Bftpd\\ ([0-9](\\.[0-9]+)+?)$/:bftpd:bftpd:\\1/'",
+    "sed -r 's/Bftpd\\ ([0-9](\\.[0-9]+)+?)$/:bftpd_project:bftpd:\\1/'"
+  ],
+  "affected_paths": [
+    "bftpd"
+  ],
+  "live_grep_commands": [
+    "^Bftpd\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

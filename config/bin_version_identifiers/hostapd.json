@@ -1,0 +1,32 @@
+{
+  "identifier": "hostapd",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "^hostapd\\ v[0-9](\\.[0-9]+)+?(-devel)?$",
+    "hostapd\\ v[0-9](\\.[0-9]+)+?$",
+    "hostapd\\ v[0-9](\\.[0-9]+)+?\\.x$"
+  ],
+  "vendor_names": [
+    "w1.fi"
+  ],
+  "product_names": [
+    "hostapd"
+  ],
+  "version_extraction": [
+    "sed -r 's/hostapd\\ v([0-9](\\.[0-9]+)+?)$/:w1.fi:hostapd:\\1/'",
+    "sed -r 's/hostapd\\ v([0-9](\\.[0-9]+)+?)(-devel)?$/:w1.fi:hostapd:\\1/'",
+    "sed -r 's/hostapd\\ v([0-9](\\.[0-9]+)+?).*$/:w1.fi:hostapd:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

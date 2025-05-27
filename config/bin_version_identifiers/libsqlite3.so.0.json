@@ -1,0 +1,24 @@
+{
+   "identifier": "libsqlite3.so.0",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "public-domain"
+   ],
+   "strict_grep_commands": [
+      "^3\\.[0-9]+\\.[0-9]+$"
+   ],
+   "vendor_names": [
+      "sqlite"
+   ],
+   "product_names": [
+      "sqlite"
+   ],
+   "version_extraction": [
+      "sed -r 's/(3(\\.[0-9]+)+?)$/:sqlite:sqlite:\\1/'"
+   ],
+   "affected_paths": [
+      "libsqlite3.so.0.*"
+   ]
+}

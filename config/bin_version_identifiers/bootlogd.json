@@ -1,0 +1,24 @@
+{
+   "identifier": "bootlogd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "\\ bootlogd\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "bootlogd"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\ bootlogd\\ ([0-9](\\.[0-9]+)+?)\\ .*/::bootlogd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

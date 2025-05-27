@@ -1,0 +1,24 @@
+{
+   "identifier": "nbtscan",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^NBTscan\\ version\\ [0-9](\\.[0-9]+)+?\\.\\ Copyright\\ \\(C\\)\\ 1999-200[0-9]\\ Alla\\ Bezroutchko\\.$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "nbtscan"
+   ],
+   "version_extraction": [
+      "sed -r 's/NBTscan\\ version\\ ([0-9](\\.[0-9]+)+?).*/::nbtscan:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

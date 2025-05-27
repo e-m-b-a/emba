@@ -1,0 +1,24 @@
+{
+   "identifier": "unrar",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^UNRAR\\ [0-9]\\.[0-9]+\\ freeware\\ .*\\ Copyright\\ \\(c\\)\\ [0-9]+-[0-9]+\\ Alexander\\ Roshal$"
+   ],
+   "vendor_names": [
+      "rarlab"
+   ],
+   "product_names": [
+      "unrar"
+   ],
+   "version_extraction": [
+      "sed -r 's/UNRAR\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/:rarlab:unrar:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,30 @@
+{
+  "identifier": "gnu_findutils",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-3.0-only"
+  ],
+  "grep_commands": [
+    "\\(GNU\\ findutils\\)\\ [0-9](\\.[0-9]+)+?$",
+    "\\(GNU\\ findutils\\)\\ [0-9](\\.[0-9]+)+?-[a-z]+$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "findutils"
+  ],
+  "version_extraction": [
+    "sed -r 's/\\(GNU\\ findutils\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:findutils:\\1/'",
+    "sed -r 's/\\(GNU\\ findutils\\)\\ ([0-9](\\.[0-9]+)+?-[a-z]+)$/:gnu:findutils:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

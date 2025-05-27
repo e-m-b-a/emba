@@ -45,7 +45,7 @@ S08_submodule_ruby_gem_archive_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lGEM_ARCHIVES_ARR < <(grep "\.gem;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lGEM_ARCHIVES_ARR < <(grep "\.gem;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lGEM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -96,7 +96,6 @@ S08_submodule_ruby_gem_archive_parser() {
 
       lAPP_LIC="NA"
       # lAPP_LIC=$(grep '^licenses' "${TMP_DIR}"/gems/metadata || true)
-      # lAPP_LIC=$(safe_echo "${lAPP_LIC}" | tr -dc '[:print:]')
 
       # grep -A1 "^version: " metadata | grep "[0-9]\."
       lAPP_VERS=$(grep -A1 '^version' "${TMP_DIR}"/gems/metadata | grep "[0-9]" || true)
@@ -143,7 +142,7 @@ S08_submodule_ruby_gem_archive_parser() {
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
       if ! build_sbom_json_hashes_arr "${lGEM_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
         continue
       fi
 

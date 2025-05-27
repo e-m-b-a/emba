@@ -1,0 +1,24 @@
+{
+   "identifier": "gnu_cpio",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-3.0-only"
+   ],
+   "grep_commands": [
+      "\\(GNU\\ cpio\\)\\ [0-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "cpio"
+   ],
+   "version_extraction": [
+      "sed -r 's/\\(GNU\\ cpio\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:cpio:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -1,0 +1,46 @@
+{
+  "identifier": "glibc",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "LGPL-2.1-or-later"
+  ],
+  "grep_commands": [
+    "GNU\\ C\\ Library\\ \\(.*\\)\\ stable\\ release\\ version\\ [0-9](\\.[0-9]+)+?",
+    "GNU\\ C\\ Library\\ \\(.*\\)\\ stable\\ release\\ version\\ [0-9](\\.[0-9]+)+?(\\.)?$",
+    "GNU\\ C\\ Library\\ \\(Debian\\ GLIBC.*\\)\\ stable\\ release\\ version\\ [0-9](\\.[0-9]+)+?,\\ ",
+    "GNU\\ C\\ Library\\ \\(GLIBC\\)\\ stable\\ release\\ version\\ [0-9](\\.[0-9]+)+?",
+    "GNU\\ C\\ Library\\ development\\ release\\ version\\ [0-9](\\.[0-9]+)+?$",
+    "GNU\\ C\\ Library\\ stable\\ release\\ version\\ [0-9](\\.[0-9]+)+?,\\ ",
+    "\\(Debian\\ GLIBC.*\\)\\ [0-9](\\.[0-9]+)+?$",
+    "^GNU\\ C\\ Library\\ \\(GNU\\ libc\\)\\ stable\\ release\\ version\\ [0-9](\\.[0-9]+)+?\\.$",
+    "^\\(Debian\\ GLIBC\\ [0-9](\\.[0-9]+)+?(-[0-9].*deb.*)?$",
+    "ldconfig\\ \\(GNU\\ libc\\)\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "gnu"
+  ],
+  "product_names": [
+    "glibc"
+  ],
+  "version_extraction": [
+    "sed -r 's/.*Debian\\ GLIBC\\ ([0-9](\\.[0-9]+)+?(-[0-9].*deb.*)?)\\)/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ \\(.*\\)\\ stable\\ release\\ version\\ ([0-9](\\.[0-9]+)+?)(\\.)?$/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ \\(.*\\)\\ stable\\ release\\ version\\ ([0-9](\\.[0-9]+)+?)/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ \\(Debian\\ GLIBC.*\\)\\ stable\\ release\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ \\(GLIBC\\)\\ stable\\ release\\ version\\ ([0-9](\\.[0-9]+)+?).*/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ \\(GNU\\ libc\\)\\ stable\\ release\\ version\\ ([0-9](\\.[0-9]+)+?).*/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ development\\ release\\ version\\ ([0-9](\\.[0-9]+)+?)$/:gnu:glibc:\\1/'",
+    "sed -r 's/GNU\\ C\\ Library\\ stable\\ release\\ version\\ ([0-9](\\.[0-9]+)+?),\\ .*/:gnu:glibc:\\1/'",
+    "sed -r 's/\\(Debian\\ GLIBC.*\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:glibc:\\1/'",
+    "sed -r 's/ldconfig\\ \\(GNU\\ libc\\)\\ ([0-9](\\.[0-9]+)+?)$/:gnu:glibc:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

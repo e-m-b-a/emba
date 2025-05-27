@@ -44,7 +44,7 @@ P23_qemu_qcow_mounter() {
       rm "${TMP_DIR}"/firmware
     fi
 
-    if [[ "${FILES_QCOW_MOUNT}" -gt 0 ]]; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -57,11 +57,12 @@ qcow_extractor() {
   local lQCOW_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
-  local lDIRS_QCOW_MOUNT=0
   local lNBD_DEV=""
   local lNBD_DEVS_ARR=()
   local lEXTRACTION_DIR_FINAL=""
-  export FILES_QCOW_MOUNT=0
+  local lFILES_QCOW_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lQCOW_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -93,7 +94,8 @@ qcow_extractor() {
   local lNBD_SIZE=""
   local lNBD_DEV_NAME=""
   local lIS_MOUNTED="no"
-  for lNBD_DEV in /sys/class/block/nbd[0-9]{1,}; do
+  for lNBD_DEV in {0..15}; do
+    lNBD_DEV="/sys/class/block/nbd${lNBD_DEV}"
     lNBD_SIZE=$(cat "${lNBD_DEV}"/size || true)
     if [[ "${lNBD_SIZE}" == "0" ]]; then
       lNBD_DEV_NAME=$(basename "${lNBD_DEV}")
@@ -114,11 +116,12 @@ qcow_extractor() {
   mapfile -t lNBD_DEVS_ARR < <(fdisk -l /dev/"${lNBD_DEV_NAME}" | grep "^/dev/" | awk '{print $1}' || true)
   if [[ "${#lNBD_DEVS_ARR[@]}" -eq 0 ]]; then
     # sometimes we are not able to find the partitions with fdisk -> fallback
-    lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    # lNBD_DEVS_ARR+=( "/dev/nbd0" )
+    lNBD_DEVS_ARR+=( "/dev/${lNBD_DEV_NAME}" )
   fi
 
   print_ln
-  fdisk /dev/"${lNBD_DEV_NAME}" -l
+  fdisk /dev/"${lNBD_DEV_NAME}" -l || print_error "[-] fdisk for /dev/${lNBD_DEV_NAME} was not successful"
   print_ln
 
   for NBD_DEV in "${lNBD_DEVS_ARR[@]}"; do
@@ -126,15 +129,24 @@ qcow_extractor() {
     mount "${NBD_DEV}" "${lTMP_QCOW_MOUNT}" || true
 
     if mount | grep -q "${NBD_DEV}"; then
-      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+      lEXTRACTION_DIR_FINAL="${lEXTRACTION_DIR_%\/}"/"$(basename "${NBD_DEV}")"
 
       copy_qemu_nbd "${lTMP_QCOW_MOUNT}" "${lEXTRACTION_DIR_FINAL}"
 
-      FILES_QCOW_MOUNT=$(find "${lEXTRACTION_DIR_FINAL}" -type f | wc -l)
-      lDIRS_QCOW_MOUNT=$(find "${lEXTRACTION_DIR_FINAL}" -type d | wc -l)
-      print_output "[*] Extracted ${ORANGE}${FILES_QCOW_MOUNT}${NC} files and ${ORANGE}${lDIRS_QCOW_MOUNT}${NC} directories from the firmware image."
-      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-      write_csv_log "Qemu QCOW filesystem extractor" "${lQCOW_PATH_}" "${lEXTRACTION_DIR_FINAL}" "${FILES_QCOW_MOUNT}" "${lDIRS_QCOW_MOUNT}" "NA"
+      mapfile -t lFILES_QCOW_ARR < <(find "${lEXTRACTION_DIR_FINAL}" -type f ! -name "*.raw")
+
+      print_output "[*] Extracted ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files from the firmware image."
+      print_output "[*] Populating backend data for ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files ... could take some time" "no_log"
+      for lBINARY in "${lFILES_QCOW_ARR[@]}"; do
+        binary_architecture_threader "${lBINARY}" "P23_qemu_qcow_mounter" &
+        local lTMP_PID="$!"
+        store_kill_pids "${lTMP_PID}"
+        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      done
+      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+      write_csv_log "Qemu QCOW filesystem extractor" "${lQCOW_PATH_}" "${lEXTRACTION_DIR_FINAL}" "${#lFILES_QCOW_ARR[@]}" "NA"
 
       print_output "[*] Unmounting ${ORANGE}${lTMP_QCOW_MOUNT}${NC} directory"
       umount "${lTMP_QCOW_MOUNT}"

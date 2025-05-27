@@ -1,0 +1,24 @@
+{
+   "identifier": "udhcp_client",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "info,\\ udhcp\\ client\\ \\(v[0-9](\\.[0-9]+)+?\\)\\ started"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "udhcp-client"
+   ],
+   "version_extraction": [
+      "sed -r 's/info,\\ udhcp\\ client\\ \\(v([0-9](\\.[0-9]+)+?)\\)\\ started.*/::udhcp-client:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

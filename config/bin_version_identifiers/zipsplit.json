@@ -1,0 +1,24 @@
+{
+   "identifier": "zipsplit",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "bsd-style"
+   ],
+   "grep_commands": [
+      "ZipSplit\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "info-zip"
+   ],
+   "product_names": [
+      "zip"
+   ],
+   "version_extraction": [
+      "sed -r 's/ZipSplit\\ ([0-9](\\.[0-9]+)+?)/:info-zip:zip:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

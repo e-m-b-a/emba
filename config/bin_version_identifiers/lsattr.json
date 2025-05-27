@@ -1,0 +1,24 @@
+{
+   "identifier": "lsattr",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "lsattr\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "lsattr"
+   ],
+   "version_extraction": [
+      "sed -r 's/lsattr\\ ([0-9](\\.[0-9]+)+?)\\ .*/::lsattr:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

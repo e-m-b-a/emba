@@ -1,0 +1,24 @@
+{
+   "identifier": "lrzsz",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "lrzsz.\\ [\\.rc0-9]+$"
+   ],
+   "vendor_names": [
+      "lrzsz_project"
+   ],
+   "product_names": [
+      "lrzsz"
+   ],
+   "version_extraction": [
+      "sed -r 's/lrzsz.\\ ([\\.rc0-9]+)$/:lrzsz_project:lrzsz:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

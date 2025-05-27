@@ -1,0 +1,58 @@
+{
+  "identifier": "mtd-utils",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "\\(mtd-utils\\)\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "mtdinfo\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "nanddump\\ [0-9](\\.[0-9]+)+?$",
+    "nanddump\\ \\$Revision:\\ [0-9](\\.[0-9]+)+?\\ \\$$",
+    "nandwrite\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubiattach\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubiblock\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubicrc32\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubidetach\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubiformat\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubimkvol\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubinfo\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubinize\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubirmvol\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubiupdatevol\\ [0-9]\\.[0-9]\\.[0-9]+$",
+    "ubiupdatevol\\ version\\ [0-9](\\.[0-9]+)+?\\ -\\ a\\ tool\\ to\\ write\\ data\\ to\\ UBI\\ volumes\\.$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "mtd-utils"
+  ],
+  "version_extraction": [
+    "sed -r 's/\\(mtd-utils\\)\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/mtdinfo\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/nanddump\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/nanddump\\ \\$Revision:\\ ([0-9](\\.[0-9]+)+?)\\ .*/::mtd-utils:\\1/'",
+    "sed -r 's/nandwrite\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubiattach\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubiblock\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubicrc32\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubidetach\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubiformat\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubimkvol\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubinfo\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubinize\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubirmvol\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubiupdatevol\\ ([0-9](\\.[0-9]+)+?)$/::mtd-utils:\\1/'",
+    "sed -r 's/ubiupdatevol\\ version\\ ([0-9](\\.[0-9]+)+?)\\ .*/::mtd-utils:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

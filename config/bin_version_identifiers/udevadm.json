@@ -1,0 +1,24 @@
+{
+   "identifier": "udevadm",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "^[0-9]{3}$"
+   ],
+   "vendor_names": [
+      "systemd_project"
+   ],
+   "product_names": [
+      "systemd"
+   ],
+   "version_extraction": [
+      "sed -r 's/([0-9]+)$/:systemd_project:systemd:\\1/'"
+   ],
+   "affected_paths": [
+      "udevadm"
+   ]
+}

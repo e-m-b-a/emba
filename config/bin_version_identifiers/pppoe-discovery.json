@@ -1,0 +1,24 @@
+{
+   "identifier": "pppoe-discovery",
+   "parsing_mode": [
+      "strict"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "strict_grep_commands": [
+      "Version\\ [0-9]\\.[0-9]+([a-z])?$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "pppoe-discovery"
+   ],
+   "version_extraction": [
+      "sed -r 's/Version\\ ([0-9](\\.[0-9]+)+?([a-z])?)$/::pppoe-discovery:\\1/'"
+   ],
+   "affected_paths": [
+      "pppoe-discovery"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "identifier": "Realtek_camera_tool",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "Welcome\\ to\\ Realtek\\ Camera\\ Tool\\.\\ Version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "realtek_camera_tool"
+   ],
+   "version_extraction": [
+      "sed -r 's/Welcome\\ to\\ Realtek\\ Camera\\ Tool\\.\\ Version\\ ([0-9](\\.[0-9]+)+?)/::realtek_camera_tool:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

@@ -9,6 +9,10 @@
 # Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
+if ! [ -f /dev/null ]; then
+  "${BUSYBOX}" mknod -m 666 /dev/null c 1 3
+fi
+
 # we should build a real and useful PATH ... currently it is just guessing
 export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -49,8 +53,6 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tEMBA_NVRAM: ${EMBA_NVRAM}"
       "${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
       "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
-      "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
-      "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
       "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
       "${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
       "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
@@ -69,6 +71,9 @@ if ("${EMBA_ETC}"); then
       # debugger bins - only started with EMBA_NC=true
       if [ "${EMBA_NC}" = "true" ]; then
         if [ "${BINARY_NAME}" = "netcat" ]; then
+          "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+          "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
+
           "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} debugging service ..."
           # we only start our netcat listener if we set EMBA_NC_STARTER on startup (see run.sh script)
           # otherwise we move on to the next binary starter
@@ -76,6 +81,9 @@ if ("${EMBA_ETC}"); then
           continue
         fi
         if [ "${_BINARY}" = "/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh" ]; then
+          "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+          "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
+
           "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}Telnetd - ${_BINARY}${NC} debugging service ..."
           ${_BINARY} &
           continue
@@ -87,11 +95,43 @@ if ("${EMBA_ETC}"); then
 
       # normal service startups
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
+        "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+        "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
+
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
+        # strip only the real binary including path:
+        _BINARY_TMP=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d ' ' -f1)
+        "${BUSYBOX}" ls -l "${_BINARY_TMP}"
       else
         "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${BINARY_NAME}${NC} already started ..."
+      fi
+
+      # ensure we flush all iptables rules regularly
+      # netgear TL-WR841HP_V2_151124
+      if "${BUSYBOX}" which iptables; then
+        if [ "$(iptables -L | "${BUSYBOX}" grep -c "^ACCEPT\|^DROP")" -gt 0 ]; then
+          "${BUSYBOX}" echo "[*] Flushing iptables ..."
+          iptables -L
+          iptables flush 2>/dev/null || true
+          iptables -F 2>/dev/null || true
+          iptables -P 2>/dev/null INPUT ACCEPT || true
+        fi
+      fi
+
+      # finally check if we have a configured IP address or something weird happened and we lost our ip configuration
+      # Do this only if we have some network_type configuration which means we are not in the network discovery mode
+      # None means we are in network discovery mode
+      ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
+      # /firmadyne/network_config_state is filled from modules/L10_system_emulation/network.sh
+      if [ "${ACTION}" != "None" ] && [ -f /firmadyne/network_config_state ]; then
+        # shellcheck disable=SC2016
+        IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+        if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
+          "${BUSYBOX}" echo -e "${ORANGE}[*] WARNING: Looks as we lost our network configuration -> reconfiguration starting now ...${NC}"
+          /firmadyne/network.sh
+        fi
       fi
     done < "/firmadyne/service"
   done

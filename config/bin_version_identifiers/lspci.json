@@ -1,0 +1,24 @@
+{
+   "identifier": "lspci",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "lspci\\ version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "pciutils"
+   ],
+   "version_extraction": [
+      "sed -r 's/lspci\\ version\\ ([0-9](\\.[0-9]+)+?)/::pciutils:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

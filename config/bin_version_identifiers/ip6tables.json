@@ -1,0 +1,24 @@
+{
+   "identifier": "ip6tables",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "ip6tables\\ v[1-9](\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "netfilter"
+   ],
+   "product_names": [
+      "iptables"
+   ],
+   "version_extraction": [
+      "sed -r 's/ip6tables\\ v([0-9](\\.[0-9]+)+?)$/:netfilter:iptables:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

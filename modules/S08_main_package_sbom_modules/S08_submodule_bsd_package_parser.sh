@@ -52,7 +52,7 @@ S08_submodule_bsd_package_parser() {
   local lPKG_MD5=""
 
   # mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
-  mapfile -t lPKG_ARCHIVES_ARR < <(grep "\.pkg;" "${P99_CSV_LOG}" | cut -d ';' -f1 || true)
+  mapfile -t lPKG_ARCHIVES_ARR < <(grep "\.pkg;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -172,7 +172,7 @@ S08_submodule_bsd_package_parser() {
       # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
       # final array with all hash values
       if ! build_sbom_json_hashes_arr "${lPKG_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
-        print_output "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS}" "no_log"
+        write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
         continue
       fi
 

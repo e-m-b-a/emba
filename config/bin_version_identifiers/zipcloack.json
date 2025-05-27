@@ -1,0 +1,24 @@
+{
+   "identifier": "zipcloack",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ZipCloak\\ [0-9](\\.[0-9]+)+?\\ "
+   ],
+   "vendor_names": [
+      "info-zip"
+   ],
+   "product_names": [
+      "zipcloak"
+   ],
+   "version_extraction": [
+      "sed -r 's/ZipCloak\\ ([0-9](\\.[0-9]+)+?)\\ /:info-zip:zipcloak:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

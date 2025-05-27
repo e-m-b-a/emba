@@ -295,7 +295,7 @@ update_box_modules() {
     lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${lBOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" || true)
     lSTARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
     lFINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
     lLAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
@@ -426,6 +426,9 @@ remove_status_bar() {
   fi
 
   sleep 1
+  if check_emba_ended; then
+    exit
+  fi
   local lRM_STR=""
   lLINE_POS="$(( lLINES - 6 ))"
   # lRM_STR="\e[""${lLINE_POS}"";1f\e[0J\e[;r\e[""${lLINE_POS}"";1f"

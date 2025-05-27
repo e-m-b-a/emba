@@ -1,0 +1,24 @@
+{
+   "identifier": "twonky",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "Twonky\\ Version\\ [0-9](\\.[0-9]+)+?"
+   ],
+   "vendor_names": [
+      "lynxtechnology"
+   ],
+   "product_names": [
+      "twonky_server"
+   ],
+   "version_extraction": [
+      "sed -r 's/Twonky\\ Version\\ ([0-9](\\.[0-9]+)+?).*/:lynxtechnology:twonky_server:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

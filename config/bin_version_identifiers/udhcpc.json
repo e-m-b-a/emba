@@ -1,0 +1,30 @@
+{
+  "identifier": "udhcpc",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "unknown"
+  ],
+  "grep_commands": [
+    "udhcpc\\ \\(v[0-9](\\.[0-9]+)+?(-pre)?\\)\\ started$",
+    "udhcpcd,\\ version\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "udhcpc"
+  ],
+  "version_extraction": [
+    "sed -r 's/udhcpc\\ \\(v([0-9](\\.[0-9]+)+?)(-pre)?\\)\\ .*/::udhcpc:\\1/'",
+    "sed -r 's/udhcpcd,\\ version\\ ([0-9](\\.[0-9]+)+?).*/::udhcpc:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

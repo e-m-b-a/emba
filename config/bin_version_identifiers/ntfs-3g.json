@@ -1,0 +1,30 @@
+{
+  "identifier": "ntfs-3g",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "^ntfs-3g\\ [0-9]+(\\.[0-9]+)+?\\ integrated\\ FUSE\\ 27$",
+    "ntfslabel\\ v[0-9](\\.[0-9]+)+?\\ "
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "ntfs-3g"
+  ],
+  "version_extraction": [
+    "sed -r 's/ntfs-3g\\ ([0-9]+(\\.[0-9]+)+?)\\ .*/::ntfs-3g:\\1/'",
+    "sed -r 's/ntfslabel\\ v([0-9]+(\\.[0-9]+)+?)\\ .*/::ntfs-3g:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

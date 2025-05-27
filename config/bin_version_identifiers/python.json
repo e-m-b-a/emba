@@ -1,0 +1,30 @@
+{
+  "identifier": "python",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "Python-2.0.1"
+  ],
+  "grep_commands": [
+    "^Python\\ [0-9](\\.[0-9]+)+?$",
+    "^Python\\ [0-9]\\.[0-9]+\\.[0-9]+\\ "
+  ],
+  "vendor_names": [
+    "python"
+  ],
+  "product_names": [
+    "python"
+  ],
+  "version_extraction": [
+    "sed -r 's/Python\\ ([0-9](\\.[0-9]+)+?)$/:python:python:\\1/'",
+    "sed -r 's/Python\\ ([0-9](\\.[0-9]+)+?)\\ .*/:python:python:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

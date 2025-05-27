@@ -1,0 +1,33 @@
+{
+  "identifier": "bzip2",
+  "parsing_mode": [
+    "multi_grep",
+    "normal"
+  ],
+  "licenses": [
+    "bzip2-1.0.6"
+  ],
+  "grep_commands": [
+    "'bzip2, and I would very much like to hear about it.  Please\"&&\"^[0-1]\\.[0-9]{1,2}(\\.[0-9]+)+?,\\ \"'",
+    "^bzip2,\\ a\\ block-sorting\\ file\\ compressor\\.\\ \\ Version\\ [0-9](\\.[0-9]+)+?,\\ ",
+    "bzip2recover\\ [0-9](\\.[0-9]+)+?:\\ extracts"
+  ],
+  "vendor_names": [
+    "bzip"
+  ],
+  "product_names": [
+    "bzip2"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?).*/:bzip:bzip2:\\1/'",
+    "sed -r 's/bzip2,\\ a\\ block-sorting\\ file\\ compressor\\.\\ \\ Version\\ ([0-9](\\.[0-9]+)+?),\\ .*/:bzip:bzip2:\\1/'",
+    "sed -r 's/bzip2recover\\ ([0-9](\\.[0-9]+)+?):\\ .*/:bzip:bzip2:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

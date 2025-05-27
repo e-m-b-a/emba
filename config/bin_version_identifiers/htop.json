@@ -1,0 +1,24 @@
+{
+   "identifier": "htop",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-only"
+   ],
+   "grep_commands": [
+      "^htop\\ [0-9](\\.[0-9]+)+?\\ -\\ \\(C\\)\\ 20[0-9]+-20[0-9]+\\ Hisham\\ Muhammad$"
+   ],
+   "vendor_names": [
+      "htop"
+   ],
+   "product_names": [
+      "htop"
+   ],
+   "version_extraction": [
+      "sed -r 's/htop\\ ([0-9](\\.[0-9]+)+?)\\ .*$/:htop:htop:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

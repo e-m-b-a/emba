@@ -34,7 +34,7 @@ S18_capa_checker() {
 
   local lBINARY=""
   local lWAIT_PIDS_S18=()
-  local lBINS_CHECKED_CNT=0
+  local lCAPA_RESULTS=0
 
   while read -r lBINARY; do
     # bypass the Linux kernel
@@ -63,11 +63,11 @@ S18_capa_checker() {
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S18+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_S18[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S18
     else
       capa_runner_fct "${lBINARY}"
     fi
-  done < <(grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f1 | sort -u || true)
+  done < <(grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S18[@]}"
 
@@ -75,12 +75,14 @@ S18_capa_checker() {
     local lBINS_AVAILABLE=0
     lBINS_AVAILABLE=$(grep -c "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" || true)
     print_ln
-    lBINS_CHECKED_CNT=$(wc -l "${TMP_DIR}"/s18_checked.tmp 2>/dev/null || true)
-    print_output "[*] Found ${ORANGE}${lBINS_CHECKED_CNT/\ *}${NC} capa results in ${ORANGE}${lBINS_AVAILABLE:-0}${NC} binaries"
+    if [[ "$(find "${LOG_PATH_MODULE}" -name "capa_*.log" | wc -l)" -gt 0 ]]; then
+      lCAPA_RESULTS=$(grep -c "Capa results for " "${LOG_PATH_MODULE}"/capa_*.log || true)
+    fi
+    print_output "[*] Found ${ORANGE}${lCAPA_RESULTS}${NC} capa results in ${ORANGE}${lBINS_AVAILABLE:-0}${NC} binaries"
     rm "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${lBINS_CHECKED_CNT/\ *}"
+  module_end_log "${FUNCNAME[0]}" "${lCAPA_RESULTS}"
 }
 
 capa_runner_fct() {
@@ -109,7 +111,9 @@ capa_runner_fct() {
 
   if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || [[ ! -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"
-    rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
+    if [[ -f  "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
+      rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
+    fi
     return
   fi
 
@@ -123,3 +127,4 @@ capa_runner_fct() {
     sed -i '/\ MBC Objective/a \[REF\] https://github.com/MBCProject/mbc-markdown' "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
   fi
 }
+

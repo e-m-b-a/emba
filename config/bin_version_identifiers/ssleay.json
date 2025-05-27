@@ -1,0 +1,24 @@
+{
+   "identifier": "ssleay",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "ssleay"
+   ],
+   "grep_commands": [
+      "part\\ of\\ SSLeay\\ [0-9]\\.[0-9]+\\.[0-9]+\\ [0-9]+-"
+   ],
+   "vendor_names": [
+      "ssleay"
+   ],
+   "product_names": [
+      "ssleay"
+   ],
+   "version_extraction": [
+      "sed -r 's/part\\ of\\ SSLeay\\ ([0-9](\\.[0-9]+)+?)\\ .*/:ssleay:ssleay:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

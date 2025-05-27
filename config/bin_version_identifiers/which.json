@@ -1,0 +1,24 @@
+{
+   "identifier": "which",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPL-2.0-or-later"
+   ],
+   "grep_commands": [
+      "^GNU\\ which\\ v[0-9]\\.[0-9]+.*"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "which"
+   ],
+   "version_extraction": [
+      "sed -r 's/GNU\\ which\\ v([0-9](\\.[0-9]+)+?).*/:gnu:which:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

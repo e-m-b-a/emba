@@ -1,0 +1,34 @@
+{
+  "identifier": "eglibc",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "LGPL-2.1-only"
+  ],
+  "grep_commands": [
+    "\\ \\(Debian\\ EGLIBC\\ [0-9](\\.[0-9]+)+?-[0-9]\\)\\ .*\\ [0-9]\\.[0-9]",
+    "\\(.*\\ EGLIBC\\ .*\\)\\ [0-9](\\.[0-9]+)+?$",
+    "\\(Debian\\ EGLIBC\\ [0-9](\\.[0-9]+)+?-[0-9]\\)\\ ([0-9](\\.[0-9]+)+?).*",
+    "\\(EGLIBC\\)\\ [0-9](\\.[0-9]+)+?$"
+  ],
+  "vendor_names": [
+    "NA"
+  ],
+  "product_names": [
+    "eglibc"
+  ],
+  "version_extraction": [
+    "sed -r 's/\\(.*\\ EGLIBC\\ .*\\)\\ ([0-9](\\.[0-9]+)+?)$/::eglibc:\\1/'",
+    "sed -r 's/\\(Debian\\ EGLIBC\\ [0-9](\\.[0-9]+)+?-[0-9]+.*\\)\\ ([0-9](\\.[0-9]+)+?)/::eglibc:\\2/",
+    "sed -r 's/\\(EGLIBC\\)\\ ([0-9](\\.[0-9]+)+?)$/::eglibc:\\1/'",
+    "sed -r 's/zdump\\ \\(Debian\\ EGLIBC\\ ([0-9](\\.[0-9]+)+?)-[0-9]\\)\\ )$/::eglibc:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

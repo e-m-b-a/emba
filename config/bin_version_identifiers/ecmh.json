@@ -1,0 +1,24 @@
+{
+   "identifier": "ecmh",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "BSD-3-Clause"
+   ],
+   "grep_commands": [
+      "Easy\\ Cast\\ du\\ Multi\\ Hub\\ \\(ecmh\\)\\ [0-9]+\\.[0-9]+\\.[0-9]+\\ by\\ Jeroen\\ Massar\\ <jeroen@unfix\\.org>"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ecmh"
+   ],
+   "version_extraction": [
+      "sed -r 's/Easy\\ Cast\\ du\\ Multi\\ Hub\\ \\(ecmh\\)\\ ([0-9]+(\\.[0-9]+)+?).*/::ecmh:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

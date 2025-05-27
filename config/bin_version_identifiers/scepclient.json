@@ -1,0 +1,24 @@
+{
+   "identifier": "scepclient",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^scepclient [0-9]\\.[0-9]$"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "scepclient"
+   ],
+   "version_extraction": [
+      "sed -r 's/scepclient\\ ([0-9](\\.[0-9]+)+?)$/::scepclient:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

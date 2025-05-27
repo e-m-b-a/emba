@@ -1,0 +1,24 @@
+{
+   "identifier": "ddnsd",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "ddnsd\\ version\\ [0-9]\\.[0-9]"
+   ],
+   "vendor_names": [
+      "NA"
+   ],
+   "product_names": [
+      "ddnsd"
+   ],
+   "version_extraction": [
+      "sed -r 's/ddnsd\\ version\\ ([0-9](\\.[0-9]+)+?).*/::ddnsd:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}
