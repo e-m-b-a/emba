@@ -1254,7 +1254,11 @@ identify_networking_emulation() {
   lKERNEL="vmlinux"
   lQEMU_ROOTFS="/dev/sda1"
   lQEMU_DISK="-drive if=ide,format=raw,file=${IMAGE}"
-  lQEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
+  # default network configuration with e1000 interface:
+  lQEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0"
+  lQEMU_NETWORK+=" -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1"
+  lQEMU_NETWORK+=" -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2"
+  lQEMU_NETWORK+=" -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
 
   if [[ "${lARCH_END}" == "mipsel" ]]; then
     lQEMU_BIN="qemu-system-${lARCH_END}"
@@ -1289,7 +1293,9 @@ identify_networking_emulation() {
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_ROOTFS="/dev/vda1"
     lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
   elif [[ "${lARCH_END}" == "arm64el"* ]]; then
     lKERNEL="Image"
     lQEMU_BIN="qemu-system-aarch64"
@@ -1299,7 +1305,9 @@ identify_networking_emulation() {
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_ROOTFS="/dev/vda1"
     lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
     lKERNEL="bzImage"
     # lKERNEL="vmlinux"
@@ -2352,7 +2360,6 @@ run_emulated_system() {
     lQEMU_ROOTFS="/dev/vda1"
     lNET_ID=0
     # newer kernels use virtio only
-    # lQEMU_NETWORK="-device virtio-net-device,netdev=net${lNET_ID} -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
     lQEMU_NETWORK=""
     lQEMU_NET_DEVICE="virtio-net-device"
   elif [[ "${ARCH}" == "NIOS2" ]]; then
@@ -2527,7 +2534,7 @@ check_online_stat() {
         write_link "${lNMAP_INIT_LOG}"
         print_ln
       fi
-      print_output "[*] Give the system another 61 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
+      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
       [[ "${lCNT}" -gt 10 ]] && break
