@@ -2098,7 +2098,7 @@ write_network_config_to_filesystem() {
           mkdir -p "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
         fi
         lFOUND_MISSING=$(find "${MNT_POINT}" -name "${lFILENAME_MISSING}" | head -1 || true)
-        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""/${lDIR_NAME_MISSING#/}"/"${lFOUND_MISSING}" ]]; then
+        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}" ]]; then
           print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}${NC}) ... trying to fix this now"
           cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}""/${lDIR_NAME_MISSING#/}"/ || true
         fi
