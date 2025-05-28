@@ -35,7 +35,7 @@ S26_kernel_vuln_verifier()
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
     print_output "[-] Missing directory for kernel sources ... exit module now"
-    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    module_end_log "${FUNCNAME[0]}" 0
     return
   fi
 
