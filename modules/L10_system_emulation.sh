@@ -511,15 +511,16 @@ main_emulation() {
   # here we set the global DEVICE which will be later used as local lDEVICE
 
   if [[ -f "${LOG_PATH_MODULE}"/firmadyne_init ]]; then
+    print_ln
     print_output "[*] Processing init files:"
     local lINIT_FILE=""
     while read -r lINIT_FILE; do
       # check the number of '/' in our possible init file
-      # if we are too deep (-gt 9) then we will skip this init entry
-      # usually this starts with the log directory:
-      # /logs/l10_system_emulation/
+      # if we are too deep (-gt 5) then we will skip this init entry
+      # usually this looks the following
+      # /bin/linuxrc
       local lINIT_DEPTH="${lINIT_FILE//[^\/]}"
-      if [[ "${#lINIT_DEPTH}" -gt 9 ]]; then
+      if [[ "${#lINIT_DEPTH}" -gt 5 ]]; then
         continue
       fi
       lINIT_FILES_ARR+=("${lINIT_FILE}")
@@ -850,7 +851,7 @@ main_emulation() {
       # sort it
       mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -t ';' -k 1,1r -k 5,5n)
       # make it unique
-      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u)
+      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | uniq)
 
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
