@@ -842,6 +842,10 @@ main_emulation() {
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
         lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
         lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
+        # currently we only support one interface on ARM based architectures:
+        # if [[ "${ARCH}" == "ARM"* ]]; then
+        #   lNETWORK_INTERFACE_CFG="eth0"
+        # fi
         lVLAN_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
         lCFG_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
@@ -1285,8 +1289,7 @@ identify_networking_emulation() {
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_ROOTFS="/dev/vda1"
     lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
-    # lQEMU_NETWORK="-device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4"
-    # lQEMU_PARAMS="-audiodev driver=none,id=none"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
   elif [[ "${lARCH_END}" == "arm64el"* ]]; then
     lKERNEL="Image"
     lQEMU_BIN="qemu-system-aarch64"
@@ -1296,6 +1299,7 @@ identify_networking_emulation() {
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_ROOTFS="/dev/vda1"
     lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
+    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
     lKERNEL="bzImage"
     # lKERNEL="vmlinux"
@@ -2053,25 +2057,29 @@ write_network_config_to_filesystem() {
       mapfile -t MISSING_FILES < <(printf "%s\n" "${MISSING_FILES[@]}" | sort -u)
 
       for lFILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
+        lFILE_PATH_MISSING="${lFILE_PATH_MISSING//[![:print:]]/}"
         print_output "[*] Checking for missing area ${ORANGE}${lFILE_PATH_MISSING}${NC} in filesystem ..."
         [[ "${lFILE_PATH_MISSING}" == *"firmadyne"* ]] && continue
         [[ "${lFILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${lFILE_PATH_MISSING}" == *"/sys/"* ]] && continue
         [[ "${lFILE_PATH_MISSING}" == *"/dev/"* ]] && continue
         [[ "${lFILE_PATH_MISSING}" == *"reboot"* ]] && continue
+        # ugly false positive cleanup
+        [[ "${lFILE_PATH_MISSING}" == *"EMBA_"* ]] && continue
 
         lFILENAME_MISSING=$(basename "${lFILE_PATH_MISSING}")
+        # ensure the found path is nothing with a '*' in it:
         [[ "${lFILENAME_MISSING}" =~ \* ]] && continue
         print_output "[*] Found missing area ${ORANGE}${lFILE_PATH_MISSING}${NC} in filesystem ... trying to fix this now"
         lDIR_NAME_MISSING=$(dirname "${lFILE_PATH_MISSING}")
-        if ! [[ -d "${MNT_POINT}""${lDIR_NAME_MISSING}" ]]; then
-          print_output "[*] Create missing directory ${ORANGE}${lDIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}""${lDIR_NAME_MISSING}" 2>/dev/null || true
+        if ! [[ -d "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" ]]; then
+          print_output "[*] Create missing directory ${ORANGE}/${lDIR_NAME_MISSING#/}${NC} in filesystem ... trying to fix this now"
+          mkdir -p "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
         fi
         lFOUND_MISSING=$(find "${MNT_POINT}" -name "${lFILENAME_MISSING}" | head -1 || true)
-        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""${lDIR_NAME_MISSING}"/"${lFOUND_MISSING}" ]]; then
-          print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}${lDIR_NAME_MISSING}/${lFOUND_MISSING}${NC}) ... trying to fix this now"
-          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}""${lDIR_NAME_MISSING}"/ || true
+        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""/${lDIR_NAME_MISSING#/}"/"${lFOUND_MISSING}" ]]; then
+          print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}${NC}) ... trying to fix this now"
+          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}""/${lDIR_NAME_MISSING#/}"/ || true
         fi
       done
     fi
@@ -2226,6 +2234,7 @@ run_emulated_system() {
   local lQEMU_NETWORK=""
   local lQEMU_ROOTFS=""
   local lCONSOLE="ttyS0"
+  local lQEMU_NET_DEVICE=""
 
   if [[ "${lARCH_END}" == "mipsel" ]]; then
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
@@ -2318,16 +2327,6 @@ run_emulated_system() {
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
-      if [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
-        if [[ -f "${BINARY_DIR}/Linux-Kernel-v4.1.17/bzImage.${lARCH_END}" ]]; then
-          # x86el kernel has issues in version 4.1.52 - need further investigation
-          print_output "[!] Bypassing known issues with kernel v${L10_KERNEL_V_LONG} - switching to v4.1.17"
-          lKERNEL="${BINARY_DIR}/Linux-Kernel-v4.1.17/bzImage.${lARCH_END}"
-        else
-          print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
-          return
-        fi
-      fi
     else
       print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
       return
@@ -2353,7 +2352,9 @@ run_emulated_system() {
     lQEMU_ROOTFS="/dev/vda1"
     lNET_ID=0
     # newer kernels use virtio only
-    lQEMU_NETWORK="-device virtio-net-device,netdev=net${lNET_ID} -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
+    # lQEMU_NETWORK="-device virtio-net-device,netdev=net${lNET_ID} -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
+    lQEMU_NETWORK=""
+    lQEMU_NET_DEVICE="virtio-net-device"
   elif [[ "${ARCH}" == "NIOS2" ]]; then
     lQEMU_PARAMS="-monitor none"
     lQEMU_NETWORK=""
@@ -2363,7 +2364,10 @@ run_emulated_system() {
     lQEMU_PARAMS=""
     lQEMU_ROOTFS="/dev/sda1"
     lQEMU_NETWORK=""
+    lQEMU_NET_DEVICE="e1000"
+  fi
 
+  if [[ "${ARCH}" == "MIPS" ]] || [[ "${lARCH_END}" == "x86el" ]] || [[ "${lARCH_END}" == "mips64"* ]] || [[ "${ARCH}" == "ARM"* ]]; then
     if [[ -n "${ETH_NUM}" ]]; then
       # if we found an eth interface we use this
       lNET_NUM="${ETH_NUM}"
@@ -2377,7 +2381,7 @@ run_emulated_system() {
 
     # 4 Interfaces -> 0-3
     for lNET_ID in {0..3}; do
-      lQEMU_NETWORK="${lQEMU_NETWORK} -device e1000,netdev=net${lNET_ID}"
+      lQEMU_NETWORK="${lQEMU_NETWORK} -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
       if [[ "${lNET_ID}" == "${lNET_NUM}" ]];then
         # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
@@ -2523,7 +2527,7 @@ check_online_stat() {
         write_link "${lNMAP_INIT_LOG}"
         print_ln
       fi
-      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
+      print_output "[*] Give the system another 61 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
       [[ "${lCNT}" -gt 10 ]] && break
