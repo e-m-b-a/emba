@@ -512,8 +512,19 @@ main_emulation() {
 
   if [[ -f "${LOG_PATH_MODULE}"/firmadyne_init ]]; then
     print_output "[*] Processing init files:"
-    tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/firmadyne_init
-    readarray -t lINIT_FILES_ARR < "${LOG_PATH_MODULE}"/firmadyne_init
+    local lINIT_FILE=""
+    while read -r lINIT_FILE; do
+      # check the number of '/' in our possible init file
+      # if we are too deep (-gt 9) then we will skip this init entry
+      # usually this starts with the log directory:
+      # /logs/l10_system_emulation/
+      local lINIT_DEPTH="${lINIT_FILE//[^\/]}"
+      if [[ "${#lINIT_DEPTH}" -gt 9 ]]; then
+        continue
+      fi
+      lINIT_FILES_ARR+=("${lINIT_FILE}")
+      echo "${lINIT_FILE}" | tee -a "${LOG_FILE}"
+    done < "${LOG_PATH_MODULE}"/firmadyne_init
   else
     print_output "[-] WARNING: init file not created! Processing backup dummy init"
     lINIT_FILES_ARR+=( "/dummy_init" )
@@ -836,16 +847,16 @@ main_emulation() {
       local lNW_ENTRY_PRIO=0
       local lIPS_INT_VLAN_TMP=()
 
-      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u -t ';' -k 1,1r -k 5,5n)
+      # sort it
+      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -t ';' -k 1,1r -k 5,5n)
+      # make it unique
+      mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -u)
+
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
         lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
         lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-        # currently we only support one interface on ARM based architectures:
-        # if [[ "${ARCH}" == "ARM"* ]]; then
-        #   lNETWORK_INTERFACE_CFG="eth0"
-        # fi
         lVLAN_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
         lCFG_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
@@ -854,6 +865,7 @@ main_emulation() {
         lIPS_INT_VLAN_TMP+=( "${lNW_ENTRY_PRIO}"\;"${lIP_CFG}"\;"${lINTERFACE_CFG}"\;"${lNETWORK_INTERFACE_CFG}"\;"${lVLAN_CFG}"\;"${lCFG_CFG}" )
         print_output "$(indent "$(orange "${lIP_CFG}"" - ""${lINTERFACE_CFG}"" - ""${lNETWORK_INTERFACE_CFG}"" - ""${lVLAN_CFG}"" - ""${lCFG_CFG}"" - ""${lNW_ENTRY_PRIO}")")"
       done
+      print_ln
 
       IPS_INT_VLAN=("${lIPS_INT_VLAN_TMP[@]}")
 

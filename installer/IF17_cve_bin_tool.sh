@@ -49,7 +49,7 @@ IF17_cve_bin_tool() {
         # we need a more up to date protobuf for the android extractor -> lets update it now
         pip_install "protobuf==5.*"
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
-        python3 external/cve-bin-tool/cve_bin_tool/cli.py --update now || true
+        python3 external/cve-bin-tool/cve_bin_tool/cli.py --update now -n json-mirror || true
         python3 external/cve-bin-tool/cve_bin_tool/cli.py --export external/cve-bin-tool/cve-database.db || true
         rm -r "${HOME}"/.cache/cve-bin-tool
         if ! [[ -f external/cve-bin-tool/cve-database.db ]]; then

@@ -20,6 +20,7 @@
 L25_web_checks() {
 
   export WEB_RESULTS=0
+  export CHROME_HEADLESS_BIN=""
 
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -34,6 +35,7 @@ L25_web_checks() {
           return
         fi
       fi
+      CHROME_HEADLESS_BIN=$(find "${EXT_DIR}/chrome-headless-shell/" -type f -executable -name chrome-headless-shell 2>/dev/null | head -1)
       main_web_check "${IP_ADDRESS_}"
     else
       print_output "[-] No IP address found ... skipping live system tests"
@@ -485,8 +487,7 @@ make_web_screenshot() {
 
   sub_module_title "Starting screenshot for ${ORANGE}${lIP_}:${lPORT_}${NC}"
 
-  # timeout --preserve-status --signal SIGINT 20 sudo -u linuxbrew xvfb-run --server-args="-screen 0, 1024x768x24" cutycapt --insecure --url="${lIP_}":"${lPORT_}" --out="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png || true
-  timeout --preserve-status --signal SIGINT 20 "${EXT_DIR}"/chrome-headless-shell/linux-136.0.7103.113/chrome-headless-shell-linux64/chrome-headless-shell --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lIP_}":"${lPORT_}"
+  timeout --preserve-status --signal SIGINT 20 "${CHROME_HEADLESS_BIN}" --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lIP_}":"${lPORT_}"
 
   if [[ -f "${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png ]]; then
     print_output "[*] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
