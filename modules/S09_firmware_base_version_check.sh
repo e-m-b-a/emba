@@ -715,7 +715,7 @@ generate_strings() {
     WAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
   fi
 
-  if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* || "${lBIN_FILE}" != *"Git pack"* ]]; then
+  if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* || "${lBIN_FILE}" == *"Git pack"* ]]; then
     return
   fi
 
