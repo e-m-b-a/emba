@@ -27,7 +27,7 @@ I120_cwe_checker() {
     print_tool_info "gcc" 1
     print_tool_info "curl" 1
     print_tool_info "make" 1
-    print_tool_info "openjdk-17-jdk" 1
+    print_tool_info "openjdk-21-jdk" 1
     # print_tool_info "rust-all" 1
     # print_tool_info "cargo" 1
 
