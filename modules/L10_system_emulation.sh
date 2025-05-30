@@ -1305,10 +1305,10 @@ identify_networking_emulation() {
     lQEMU_MACHINE="virt"
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_ROOTFS="/dev/vda1"
-    lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
+    lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev socket,listen=:2000,id=net0"
+    # lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2001,id=net1"
+    # lQEMU_NETWORK+=" -device virtio-net-device,netdev=net2 -netdev socket,listen=:2002,id=net2"
+    # lQEMU_NETWORK+=" -device virtio-net-device,netdev=net3 -netdev socket,listen=:2003,id=net3"
   elif [[ "${lARCH_END}" == "arm64el"* ]]; then
     lKERNEL="Image"
     lQEMU_BIN="qemu-system-aarch64"
@@ -1317,10 +1317,10 @@ identify_networking_emulation() {
     # lCONSOLE="ttyAMA0"
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_ROOTFS="/dev/vda1"
-    lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2"
-    lQEMU_NETWORK+=" -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3"
+    lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev socket,listen=:2000,id=net0"
+    # lQEMU_NETWORK+=" -device virtio-net-device,netdev=net1 -netdev socket,listen=:2001,id=net1"
+    # lQEMU_NETWORK+=" -device virtio-net-device,netdev=net2 -netdev socket,listen=:2002,id=net2"
+    # lQEMU_NETWORK+=" -device virtio-net-device,netdev=net3 -netdev socket,listen=:2003,id=net3"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
     lKERNEL="bzImage"
     # lKERNEL="vmlinux"
@@ -2371,19 +2371,16 @@ run_emulated_system() {
     lQEMU_DISK="-drive if=none,file=${IMAGE},format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     lQEMU_PARAMS="-audiodev driver=none,id=none"
     lQEMU_ROOTFS="/dev/vda1"
-    lNET_ID=0
     # newer kernels use virtio only
-    lQEMU_NETWORK=""
     lQEMU_NET_DEVICE="virtio-net-device"
   elif [[ "${ARCH}" == "NIOS2" ]]; then
     lQEMU_PARAMS="-monitor none"
-    lQEMU_NETWORK=""
     lQEMU_DISK="-drive file=${IMAGE},format=raw"
+    lQEMU_NET_DEVICE="virtio-net-device"
   elif [[ "${ARCH}" == "MIPS" ]] || [[ "${lARCH_END}" == "x86el" ]] || [[ "${lARCH_END}" == "mips64"* ]]; then
     lQEMU_DISK="-drive if=ide,format=raw,file=${IMAGE}"
     lQEMU_PARAMS=""
     lQEMU_ROOTFS="/dev/sda1"
-    lQEMU_NETWORK=""
     lQEMU_NET_DEVICE="e1000"
   fi
 
@@ -2401,15 +2398,18 @@ run_emulated_system() {
 
     # 4 Interfaces -> 0-3
     for lNET_ID in {0..3}; do
-      lQEMU_NETWORK="${lQEMU_NETWORK} -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
       if [[ "${lNET_ID}" == "${lNET_NUM}" ]];then
         # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
-        lQEMU_NETWORK="${lQEMU_NETWORK} -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
+        lQEMU_NETWORK+=" -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
+        lQEMU_NETWORK+=" -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
       else
-        print_output "[*] Create socket placeholder interface: ${ORANGE}${lNET_ID}${NC}"
-        # place a socket connection placeholder:
-        lQEMU_NETWORK="${lQEMU_NETWORK} -netdev socket,id=net${lNET_ID},listen=:200${lNET_ID}"
+        if [[ "${ARCH}" != "ARM"* ]]; then
+          print_output "[*] Create socket placeholder interface: ${ORANGE}${lNET_ID}${NC}"
+          # place a socket connection placeholder:
+          lQEMU_NETWORK+=" -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
+          lQEMU_NETWORK+=" -netdev socket,id=net${lNET_ID},listen=:200${lNET_ID}"
+        fi
       fi
     done
   fi
