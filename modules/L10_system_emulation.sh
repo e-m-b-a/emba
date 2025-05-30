@@ -2548,7 +2548,7 @@ check_online_stat() {
       print_output "[-] Probably the IP address of the system has changed."
     fi
     print_ln
-    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
+    nmap -Pn -n -A -sSV --host-timeout 2m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
 
     local lCNT=0
     while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -le 2 ]]; do
@@ -2561,7 +2561,7 @@ check_online_stat() {
       fi
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
-      nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
+      nmap -Pn -n -A -sSV --host-timeout 2m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
       [[ "${lCNT}" -gt 10 ]] && break
       lCNT=$((lCNT+1))
     done
@@ -2654,7 +2654,7 @@ check_online_stat() {
         print_output "[*] Nmap portscan for detected services (${ORANGE}${lPORTS_TO_SCAN}${NC}) started during system init on ${ORANGE}${lIP_ADDRESS}${NC}"
         write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
         print_ln
-        nmap -Pn -n -sSUV --host-timeout 30m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+        nmap -Pn -n -sSUV --host-timeout 5m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
       fi
     fi
   fi

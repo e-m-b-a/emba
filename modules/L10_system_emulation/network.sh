@@ -11,9 +11,14 @@
 
 BUSYBOX=/firmadyne/busybox
 
-# just in case we have already strated our initial service configuration
-if "${BUSYBOX}" grep -q "network config started" /firmadyne/EMBA_config_state 2>/dev/null; then
-  exit
+# if we have not parameter we are going to check this the usual way
+# if we have a first parameter we skipt this check as we recall this network
+# script from run_service script and it looks as we have lost our configuration
+if [ "${1}" -ne 1 ]; then
+  # just in case we have already strated our initial service configuration
+  if "${BUSYBOX}" grep -q "network config started" /firmadyne/EMBA_config_state 2>/dev/null; then
+    exit
+  fi
 fi
 
 ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
