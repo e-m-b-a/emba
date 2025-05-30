@@ -11,6 +11,11 @@
 
 BUSYBOX=/firmadyne/busybox
 
+# just in case we have already strated our initial service configuration
+if "${BUSYBOX}" grep -q "network config started" /firmadyne/EMBA_config_state 2>/dev/null; then
+  exit
+fi
+
 ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
 IP_LOOP="127.0.0.1"
 
@@ -18,6 +23,7 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "\n[*] Network configuration - ACTION: ${ORANGE}${ACTION}${NC}"
+"${BUSYBOX}" echo "network config started" >> /firmadyne/EMBA_config_state
 
 if ("${EMBA_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
@@ -134,5 +140,5 @@ if ("${EMBA_NET}"); then
 
   "${BUSYBOX}" echo "[*] Current network configuration:"
   "${BUSYBOX}" ifconfig -a
-  "${BUSYBOX}" echo "network config done" > /firmadyne/network_config_state
+  "${BUSYBOX}" echo "network config finished" >> /firmadyne/EMBA_config_state
 fi

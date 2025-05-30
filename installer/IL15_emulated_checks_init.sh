@@ -64,7 +64,7 @@ IL15_emulated_checks_init() {
 
     # chromium headless shell
     print_tool_info "libnss3"
-    print_tool_info "libatk1.0-0"
+    print_tool_info "libatk1.0-0t64"
     print_tool_info "libatk-bridge2.0-dev"
     print_tool_info "libxkbcommon0"
     print_tool_info "libxdamage1"

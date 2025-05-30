@@ -380,8 +380,8 @@ get_cve_busybox_data_threader() {
   local lFIRST_EPSS=""
   local lCVE_SUMMARY=""
 
-  lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f5)
-  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f7)
+  lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f4)
+  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f6)
   lFIRST_EPSS="$(get_epss_data "${lCVE_ID}")"
   lFIRST_EPSS="${lFIRST_EPSS/\;*}"
   lCVE_SUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)

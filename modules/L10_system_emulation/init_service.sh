@@ -10,6 +10,11 @@
 
 BUSYBOX=/firmadyne/busybox
 
+# just in case we have already started our initial service configuration
+if "${BUSYBOX}" grep -q "init service config started" /firmadyne/EMBA_config_state 2>/dev/null; then
+  exit
+fi
+
 # we should build a real and useful PATH ... currently it is just guessing
 export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -18,6 +23,8 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] Starting initial services in emulated environment...${NC}"
+"${BUSYBOX}" echo "init service config started" >> /firmadyne/EMBA_config_state
+
 "${BUSYBOX}" cat /firmadyne/startup_service
 
 if ("${EMBA_ETC}"); then

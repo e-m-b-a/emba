@@ -2108,11 +2108,11 @@ write_network_config_to_filesystem() {
     # as we have the filesytem mounted right before the final run we can link libnvram now
     link_libnvram_so "${MNT_POINT}" "dbg"
 
-    # if we have a /firmadyne/network_config_state from a previous emulation run we need to remove it
+    # if we have a /firmadyne/EMBA_config_state from a previous emulation run we need to remove it
     # before the next emulation testrun
     # This file is an indiator that the initial network config was done and we can start checking
     # the network config during emulation
-    rm "${MNT_POINT}"/firmadyne/network_config_state 2>/dev/null || true
+    rm "${MNT_POINT}"/firmadyne/EMBA_config_state 2>/dev/null || true
 
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
@@ -2396,14 +2396,20 @@ run_emulated_system() {
       lNET_NUM=0
     fi
 
-    # 4 Interfaces -> 0-3
-    for lNET_ID in {0..3}; do
+    # 6 Interfaces -> 0-5
+    for lNET_ID in {0..5}; do
       if [[ "${lNET_ID}" == "${lNET_NUM}" ]];then
         # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
         lQEMU_NETWORK+=" -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
         lQEMU_NETWORK+=" -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
       else
+        # only 0-3 are handled via placeholder interfaces
+        if [[ "${lNET_ID}" -gt 3 ]]; then
+          continue
+        fi
+        # on ARM we have currently only one interface and we need to connect this to the host
+        # This means we do not place placeholder interfaces for ARM architecture
         if [[ "${ARCH}" != "ARM"* ]]; then
           print_output "[*] Create socket placeholder interface: ${ORANGE}${lNET_ID}${NC}"
           # place a socket connection placeholder:
@@ -2412,6 +2418,12 @@ run_emulated_system() {
         fi
       fi
     done
+  fi
+
+  if [[ -z "${lQEMU_NETWORK}" ]]; then
+    print_output "[!] No network interface config created ... stop further emulation"
+    print_output "[-] No firmware emulation ${ORANGE}${ARCH}${NC} / ${ORANGE}${lIMAGE_NAME}${NC} possible"
+    return
   fi
 
   # dirty workaround to fill the KERNEL which is used later on
