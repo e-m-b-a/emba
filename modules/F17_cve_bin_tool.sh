@@ -329,7 +329,7 @@ cve_bin_tool_threader() {
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
     print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
     while read -r lCVE_LINE; do
-      print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
+      # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
