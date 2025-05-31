@@ -10,10 +10,16 @@
 
 BUSYBOX=/firmadyne/busybox
 
+# just in case we have already started our initial system configuration
+if "${BUSYBOX}" grep -q "preInit started" /firmadyne/EMBA_config_state 2>/dev/null; then
+  exit
+fi
+
 ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script starting ...${NC}"
+"${BUSYBOX}" echo "preInit started" >> /firmadyne/EMBA_config_state
 
 print_keepalive() {
   while(true); do
