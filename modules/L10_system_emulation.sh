@@ -545,6 +545,9 @@ main_emulation() {
   local lINIT_FILE=""
 
   for lINIT_FILE in "${lINIT_FILES_ARR[@]}"; do
+    #if [[ "${lINIT_FILE}" != *"/etc/rc.common" ]]; then
+    #  continue
+    #fi
     lINIT_FNAME=$(basename "${lINIT_FILE}")
     # this is the main init entry - we modify it later for special cases:
     export KINIT="init=/firmadyne/preInit.sh"
@@ -972,39 +975,6 @@ emulation_with_config() {
 
   if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
     mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
-    # if we have created our qemu log file and TCP is not ok we check for additional IP addresses and
-    # rerun the emulation if a different IP address was found
-
-    if [[ "${TCP}" != "ok" ]]; then
-      local lTEMP_RUN_IPs_ARR=()
-      local lTMP_IP=""
-      # lets check if the system has configured some different IP address then expected
-      # we use the output of ipconfig from the qemu logs for this check
-      # first: generate an array with the possible ip addresses (remove already local addresses like 127.0.0.)
-      mapfile -t lTEMP_RUN_IPs_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" \
-        "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | \
-        grep -v "127.0.0." | grep -v "${IP_ADDRESS_}" | cut -d ':' -f2 | sort -u || true)
-      for lTMP_IP in "${lTEMP_RUN_IPs_ARR[@]}"; do
-        # check every detected ip address against our real system ip address
-        # if we have some other ip address detected we move on:
-        if [[ "${lTMP_IP}" != "${IP_ADDRESS_}" ]]; then
-          # check every ip address for our used interfaces (ethX/brX)
-          # if we find a typical used interface with the changed IP address we will check it again
-          if (grep -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
-            print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${MAGENTA} to address ${ORANGE}${lTMP_IP}${NC}"
-            # we restart the emulation with the identified IP address for a maximum of one time
-            if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
-              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
-              lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
-              IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
-              emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
-            else
-              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed but ${ORANGE}not executed${NC}"
-            fi
-          fi
-        fi
-      done
-    fi
   fi
 
   if [[ "${SYS_ONLINE}" -eq 1 ]]; then
@@ -1043,6 +1013,43 @@ emulation_with_config() {
   fi
   if ! [[ -f "${LOG_PATH_MODULE}/qemu.final.serial_${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}.log" ]]; then
     print_output "[!] Warning: No Qemu log file generated for ${ORANGE}${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}${NC}"
+  fi
+
+  # if we have created our qemu log file and TCP is not ok we check for additional IP addresses and
+  # rerun the emulation if a different IP address was found
+  if [[ -f "${LOG_PATH_MODULE}/qemu.final.serial_${IMAGE_NAME}-${lIPS_INT_VLAN_CFG//\;/-}-${lINIT_FNAME}.log" ]]; then
+    local lTEMP_RUN_IPs_ARR=()
+    local lTMP_IP=""
+    # lets check if the system has configured some different IP address then expected
+    # we use the output of ipconfig from the qemu logs for this check
+    # first: generate an array with the possible ip addresses (remove already local addresses like 127.0.0.)
+    mapfile -t lTEMP_RUN_IPs_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" \
+      "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | \
+      grep -v "127.0.0." | grep -v "${IP_ADDRESS_}" | cut -d ':' -f2 | sort -u || true)
+    for lTMP_IP in "${lTEMP_RUN_IPs_ARR[@]}"; do
+      # check every detected ip address against our real system ip address
+      # if we have some other ip address detected we move on:
+      if [[ "${lTMP_IP}" != "${IP_ADDRESS_}" ]]; then
+        # check every ip address for our used interfaces (ethX/brX)
+        # if we find a typical used interface with the changed IP address we will check it again
+        if (grep -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
+          print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${MAGENTA} to address ${ORANGE}${lTMP_IP}${NC}"
+          # we restart the emulation with the identified IP address for a maximum of one time
+          if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
+            if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
+              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
+              lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
+              IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
+              emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
+            else
+              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed but ${ORANGE}not executed${NC}"
+            fi
+          else
+            print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} could be performed but ${ORANGE}network services already available${NC}"
+          fi
+        fi
+      fi
+    done
   fi
 }
 
@@ -2561,7 +2568,7 @@ check_online_stat() {
       fi
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
-      nmap -Pn -n -A -sSV --host-timeout 2m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
+      nmap -Pn -n -A -sSV --host-timeout 2m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
       [[ "${lCNT}" -gt 10 ]] && break
       lCNT=$((lCNT+1))
     done
