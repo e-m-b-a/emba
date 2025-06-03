@@ -49,10 +49,20 @@ IF17_cve_bin_tool() {
         # we need a more up to date protobuf for the android extractor -> lets update it now
         pip_install "protobuf==5.*"
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
+        # if a cve-datbase file is available in the config directory
+        # we start our container building with importing this cve-database
+        # if no db is available we skip this step and update it
+        if [[ -f /installer/cve-database.db ]]; then
+          echo "[*] Importing CVE database from /installer/cve-database.db"
+          python3 external/cve-bin-tool/cve_bin_tool/cli.py --import /installer/cve-database.db || true
+        fi
+        echo "[*] Updating CVE database"
         python3 external/cve-bin-tool/cve_bin_tool/cli.py --update now -n json-mirror || true
-        python3 external/cve-bin-tool/cve_bin_tool/cli.py --export external/cve-bin-tool/cve-database.db || true
+        echo "[*] Exporting CVE database"
+        python3 external/cve-bin-tool/cve_bin_tool/cli.py --export /installer/cve-database.db || true
         rm -r "${HOME}"/.cache/cve-bin-tool
-        if ! [[ -f external/cve-bin-tool/cve-database.db ]]; then
+
+        if ! [[ -f /installer/cve-database.db ]]; then
           echo "ERROR: Could not build cve-bin-tool database"
           exit 1
         fi

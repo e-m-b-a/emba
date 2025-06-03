@@ -3,7 +3,7 @@ FROM kalilinux/kali-rolling
 
 COPY ./installer.sh /
 COPY ["./installer", "./helpers/helpers_emba_load_strict_settings.sh", "/installer/"]
-
+COPY ./config/cve-database.db /installer/
 
 WORKDIR /
 

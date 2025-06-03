@@ -545,9 +545,6 @@ main_emulation() {
   local lINIT_FILE=""
 
   for lINIT_FILE in "${lINIT_FILES_ARR[@]}"; do
-    # if [[ "${lINIT_FILE}" != *"/etc/rc.common" ]]; then
-    #  continue
-    # fi
     lINIT_FNAME=$(basename "${lINIT_FILE}")
     # this is the main init entry - we modify it later for special cases:
     export KINIT="init=/firmadyne/preInit.sh"
