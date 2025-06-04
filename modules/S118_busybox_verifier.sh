@@ -236,7 +236,7 @@ busybox_vuln_testing_threader() {
   local lBB_VERSION="${4:-}"
 
   # print_output "[*] VULN: ${VULN}"
-  CVE=$(echo "${VULN}" | cut -d, -f5)
+  CVE=$(echo "${VULN}" | cut -d, -f4)
   local LOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${CVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
