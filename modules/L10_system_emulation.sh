@@ -929,7 +929,7 @@ emulation_with_config() {
   check_online_stat "${lIPS_INT_VLAN_CFG}" "${IMAGE_NAME}" &
   local lCHECK_ONLINE_STAT_PID="$!"
 
-  print_keepalive &
+  print_keepalive "${LOG_PATH_MODULE}/qemu.final.serial.log" "${IMAGE_NAME}" &
   local lALIVE_PID="$!"
   disown "${lALIVE_PID}" 2> /dev/null || true
 
@@ -1347,11 +1347,8 @@ identify_networking_emulation() {
 
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
-  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.initial.serial.log" &
-  local lKPANIC_PID="$!"
-  disown "${lKPANIC_PID}" 2> /dev/null || true
 
-  print_keepalive &
+  print_keepalive "${LOG_PATH_MODULE}/qemu.initial.serial.log" "${lIMAGE_NAME}" &
   local lALIVE_PID="$!"
   disown "${lALIVE_PID}" 2> /dev/null || true
 
@@ -1366,36 +1363,38 @@ identify_networking_emulation() {
   if ! [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
     print_output "[-] No ${ORANGE}${LOG_PATH_MODULE}/qemu.initial.serial.log${NC} log file generated."
   fi
-  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
-    kill -9 "${lKPANIC_PID}" >/dev/null || true
-  fi
 }
 
 print_keepalive() {
+  # needed for run_kpanic_identification which we are calling from the keepalive printer
+  local lLOG_FILE="${1:-}"
+  local lIMAGE_NAME="${2:-}"
+
   while(true); do
     print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
+    run_kpanic_identification "${lLOG_FILE}" "${lIMAGE_NAME}"
     sleep 5
   done
 }
 
 run_kpanic_identification() {
   local lLOG_FILE="${1:-}"
+  local lIMAGE_NAME="${2:-}"
   # this function identifies kernel panics and stops the further process to save time
   # and not to run 600 secs of network identification a kernel panic
   local lCOUNTER=0
   local lKPANIC=0
   # wait until we have a log file
-  sleep 5
-  while [[ "${lCOUNTER}" -lt 6 ]]; do
-    lKPANIC=$(tail -n 50 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
-    if [[ "${lKPANIC}" -gt 0 ]]; then
-      print_output "[*] Kernel Panic detected - stopping emulation"
-      pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
-      break
-    fi
-    sleep 5
-    ((lCOUNTER+=1))
-  done
+  if ! [[ -f "${lLOG_FILE}" ]]; then
+    return
+  fi
+  lKPANIC=$(tail -n 50 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
+  if [[ "${lKPANIC}" -gt 0 ]]; then
+    print_output "[*] Kernel Panic detected - stopping emulation"
+    pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
+    stopping_emulation_process "${lIMAGE_NAME}"
+    return
+  fi
 }
 
 #  run_network_id_emulation "${lCONSOLE}" "${lCPU}" "${lKERNEL}" "${lQEMU_BIN}" "${lQEMU_MACHINE}" "${lQEMU_DISK}" "${lQEMU_PARAMS}" "${lQEMU_NETWORK}" "${lQEMU_ROOTFS}" "${lIMAGE_NAME}" &
@@ -2491,8 +2490,6 @@ check_online_stat() {
   local lSYS_ONLINE=0
   local lTCP_SERV_NETSTAT_ARR=()
   local lUDP_SERV_NETSTAT_ARR=()
-
-  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.final.serial.log" &
 
   # wait 20 secs after boot before starting pinging
   sleep 20

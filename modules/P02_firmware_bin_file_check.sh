@@ -171,7 +171,7 @@ fw_bin_detector() {
     lDJI_PRAK_ENC_CHECK=$(grep -c "PRAK\|RREK\|IAEK\|PUEK" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
     lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
     # we are running binwalk on the file to analyze the output afterwards:
-    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${LOG_PATH_MODULE}"/p02_binwalk_output.txt
+    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true
     if [[ -f "${LOG_PATH_MODULE}"/p02_binwalk_output.txt ]]; then
       lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     else
