@@ -1382,7 +1382,7 @@ run_kpanic_identification() {
   local lIMAGE_NAME="${2:-}"
   # this function identifies kernel panics and stops the further process to save time
   # and not to run 600 secs of network identification a kernel panic
-  local lCOUNTER=0
+  # local lCOUNTER=0
   local lKPANIC=0
   # wait until we have a log file
   if ! [[ -f "${lLOG_FILE}" ]]; then
