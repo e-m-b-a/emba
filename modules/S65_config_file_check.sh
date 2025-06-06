@@ -53,18 +53,16 @@ scan_config()
   fi
 }
 
-check_fstab()
-{
+check_fstab() {
   sub_module_title "Scan fstab"
   local lFSTAB_ARR=()
   local lFSTAB_FILE=""
 
-  # IFS=" " read -r -a lFSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
   mapfile -t lFSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
   if [[ ${#lFSTAB_ARR[@]} -gt 0 ]] ; then
-    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "username" "%" 2>/dev/null' || true)")
-    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "password" "%" 2>/dev/null' || true)")
+    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "username" "%"' 2>/dev/null || true)")
+    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "password" "%"' 2>/dev/null || true)")
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then

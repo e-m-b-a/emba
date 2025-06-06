@@ -320,10 +320,7 @@ cve_bin_tool_threader() {
   fi
 
   python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
-  # benchmark no metric:
-  # real    398.48s
-  # with metric
-  # real    1363.45s
+
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
     rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
   fi
@@ -332,6 +329,7 @@ cve_bin_tool_threader() {
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
     print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
     while read -r lCVE_LINE; do
+      # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -427,15 +425,16 @@ tear_down_cve_threader() {
   # echo "lCVE_LINE: ${lCVE_LINE}"
   local lBOM_REF="${lCVE_DATA_ARR[*]:0:1}"
   local lORIG_SOURCE="${lCVE_DATA_ARR[*]:1:1}"
+
   # local lBIN_VENDOR="${lCVE_DATA_ARR[*]:2:1}"
   local lBIN_NAME="${lCVE_DATA_ARR[*]:3:1}"
   local lBIN_VERS="${lCVE_DATA_ARR[*]:4:1}"
-  local lCVE_ID="${lCVE_DATA_ARR[*]:6:1}"
-  local lCVSS_SEVERITY="${lCVE_DATA_ARR[*]:7:1}"
-  local lCVSS_SCORE="${lCVE_DATA_ARR[*]:8:1}"
-  local lVULN_SOURCE="${lCVE_DATA_ARR[*]:9:1}"
-  local lCVSS_VERS="${lCVE_DATA_ARR[*]:10:1}"
-  local lCVSS_VECTOR="${lCVE_DATA_ARR[*]:11:1}"
+  local lCVE_ID="${lCVE_DATA_ARR[*]:5:1}"
+  local lCVSS_SEVERITY="${lCVE_DATA_ARR[*]:6:1}"
+  local lCVSS_SCORE="${lCVE_DATA_ARR[*]:7:1}"
+  local lVULN_SOURCE="${lCVE_DATA_ARR[*]:8:1}"
+  local lCVSS_VERS="${lCVE_DATA_ARR[*]:9:1}"
+  local lCVSS_VECTOR="${lCVE_DATA_ARR[*]:10:1}"
 
   # if we find a blacklist file we check if the current CVE value is in the blacklist
   # if we find it this CVE is not further processed
