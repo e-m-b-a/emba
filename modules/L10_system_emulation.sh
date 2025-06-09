@@ -1348,6 +1348,10 @@ identify_networking_emulation() {
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
 
+  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.initial.serial.log" &
+  local lKPANIC_PID="$!"
+  disown "${lKPANIC_PID}" 2> /dev/null || true
+
   print_keepalive "${LOG_PATH_MODULE}/qemu.initial.serial.log" "${lIMAGE_NAME}" &
   local lALIVE_PID="$!"
   disown "${lALIVE_PID}" 2> /dev/null || true
@@ -1363,6 +1367,9 @@ identify_networking_emulation() {
   if ! [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
     print_output "[-] No ${ORANGE}${LOG_PATH_MODULE}/qemu.initial.serial.log${NC} log file generated."
   fi
+  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
+    kill -9 "${lKPANIC_PID}" >/dev/null || true
+  fi
 }
 
 print_keepalive() {
@@ -1372,29 +1379,28 @@ print_keepalive() {
 
   while(true); do
     print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
-    run_kpanic_identification "${lLOG_FILE}" "${lIMAGE_NAME}"
     sleep 5
   done
 }
 
 run_kpanic_identification() {
   local lLOG_FILE="${1:-}"
-  local lIMAGE_NAME="${2:-}"
   # this function identifies kernel panics and stops the further process to save time
   # and not to run 600 secs of network identification a kernel panic
-  # local lCOUNTER=0
+  local lCOUNTER=0
   local lKPANIC=0
   # wait until we have a log file
-  if ! [[ -f "${lLOG_FILE}" ]]; then
-    return
-  fi
-  lKPANIC=$(tail -n 50 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
-  if [[ "${lKPANIC}" -gt 0 ]]; then
-    print_output "[*] Kernel Panic detected - stopping emulation"
-    pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
-    stopping_emulation_process "${lIMAGE_NAME}"
-    return
-  fi
+  sleep 5
+  while [[ "${lCOUNTER}" -lt 6 ]]; do
+    lKPANIC=$(tail -n 50 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
+    if [[ "${lKPANIC}" -gt 0 ]]; then
+      print_output "[*] Kernel Panic detected - stopping emulation"
+      pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
+      break
+    fi
+    sleep 5
+    ((lCOUNTER+=1))
+  done
 }
 
 #  run_network_id_emulation "${lCONSOLE}" "${lCPU}" "${lKERNEL}" "${lQEMU_BIN}" "${lQEMU_MACHINE}" "${lQEMU_DISK}" "${lQEMU_PARAMS}" "${lQEMU_NETWORK}" "${lQEMU_ROOTFS}" "${lIMAGE_NAME}" &
@@ -2491,6 +2497,10 @@ check_online_stat() {
   local lTCP_SERV_NETSTAT_ARR=()
   local lUDP_SERV_NETSTAT_ARR=()
 
+  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.final.serial.log" &
+  local lKPANIC_PID="$!"
+  disown "${lKPANIC_PID}" 2> /dev/null || true
+
   # wait 20 secs after boot before starting pinging
   sleep 20
 
@@ -2549,25 +2559,26 @@ check_online_stat() {
       print_output "[-] Probably the IP address of the system has changed."
     fi
     print_ln
-    nmap -Pn -n -A -sSV --host-timeout 2m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
-
     local lCNT=0
-    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -le 2 ]]; do
-      if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -gt 0 ]]; then
-        local lNMAP_INIT_LOG="${ARCHIVE_PATH}"/"${lNMAP_LOG/\.txt/\.${RANDOM}\.init}"
-        cp "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${lNMAP_INIT_LOG}"
+    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" || true
+    tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}"
+
+    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}")" -le 2 ]]; do
+      if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
         print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
-        write_link "${lNMAP_INIT_LOG}"
+        write_link "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}"
         print_ln
       fi
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
-      nmap -Pn -n -A -sSV --host-timeout 2m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
-      [[ "${lCNT}" -gt 10 ]] && break
       lCNT=$((lCNT+1))
+      # we store our Nmap logs in dedicated files (${lCNT}_nmap_log_file):
+      nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" || true
+      # ensure we have the last results also in our main Nmap log file:
+      # cp "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
+      tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}"
+      [[ "${lCNT}" -gt 10 ]] && break
     done
-
-    tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
 
     mapfile -t lTCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t lUDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
@@ -2591,26 +2602,26 @@ check_online_stat() {
         printf -v lTCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
         # # replace \n and ' ' with ,
         lTCP_SERV_STARTUP=${lTCP_SERV//+([$'\n'\ ])/,}
-        print_output "[*] TCP Services detected via startup: ${ORANGE}${lTCP_SERV_STARTUP}${NC}"
+        [[ "${lTCP_SERV_STARTUP}" != "," ]] && print_output "[*] TCP Services detected via startup: ${ORANGE}${lTCP_SERV_STARTUP}${NC}"
       fi
       # rewrite our array into a nice string for printing it
       if [[ "${#UDP_SERVICES_STARTUP[@]}" -gt 0 ]]; then
         printf -v lUDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
         lUDP_SERV_STARTUP=${lUDP_SERV//+([$'\n'\ ])/,}
-        print_output "[*] UDP Services detected via startup: ${ORANGE}${lUDP_SERV_STARTUP}${NC}"
+        [[ "${lUDP_SERV_STARTUP}" != "," ]] && print_output "[*] UDP Services detected via startup: ${ORANGE}${lUDP_SERV_STARTUP}${NC}"
       fi
 
       # rewrite our array into a nice string for printing it
       if [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
         printf -v lTCP_SERV "%s " "${lTCP_SERV_NETSTAT_ARR[@]}"
         lTCP_SERV_NETSTAT=${lTCP_SERV//+([$'\n'\ ])/,}
-        print_output "[*] TCP Services detected via netstat: ${ORANGE}${lTCP_SERV_NETSTAT}${NC}"
+        [[ "${lTCP_SERV_NETSTAT}" != "," ]] && print_output "[*] TCP Services detected via netstat: ${ORANGE}${lTCP_SERV_NETSTAT}${NC}"
       fi
       # rewrite our array into a nice string for printing it
       if [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
         printf -v lUDP_SERV "%s " "${lUDP_SERV_NETSTAT_ARR[@]}"
         lUDP_SERV_NETSTAT=${lUDP_SERV//+([$'\n'\ ])/,}
-        print_output "[*] UDP Services detected via netstat: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
+        [[ "${lUDP_SERV_NETSTAT}" != "," ]] && print_output "[*] UDP Services detected via netstat: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
       fi
       print_ln
 
@@ -2653,9 +2664,10 @@ check_online_stat() {
       if [[ "${lTCP_SERV}" =~ ^T:[0-9].* ]] || [[ "${lUDP_SERV}" =~ ^U:[0-9].* ]]; then
         print_ln
         print_output "[*] Nmap portscan for detected services (${ORANGE}${lPORTS_TO_SCAN}${NC}) started during system init on ${ORANGE}${lIP_ADDRESS}${NC}"
+        # link is for the next Nmap results:
         write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
         print_ln
-        nmap -Pn -n -sSUV --host-timeout 5m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+        nmap -Pn -n -sSUV --host-timeout 10m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
       fi
     fi
   fi
@@ -2666,6 +2678,10 @@ check_online_stat() {
   color_qemu_log "${LOG_PATH_MODULE}/qemu.final.serial.log"
 
   pkill -9 -f "tail -F ${LOG_PATH_MODULE}/qemu.final.serial.log" || true &>/dev/null
+
+  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
+    kill -9 "${lKPANIC_PID}" >/dev/null || true
+  fi
 }
 
 stopping_emulation_process() {
