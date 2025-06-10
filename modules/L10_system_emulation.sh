@@ -2560,23 +2560,23 @@ check_online_stat() {
     fi
     print_ln
     local lCNT=0
-    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" || true
-    tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}"
+    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
+    tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
 
-    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}")" -le 2 ]]; do
-      if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
+    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -le 2 ]]; do
+      if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
         print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
-        write_link "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}"
+        write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
         print_ln
       fi
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - CNT: ${lCNT}.\n" "no_log"
       sleep 60
       lCNT=$((lCNT+1))
       # we store our Nmap logs in dedicated files (${lCNT}_nmap_log_file):
-      nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" || true
+      nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
       # ensure we have the last results also in our main Nmap log file:
       # cp "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
-      tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}"
+      tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
       [[ "${lCNT}" -gt 10 ]] && break
     done
 
@@ -2665,9 +2665,9 @@ check_online_stat() {
         print_ln
         print_output "[*] Nmap portscan for detected services (${ORANGE}${lPORTS_TO_SCAN}${NC}) started during system init on ${ORANGE}${lIP_ADDRESS}${NC}"
         # link is for the next Nmap results:
-        write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
+        write_link "${ARCHIVE_PATH}/${lNMAP_LOG}"
         print_ln
-        nmap -Pn -n -sSUV --host-timeout 10m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+        nmap -Pn -n -sSUV --host-timeout 10m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}/nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lNMAP_LOG}" "${LOG_FILE}" || true
       fi
     fi
   fi
