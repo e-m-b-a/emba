@@ -169,13 +169,11 @@ unblobber() {
   local lUNBLOB_BIN="unblob"
   local lTIMEOUT="300m"
 
-  # unblob should be checked in the dependency checker
-
   if [[ "${DIFF_MODE}" -ne 1 ]]; then
     sub_module_title "Analyze binary firmware $(basename "${lFIRMWARE_PATH}") with unblob"
   fi
 
-  print_output "[*] Extracting firmware ${ORANGE}$(basename "${lFIRMWARE_PATH}")${NC} to directory ${ORANGE}${lOUTPUT_DIR_UNBLOB}${NC}"
+  print_output "[*] Extracting binary blob ${ORANGE}$(basename "${lFIRMWARE_PATH}")${NC} to directory ${ORANGE}${lOUTPUT_DIR_UNBLOB}${NC}"
 
   if ! [[ -d "${lOUTPUT_DIR_UNBLOB}" ]]; then
     mkdir -p "${lOUTPUT_DIR_UNBLOB}"
