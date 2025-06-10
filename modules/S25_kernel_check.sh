@@ -164,7 +164,7 @@ populate_karrays() {
       for lV in "${KV_C_ARR[@]}" ; do
         lKERNEL_VERSION_ARR+=( "${lV}" )
       done
-    done < <(cut -d ";" -f1 "${S24_CSV_LOG}" | tail -n +2)
+    done < <(cut -d ";" -f2 "${S24_CSV_LOG}")
   fi
 
   # unique our results
