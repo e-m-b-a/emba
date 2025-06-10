@@ -2667,7 +2667,7 @@ check_online_stat() {
         # link is for the next Nmap results:
         write_link "${ARCHIVE_PATH}/${lNMAP_LOG}"
         print_ln
-        nmap -Pn -n -sSUV --host-timeout 10m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}/nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lNMAP_LOG}" "${LOG_FILE}" || true
+        nmap -Pn -n -sSUV --host-timeout 30m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}/nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lNMAP_LOG}" "${LOG_FILE}" || true
       fi
     fi
   fi
