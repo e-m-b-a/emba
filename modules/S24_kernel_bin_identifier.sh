@@ -114,7 +114,7 @@ binary_kernel_check_threader() {
 
     if [[ -n "${lVERSION_IDENTIFIED}" ]]; then
       print_ln
-      print_output "[+] Possible Linux Kernel found: ${ORANGE}${lFILE_PATH}${NC}"
+      print_output "[+] Possible Linux Kernel found: ${ORANGE}${lFILE_PATH} / ${lVERSION_IDENTIFIED}${NC}"
       print_ln
       print_output "$(indent "$(orange "${lVERSION_IDENTIFIED}")")"
       print_ln
