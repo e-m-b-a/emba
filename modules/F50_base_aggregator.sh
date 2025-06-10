@@ -646,6 +646,7 @@ binary_fct_output() {
 output_cve_exploits() {
   local lDATA_GENERATED=0
   local lBINARY=""
+  local lBIN_VERS=""
 
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 ]]; then
     if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 ]] && [[ -f "${F17_LOG_DIR}/vuln_summary.txt" ]]; then
@@ -655,8 +656,9 @@ output_cve_exploits() {
       # run over F17/vuln_summary.txt and add links - need to do this here and not in f17 as there the threading mode kicks us
       while read -r OVERVIEW_LINE; do
         lBINARY="$(echo "${OVERVIEW_LINE}" | cut -d: -f2 | tr -d '[:blank:]')"
+        lBIN_VERS="$(echo "${OVERVIEW_LINE}" | cut -d: -f3 | tr -d '[:blank:]')"
         print_output "${OVERVIEW_LINE}"
-        write_link "f17#cve_${lBINARY}"
+        write_link "f17#cve_${lBINARY}_${lBIN_VERS}"
       done < "${F17_LOG_DIR}/vuln_summary.txt"
       print_ln
     fi

@@ -275,10 +275,10 @@ sbom_preprocessing_threader() {
 
   lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
   local lANCHOR=""
-  lANCHOR="${lPRODUCT_ARR[0]}_${lPRODUCT_VERSION}"
+  lANCHOR="${lPRODUCT_ARR[0]//\'}_${lPRODUCT_VERSION}"
   lANCHOR="cve_${lANCHOR:0:20}"
 
-  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[*]//(\'\\n)}${NC} - vendor ${ORANGE}${lVENDOR_ARR[*]//(\'\\n)}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
+  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[*]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[*]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 
   echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 }
@@ -347,7 +347,7 @@ cve_bin_tool_threader() {
   write_log "" "${lBIN_LOG}"
 
   local lANCHOR=""
-  lANCHOR="${lPRODUCT_NAME}_${lVERS}"
+  lANCHOR="${lPRODUCT_NAME//\'}_${lVERS}"
   lANCHOR="cve_${lANCHOR:0:20}"
   write_log "[*] Vulnerability details for ${ORANGE}${lPRODUCT_NAME}${NC} / version ${ORANGE}${lVERS}${NC} / source ${ORANGE}${lORIG_SOURCE}${NC}:" "${lBIN_LOG}"
   write_anchor "${lANCHOR}" "${lBIN_LOG}"
