@@ -21,11 +21,12 @@
 # vulnerabilities which we identified based on the kernel version
 kernel_downloader() {
   local lKERNEL_ARCH_PATH="${EXT_DIR}"/linux_kernel_sources/
-  local lOUTPUTTER_TEXT=""
+  local LOG_PATH_MODULE="${LOG_DIR}/s24_kernel_bin_identifier"
+  local LOG_FILE="${LOG_PATH_MODULE}/kernel_downloader.log"
 
-  if [[ "${NO_UPDATE_CHECK:-0}" -eq 1 ]]; then
-    return
-  fi
+  #if [[ "${NO_UPDATE_CHECK:-0}" -eq 1 ]]; then
+  #  return
+  #fi
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
     mkdir "${lKERNEL_ARCH_PATH}"
@@ -47,25 +48,24 @@ kernel_downloader() {
     done
   fi
 
-  if ! [[ -d "${LOG_DIR}/s24_kernel_bin_identifier" ]]; then
-    mkdir "${LOG_DIR}/s24_kernel_bin_identifier"
+  if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
+    mkdir "${LOG_PATH_MODULE}"
   fi
   # now we should have a csv log with a kernel version:
   if ! [[ -f "${S24_CSV_LOG}" ]]; then
-    lOUTPUTTER_TEXT="[-] $(print_date) - No Kernel version identified ..."
-    print_output "${lOUTPUTTER_TEXT}" "no_log"
-    write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+    print_output "[-] $(print_date) - No Kernel version identified ... exit kernel downloader process"
     return
   fi
+  print_output "[*] Kernel downloader running ..."
   local lK_VERSIONS_ARR=()
   local lK_VERSION=""
 
-  mapfile -t lK_VERSIONS_ARR < <(cut -d\; -f2 "${S24_CSV_LOG}" | tail -n +2 | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
+  mapfile -t lK_VERSIONS_ARR < <(cut -d\; -f2 "${S24_CSV_LOG}" | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
+  print_output "[*] Detected kernel details:"
+  cat "${S24_CSV_LOG}" >> "${LOG_FILE}"
 
   for lK_VERSION in "${lK_VERSIONS_ARR[@]}"; do
-    lOUTPUTTER_TEXT="[*] $(print_date) - Checking download of kernel version ${ORANGE}${lK_VERSION}${NC}"
-    print_output "${lOUTPUTTER_TEXT}" "no_log"
-    write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+    print_output "[*] $(print_date) - Checking download of kernel version ${ORANGE}${lK_VERSION}${NC}"
     local lK_VER_DOWNLOAD=""
     local lK_VER_1st=""
     local lK_VER_2nd=""
@@ -92,9 +92,7 @@ kernel_downloader() {
 
     # we check if the sources archive is already available and is a valid tgz file:
     if ! [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]] || ! gunzip -t "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION}.tar.gz" > /dev/null; then
-      lOUTPUTTER_TEXT="[*] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC}"
-      print_output "${lOUTPUTTER_TEXT}" "no_log"
-      write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+      print_output "[*] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC}"
 
       if ! [[ -d "${TMP_DIR}" ]]; then
         mkdir "${TMP_DIR}"
@@ -106,16 +104,14 @@ kernel_downloader() {
       enable_strict_mode "${STRICT_MODE}" 0
 
       if [[ -f "${TMP_DIR}"/wget.log ]]; then
-        tee -a "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log" < "${TMP_DIR}"/wget.log || true
+        tee -a "${LOG_FILE}" < "${TMP_DIR}"/wget.log || true
         rm "${TMP_DIR}"/wget.log
       fi
       # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
       # checks for the file "${TMP_DIR}"/linux_download_failed. If this file is available it stops waiting for the kernel
       # sources
       if [[ ${lD_RETURN} -ne 0 ]] ; then
-        lOUTPUTTER_TEXT="[-] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC} failed"
-        print_output "${lOUTPUTTER_TEXT}" "no_log"
-        write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+        print_output "[-] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC} failed"
 
         echo "failed" > "${TMP_DIR}"/linux_download_failed
         if [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]]; then
@@ -123,25 +119,17 @@ kernel_downloader() {
         fi
       fi
     else
-      lOUTPUTTER_TEXT="[*] $(print_date) - Kernel sources of version ${ORANGE}${lK_VERSION}${NC} already available"
-      print_output "${lOUTPUTTER_TEXT}" "no_log"
-      write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+      print_output "[*] $(print_date) - Kernel sources of version ${ORANGE}${lK_VERSION}${NC} already available"
     fi
 
     if ! [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]]; then
-      lOUTPUTTER_TEXT="[-] $(print_date) - Kernel sources not available ..."
-      print_output "${lOUTPUTTER_TEXT}" "no_log"
-      write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+      print_output "[-] $(print_date) - Kernel sources not available ..."
       continue
     fi
     if ! file "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz | grep -q "gzip compressed data"; then
-      lOUTPUTTER_TEXT="[-] $(print_date) - Kernel sources not available ..."
-      print_output "${lOUTPUTTER_TEXT}" "no_log"
-      write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+      print_output "[-] $(print_date) - Kernel sources not available ..."
       continue
     fi
-    lOUTPUTTER_TEXT="[*] $(print_date) - Kernel source for version ${ORANGE}${lK_VERSION}${NC} stored in ${ORANGE}${lKERNEL_ARCH_PATH}${NC}"
-    print_output "${lOUTPUTTER_TEXT}" "no_log"
-    write_log "${lOUTPUTTER_TEXT}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
+    print_output "[*] $(print_date) - Kernel source for version ${ORANGE}${lK_VERSION}${NC} stored in ${ORANGE}${lKERNEL_ARCH_PATH}${NC}"
   done
 }
