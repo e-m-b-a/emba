@@ -155,7 +155,7 @@ binary_kernel_check_threader() {
               print_ln
               print_output "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}"
               export CONFIDENCE_LEVEL=4
-              if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+              if version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
                 # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
                 # continue 2
                 return
@@ -172,7 +172,7 @@ binary_kernel_check_threader() {
       # if we have not elf file created and logged we now log the original kernel
       # in case we have an elf file lFILE_PATH was already included in the SBOM
       if [[ ! -f "${lFILE_PATH}".elf ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
-        if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+        if version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
           # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
           # continue 2
           return

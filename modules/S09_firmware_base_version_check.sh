@@ -265,7 +265,7 @@ S09_identifier_threadings() {
   if [[ -f "${S09_CSV_LOG}" ]]; then
     # this should prevent double checking - if a version identifier was already successful we do not need to
     # test the other identifiers. In threaded mode this usually does not decrease testing speed.
-    if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f2 | grep -c "^${lRULE_IDENTIFIER}$")" -gt 0 ]]; then
+    if [[ "$(tail -n +2 "${S09_CSV_LOG}" | cut -d\; -f4 | grep -c "^${lRULE_IDENTIFIER}$")" -gt 0 ]]; then
       print_output "[*] Already identified component for identifier ${lRULE_IDENTIFIER} ... skipping further tests" "no_log"
       # continue
       return
@@ -312,7 +312,7 @@ S09_identifier_threadings() {
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${lAPP_NAME} ${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - strict${GREEN})."
-            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+            if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
               # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
               continue 2
             fi
@@ -346,7 +346,7 @@ S09_identifier_threadings() {
         lVERSION_IDENTIFIED="${lVERSION_IDENTIFIED//[![:print:]]/}"
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - zgrep${GREEN})."
-          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+          if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
             continue 2
           fi
         fi
@@ -384,7 +384,7 @@ S09_identifier_threadings() {
             # this is a little hack to get the original firmware look like a typical EMBA P99 entry
             lBIN_FILE_DETAILS=$(file -b "${FIRMWARE_PATH_BAK}")
             lBINARY_ENTRY="S09_tmp_entry_for_RTOS_detection;${FIRMWARE_PATH_BAK};3;4;5;6;7;${lBIN_FILE_DETAILS};${lMD5_SUM}"
-            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+            if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
               # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
               break
             fi
@@ -414,14 +414,16 @@ S09_identifier_threadings() {
 }
 
 version_parsing_logging() {
-  local lVERSION_IDENTIFIED="${1:-}"
-  local lBINARY_ENTRY="${2:-}"
-  local lRULE_IDENTIFIER="${3:-}"
-  local -n lrVENDOR_NAME_ARR_ref="${4:-}"
-  local -n lrPRODUCT_NAME_ARR_ref="${5:-}"
-  local -n lrLICENSES_ARR_ref="${6:-}"
+  local lCSV_TO_LOG="${1:-}"
+  local lSRC_MODULE="${2:-}"
+  local lVERSION_IDENTIFIED="${3:-}"
+  local lBINARY_ENTRY="${4:-}"
+  local lRULE_IDENTIFIER="${5:-}"
+  local -n lrVENDOR_NAME_ARR_ref="${6:-}"
+  local -n lrPRODUCT_NAME_ARR_ref="${7:-}"
+  local -n lrLICENSES_ARR_ref="${8:-}"
   # shellcheck disable=SC2034
-  local -n lrCSV_REGEX_ARR_ref="${7:-}"
+  local -n lrCSV_REGEX_ARR_ref="${9:-}"
 
   local lMD5_SUM=""
   local lBINARY_PATH="NA"
@@ -458,7 +460,7 @@ version_parsing_logging() {
     fi
     print_output "[*] Parsing CSV_RULE: ${lCSV_RULE} - lAPP_MAINT: ${lAPP_MAINT} - lAPP_NAME: ${lAPP_NAME} - lAPP_VERS: ${lAPP_VERS}" "no_log"
 
-    write_csv_log "${lBINARY_PATH}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lrLICENSES_ARR_ref[*]}" "${TYPE}"
+    write_csv_log_to_path "${lCSV_TO_LOG}" "${lSRC_MODULE}" "${lBINARY_PATH}" "${lRULE_IDENTIFIER}" "${lAPP_NAME}" "${lVERSION_IDENTIFIED}" "${lCSV_RULE}" "${lrLICENSES_ARR_ref[*]}" "${TYPE}"
     check_for_s08_csv_log "${S08_CSV_LOG}"
 
     if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
@@ -836,7 +838,7 @@ bin_string_checker() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
 
-            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
+            if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
               # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
               continue 2
             fi
@@ -859,7 +861,7 @@ bin_string_checker() {
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in file ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
 
-            if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
+            if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
               # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
               continue 2
             fi
@@ -879,7 +881,7 @@ bin_string_checker() {
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static${GREEN})."
 
-          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
+          if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lrVENDOR_NAME_ARR" "lrPRODUCT_NAME_ARR" "lrLICENSES_ARR" "lrCSV_REGEX_ARR"; then
             # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
             continue 2
           fi

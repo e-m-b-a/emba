@@ -121,7 +121,7 @@ lighttpd_binary_analysis() {
 
           export CONFIDENCE_LEVEL=3
 
-          if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+          if version_parsing_logging "${S09_CSV_LOG}" "S36_lighttpd" "${lVERSION_IDENTIFIED}" "${lBINARY_DATA}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
             # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
             continue 2
           fi
