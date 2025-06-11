@@ -9,6 +9,12 @@
 # Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
+
+# just in case we have already started our initial system configuration
+if "${BUSYBOX}" grep -q "run_service started" /firmadyne/EMBA_config_state 2>/dev/null; then
+  exit
+fi
+
 if ! [ -f /dev/null ]; then
   "${BUSYBOX}" mknod -m 666 /dev/null c 1 3
 fi
@@ -21,6 +27,7 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] Starting services in emulated environment...${NC}"
+"${BUSYBOX}" echo "run_service started" >> /firmadyne/EMBA_config_state
 "${BUSYBOX}" cat /firmadyne/service
 
 if ("${EMBA_ETC}"); then
@@ -124,13 +131,13 @@ if ("${EMBA_ETC}"); then
       # Do this only if we have some network_type configuration which means we are not in the network discovery mode
       # None means we are in network discovery mode
       ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
-      # /firmadyne/network_config_state is filled from modules/L10_system_emulation/network.sh
-      if [ "${ACTION}" != "None" ] && [ -f /firmadyne/network_config_state ]; then
+      # /firmadyne/EMBA_config_state is filled from modules/L10_system_emulation/network.sh
+      if [ "${ACTION}" != "None" ] && ("${BUSYBOX}" grep -q "network config finished" /firmadyne/EMBA_config_state); then
         # shellcheck disable=SC2016
         IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
         if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
           "${BUSYBOX}" echo -e "${ORANGE}[*] WARNING: Looks as we lost our network configuration -> reconfiguration starting now ...${NC}"
-          /firmadyne/network.sh
+          /firmadyne/network.sh 1
         fi
       fi
     done < "/firmadyne/service"

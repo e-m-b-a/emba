@@ -20,6 +20,7 @@
 L25_web_checks() {
 
   export WEB_RESULTS=0
+  export CHROME_HEADLESS_BIN=""
 
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -34,6 +35,7 @@ L25_web_checks() {
           return
         fi
       fi
+      CHROME_HEADLESS_BIN=$(find "${EXT_DIR}/chrome-headless-shell/" -type f -executable -name chrome-headless-shell 2>/dev/null | head -1)
       main_web_check "${IP_ADDRESS_}"
     else
       print_output "[-] No IP address found ... skipping live system tests"
@@ -71,7 +73,7 @@ main_web_check() {
         lSSL=1
         if system_online_check "${lIP_ADDRESS_}"; then
           # we make a screenshot for every web server
-          make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}"
+          make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "https"
         else
           print_output "[-] System not responding - No screenshot possible"
         fi
@@ -112,10 +114,9 @@ main_web_check() {
           print_output "[-] System not responding - No basic auth check possible"
         fi
 
-
         if system_online_check "${lIP_ADDRESS_}" ; then
           # we make a screenshot for every web server
-          make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}"
+          make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "http"
         else
           print_output "[-] System not responding - No screenshot possible"
         fi
@@ -482,14 +483,15 @@ web_access_crawler() {
 make_web_screenshot() {
   local lIP_="${1:-}"
   local lPORT_="${2:-}"
+  # http or https for our url:
+  local lSSL="${3:-}"
 
   sub_module_title "Starting screenshot for ${ORANGE}${lIP_}:${lPORT_}${NC}"
 
-  # Todo: Download not fully working
-  timeout --preserve-status --signal SIGINT 20 sudo -u linuxbrew xvfb-run --server-args="-screen 0, 1024x768x24" cutycapt --insecure --url="${lIP_}":"${lPORT_}" --out="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png || true
+  timeout --preserve-status --signal SIGINT 20 "${CHROME_HEADLESS_BIN}" --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lSSL}://${lIP_}:${lPORT_}" 2>/dev/null
 
   if [[ -f "${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png ]]; then
-    print_output "[*] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
+    print_output "[+] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
     write_link "${LOG_PATH_MODULE}/screenshot_${lIP_}_${lPORT_}.png"
     WEB_RESULTS=1
   else

@@ -66,7 +66,6 @@ check_live_nmap_basic() {
 
   # find all Nmap results
   mapfile -t lNMAP_RESULT_FILES_ARR < <(find "${LOG_PATH_MODULE}" -name "*.nmap")
-  write_csv_log "---" "service identifier" "version_detected" "csv_rule" "license" "static/emulation/nmap/nikto"
 
   if [[ -v lNMAP_RESULT_FILES_ARR[@] ]]; then
     for lNMAP_RESULTF in "${lNMAP_RESULT_FILES_ARR[@]}"; do
@@ -117,7 +116,6 @@ check_live_nmap_basic() {
         fi
         if [[ "${lNMAP_CPE}" =~ :.*[0-9].* ]]; then
           print_output "[*] CPE details detected: ${ORANGE}${lNMAP_CPE}${NC}"
-          write_csv_log "---" "NA" "NA" "${lNMAP_CPE}" "NA" "${lTYPE}"
         fi
       done
     done
@@ -234,7 +232,7 @@ l15_version_detector_threader() {
       print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${GREEN} in emulated service ${ORANGE}${lSERVICE}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${lTYPE}${GREEN})."
       export TYPE="${lTYPE}"
       export PACKAGING_SYSTEM="system_emulation"
-      if version_parsing_logging "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+      if version_parsing_logging "${S09_CSV_LOG}" "L15_emulated_checks_nmap" "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
         # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next service -> return"
         return
       fi

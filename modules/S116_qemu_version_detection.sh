@@ -62,8 +62,6 @@ S116_qemu_version_detection() {
       local lVERSION_JSON_CFG=""
       mapfile -t lVERSION_IDENTIFIER_CFG_ARR < <(find "${lVERSION_IDENTIFIER_CFG_PATH}" -name "*.json")
 
-      write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
-
       for lVERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
         if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
           # this should prevent double checking - if a version identifier was already successful we do not need to
@@ -145,7 +143,7 @@ version_detection_thread() {
             fi
             if [[ -n "${lBINARY_ENTRY}" ]]; then
               print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_ENTRY}"
-              if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+              if version_parsing_logging "${S09_CSV_LOG}" "S116_qemu_version_detection" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
                 # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
                 continue
               fi
@@ -177,7 +175,7 @@ version_detection_thread() {
             fi
             if [[ -n "${lBINARY_ENTRY}" ]]; then
               print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_MATCH}"
-              if version_parsing_logging "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+              if version_parsing_logging "${S09_CSV_LOG}" "S116_qemu_version_detection" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
                 # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
                 continue
               fi

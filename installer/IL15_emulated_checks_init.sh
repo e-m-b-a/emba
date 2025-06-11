@@ -38,10 +38,10 @@ IL15_emulated_checks_init() {
     print_tool_info "python3-pip" 1
     # mini UPnP client
     print_tool_info "miniupnpc" 1
-    print_tool_info "cutycapt" 1
+    # print_tool_info "cutycapt" 1
 
     # needed for cutycapt
-    print_tool_info "xvfb" 1
+    # print_tool_info "xvfb" 1
     # print_tool_info "libqt5webkit5" 1
     # print_tool_info "xfonts-100dpi" 1
     # print_tool_info "xfonts-75dpi" 1
@@ -62,6 +62,15 @@ IL15_emulated_checks_init() {
     print_pip_info "upnpclient"
     print_pip_info "beautifulsoup4"
 
+    # chromium headless shell
+    print_tool_info "libnss3"
+    print_tool_info "libatk1.0-0t64"
+    print_tool_info "libatk-bridge2.0-dev"
+    print_tool_info "libxkbcommon0"
+    print_tool_info "libxdamage1"
+    print_tool_info "libasound2t64"
+    print_tool_info "npm"
+
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
@@ -81,6 +90,11 @@ IL15_emulated_checks_init() {
       if ! [[ -d external/nikto ]]; then
         git clone https://github.com/sullo/nikto.git external/nikto
       fi
+
+      # chrome-headless-shell
+      cd ./external || ( echo "Could not install EMBA component chrome-headless-shell" && exit 1 )
+      npx -y @puppeteer/browsers install chrome-headless-shell@stable
+      cd "${HOME_PATH}" || ( echo "Could not install EMBA component chrome-headless-shell@stable" && exit 1 )
 
       # EMBAbite fuzzer used this:
       # pip_install "upnpclient"

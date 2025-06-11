@@ -35,7 +35,7 @@ S26_kernel_vuln_verifier()
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
     print_output "[-] Missing directory for kernel sources ... exit module now"
-    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    module_end_log "${FUNCNAME[0]}" 0
     return
   fi
 
@@ -46,9 +46,9 @@ S26_kernel_vuln_verifier()
 
   # now we should have a csv log with a kernel version:
   # shellcheck disable=SC2153
-  if ! [[ -f "${S24_CSV_LOG}" ]] || [[ "$(wc -l "${S24_CSV_LOG}" | awk '{print $1}')" -lt 2 ]]; then
+  if ! [[ -f "${S24_CSV_LOG}" ]] || [[ "$(wc -l "${S24_CSV_LOG}" | awk '{print $1}')" -lt 1 ]]; then
     print_output "[-] No Kernel version file (s24 results) identified ..."
-    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+    module_end_log "${FUNCNAME[0]}" 0
     return
   fi
 
@@ -71,14 +71,15 @@ S26_kernel_vuln_verifier()
     local lK_FOUND=0
     print_output "[+] Identified kernel version: ${ORANGE}${lK_VERSION}${NC}"
 
-    mapfile -t lKERNEL_ELF_EMBA_ARR < <(grep "${lK_VERSION}" "${S24_CSV_LOG}" | cut -d\; -f4-7 | \
+    mapfile -t lKERNEL_ELF_EMBA_ARR < <(grep "${lK_VERSION}" "${S24_CSV_LOG}" | \
       grep -v "config extracted" | sort -u | sort -r -n -t\; -k4 || true)
 
     # we check for a kernel configuration
     for lKERNEL_DATA in "${lKERNEL_ELF_EMBA_ARR[@]}"; do
-      if [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f3)" == "/"* ]]; then
-        # field 3 is the kernel config file
-        KERNEL_CONFIG_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f3)
+      # print_output "[*] KERNEL_DATA: ${lKERNEL_DATA}" "no_log"
+      if [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f5)" == "/"* ]]; then
+        # field 5 is the kernel config file
+        KERNEL_CONFIG_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f5)
         print_output "[+] Found kernel configuration file: ${ORANGE}${KERNEL_CONFIG_PATH}${NC}"
         # we use the first entry with a kernel config detected
         if [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f1)" == "/"* ]]; then
@@ -200,11 +201,6 @@ S26_kernel_vuln_verifier()
 
     print_output "[*] Kernel sources for version ${ORANGE}${lK_VERSION}${NC} available"
     write_link "${LOG_DIR}/kernel_downloader.log"
-    # mkdir "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true
-    # (grep -r -l "cpe:2.3:[ao]:linux:linux_kernel:" "${NVD_DIR}" | xargs cp -f -t "${LOG_PATH_MODULE}"/cpe_search_tmp_dir || true)&
-    # local lTMP_PID="$!"
-    # store_kill_pids "${lTMP_PID}"
-    # local lWAIT_PIDS_CVE_COPY_ARR=( "${lTMP_PID}" )
 
     lKERNEL_DIR="${LOG_PATH_MODULE}/linux-${lK_VERSION_KORG}"
     [[ -d "${lKERNEL_DIR}" ]] && rm -rf "${lKERNEL_DIR}"
@@ -228,8 +224,6 @@ S26_kernel_vuln_verifier()
 
     print_output "[*] Generate CVE vulnerabilities array for kernel version ${ORANGE}${lK_VERSION}${NC} ..." "no_log"
     mapfile -t lALL_KVULNS_ARR < <(tail -n+2 "${lCVE_DETAILS_PATH}")
-    # readable log file for the web report:
-    # jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${lCVE_DETAILS_PATH}" > "${LOG_PATH_MODULE}""/kernel-${lK_VERSION}-vulns.log"
 
     print_ln
     print_output "[+] Extracted ${ORANGE}${#lALL_KVULNS_ARR[@]}${GREEN} vulnerabilities based on kernel version only"
@@ -241,12 +235,18 @@ S26_kernel_vuln_verifier()
 
     sub_module_title "Identify kernel symbols ..."
     readelf -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
-      sed 's/\[\.\.\.\]//' > "${LOG_PATH_MODULE}"/symbols.txt
+      sed 's/\[\.\.\.\]//' > "${LOG_PATH_MODULE}"/symbols.txt || true
     SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols.txt | awk '{print $1}')
-    print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel"
+    print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
+
+    if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
+      print_output "[-] No symbols found for kernel ${lK_VERSION} - ${KERNEL_ELF_PATH}"
+      print_output "[*] No further analysis possible for ${lK_VERSION} - ${KERNEL_ELF_PATH}"
+      continue
+    fi
 
     if [[ -d "${LOG_DIR}""/firmware" ]]; then
-      print_output "[*] Identify kernel modules symbols ..." "no_log"
+      print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
       # shellcheck disable=SC2016
       find "${LOG_DIR}/firmware" -name "*.ko" -print0|xargs -r -0 -P 16 -I % sh -c 'readelf -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >> "${LOG_PATH_MODULE}"/symbols.txt || true
     fi
@@ -254,13 +254,8 @@ S26_kernel_vuln_verifier()
     uniq "${LOG_PATH_MODULE}"/symbols.txt > "${LOG_PATH_MODULE}"/symbols_uniq.txt
     SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols_uniq.txt | awk '{print $1}')
 
-    if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
-      print_output "[-] No symbols found ... check for further kernel version"
-      continue
-    fi
-
     print_ln
-    print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols"
+    print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
     write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
     print_ln
     split_symbols_file
@@ -325,7 +320,8 @@ vuln_checker_threader() {
   # lK_PATH is now defined with some backup text for output if lK_PATHS_ARR population without results
   local lK_PATH="missing vulnerability path from advisory"
 
-  lCVE=$(echo "${lVULN}" | cut -d, -f5)
+  # print_output "[*] VULN data: ${lVULN}" "no_log"
+  lCVE=$(echo "${lVULN}" | cut -d, -f4)
   if ! [[ "${lCVE}" == "CVE-"* ]]; then
     print_output "[-] No CVE identifier extracted for ${lVULN} ..."
     return
@@ -334,7 +330,7 @@ vuln_checker_threader() {
   print_output "${lOUTx}" "no_log"
   write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
 
-  lCVSS3="$(echo "${lVULN}" | cut -d, -f7)"
+  lCVSS3="$(echo "${lVULN}" | cut -d, -f6)"
   # lSUMMARY="$(echo "${lVULN}" | cut -d: -f6-)"
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
 
@@ -776,5 +772,5 @@ get_kernel_version_csv_data_s24() {
 
   # currently we only support one kernel version
   # if we detect multiple kernel versions we only process the first one after sorting
-  mapfile -t K_VERSIONS_ARR < <(cut -d\; -f4 "${lS24_CSV_LOG}" | tail -n +2 | grep -v "NA" | sort -u)
+  mapfile -t K_VERSIONS_ARR < <(cut -d\; -f2 "${lS24_CSV_LOG}" | grep -v "NA" | sort -u)
 }

@@ -136,6 +136,7 @@ build_sbom_json_hashes_arr() {
       # write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
       lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
       lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")
+      lDUP_RAND_ID="${RANDOM}"
       # we test the current version against the stored version. But as we often have a version from a package manager like
       # 1.2.3-deb-123abc and from the binary level we have only 1.2.3
       # To handle these cases we check against the version ^1.2.3*
@@ -143,8 +144,8 @@ build_sbom_json_hashes_arr() {
         # write_log "[*] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
         write_log "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
-        jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/\.tmp}"
-        if ! [[ -f "${lDUP_CHECK_FILE/\.json/\.tmp}" ]]; then
+        jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp"
+        if ! [[ -f "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" ]]; then
           continue
         fi
 
@@ -152,8 +153,8 @@ build_sbom_json_hashes_arr() {
         # on the 2nd case we also add this different version to the properties
         if [[ "${lAPP_VERS}" != "${lDUP_CHECK_VERS}" ]]; then
           write_log "[*] Version difference detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
-          jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS+2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/\.tmp}" > "${lDUP_CHECK_FILE/\.json/\.tmp1}"
-          mv "${lDUP_CHECK_FILE/\.json/\.tmp1}" "${lDUP_CHECK_FILE/\.json/\.tmp}" 2>/dev/null || true
+          jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS+2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" > "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
+          mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" 2>/dev/null || true
         fi
 
         # extract the confidence level from the json and compare it to our current level:
@@ -164,12 +165,12 @@ build_sbom_json_hashes_arr() {
             # if our current level is higher as the level from the json we need to adjust it now
             write_log "[*] Duplicate handling - Confidence level needs to be adjusted for ${lDUP_CHECK_FILE} -> from ${lCONFIDENCE_LEVEL_JSON:-NA} -> to $(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")" "${SBOM_LOG_PATH}"/duplicates.txt
             # very dirty :-D
-            jq . "${lDUP_CHECK_FILE/\.json/\.tmp}" | sed 's/"value": "'"${lCONFIDENCE_LEVEL_JSON:-NA}"'"/"value": "'"$(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"'"/' > "${lDUP_CHECK_FILE/\.json/\.tmp1}" || true
-            mv "${lDUP_CHECK_FILE/\.json/\.tmp1}" "${lDUP_CHECK_FILE/\.json/\.tmp}" 2>/dev/null || true
+            jq . "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" | sed 's/"value": "'"${lCONFIDENCE_LEVEL_JSON:-NA}"'"/"value": "'"$(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"'"/' > "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" || true
+            mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" 2>/dev/null || true
             # Todo: adjust json
           fi
         fi
-        mv "${lDUP_CHECK_FILE/\.json/\.tmp}" "${lDUP_CHECK_FILE}" 2>/dev/null || true
+        mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" "${lDUP_CHECK_FILE}" 2>/dev/null || true
         return 1
       fi
     done
