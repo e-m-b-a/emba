@@ -956,7 +956,7 @@ emulation_with_config() {
       SYS_ONLINE=1
       BOOTED="yes"
     fi
-    if grep -q "tcp.*open" "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null; then
+    if grep -q "tcp.*open" "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null; then
       TCP="ok"
       SYS_ONLINE=1
       BOOTED="yes"
@@ -1032,7 +1032,7 @@ emulation_with_config() {
         if (grep -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
           print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${MAGENTA} to address ${ORANGE}${lTMP_IP}${NC}"
           # we restart the emulation with the identified IP address for a maximum of one time
-          if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
+          if [[ $(grep "tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
             if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
               print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
               lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
@@ -2563,7 +2563,7 @@ check_online_stat() {
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
     tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
 
-    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -le 2 ]]; do
+    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -le "${MIN_TCP_SERV}" ]]; do
       if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
         print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
         write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"

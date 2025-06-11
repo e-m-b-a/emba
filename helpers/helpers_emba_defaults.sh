@@ -77,8 +77,6 @@ set_defaults() {
   # some processes are running long and logging a lot
   # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
   export QEMU_KILL_SIZE="10M"
-  # export L10_KERNEL_V_LONG="4.1.17"
-  # export L10_KERNEL_V_LONG="4.1.52"
   export L10_KERNEL_V_LONG="4.14.336"
   export L10_BB_VER="1.36.1"
   export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
