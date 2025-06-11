@@ -76,7 +76,7 @@ S26_kernel_vuln_verifier()
 
     # we check for a kernel configuration
     for lKERNEL_DATA in "${lKERNEL_ELF_EMBA_ARR[@]}"; do
-      print_output "[*] KERNEL_DATA: ${lKERNEL_DATA}" "no_log"
+      # print_output "[*] KERNEL_DATA: ${lKERNEL_DATA}" "no_log"
       if [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f5)" == "/"* ]]; then
         # field 5 is the kernel config file
         KERNEL_CONFIG_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f5)
@@ -237,10 +237,10 @@ S26_kernel_vuln_verifier()
     readelf -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
       sed 's/\[\.\.\.\]//' > "${LOG_PATH_MODULE}"/symbols.txt || true
     SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols.txt | awk '{print $1}')
-    print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel"
+    print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
 
     if [[ -d "${LOG_DIR}""/firmware" ]]; then
-      print_output "[*] Identify kernel modules symbols ..." "no_log"
+      print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
       # shellcheck disable=SC2016
       find "${LOG_DIR}/firmware" -name "*.ko" -print0|xargs -r -0 -P 16 -I % sh -c 'readelf -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >> "${LOG_PATH_MODULE}"/symbols.txt || true
     fi
@@ -256,7 +256,7 @@ S26_kernel_vuln_verifier()
       split_symbols_file
     else
       print_output "[-] No symbols found for kernel ${lK_VERSION}"
-      # continue
+      continue
     fi
 
     sub_module_title "Linux kernel vulnerability verification"

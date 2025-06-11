@@ -24,10 +24,6 @@ kernel_downloader() {
   local LOG_PATH_MODULE="${LOG_DIR}/s24_kernel_bin_identifier"
   local LOG_FILE="${LOG_PATH_MODULE}/kernel_downloader.log"
 
-  #if [[ "${NO_UPDATE_CHECK:-0}" -eq 1 ]]; then
-  #  return
-  #fi
-
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
     mkdir "${lKERNEL_ARCH_PATH}"
   fi

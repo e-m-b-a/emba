@@ -534,6 +534,7 @@ version_parsing_logging() {
     # we continue with the next binary -> set return as marker to get the knowledge in the caller
     return 0
   done
+  return 1
 }
 
 # we create the final_bins.txt file which includes the binaries for further analysis
