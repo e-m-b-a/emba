@@ -239,6 +239,12 @@ S26_kernel_vuln_verifier()
     SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols.txt | awk '{print $1}')
     print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
 
+    if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
+      print_output "[-] No symbols found for kernel ${lK_VERSION} - ${KERNEL_ELF_PATH}"
+      print_output "[*] No further analysis possible for ${lK_VERSION} - ${KERNEL_ELF_PATH}"
+      continue
+    fi
+
     if [[ -d "${LOG_DIR}""/firmware" ]]; then
       print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
       # shellcheck disable=SC2016
@@ -248,16 +254,11 @@ S26_kernel_vuln_verifier()
     uniq "${LOG_PATH_MODULE}"/symbols.txt > "${LOG_PATH_MODULE}"/symbols_uniq.txt
     SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols_uniq.txt | awk '{print $1}')
 
-    if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
-      print_ln
-      print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols"
-      write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
-      print_ln
-      split_symbols_file
-    else
-      print_output "[-] No symbols found for kernel ${lK_VERSION}"
-      continue
-    fi
+    print_ln
+    print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
+    write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
+    print_ln
+    split_symbols_file
 
     sub_module_title "Linux kernel vulnerability verification"
 
