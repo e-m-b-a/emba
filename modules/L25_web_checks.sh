@@ -491,7 +491,7 @@ make_web_screenshot() {
   timeout --preserve-status --signal SIGINT 20 "${CHROME_HEADLESS_BIN}" --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lSSL}://${lIP_}:${lPORT_}" 2>/dev/null
 
   if [[ -f "${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png ]]; then
-    print_output "[*] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
+    print_output "[+] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
     write_link "${LOG_PATH_MODULE}/screenshot_${lIP_}_${lPORT_}.png"
     WEB_RESULTS=1
   else

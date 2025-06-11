@@ -985,7 +985,11 @@ emulation_with_config() {
     print_ln
 
     if [[ "${TCP}" == "ok" ]]; then
-      print_output "[+] Network services are available." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+      if [[ $(grep -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge "${MIN_TCP_SERV}" ]]; then
+        print_output "[+] Network services are available - no further emulation runs are needed" "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+      else
+        print_output "[+] Network services are available - further emulation runs are needed." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+      fi
       print_ln
     fi
 
