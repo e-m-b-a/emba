@@ -52,13 +52,13 @@ kernel_downloader() {
     print_output "[-] $(print_date) - No Kernel version identified ... exit kernel downloader process"
     return
   fi
-  print_output "[*] Kernel downloader running ..."
+  print_output "[*] $(print_date) - Kernel downloader running ..."
   local lK_VERSIONS_ARR=()
   local lK_VERSION=""
 
   mapfile -t lK_VERSIONS_ARR < <(cut -d\; -f2 "${S24_CSV_LOG}" | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
-  print_output "[*] Detected kernel details:"
-  cat "${S24_CSV_LOG}" >> "${LOG_FILE}"
+  print_output "[*] $(print_date) - Detected kernel details:"
+  print_output "$(indent "$(cat "${S24_CSV_LOG}")")"
 
   for lK_VERSION in "${lK_VERSIONS_ARR[@]}"; do
     print_output "[*] $(print_date) - Checking download of kernel version ${ORANGE}${lK_VERSION}${NC}"
