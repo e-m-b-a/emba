@@ -48,7 +48,8 @@ IP61_unblob() {
     print_tool_info "python3-magic" 1
     print_tool_info "pkg-config" 1
     print_tool_info "pkgconf" 1
-    # print_tool_info "unblob" 1
+    print_tool_info "erofs-utils" 1
+    print_tool_info "partclone" 1
     # print_pip_info "cmake"
     print_tool_info "python3-lief" 1
     # print_pip_info "unblob"

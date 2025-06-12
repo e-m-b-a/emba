@@ -2554,10 +2554,11 @@ check_online_stat() {
   else
     print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
     sleep 60
-    print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
-    write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
+    print_output "[*] Default Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
+    # write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
-    # this is just for the nice logfile
+
+    # this is just for the logfile
     if ! ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}"; then
       print_output "[-] Warning: System was already available but it does not respond to ping anymore."
       print_output "[-] Probably the IP address of the system has changed."
@@ -2569,6 +2570,7 @@ check_online_stat() {
 
     while [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -lt "${MIN_TCP_SERV}" ]]; do
       if [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
+        print_ln
         print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
         write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
         print_ln
@@ -2583,6 +2585,8 @@ check_online_stat() {
       tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
       [[ "${lCNT}" -gt 10 ]] && break
     done
+    # get a backup of our current results and add the later nmap scans to this file for the web report
+    cp "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}/${lNMAP_LOG}"
 
     mapfile -t lTCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t lUDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
