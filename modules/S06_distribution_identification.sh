@@ -98,9 +98,8 @@ S06_distribution_identification()
 
           # spcial case - bmc identifier
           if [[ "${lIDENTIFIER}" != *[0-9]* ]] && [[ "${lIDENTIFIER}" == *"supermicro:bmc"* ]]; then
-            cp "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log" 2>/dev/null || true
             print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
-            write_link "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+            copy_and_link_file "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
             write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
@@ -111,15 +110,14 @@ S06_distribution_identification()
 
           # check if not zero and not only spaces
           if [[ -n "${lIDENTIFIER// }" ]] && [[ "${lIDENTIFIER}" == *[0-9]* ]]; then
-            cp "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log" 2>/dev/null || true
             if [[ -n "${DLINK_FW_VER}" ]]; then
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} for D-Link device."
-              write_link "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+              copy_and_link_file "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               write_csv_log "${lFILE}" "dlink" "${lIDENTIFIER}" "${lCSV_RULE}"
             else
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
-              write_link "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+              copy_and_link_file "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               # print_output "[*] lCSV_RULE: ${lCSV_RULE}"
               write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
