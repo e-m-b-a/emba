@@ -61,6 +61,7 @@ S06_distribution_identification()
       fi
       mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
+        local lLOG_DEST_PATH=""
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
@@ -96,7 +97,7 @@ S06_distribution_identification()
 
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
-          local lLOG_DEST_PATH="${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+          lLOG_DEST_PATH="${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
 
           # special case - bmc identifier
           if [[ "${lIDENTIFIER}" != *[0-9]* ]] && [[ "${lIDENTIFIER}" == *"supermicro:bmc"* ]]; then
