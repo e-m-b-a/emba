@@ -382,7 +382,8 @@ check_kconfig() {
   if [[ -f "${lKCONF_LOG}" ]]; then
     lFAILED_KSETTINGS=$(grep -c "FAIL: " "${lKCONF_LOG}" || true)
     if [[ "${lFAILED_KSETTINGS}" -gt 0 ]]; then
-      write_log "[+] Found ${ORANGE}${lFAILED_KSETTINGS}${GREEN} security related kernel settings which should be reviewed - ${ORANGE}$(print_path "${lKCONFIG_FILE}")${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp" "${lKCONF_LOG}"
+      write_log "[+] Found ${ORANGE}${lFAILED_KSETTINGS}${GREEN} security related kernel settings which should be reviewed - ${ORANGE}$(print_path "${lKCONFIG_FILE}")${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+      write_link "${lKCONF_LOG}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
       write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
       write_log "[*] Statistics:${lFAILED_KSETTINGS}"
     fi

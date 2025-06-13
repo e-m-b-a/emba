@@ -96,10 +96,12 @@ S06_distribution_identification()
 
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
-          # spcial case - bmc identifier
+          local lLOG_DEST_PATH="${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+
+          # special case - bmc identifier
           if [[ "${lIDENTIFIER}" != *[0-9]* ]] && [[ "${lIDENTIFIER}" == *"supermicro:bmc"* ]]; then
             print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
-            copy_and_link_file "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+            copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
             write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
@@ -112,12 +114,12 @@ S06_distribution_identification()
           if [[ -n "${lIDENTIFIER// }" ]] && [[ "${lIDENTIFIER}" == *[0-9]* ]]; then
             if [[ -n "${DLINK_FW_VER}" ]]; then
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} for D-Link device."
-              copy_and_link_file "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+              copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               write_csv_log "${lFILE}" "dlink" "${lIDENTIFIER}" "${lCSV_RULE}"
             else
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
-              copy_and_link_file "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+              copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               # print_output "[*] lCSV_RULE: ${lCSV_RULE}"
               write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
