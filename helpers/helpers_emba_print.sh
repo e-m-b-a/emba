@@ -429,7 +429,7 @@ copy_and_link_file() {
 
   if [[ ${HTML} -eq 1 ]] ; then
     if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
-      mkdir "$(dirname "${lDST_FILE}")" || true
+      mkdir -p "$(dirname "${lDST_FILE}")" || true
     fi
     if [[ -f "${lSRC_FILE}" ]]; then
       cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
