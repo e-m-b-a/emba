@@ -2531,7 +2531,7 @@ check_online_stat() {
       print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
       ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
       print_ln
-      echo -e "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." >> "${TMP_DIR}"/online_stats.tmp
+      write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp
       lSYS_ONLINE=1
     fi
 
@@ -2545,11 +2545,11 @@ check_online_stat() {
           print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
           ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}"
           print_ln
-          echo -e "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." >> "${TMP_DIR}"/online_stats.tmp
+          write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp
         fi
       fi
       print_ln
-      echo -e "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable on TCP port 0 via hping." >> "${TMP_DIR}"/online_stats.tmp
+      write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable on TCP port 0 via hping." "${TMP_DIR}"/online_stats.tmp
       lSYS_ONLINE=1
     fi
 

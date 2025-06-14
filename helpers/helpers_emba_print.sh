@@ -404,8 +404,7 @@ write_pid_log() {
   echo "${lLOG_MESSAGE}" >> "${TMP_DIR}"/"${PID_LOG_FILE}" || true
 }
 
-write_link()
-{
+write_link() {
   if [[ ${HTML} -eq 1 ]] ; then
     local lLINK="${1:-}"
     lLINK="$(format_log "[REF] ""${lLINK}" 1)"
