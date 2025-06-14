@@ -47,7 +47,8 @@ S24_kernel_bin_identifier()
   done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | sort -u || true)
 
   wait_for_pid "${lWAIT_PIDS_S24_main[@]}"
-  find "${LOG_PATH_MODULE}" -name "*.tmp" -exec cat {} \; | tee -a "${LOG_FILE}"
+  # shellcheck disable=SC2153
+  find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -exec cat {} \; | tee -a "${LOG_FILE}"
   lNEG_LOG=1
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -62,6 +63,7 @@ binary_kernel_check_threader() {
   lFILE_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
   lFILE_NAME=$(basename "${lFILE_PATH}")
 
+  local lLOG_FILE="${LOG_PATH_MODULE}/threading_${lFILE_NAME}.tmp"
   local lBIN_FILE="NA"
   local lKCONFIG_EXTRACTED="NA"
   local lK_VER_CLEAN="NA"
@@ -116,20 +118,20 @@ binary_kernel_check_threader() {
     lVERSION_IDENTIFIED=$(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}"| sort -u || true)
 
     if [[ -n "${lVERSION_IDENTIFIED}" ]]; then
-      write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-      write_log "[+] Possible Linux Kernel found: ${ORANGE}${lFILE_PATH} / ${lVERSION_IDENTIFIED}${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-      write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-      write_log "$(indent "$(orange "${lVERSION_IDENTIFIED}")")" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-      write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+      write_log "" "${lLOG_FILE}"
+      write_log "[+] Possible Linux Kernel found: ${ORANGE}${lFILE_PATH} / ${lVERSION_IDENTIFIED}${NC}" "${lLOG_FILE}"
+      write_log "" "${lLOG_FILE}"
+      write_log "$(indent "$(orange "${lVERSION_IDENTIFIED}")")" "${lLOG_FILE}"
+      write_log "" "${lLOG_FILE}"
 
       # rough init entry detection
       mapfile -t lK_INITS_ARR < <(grep -E "init=\/" "${lSTRINGS_OUTPUT}" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | tr -d '"' | sort -u || true)
       for lK_INIT in "${lK_INITS_ARR[@]}"; do
         if [[ "${lK_INIT}" =~ init=\/.* ]]; then
-          write_log "[+] Init found in Linux kernel file ${ORANGE}${lFILE_PATH}${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-          write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-          write_log "$(indent "$(orange "${lK_INIT}")")" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-          write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+          write_log "[+] Init found in Linux kernel file ${ORANGE}${lFILE_PATH}${NC}" "${lLOG_FILE}"
+          write_log "" "${lLOG_FILE}"
+          write_log "$(indent "$(orange "${lK_INIT}")")" "${lLOG_FILE}"
+          write_log "" "${lLOG_FILE}"
         else
           lK_INIT="NA"
         fi
@@ -138,9 +140,9 @@ binary_kernel_check_threader() {
       # we test all possible kernel files with vmlinux-to-elf. It does not matter if it is already an elf file or not
       # if it is already an elf file we need the output for the module report
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
-        write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-        write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >> "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp" || true
+        write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
+        write_log "" "${lLOG_FILE}"
+        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >> "${lLOG_FILE}" || true
         if [[ -f "${lFILE_PATH}".elf ]]; then
           lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
           lMD5_SUM="${lMD5_SUM/\ *}"
@@ -155,16 +157,16 @@ binary_kernel_check_threader() {
           lBIN_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
 
           if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
-            write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-            write_log "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+            write_log "" "${lLOG_FILE}"
+            write_log "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}" "${lLOG_FILE}"
             export CONFIDENCE_LEVEL=4
             version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"
           else
-            write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-            write_log "[-] No Linux kernel elf file was created." "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+            write_log "" "${lLOG_FILE}"
+            write_log "[-] No Linux kernel elf file was created." "${lLOG_FILE}"
           fi
         fi
-        write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+        write_log "" "${lLOG_FILE}"
       fi
 
       # if we have not elf file created and logged we now log the original kernel
@@ -180,7 +182,7 @@ binary_kernel_check_threader() {
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
         disable_strict_mode "${STRICT_MODE}" 0
-        extract_kconfig "${lFILE_PATH}"
+        extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
         lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
         enable_strict_mode "${STRICT_MODE}" 0
 
@@ -212,10 +214,12 @@ binary_kernel_check_threader() {
         # double check we really have a Kernel config extracted
         if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
           lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
-          write_log "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp" "${lKCONFIG_EXTRACTED}"
-          check_kconfig "${lKCONFIG_EXTRACTED}" "${lK_ARCH}"
+          write_log "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
+          write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
+          check_kconfig "${lKCONFIG_EXTRACTED}" "${lK_ARCH}" "${lLOG_FILE}"
         else
-          write_log "[-] No valid kernel configuration extracted from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp" "${lKCONFIG_EXTRACTED}"
+          write_log "[-] No valid kernel configuration extracted from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
+          write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
         fi
 
         # we should only get one element back, but as array
@@ -238,9 +242,9 @@ binary_kernel_check_threader() {
       if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
         lK_CON_DET=$(grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" "${lSTRINGS_OUTPUT}" || true)
         if [[ "${lK_CON_DET}" =~ \ Kernel\ Configuration ]]; then
-          write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-          write_log "[+] Found kernel configuration file: ${ORANGE}${lFILE_PATH}${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-          check_kconfig "${lFILE_PATH}"
+          write_log "" "${lLOG_FILE}"
+          write_log "[+] Found kernel configuration file: ${ORANGE}${lFILE_PATH}${NC}" "${lLOG_FILE}"
+          check_kconfig "${lFILE_PATH}" "NA" "${lLOG_FILE}"
           KCFG_MD5_ARR+=("${lCFG_MD5}")
         fi
       fi
@@ -262,14 +266,16 @@ extract_kconfig() {
 
   # Check invocation:
   export IMG="${1:-}"
+  local lLOG_FILE="${2:-}"
+
   export KCONFIG_EXTRACTED=""
 
   if ! [[ -f "${IMG}" ]]; then
-    write_log "[-] No kernel file to analyze here - ${ORANGE}${IMG}${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+    write_log "[-] No kernel file to analyze here - ${ORANGE}${IMG}${NC}" "${lLOG_FILE}"
     return
   fi
 
-  write_log "[*] Trying to extract kernel configuration from ${ORANGE}${IMG}${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+  write_log "[*] Trying to extract kernel configuration from ${ORANGE}${IMG}${NC}" "${lLOG_FILE}"
 
   export CF1='IKCFG_ST\037\213\010'
   export CF2='0123456789'
@@ -281,39 +287,40 @@ extract_kconfig() {
   trap "rm -f ${TMP1} ${TMP2}" 0
 
   # Initial attempt for uncompressed images or objects:
-  dump_config "${IMG}"
+  dump_config "${IMG}" "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
   # That didn't work, so retry after decompression.
-  try_decompress '\037\213\010' xy    gunzip
+  try_decompress '\037\213\010' xy    gunzip "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\3757zXZ\000' abcde unxz
+  try_decompress '\3757zXZ\000' abcde unxz "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress 'BZh'          xy    bunzip2
+  try_decompress 'BZh'          xy    bunzip2 "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\135\0\0\0'   xxx   unlzma
+  try_decompress '\135\0\0\0'   xxx   unlzma "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\211\114\132' xy    'lzop -d'
+  try_decompress '\211\114\132' xy    'lzop -d' "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\002\041\114\030' xyy 'lz4 -d -l'
+  try_decompress '\002\041\114\030' xyy 'lz4 -d -l' "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\050\265\057\375' xxx unzstd
+  try_decompress '\050\265\057\375' xxx unzstd "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 }
 
 dump_config() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
   local lIMG_="${1:-}"
+  local lLOG_FILE="${2:-}"
   local lCFG_MD5=""
 
   if ! [[ -f "${lIMG_}" ]]; then
-    write_log "[-] No kernel file to analyze here - ${ORANGE}${lIMG_}${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+    write_log "[-] No kernel file to analyze here - ${ORANGE}${lIMG_}${NC}" "${lLOG_FILE}"
     return
   fi
 
@@ -337,7 +344,7 @@ dump_config() {
         # return value of 4 means we are done and we are going back to the main function of this module for the next file
         return 4
       else
-        write_log "[*] Firmware binary ${ORANGE}${IMG}${NC} already analyzed .. skipping" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+        write_log "[*] Firmware binary ${ORANGE}${IMG}${NC} already analyzed .. skipping" "${lLOG_FILE}"
         return 4
       fi
     fi
@@ -346,24 +353,28 @@ dump_config() {
 
 try_decompress() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
+  local lLOG_FILE="${1:-}"
+
   export POS=""
   for POS in $(tr "$1\n$2" "\n$2=" < "${IMG}" | grep -abo "^$2"); do
     POS=${POS%%:*}
     tail -c+"${POS}" "${IMG}" | "${3}" > "${TMP2}" 2> /dev/null
-    dump_config "${TMP2}"
+    dump_config "${TMP2}" "${lLOG_FILE}"
     [[ $? -eq 4 ]] && return 4
   done
 }
 
 check_kconfig() {
   local lKCONFIG_FILE="${1:-}"
-  local lKCONFIG_ARCH="${2:-NA}"
-  local lKCONF_HARD_CHECKER="${EXT_DIR}"/kconfig-hardened-check/bin/kernel-hardening-checker
+  local lKCONFIG_ARCH="${2:-}"
+  local lLOG_FILE="${3:-}"
+
+  local lKCONF_HARD_CHECKER="${EXT_DIR}/kconfig-hardened-check/bin/kernel-hardening-checker"
   local lFAILED_KSETTINGS=""
   local lKCONF_LOG=""
 
   if ! [[ -e "${lKCONF_HARD_CHECKER}" ]]; then
-    write_log "[-] Kernel config hardening checker not found" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+    write_log "[-] Kernel config hardening checker not found" "${lLOG_FILE}"
     return
   fi
 
@@ -372,19 +383,20 @@ check_kconfig() {
   fi
 
   if [[ "${lKCONFIG_ARCH,,}" == *"mips"* ]]; then
-    write_log "[-] Architecture ${ORANGE}${lKCONFIG_ARCH}${NC} not supported by ${ORANGE}kernel-hardening-checker${NC}." "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+    write_log "[-] Architecture ${ORANGE}${lKCONFIG_ARCH}${NC} not supported by ${ORANGE}kernel-hardening-checker${NC}." "${lLOG_FILE}"
     return
   fi
 
-  write_log "[*] Testing kernel configuration file ${ORANGE}${lKCONFIG_FILE}${NC} with kconfig-hardened-check (architecture ${lKCONFIG_ARCH})." "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
+  write_log "[*] Testing kernel configuration file ${ORANGE}${lKCONFIG_FILE}${NC} with kconfig-hardened-check (architecture ${lKCONFIG_ARCH})." "${lLOG_FILE}"
   lKCONF_LOG="${LOG_PATH_MODULE}/kconfig_hardening_check_$(basename "${lKCONFIG_FILE}").log"
   "${lKCONF_HARD_CHECKER}" -c "${lKCONFIG_FILE}" | tee -a "${lKCONF_LOG}" || true
   if [[ -f "${lKCONF_LOG}" ]]; then
     lFAILED_KSETTINGS=$(grep -c "FAIL: " "${lKCONF_LOG}" || true)
     if [[ "${lFAILED_KSETTINGS}" -gt 0 ]]; then
-      write_log "[+] Found ${ORANGE}${lFAILED_KSETTINGS}${GREEN} security related kernel settings which should be reviewed - ${ORANGE}$(print_path "${lKCONFIG_FILE}")${NC}" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp" "${lKCONF_LOG}"
-      write_log "" "${LOG_PATH_MODULE}/${lFILE_NAME}.tmp"
-      write_log "[*] Statistics:${lFAILED_KSETTINGS}"
+      write_log "[+] Found ${ORANGE}${lFAILED_KSETTINGS}${GREEN} security related kernel settings which should be reviewed - ${ORANGE}$(print_path "${lKCONFIG_FILE}")${NC}" "${lLOG_FILE}"
+      write_link "${lKCONF_LOG}" "${lLOG_FILE}"
+      write_log "" "${lLOG_FILE}"
+      write_log "[*] Statistics:${lFAILED_KSETTINGS}" "${lLOG_FILE}"
     fi
   fi
 }

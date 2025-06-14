@@ -96,10 +96,16 @@ fi
 # ensure we have our kernel entry in the beginning and all the other entries afterwards:
 "${BUSYBOX}" echo "[*] Re-creating firmadyne/init:"
 for entry in "${arr_prio[@]}"; do
+  if [ -z "${entry}" ]; then
+    continue
+  fi
   "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
 done
 if [ -s /firmadyne/init_tmp ]; then
   while read -r entry; do
+    if [ -z "${entry}" ]; then
+      continue
+    fi
     if ! "${BUSYBOX}" grep -q "${entry}" /firmadyne/init; then
       "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
     fi

@@ -61,6 +61,7 @@ S06_distribution_identification()
       fi
       mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
+        local lLOG_DEST_PATH=""
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
@@ -96,11 +97,12 @@ S06_distribution_identification()
 
           check_for_s08_csv_log "${S08_CSV_LOG}"
 
-          # spcial case - bmc identifier
+          lLOG_DEST_PATH="${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+
+          # special case - bmc identifier
           if [[ "${lIDENTIFIER}" != *[0-9]* ]] && [[ "${lIDENTIFIER}" == *"supermicro:bmc"* ]]; then
-            cp "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log" 2>/dev/null || true
             print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
-            write_link "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+            copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
             write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
@@ -111,15 +113,14 @@ S06_distribution_identification()
 
           # check if not zero and not only spaces
           if [[ -n "${lIDENTIFIER// }" ]] && [[ "${lIDENTIFIER}" == *[0-9]* ]]; then
-            cp "${lFILE}" "${LOG_PATH_MODULE}/$(basename "${lFILE}").log" 2>/dev/null || true
             if [[ -n "${DLINK_FW_VER}" ]]; then
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} for D-Link device."
-              write_link "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+              copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               write_csv_log "${lFILE}" "dlink" "${lIDENTIFIER}" "${lCSV_RULE}"
             else
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
-              write_link "${LOG_PATH_MODULE}/$(basename "${lFILE}").log"
+              copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               # print_output "[*] lCSV_RULE: ${lCSV_RULE}"
               write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
