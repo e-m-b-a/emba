@@ -575,6 +575,10 @@ main() {
       DIFF_MODE=1
       print_output "[*] $(print_date) - Multiple firmware binarie detected." "no_log"
       print_output "    EMBA starts in firmware diff mode." "no_log"
+    elif [[ ${RESCAN_SBOM} -eq 1 ]]; then
+      print_output "[*] $(print_date) - Rescan SBOM mode detected." "no_log"
+      print_output "    EMBA will reuse existing SBOM for fresh CVE analysis." "no_log"
+      export OUTPUT_DIR="${LOG_DIR}"
     else
       print_output "[!] $(print_date) - Invalid firmware file" "no_log"
       print_help

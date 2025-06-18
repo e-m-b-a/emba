@@ -28,7 +28,7 @@ log_folder() {
   if [[ ${ONLY_DEP} -eq 0 ]] && [[ -d "${LOG_DIR}" ]] ; then
     # If RESCAN_SBOM is enabled, skip log directory deletion prompt and reuse existing directory
     if [[ ${RESCAN_SBOM} -eq 1 ]]; then
-      print_output "[*] ${ORANGE}RESCAN_SBOM${NC} mode: Reusing existing log directory ${ORANGE}${LOG_DIR}${NC}" "no_log"
+      print_output "[*] Rescanning SBOM using existing log directory ${ORANGE}${LOG_DIR}${NC}" "no_log"
       return
     fi
     export RESTART=0          # indicator for testing unfinished tests again
