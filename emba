@@ -368,6 +368,20 @@ main() {
   emba_parameter_parsing "$@"
   set_log_paths
 
+  # Validate RESCAN_SBOM mode requirements
+  if [[ ${RESCAN_SBOM} -eq 1 ]]; then
+    if [[ -z "${LOG_DIR}" ]] || [[ "${LOG_DIR}" == *"/logs" ]]; then
+      print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires an existing log directory specified with ${ORANGE}-l${NC} parameter" "no_log"
+      print_output "[-] The log directory must be from a previous EMBA scan and contain an SBOM" "no_log"
+      exit 1
+    fi
+    if [[ ! -d "${LOG_DIR}" ]]; then
+      print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires the log directory ${ORANGE}${LOG_DIR}${NC} to exist" "no_log"
+      print_output "[-] Please specify a valid existing log directory from a previous EMBA scan" "no_log"
+      exit 1
+    fi
+  fi
+
   print_ln "no_log"
 
   write_notification "EMBA starting"
@@ -806,10 +820,18 @@ main() {
   fi
 
   #######################################################################################
+  # RESCAN_SBOM mode - Skip to F17 module execution only
+  #######################################################################################
+  if [[ ${RESCAN_SBOM} -eq 1 ]]; then
+    print_output "[*] ${ORANGE}RESCAN_SBOM${NC} mode: Skipping all phases except reporting (F17 CVE analysis)" "main"
+    export TESTING_DONE=1
+  fi
+
+  #######################################################################################
   # Quests (Q-modules)
   #######################################################################################
 
-  if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ ${RESCAN_SBOM} -eq 0 ]]; then
     if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
       while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
         sleep 1
@@ -834,7 +856,7 @@ main() {
   #######################################################################################
   # Pre-Check (P-modules)
   #######################################################################################
-  if [[ "${PRE_CHECK}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ "${PRE_CHECK}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ ${RESCAN_SBOM} -eq 0 ]]; then
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
@@ -872,7 +894,7 @@ main() {
   #######################################################################################
   # Diff mode (D-modules)
   #######################################################################################
-  if [[ "${DIFF_MODE}" -eq 1 ]] ; then
+  if [[ "${DIFF_MODE}" -eq 1 ]] && [[ ${RESCAN_SBOM} -eq 0 ]]; then
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
@@ -903,7 +925,7 @@ main() {
   # Firmware-Check (S modules)
   #######################################################################################
   WAIT_PIDS=()
-  if [[ ${FIRMWARE} -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ ${FIRMWARE} -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ ${RESCAN_SBOM} -eq 0 ]]; then
     print_output "\n=================================================================\n" "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
@@ -932,7 +954,7 @@ main() {
   #######################################################################################
   # Live Emulation - Check (L-modules)
   #######################################################################################
-  if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ ${RESCAN_SBOM} -eq 0 ]]; then
     print_output "\n=================================================================\n" "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
       print_output "[!] $(print_date) - System emulation phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
@@ -963,6 +985,9 @@ main() {
   fi
   write_notification "Reporting phase started"
 
+  if [[ ${RESCAN_SBOM} -eq 1 ]]; then
+    export SELECT_MODULES=("${SELECT_MODULES[@]}" "f17")
+  fi
   run_modules "F" "0" "${HTML}"
 
   [[ ${DISABLE_STATUS_BAR} -eq 0 ]] && remove_status_bar
