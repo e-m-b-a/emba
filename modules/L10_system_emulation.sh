@@ -355,11 +355,11 @@ create_emulation_filesystem() {
       # kernelInit is getting the output of the init command line we get from s24
       if grep -q ";rdinit=" "${S24_CSV_LOG}"; then
         print_output "[*] Found ${ORANGE}rdinit${NC} entry for kernel - see ${ORANGE}${S24_LOG}${NC}:"
-        grep ";rdinit=/" "${S24_CSV_LOG}" | cut -d\; -f5 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+        grep ";rdinit=/" "${S24_CSV_LOG}" | cut -d\; -f4 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
       elif grep -q ";init=" "${S24_CSV_LOG}"; then
         print_output "[*] Found ${ORANGE}init${NC} entry for kernel - see ${ORANGE}${S24_LOG}${NC}:"
-        grep ";init=/" "${S24_CSV_LOG}" | cut -d\; -f5 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+        grep ";init=/" "${S24_CSV_LOG}" | cut -d\; -f4 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
       fi
     else
@@ -1352,9 +1352,9 @@ identify_networking_emulation() {
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
 
-  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.initial.serial.log" &
-  local lKPANIC_PID="$!"
-  disown "${lKPANIC_PID}" 2> /dev/null || true
+  # run_kpanic_identification "${LOG_PATH_MODULE}/qemu.initial.serial.log" &
+  # local lKPANIC_PID="$!"
+  # disown "${lKPANIC_PID}" 2> /dev/null || true
 
   print_keepalive "${LOG_PATH_MODULE}/qemu.initial.serial.log" "${lIMAGE_NAME}" &
   local lALIVE_PID="$!"
@@ -1371,9 +1371,9 @@ identify_networking_emulation() {
   if ! [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
     print_output "[-] No ${ORANGE}${LOG_PATH_MODULE}/qemu.initial.serial.log${NC} log file generated."
   fi
-  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
-    kill -9 "${lKPANIC_PID}" >/dev/null || true
-  fi
+  # if [[ -e /proc/"${lKPANIC_PID}" ]]; then
+  #   kill -9 "${lKPANIC_PID}" >/dev/null || true
+  # fi
 }
 
 print_keepalive() {
@@ -1383,8 +1383,21 @@ print_keepalive() {
 
   while(true); do
     print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
+    run_kpanic_identification_single "${lLOG_FILE}" "${lIMAGE_NAME}"
     sleep 5
   done
+}
+
+run_kpanic_identification_single() {
+  local lLOG_FILE="${1:-}"
+  local lIMAGE_NAME="${2:-}"
+
+  lKPANIC=$(tail -n 50 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
+  if [[ "${lKPANIC}" -gt 0 ]]; then
+    print_output "[*] Kernel Panic detected - stopping emulation"
+    stopping_emulation_process "${lIMAGE_NAME}"
+    pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
+  fi
 }
 
 run_kpanic_identification() {
@@ -2501,9 +2514,9 @@ check_online_stat() {
   local lTCP_SERV_NETSTAT_ARR=()
   local lUDP_SERV_NETSTAT_ARR=()
 
-  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.final.serial.log" &
-  local lKPANIC_PID="$!"
-  disown "${lKPANIC_PID}" 2> /dev/null || true
+  # run_kpanic_identification "${LOG_PATH_MODULE}/qemu.final.serial.log" &
+  # local lKPANIC_PID="$!"
+  # disown "${lKPANIC_PID}" 2> /dev/null || true
 
   # wait 20 secs after boot before starting pinging
   sleep 20
@@ -2518,7 +2531,7 @@ check_online_stat() {
       print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
       ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
       print_ln
-      echo -e "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." >> "${TMP_DIR}"/online_stats.tmp
+      write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp
       lSYS_ONLINE=1
     fi
 
@@ -2532,11 +2545,11 @@ check_online_stat() {
           print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
           ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}"
           print_ln
-          echo -e "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." >> "${TMP_DIR}"/online_stats.tmp
+          write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp
         fi
       fi
       print_ln
-      echo -e "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable on TCP port 0 via hping." >> "${TMP_DIR}"/online_stats.tmp
+      write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable on TCP port 0 via hping." "${TMP_DIR}"/online_stats.tmp
       lSYS_ONLINE=1
     fi
 
@@ -2687,9 +2700,9 @@ check_online_stat() {
 
   pkill -9 -f "tail -F ${LOG_PATH_MODULE}/qemu.final.serial.log" || true &>/dev/null
 
-  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
-    kill -9 "${lKPANIC_PID}" >/dev/null || true
-  fi
+  # if [[ -e /proc/"${lKPANIC_PID}" ]]; then
+  #   kill -9 "${lKPANIC_PID}" >/dev/null || true
+  # fi
 }
 
 stopping_emulation_process() {

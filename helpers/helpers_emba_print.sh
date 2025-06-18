@@ -404,8 +404,7 @@ write_pid_log() {
   echo "${lLOG_MESSAGE}" >> "${TMP_DIR}"/"${PID_LOG_FILE}" || true
 }
 
-write_link()
-{
+write_link() {
   if [[ ${HTML} -eq 1 ]] ; then
     local lLINK="${1:-}"
     lLINK="$(format_log "[REF] ""${lLINK}" 1)"
@@ -416,6 +415,26 @@ write_link()
       else
         echo -e "${lLINK}" | tee -a "${LOG_FILE}" >/dev/null
       fi
+    fi
+  fi
+}
+
+# The copy_and_link_file is used to copy files from the filesystem to the web-report and
+# automatically link it
+# This is usually used after a print_output "[*] asdf"
+copy_and_link_file() {
+  local lSRC_FILE="${1:-}"
+  local lDST_FILE="${2:-}"
+
+  if [[ ${HTML} -eq 1 ]] ; then
+    if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
+      mkdir -p "$(dirname "${lDST_FILE}")" || true
+    fi
+    if [[ -f "${lSRC_FILE}" ]]; then
+      cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
+    fi
+    if [[ -f "${lDST_FILE}" ]]; then
+      write_link "${lDST_FILE}"
     fi
   fi
 }
