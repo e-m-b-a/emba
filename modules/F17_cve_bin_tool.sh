@@ -182,7 +182,7 @@ F17_cve_bin_tool() {
 
   # Handle rescan mode: preserve existing files as "previous" versions and use standard names for new files
   local lFILE_SUFFIX=""
-  if [[ ${RESCAN_SBOM:-0} -eq 1 ]]; then
+  if [[ "${RESCAN_SBOM:-0}" -eq 1 ]]; then
     print_output "[*] Backing up existing VEX files as previous versions" "no_log"
 
     # Handle EMBA_sbom_vex_only.json
