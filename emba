@@ -380,6 +380,14 @@ main() {
       print_output "[-] Please specify a valid existing log directory from a previous EMBA scan" "no_log"
       exit 1
     fi
+    # Finally check for the EMBA SBOM json log file required by F17
+    local lSBOM_FILE="${LOG_DIR}/SBOM/EMBA_cyclonedx_sbom.json"
+    if [[ ! -f "${lSBOM_FILE}" ]]; then
+      print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires an existing EMBA SBOM file" "no_log"
+      print_output "[-] Missing SBOM file: ${ORANGE}${lSBOM_FILE}${NC}" "no_log"
+      print_output "[-] Please ensure the log directory is from a complete EMBA scan with F15 SBOM generation" "no_log"
+      exit 1
+    fi
   fi
 
   print_ln "no_log"
