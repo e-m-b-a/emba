@@ -532,7 +532,7 @@ main() {
 
     # Print additional information about the firmware (-Y, -X, -Z, -N)
     print_firmware_info "${FW_VENDOR}" "${FW_VERSION}" "${FW_DEVICE}" "${FW_NOTES}"
-    if [[ "${KERNEL}" -ne 1 ]] && [[ "${CONTAINER_EXTRACT}" -ne 1 ]] && [[ "${ONLY_DEP}" -eq 0 ]]; then
+    if [[ "${KERNEL}" -ne 1 ]] && [[ "${CONTAINER_EXTRACT}" -ne 1 ]] && [[ "${ONLY_DEP}" -eq 0 ]] && [[ ${RESCAN_SBOM} -eq 0 ]]; then
       check_init_size
     fi
 
@@ -827,7 +827,8 @@ main() {
   # RESCAN_SBOM mode - Skip to F17 module execution only
   #######################################################################################
   if [[ ${RESCAN_SBOM} -eq 1 ]]; then
-    print_output "[*] ${ORANGE}RESCAN_SBOM${NC} mode: Skipping all phases except reporting (F17 CVE analysis)" "main"
+    print_output "[*] $(print_date) - Rescan SBOM mode enabled" "main"
+    print_output "[*] $(print_date) - Skipping all phases except reporting (F17 CVE analysis)" "main"
     export TESTING_DONE=1
   fi
 
