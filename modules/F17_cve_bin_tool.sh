@@ -180,10 +180,54 @@ F17_cve_bin_tool() {
 
   print_output "[*] Generating final VEX vulnerability json ..." "no_log"
 
-  # Create datetime suffix for rescan mode
+  # Handle rescan mode: preserve existing files as "previous" versions and use standard names for new files
   local lFILE_SUFFIX=""
   if [[ ${RESCAN_SBOM:-0} -eq 1 ]]; then
-    lFILE_SUFFIX="_$(date +"%Y%m%d_%H%M%S")"
+    print_output "[*] Backing up existing VEX files as previous versions" "no_log"
+    
+    # Handle EMBA_sbom_vex_only.json
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
+      # Chain previous versions if multiple rescans exist
+      local lCOUNTER=1
+      while [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous_${lCOUNTER}.json" ]]; do
+        ((lCOUNTER++))
+      done
+      
+      # If there's already a .previous.json file, rename it to numbered version
+      if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous.json" ]]; then
+        mv "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous.json" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous_${lCOUNTER}.json"
+      fi
+      
+      # Move current file to .previous
+      mv "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous.json"
+      print_output "[*] Backed up existing VEX-only file as EMBA_sbom_vex_only.previous.json" "no_log"
+    fi
+    
+    # Handle EMBA_cyclonedx_vex_sbom.json
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
+      # Chain previous versions if multiple rescans exist
+      local lCOUNTER=1
+      while [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous_${lCOUNTER}.json" ]]; do
+        ((lCOUNTER++))
+      done
+      
+      # If there's already a .previous.json file, rename it to numbered version
+      if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous.json" ]]; then
+        mv "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous.json" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous_${lCOUNTER}.json"
+      fi
+      
+      # Move current file to .previous
+      mv "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous.json"
+      print_output "[*] Backed up existing SBOM+VEX file as EMBA_cyclonedx_vex_sbom.previous.json" "no_log"
+    fi
+    
+    # Handle EMBA_sbom_vex_tmp.json if it exists
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
+      rm "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+    fi
+    
+    # New files will use standard names (no suffix) so HTML integration works automatically
+    lFILE_SUFFIX=""
   fi
 
   # now we need to build our full vex json
