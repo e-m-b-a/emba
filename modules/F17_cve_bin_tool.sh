@@ -184,7 +184,7 @@ F17_cve_bin_tool() {
   local lFILE_SUFFIX=""
   if [[ ${RESCAN_SBOM:-0} -eq 1 ]]; then
     print_output "[*] Backing up existing VEX files as previous versions" "no_log"
-    
+
     # Handle EMBA_sbom_vex_only.json
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
       # Chain previous versions if multiple rescans exist
@@ -192,17 +192,17 @@ F17_cve_bin_tool() {
       while [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous_${lCOUNTER}.json" ]]; do
         ((lCOUNTER++))
       done
-      
+
       # If there's already a .previous.json file, rename it to numbered version
       if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous.json" ]]; then
         mv "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous.json" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous_${lCOUNTER}.json"
       fi
-      
+
       # Move current file to .previous
       mv "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.previous.json"
       print_output "[*] Backed up existing VEX-only file as EMBA_sbom_vex_only.previous.json" "no_log"
     fi
-    
+
     # Handle EMBA_cyclonedx_vex_sbom.json
     if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
       # Chain previous versions if multiple rescans exist
@@ -210,22 +210,22 @@ F17_cve_bin_tool() {
       while [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous_${lCOUNTER}.json" ]]; do
         ((lCOUNTER++))
       done
-      
+
       # If there's already a .previous.json file, rename it to numbered version
       if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous.json" ]]; then
         mv "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous.json" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous_${lCOUNTER}.json"
       fi
-      
+
       # Move current file to .previous
       mv "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.previous.json"
       print_output "[*] Backed up existing SBOM+VEX file as EMBA_cyclonedx_vex_sbom.previous.json" "no_log"
     fi
-    
+
     # Handle EMBA_sbom_vex_tmp.json if it exists
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
       rm "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
     fi
-    
+
     # New files will use standard names (no suffix) so HTML integration works automatically
     lFILE_SUFFIX=""
   fi
