@@ -79,7 +79,7 @@ sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-emulation.emb
 
 ## Get involved
 The IoT is growing, the development is ongoing, and there are many new features that we want to add.
-We welcome [pull requests](https://github.com/e-m-b-a/emba/pulls) and [issues](https://github.com/e-m-b-a/emba/issues) on GitHub. Also check the [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTORS](./CONTRIBUTORS.md) documentation for further details on how to get part of the _EMBA_ commmunity.
+We welcome [pull requests](https://github.com/e-m-b-a/emba/pulls) and [issues](https://github.com/e-m-b-a/emba/issues) on GitHub. Also check the [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTORS](./CONTRIBUTORS.md) documentation for further details on how to get part of the _EMBA_ community.
 
 ## Team
 

@@ -71,7 +71,7 @@ S110_yara_check() {
 
     print_ln
     print_ln
-    print_output "[*] Found ${ORANGE}${lCOUNTING}${NC} yara rule matches in ${ORANGE}${#FILE_ARR[@]}${NC} files."
+    print_output "[*] Found ${ORANGE}${lCOUNTING}${NC} yara rule matches in extracted firmware files."
     write_log ""
     write_log "[*] Statistics:${lCOUNTING}"
 

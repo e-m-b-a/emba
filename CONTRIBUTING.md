@@ -36,7 +36,7 @@ It also sketches the typical integration process of patches.
 
 ## 2) Code Guidelines
 
-- General: Identation should be 2 spaces (no tab character)
+- General: Indentation should be 2 spaces (no tab character)
 
 - Comments: use # sign followed by a space. When needed, create a comment block. Blank lines: allowed
 

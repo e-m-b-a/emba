@@ -4,7 +4,7 @@
       "strict"
    ],
    "licenses": [
-      "unknwon"
+      "unknown"
    ],
    "strict_grep_commands": [
       "^Version\\ [0-9](\\.[0-9]+)+?$"

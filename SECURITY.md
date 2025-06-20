@@ -16,6 +16,6 @@ There are multiple reasons for that:
 
 If there is a security problem within _EMBA_ please open an issue or contact us via one of the following ways:
 * [Open an Issue](https://github.com/e-m-b-a/emba/issues)
-* [Start a Discussions](https://github.com/e-m-b-a/emba/discussions)
+* [Start a Discussion](https://github.com/e-m-b-a/emba/discussions)
 * [PM us via Twitter](https://twitter.com/securefirmware)
 * [PM us via Mastodon](https://infosec.exchange/@securefirmware)
