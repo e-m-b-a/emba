@@ -92,7 +92,7 @@ S109_jtr_local_pw_cracking() {
 
     # sort and make unique
     if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
-      sort -u --o "${LOG_PATH_MODULE}"/jtr_hashes.txt "${LOG_PATH_MODULE}"/jtr_hashes.txt
+      sort -u -o "${LOG_PATH_MODULE}"/jtr_hashes.txt "${LOG_PATH_MODULE}"/jtr_hashes.txt
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
