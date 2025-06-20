@@ -161,6 +161,8 @@ binary_kernel_check_threader() {
             write_log "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}" "${lLOG_FILE}"
             export CONFIDENCE_LEVEL=4
             version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"
+            # from now on we can work with our generated elf file
+            lFILE_PATH+=".elf"
           else
             write_log "" "${lLOG_FILE}"
             write_log "[-] No Linux kernel elf file was created." "${lLOG_FILE}"
@@ -171,9 +173,9 @@ binary_kernel_check_threader() {
 
       # if we have not elf file created and logged we now log the original kernel
       # in case we have an elf file lFILE_PATH was already included in the SBOM
-      if [[ ! -f "${lFILE_PATH}".elf ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
+      if [[ ! -f "${lFILE_PATH}" ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
         if version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
-          # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
+          # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} for non ELF kernel -> continue to next binary"
           # continue 2
           return
         fi
@@ -181,6 +183,7 @@ binary_kernel_check_threader() {
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
+        print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
         disable_strict_mode "${STRICT_MODE}" 0
         extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
         lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
@@ -189,9 +192,10 @@ binary_kernel_check_threader() {
         lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
         demess_kv_version "${lK_VER_TMP}"
         # -> KV_ARR
+        # we are using lBINARY_ENTRY which is already populated with our ELF data
         lK_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
 
-        if [[ "${lK_FILE}" == *"ELF "* ]]; then
+        if [[ "${lK_FILE}" == *"ELF"* ]]; then
           lK_SYMBOLS="$(readelf -s "${lFILE_PATH}" | grep -c "FUNC\|OBJECT" || true)"
 
           [[ "${lK_FILE}" == *"LSB"* ]] && lK_ARCH_END="EL"
@@ -238,14 +242,17 @@ binary_kernel_check_threader() {
       fi
     # ASCII kernel config files:
     elif file -b "${lFILE_PATH}" | grep -q "ASCII"; then
-      lCFG_MD5=$(md5sum "${lFILE_PATH}" | awk '{print $1}')
-      if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
-        lK_CON_DET=$(grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" "${lSTRINGS_OUTPUT}" || true)
-        if [[ "${lK_CON_DET}" =~ \ Kernel\ Configuration ]]; then
-          write_log "" "${lLOG_FILE}"
-          write_log "[+] Found kernel configuration file: ${ORANGE}${lFILE_PATH}${NC}" "${lLOG_FILE}"
-          check_kconfig "${lFILE_PATH}" "NA" "${lLOG_FILE}"
-          KCFG_MD5_ARR+=("${lCFG_MD5}")
+      # ensure this is only done in non SBOM_MINIMAL mode
+      if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
+        lCFG_MD5=$(md5sum "${lFILE_PATH}" | awk '{print $1}')
+        if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
+          lK_CON_DET=$(grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" "${lSTRINGS_OUTPUT}" || true)
+          if [[ "${lK_CON_DET}" =~ \ Kernel\ Configuration ]]; then
+            write_log "" "${lLOG_FILE}"
+            write_log "[+] Found kernel configuration file: ${ORANGE}${lFILE_PATH}${NC}" "${lLOG_FILE}"
+            check_kconfig "${lFILE_PATH}" "NA" "${lLOG_FILE}"
+            KCFG_MD5_ARR+=("${lCFG_MD5}")
+          fi
         fi
       fi
     fi

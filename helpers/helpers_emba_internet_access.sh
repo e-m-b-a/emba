@@ -58,7 +58,22 @@ kernel_downloader() {
 
   mapfile -t lK_VERSIONS_ARR < <(cut -d\; -f2 "${S24_CSV_LOG}" | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
   print_output "[*] $(print_date) - Detected kernel details:"
-  print_output "$(indent "$(cat "${S24_CSV_LOG}")")"
+  mapfile -t lKERNEL_DETAILS_TMP_ARR < "${S24_CSV_LOG}"
+  for lKERNEL_DETAILS_TMP_ENTRY in "${lKERNEL_DETAILS_TMP_ARR[@]}"; do
+    local lKERNEL_DETAILS_TMP_FILE=""
+    local lKERNEL_DETAILS_TMP_VERSION=""
+    local lKERNEL_DETAILS_TMP_ARCH=""
+    local lKERNEL_DETAILS_TMP_END=""
+
+    lKERNEL_DETAILS_TMP_FILE=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f1)
+    lKERNEL_DETAILS_TMP_VERSION=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f2)
+    lKERNEL_DETAILS_TMP_ARCH=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f7)
+    lKERNEL_DETAILS_TMP_END=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f8)
+    if [[ -z "${lKERNEL_DETAILS_TMP_VERSION}" ]]; then
+      continue
+    fi
+    print_output "$(indent "$(orange "${lKERNEL_DETAILS_TMP_FILE} - ${lKERNEL_DETAILS_TMP_VERSION} - ${lKERNEL_DETAILS_TMP_ARCH}-${lKERNEL_DETAILS_TMP_END}")")"
+  done
 
   for lK_VERSION in "${lK_VERSIONS_ARR[@]}"; do
     print_output "[*] $(print_date) - Checking download of kernel version ${ORANGE}${lK_VERSION}${NC}"
