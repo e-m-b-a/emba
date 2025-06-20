@@ -34,7 +34,7 @@ NC="\033[0m"  # no color
 
 if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
   PoC_CNT_BEFORE="$(wc -l "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv | awk '{print $1}')"
-  echo -e "${GREEN}[+] Found ${ORANGE}${PoC_CNT_BEFORE}${GREEN} advisories with PoC code (before udpate)"
+  echo -e "${GREEN}[+] Found ${ORANGE}${PoC_CNT_BEFORE}${GREEN} advisories with PoC code (before update)"
 fi
 
 if [[ -d "${SAVE_PATH}" ]]; then
