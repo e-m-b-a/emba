@@ -570,8 +570,8 @@ report_kvulns_csv() {
   local lCVE_SYMBOL_FOUND=0
   local lCVE_COMPILE_FOUND=0
 
-  lCVE=$(echo "${lVULN}" | cut -d, -f5)
-  lCVSS="$(echo "${lVULN}" | cut -d: -f7)"
+  lCVE=$(echo "${lVULN}" | cut -d, -f4)
+  lCVSS="$(echo "${lVULN}" | cut -d, -f6)"
   lCVE_SYMBOL_FOUND=$(find "${LOG_PATH_MODULE}" -maxdepth 1 -name "${lCVE}_symbol_verified.txt" | wc -l)
   lCVE_COMPILE_FOUND=$(find "${LOG_PATH_MODULE}" -maxdepth 1 -name "${lCVE}_compiled_verified.txt" | wc -l)
   write_log "${lK_VERSION};${ORIG_K_ARCH};${lCVE};NA;${lCVSS};${lCVE_SYMBOL_FOUND:-0};${lCVE_COMPILE_FOUND:-0}" "${LOG_PATH_MODULE}"/cve_results_kernel_"${lK_VERSION}".csv
