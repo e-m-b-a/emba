@@ -63,6 +63,7 @@ set_defaults() {
   export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
+  export RESCAN_SBOM=0          # rescan existing log directory with F17 module only
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default EMBA scan

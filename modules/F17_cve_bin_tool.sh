@@ -17,6 +17,25 @@
 #               via cve-bin-tool
 # shellcheck disable=SC2153
 
+backup_vex_file() {
+  local lFILE_PATH="${1:-}"
+
+  if [[ -f "${lFILE_PATH}" ]]; then
+    local lCOUNTER=1
+    local lBASE_NAME="${lFILE_PATH%%.json}"
+    while [[ -f "${lBASE_NAME}.previous_${lCOUNTER}.json" ]]; do
+      ((lCOUNTER++))
+    done
+
+    if [[ -f "${lBASE_NAME}.previous.json" ]]; then
+      mv "${lBASE_NAME}.previous.json" "${lBASE_NAME}.previous_${lCOUNTER}.json"
+    fi
+
+    mv "${lFILE_PATH}" "${lBASE_NAME}.previous.json"
+    print_output "[*] Backed up ${lFILE_PATH} as $(basename "${lBASE_NAME}.previous.json")" "no_log"
+  fi
+}
+
 F17_cve_bin_tool() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final vulnerability aggregator"
@@ -181,17 +200,34 @@ F17_cve_bin_tool() {
 
   print_output "[*] Generating final VEX vulnerability json ..." "no_log"
 
+  # Handle rescan mode: preserve existing files as "previous" versions and use standard names for new files
+  local lFILE_SUFFIX=""
+  if [[ "${RESCAN_SBOM:-0}" -eq 1 ]]; then
+    print_output "[*] Backing up existing VEX files as previous versions" "no_log"
+
+    backup_vex_file "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+    backup_vex_file "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json"
+
+    # Handle EMBA_sbom_vex_tmp.json if it exists
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
+      rm "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+    fi
+
+    # New files will use standard names (no suffix) so HTML integration works automatically
+    lFILE_SUFFIX=""
+  fi
+
   # now we need to build our full vex json
   mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json")
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
     local lNEG_LOG=1
-    echo "\"vulnerabilities\": [" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+    echo "\"vulnerabilities\": [" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp${lFILE_SUFFIX}.json"
 
     for lVEX_FILE_ID in "${!lVEX_JSON_ENTRIES_ARR[@]}"; do
       lVEX_FILE="${lVEX_JSON_ENTRIES_ARR["${lVEX_FILE_ID}"]}"
       if [[ -s "${lVEX_FILE}" ]]; then
         if (json_pp < "${lVEX_FILE}" &> /dev/null); then
-          cat "${lVEX_FILE}" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+          cat "${lVEX_FILE}" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp${lFILE_SUFFIX}.json"
         else
           print_output "[!] WARNING: SBOM component ${lVEX_FILE} failed to validate with json_pp"
           continue
@@ -201,33 +237,34 @@ F17_cve_bin_tool() {
         continue
       fi
       if [[ $((lVEX_FILE_ID+1)) -lt "${#lVEX_JSON_ENTRIES_ARR[@]}" ]]; then
-        echo -n "," >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+        echo -n "," >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp${lFILE_SUFFIX}.json"
       fi
     done
 
-    echo -n "]" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
-    tr -d '\n' < "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+    echo -n "]" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp${lFILE_SUFFIX}.json"
+    tr -d '\n' < "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp${lFILE_SUFFIX}.json" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json"
 
-    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" ]]; then
       sub_module_title "VEX - Vulnerability Exploitability eXchange"
-      print_output "[+] VEX data in json format is available" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+      print_output "[+] VEX data in json format is available" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json"
 
       # let's replace the vulnerability marker with our VEX:
-      sed -e '/\"vulnerabilities\": \[\]/{r '"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" -e 'd;}' "${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json" > "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" || print_error "[-] SBOM - VEX merge failed"
+      sed -e '/\"vulnerabilities\": \[\]/{r '"${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" -e 'd;}' "${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json" > "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom${lFILE_SUFFIX}.json" || print_error "[-] SBOM - VEX merge failed"
 
       # now we ensure that we have a valid vex only json:
       # https://github.com/CycloneDX/bom-examples/blob/master/VEX/vex.json
-      sed -i '1i "version": 1,' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
-      sed -i '1i "specVersion": "1.5",' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
-      sed -i '1i "bomFormat": "CycloneDX",' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
-      sed -i '1i {' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i "version": 1,' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i "specVersion": "1.5",' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i "bomFormat": "CycloneDX",' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" || print_error "[-] VEX only JSON preparation failed"
+      sed -i '1i {' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" || print_error "[-] VEX only JSON preparation failed"
 
       # adjust the end of our json:
-      echo '}' >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      echo '}' >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_only${lFILE_SUFFIX}.json" || print_error "[-] VEX only JSON preparation failed"
     fi
-    if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
-      print_output "[+] CycloneDX SBOM with VEX data in JSON format is ready" "" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json"
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom${lFILE_SUFFIX}.json" ]]; then
+      print_output "[+] CycloneDX SBOM with VEX data in JSON format is ready" "" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom${lFILE_SUFFIX}.json"
     fi
+
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
