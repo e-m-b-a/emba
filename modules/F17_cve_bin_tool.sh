@@ -110,7 +110,7 @@ F17_cve_bin_tool() {
       cp "${S118_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" 2>/dev/null || true
       cp "${S118_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" 2>/dev/null || true
       cp "${S118_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || true
-      if [[ -f  "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
+      if [[ -f "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
         lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPRODUCT_NAME}.*:.*${lPRODUCT_VERSION}.*:" "${S118_LOG_DIR}"/vuln_summary.txt || true)
         echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
@@ -130,7 +130,7 @@ F17_cve_bin_tool() {
       cp "${S36_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] lighttpd CVE log copy process failed"
       cp "${S36_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] lighttpd CVE log copy process failed"
       cp "${S36_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] lighttpd CVE log copy process failed"
-      if [[ -f  "${S36_LOG_DIR}/vuln_summary.txt" ]]; then
+      if [[ -f "${S36_LOG_DIR}/vuln_summary.txt" ]]; then
         lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPRODUCT_NAME}.*:.*${lPRODUCT_VERSION}.*:" "${S36_LOG_DIR}"/vuln_summary.txt || true)
         echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
@@ -151,8 +151,9 @@ F17_cve_bin_tool() {
       cp "${S26_LOG_DIR}/json/"* "${LOG_PATH_MODULE}/json/" || print_error "[-] Linux Kernel CVE log copy process failed"
       cp "${S26_LOG_DIR}/cve_sum/"* "${LOG_PATH_MODULE}/cve_sum/" || print_error "[-] Linux Kernel CVE log copy process failed"
       cp "${S26_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] Linux Kernel CVE log copy process failed"
-      if [[ -f  "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
-        cat "${S26_LOG_DIR}/vuln_summary.txt" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+      if [[ -f "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
+        lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPRODUCT_NAME}.*:.*${lPRODUCT_VERSION}.*:" "${S26_LOG_DIR}"/vuln_summary.txt || true)
+        echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
       local lBIN_LOG=""
       lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPRODUCT_NAME}_${lPRODUCT_VERSION}_finished.txt" | sort -u | head -1)
@@ -841,6 +842,9 @@ tear_down_cve_threader() {
 
   # make it nice:
   jq . "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.json"
+
+  # cleanup
+  rm "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || true
 }
 
 get_kernel_s25_data() {
