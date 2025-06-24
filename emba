@@ -370,7 +370,7 @@ main() {
 
   # Validate RESCAN_SBOM mode requirements
   if [[ "${RESCAN_SBOM}" -eq 1 ]]; then
-    if [[ -z "${LOG_DIR}" ]] || [[ "${LOG_DIR}" == *"/logs" ]]; then
+    if [[ -z "${LOG_DIR}" ]]; then
       print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires an existing log directory specified with ${ORANGE}-l${NC} parameter" "no_log"
       print_output "[-] The log directory must be from a previous EMBA scan and contain an SBOM" "no_log"
       exit 1
@@ -381,10 +381,9 @@ main() {
       exit 1
     fi
     # Finally check for the EMBA SBOM json log file required by F17
-    local lSBOM_FILE="${LOG_DIR}/SBOM/EMBA_cyclonedx_sbom.json"
-    if [[ ! -f "${lSBOM_FILE}" ]]; then
+    if [[ ! -f "${EMBA_SBOM_JSON}" ]]; then
       print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires an existing EMBA SBOM file" "no_log"
-      print_output "[-] Missing SBOM file: ${ORANGE}${lSBOM_FILE}${NC}" "no_log"
+      print_output "[-] Missing SBOM file: ${ORANGE}${EMBA_SBOM_JSON}${NC}" "no_log"
       print_output "[-] Please ensure the log directory is from a complete EMBA scan with F15 SBOM generation" "no_log"
       exit 1
     fi
@@ -696,7 +695,7 @@ main() {
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:d:De:Ef:Fhijk:l:m:N:o:p:P:qQrsStT:UX:yY:WzZ: OPT ; do
+    while getopts a:A:BcC:d:De:Ef:Fhijk:l:m:N:o:p:P:qQRrsStT:UX:yY:WzZ: OPT ; do
       case ${OPT} in
         D|f|i|l|o)
           ;;

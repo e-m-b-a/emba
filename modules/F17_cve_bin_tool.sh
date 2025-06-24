@@ -45,7 +45,7 @@ F17_cve_bin_tool() {
   # our first approach is to use our beautiful SBOM and walk through it
   # if for any reasons (disabled F15 module) there is no SBOM we check for s08_package_mgmt_extractor.csv
 
-  local lEMBA_SBOM_JSON="${SBOM_LOG_PATH%\/}/EMBA_cyclonedx_sbom.json"
+  local lEMBA_SBOM_JSON="${EMBA_SBOM_JSON}"
   local lSBOM_ARR=()
   local lSBOM_ENTRY=""
   local lWAIT_PIDS_F17_ARR=()
