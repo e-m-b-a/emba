@@ -154,6 +154,8 @@ emba_parameter_parsing() {
         ;;
       R)
         export RESCAN_SBOM=1
+	# in VEX rescanning mode we only run F17
+        export SELECT_MODULES=("f17")
         ;;
       r)
         # removes the extracted firmware as well as the emulation archives from l10

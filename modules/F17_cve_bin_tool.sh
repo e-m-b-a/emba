@@ -17,25 +17,6 @@
 #               via cve-bin-tool
 # shellcheck disable=SC2153
 
-backup_vex_file() {
-  local lFILE_PATH="${1:-}"
-
-  if [[ -f "${lFILE_PATH}" ]]; then
-    local lCOUNTER=1
-    local lBASE_NAME="${lFILE_PATH%%.json}"
-    while [[ -f "${lBASE_NAME}.previous_${lCOUNTER}.json" ]]; do
-      ((lCOUNTER++))
-    done
-
-    if [[ -f "${lBASE_NAME}.previous.json" ]]; then
-      mv "${lBASE_NAME}.previous.json" "${lBASE_NAME}.previous_${lCOUNTER}.json"
-    fi
-
-    mv "${lFILE_PATH}" "${lBASE_NAME}.previous.json"
-    print_output "[*] Backed up ${lFILE_PATH} as $(basename "${lBASE_NAME}.previous.json")" "no_log"
-  fi
-}
-
 F17_cve_bin_tool() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final vulnerability aggregator"
@@ -72,13 +53,12 @@ F17_cve_bin_tool() {
   sub_module_title "Software inventory overview"
   print_output "[*] Analyzing ${#lSBOM_ARR[@]} SBOM components ..." "no_log"
 
-  local lWAIT_PIDS_TEMP=()
   # first round is primarly for removing duplicates, unhandled_file entries and printing a quick initial overview for the html report
   # 2nd round is for the real testing
+  local lWAIT_PIDS_TEMP=()
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     sbom_preprocessing_threader "${lSBOM_ENTRY}" &
     local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_TEMP+=( "${lTMP_PID}" )
     max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_TEMP
     local lNEG_LOG=1
@@ -94,6 +74,7 @@ F17_cve_bin_tool() {
   fi
 
   sub_module_title "Vulnerability overview"
+
   # 2nd round with pre-processed array -> we are going to check for CVEs now
   while read -r lSBOM_ENTRY; do
     local lBOM_REF=""
@@ -117,7 +98,7 @@ F17_cve_bin_tool() {
     lPRODUCT_VERSION=$(jq --raw-output '.version' <<< "${lSBOM_ENTRY}")
 
     # avoid duplicates
-    if (grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
+    if grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"; then
       continue
     fi
     echo "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" >> "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
@@ -295,10 +276,6 @@ sbom_preprocessing_threader() {
 
   # lPRODUCT_NAME is only used for duplicate checking:
   lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
-  # ensure this product/version combination is not already in our testing array:
-  if (grep -q "\"name\":\"${lPRODUCT_NAME}\",\"version\":\"${lPRODUCT_VERSION}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
-    return
-  fi
 
   # extract all our possible vendor names and product names:
   mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<< "${lSBOM_ENTRY}")
@@ -315,9 +292,12 @@ sbom_preprocessing_threader() {
   lANCHOR="${lPRODUCT_ARR[0]//\'}_${lPRODUCT_VERSION}"
   lANCHOR="cve_${lANCHOR:0:20}"
 
-  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
-
+  # ensure this product/version combination is not already in our testing array:
+  if (grep -q "\"name\":\"${lPRODUCT_NAME}\",\"version\":\"${lPRODUCT_VERSION}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
+    return
+  fi
   echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
+  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 }
 
 cve_bin_tool_threader() {
@@ -913,5 +893,22 @@ get_epss_data() {
   echo "${lEPSS_EPSS};${lEPSS_PERC}"
 }
 
+backup_vex_file() {
+  local lFILE_PATH="${1:-}"
 
+  if [[ -f "${lFILE_PATH}" ]]; then
+    local lCOUNTER=1
+    local lBASE_NAME="${lFILE_PATH%%.json}"
+    while [[ -f "${lBASE_NAME}.previous_${lCOUNTER}.json" ]]; do
+      ((lCOUNTER++))
+    done
+
+    if [[ -f "${lBASE_NAME}.previous.json" ]]; then
+      mv "${lBASE_NAME}.previous.json" "${lBASE_NAME}.previous_${lCOUNTER}.json"
+    fi
+
+    mv "${lFILE_PATH}" "${lBASE_NAME}.previous.json"
+    print_output "[*] Backed up ${lFILE_PATH} as $(basename "${lBASE_NAME}.previous.json")" "no_log"
+  fi
+}
 

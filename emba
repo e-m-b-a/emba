@@ -765,10 +765,12 @@ main() {
       print_ln "no_log"
       welcome
       # default EMBA analysis mode:
-      local lQUEST_CONTAINER_=""
-      lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
-      print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
+      if [[ "${RESCAN_SBOM}" -ne 1 ]]; then
+        local lQUEST_CONTAINER_=""
+        lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
+        print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
+      fi
 
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then
@@ -997,9 +999,6 @@ main() {
   fi
   write_notification "Reporting phase started"
 
-  if [[ "${RESCAN_SBOM}" -eq 1 ]]; then
-    export SELECT_MODULES=("${SELECT_MODULES[@]}" "f17")
-  fi
   run_modules "F" "0" "${HTML}"
 
   [[ ${DISABLE_STATUS_BAR} -eq 0 ]] && remove_status_bar
