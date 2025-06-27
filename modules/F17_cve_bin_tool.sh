@@ -206,7 +206,7 @@ F17_cve_bin_tool() {
   fi
 
   # now we need to build our full vex json
-  mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json")
+  mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json" ! -name "*.tmp.json")
   print_output "[*] Building final VEX - Vulnerability Exploitability eXchange" "no_log"
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
     local lNEG_LOG=1
