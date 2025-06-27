@@ -41,6 +41,7 @@ F17_cve_bin_tool() {
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..." "no_log"
+
   if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
     print_error "[-] No SBOM available!"
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -74,6 +75,19 @@ F17_cve_bin_tool() {
   fi
 
   sub_module_title "Vulnerability overview"
+  # we need to wait for the import of the CVE database
+  # just to ensure everything is in place we wait a max of ~2 minutes
+  # if we fail we try to proceed and hope ...
+  local lCNT=0
+  while ! [[ -f "${TMP_DIR}/tmp_state_data.log" ]]; do
+    print_output "[*] Waiting for CVE database ..." "no_log"
+    lCNT=$((lCNT+1))
+    if [[ "${lCNT}" -gt 24 ]]; then
+      print_output "[-] CVE database not prepared in time ... trying to proceed"
+      break
+    fi
+    sleep 5
+  done
 
   # 2nd round with pre-processed array -> we are going to check for CVEs now
   while read -r lSBOM_ENTRY; do
