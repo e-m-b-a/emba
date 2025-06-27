@@ -98,7 +98,7 @@ F17_cve_bin_tool() {
     lPRODUCT_VERSION=$(jq --raw-output '.version' <<< "${lSBOM_ENTRY}")
 
     # avoid duplicates
-    if grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"; then
+    if (grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
       continue
     fi
     echo "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" >> "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
@@ -185,8 +185,16 @@ F17_cve_bin_tool() {
   if [[ "${RESCAN_SBOM:-0}" -eq 1 ]]; then
     print_output "[*] Backing up existing VEX files as previous versions" "no_log"
 
-    backup_vex_file "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
-    backup_vex_file "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json"
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
+      backup_vex_file "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+    else
+      print_output "[-] No VEX only json file found"
+    fi
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
+      backup_vex_file "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json"
+    else
+      print_output "[-] No VEX SBOM json file found"
+    fi
 
     # Handle EMBA_sbom_vex_tmp.json if it exists
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
@@ -199,6 +207,7 @@ F17_cve_bin_tool() {
 
   # now we need to build our full vex json
   mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json")
+  print_output "[*] Building final VEX - Vulnerability Exploitability eXchange" "no_log"
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
     local lNEG_LOG=1
     echo "\"vulnerabilities\": [" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp${lFILE_SUFFIX}.json"
@@ -244,7 +253,6 @@ F17_cve_bin_tool() {
     if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom${lFILE_SUFFIX}.json" ]]; then
       print_output "[+] CycloneDX SBOM with VEX data in JSON format is ready" "" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom${lFILE_SUFFIX}.json"
     fi
-
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
