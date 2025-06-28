@@ -368,6 +368,27 @@ main() {
   emba_parameter_parsing "$@"
   set_log_paths
 
+  # Validate RESCAN_SBOM mode requirements
+  if [[ "${RESCAN_SBOM}" -eq 1 ]]; then
+    if [[ -z "${LOG_DIR}" ]]; then
+      print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires an existing log directory specified with ${ORANGE}-l${NC} parameter" "no_log"
+      print_output "[-] The log directory must be from a previous EMBA scan and contain an SBOM" "no_log"
+      exit 1
+    fi
+    if [[ ! -d "${LOG_DIR}" ]]; then
+      print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires the log directory ${ORANGE}${LOG_DIR}${NC} to exist" "no_log"
+      print_output "[-] Please specify a valid existing log directory from a previous EMBA scan" "no_log"
+      exit 1
+    fi
+    # Finally check for the EMBA SBOM json log file required by F17
+    if [[ ! -f "${EMBA_SBOM_JSON}" ]]; then
+      print_output "[-] ${RED}ERROR:${NC} RESCAN_SBOM mode requires an existing EMBA SBOM file" "no_log"
+      print_output "[-] Missing SBOM file: ${ORANGE}${EMBA_SBOM_JSON}${NC}" "no_log"
+      print_output "[-] Please ensure the log directory is from a complete EMBA scan with F15 SBOM generation" "no_log"
+      exit 1
+    fi
+  fi
+
   print_ln "no_log"
 
   write_notification "EMBA starting"
@@ -481,7 +502,7 @@ main() {
 
     # kernel downloader runs on the host and waits for an identified kernel version. Afterwards
     # it tries to download the kernel sources for further analysis
-    if [[ ${IN_DOCKER} -eq 0 ]]; then
+    if [[ ${IN_DOCKER} -eq 0 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
       kernel_downloader &
       K_DOWN_PID="$!"
       store_kill_pids "${K_DOWN_PID}"
@@ -518,7 +539,7 @@ main() {
 
     # Print additional information about the firmware (-Y, -X, -Z, -N)
     print_firmware_info "${FW_VENDOR}" "${FW_VERSION}" "${FW_DEVICE}" "${FW_NOTES}"
-    if [[ "${KERNEL}" -ne 1 ]] && [[ "${CONTAINER_EXTRACT}" -ne 1 ]] && [[ "${ONLY_DEP}" -eq 0 ]]; then
+    if [[ "${KERNEL}" -ne 1 ]] && [[ "${CONTAINER_EXTRACT}" -ne 1 ]] && [[ "${ONLY_DEP}" -eq 0 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
       check_init_size
     fi
 
@@ -561,6 +582,10 @@ main() {
       DIFF_MODE=1
       print_output "[*] $(print_date) - Multiple firmware binarie detected." "no_log"
       print_output "    EMBA starts in firmware diff mode." "no_log"
+    elif [[ "${RESCAN_SBOM}" -eq 1 ]]; then
+      print_output "[*] $(print_date) - Rescan SBOM mode detected." "no_log"
+      print_output "    EMBA will reuse existing SBOM for fresh CVE analysis." "no_log"
+      export OUTPUT_DIR="${LOG_DIR}"
     else
       print_output "[!] $(print_date) - Invalid firmware file" "no_log"
       print_help
@@ -670,7 +695,7 @@ main() {
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:d:De:Ef:Fhijk:l:m:N:o:p:P:qQrsStT:UX:yY:WzZ: OPT ; do
+    while getopts a:A:BcC:d:De:Ef:Fhijk:l:m:N:o:p:P:qQRrsStT:UX:yY:WzZ: OPT ; do
       case ${OPT} in
         D|f|i|l|o)
           ;;
@@ -740,10 +765,12 @@ main() {
       print_ln "no_log"
       welcome
       # default EMBA analysis mode:
-      local lQUEST_CONTAINER_=""
-      lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
-      print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
+      if [[ "${RESCAN_SBOM}" -ne 1 ]]; then
+        local lQUEST_CONTAINER_=""
+        lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
+        print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
+      fi
 
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then
@@ -806,10 +833,19 @@ main() {
   fi
 
   #######################################################################################
+  # RESCAN_SBOM mode - Skip to F17 module execution only
+  #######################################################################################
+  if [[ "${RESCAN_SBOM}" -eq 1 ]]; then
+    print_output "[*] $(print_date) - Rescan SBOM mode enabled" "main"
+    print_output "[*] $(print_date) - Skipping all phases except reporting (F17 CVE analysis)" "main"
+    export TESTING_DONE=1
+  fi
+
+  #######################################################################################
   # Quests (Q-modules)
   #######################################################################################
 
-  if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
     if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
       while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
         sleep 1
@@ -834,7 +870,7 @@ main() {
   #######################################################################################
   # Pre-Check (P-modules)
   #######################################################################################
-  if [[ "${PRE_CHECK}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ "${PRE_CHECK}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
@@ -872,7 +908,7 @@ main() {
   #######################################################################################
   # Diff mode (D-modules)
   #######################################################################################
-  if [[ "${DIFF_MODE}" -eq 1 ]] ; then
+  if [[ "${DIFF_MODE}" -eq 1 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
@@ -903,7 +939,7 @@ main() {
   # Firmware-Check (S modules)
   #######################################################################################
   WAIT_PIDS=()
-  if [[ ${FIRMWARE} -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ "${FIRMWARE}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
     print_output "\n=================================================================\n" "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
@@ -932,7 +968,7 @@ main() {
   #######################################################################################
   # Live Emulation - Check (L-modules)
   #######################################################################################
-  if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
+  if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]] && [[ "${RESCAN_SBOM}" -eq 0 ]]; then
     print_output "\n=================================================================\n" "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
       print_output "[!] $(print_date) - System emulation phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
