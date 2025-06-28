@@ -62,7 +62,7 @@ I13_disasm() {
 
         if ! [[ -f "external/capa" ]]; then
           download_file "Capa" "https://github.com/mandiant/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip" "external/capa-v${CAPA_VERSION}-linux.zip"
-          unzip external/capa-v"${CAPA_VERSION}"-linux.zip -d external || ( echo "Could not install EMBA component binutils" && exit 1 )
+          unzip external/capa-v"${CAPA_VERSION}"-linux.zip -d external || ( echo "Could not install EMBA component Capa" && exit 1 )
           rm external/capa-v"${CAPA_VERSION}"-linux.zip
         fi
 
