@@ -14,7 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  Installs basic toole which are always needed for EMBA and currently have no dedicated installer module
+# Description:  Installs basic tools which are always needed for EMBA and currently have no dedicated installer module
 
 I01_default_apps(){
   module_title "${FUNCNAME[0]}"
@@ -34,7 +34,6 @@ I01_default_apps(){
     print_tool_info "tcllib" 1
     print_tool_info "u-boot-tools" 1
     print_tool_info "python3-bandit" 1
-    print_tool_info "iputils-ping" 1
     # john password cracker
     print_tool_info "john" 1
     print_tool_info "john-data" 1

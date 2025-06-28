@@ -45,6 +45,7 @@ export BOLD='\033[1m'
 export NC='\033[0m' # no color
 
 SOURCES=()
+JSON_SOURCES=()
 MODULES_TO_CHECK_ARR=()
 MODULES_TO_CHECK_ARR_TAB=()
 MODULES_TO_CHECK_ARR_SEMGREP=()
@@ -148,7 +149,6 @@ dockerchecker() {
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
-      ((MODULES_TO_CHECK=MODULES_TO_CHECK+1))
       MODULES_TO_CHECK_ARR_DOCKER+=( "${DOCKER_COMP}" )
     fi
   done
