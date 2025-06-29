@@ -1105,7 +1105,12 @@ handle_fs_mounts() {
 
     print_output "[*] Found filesystem mount and analysing it: ${ORANGE}${lFS_MOUNT}${NC}"
     # as the original mount will not work, we need to remove it from the startup file:
-    sed -i 's|'"${lFS_MOUNT}"'|\#'"${lFS_MOUNT}"'|g' "${MNT_POINT}""${lINIT_FILE}"
+    if [[ -f "${MNT_POINT}""${lINIT_FILE}" ]]; then
+      sed -i 's|'"${lFS_MOUNT}"'|\#'"${lFS_MOUNT}"'|g' "${MNT_POINT}""${lINIT_FILE}"
+    else
+      print_error "[-] Init file ${MNT_POINT}${lINIT_FILE} NOT available ... returning but this could result in further issues"
+      return
+    fi
 
     lMOUNT_PT=$(echo "${lFS_MOUNT}" | awk '{print $5}')
     lMOUNT_FS=$(echo "${lFS_MOUNT}" | grep " \-t " | sed 's/.*-t //g' | awk '{print $1}')
@@ -2544,7 +2549,7 @@ check_online_stat() {
       if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
         if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
           print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
-          ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}"
+          ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
           print_ln
           write_log "${GREEN}[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp
         fi

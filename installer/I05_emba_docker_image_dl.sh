@@ -93,7 +93,16 @@ I05_emba_docker_image_dl() {
 
           # Make sure the image has the latest label
           docker tag "${CONTAINER}" "${CONTAINER/:*}:latest"
-          sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
+
+          # Ensure compatibility between GNU sed and BSD sed
+          if sed --version >/dev/null 2>&1; then
+            # GNU sed
+            sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
+          else
+            # BSD sed
+            sed -i '' "/image:/c\    image: ${CONTAINER}" docker-compose.yml
+          fi
+
           export DOCKER_CLI_EXPERIMENTAL=disabled
           "${DOCKER_COMPOSE[@]}" up --no-start
         else

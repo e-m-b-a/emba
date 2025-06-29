@@ -26,7 +26,7 @@ import_helper() {
   local lHELPER_FILE=""
   mapfile -d '' lHELPERS_ARR < <(find "${HELP_DIR}" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for lHELPER_FILE in "${lHELPERS_ARR[@]}" ; do
-    if ( file -b "${lHELPER_FILE}" | grep -q "shell script" ) && ! [[ "${lHELPER_FILE}" =~ \ |\' ]] ; then
+    if [[ $(head -n 1 "${lHELPER_FILE}") =~ ^#!.*bash ]] && ! [[ "${lHELPER_FILE}" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "${lHELPER_FILE}"

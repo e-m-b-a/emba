@@ -17,7 +17,7 @@
 
 # Description:  Installs needed stuff for EMBA
 
-# it the installer fails you can try to change it to 0
+# if the installer fails you can try to change it to 0
 STRICT_MODE=1
 
 ORIG_USER="${SUDO_USER:-${USER}}"
@@ -101,7 +101,7 @@ while getopts CdDFghlrsc: OPT ; do
     d)
       export DOCKER_SETUP=1
       export CVE_SEARCH=0
-      echo -e "${GREEN}""${BOLD}""Install all dependecies for EMBA in default/docker mode""${NC}"
+      echo -e "${GREEN}""${BOLD}""Install all dependencies for EMBA in default/docker mode""${NC}"
       ;;
     D)
       export IN_DOCKER=1
