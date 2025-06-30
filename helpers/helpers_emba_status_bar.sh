@@ -490,6 +490,7 @@ kill_box_pid() {
   while [[ -e /proc/"${lPID}" ]]; do
     # print_output "[*] Status bar - kill pid: $lPID" "no_log"
     kill -9 "${lPID}" 2>/dev/null || true
+    sleep 0.1
   done
 }
 

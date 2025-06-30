@@ -12,6 +12,7 @@ resolve_link() {
   TARGET=$("${BUSYBOX}" readlink "${LINK}")
   if [ -z "${TARGET}" ]; then
     echo "${LINK}"
+    return
   fi
   echo "${TARGET}"
 }

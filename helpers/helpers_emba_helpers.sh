@@ -126,7 +126,7 @@ cleaner() {
   fi
   # stop inotifywait on host
   if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &> /dev/null 2>&1; then
-    print_output "[*] $(print_date) - Stopping inotify ...""no_log"
+    print_output "[*] $(print_date) - Stopping inotify ..." "no_log"
     pkill -f "inotifywait.*${LOG_DIR}.*" >/dev/null || true
   fi
 

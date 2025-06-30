@@ -35,8 +35,8 @@ GCC_STC_MATCHING_FILE="/tmp/gcc_abi.html"
 # final EMBA csv config file
 GCC_OUTPUT_CSV="./config/gcc_libstdc_details.csv"
 
-curl "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
-curl "${GCC_STD_HTML}" > "${GCC_STC_MATCHING_FILE}"
+curl -f "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
+curl -f "${GCC_STD_HTML}" > "${GCC_STC_MATCHING_FILE}"
 
 if ! [[ -f "${GCC_STC_MATCHING_FILE}" ]]; then
   print_output "[-] Error downloading ${GCC_STD_HTML}" "no_log"

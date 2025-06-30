@@ -93,7 +93,7 @@ log_folder() {
             print_output "$(indent "$(mount | grep "${LOG_DIR}")")" "no_log"
           else
             rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
-            echo -e "\\n${GREEN}Sucessfully deleted: ${ORANGE}${LOG_DIR}${NC}\\n"
+            echo -e "\\n${GREEN}Successfully deleted: ${ORANGE}${LOG_DIR}${NC}\\n"
           fi
         ;;
         n|N )
@@ -288,7 +288,7 @@ architecture_check() {
       if [[ ${lARCH_X64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""${lARCH_X64_CNT}")")" ; fi
       if [[ ${lARCH_X86_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""${lARCH_X86_CNT}")")" ; fi
       if [[ ${lARCH_PPC_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""${lARCH_PPC_CNT}")")" ; fi
-      if [[ ${lARCH_PPC_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "PPC64         ""${lARCH_PPC64_CNT}")")" ; fi
+      if [[ ${lARCH_PPC64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "PPC64         ""${lARCH_PPC64_CNT}")")" ; fi
       if [[ ${lARCH_NIOS2_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""${lARCH_NIOS2_CNT}")")" ; fi
       if [[ ${lARCH_RISCV_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "RISC-V        ""${lARCH_RISCV_CNT}")")" ; fi
       if [[ ${lARCH_QCOM_DSP6_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Qualcom DSP6  ""${lARCH_QCOM_DSP6_CNT}")")" ; fi
@@ -478,7 +478,7 @@ prepare_binary_arr() {
   # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; grep "ELF\|PE32" | cut -d: -f1 || true)
   # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep "ELF\|PE32" | cut -d: -f1 2>/dev/null || true)
   readarray -t lBINARIES_TMP_ARR < <(grep ";ELF\|;PE32" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
-  if [[ -v lBINARIES_TMP_ARR[@] ]]; then
+  if [[ "${#lBINARIES_TMP_ARR[@]}" -gt 0 ]]; then
     for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
       if [[ -f "${lBINARY}" ]]; then
         lBIN_MD5=$(md5sum "${lBINARY}" | cut -d\  -f1)

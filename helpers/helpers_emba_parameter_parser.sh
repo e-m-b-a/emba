@@ -55,7 +55,7 @@ emba_parameter_parsing() {
         export ONLY_DEP="${OPTARG}"
         # a value of 1 means dep check on host and in container
         # a value of 2 means dep check only in container
-        ! [[ "${ONLY_DEP}" =~ [12] ]] && exit 1
+        ! [[ "${ONLY_DEP}" =~ [12] ]] && { echo "Error: Invalid value for ONLY_DEP. Valid values are 1 (host and container) or 2 (container only)."; exit 1; }
         # on dependency check we need to check all deps -> activate all modules:
         export BINARY_EXTENDED=1
         export FULL_EMULATION=1

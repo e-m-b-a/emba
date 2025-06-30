@@ -30,6 +30,7 @@ fi
 ## Color definition
 GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
+RED="\033[0;31m"
 NC="\033[0m"  # no color
 
 if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
@@ -68,7 +69,7 @@ done
 # as we do not reach all the advisories via this search mechanism we also load the current state
 # and use the URLs from it for further crawling:
 if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
-  echo -e "[*] Adding already knwon URLs from current configuration file"
+  echo -e "[*] Adding already known URLs from current configuration file"
   # remove first line which is the header
   cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv | sed 1d >> "${SAVE_PATH}"/"${LINKS}"
 else
@@ -175,6 +176,6 @@ else
   echo "[-] Not able to copy generated PoC file to configuration directory ${EMBA_CONFIG_PATH}"
 fi
 
-echo -e "${GREEN}[+] Found ${ORANGE}${PoC_CNT_BEFORE}${GREEN} advisories with PoC code (before udpate)."
+echo -e "${GREEN}[+] Found ${ORANGE}${PoC_CNT_BEFORE}${GREEN} advisories with PoC code (before update)."
 echo ""
 echo -e "${GREEN}[+] Found ${ORANGE}${PoC_CNT}${GREEN} advisories with PoC code (after update)."

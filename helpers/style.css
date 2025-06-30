@@ -78,7 +78,7 @@ a.l {
 
 a.f {
   background:linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px !important;
+  padding-right:18px!important;
 }
 
 a pre:hover {
@@ -420,7 +420,7 @@ pre a:hover {
 #nav {
   overflow:hidden;
   padding-bottom:100px;
-  visibility:show;
+  visibility:visible;
 }
 
 #nav a {

@@ -73,7 +73,9 @@ disable_strict_mode() {
     set +o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
     set +E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
     shopt -u extdebug # Enable extended debugging
-    unset IFS
+    # unset IFS
+    # nosemgrep
+    IFS=$'\n\t'     # Restore the default "internal field separator"
     trap - ERR
     set +x
 

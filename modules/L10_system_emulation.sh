@@ -1103,12 +1103,13 @@ handle_fs_mounts() {
     local lMOUNT_FS=""
     local lFS_FIND=""
 
+    local lINIT_FILE_PATH="${MNT_POINT}${lINIT_FILE}"
     print_output "[*] Found filesystem mount and analysing it: ${ORANGE}${lFS_MOUNT}${NC}"
     # as the original mount will not work, we need to remove it from the startup file:
-    if [[ -f "${MNT_POINT}""${lINIT_FILE}" ]]; then
-      sed -i 's|'"${lFS_MOUNT}"'|\#'"${lFS_MOUNT}"'|g' "${MNT_POINT}""${lINIT_FILE}"
+    if [[ -f "${lINIT_FILE_PATH}" ]]; then
+      sed -i 's|'"${lFS_MOUNT}"'|\#'"${lFS_MOUNT}"'|g' "${lINIT_FILE_PATH}"
     else
-      print_error "[-] Init file ${MNT_POINT}${lINIT_FILE} NOT available ... returning but this could result in further issues"
+      print_error "[-] Init file ${lINIT_FILE_PATH} NOT available ... returning but this could result in further issues"
       return
     fi
 

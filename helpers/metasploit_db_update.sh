@@ -16,6 +16,13 @@
 
 # Description:  Update script for Metasploit Exploit collection
 
+set -euo pipefail
+
+if [[ -z "${1:-}" ]]; then
+  echo "Usage: $0 <metasploit_installation_directory>"
+  exit 1
+fi
+
 EMBA_CONFIG_PATH="./config"
 MSF_DB_PATH="${EMBA_CONFIG_PATH}"/msf_cve-db.txt
 MSF_MOD_PATH="${1:-}"
@@ -31,7 +38,7 @@ if ! [[ -d "${EMBA_CONFIG_PATH}" ]]; then
 fi
 if ! [[ -d "${MSF_MOD_PATH}" ]]; then
   echo "[-] No Metasploit directory found! Please install Metasploit and re-try it"
-  echo "[*] Current Metasploit directory configuration: ${ORANGE}${MSF_MOD_PATH}${NC}."
+  echo -e "[*] Current Metasploit directory configuration: ${ORANGE}${MSF_MOD_PATH}${NC}."
   exit 1
 fi
 

@@ -16,7 +16,7 @@
 # Description: Helper functions for SBOM building
 #
 
-# first: build the properaties path array
+# first: build the properties path array
 # This can be used for the binary path (souce_path) and for paths extracted from a
 # package like deb or rpm (path). Additionally, it is commonly used for the architecture
 # and further meta data like the version identifier

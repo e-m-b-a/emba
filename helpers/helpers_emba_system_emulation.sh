@@ -56,8 +56,9 @@ restart_emulation() {
     return "$?"
   elif [[ "${lSTATE_CHECK_MECHANISM}" == "TCP" ]]; then
     # local PORT=80
-    print_output "[-] Check currently not implemented!" "no_log"
+    print_output "[-] TCP check currently not implemented!" "no_log"
     # tcp_check "${lIP_ADDRESS}" "${PORT}"
+    return 1
   fi
   return 0
 }
@@ -75,7 +76,7 @@ system_online_check() {
     return "$?"
   elif [[ "${STATE_CHECK_MECHANISM:-PING}" == "TCP" ]]; then
     # local PORT=80
-    print_output "[-] Check currently not implemented ... we do a hping check" "no_log"
+    print_output "[-] TCP check is not implemented. Falling back to HPING check." "no_log"
     # tcp_check "${lIP_ADDRESS}" "${PORT}"
     hping_check "${lIP_ADDRESS}" 0
     return "$?"

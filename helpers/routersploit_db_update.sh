@@ -16,6 +16,13 @@
 
 # Description:  Update script for Routersploit Exploit collection
 
+set -euo pipefail
+
+if [[ -z "${1}" ]]; then
+  echo "Usage: $0 <routersploit_install_path>"
+  exit 1
+fi
+
 EMBA_CONFIG_PATH="./config"
 ROUTERSPLOIT_CVE_PATH="${EMBA_CONFIG_PATH}"/routersploit_cve-db.txt
 ROUTERSPLOIT_EDB_PATH="${EMBA_CONFIG_PATH}"/routersploit_exploit-db.txt
@@ -37,10 +44,12 @@ if ! [[ -d "${ROUTERSPLOIT_MOD_PATH}" ]]; then
 fi
 
 if [[ -f "${ROUTERSPLOIT_CVE_PATH}" ]]; then
-  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l "${ROUTERSPLOIT_CVE_PATH}" | awk '{print $1}')${GREEN} CVE matching exploit entries (before update).${NC}"
+  CNT_TMP=$(wc -l "${ROUTERSPLOIT_CVE_PATH}")
+  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}${CNT_TMP/\ *}${GREEN} CVE matching exploit entries (before update).${NC}"
 fi
 if [[ -f "${ROUTERSPLOIT_EDB_PATH}" ]]; then
-  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l "${ROUTERSPLOIT_EDB_PATH}" | awk '{print $1}')${GREEN} EDB matching exploit entries (before update).${NC}"
+  CNT_TMP=$(wc -l "${ROUTERSPLOIT_EDB_PATH}")
+  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}${CNT_TMP/\ *}${GREEN} EDB matching exploit entries (before update).${NC}"
 fi
 
 echo "[*] Building the Routersploit exploit database"
