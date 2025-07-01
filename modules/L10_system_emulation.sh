@@ -1389,7 +1389,7 @@ print_keepalive() {
 
   while(true); do
     print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
-    run_kpanic_identification_single "${lLOG_FILE}" "${lIMAGE_NAME}"
+    # run_kpanic_identification_single "${lLOG_FILE}" "${lIMAGE_NAME}"
     sleep 5
   done
 }
