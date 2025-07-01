@@ -52,37 +52,37 @@ a.submodul:hover {
 }
 
 a.d {
-  background: linear-gradient(270deg, #088b83 10px, rgba(0, 0, 0, 0) 0px);
+  background: linear-gradient(270deg, #088b83 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px!important;
 }
 
 a.p {
-  background: linear-gradient(270deg, #088a83 10px, rgba(0, 0, 0, 0) 0px);
+  background: linear-gradient(270deg, #088a83 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px!important;
 }
 
 a.s {
-  background: linear-gradient(270deg, #079e07 10px, rgba(0, 0, 0, 0) 0px);
+  background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px!important;
 }
 
 a.q {
-  background: linear-gradient(270deg, #079e07 10px, rgba(0, 0, 0, 0) 0px);
+  background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px!important;
 }
 
 a.l {
-  background: linear-gradient(270deg, #99079e 10px, rgba(0, 0, 0, 0) 0px);
+  background: linear-gradient(270deg, #99079e 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px!important;
 }
 
 a.f {
-  background: linear-gradient(270deg, #CC410B 10px, rgba(0, 0, 0, 0) 0px);
+  background: linear-gradient(270deg, #CC410B 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px!important;
 }
 
 a pre:hover {
-  background-color: rgb(104, 104, 104);
+  background-color: rgb(104 104 104);
 }
 
 pre hr {
@@ -112,7 +112,7 @@ pre a {
 }
 
 pre a:hover {
-  background-color: rgb(104, 104, 104);
+  background-color: rgb(104 104 104);
 }
 
 .anc {
@@ -291,12 +291,12 @@ pre a:hover {
   z-index: 1;
 }
 
-.side::-webkit-scrollbar, .main::-webkit-scrollbar {
+.side::-webkit-scrollbar,.main::-webkit-scrollbar {
   display: none;
 }
 
 .rectButton {
-  bottom: 0px;
+  bottom: 0;
   cursor: pointer;
   height: 50px;
   width: 50px;
@@ -308,7 +308,7 @@ pre a:hover {
 }
 
 .rectButtonVisible {
-  bottom: 0px;
+  bottom: 0;
   cursor: pointer;
   height: 50px;
   width: 50px;
@@ -340,13 +340,13 @@ pre a:hover {
 }
 
 #buttonTime {
-  bottom: 0px;
+  bottom: 0;
   left: 0;
   background-color: #044209;
 }
 
 #buttonTimeInvisible {
-  bottom: 0px;
+  bottom: 0;
   left: 0;
   background-color: #044209;
   visibility: hidden !important;
@@ -357,7 +357,7 @@ pre a:hover {
 }
 
 #buttonInfo {
-  bottom: 0px;
+  bottom: 0;
   right: 0;
   background-color: #093a41;
 }
@@ -367,7 +367,7 @@ pre a:hover {
 }
 
 #buttonDown {
-  bottom: 0px;
+  bottom: 0;
   right: 150px;
   background-color: #614406;
 }
@@ -377,7 +377,7 @@ pre a:hover {
 }
 
 #buttonUp {
-  bottom: 0px;
+  bottom: 0;
   right: 200px;
   background-color: #614406;
 }
@@ -387,7 +387,7 @@ pre a:hover {
 }
 
 #buttonBack {
-  bottom: 0px;
+  bottom: 0;
   right: 50px;
   background-color: #614406;
 }
@@ -397,7 +397,7 @@ pre a:hover {
 }
 
 #buttonForward {
-  bottom: 0px;
+  bottom: 0;
   right: 100px;
   background-color: #614406;
 }

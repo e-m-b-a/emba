@@ -1358,9 +1358,9 @@ identify_networking_emulation() {
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
 
-  # run_kpanic_identification "${LOG_PATH_MODULE}/qemu.initial.serial.log" &
-  # local lKPANIC_PID="$!"
-  # disown "${lKPANIC_PID}" 2> /dev/null || true
+  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.initial.serial.log" &
+  local lKPANIC_PID="$!"
+  disown "${lKPANIC_PID}" 2> /dev/null || true
 
   print_keepalive "${LOG_PATH_MODULE}/qemu.initial.serial.log" "${lIMAGE_NAME}" &
   local lALIVE_PID="$!"
@@ -1389,6 +1389,8 @@ print_keepalive() {
 
   while(true); do
     print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
+    # Temporarily disabled for debugging purposes. Uncomment to enable regular kernel panic identification.
+    # Currently this is handled via run_kpanic_identification
     # run_kpanic_identification_single "${lLOG_FILE}" "${lIMAGE_NAME}"
     sleep 5
   done
@@ -1398,7 +1400,7 @@ run_kpanic_identification_single() {
   local lLOG_FILE="${1:-}"
   local lIMAGE_NAME="${2:-}"
 
-  lKPANIC=$(tail -n 50 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
+  lKPANIC=$(tail -n 20 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
   if [[ "${lKPANIC}" -gt 0 ]]; then
     print_output "[*] Kernel Panic detected - stopping emulation"
     stopping_emulation_process "${lIMAGE_NAME}"
@@ -2522,9 +2524,9 @@ check_online_stat() {
   local lTCP_SERV_NETSTAT_ARR=()
   local lUDP_SERV_NETSTAT_ARR=()
 
-  # run_kpanic_identification "${LOG_PATH_MODULE}/qemu.final.serial.log" &
-  # local lKPANIC_PID="$!"
-  # disown "${lKPANIC_PID}" 2> /dev/null || true
+  run_kpanic_identification "${LOG_PATH_MODULE}/qemu.final.serial.log" &
+  local lKPANIC_PID="$!"
+  disown "${lKPANIC_PID}" 2> /dev/null || true
 
   # wait 20 secs after boot before starting pinging
   sleep 20
