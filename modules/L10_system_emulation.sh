@@ -1906,6 +1906,7 @@ get_networking_details_emulation() {
     for PANIC in "${PANICS[@]}"; do
       print_output "[!] WARNING: Kernel Panic detected: ${ORANGE}${PANIC}${NC}"
       print_output "${NC}"
+      PANICS=()
     done
     color_qemu_log "${LOG_PATH_MODULE}/qemu.initial.serial.log"
   else

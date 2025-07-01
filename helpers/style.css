@@ -4,13 +4,13 @@ EMBA - EMBEDDED LINUX ANALYZER
 Copyright 2020-2023 Siemens AG
 Copyright 2020-2025 Siemens Energy AG
 
-EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software,   and you are
 welcome to redistribute it under the terms of the GNU General Public License.
 See LICENSE file for usage of this software.
 
 EMBA is licensed under GPLv3
 
-Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
+Author(s): Michael Messner,   Pascal Eckmann,  Stefan Haboeck
 */
 
 * {
@@ -52,37 +52,37 @@ a.submodul:hover {
 }
 
 a.d {
-  background: linear-gradient(270deg,#088b83 10px,rgba(0,0,0,0) 0px);
+  background: linear-gradient(270deg,   #088b83 10px,  rgba(0, 0, 0, 0) 0px);
   padding-right: 18px!important;
 }
 
 a.p {
-  background: linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0) 0px);
+  background: linear-gradient(270deg,   #088a83 10px,  rgba(0, 0, 0, 0) 0px);
   padding-right: 18px!important;
 }
 
 a.s {
-  background: linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
+  background: linear-gradient(270deg,   #079e07 10px,  rgba(0, 0, 0, 0) 0px);
   padding-right: 18px!important;
 }
 
 a.q {
-  background: linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
+  background: linear-gradient(270deg,   #079e07 10px,  rgba(0, 0, 0, 0) 0px);
   padding-right: 18px!important;
 }
 
 a.l {
-  background: linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0) 0px);
+  background: linear-gradient(270deg,  #99079e 10px, rgba(0, 0, 0, 0) 0px);
   padding-right: 18px!important;
 }
 
 a.f {
-  background: linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0) 0px);
+  background: linear-gradient(270deg,  #CC410B 10px, rgba(0, 0, 0, 0) 0px);
   padding-right: 18px!important;
 }
 
 a pre:hover {
-  background-color: rgb(104, 104, 104);
+  background-color: rgb(104,   104,  104);
 }
 
 pre hr {
@@ -112,7 +112,7 @@ pre a {
 }
 
 pre a:hover {
-  background-color: rgb(104, 104, 104);
+  background-color: rgb(104,   104,  104);
 }
 
 .anc {
@@ -176,7 +176,7 @@ pre a:hover {
   display: inline-block;
   background-color: #333;
   width: 100%;
-  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background: linear-gradient(45deg,   transparent 75%,  #777 75%);
   background-position: top right;
   background-size: 15px 35px;
   background-repeat: no-repeat;
@@ -184,7 +184,7 @@ pre a:hover {
 }
 
 .reference:hover {
-  background: linear-gradient(45deg, transparent 75%, #beec18 75%);
+  background: linear-gradient(45deg,   transparent 75%,  #beec18 75%);
   background-position: top right;
   background-size: 15px 35px;
   background-repeat: no-repeat;
@@ -195,7 +195,7 @@ pre a:hover {
   display: inline-block;
   background-color: #333;
   width: 100%;
-  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background: linear-gradient(45deg,   transparent 75%,  #777 75%);
   background-position: top right;
   background-size: 15px 35px;
   background-repeat: no-repeat;
@@ -203,7 +203,7 @@ pre a:hover {
 }
 
 .refmodul:hover {
-  background: linear-gradient(45deg, transparent 75%, #eca218 75%);
+  background: linear-gradient(45deg,   transparent 75%,  #eca218 75%);
   background-position: top right;
   background-size: 15px 35px;
   background-repeat: no-repeat;
@@ -214,7 +214,7 @@ pre a:hover {
   display: inline-block;
   background-color: #333;
   width: 100%;
-  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background: linear-gradient(45deg,   transparent 75%,  #777 75%);
   background-position: top right;
   background-size: 15px 35px;
   background-repeat: no-repeat;
@@ -222,7 +222,7 @@ pre a:hover {
 }
 
 .refmodulext:hover {
-  background: linear-gradient(45deg, transparent 75%, #ec1894 75%);
+  background: linear-gradient(45deg,   transparent 75%,  #ec1894 75%);
   background-position: top right;
   background-size: 15px 35px;
   background-repeat: no-repeat;
@@ -291,7 +291,7 @@ pre a:hover {
   z-index: 1;
 }
 
-.side::-webkit-scrollbar,.main::-webkit-scrollbar {
+.side::-webkit-scrollbar,  .main::-webkit-scrollbar {
   display: none;
 }
 
