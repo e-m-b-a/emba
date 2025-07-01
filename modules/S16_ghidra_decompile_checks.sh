@@ -166,7 +166,7 @@ ghidra_analyzer() {
     rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
   if [[ -f "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" ]]; then
-    rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
+    rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.gpr"
   fi
 
   # if Ghidra was not able to produce code we can return now:
