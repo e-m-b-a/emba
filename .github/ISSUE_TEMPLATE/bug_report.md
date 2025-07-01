@@ -30,9 +30,9 @@ If applicable, add screenshots to help explain your problem.
 - Installation method: default with up to date docker image
 
 **Priority issue**
-Are you already a [Sponsor](https://github.com/sponsors/e-m-b-a)? - [Y/N]
-
+Are you already a [Sponsor][1]? - [Y/N]
 
 **Additional context**
 Add any other context about the problem here.
 
+[1]: <https://github.com/sponsors/e-m-b-a/> "EMBA Sponsoring"
