@@ -24,7 +24,7 @@ body {
 }
 
 a {
-  color: inherit; 
+  color: inherit;
 }
 
 a.etc {
@@ -236,13 +236,13 @@ pre hr {
 
 .main {
   -ms-overflow-style: none;
-  color: #FFF;
+  color: #fff;
   margin-bottom: 100px;
   margin-left: 250px;
   overflow: scroll;
   padding: 20px;
   scrollbar-width: none;
-  transition:margin-left .5s;
+  transition: margin-left 0.5s;
 }
 
 .bold {
@@ -286,7 +286,7 @@ pre hr {
   position: fixed;
   scrollbar-width: none;
   top: 0;
-  transition: .5s;
+  transition: 0.5s;
   width: 250px;
   z-index: 1;
 }
