@@ -4,7 +4,7 @@
       "normal"
    ],
    "licenses": [
-      "unknown"
+      "GPL-2.0-or-later"
    ],
    "grep_commands": [
       "^msmtp version [0-9](\\.[0-9]+)+?$"

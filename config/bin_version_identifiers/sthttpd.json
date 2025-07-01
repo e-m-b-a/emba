@@ -7,7 +7,7 @@
     "bsd-style"
   ],
   "grep_commands": [
-    "^sthttpd\\/[0-9](\\.[0-9]+)+?([a-z])?.*"
+    "^sthttpd\\/[0-9]+(\\.[0-9]+)+?([a-z])?.*"
   ],
   "vendor_names": [
     "open_source_development_team",
