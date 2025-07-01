@@ -22,4 +22,7 @@ Are you already a [Sponsor][]? - [Y/N]
 **Additional context**
 Add any other context or screenshots about the feature request here.
 
-[sponsor]: https://github.com/sponsors/e-m-b-a
+[Mercury][]
+
+[mercury]: https://example.com/mercury/
+[sponsor]: https://github.com/sponsors/e-m-b-a/
