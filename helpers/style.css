@@ -81,14 +81,6 @@ a.f {
   padding-right: 18px!important;
 }
 
-a pre:hover {
-  background-color: rgb(104 104 104);
-}
-
-pre hr {
-  margin-left: -40px;
-}
-
 hr.double {
   border: 0;
   border-top: 5px double #9f9f9f;
@@ -113,6 +105,14 @@ pre a {
 
 pre a:hover {
   background-color: rgb(104 104 104);
+}
+
+a pre:hover {
+  background-color: rgb(104 104 104);
+}
+
+pre hr {
+  margin-left: -40px;
 }
 
 .anc {
