@@ -7,7 +7,7 @@
       "Apache-2.0"
    ],
    "zgrep_grep_commands": [
-      "Log4jReleaseVersion:\\ [0-9]\\.[0-9]"
+      "Log4jReleaseVersion:\\ [0-9]+\\.[0-9]+"
    ],
    "vendor_names": [
       "apache"
@@ -16,7 +16,7 @@
       "log4j"
    ],
    "version_extraction": [
-      "sed -r 's/Log4jReleaseVersion:\\ ([0-9](\\.[0-9]+)+?)/:apache:log4j:\\1/'"
+      "sed -r 's/Log4jReleaseVersion:\\ ([0-9]+(\\.[0-9]+)+?)/:apache:log4j:\\1/'"
    ],
    "affected_paths": [
       "log4j-core"
