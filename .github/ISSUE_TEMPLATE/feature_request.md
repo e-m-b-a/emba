@@ -22,4 +22,4 @@ Are you already a [Sponsor][1]? - [Y/N]
 **Additional context**
 Add any other context or screenshots about the feature request here.
 
-[1]: https://github.com/sponsors/e-m-b-a/
+[1]: <https://github.com/sponsors/e-m-b-a/> "EMBA Sponsoring"
