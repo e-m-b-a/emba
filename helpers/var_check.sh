@@ -23,6 +23,9 @@ elif [[ "${1}" == "helpers" ]]; then
   print_output "[*] Testing ${#SCRIPTS_TO_TEST[@]} EMBA helpers" "no_log"
 elif [[ -f "${1}" ]]; then
   SCRIPTS_TO_TEST=("${1}")
+else
+  print_output "[*] Usage: ${0} [all, modules, helpers]" "no_log"
+  exit 1
 fi
 
 UNKNOWN_VARS_CNT_ALL=0
@@ -42,7 +45,7 @@ for MODULE in "${SCRIPTS_TO_TEST[@]}"; do
   mapfile -t UNKNOWN_VARS_ARR_ARR2 < <(grep -o -E "readarray -t( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | awk '{print $3}' | cut -d '=' -f1 | grep -v "mapfile\|declare\|local\|export\|for\|if" | sort -u)
 
   UNKNOWN_VARS_ARR=( "${UNKNOWN_LOOP_VARS[@]}" "${UNKNOWN_ARR_ADD[@]}" "${UNKNOWN_VARS_ARR_VAR[@]}" "${UNKNOWN_VARS_ARR_ARR[@]}" "${UNKNOWN_VARS_ARR_ARR1[@]}" "${UNKNOWN_VARS_ARR_ARR2[@]}" )
-  eval "UNKNOWN_VARS_ARR=($(for i in "${UNKNOWN_VARS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+  mapfile -t UNKNOWN_VARS_ARR < <(printf "%s\n" "${UNKNOWN_VARS_ARR[@]}" | sort -u)
 
   if [[ "${#LOCALS_ARR[@]}" -gt 0 ]]; then
     print_output "$(indent "Found ${#LOCALS_ARR[@]} local variables in ${MODULE}")" "no_log"

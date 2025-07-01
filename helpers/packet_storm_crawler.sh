@@ -16,6 +16,8 @@
 
 # Description:  Update script for packetstorm PoC/Exploit collection
 
+set -euo pipefail
+
 URL="https://packetstormsecurity.com/files/tags/exploit/page"
 LINKS="packet_storm_links.txt"
 SAVE_PATH="/tmp/packet_storm"
@@ -42,9 +44,7 @@ NC="\033[0m"  # no color
 if [[ -d "${SAVE_PATH}" ]]; then
   rm -r "${SAVE_PATH}"
 fi
-if ! [[ -d "${SAVE_PATH}/advisory" ]]; then
-  mkdir -p "${SAVE_PATH}/advisory"
-fi
+mkdir -p "${SAVE_PATH}/advisory"
 
 if [[ -f "${EMBA_CONFIG_PATH}"/PS_PoC_results.csv ]]; then
   ENTRIES_BEFORE="$(wc -l "${EMBA_CONFIG_PATH}"/PS_PoC_results.csv | awk '{print $1}')"

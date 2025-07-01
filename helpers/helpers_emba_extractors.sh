@@ -21,9 +21,11 @@ docker_container_extractor() {
   if ! [[ -d "${LOG_DIR}"/firmware/ ]]; then
     mkdir "${LOG_DIR}"/firmware/
   fi
-  if docker container ls -a | grep -q "${lCONTAINER_ID}"; then
+  local lDOCKER_LS_OUTPUT=""
+  lDOCKER_LS_OUTPUT=$(docker container ls -a)
+  if [[ "${lDOCKER_LS_OUTPUT}" == *"${lCONTAINER_ID}"* ]]; then
     print_output "[*] Found docker container for extraction:"
-    docker container ls -a | grep "${lCONTAINER_ID}" | tee -a "${LOG_FILE}"
+    echo "${lDOCKER_LS_OUTPUT}" | grep "${lCONTAINER_ID}" | tee -a "${LOG_FILE}"
     print_ln
   else
     print_output "[-] Warning: Docker container with ID ${ORANGE}${lCONTAINER_ID}${NC} not found"

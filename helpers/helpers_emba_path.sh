@@ -32,7 +32,7 @@ check_path_valid() {
 
 abs_path() {
   if [[ -e "${1:-}" ]] ; then
-    echo -e "$(realpath -s "${1:-}")"
+    realpath -s "${1:-}"
   else
     echo "${1:-}"
   fi
@@ -80,10 +80,10 @@ cut_path() {
 }
 
 path_attr() {
-  if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
-    echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g)")"
-  elif [[ -L "${1}" ]] ;  then
+  if [[ -L "${1}" ]] ;  then
     echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g) -> %l")"
+  elif [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
+    echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g)")"
   fi
 }
 

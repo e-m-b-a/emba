@@ -33,7 +33,7 @@ GCC_RELEASES_FILE="/tmp/gcc_releases.html"
 # final EMBA csv config file
 GCC_OUTPUT_CSV="./config/gcc_details.csv"
 
-curl "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
+curl -sf "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
 
 if ! [[ -f "${GCC_RELEASES_FILE}" ]]; then
   print_output "[-] Error downloading ${GCC_RELEASES_FILE}" "no_log"

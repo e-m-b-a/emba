@@ -113,7 +113,9 @@ update_box_system_load() {
 
   update_cpu() {
     local lCPU_LOG_STR=""
-    lCPU_LOG_STR="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
+    local lCPU_LOG_IDLE=""
+    lCPU_LOG_IDLE="$(vmstat 1 2 | tail -1 | awk '{print $15}')"
+    lCPU_LOG_STR="$(system_load_util_str "$((100-"${lCPU_LOG_IDLE}"))" 0 2> /dev/null || true)"
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       sed -i "2s/.*/${lCPU_LOG_STR}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
     fi
@@ -490,6 +492,7 @@ kill_box_pid() {
   while [[ -e /proc/"${lPID}" ]]; do
     # print_output "[*] Status bar - kill pid: $lPID" "no_log"
     kill -9 "${lPID}" 2>/dev/null || true
+    sleep 0.1
   done
 }
 

@@ -22,8 +22,6 @@ restart_emulation() {
   local lRESTART_SCAN="${3:-0}"
   local lSTATE_CHECK_MECHANISM="${4:-"PING"}"
 
-  local lHOME_PATH=""
-
   if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
     print_output "[+] System with ${ORANGE}${lIP_ADDRESS}${GREEN} responding again - probably it recovered automatically.${NC}" "no_log"
     return
@@ -43,10 +41,9 @@ restart_emulation() {
   check_qemu_instance_l10
 
   # what an ugly hack - probably we are going to improve this later on
-  lHOME_PATH="$(pwd)"
-  cd "${ARCHIVE_PATH}" || (print_output "[-] Emulation archive path not found")
+  pushd "${ARCHIVE_PATH}" || { print_output "[-] Emulation archive path not found"; return 1; }
   ./run.sh &
-  cd "${lHOME_PATH}" || (print_output "[-] EMBA path not available?")
+  popd || { print_output "[-] EMBA path not available?"; return 1; }
 
   if [[ "${lSTATE_CHECK_MECHANISM}" == "PING" ]]; then
     ping_check "${lIP_ADDRESS}" 1
@@ -56,8 +53,9 @@ restart_emulation() {
     return "$?"
   elif [[ "${lSTATE_CHECK_MECHANISM}" == "TCP" ]]; then
     # local PORT=80
-    print_output "[-] Check currently not implemented!" "no_log"
+    print_output "[-] TCP check currently not implemented!" "no_log"
     # tcp_check "${lIP_ADDRESS}" "${PORT}"
+    return 1
   fi
   return 0
 }
@@ -75,7 +73,7 @@ system_online_check() {
     return "$?"
   elif [[ "${STATE_CHECK_MECHANISM:-PING}" == "TCP" ]]; then
     # local PORT=80
-    print_output "[-] Check currently not implemented ... we do a hping check" "no_log"
+    print_output "[-] TCP check is not implemented. Falling back to HPING check." "no_log"
     # tcp_check "${lIP_ADDRESS}" "${PORT}"
     hping_check "${lIP_ADDRESS}" 0
     return "$?"
@@ -89,12 +87,13 @@ hping_check() {
   local lCOUNTER=0
   # RESTARTER is used to indicate a non reachable system for another wait period after the system is recovered
   local lRESTARTER=0
+  local lMAX_PING_CNT=50
 
   while ! [[ "$(hping3 -n -c 1 "${lIP_ADDRESS}" 2> /dev/null | grep -c "^len=")" -gt 0 ]]; do
     lRESTARTER=1
     [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... hping mode" "no_log"
     ((lCOUNTER+=1))
-    if [[ "${lCOUNTER}" -gt 50 ]]; then
+    if [[ "${lCOUNTER}" -gt "${lMAX_PING_CNT}" ]]; then
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
     fi

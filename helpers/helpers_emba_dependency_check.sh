@@ -259,7 +259,7 @@ preparing_cve_bin_tool() {
   python3 "${lCVE_BIN_TOOL}" -i "${TMP_DIR}/cve_bin_tool_health_check.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${TMP_DIR}/cve_bin_tool_health_check_results" >/dev/null || true
 
   if [[ -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv" ]]; then
-    echo "cve-bin-tool database preparation finshed" >> "${TMP_DIR}/tmp_state_data.log"
+    echo "cve-bin-tool database preparation finished" >> "${TMP_DIR}/tmp_state_data.log"
     print_output "[+] cve-bin-tool database preparation finished" "no_log"
     rm -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv"
   else

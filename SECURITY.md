@@ -4,7 +4,7 @@ _EMBA_ is a platform for optimizing our research and testing tasks in the field 
 
 # WARNING
 
-_EMBA_ is using multiple protections layers like chroot, docker, read-only filesystem, non executable mounts and disabled networking functionality.
+_EMBA_ is using multiple protection layers like chroot, docker, read-only filesystem, non executable mounts and disabled networking functionality.
 Nevertheless, _EMBA_ should only be used on test systems! It should not be installed/deployed on production systems.
 
 There are multiple reasons for that:

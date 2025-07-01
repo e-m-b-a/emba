@@ -17,6 +17,7 @@
 #               this script also tries to fix sym links which are regularly broken
 
 BUSYBOX="/busybox"
+SYMLINK_THRESHOLD=10
 
 ROOT_DIR="${1:-}"
 if ! [[ -d "${ROOT_DIR}" ]]; then
@@ -24,7 +25,12 @@ if ! [[ -d "${ROOT_DIR}" ]]; then
   exit
 fi
 
-cp "$(command -v busybox)" "${ROOT_DIR}"
+BUSYBOX_PATH="$(command -v busybox)"
+if [[ -z "${BUSYBOX_PATH}" ]]; then
+  echo "[-] BusyBox not found on host ... exit helper script"
+  exit
+fi
+cp "${BUSYBOX_PATH}" "${ROOT_DIR}"
 chmod +x "${ROOT_DIR}"/busybox
 
 echo "[*] Identifying possible executable files"
@@ -84,7 +90,7 @@ else
   exit 1
 fi
 
-if [[ $(find "." -type l | wc -l) -lt 10 ]]; then
+if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
   echo ""
   echo "[*] Identifying possible dead symlinks"
   mapfile -t POSSIBLE_DEAD_SYMLNKS < <(find "." -xdev -type f) # -exec file {} \; | grep "data\|ASCII\ text" | cut -d: -f1)

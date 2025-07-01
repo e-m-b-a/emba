@@ -101,7 +101,7 @@ def exploit_checker(host,ports,architecture)
       mod.datastore['SRVHOST'] = Rex::Socket.source_address("#{host.to_s}") 
 
       if architecture == "mipsbe"
-        # mipsle is mostly target 1
+        # mipsbe is mostly target 1
         mod.datastore['TARGET'] = 1
       end
       if architecture == "mipsle"

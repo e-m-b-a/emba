@@ -216,7 +216,7 @@ escape_echo() {
 
 check_int() {
   local lINT_TO_CHECK="${1:-}"
-  [[ -z "${lINPUT_TO_CHECK}" ]] && return
+  [[ -z "${lINT_TO_CHECK}" ]] && return
   if [[ -n "${lINT_TO_CHECK//[0-9]/}" ]]; then
     print_output "[-] Invalid input detected - integers only" "no_log"
     exit 1

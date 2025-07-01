@@ -25,7 +25,7 @@ def run_scanner(host:, mod_name:, port:)
     run_single("set RPORT #{port}")
     run_single("set RHOSTS #{host}")
     run_single("run")
-  rescue ::Exception => e
+  rescue StandardError => e
     print_error(e.message)
   end
 end
@@ -39,7 +39,7 @@ def vnc_checker(host, port)
     ].each do |mod|
       run_scanner(host: host, mod_name: mod.to_s, port: port)
     end
-  rescue ::Exception => e
+  rescue StandardError => e
     print_error(e.message)
   end
   print_status("All VNC modules sent to #{host} ...")

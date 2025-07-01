@@ -7,7 +7,7 @@
       "unknown"
    ],
    "grep_commands": [
-      "^discover\\ [0-9](\\.[0-9]+)+?$"
+      "^discover\\ [0-9]+(\\.[0-9]+)+?$"
    ],
    "vendor_names": [
       "NA"
@@ -16,7 +16,7 @@
       "discover"
    ],
    "version_extraction": [
-      "sed -r 's/discover\\ ([0-9](\\.[0-9]+)+?)$/::discover:\\1/'"
+      "sed -r 's/discover\\ ([0-9]+(\\.[0-9]+)+?)$/::discover:\\1/'"
    ],
    "affected_paths": [
       "NA"

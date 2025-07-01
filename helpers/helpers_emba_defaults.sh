@@ -52,7 +52,7 @@ set_defaults() {
   export FW_NOTES=""
   export ARCH=""
   export EFI_ARCH=""
-  export EXLUDE=()
+  export EXCLUDE=()
   export SELECT_MODULES=()
   export MODULES_EXPORTED=()
   export MD5_DONE_DEEP=()       # for tracking the extracted files in deep extractor
@@ -88,7 +88,6 @@ set_defaults() {
 
   export SHELLCHECK=1
 
-  export QUEST_CONTAINER=""
   export GPT_OPTION=0           # 0 -> off 1-> unpayed plan 2 -> no rate-limit
   export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
   export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
@@ -97,39 +96,38 @@ set_defaults() {
   export THREADED=1             # 0 -> single thread
                                 # 1 -> multi threaded
   export YARA=0                 # default: disable yara tests
-  export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
+  export OVERWRITE_LOG=0        # automatically overwrite log directory, if necessary
   export MAX_EXT_SPACE=110000   # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
   export LOG_DIR="${INVOCATION_PATH}""/logs"
-  # export ERROR_LOG="${LOG_DIR}/emba_error.log"
-  export TMP_DIR="${LOG_DIR}""/tmp"
-  export CSV_DIR="${LOG_DIR}""/csv_logs"
-  export JSON_DIR="${LOG_DIR}""/json_logs"
+  # export ERROR_LOG="${LOG_DIR}/emba_error.log"  # This variable is reserved for logging errors. It is currently disabled but can be enabled for debugging purposes in the future.
+  export TMP_DIR="${LOG_DIR}/tmp"
+  export CSV_DIR="${LOG_DIR}/csv_logs"
+  export JSON_DIR="${LOG_DIR}/json_logs"
   export MAIN_LOG_FILE="emba.log"
-  export CONFIG_DIR="${INVOCATION_PATH}""/config"
-  export EXT_DIR="${INVOCATION_PATH}""/external"
-  export HELP_DIR="${INVOCATION_PATH}""/helpers"
-  export MOD_DIR="${INVOCATION_PATH}""/modules"
-  export MOD_DIR_LOCAL="${INVOCATION_PATH}""/EMBA-Non-free/modules_local"
+  export CONFIG_DIR="${INVOCATION_PATH}/config"
+  export EXT_DIR="${INVOCATION_PATH}/external"
+  export HELP_DIR="${INVOCATION_PATH}/helpers"
+  export MOD_DIR="${INVOCATION_PATH}/modules"
+  export MOD_DIR_LOCAL="${INVOCATION_PATH}/EMBA-Non-free/modules_local"
   export PID_LOGGING=0
   # this will be in TMP_DIR/pid_notes.log
   export PID_LOG_FILE="pid_notes.log"
-  export BASE_LINUX_FILES="${CONFIG_DIR}""/linux_common_files.txt"
+  export BASE_LINUX_FILES="${CONFIG_DIR}/linux_common_files.txt"
   if [[ -f "${CONFIG_DIR}"/known_exploited_vulnerabilities.csv ]]; then
-    export KNOWN_EXP_CSV="${CONFIG_DIR}"/known_exploited_vulnerabilities.csv
+    export KNOWN_EXP_CSV="${CONFIG_DIR}/known_exploited_vulnerabilities.csv"
   fi
   if [[ -f "${CONFIG_DIR}"/msf_cve-db.txt ]]; then
-    export MSF_DB_PATH="${CONFIG_DIR}"/msf_cve-db.txt
+    export MSF_DB_PATH="${CONFIG_DIR}/msf_cve-db.txt"
   fi
   export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
-  if [[ -f "${CONFIG_DIR}"/trickest_cve-db.txt ]]; then
-    export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
+  if [[ -f "${CONFIG_DIR}/trickest_cve-db.txt" ]]; then
+    export TRICKEST_DB_PATH="${CONFIG_DIR}/trickest_cve-db.txt"
   fi
-  export GTFO_CFG="${CONFIG_DIR}"/gtfobins_urls.cfg         # gtfo urls
+  export GTFO_CFG="${CONFIG_DIR}/gtfobins_urls.cfg"         # gtfo urls
   export SILENT=0
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
   export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
-  export NOTIFICATION_ID=1
   if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
     export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   fi
