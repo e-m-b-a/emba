@@ -52,8 +52,8 @@ fi
 
 echo "[*] Building the Metasploit exploit database"
 # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
-find "${MSF_MOD_PATH}" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" \
-  | sed 's/.*\/metasploit-framework//'| sort > "${MSF_DB_PATH}"
+find "${MSF_MOD_PATH}" -type f -iname "*.rb" -exec grep -a -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" \
+  | sed "s@${MSF_MOD_PATH}@@"| sort > "${MSF_DB_PATH}"
 
 if [[ -f "${MSF_DB_PATH}" ]]; then
   echo -e "${GREEN}[*] Metasploit exploit database now has ${ORANGE}$(wc -l "${MSF_DB_PATH}" | awk '{print $1}')${GREEN} exploit entries (after update).${NC}"

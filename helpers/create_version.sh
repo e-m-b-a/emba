@@ -18,7 +18,7 @@
 create_version() {
   local lVERSION=""
   lVERSION="$(grep "export EMBA_VERSION=" helpers/helpers_emba_defaults.sh | cut -d\" -f2)"
-  echo "${lVERSION}" > config/VERSION.txt
+  echo -e "${lVERSION}\n" > config/VERSION.txt
 }
 
 create_version
