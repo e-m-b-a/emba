@@ -18,7 +18,7 @@
 
 
 emba_parameter_parsing() {
-  while getopts a:bBA:cC:d:De:Ef:Fhik:l:m:N:o:p:P:qQrsStT:UVX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:d:De:Ef:Fhik:l:m:N:o:p:P:qQRrsStT:UVX:yY:WzZ: OPT ; do
     case "${OPT}" in
       a)
         check_alnum "${OPTARG}"
@@ -151,6 +151,11 @@ emba_parameter_parsing() {
         ;;
       Q)
         export FULL_EMULATION=1
+        ;;
+      R)
+        export RESCAN_SBOM=1
+        # in VEX rescanning mode we only run F17
+        export SELECT_MODULES=("f17")
         ;;
       r)
         # removes the extracted firmware as well as the emulation archives from l10

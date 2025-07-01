@@ -63,6 +63,7 @@ set_defaults() {
   export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
+  export RESCAN_SBOM=0          # rescan existing log directory with F17 module only
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default EMBA scan
@@ -195,6 +196,7 @@ set_defaults() {
 
 set_log_paths() {
   export SBOM_LOG_PATH="${LOG_DIR}/SBOM"
+  export EMBA_SBOM_JSON="${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json"
   export P02_LOG="${LOG_DIR}/p02_firmware_bin_file_check.txt"
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"

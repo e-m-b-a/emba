@@ -26,7 +26,7 @@ F17_cve_bin_tool() {
   # our first approach is to use our beautiful SBOM and walk through it
   # if for any reasons (disabled F15 module) there is no SBOM we check for s08_package_mgmt_extractor.csv
 
-  local lEMBA_SBOM_JSON="${SBOM_LOG_PATH%\/}/EMBA_cyclonedx_sbom.json"
+  local lEMBA_SBOM_JSON="${EMBA_SBOM_JSON}"
   local lSBOM_ARR=()
   local lSBOM_ENTRY=""
   local lWAIT_PIDS_F17_ARR=()
@@ -41,6 +41,7 @@ F17_cve_bin_tool() {
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..." "no_log"
+
   if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
     print_error "[-] No SBOM available!"
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -53,13 +54,12 @@ F17_cve_bin_tool() {
   sub_module_title "Software inventory overview"
   print_output "[*] Analyzing ${#lSBOM_ARR[@]} SBOM components ..." "no_log"
 
-  local lWAIT_PIDS_TEMP=()
   # first round is primarly for removing duplicates, unhandled_file entries and printing a quick initial overview for the html report
   # 2nd round is for the real testing
+  local lWAIT_PIDS_TEMP=()
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     sbom_preprocessing_threader "${lSBOM_ENTRY}" &
     local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_TEMP+=( "${lTMP_PID}" )
     max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_TEMP
     local lNEG_LOG=1
@@ -75,6 +75,20 @@ F17_cve_bin_tool() {
   fi
 
   sub_module_title "Vulnerability overview"
+  # we need to wait for the import of the CVE database
+  # just to ensure everything is in place we wait a max of ~2 minutes
+  # if we fail we try to proceed and hope ...
+  local lCNT=0
+  while ! [[ -f "${TMP_DIR}/tmp_state_data.log" ]]; do
+    print_output "[*] Waiting for CVE database ..." "no_log"
+    lCNT=$((lCNT+1))
+    if [[ "${lCNT}" -gt 24 ]]; then
+      print_output "[-] CVE database not prepared in time ... trying to proceed"
+      break
+    fi
+    sleep 5
+  done
+
   # 2nd round with pre-processed array -> we are going to check for CVEs now
   while read -r lSBOM_ENTRY; do
     local lBOM_REF=""
@@ -181,8 +195,30 @@ F17_cve_bin_tool() {
 
   print_output "[*] Generating final VEX vulnerability json ..." "no_log"
 
+  # Handle rescan mode: preserve existing files as "previous" versions and use standard names for new files
+  if [[ "${RESCAN_SBOM:-0}" -eq 1 ]]; then
+    print_output "[*] Backing up existing VEX files as previous versions" "no_log"
+
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
+      backup_vex_file "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+    else
+      print_output "[-] No VEX only json file found"
+    fi
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
+      backup_vex_file "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json"
+    else
+      print_output "[-] No VEX SBOM json file found"
+    fi
+
+    # Handle EMBA_sbom_vex_tmp.json if it exists
+    if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
+      rm "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+    fi
+  fi
+
   # now we need to build our full vex json
   mapfile -t lVEX_JSON_ENTRIES_ARR < <(find "${LOG_PATH_MODULE}/json/" -name "*.json")
+  print_output "[*] Building final VEX - Vulnerability Exploitability eXchange" "no_log"
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
     local lNEG_LOG=1
     echo "\"vulnerabilities\": [" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
@@ -259,10 +295,6 @@ sbom_preprocessing_threader() {
 
   # lPRODUCT_NAME is only used for duplicate checking:
   lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
-  # ensure this product/version combination is not already in our testing array:
-  if (grep -q "\"name\":\"${lPRODUCT_NAME}\",\"version\":\"${lPRODUCT_VERSION}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
-    return
-  fi
 
   # extract all our possible vendor names and product names:
   mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<< "${lSBOM_ENTRY}")
@@ -279,9 +311,12 @@ sbom_preprocessing_threader() {
   lANCHOR="${lPRODUCT_ARR[0]//\'}_${lPRODUCT_VERSION}"
   lANCHOR="cve_${lANCHOR:0:20}"
 
-  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
-
+  # ensure this product/version combination is not already in our testing array:
+  if (grep -q "\"name\":\"${lPRODUCT_NAME}\",\"version\":\"${lPRODUCT_VERSION}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
+    return
+  fi
   echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
+  print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 }
 
 cve_bin_tool_threader() {
@@ -880,5 +915,22 @@ get_epss_data() {
   echo "${lEPSS_EPSS};${lEPSS_PERC}"
 }
 
+backup_vex_file() {
+  local lFILE_PATH="${1:-}"
 
+  if [[ -f "${lFILE_PATH}" ]]; then
+    local lCOUNTER=1
+    local lBASE_NAME="${lFILE_PATH%%.json}"
+    while [[ -f "${lBASE_NAME}.previous_${lCOUNTER}.json" ]]; do
+      ((lCOUNTER++))
+    done
+
+    if [[ -f "${lBASE_NAME}.previous.json" ]]; then
+      mv "${lBASE_NAME}.previous.json" "${lBASE_NAME}.previous_${lCOUNTER}.json"
+    fi
+
+    mv "${lFILE_PATH}" "${lBASE_NAME}.previous.json"
+    print_output "[*] Backed up ${lFILE_PATH} as $(basename "${lBASE_NAME}.previous.json")" "no_log"
+  fi
+}
 
