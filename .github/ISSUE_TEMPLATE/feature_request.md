@@ -17,12 +17,9 @@ A clear and concise description of what you want to happen.
 A clear and concise description of any alternative solutions or features you've considered.
 
 **Priority issue**
-Are you already a [Sponsor][]? - [Y/N]
+Are you already a [Sponsor][1]? - [Y/N]
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
 
-[Mercury][]
-
-[mercury]: https://example.com/mercury/
-[sponsor]: https://github.com/sponsors/e-m-b-a/
+[1]: https://github.com/sponsors/e-m-b-a/
