@@ -60,7 +60,7 @@ while ((ID<="${NUMBER_OF_PAGES}")); do
   FAIL_CNT=0
 
   # Download and error handling:
-  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}"/"temp.txt"; do
+  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}/temp.txt"; do
     ((CUR_SLEEP_TIME+=$(shuf -i 1-5 -n 1)))
     ((FAIL_CNT+=1))
     if [[ "${FAIL_CNT}" -gt 20 ]]; then
@@ -71,16 +71,16 @@ while ((ID<="${NUMBER_OF_PAGES}")); do
     sleep "${CUR_SLEEP_TIME}"
   done
 
-  if grep -q "No Results Found" "${SAVE_PATH}"/"temp.txt"; then
+  if grep -q "No Results Found" "${SAVE_PATH}/temp.txt"; then
     echo -e "[*] Finished downloading exploits from packetstormsecurity.com with page ${ORANGE}${ID}${NC} ... exit now"
     break
   fi
 
-  grep -E "\/files\/[0-9]+|\/files\/cve|\/files\/tags|www.metasploit.com" "${SAVE_PATH}"/"temp.txt" | awk '{if ($0 ~ "/files/tags/exploit/page[0-9]") exit; else print}' | sed '1,/\.html/ { /\.html/!d }' > "${SAVE_PATH}"/"${LINKS}"
-  rm "${SAVE_PATH}"/"temp.txt"
+  grep -E "\/files\/[0-9]+|\/files\/cve|\/files\/tags|www.metasploit.com" "${SAVE_PATH}/temp.txt" | awk '{if ($0 ~ "/files/tags/exploit/page[0-9]") exit; else print}' | sed '1,/\.html/ { /\.html/!d }' > "${SAVE_PATH}/${LINKS}"
+  rm "${SAVE_PATH}/temp.txt"
 
-  NO_DUP_LINKS=$(awk -F'/' '!seen[$5]++ || /metasploit/' "${SAVE_PATH}"/"${LINKS}")
-  TAGS_CVES=$(grep -E "\/files\/(tags|cve)" "${SAVE_PATH}"/"${LINKS}")
+  NO_DUP_LINKS=$(awk -F'/' '!seen[$5]++ || /metasploit/' "${SAVE_PATH}/${LINKS}")
+  TAGS_CVES=$(grep -E "\/files\/(tags|cve)" "${SAVE_PATH}/${LINKS}")
   OUTPUT="${NO_DUP_LINKS}
 ${TAGS_CVES}
  9999. END"
@@ -89,7 +89,7 @@ ${TAGS_CVES}
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
 
-  mapfile -t MARKERS < <( grep -E "\/files\/[0-9]+" "${SAVE_PATH}"/"${LINKS}" | sed -r 's/(\[[0-9]+\]).*files\/[0-9]+\/(.*)\.html/\1\2/' | tr "-" " ")
+  mapfile -t MARKERS < <( grep -E "\/files\/[0-9]+" "${SAVE_PATH}/${LINKS}" | sed -r 's/(\[[0-9]+\]).*files\/[0-9]+\/(.*)\.html/\1\2/' | tr "-" " ")
 
   for ((index=0; index < ${#MARKERS[@]}; index++)); do
     CVEs=()
