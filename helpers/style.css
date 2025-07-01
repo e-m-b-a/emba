@@ -14,13 +14,13 @@ Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 */
 
 * {
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 body {
-  background-color:#222;
-  font-family:monospace;
-  margin:0;
+  background-color: #222;
+  font-family: monospace;
+  margin: 0;
 }
 
 a {
@@ -28,57 +28,57 @@ a {
 }
 
 a.etc {
-  background-color:#2c354a;
+  background-color: #2c354a;
 }
 
 a.etc:hover {
-  background-color:#3c4864;
+  background-color: #3c4864;
 }
 
 a.modul {
-  background-color:#333;
+  background-color: #333;
 }
 
 a.modul:hover {
-  background-color:#4e4e4e;
+  background-color: #4e4e4e;
 }
 
 a.submodul {
-  background-color:#555;
+  background-color: #555;
 }
 
 a.submodul:hover {
-  background-color:#6e6e6e;
+  background-color: #6e6e6e;
 }
 
 a.d {
-  background:linear-gradient(270deg,#088b83 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px!important;
+  background: linear-gradient(270deg,#088b83 10px,rgba(0,0,0,0) 0px);
+  padding-right: 18px!important;
 }
 
 a.p {
-  background:linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px!important;
+  background: linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0) 0px);
+  padding-right: 18px!important;
 }
 
 a.s {
-  background:linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px!important;
+  background: linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
+  padding-right: 18px!important;
 }
 
 a.q {
-  background:linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px!important;
+  background: linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
+  padding-right: 18px!important;
 }
 
 a.l {
-  background:linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px!important;
+  background: linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0) 0px);
+  padding-right: 18px!important;
 }
 
 a.f {
-  background:linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0) 0px);
-  padding-right:18px!important;
+  background: linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0) 0px);
+  padding-right: 18px!important;
 }
 
 a pre:hover {
@@ -90,17 +90,17 @@ pre hr {
 }
 
 hr.double {
-  border:0;
-  border-top:5px double #9f9f9f;
+  border: 0;
+  border-top: 5px double #9f9f9f;
 }
 
 hr.mono {
-  border:0;
-  border-top:2px solid #9f9f9f;
+  border: 0;
+  border-top: 2px solid #9f9f9f;
 }
 
 pre {
-  font-size:16px;
+  font-size: 16px;
   margin: 0 0 0 40px;
   word-break: break-all;
   white-space: pre-wrap;
@@ -130,19 +130,19 @@ pre a:hover {
 }
 
 .backButton {
-  background-color:#2d6029!important;
+  background-color: #2d6029!important;
 }
 
 .backButton:hover {
-  background-color:#377732!important;
+  background-color: #377732!important;
 }
 
 .expand {
-  background-color:#133d5f!important;
+  background-color: #133d5f!important;
 }
 
 .expand:hover {
-  background-color:#3d4781!important;
+  background-color: #3d4781!important;
 }
 
 .expand_area {
@@ -154,17 +154,17 @@ pre a:hover {
 }
 
 .expand_njs {
-  background-color:#133d5f!important;
+  background-color: #133d5f!important;
 }
 
 .hidden {
-  height:0;
-  padding:0!important;
-  visibility:hidden;
+  height: 0;
+  padding: 0!important;
+  visibility: hidden;
 }
 
 .inherit {
-  width:inherit;
+  width: inherit;
 }
 
 .local {
@@ -229,181 +229,181 @@ pre a:hover {
 }
 
 #logo {
-  background-color:#fff;
-  padding:5%;
-  width:100%;
+  background-color: #fff;
+  padding: 5%;
+  width: 100%;
 }
 
 .main {
-  -ms-overflow-style:none;
-  color:#FFF;
-  margin-left:250px;
-  overflow:scroll;
-  padding:20px;
-  scrollbar-width:none;
+  -ms-overflow-style: none;
+  color: #FFF;
+  margin-left: 250px;
+  overflow: scroll;
+  padding: 20px;
+  scrollbar-width: none;
   transition:margin-left .5s;
   margin-bottom: 100px;
 }
 
 .bold {
-  font-weight:700;
+  font-weight: 700;
 }
 
 .italic {
-  font-style:italic;
+  font-style: italic;
 }
 
 .blue {
-  color:#00f;
+  color: #00f;
 }
 
 .cyan {
-  color:#09f;
+  color: #09f;
 }
 
 .green {
-  color:#0f0;
+  color: #0f0;
 }
 
 .magenta {
-  color:#f9f;
+  color: #f9f;
 }
 
 .orange {
-  color:#f90;
+  color: #f90;
 }
 
 .red {
-  color:red;
+  color: red;
 }
 
 .side {
-  -ms-overflow-style:none;
-  background-color:#2d2d2d;
-  height:100%;
-  left:0;
-  overflow-y:scroll;
-  position:fixed;
-  scrollbar-width:none;
-  top:0;
-  transition:.5s;
-  width:250px;
-  z-index:1;
+  -ms-overflow-style: none;
+  background-color: #2d2d2d;
+  height: 100%;
+  left: 0;
+  overflow-y: scroll;
+  position: fixed;
+  scrollbar-width: none;
+  top: 0;
+  transition: .5s;
+  width: 250px;
+  z-index: 1;
 }
 
 .side::-webkit-scrollbar,.main::-webkit-scrollbar {
-  display:none;
+  display: none;
 }
 
 .rectButton {
-  bottom:0px;
-  cursor:pointer;
-  height:50px;
-  width:50px;
+  bottom: 0px;
+  cursor: pointer;
+  height: 50px;
+  width: 50px;
   line-height: 50px;
-  position:fixed;
-  text-align:center;
-  visibility:hidden;
-  padding:5px;
+  position: fixed;
+  text-align: center;
+  visibility: hidden;
+  padding: 5px;
 }
 
 .rectButtonVisible {
-  bottom:0px;
-  cursor:pointer;
-  height:50px;
-  width:50px;
+  bottom: 0px;
+  cursor: pointer;
+  height: 50px;
+  width: 50px;
   line-height: 50px;
-  position:fixed;
-  text-align:center;
-  padding:5px;
+  position: fixed;
+  text-align: center;
+  padding: 5px;
 }
 
 #buttonSizer {
-  bottom:0;
-  left:0;
+  bottom: 0;
+  left: 0;
 }
 
 .buttonClose {
-  background-color:#821c1c;
+  background-color: #821c1c;
 }
 
 .buttonClose:hover {
-  background-color:#a52323;
+  background-color: #a52323;
 }
 
 .buttonOpen {
-  background-color:#096b09;
+  background-color: #096b09;
 }
 
 .buttonOpen:hover {
-  background-color:#0b860b;
+  background-color: #0b860b;
 }
 
 #buttonTime {
-  bottom:0px;
-  left:0;
-  background-color:#044209;
+  bottom: 0px;
+  left: 0;
+  background-color: #044209;
 }
 
 #buttonTimeInvisible {
-  bottom:0px;
-  left:0;
-  background-color:#044209;
+  bottom: 0px;
+  left: 0;
+  background-color: #044209;
   visibility: hidden !important;
 }
 
 #buttonTime:hover {
-  background-color:#05500b;
+  background-color: #05500b;
 }
 
 #buttonInfo {
-  bottom:0px;
-  right:0;
-  background-color:#093a41;
+  bottom: 0px;
+  right: 0;
+  background-color: #093a41;
 }
 
 #buttonInfo:hover {
-  background-color:#0b4a53;
+  background-color: #0b4a53;
 }
 
 #buttonDown {
-  bottom:0px;
-  right:150px;
-  background-color:#614406;
+  bottom: 0px;
+  right: 150px;
+  background-color: #614406;
 }
 
 #buttonDown:hover {
-  background-color:#795509;
+  background-color: #795509;
 }
 
 #buttonUp {
-  bottom:0px;
-  right:200px;
-  background-color:#614406;
+  bottom: 0px;
+  right: 200px;
+  background-color: #614406;
 }
 
 #buttonUp:hover {
-  background-color:#795509;
+  background-color: #795509;
 }
 
 #buttonBack {
-  bottom:0px;
-  right:50px;
-  background-color:#614406;
+  bottom: 0px;
+  right: 50px;
+  background-color: #614406;
 }
 
 #buttonBack:hover {
-  background-color:#795509;
+  background-color: #795509;
 }
 
 #buttonForward {
-  bottom:0px;
-  right:100px;
-  background-color:#614406;
+  bottom: 0px;
+  right: 100px;
+  background-color: #614406;
 }
 
 #buttonForward:hover {
-  background-color:#795509;
+  background-color: #795509;
 }
 
 .nonClickable {
@@ -412,31 +412,31 @@ pre a:hover {
 }
 
 .image {
-  margin:15px 0;
-  max-width:640px;
-  width:100%;
+  margin: 15px 0;
+  max-width: 640px;
+  width: 100%;
 }
 
 #nav {
-  overflow:hidden;
-  padding-bottom:100px;
-  visibility:visible;
+  overflow: hidden;
+  padding-bottom: 100px;
+  visibility: visible;
 }
 
 #nav a {
-  color:#f2f2f2;
-  display:block;
-  padding:14px 8px;
-  text-align:center;
-  text-decoration:none;
+  color: #f2f2f2;
+  display: block;
+  padding: 14px 8px;
+  text-align: center;
+  text-decoration: none;
 }
 
 #nav input {
-  color:#f2f2f2;
-  display:block;
-  padding:14px 8px;
-  text-align:center;
-  text-decoration:none;
+  color: #f2f2f2;
+  display: block;
+  padding: 14px 8px;
+  text-align: center;
+  text-decoration: none;
   border: none;
   width: 100%;
   font-family: monospace;
