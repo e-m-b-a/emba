@@ -94,9 +94,9 @@ hr.mono {
 pre {
   font-size: 16px;
   margin: 0 0 0 40px;
+  text-indent: -40px;
   word-break: break-all;
   white-space: pre-wrap;
-  text-indent: -40px;
 }
 
 pre a {
@@ -116,9 +116,9 @@ pre hr {
 }
 
 .anc {
-  visibility: hidden;
   position: relative;
   top: -50px;
+  visibility: hidden;
 }
 
 #embark {
@@ -172,60 +172,60 @@ pre hr {
 }
 
 .reference {
-  padding-right: 20px;
-  display: inline-block;
-  background-color: #333;
-  width: 100%;
   background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-color: #333;
   background-position: top right;
-  background-size: 15px 35px;
   background-repeat: no-repeat;
+  background-size: 15px 35px;
+  display: inline-block;
+  padding-right: 20px;
   text-decoration: none;
+  width: 100%;
 }
 
 .reference:hover {
   background: linear-gradient(45deg, transparent 75%, #beec18 75%);
   background-position: top right;
-  background-size: 15px 35px;
   background-repeat: no-repeat;
+  background-size: 15px 35px;
 }
 
 .refmodul {
-  padding-right: 20px;
-  display: inline-block;
-  background-color: #333;
-  width: 100%;
   background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-color: #333;
   background-position: top right;
-  background-size: 15px 35px;
   background-repeat: no-repeat;
+  background-size: 15px 35px;
+  display: inline-block;
+  padding-right: 20px;
   text-decoration: none;
+  width: 100%;
 }
 
 .refmodul:hover {
   background: linear-gradient(45deg, transparent 75%, #eca218 75%);
   background-position: top right;
-  background-size: 15px 35px;
   background-repeat: no-repeat;
+  background-size: 15px 35px;
 }
 
 .refmodulext {
-  padding-right: 20px;
-  display: inline-block;
-  background-color: #333;
-  width: 100%;
   background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-color: #333;
   background-position: top right;
-  background-size: 15px 35px;
   background-repeat: no-repeat;
+  background-size: 15px 35px;
+  display: inline-block;
+  padding-right: 20px;
   text-decoration: none;
+  width: 100%;
 }
 
 .refmodulext:hover {
   background: linear-gradient(45deg, transparent 75%, #ec1894 75%);
   background-position: top right;
-  background-size: 15px 35px;
   background-repeat: no-repeat;
+  background-size: 15px 35px;
 }
 
 #logo {
@@ -237,12 +237,12 @@ pre hr {
 .main {
   -ms-overflow-style: none;
   color: #FFF;
+  margin-bottom: 100px;
   margin-left: 250px;
   overflow: scroll;
   padding: 20px;
   scrollbar-width: none;
   transition:margin-left .5s;
-  margin-bottom: 100px;
 }
 
 .bold {
@@ -299,23 +299,23 @@ pre hr {
   bottom: 0;
   cursor: pointer;
   height: 50px;
-  width: 50px;
   line-height: 50px;
+  padding: 5px;
   position: fixed;
   text-align: center;
   visibility: hidden;
-  padding: 5px;
+  width: 50px;
 }
 
 .rectButtonVisible {
   bottom: 0;
   cursor: pointer;
   height: 50px;
-  width: 50px;
   line-height: 50px;
+  padding: 5px;
   position: fixed;
   text-align: center;
-  padding: 5px;
+  width: 50px;
 }
 
 #buttonSizer {
@@ -340,15 +340,15 @@ pre hr {
 }
 
 #buttonTime {
+  background-color: #044209;
   bottom: 0;
   left: 0;
-  background-color: #044209;
 }
 
 #buttonTimeInvisible {
+  background-color: #044209;
   bottom: 0;
   left: 0;
-  background-color: #044209;
   visibility: hidden !important;
 }
 
@@ -357,9 +357,9 @@ pre hr {
 }
 
 #buttonInfo {
+  background-color: #093a41;
   bottom: 0;
   right: 0;
-  background-color: #093a41;
 }
 
 #buttonInfo:hover {
@@ -367,9 +367,9 @@ pre hr {
 }
 
 #buttonDown {
+  background-color: #614406;
   bottom: 0;
   right: 150px;
-  background-color: #614406;
 }
 
 #buttonDown:hover {
@@ -377,9 +377,9 @@ pre hr {
 }
 
 #buttonUp {
+  background-color: #614406;
   bottom: 0;
   right: 200px;
-  background-color: #614406;
 }
 
 #buttonUp:hover {
@@ -387,9 +387,9 @@ pre hr {
 }
 
 #buttonBack {
+  background-color: #614406;
   bottom: 0;
   right: 50px;
-  background-color: #614406;
 }
 
 #buttonBack:hover {
@@ -397,9 +397,9 @@ pre hr {
 }
 
 #buttonForward {
+  background-color: #614406;
   bottom: 0;
   right: 100px;
-  background-color: #614406;
 }
 
 #buttonForward:hover {
@@ -432,12 +432,12 @@ pre hr {
 }
 
 #nav input {
+  border: none;
   color: #f2f2f2;
   display: block;
+  font-family: monospace;
   padding: 14px 8px;
   text-align: center;
   text-decoration: none;
-  border: none;
   width: 100%;
-  font-family: monospace;
 }
