@@ -53,32 +53,32 @@ a.submodul:hover {
 
 a.d {
   background: linear-gradient(270deg, #088b83 10px, rgb(0 0 0 / 0%) 0);
-  padding-right: 18px!important;
+  padding-right: 18px !important;
 }
 
 a.p {
   background: linear-gradient(270deg, #088a83 10px, rgb(0 0 0 / 0%) 0);
-  padding-right: 18px!important;
+  padding-right: 18px !important;
 }
 
 a.s {
   background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
-  padding-right: 18px!important;
+  padding-right: 18px !important;
 }
 
 a.q {
   background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
-  padding-right: 18px!important;
+  padding-right: 18px !important;
 }
 
 a.l {
   background: linear-gradient(270deg, #99079e 10px, rgb(0 0 0 / 0%) 0);
-  padding-right: 18px!important;
+  padding-right: 18px !important;
 }
 
 a.f {
   background: linear-gradient(270deg, #cc410b 10px, rgb(0 0 0 / 0%) 0);
-  padding-right: 18px!important;
+  padding-right: 18px !important;
 }
 
 hr.double {
@@ -130,19 +130,19 @@ pre hr {
 }
 
 .backButton {
-  background-color: #2d6029!important;
+  background-color: #2d6029 !important;
 }
 
 .backButton:hover {
-  background-color: #377732!important;
+  background-color: #377732 !important;
 }
 
 .expand {
-  background-color: #133d5f!important;
+  background-color: #133d5f !important;
 }
 
 .expand:hover {
-  background-color: #3d4781!important;
+  background-color: #3d4781 !important;
 }
 
 .expand_area {
@@ -154,12 +154,12 @@ pre hr {
 }
 
 .expand_njs {
-  background-color: #133d5f!important;
+  background-color: #133d5f !important;
 }
 
 .hidden {
   height: 0;
-  padding: 0!important;
+  padding: 0 !important;
   visibility: hidden;
 }
 
