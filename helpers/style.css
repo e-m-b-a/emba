@@ -95,8 +95,8 @@ pre {
   font-size: 16px;
   margin: 0 0 0 40px;
   text-indent: -40px;
-  white-space: pre-wrap;
   word-break: break-all;
+  white-space: pre-wrap;
 }
 
 pre a {
