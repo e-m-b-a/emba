@@ -22,7 +22,7 @@ print_help()
   echo -e "${CYAN}""-d""${NC}""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "${CYAN}""-D""${NC}""         Only used via docker-compose for building EMBA docker container"
   echo -e "${CYAN}""-F""${NC}""         Developer installation (for running on your host in developer mode)"
-  echo -e "${CYAN}""-g""${NC}""         Install all dependecies for EMBA tests via Github actions (CVE-search database not populated)""${NC}"
+  echo -e "${CYAN}""-g""${NC}""         Install all dependencies for EMBA tests via Github actions (CVE-search database not populated)""${NC}"
   echo -e "${CYAN}""-h""${NC}""         Print this help message"
   echo -e "${CYAN}""-l""${NC}""         List all dependencies of EMBA (deprecated)"
   echo -e "${CYAN}""-r""${NC}""         Remove a default installation of EMBA"
@@ -171,7 +171,7 @@ pip_install() {
   local PIP_PARAMS=("${PIP_NAME}")
   local PIP_OPTS="${2:-}"
   if [[ -n "${PIP_OPTS}" ]]; then
-    local PIP_PARAMS+=("${PIP_OPTS}")
+    PIP_PARAMS+=("${PIP_OPTS}")
   fi
 
   local PIP_VERS=""
