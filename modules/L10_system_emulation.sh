@@ -2746,7 +2746,7 @@ create_emulation_archive() {
     mount "${lDEVICE}" "${MNT_POINT}" || true
     rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
     umount_qemu_image "${lDEVICE}"
-    delete_device_entry "$(basename ${lIMAGE})" "${lDEVICE}" "${MNT_POINT}"
+    delete_device_entry "$(basename "${lIMAGE}")" "${lDEVICE}" "${MNT_POINT}"
 
     cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_error "[-] Error in image copy procedure"
   fi
