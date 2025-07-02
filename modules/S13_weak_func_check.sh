@@ -202,7 +202,7 @@ function_check_NIOS2() {
         "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "call.*${lFUNC_ADDR}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         sed -i -r "s/^.*:.*(${lFUNC_ADDR}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
         COUNT_FUNC="$(grep -c "call.*""${lFUNC_ADDR}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -251,7 +251,7 @@ function_check_PPC32() {
         "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "bl.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
         COUNT_FUNC="$(grep -c "bl.*""${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -306,7 +306,7 @@ function_check_MIPS() {
         "${OBJDUMP}" -d "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
         COUNT_FUNC="$(grep -c "l[wd].*""${lFUNCTION}" "${FUNC_LOG}" 2> /dev/null || true)"
         if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -353,7 +353,7 @@ function_check_ARM64() {
       "${OBJDUMP}" -d "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
       sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
       if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -400,7 +400,7 @@ function_check_ARM32() {
       "${OBJDUMP}" -d "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
       sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
       if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -448,7 +448,7 @@ function_check_x86() {
         "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
         COUNT_FUNC="$(grep -c -e "call.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -496,7 +496,7 @@ function_check_x86_64() {
         "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" 2>/dev/null | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
         COUNT_FUNC="$(grep -c -e "call.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${lFUNCTION}" == "strcpy"  ]] ; then

@@ -421,8 +421,8 @@ web_access_crawler() {
   if [[ -f "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" ]]; then
     grep -A1 Testing "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" | grep -i -B1 "200 OK:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*${lIP_}:${lPORT}//" | sort -u >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" || true
     grep -A1 Testing "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" | grep -i -B1 "401 Unauth:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*${lIP_}:${lPORT}//" | sort -u >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-401Unauth.log" || true
-    lCRAWL_RESP_200=$(wc -l "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" | awk '{print $1}')
-    lCRAWL_RESP_401=$(wc -l "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-401Unauth.log" | awk '{print $1}')
+    lCRAWL_RESP_200=$(wc -l < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log")
+    lCRAWL_RESP_401=$(wc -l < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-401Unauth.log")
 
     # Colorizing the log file:
     sed -i -r "s/.*HTTP\/.*\ 200\ .*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"

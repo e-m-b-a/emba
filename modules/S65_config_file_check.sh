@@ -28,7 +28,7 @@ S65_config_file_check()
   scan_config
   check_fstab
 
-  if [[ "${#CONF_FILES_ARR[@]}" -gt 0 ]] || [[ -v FSTAB_USER_FILES[@] ]] || [[ -v FSTAB_USER_FILES[@] ]]; then
+  if [[ "${#CONF_FILES_ARR[@]}" -gt 0 ]] || [[ -v FSTAB_USER_FILES[@] ]] || [[ -v FSTAB_PASS_FILES[@] ]]; then
     lNEG_LOG=1
   fi
 

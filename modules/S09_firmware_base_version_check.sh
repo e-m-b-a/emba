@@ -118,7 +118,7 @@ S09_firmware_base_version_check() {
       mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
 
       local lINIT_FILES_CNT=0
-      lINIT_FILES_CNT="$(wc -l "${P99_CSV_LOG}" | awk '{print $1}')"
+      lINIT_FILES_CNT="$(wc -l < "${P99_CSV_LOG}")"
       if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
         print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
         print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"

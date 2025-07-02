@@ -102,7 +102,7 @@ cwe_check() {
 
     if [[ "${THREADED}" -eq 1 ]]; then
       # while s09 is running we throttle this module:
-      local lMAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
+      local lMAX_MOD_THREADS=$(("$(nproc || echo 1)" / 3))
       if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
         local lMAX_MOD_THREADS=1
       fi

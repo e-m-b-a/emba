@@ -194,7 +194,7 @@ radare_function_check_PPC32() {
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -E -A 2 -B 20 "bl.*${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c "bl.*""${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
@@ -238,7 +238,7 @@ radare_function_check_MIPS() {
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${lBINARY_}" 2>/dev/null | grep -A 20 -B 25 "^l[wd] .*${lFUNCTION}""(gp)" >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
       radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
       COUNT_FUNC="$(grep -c "l[wd].*""${lFUNCTION}" "${FUNC_LOG}" 2> /dev/null || true)"
@@ -283,7 +283,7 @@ radare_function_check_ARM64() {
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -A 2 -B 20 "bl.*${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
       radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
       COUNT_FUNC="$(grep -c "bl.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
@@ -328,7 +328,7 @@ radare_function_check_ARM32() {
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -A 2 -B 20 "bl.*${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
       radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
       COUNT_FUNC="$(grep -c "bl.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
@@ -375,7 +375,7 @@ radare_function_check_hexagon() {
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -E -A 2 -B 20 "call.*${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c -e "call.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
@@ -421,7 +421,7 @@ radare_function_check_x86() {
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -E -A 2 -B 20 "call.*${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c -e "call.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
@@ -467,7 +467,7 @@ radare_function_check_x86_64() {
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -E -A 2 -B 20 "call.*${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
-      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
+      if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
         radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c -e "call.*${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"

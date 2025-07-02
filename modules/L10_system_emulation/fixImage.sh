@@ -17,8 +17,9 @@ resolve_link() {
   TARGET=$("${BUSYBOX}" readlink "${1}")
   if [ -z "${TARGET}" ]; then
     echo "${1}"
+  else
+    echo "${TARGET}"
   fi
-  echo "${TARGET}"
 }
 
 if ("${EMBA_BOOT}"); then

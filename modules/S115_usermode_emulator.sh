@@ -118,7 +118,10 @@ S115_usermode_emulator() {
         fi
       done
 
-      print_output "[*] Testing ${ORANGE}${#lBIN_EMU_ARR[@]}${NC} unique executables in root dirctory: ${ORANGE}${R_PATH}${NC} (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
+      print_output "[*] Testing ${ORANGE}${#lBIN_EMU_ARR[@]}${NC} unique executables in root directory: ${ORANGE}${R_PATH}${NC} (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
+
+      local lCPU_CNT=1
+      lCPU_CNT="$(nproc || echo 1)"
 
       for BIN_ in "${lBIN_EMU_ARR[@]}" ; do
         ((lBIN_CNT=lBIN_CNT+1))
@@ -141,10 +144,10 @@ S115_usermode_emulator() {
         else
           if [[ "${THREADED}" -eq 1 ]]; then
             # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
-            lMAX_THREADS_S115=$((5*"$(grep -c ^processor /proc/cpuinfo || true)"))
+            lMAX_THREADS_S115=$((5*"${lCPU_CNT:-1}"))
             if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
               # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
-              lMAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo || true)"))
+              lMAX_THREADS_S115=$((3*"${lCPU_CNT:-1}"))
             fi
           fi
           if [[ "${BIN_}" != './qemu-'*'-static' ]]; then
@@ -374,7 +377,7 @@ run_init_test() {
   fi
   run_init_qemu "${lCPU_CONFIG}" "${lBIN_EMU_NAME_}" "${lLOG_FILE_INIT}" "${lEMULATOR}"
 
-  if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2> /dev/null) -gt 0 || $(wc -l "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" | awk '{print $1}') -lt 6 ]]; then
+  if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2> /dev/null) -gt 0 || $(wc -l < "${LOG_PATH_MODULE}/qemu_initx_${lBIN_EMU_NAME_}.txt") -lt 6 ]]; then
 
     write_log "[-] Emulation process of binary ${ORANGE}${lBIN_EMU_NAME_}${NC} with CPU configuration ${ORANGE}${lCPU_CONFIG}${NC} failed" "${lLOG_FILE_INIT}"
 
@@ -395,7 +398,7 @@ run_init_test() {
         lCPU_CONFIG="NONE"
       fi
 
-      if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2> /dev/null) -gt 0 || $(wc -l "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" | awk '{print $1}') -lt 6 ]]; then
+      if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2> /dev/null) -gt 0 || $(wc -l < "${LOG_PATH_MODULE}/qemu_initx_${lBIN_EMU_NAME_}.txt") -lt 6 ]]; then
         write_log "[-] Emulation process of binary ${ORANGE}${lBIN_EMU_NAME_}${NC} with CPU configuration ${ORANGE}${lCPU_CONFIG}${NC} failed" "${lLOG_FILE_INIT}"
         continue
       fi
@@ -827,7 +830,7 @@ s115_cleanup() {
   print_ln "no_log"
   print_output "[*] Umounting proc, sys and run" "no_log"
   mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "${EMULATION_PATH_BASE}" || true)
-  if [[ -v lCHECK_MOUNTS_ARR[@] ]]; then
+  if [[ "${#lCHECK_MOUNTS_ARR[@]}" -gt 0 ]]; then
     for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
       print_output "[*] Unmounting ${lMOUNT}" "no_log"
       lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)

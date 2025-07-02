@@ -49,7 +49,7 @@ S60_cert_file_check()
     lCURRENT_DATE=$(date +%s)
     lFUTURE_DATE=$(date --date="${lEXPIRE_WATCH_DATE}" +%s)
     for lCERT_ENTRY in "${lCERT_FILES_ARR[@]}" ; do
-      if [[ -f "${lCERT_ENTRY}" && $(wc -l "${lCERT_ENTRY}" | awk '{print $1}'|| true) -gt 1 ]]; then
+      if [[ -f "${lCERT_ENTRY}" && $(wc -l < "${lCERT_ENTRY}") -gt 1 ]]; then
         ((lCERT_FILES_CNT+=1))
         if command -v openssl > /dev/null ; then
           lCERT_NAME=$(basename "${lCERT_ENTRY}")

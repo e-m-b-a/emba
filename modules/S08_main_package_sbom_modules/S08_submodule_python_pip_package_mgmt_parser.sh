@@ -216,15 +216,15 @@ S08_submodule_python_pip_package_mgmt_parser() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=$(grep "^License: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_LIC=${lAPP_LIC/*:\ }
 
-        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_DESC=${lAPP_DESC/*:\ }
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
-        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_MAINT=${lAPP_MAINT/*:\ }
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
@@ -262,7 +262,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP site-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}METADATA${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
@@ -278,15 +278,15 @@ S08_submodule_python_pip_package_mgmt_parser() {
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_LIC=$(grep "^License: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_LIC=${lAPP_LIC/*:\ }
 
-        lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_DESC=$(grep "^Summary: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_DESC=${lAPP_DESC/*:\ }
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
-        lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
+        lAPP_MAINT=$(grep "^Author: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_MAINT=${lAPP_MAINT/*:\ }
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
@@ -324,7 +324,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
-        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP dist-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+        write_log "[*] Found PIP package ${ORANGE}${lAPP_NAME}${NC} - Version ${ORANGE}${lAPP_VERS}${NC} in PIP site-packages directory ${ORANGE}${lPIP_SITE_META_PACKAGE}${NC} - Source ${ORANGE}PKG-INFO${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPIP_SITE_META_PACKAGE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done

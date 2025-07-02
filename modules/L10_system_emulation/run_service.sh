@@ -11,7 +11,7 @@
 BUSYBOX=/firmadyne/busybox
 
 # just in case we have already started our initial system configuration
-if "${BUSYBOX}" grep -q "run_service started" /firmadyne/EMBA_config_state 2>/dev/null; then
+if "${BUSYBOX}" grep -q "run_service started" /tmp/EMBA_config_state 2>/dev/null; then
   exit
 fi
 
@@ -27,7 +27,7 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] Starting services in emulated environment...${NC}"
-"${BUSYBOX}" echo "run_service started" >> /firmadyne/EMBA_config_state
+"${BUSYBOX}" echo "run_service started" >> /tmp/EMBA_config_state
 "${BUSYBOX}" cat /firmadyne/service
 
 if ("${EMBA_ETC}"); then
@@ -131,8 +131,8 @@ if ("${EMBA_ETC}"); then
       # Do this only if we have some network_type configuration which means we are not in the network discovery mode
       # None means we are in network discovery mode
       ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
-      # /firmadyne/EMBA_config_state is filled from modules/L10_system_emulation/network.sh
-      if [ "${ACTION}" != "None" ] && ("${BUSYBOX}" grep -q "network config finished" /firmadyne/EMBA_config_state); then
+      # /tmp/EMBA_config_state is filled from modules/L10_system_emulation/network.sh
+      if [ "${ACTION}" != "None" ] && ("${BUSYBOX}" grep -q "network config finished" /tmp/EMBA_config_state); then
         # shellcheck disable=SC2016
         IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
         if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then

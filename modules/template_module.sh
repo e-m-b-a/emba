@@ -16,7 +16,7 @@
 
 # Code Guidelines:
 # -----------------------------
-# Identation should be 2 spaces (no tab character).
+# Indentation should be 2 spaces (no tab character).
 # Comments: use # sign followed by a space. When needed, create a comment block. Blank lines: allowed.
 # All functions use snake_case (e.g. test_xyz()). One blank lines between functions.
 # Variables should be capitalized, with underscore as word separator (e.g. FILE_EXISTS=1).
@@ -226,7 +226,7 @@ path_handling() {
   readarray -t lTEST_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   local lTEST_E=""
   for lTEST_E in "${lTEST_ARR[@]}"; do
-    if [[ -f "${MP_DIR}" ]] ; then
+    if [[ -f "${lTEST_E}" ]] ; then
       lCHECK=1
       print_output "[+] Found ""$(print_path "${lTEST_E}")"
     fi

@@ -174,9 +174,9 @@ grepit_search() {
     fi
     if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]]; then
       if [[ "${lLOG_DETAILS}" -eq 1 ]]; then
-        lLINES_OF_OUTPUT=$(( "$(wc -l "${LOG_PATH_MODULE}/${lOUTFILE}" | awk '{print $1}')" -8 ))
+        lLINES_OF_OUTPUT=$(( "$(wc -l < "${LOG_PATH_MODULE}/${lOUTFILE}")" -8 ))
       else
-        lLINES_OF_OUTPUT=$(( "$(wc -l "${LOG_PATH_MODULE}/${lOUTFILE}" | awk '{print $1}')" -1 ))
+        lLINES_OF_OUTPUT=$(( "$(wc -l < "${LOG_PATH_MODULE}/${lOUTFILE}")" -1 ))
       fi
       lCURRENT_TEST=$(basename -s .txt "${lOUTFILE}")
       # this is the output to the terminal. For the final report we wait till all tests are finished and then we
