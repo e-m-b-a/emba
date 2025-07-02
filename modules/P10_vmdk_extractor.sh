@@ -20,11 +20,10 @@ export PRE_THREAD_ENA=0
 P10_vmdk_extractor() {
   local lNEG_LOG=0
 
-  if [[ "${VMDK_DETECTED-0}" -eq 1 ]]; then
+  if [[ "${VMDK_DETECTED:-0}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "VMDK (Virtual Machine Disk) extractor"
     pre_module_reporter "${FUNCNAME[0]}"
-    local lNEG_LOG=0
     EXTRACTION_DIR="${LOG_DIR}"/firmware/vmdk_extractor/
 
     vmdk_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
@@ -83,7 +82,7 @@ vmdk_extractor() {
     lDEV_NAME=$(basename "${lMOUNT_DEV}")
     print_output "[*] Trying to mount ${ORANGE}${lMOUNT_DEV}${NC} to ${ORANGE}${lTMP_VMDK_MNT}${NC} directory"
     # if troubles ahead with vmdk mount, remove the error redirection
-    guestmount -a "${lVMDK_PATH_}" -m "${lMOUNT_DEV}" --ro "${lTMP_VMDK_MNT}" 2>/dev/null || true
+    guestmount -a "${lVMDK_PATH_}" -m "${lMOUNT_DEV}" --ro "${lTMP_VMDK_MNT}" 2>/dev/null || { print_error "[-] Mounting VMDK ${lVMDK_PATH_} failed ..."; continue; }
     if mount | grep -q vmdk_mount; then
       print_output "[*] Copying ${ORANGE}${lMOUNT_DEV}${NC} to firmware directory ${ORANGE}${lEXTRACTION_DIR_}/${lDEV_NAME}${NC}"
       mkdir -p "${lEXTRACTION_DIR_}"/"${lDEV_NAME}"/ || true

@@ -52,7 +52,7 @@ IF20_nvd_feed() {
 
         if [[ -d external/EPSS-data ]]; then
           cd external/EPSS-data || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )
-          git pull || echo "Could not update NVD database ... Please check it manually"
+          git pull || echo "Could not update NIST EPSS data feed ... Please check it manually"
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )
         else
           git clone --depth 1 -b main https://github.com/EMBA-support-repos/EPSS-data.git external/EPSS-data || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )

@@ -596,7 +596,7 @@ main() {
     if [[ ${THREADED} -eq 1 ]] && [[ "${MAX_MODS}" -eq 0 ]]; then
       # the maximum modules in parallel
       # rule of thumb - per core half a module, minimum 2 modules
-      MAX_MODS="$(( "$(grep -c ^processor /proc/cpuinfo)" /2 +1))"
+      MAX_MODS="$(( "$(nproc)" /2 +1))"
 
       # if we have only one core we run two modules in parallel
       if [[ "${MAX_MODS}" -lt 2 ]]; then
@@ -609,7 +609,7 @@ main() {
     if [[ ${THREADED} -eq 1 ]] && [[ "${MAX_MOD_THREADS}" -eq 0 ]]; then
       # the maximum threads per modules - if this value does not match adjust it via
       # local MAX_MOD_THREADS=123 in module area
-      export MAX_MOD_THREADS="$(( 2* "$(grep -c ^processor /proc/cpuinfo)" ))"
+      export MAX_MOD_THREADS="$(( 2* "$(nproc)" ))"
     fi
 
     # setup non threaded mode:

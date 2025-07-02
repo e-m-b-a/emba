@@ -940,9 +940,11 @@ get_data() {
     # we make something like this: "bridge-default-normal"
     MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f9 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
-  if [[ -f "${L15_LOG}" ]]; then
+  if [[ -f "${L20_LOG}" ]]; then
     # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "${L15_LOG}" | cut -d: -f2 || true)
     SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "${L20_LOG}" | cut -d: -f2 || true)
+  fi
+  if [[ -f "${L25_LOG}" ]]; then
     WEB_UP=$(grep -a "\[\*\]\ Statistics:" "${L25_LOG}" | cut -d: -f2 || true)
   fi
   if [[ -f "${L35_CSV_LOG}" ]]; then

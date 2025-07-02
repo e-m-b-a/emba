@@ -46,7 +46,7 @@ P55_unblob_extractor() {
     UNBLOB="$(cat "${TMP_DIR}"/unblob_disable.cfg)"
   fi
 
-  if [[ "${UNBLOB}" -eq 0 ]]; then
+  if [[ "${UNBLOB:-1}" -eq 0 ]]; then
     if [[ -f "${TMP_DIR}""/unblob_disable.cfg" ]]; then
       print_output "[-] Unblob module automatically disabled from other module."
     else

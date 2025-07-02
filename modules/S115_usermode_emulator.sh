@@ -121,7 +121,7 @@ S115_usermode_emulator() {
       print_output "[*] Testing ${ORANGE}${#lBIN_EMU_ARR[@]}${NC} unique executables in root directory: ${ORANGE}${R_PATH}${NC} (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
 
       local lCPU_CNT=1
-      lCPU_CNT="$(grep -c ^processor /proc/cpuinfo || true)"
+      lCPU_CNT="$(nproc || echo 1)"
 
       for BIN_ in "${lBIN_EMU_ARR[@]}" ; do
         ((lBIN_CNT=lBIN_CNT+1))

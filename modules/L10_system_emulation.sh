@@ -2158,7 +2158,7 @@ write_network_config_to_filesystem() {
 
 nvram_check() {
   local lIMAGE_NAME="${1:-}"
-  local lMAX_THREADS_NVRAM=$((4*"$(grep -c ^processor /proc/cpuinfo || true)"))
+  local lMAX_THREADS_NVRAM=$((4*"$(nproc || echo 1)"))
   local lDEVICE=""
   local lWAIT_PIDS_AE=()
   local lCURRENT_DIR=""
