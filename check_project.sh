@@ -37,6 +37,13 @@ if [[ "${STRICT_MODE}" -eq 1 ]]; then
   trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
 fi
 
+if [[ "$*" == *"--fast"* ]]; then
+  FAST_EXECUTION=1
+elif [[ "$*" == *"--help"* ]]; then
+  echo "Usage: ${0} [--fast]"
+  exit 0
+fi
+
 export GREEN='\033[0;32m'
 export ORANGE='\033[0;33m'
 export RED='\033[0;31m'
@@ -160,16 +167,22 @@ check() {
 
   echo -e "\\n""${GREEN}""Load all files for check:""${NC}""\\n"
 
-  import_emba_main
-  import_installer
-  import_helper
-  import_config_scripts
-  import_reporting_templates
-  import_module
-  import_json
+  if [[ "${FAST_EXECUTION:-0}" -eq 1 ]]; then
+    mapfile -t SOURCES < <(git status -s | grep -v "\.swp$" | grep -v "\.json$" | awk '{print $2}' | sort -u)
+    mapfile -t JSON_SOURCES < <(git status -s | grep -v "\.swp$" | grep "\.json$" | awk '{print $2}' | sort -u)
+  else
+    import_emba_main
+    import_installer
+    import_helper
+    import_config_scripts
+    import_reporting_templates
+    import_module
+    import_json
+  fi
 
   echo -e "\\n""${GREEN}""Check all source for correct tab usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}tab check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
     if [[ $(grep -cP '\t' "${SOURCE}") -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
@@ -181,6 +194,7 @@ check() {
 
   echo -e "\\n""${GREEN}""Check all source for correct comment usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}comment check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
     if [[ $(grep -E -r "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
@@ -193,6 +207,7 @@ check() {
 
   echo -e "\\n""${GREEN}""Check all source for correct space usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}space check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
     if ! grep -q -E ' +$' "${SOURCE}"; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
@@ -205,6 +220,7 @@ check() {
 
   echo -e "\\n""${GREEN}""Check all scripts for not using grep -R:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     [[ "${SOURCE}" == *"check_project.sh" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}recursive grep check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
 
@@ -218,6 +234,7 @@ check() {
 
   echo -e "\\n""${GREEN}""Run shellcheck and semgrep:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}shellcheck${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
     if shellcheck -x -o require-variable-braces -P "${INSTALLER_DIR}":"${HELP_DIR}":"${MOD_DIR}":"${MOD_DIR_LOCAL}" "${SOURCE}" || [[ $? -ne 1 && $? -ne 2 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
@@ -238,6 +255,7 @@ check() {
 
   echo -e "\\n""${GREEN}""Check JSON with json_pp:""${NC}""\\n"
   for SOURCE in "${JSON_SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Check ${ORANGE}json validity${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
     if (json_pp < "${SOURCE}" &> /dev/null); then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
@@ -249,6 +267,7 @@ check() {
 
   echo -e "\\n""${GREEN}""Check all scripts for correct permissions:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Check ${ORANGE}permission${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
     if stat -L -c "%a" "${SOURCE}" | grep -q "755"; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
@@ -473,13 +492,18 @@ var_checker() {
 # main:
 check_tools
 check
-var_checker modules
-var_checker helpers
-function_entry_space_check
-dockerchecker
-copy_right_check "Siemens Energy AG" 2025 ./ ./external
-list_linter_exceptions shellcheck ./ ./external
-list_linter_exceptions semgrep ./ ./external
+
+# the following checks are only performed in full check mode (without --fast switch)
+if [[ "${FAST_EXECUTION:-0}" -ne 1 ]]; then
+  var_checker modules
+  var_checker helpers
+  function_entry_space_check
+  dockerchecker
+  copy_right_check "Siemens Energy AG" 2025 ./ ./external
+  list_linter_exceptions shellcheck ./ ./external
+  list_linter_exceptions semgrep ./ ./external
+fi
+
 summary
 
 if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
