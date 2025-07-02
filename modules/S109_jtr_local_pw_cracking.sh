@@ -100,7 +100,7 @@ S109_jtr_local_pw_cracking() {
       tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/jtr_hashes.txt
       print_ln
       if [[ -f "${lJTR_WORDLIST}" ]]; then
-        print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${lJTR_WORDLIST}" | awk '{print $1}')${NC} entries."
+        print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l < "${lJTR_WORDLIST}")${NC} entries."
         john --progress-every=120 --wordlist="${lJTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt |& safe_logging "${LOG_FILE}" 0 || true &
         lPID="$!"
       else
@@ -141,7 +141,7 @@ S109_jtr_local_pw_cracking() {
           lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
           print_output "[*] Testing password hash types ${ORANGE}${lJTR_FORMAT}${NC}"
           if [[ -f "${lJTR_WORDLIST}" ]]; then
-            print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${lJTR_WORDLIST}" | awk '{print $1}')${NC} entries."
+            print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l < "${lJTR_WORDLIST}")${NC} entries."
             find "${lJTR_WORDLIST}" | tee -a "${LOG_FILE}"
             john --format="${lJTR_FORMAT}" --progress-every=120 --wordlist="${lJTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
             lPID="$!"

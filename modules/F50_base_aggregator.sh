@@ -617,7 +617,7 @@ binary_fct_output() {
     lBINS_CWE_CHCK_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}""/s17_cwe_checker/cwe_""${BINARY}"".log" || true)
   fi
   if [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".csv ]]; then
-    lBINS_SEMGREP_CNT=$(wc -l "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" | awk '{print $1}' || true)
+    lBINS_SEMGREP_CNT=$(wc -l < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" || true)
   fi
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local lFCT_LINK=""
@@ -840,7 +840,7 @@ get_data() {
     mapfile -t LINUX_DISTRIS_ARR < <(grep "Version information found" "${S06_LOG}" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u || true)
   fi
   if ! [[ "${FILE_ARR_COUNT-0}" -gt 0 ]]; then
-    FILE_ARR_COUNT=$(wc -l "${P99_CSV_LOG}" | awk '{print $1}'|| true)
+    FILE_ARR_COUNT=$(wc -l < "${P99_CSV_LOG}"|| true)
     DETECTED_DIR=$(find "${FIRMWARE_PATH_CP}" -type d 2>/dev/null | wc -l || true)
   fi
   if [[ -f "${S13_LOG}" ]]; then

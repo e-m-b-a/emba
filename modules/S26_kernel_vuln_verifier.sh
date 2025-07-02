@@ -46,7 +46,7 @@ S26_kernel_vuln_verifier()
 
   # now we should have a csv log with a kernel version:
   # shellcheck disable=SC2153
-  if ! [[ -f "${S24_CSV_LOG}" ]] || [[ "$(wc -l "${S24_CSV_LOG}" | awk '{print $1}')" -lt 1 ]]; then
+  if ! [[ -f "${S24_CSV_LOG}" ]] || [[ "$(wc -l < "${S24_CSV_LOG}")" -lt 1 ]]; then
     print_output "[-] No Kernel version file (s24 results) identified ..."
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -236,7 +236,7 @@ S26_kernel_vuln_verifier()
     sub_module_title "Identify kernel symbols ..."
     readelf -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
       sed 's/\[\.\.\.\]//' > "${LOG_PATH_MODULE}"/symbols.txt || true
-    SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols.txt | awk '{print $1}')
+    SYMBOLS_CNT=$(wc -l < "${LOG_PATH_MODULE}"/symbols.txt)
     print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
 
     if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
@@ -252,7 +252,7 @@ S26_kernel_vuln_verifier()
     fi
 
     uniq "${LOG_PATH_MODULE}"/symbols.txt > "${LOG_PATH_MODULE}"/symbols_uniq.txt
-    SYMBOLS_CNT=$(wc -l "${LOG_PATH_MODULE}"/symbols_uniq.txt | awk '{print $1}')
+    SYMBOLS_CNT=$(wc -l < "${LOG_PATH_MODULE}"/symbols_uniq.txt)
 
     print_ln
     print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
@@ -542,7 +542,7 @@ compile_kernel() {
     tr ' ' '\n' < "${LOG_PATH_MODULE}"/kernel-compile.log | grep ".*\.[chS]" | tr -d '"' | tr -d ')' | tr -d '<' | tr -d '>' \
       | tr -d '(' | sed 's/^\.\///' | sed '/^\/.*/d' | tr -d ';' | sed 's/^>//' | sed 's/^-o//' | tr -d \' \
       | sed 's/--defines=//' | sed 's/\.$//' | sort -u > "${LOG_PATH_MODULE}"/kernel-compile-files.log
-    COMPILE_SOURCE_FILES=$(wc -l "${LOG_PATH_MODULE}"/kernel-compile-files.log | awk '{print $1}')
+    COMPILE_SOURCE_FILES=$(wc -l < "${LOG_PATH_MODULE}"/kernel-compile-files.log)
     print_output "[+] Found ${ORANGE}${COMPILE_SOURCE_FILES}${GREEN} used source files during compilation" "" "${LOG_PATH_MODULE}/kernel-compile-files.log"
 
     # lets check the entries and verify them in our kernel sources
@@ -554,7 +554,7 @@ compile_kernel() {
         echo "${COMPILE_SOURCE_FILE}" >> "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log
       fi
     done < "${LOG_PATH_MODULE}"/kernel-compile-files.log
-    COMPILE_SOURCE_FILES_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log | awk '{print $1}')
+    COMPILE_SOURCE_FILES_VERIFIED=$(wc -l < "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log)
     print_ln
     print_output "[+] Found ${ORANGE}${COMPILE_SOURCE_FILES_VERIFIED}${GREEN} used and available source files during compilation" "" "${LOG_PATH_MODULE}/kernel-compile-files_verified.log"
   else
@@ -624,7 +624,7 @@ final_log_kernel_vulns() {
     max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_S26_1_ARR
   done
 
-  lSYM_USAGE_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null | tail -1 | awk '{print $1}' 2>/dev/null || true)
+  lSYM_USAGE_VERIFIED=$(wc -l < "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null || true)
   # nosemgrep
   lVULN_PATHS_VERIFIED_SYMBOLS=$(cat "${LOG_PATH_MODULE}"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | sed 's/.*verified - //' | sed 's/.*verified (GPL) - //' | sort -u | wc -l || true)
   # nosemgrep

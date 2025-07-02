@@ -113,7 +113,7 @@ S16_ghidra_decompile_checks()
   if [[ "$(find "${LOG_PATH_MODULE}" -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
     # shellcheck disable=SC2126
-    lVULN_COUNTER=$(wc -l "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 | awk '{print $1}' || true)
+    lVULN_COUNTER=$(wc -l < "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 || true)
   fi
   if [[ "${lVULN_COUNTER}" -gt 0 ]]; then
     print_ln
@@ -206,9 +206,9 @@ ghidra_analyzer() {
   semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea /tmp/haruspex_"${lNAME}"/* >> "${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
 
   # check if there are more details in our log (not only the header with the binary protections)
-  if [[ "$(wc -l "${lSEMGREPLOG}" | awk '{print $1}' 2>/dev/null)" -gt 0 ]]; then
+  if [[ "$(wc -l < "${lSEMGREPLOG}")" -gt 0 ]]; then
     jq  -rc '.results[] | "\(.path),\(.check_id),\(.end.line),\(.extra.message)"' "${lSEMGREPLOG}" >> "${lSEMGREPLOG_CSV}" || true
-    lS16_SEMGREP_ISSUES=$(wc -l "${lSEMGREPLOG_CSV}" | awk '{print $1}' || true)
+    lS16_SEMGREP_ISSUES=$(wc -l < "${lSEMGREPLOG_CSV}" || true)
 
     if [[ "${lS16_SEMGREP_ISSUES}" -gt 0 ]]; then
       print_output "[+] Found ""${ORANGE}""${lS16_SEMGREP_ISSUES}"" issues""${GREEN}"" in native binary ""${ORANGE}""${lNAME}""${NC}" "" "${lSEMGREPLOG_TXT}"

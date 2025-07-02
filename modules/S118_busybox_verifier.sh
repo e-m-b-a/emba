@@ -345,7 +345,7 @@ get_cve_busybox_data() {
   cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR
 
   if [[ -f "${CVE_DETAILS_PATH}" ]]; then
-    lVULN_CNT="$(wc -l "${CVE_DETAILS_PATH}" | awk '{print $1}')"
+    lVULN_CNT="$(wc -l < "${CVE_DETAILS_PATH}")"
     if [[ "${lVULN_CNT}" -gt 0 ]]; then
       # remove the first csv line
       lVULN_CNT=$((lVULN_CNT-1))

@@ -82,7 +82,7 @@ S116_qemu_version_detection() {
       print_ln "no_log"
 
       [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
-      if [[ $(wc -l "${CSV_DIR}"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
+      if [[ $(wc -l < "${CSV_DIR}"/s116_qemu_version_detection.csv) -gt 1 ]]; then
         lNEG_LOG=1
       fi
     fi

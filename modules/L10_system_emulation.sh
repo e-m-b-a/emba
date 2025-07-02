@@ -779,7 +779,7 @@ main_emulation() {
         local lPORTS_1st=0
         local lCOUNTING_1st=0
         mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log
-        lCOUNTING_1st=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | awk '{print $1}')
+        lCOUNTING_1st=$(wc -l < "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log)
         lPORTS_1st=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | sort -u | wc -l | awk '{print $1}' || true)
         switch_inits "${KINIT}"
 
@@ -795,7 +795,7 @@ main_emulation() {
           # now we need to check if something is better now or we should switch back to the original init
           lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
           lF_STARTUP=$(( "${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" ))
-          lCOUNTING_2nd=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $1}')
+          lCOUNTING_2nd=$(wc -l < "${LOG_PATH_MODULE}"/qemu.initial.serial.log)
           lPORTS_2nd=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
           # IPS_INT_VLAN is always at least 1 for the default configuration
         else
@@ -2144,11 +2144,11 @@ write_network_config_to_filesystem() {
     # as we have the filesytem mounted right before the final run we can link libnvram now
     link_libnvram_so "${MNT_POINT}" "dbg"
 
-    # if we have a /firmadyne/EMBA_config_state from a previous emulation run we need to remove it
+    # if we have a /tmp/EMBA_config_state from a previous emulation run we need to remove it
     # before the next emulation testrun
     # This file is an indiator that the initial network config was done and we can start checking
     # the network config during emulation
-    rm "${MNT_POINT}"/firmadyne/EMBA_config_state 2>/dev/null || true
+    rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
 
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
@@ -2205,7 +2205,7 @@ nvram_check() {
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final ]]; then
-      if [[ "$(wc -l "${LOG_PATH_MODULE}"/nvram/nvram_files_final | awk '{print $1}')" -gt 0 ]]; then
+      if [[ "$(wc -l < "${LOG_PATH_MODULE}"/nvram/nvram_files_final)" -gt 0 ]]; then
         # print_output "[*] Identified the following NVRAM files:"
         # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/nvram/nvram_files_final
 
@@ -2736,6 +2736,18 @@ create_emulation_archive() {
   if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
     # we only copy the kernel and the firmware image to the archive if FINAL_FW_RM is not set
     cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_error "[-] Error in kernel copy procedure"
+
+    # we need to ensure that the EMBA_config_state file gets removed
+    lDEVICE="$(add_partition_emulation "${lIMAGE}")"
+    if [[ "${lDEVICE}" == "NA" ]]; then
+      lDEVICE="$(add_partition_emulation "${lIMAGE}")"
+    fi
+    sleep 1
+    mount "${lDEVICE}" "${MNT_POINT}" || true
+    rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
+    umount_qemu_image "${lDEVICE}"
+    delete_device_entry "$(basename ${lIMAGE})" "${lDEVICE}" "${MNT_POINT}"
+
     cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_error "[-] Error in image copy procedure"
   fi
 
