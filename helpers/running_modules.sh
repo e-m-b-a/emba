@@ -19,9 +19,9 @@
 #               watch -c ./helpers/running_modules.sh ~/firmware-stuff/emba_logs_dir300_new_bins
 
 
-export GREEN="\033[0;32m"
-export ORANGE="\033[0;33m"
-export NC="\033[0m"  # no color
+GREEN="\033[0;32m"
+ORANGE="\033[0;33m"
+NC="\033[0m"  # no color
 
 if [[ $# -eq 0 ]]; then
   echo -e "\\n""${ORANGE}""In order to be able to use this script, you have to specify an EMBA firmware log directory${NC}"
@@ -36,7 +36,7 @@ if ! [[ -f "${EMBA_LOG_FILE}" ]]; then
   exit 1
 fi
 
-mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${EMBA_LOG_FILE}" | awk '{print $9}'|| true)
+mapfile -t STARTED_EMBA_PROCESSES < <(grep -w starting "${EMBA_LOG_FILE}" | awk '{print $9}'|| true)
 
 for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
   if ! grep -i -q "${EMBA_STARTED_PROC} finished ${EMBA_LOG_FILE}"; then

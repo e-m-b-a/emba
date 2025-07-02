@@ -297,13 +297,13 @@ lighttpd_config_analysis() {
         for lLIGHT_VER in "${lLIGHT_VERSIONS_ARR[@]}"; do
           if [[ "$(version "${lLIGHT_VER}")" -lt "$(version "1.4.68")" ]]; then
             print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not mitigating the BEAST attack (CVE-2009-3555) via ssl.disable-client-renegotiation.${NC}"
-            print_output "$(indent "$(orange "$(grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#" || true)")")"
+            print_output "$(indent "$(orange "$(grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -E -v "^([[:space:]])?#" || true)")")"
           fi
         done
       else
         # just in case we have not found a version number we show the warning.
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not mitigating the BEAST attack (CVE-2009-3555) via ssl.disable-client-renegotiation.${NC}"
-        print_output "$(indent "$(orange "$(grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
     fi
 
@@ -370,31 +370,31 @@ lighttpd_config_analysis() {
       print_output "[*] Testing web server DES ciphers"
       if grep -E "ssl.cipher-list.*:DES" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not disabling DES ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -q -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
 
       print_output "[*] Testing web server 3DES ciphers"
       if grep -E "ssl.cipher-list.*:3DES" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not disabling 3DES ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -q -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
 
       print_output "[*] Testing web server MD5 ciphers"
       if grep -E "ssl.cipher-list.*:MD5" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not disabling MD5 ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -q -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
 
       # lighttpd implicitly applies ssl.cipher-list = "HIGH" (since lighttpd 1.4.54) if ssl.cipher-list is not explicitly set in lighttpd.conf.
       print_output "[*] Testing web server LOW ciphers"
       if grep -E "ssl.cipher-list.*:LOW" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server enabling LOW ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -q -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
       print_output "[*] Testing web server MEDIUM ciphers"
       if grep -E "ssl.cipher-list.*:MEDIUM" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server enabling MEDIUM ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -q -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
     fi
   fi
