@@ -2889,6 +2889,10 @@ write_script_exec() {
       lCOMMAND=$(echo "${lCOMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
       # shellcheck disable=SC2001
       lCOMMAND=$(echo "${lCOMMAND}" | sed "s|\"${LOG_PATH_MODULE:-}\"|\.|g")
+      # remove the timeout from the qemu startup command
+      lCOMMAND="${lCOMMAND#timeout --preserve-status --signal SIGINT [[:digit:]]* }"
+      # remove the tail kill command
+      lCOMMAND="${lCOMMAND% ; pkill -9 -f tail.*-F.*.}"
     fi
 
     echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
