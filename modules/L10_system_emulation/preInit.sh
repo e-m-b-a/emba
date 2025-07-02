@@ -10,16 +10,15 @@
 
 BUSYBOX=/firmadyne/busybox
 
-# just in case we have already started our initial system configuration
-if "${BUSYBOX}" grep -q "preInit started" /tmp/EMBA_config_state 2>/dev/null; then
-  exit
-fi
-
 ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script starting ...${NC}"
-"${BUSYBOX}" echo "preInit started" >> /tmp/EMBA_config_state
+# we create the config state file and track our state in here. This is used from
+# the other scripts to track the emulation state and ensure they are not running multiple times
+# this file gets removed between automated emulation states. Nevertheless, as we are overwriting
+# it from the preInit script here we should be also fine on manual runs via run.sh
+"${BUSYBOX}" echo "preInit started" > /tmp/EMBA_config_state
 
 print_keepalive() {
   while(true); do
