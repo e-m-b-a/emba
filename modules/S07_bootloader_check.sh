@@ -42,7 +42,7 @@ check_dtb()
   local lDTB_FILE=""
 
   # readarray -t lDTB_ARR < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 || true)
-  mapfile -t lDTB_ARR < <(grep ".dtb;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  mapfile -t lDTB_ARR < <(grep "\\.dtb;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ ${#lDTB_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Device tree blobs found:"
@@ -86,13 +86,14 @@ check_bootloader()
   lCHECK=0
   local lGRUB_PATHS_ARR=()
   local lGRUB_FILE=""
+  local lGRUB=""
   # mapfile -t lGRUB_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/grub/grub.conf" || true)
   mapfile -t lGRUB_PATHS_ARR < <(grep "/boot/grub/grub.conf;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lGRUB_FILE in "${lGRUB_PATHS_ARR[@]}" ; do
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
       print_output "[+] Found Grub config: ""$(print_path "${lGRUB_FILE}")"
-      GRUB="${lGRUB_FILE}"
+      lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub"
       ((STARTUP_FINDS+=1))
     fi
@@ -103,7 +104,7 @@ check_bootloader()
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
       print_output "[+] Found Grub config: ""$(print_path "${lGRUB_FILE}")"
-      GRUB="${lGRUB_FILE}"
+      lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub"
       ((STARTUP_FINDS+=1))
     fi
@@ -120,7 +121,7 @@ check_bootloader()
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
       print_output "[+] Found Grub2 config: ""$(print_path "${lGRUB_FILE}")"
-      GRUB="${lGRUB_FILE}"
+      lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub2"
       ((STARTUP_FINDS+=1))
     fi
@@ -131,7 +132,7 @@ check_bootloader()
     if [[ -f "${lGRUB_FILE}" ]] ; then
       lCHECK=1
       print_output "[+] Found Grub2 config: ""$(print_path "${lGRUB_FILE}")"
-      GRUB="${lGRUB_FILE}"
+      lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub2"
       ((STARTUP_FINDS+=1))
     fi
@@ -147,13 +148,13 @@ check_bootloader()
   local lFIND4=""
   local lFIND5=""
   local lFOUND=0
-  if [[ -n "${GRUB:-}" ]] ; then
-    print_output "[*] Check Grub config: ""$(print_path "${GRUB}")"
-    lFIND=$(grep 'password --md5' "${GRUB}"| grep -v '^#' || true)
-    lFIND2=$(grep 'password --encrypted' "${GRUB}"| grep -v '^#' || true)
-    lFIND3=$(grep 'set superusers' "${GRUB}"| grep -v '^#' || true)
-    lFIND4=$(grep 'password_pbkdf2' "${GRUB}"| grep -v '^#' || true)
-    lFIND5=$(grep 'grub.pbkdf2' "${GRUB}"| grep -v '^#' || true)
+  if [[ -n "${lGRUB:-}" ]] ; then
+    print_output "[*] Check Grub config: ""$(print_path "${lGRUB}")"
+    lFIND=$(grep 'password --md5' "${lGRUB}"| grep -v '^#' || true)
+    lFIND2=$(grep 'password --encrypted' "${lGRUB}"| grep -v '^#' || true)
+    lFIND3=$(grep 'set superusers' "${lGRUB}"| grep -v '^#' || true)
+    lFIND4=$(grep 'password_pbkdf2' "${lGRUB}"| grep -v '^#' || true)
+    lFIND5=$(grep 'grub.pbkdf2' "${lGRUB}"| grep -v '^#' || true)
     # GRUB1: Password should be set (MD5 or SHA1)
     if [[ -n "${lFIND}" ]] || [[ -n "${lFIND2}" ]] ; then
       lFOUND=1

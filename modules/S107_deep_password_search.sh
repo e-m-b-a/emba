@@ -37,7 +37,7 @@ S107_deep_password_search()
       mapfile -t lPW_HASHES_ARR < <(strings "${lPW_PATH}" | grep --color -a -E -f "${lPW_HASH_CONFIG}" || true)
       for lPW_HASH in "${lPW_HASHES_ARR[@]}"; do
         print_output "[+] PATH: ${ORANGE}$(print_path "${lPW_PATH}")${GREEN}\t-\tHash: ${ORANGE}${lPW_HASH}${GREEN}."
-        write_csv_log "NA" "${lPW_PATH}" "${lPW_HASH}"
+        write_csv_log "${lPW_PATH}" "${lPW_HASH}"
         ((lPW_COUNTER+=1))
       done
     done < "${TMP_DIR}"/pw_hashes.txt

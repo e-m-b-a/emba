@@ -53,7 +53,7 @@ S18_capa_checker() {
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBINARY}" | awk '{print $1}')"
     if ( grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
-      # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with capa" "no_log"
+      # print_output "[*] ${ORANGE}${lBINARY}${NC} already tested with capa" "no_log"
       continue
     fi
     echo "${lBIN_MD5}" >> "${TMP_DIR}"/s18_checked.tmp
@@ -107,7 +107,7 @@ capa_runner_fct() {
   fi
 
   print_output "[*] Testing binary behavior with capa for $(print_path "${lBINARY}")" "no_log"
-  "${EXT_DIR}"/capa "${lCAPA_OPTS[@]}" "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}".log || print_error "[-] Capa analysis failed for ${lBINARY}"
+  "${EXT_DIR}"/capa "${lCAPA_OPTS[@]}" "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || print_error "[-] Capa analysis failed for ${lBINARY}"
 
   if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || [[ ! -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"

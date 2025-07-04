@@ -32,6 +32,9 @@ S21_python_check()
   local lWAIT_PIDS_S21_ARR=()
 
   if [[ ${PYTHON_CHECK} -eq 1 ]] ; then
+    # clearing tmp log file first
+    rm -f "${TMP_DIR}"/S21_VULNS.tmp
+
     write_csv_log "Script path" "Python issues detected" "common linux file"
     # mapfile -t lPYTHON_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
     mapfile -t lPYTHON_SCRIPTS_ARR < <(grep "Python script.*executable" "${P99_CSV_LOG}" | sort -u || true)
@@ -93,7 +96,7 @@ s21_script_bandit() {
 
   lSCRIPT_NAME=$(basename "${lPY_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
   lPY_LOG="${LOG_PATH_MODULE}""/bandit_""${lSCRIPT_NAME}"".txt"
-  bandit -r "${lPY_SCRIPT_}" > "${lPY_LOG}" 2> /dev/null || true
+  bandit "${lPY_SCRIPT_}" > "${lPY_LOG}" 2> /dev/null || true
 
   lVULNS=$(grep -c ">> Issue: " "${lPY_LOG}" 2> /dev/null || true)
   if [[ "${lVULNS}" -ne 0 ]] ; then

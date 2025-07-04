@@ -41,7 +41,7 @@ IP00_extractors(){
     # Buffalo decryptor
     print_file_info "buffalo-enc.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-enc.c" "external/buffalo-enc.c"
     print_file_info "buffalo-lib.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.c"
-    print_file_info "buffalo-lib.h" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.h"
+    print_file_info "buffalo-lib.h" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.h" "external/buffalo-lib.h"
     print_tool_info "gcc" 1
     print_tool_info "libc6-dev" 1
     print_tool_info "mtd-utils" 1

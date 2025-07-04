@@ -34,7 +34,6 @@ S08_submodule_ruby_gem_archive_parser() {
   local lAPP_VENDOR="NA"
   local lCPE_IDENTIFIER="NA"
   local lPOS_RES=0
-  local lMD5_CHECKSUM="NA"
   local lSHA256_CHECKSUM="NA"
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
@@ -103,7 +102,6 @@ S08_submodule_ruby_gem_archive_parser() {
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-      lMD5_CHECKSUM="$(md5sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
       lSHA512_CHECKSUM="$(sha512sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
 
@@ -124,7 +122,7 @@ S08_submodule_ruby_gem_archive_parser() {
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       # add package files to properties
-      if [[ ! -f "${TMP_DIR}/gems/data.tar.xz" ]]; then
+      if [[ -f "${TMP_DIR}/gems/data.tar.gz" ]]; then
         mapfile -t lGEM_FILES_ARR < <(tar -tvf "${TMP_DIR}/gems/data.tar.gz" | awk '{print $6}' || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed")
         for lGEM_FILE_ID in "${!lGEM_FILES_ARR[@]}"; do
           lGEM_FILE="${lGEM_FILES_ARR["${lGEM_FILE_ID}"]}"
@@ -150,7 +148,7 @@ S08_submodule_ruby_gem_archive_parser() {
       build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+      write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lPKG_MD5:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
       rm -rf "${TMP_DIR}"/gems || true
     done

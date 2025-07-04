@@ -114,16 +114,14 @@ version_detection_thread() {
   local lBINARY_PATH_=""
   local lBINARY_PATHS_ARR=()
   local lLOG_PATH_MODULE_S115="${LOG_DIR}"/s115_usermode_emulator/
-  export TYPE="emulation"
-
   local lVERSION_IDENTIFIER=""
-
-  local lBINARY_PATHS_ARR=()
   export PACKAGING_SYSTEM="user_mode_bin_analysis"
+  export TYPE="emulation"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ ${lPARSING_MODE_ARR[*]} == *"strict"* ]]; then
     TYPE="emulation/strict"
+    local lSTRICT_LOGS_ARR=()
     for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
       local lSTRICT_LOGS_ARR_TMP=()
       lAPP_NAME="$(basename "${lAPP_NAME}")"

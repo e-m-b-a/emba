@@ -24,15 +24,15 @@ ORANGE="\033[0;33m"
 NC="\033[0m"  # no color
 
 if [[ $# -eq 0 ]]; then
-  echo -e "\\n""${ORANGE}""In order to be able to use this script, you have to specify an EMBA firmware log directory${NC}"
+  echo -e "\\n${ORANGE}In order to be able to use this script, you have to specify an EMBA firmware log directory${NC}"
   exit 1
 fi
 
 EMBA_LOG_DIR="${1:-}"
-EMBA_LOG_FILE="${EMBA_LOG_DIR}""/emba.log"
+EMBA_LOG_FILE="${EMBA_LOG_DIR%/}/emba.log"
 
 if ! [[ -f "${EMBA_LOG_FILE}" ]]; then
-  echo -e "\\n""${ORANGE}""No valid EMBA firmware log directory found.${NC}"
+  echo -e "\\n${ORANGE}No valid EMBA firmware log directory found.${NC}"
   exit 1
 fi
 

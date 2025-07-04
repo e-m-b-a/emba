@@ -15,6 +15,10 @@ if "${BUSYBOX}" grep -q "run_service started" /tmp/EMBA_config_state 2>/dev/null
   exit
 fi
 
+get_date() {
+  "${BUSYBOX}" date
+}
+
 if ! [ -f /dev/null ]; then
   "${BUSYBOX}" mknod -m 666 /dev/null c 1 3
 fi
@@ -26,15 +30,16 @@ export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local
 ORANGE="\033[0;33m"
 NC="\033[0m"
 
-"${BUSYBOX}" echo -e "${ORANGE}[*] Starting services in emulated environment...${NC}"
+"${BUSYBOX}" echo -e "${ORANGE}[*] $(get_date) - Starting services in emulated environment...${NC}"
 "${BUSYBOX}" echo "run_service started" >> /tmp/EMBA_config_state
 "${BUSYBOX}" cat /firmadyne/service
 
 if ("${EMBA_ETC}"); then
+  INITIAL_DELAY=30
   # first, the system should do the job by itself
   # after 100sec we jump in with our service helpers
-  "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting 30sec before helpers starting services in emulated environment...${NC}"
-  "${BUSYBOX}" sleep 30
+  "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting ${INITIAL_DELAY} sec before helpers starting services in emulated environment...${NC}"
+  "${BUSYBOX}" sleep "${INITIAL_DELAY}"
   # some rules we need to apply for different services:
   if "${BUSYBOX}" grep -q lighttpd /firmadyne/service; then
     # ensure we have the pid file for lighttpd:
@@ -49,7 +54,7 @@ if ("${EMBA_ETC}"); then
   while (true); do
     while IFS= read -r _BINARY; do
       "${BUSYBOX}" sleep 5
-      "${BUSYBOX}" echo -e "${NC}[*] $(${BUSYBOX} date) - Environment details ..."
+      "${BUSYBOX}" echo -e "${NC}[*] $(get_date) - Environment details ..."
 
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
@@ -72,7 +77,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" ifconfig -a
       "${BUSYBOX}" echo "[*] Running processes:"
       "${BUSYBOX}" ps
-      "${BUSYBOX}" echo "[*] /proc filesytem:"
+      "${BUSYBOX}" echo "[*] /proc filesystem:"
       "${BUSYBOX}" ls /proc
 
       # debugger bins - only started with EMBA_NC=true
@@ -92,7 +97,9 @@ if ("${EMBA_ETC}"); then
           "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
 
           "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}Telnetd - ${_BINARY}${NC} debugging service ..."
-          ${_BINARY} &
+          # shellcheck disable=SC2086
+          "${BUSYBOX}" sh ${_BINARY} & # nosemgrep
+          # ${_BINARY} &
           continue
         fi
       fi
@@ -101,12 +108,12 @@ if ("${EMBA_ETC}"); then
       fi
 
       # normal service startups
-      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
+      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
         "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
         "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
 
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} service ..."
-        #BINARY variable could be something like: binary parameter parameter ...
+        # BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
         # strip only the real binary including path:
         _BINARY_TMP=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d ' ' -f1)

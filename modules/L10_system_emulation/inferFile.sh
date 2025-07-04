@@ -50,11 +50,11 @@ if ("${EMBA_BOOT}"); then
       fi
       "${BUSYBOX}" echo "[*] Found possible startup file ${STARTUP_FILE}"
       arr+=("${STARTUP_FILE}")
-      #if [ -e "${STARTUP_FILE}" ]; then
+      # if [ -e "${STARTUP_FILE}" ]; then
       #  arr+=("${STARTUP_FILE}")
-      #else
+      # else
       #  "${BUSYBOX}" echo "[-] Something went wrong with startup file $STARTUP_FILE"
-      #fi
+      # fi
     done
   done
 
@@ -77,8 +77,8 @@ if ("${EMBA_BOOT}"); then
         # find original program from binary directories
         "${BUSYBOX}" echo "[*] Analysing ${FILE}"
         FILE_NAME=$("${BUSYBOX}" basename "${FILE}")
-        if ("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" grep -qr "${FILE_NAME}" {} \;); then
-          TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
+        if ("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -exec "${BUSYBOX}" grep -qr "${FILE_NAME}" {} \;); then
+          TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
           "${BUSYBOX}" echo "[*] Re-creating symlink ${TARGET_FILE} -> ${FILE}"
           "${BUSYBOX}" ln -s "${TARGET_FILE}" "${FILE}"
         else

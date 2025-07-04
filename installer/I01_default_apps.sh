@@ -98,9 +98,9 @@ I01_default_apps(){
         sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
         # Install Rust (used from cwe_checker and binwalk)
-        rm "${HOME}"/.cargo -r -f
-        rm "${HOME}"/.config -r -f
-        rm external/rustup -r -f
+        rm -rf "${HOME}"/.cargo
+        rm -rf "${HOME}"/.config
+        rm -rf external/rustup
 
         curl https://sh.rustup.rs -sSf | sh -s -- -y
         # shellcheck disable=SC1091

@@ -175,10 +175,11 @@ S118_busybox_verifier()
     print_ln
 
     local lVULN_CNT=0
+    local lVULN=""
     write_csv_log "BusyBox VERSION" "BusyBox APPLET" "Verified CVE" "CNT all CVEs" "CVE Summary"
-    for VULN in "${lALL_BB_VULNS_ARR[@]}"; do
+    for lVULN in "${lALL_BB_VULNS_ARR[@]}"; do
       lVULN_CNT=$((lVULN_CNT+1))
-      busybox_vuln_testing_threader "${VULN}" "${lVULN_CNT}" "${#lALL_BB_VULNS_ARR[@]}" ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}" &
+      busybox_vuln_testing_threader "${lVULN}" "${lVULN_CNT}" "${#lALL_BB_VULNS_ARR[@]}" ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S118_ARR+=( "${lTMP_PID}" )
@@ -230,22 +231,24 @@ S118_busybox_verifier()
 }
 
 busybox_vuln_testing_threader() {
-  local VULN="${1:-}"
+  local lVULN="${1:-}"
   local lVULN_CNT="${2:-}"
   local lALL_BB_VULNS_ARR_SIZE="${3:-}"
   local lBB_VERSION="${4:-}"
 
-  # print_output "[*] VULN: ${VULN}"
-  CVE=$(echo "${VULN}" | cut -d, -f4)
-  local LOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${CVE}"
+
+  # print_output "[*] VULN: ${lVULN}"
+  local lCVE=""
+  lCVE=$(echo "${lVULN}" | cut -d, -f4)
+  local lLOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${lCVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
     mkdir "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
   fi
 
-  lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${CVE%-*}/${CVE:0:11}"*"xx/${CVE}.json" 2>/dev/null || true)
-  # print_output "[*] ${CVE} - ${lSUMMARY}"
-  print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${lALL_BB_VULNS_ARR_SIZE}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
+  lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
+  # print_output "[*] ${lCVE} - ${lSUMMARY}"
+  print_output "[*] Testing vulnerability ${ORANGE}${lVULN_CNT}${NC} / ${ORANGE}${lALL_BB_VULNS_ARR_SIZE}${NC} / ${ORANGE}${lCVE}${NC}" "no_log"
 
   for lBB_APPLET in "${BB_VERIFIED_APPLETS[@]}"; do
     # remove false positives for applet "which"
@@ -254,10 +257,10 @@ busybox_vuln_testing_threader() {
     fi
     # print_output "[*] Testing applet ${lBB_APPLET} against Summary: ${lSUMMARY}"
     if [[ "${lSUMMARY}" == *" ${lBB_APPLET} "* ]]; then
-      write_log "[+] Verified BusyBox vulnerability ${ORANGE}${CVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}" "${LOG_FILE_BB_MODULE}"
-      echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${LOG_FILE_BB_MODULE}"
-      write_csv_log "${lBB_VERSION}" "${lBB_APPLET}" "${CVE}" "${lALL_BB_VULNS_ARR_SIZE}" "${lSUMMARY}"
-      write_log "\\n-----------------------------------------------------------------\\n" "${LOG_FILE_BB_MODULE}"
+      write_log "[+] Verified BusyBox vulnerability ${ORANGE}${lCVE}${GREEN} - applet ${ORANGE}${lBB_APPLET}${GREEN}" "${lLOG_FILE_BB_MODULE}"
+      echo -e "\t${lSUMMARY//\\/}" | sed -e "s/\ ${lBB_APPLET}\ /\ ${ORANGE_}${lBB_APPLET}${NC_}\ /g" | tee -a "${lLOG_FILE_BB_MODULE}"
+      write_csv_log "${lBB_VERSION}" "${lBB_APPLET}" "${lCVE}" "${lALL_BB_VULNS_ARR_SIZE}" "${lSUMMARY}"
+      write_log "\\n-----------------------------------------------------------------\\n" "${lLOG_FILE_BB_MODULE}"
     fi
   done
 }

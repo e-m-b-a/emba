@@ -95,7 +95,7 @@ web_file_search()
   #  | sort -u -k1,1 | cut -d\  -f3)
   mapfile -t lWEB_STUFF_ARR < <(grep ".htm;\|.html\|.cgi\|.asp\|.php\|.xml\|.rg" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
-  if [[ -v lWEB_STUFF_ARR[@] ]] ; then
+  if [[ "${#lWEB_STUFF_ARR[@]}" -gt 0 ]] ; then
     write_log "[+] Found web related files:" "${LOG_PATH_MODULE}"/web_file_search.txt
     for lWEB_FILE in "${lWEB_STUFF_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lWEB_FILE/;*}")")" "${LOG_PATH_MODULE}"/web_file_search.txt &
@@ -133,16 +133,11 @@ webserver_check()
   local lHTTPD_FILE_ARR=()
   local lLINE=""
 
-  # readarray -t lAPACHE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lAPACHE_FILE_ARR < <(grep "apache" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
-  # readarray -t lNGINX_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lAPACHE_FILE_ARR < <(grep "nginx" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
-  # readarray -t lLIGHTTP_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lAPACHE_FILE_ARR < <(grep "lighttp" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
-  # readarray -t lCHEROKEE_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lAPACHE_FILE_ARR < <(grep "cheroke" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
-  # readarray -t lHTTPD_FILE_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
-  readarray -t lAPACHE_FILE_ARR < <(grep "httpd" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  readarray -t lAPACHE_FILE_ARR < <(grep -a -i "apache" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  readarray -t lNGINX_FILE_ARR < <(grep -a -i "nginx" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  readarray -t lLIGHTTP_FILE_ARR < <(grep -a -i "lighttp" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  readarray -t lCHEROKEE_FILE_ARR < <(grep -a -i "cheroke" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  readarray -t lHTTPD_FILE_ARR < <(grep -a -i "httpd" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ ${#lAPACHE_FILE_ARR[@]} -gt 0 ]] ; then
     write_log "[+] Found Apache related files:" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -178,7 +173,7 @@ webserver_check()
     write_log "[+] Found Cherokee related files:" "${LOG_PATH_MODULE}"/webserver_search.txt
     for lLINE in "${lCHEROKEE_FILE_ARR[@]}" ; do
       write_log "$(indent "$(print_path "${lLINE}")")" "${LOG_PATH_MODULE}"/webserver_search.txt
-      write_csv_log "Cherokee web server file" "$(basename "${lLINE}")" "${lLINE}" "${LOG_PATH_MODULE}"/webserver_search.txt
+      write_csv_log "Cherokee web server file" "$(basename "${lLINE}")" "${lLINE}"
     done
   else
     write_log "[-] No Cherokee related files found" "${LOG_PATH_MODULE}"/webserver_search.txt
@@ -200,7 +195,6 @@ php_check()
   local lPHP_INI_ARR=()
   local lPHP_INI_ENTRY=""
 
-  # readarray -t lPHP_INI_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 )
   readarray -t lPHP_INI_ARR < <(grep "php.ini" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
   if [[ ${#lPHP_INI_ARR[@]} -gt 0 ]] ; then
