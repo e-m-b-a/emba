@@ -2593,10 +2593,12 @@ check_online_stat() {
     mapfile -t lTCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t lUDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     # check the already created nmap log for open services to include these services in the final scan
-    mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -E "[0-9]+/open/tcp" "${ARCHIVE_PATH}/${lNMAP_LOG}" | cut -d '/' -f1 || true)
-    mapfile -t lNMAP_SERV_UDP_ARR < <(grep -o -E "[0-9]+/open/udp" "${ARCHIVE_PATH}/${lNMAP_LOG}" | cut -d '/' -f1 || true)
+    mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -E "[0-9]+/open/tcp" "${ARCHIVE_PATH}/${lNMAP_LOG}" | cut -d '/' -f1 | sort -u || true)
+    mapfile -t lNMAP_SERV_UDP_ARR < <(grep -o -E "[0-9]+/open/udp" "${ARCHIVE_PATH}/${lNMAP_LOG}" | cut -d '/' -f1 | sort -u || true)
 
-    if [[ "${#SERVICES_STARTUP[@]}" -gt 0 ]] || [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] || [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
+    if [[ "${#SERVICES_STARTUP[@]}" -gt 0 ]] || [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] || \
+      [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] || [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]] || \
+      [[ "${#lNMAP_SERV_UDP_ARR[@]}" -gt 0 ]]; then
       local lUDP_SERV_NETSTAT=""
       local lUDP_SERV_STARTUP=""
       local lUDP_SERV=""
