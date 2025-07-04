@@ -15,6 +15,10 @@ if "${BUSYBOX}" grep -q "init service config started" /tmp/EMBA_config_state 2>/
   exit
 fi
 
+get_date() {
+  "${BUSYBOX}" date
+}
+
 # we should build a real and useful PATH ... currently it is just guessing
 export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -22,7 +26,7 @@ export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local
 ORANGE="\033[0;33m"
 NC="\033[0m"
 
-"${BUSYBOX}" echo -e "${ORANGE}[*] Starting initial services in emulated environment...${NC}"
+"${BUSYBOX}" echo -e "${ORANGE}[*] $(get_date) - Starting initial services in emulated environment...${NC}"
 "${BUSYBOX}" echo "init service config started" >> /tmp/EMBA_config_state
 
 "${BUSYBOX}" cat /firmadyne/startup_service
@@ -39,13 +43,16 @@ if ("${EMBA_ETC}"); then
     SERVICE_NAME=$("${BUSYBOX}" basename "${SERVICE_NAME}")
 
     # normal service startups
-    if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${SERVICE_NAME}") ); then
+    if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}") ); then
       "${BUSYBOX}" echo -e "\tSERVICE_NAME: ${SERVICE_NAME}"
       "${BUSYBOX}" echo -e "\tSERVICE: ${SERVICE}"
 
       "${BUSYBOX}" echo -e "${NC}[*] Starting initial service ${ORANGE}${SERVICE_NAME} - ${SERVICE}${NC} ..."
-      #BINARY variable could be something like: binary parameter parameter ...
-      ${SERVICE} &
+      # shellcheck disable=SC3060
+      "${BUSYBOX}" ls -l "${SERVICE/\ *}"
+      # BINARY variable could be something like: binary parameter parameter ...
+      # shellcheck disable=SC2086
+      "${BUSYBOX}" sh ${SERVICE} &  # nosemgrep
     else
       "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${SERVICE_NAME}${NC} already started ..."
     fi

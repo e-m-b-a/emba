@@ -81,7 +81,6 @@ I120_cwe_checker() {
         if ! [[ -d ./external/cwe_checker ]]; then
           export PATH="${PATH}":"${HOME}"/.cargo/bin
 
-          if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
           mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/EMBA-support-repos/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )

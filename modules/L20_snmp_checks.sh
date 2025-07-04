@@ -83,7 +83,7 @@ check_basic_snmp() {
   fi
   print_ln
   print_output "[*] SNMP walk with community name ${ORANGE}private${NC}"
-  snmpwalk -v2c -c private "${lIP_ADDRESS}" .iso | tee "${LOG_PATH_MODULE}"/snmapwalk-private-"${lIP_ADDRESS}".txt || true
+  snmpwalk -v2c -c private "${lIP_ADDRESS}" .iso | tee "${LOG_PATH_MODULE}"/snmpwalk-private-"${lIP_ADDRESS}".txt || true
   if [[ -f "${LOG_PATH_MODULE}"/snmpwalk-private-"${lIP_ADDRESS}".txt ]]; then
     write_link "${LOG_PATH_MODULE}"/snmpwalk-private-"${lIP_ADDRESS}".txt
     cat "${LOG_PATH_MODULE}"/snmpwalk-private-"${lIP_ADDRESS}".txt

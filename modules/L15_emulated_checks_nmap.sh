@@ -67,7 +67,7 @@ check_live_nmap_basic() {
   # find all Nmap results
   mapfile -t lNMAP_RESULT_FILES_ARR < <(find "${LOG_PATH_MODULE}" -name "*.nmap")
 
-  if [[ -v lNMAP_RESULT_FILES_ARR[@] ]]; then
+  if [[ "${#lNMAP_RESULT_FILES_ARR[@]}" -gt 0 ]]; then
     for lNMAP_RESULTF in "${lNMAP_RESULT_FILES_ARR[@]}"; do
       print_output "[*] Found Nmap results ${ORANGE}$(basename "${lNMAP_RESULTF}")${NC}:"
       tee -a "${LOG_FILE}" < "${lNMAP_RESULTF}"

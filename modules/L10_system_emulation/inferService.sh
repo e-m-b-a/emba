@@ -12,7 +12,7 @@ BUSYBOX="/busybox"
 ORANGE="\033[0;33m"
 NC="\033[0m"
 
-# This script is based on the original FirmAE inferFile.sh script 
+# This script is based on the original FirmAE inferFile.sh script
 # This script supports multiple startup services, colored output
 # and more services
 
@@ -33,7 +33,7 @@ fi
 
 # we search for possible init startup directories and iterate them later for possible init scripts
 # the /firmadyne/startup_service are only tried to startup once during bootup
-for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*\.d*"); do
+for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${INIT_DIR}" -type f); do
     # currently we only use some services for startup
     # if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init\|event"; then
@@ -63,6 +63,15 @@ for RC_DIR in $("${BUSYBOX}" find / -type d -name "*rc.d*"); do
       fi
     # fi
   done
+done
+for SERVICE in $("${BUSYBOX}" find / -type f -name "rc"); do
+  if [ -e "${SERVICE}" ]; then
+    if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/startup_service 2>/dev/null; then
+      "${BUSYBOX}" echo -e "[*] Writing EMBA service starter for ${ORANGE}${SERVICE} service${NC}"
+      "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/startup_service
+      "${BUSYBOX}" chmod +x "${SERVICE}"
+    fi
+  fi
 done
 
 if [ -e /bin/boa ]; then
@@ -98,7 +107,8 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
   -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
   -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \
   -o -name "streamd" -type f -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f \
-  -o -name "pppoe-server" -type f -o -name "pppd" -type f -o -name "nvram_daemon" -type f -o -name "nvram" -type f); do
+  -o -name "pppoe-server" -type f -o -name "pppd" -type f -o -name "nvram_daemon" -type f -o -name "nvram" -type f \
+  -o -name "rc" -type f -o -name "vsftpd" -type f); do
 
   if [ -x "${BINARY}" ]; then
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")
@@ -136,6 +146,14 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
         "${BUSYBOX}" echo -e -n "${BINARY} -p 9875 -a 0.0.0.0 -i eth0 -d\n" >> /firmadyne/service
+      fi
+    elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "vsftpd" ]; then
+      if ! "${BUSYBOX}" grep -q "${BINARY} -" /firmadyne/service 2>/dev/null; then
+        for VSFTPD_CONFIG in $("${BUSYBOX}" find / -name "*vsftpd*.conf" -type f); do
+          "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} - ${VSFTPD_CONFIG}${NC}"
+          "${BUSYBOX}" echo -e -n "${BINARY} ${VSFTPD_CONFIG}\n" >> /firmadyne/service
+        done
+        "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
       if ! "${BUSYBOX}" grep -q "${BINARY} -" /firmadyne/service 2>/dev/null; then

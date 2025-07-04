@@ -196,10 +196,10 @@ check() {
   for SOURCE in "${SOURCES[@]}"; do
     [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}comment check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    if [[ $(grep -E -r "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
+    if [[ $(grep -E -r "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|/bin/sh\|/firmadyne/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      grep -E -r -n "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|shellcheck" | grep -v -E "#$"
+      grep -E -r -n "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|shellcheck\|/firmadyne/sh" | grep -v -E "#$"
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
       MODULES_TO_CHECK_ARR_COMMENT+=("${SOURCE}")
     fi

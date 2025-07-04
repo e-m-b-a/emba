@@ -81,6 +81,9 @@ zyxel_zip_extractor() {
   mapfile -t lZLD_BINS_ARR < <(find "${lEXTRACTION_DIR_}" -name "zld_fsextract")
   lRI_FILE_BIN="$(basename -s .ri "${lRI_FILE_}")".bin
 
+  local lZLD_BIN_FILE=""
+  local lRI_FILE_BIN_PATH_FILE=""
+
   for lZLD_BIN in "${lZLD_BINS_ARR[@]}"; do
     local lZIP_KEY=""
     print_output "[*] Checking ${ORANGE}${lZLD_BIN}${NC}"
@@ -89,11 +92,14 @@ zyxel_zip_extractor() {
     lRI_FILE_BIN_PATH=$(find "${LOG_DIR}"/firmware -name "${lRI_FILE_BIN}" | head -1)
     # => this should be the protected Zip file
 
-    if [[ $(file "${lZLD_BIN}") == *"ELF"* ]] && [[ $(file "${lRI_FILE_BIN_PATH}") == *"Zip archive data"* ]]; then
+    lZLD_BIN_FILE=$(file "${lZLD_BIN}")
+    lRI_FILE_BIN_PATH_FILE=$(file "${lRI_FILE_BIN_PATH}")
+
+    if [[ "${lZLD_BIN_FILE}" == *"ELF"* ]] && [[ "${lRI_FILE_BIN_PATH_FILE}" == *"Zip archive data"* ]]; then
       print_output "[*] Found Zyxel environment in ${ORANGE}${lZLD_DIR}${NC}"
       # now we know that we have an elf for extraction and and unzip binary in the extraction dir
       # this is everything we need for the key
-      if ( file "${lZLD_BIN}" | grep -q "ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1" ) ; then
+      if [[ "${lZLD_BIN_FILE}" == *"ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1"* ]]; then
         # todo: check if Zyxel also uses other architectures
         local lEMULATOR="qemu-mipsn32-static"
         print_output "[*] Found valid emulator ${ORANGE}${lEMULATOR}${NC}"
@@ -126,7 +132,7 @@ zyxel_zip_extractor() {
       fi
 
       # if we have found a lZIP_KEY:
-      if [[ -v lZIP_KEY ]]; then
+      if [[ -n "${lZIP_KEY}" ]]; then
         print_ln
         print_output "[+] Possible ZIP key detected: ${ORANGE}${lZIP_KEY}${NC}" "" "${LOG_PATH_MODULE}/zld_strace.log"
 
@@ -153,7 +159,7 @@ zyxel_zip_extractor() {
 
       # if it was possible to extract something with the key:
       if [[ "${#lFILES_ZYXEL_ARR[@]}" -gt 0 ]]; then
-        # compress.img ist the firmware -> letz search for it
+        # compress.img is the firmware -> let's search for it
         lCOMPRESS_IMG=$(grep "compress.img;" "${P99_CSV_LOG}" | sort -u)
         if [[ "${lCOMPRESS_IMG}" == *"Squashfs"* ]]; then
           print_output "[+] Found valid ${ORANGE}compress.img${GREEN} and extract it now"

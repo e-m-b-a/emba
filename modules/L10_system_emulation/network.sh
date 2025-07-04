@@ -12,10 +12,10 @@
 BUSYBOX=/firmadyne/busybox
 
 # if we have not parameter we are going to check this the usual way
-# if we have a first parameter we skipt this check as we recall this network
+# if we have a first parameter we skip this check as we recall this network
 # script from run_service script and it looks as we have lost our configuration
-if [ "${1}" -ne 1 ]; then
-  # just in case we have already strated our initial service configuration
+if [ "${1}" != "1" ]; then
+  # just in case we have already started our initial service configuration
   if "${BUSYBOX}" grep -q "network config started" /tmp/EMBA_config_state 2>/dev/null; then
     exit
   fi
@@ -57,19 +57,19 @@ if ("${EMBA_NET}"); then
     NET_INTERFACE=$("${BUSYBOX}" cat /firmadyne/net_interface)
 
     # netgear WNR2000 bridge command
-    CNT=0
+    CNT=1
     while (true); do
-      CNT=$((CNT+1))
-      echo "[*] Waiting until brctl shows up our ${NET_BRIDGE} - CNT: ${CNT} / 20"
+      echo "[*] Waiting until brctl shows up our ${NET_BRIDGE} - CNT: ${CNT} / 15"
       "${BUSYBOX}" sleep 5
       if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE}"); then
-        echo "[+] brctl showed up our ${NET_BRIDGE} - CNT: ${CNT} / 20 -> proceeding"
+        echo "[+] brctl showed up our ${NET_BRIDGE} - CNT: ${CNT} / 15 -> proceeding"
         break
       fi
-      if [ "${CNT}" -gt 20 ]; then
-        echo "[-] brctl does not showed up our ${NET_BRIDGE} - CNT: ${CNT} / 20 -> proceeding"
+      if [ "${CNT}" -gt 15 ]; then
+        echo "[-] brctl does not showed up our ${NET_BRIDGE} - CNT: ${CNT} / 15 -> proceeding"
         break
       fi
+      CNT=$((CNT+1))
     done
 
     "${BUSYBOX}" sleep 5
@@ -84,10 +84,10 @@ if ("${EMBA_NET}"); then
         "${BUSYBOX}" echo -e "[*] Setting default IP address: ${ORANGE}${IP} / mode: normal${NC}"
       fi
       # tplink TL-WA860RE_EU_UK_US__V5_171116
-      #"${BUSYBOX}" brctl addbr "${NET_BRIDGE}"
-      #"${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
+      # "${BUSYBOX}" brctl addbr "${NET_BRIDGE}"
+      # "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" "${IP}" up
-      #"${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
+      # "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
     elif [ "${ACTION}" = "interface" ]; then
       # with this mechanism we setup the eth interface with an IP address and not the bridge
       # this is usually used as an additional fallback solution

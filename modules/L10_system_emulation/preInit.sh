@@ -10,6 +10,10 @@
 
 BUSYBOX=/firmadyne/busybox
 
+get_date() {
+  "${BUSYBOX}" date
+}
+
 ORANGE="\033[0;33m"
 NC="\033[0m"
 
@@ -22,7 +26,7 @@ NC="\033[0m"
 
 print_keepalive() {
   while(true); do
-    "${BUSYBOX}" echo -e "[*] $(${BUSYBOX} date) - EMBA emulation system is live"
+    "${BUSYBOX}" echo -e "[*] $(get_date) - EMBA emulation system is live"
     "${BUSYBOX}" sleep 5
   done
 }
@@ -32,6 +36,7 @@ print_keepalive() {
 [ -d /sys ] || "${BUSYBOX}" mkdir -p /sys
 [ -d /proc ] || "${BUSYBOX}" mkdir -p /proc
 [ -d /tmp ] || "${BUSYBOX}" mkdir -p /tmp
+[ -d /run ] || "${BUSYBOX}" mkdir -p /run
 [ -d /var/lock ] || "${BUSYBOX}" mkdir -p /var/lock
 
 "${BUSYBOX}" mount -t sysfs sysfs /sys
@@ -42,7 +47,7 @@ print_keepalive() {
 "${BUSYBOX}" mount -t devpts devpts /dev/pts
 "${BUSYBOX}" mount -t tmpfs tmpfs /run
 
-"${BUSYBOX}" echo -e "${NC}[*] $(${BUSYBOX} date) - Environment details ..."
+"${BUSYBOX}" echo -e "${NC}[*] $(get_date) - Environment details ..."
 "${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
 "${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
 "${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"

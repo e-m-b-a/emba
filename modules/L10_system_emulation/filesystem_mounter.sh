@@ -139,7 +139,7 @@ image_mounter() {
   lIMAGE_PATH="${lIMAGE_PATH%\/*}"
   lIMAGE_NAME="${lIMAGE/*\/}"
   lMNT_POINT="${lIMAGE_PATH}"/mounter
-  [[ ! -d "${lIMAGE_PATH}"/mounter ]] && mkdir "${lIMAGE_PATH}"/mounter
+  [[ ! -d "${lMNT_POINT}" ]] && mkdir "${lMNT_POINT}"
 
   echo -e "[*] Identify Qemu Image device for ${ORANGE}${lIMAGE_PATH}/${lIMAGE_NAME}${NC}"
   lDEVICE="$(add_partition_emulation "${lIMAGE_PATH}/${lIMAGE_NAME}")"
@@ -169,7 +169,7 @@ image_unmounter() {
   lIMAGE_NAME="${lIMAGE/*\/}"
   lMNT_POINT="${lIMAGE_PATH}"/mounter
 
-  if [[ ! -d "${lIMAGE_PATH}"/mounter ]]; then
+  if [[ ! -d "${lMNT_POINT}" ]]; then
     echo "[-] No mounted image identified"
     exit 1
   fi
@@ -205,7 +205,7 @@ if ! [[ ${EUID} -eq 0 ]] ; then
 fi
 
 if [[ "${MOUNTER}" != "mount" && "${MOUNTER}" != "umount" ]]; then
-  echo -e "[-] Specify \"mount\" for mounting a filesystem or \"umount\" for unmounting a filsystem"
+  echo -e "[-] Specify \"mount\" for mounting a filesystem or \"umount\" for unmounting a filesystem"
   exit 1
 fi
 
