@@ -2641,12 +2641,12 @@ check_online_stat() {
       if [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]]; then
         printf -v lTCP_SERV "%s " "${lNMAP_SERV_TCP_ARR[@]}"
         lTCP_SERV_NMAP=${lTCP_SERV//+([$'\n'\ ])/,}
-        [[ "${lTCP_SERV_NMAP}" != "," ]] && print_output "[*] TCP Services detected via Nmap: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
+        [[ "${lTCP_SERV_NMAP}" != "," ]] && print_output "[*] TCP Services detected via Nmap: ${ORANGE}${lTCP_SERV_NMAP}${NC}"
       fi
       if [[ "${#lNMAP_SERV_UDP_ARR[@]}" -gt 0 ]]; then
         printf -v lUDP_SERV "%s " "${lNMAP_SERV_UDP_ARR[@]}"
         lUDP_SERV_NMAP=${lUDP_SERV//+([$'\n'\ ])/,}
-        [[ "${lUDP_SERV_NMAP}" != "," ]] && print_output "[*] UDP Services detected via Nmap: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
+        [[ "${lUDP_SERV_NMAP}" != "," ]] && print_output "[*] UDP Services detected via Nmap: ${ORANGE}${lUDP_SERV_NMAP}${NC}"
       fi
 
       print_ln
