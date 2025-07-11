@@ -624,7 +624,7 @@ final_log_kernel_vulns() {
     max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_S26_1_ARR
   done
 
-  lSYM_USAGE_VERIFIED=$(wc -l < "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null || true)
+  lSYM_USAGE_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null | tail -n1 | awk '{print $1}' || true)
   # nosemgrep
   lVULN_PATHS_VERIFIED_SYMBOLS=$(cat "${LOG_PATH_MODULE}"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | sed 's/.*verified - //' | sed 's/.*verified (GPL) - //' | sort -u | wc -l || true)
   # nosemgrep
