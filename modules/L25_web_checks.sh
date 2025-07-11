@@ -488,7 +488,7 @@ make_web_screenshot() {
 
   sub_module_title "Starting screenshot for ${ORANGE}${lIP_}:${lPORT_}${NC}"
 
-  timeout --preserve-status --signal SIGINT 20 "${CHROME_HEADLESS_BIN}" --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lSSL}://${lIP_}:${lPORT_}" 2>/dev/null
+  timeout --preserve-status --signal SIGINT 20 "${CHROME_HEADLESS_BIN}" --no-sandbox --hide-scrollbars --window-size=1024,768 --disable-gpu --screenshot="${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png "${lSSL}://${lIP_}:${lPORT_}" 2>/dev/null || true
 
   if [[ -f "${LOG_PATH_MODULE}"/screenshot_"${lIP_}"_"${lPORT_}".png ]]; then
     print_output "[+] Screenshot of web server on IP ${ORANGE}${lIP_}:${lPORT_}${NC} created"
