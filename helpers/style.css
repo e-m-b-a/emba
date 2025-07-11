@@ -210,8 +210,8 @@ pre hr {
 }
 
 .refmodulext {
-  background: linear-gradient(45deg, transparent 75%, #777 75%);
   background-color: #333;
+  background: linear-gradient(45deg, transparent 75%, #777 75%);
   background-position: top right;
   background-repeat: no-repeat;
   background-size: 15px 35px;
