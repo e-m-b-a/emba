@@ -50,7 +50,10 @@ F15_cyclonedx_sbom() {
     local lDEP_FILES_ARR=()
 
     if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
-      lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log)
+      lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log | head -n 1)
+      if [[ $(sort -u "${TMP_DIR}"/fw_name.log | wc -l) -gt 1 ]]; then
+        print_output "[*] Warning: Multiple firmware paths detected in fw_name.log. Using the first entry: ${lFW_PATH}"
+      fi
       # lEMBA_COMMAND=$(sort -u "${TMP_DIR}"/emba_command.log)
     else
       lFW_PATH="${FIRMWARE_PATH_BAK}"
@@ -187,7 +190,7 @@ F15_cyclonedx_sbom() {
       vulnerabilities="[]" \
       > "${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
 
-    # I am sure there is a much cleaner way but for now I am stuck and don't get it in a different way :(
+    # Replace placeholder '%SPACE%' with actual spaces in the generated JSON file to ensure proper formatting.
     sed -i 's/%SPACE%/\ /g' "${lSBOM_LOG_FILE}.json"
 
     if [[ -s "${lSBOM_LOG_FILE}.json" ]]; then
