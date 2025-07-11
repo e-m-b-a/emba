@@ -89,7 +89,7 @@ check_basic_snmp() {
     cat "${LOG_PATH_MODULE}"/snmpwalk-private-"${lIP_ADDRESS}".txt
   fi
 
-  SNMP_UP=$(wc -l "${LOG_PATH_MODULE}"/snmp* | tail -n1 | awk '{print $1}' || true)
+  SNMP_UP=$(wc -l "${LOG_PATH_MODULE}"/snmp* | tail -n1 | awk '{print $1}' || echo 0)
 
   if [[ "${SNMP_UP}" -gt 20 ]]; then
     SNMP_UP=1
@@ -131,7 +131,7 @@ check_snmp_vulns() {
     fi
   done
 
-  lSNMP_UP_tmp=$(wc -l "${LOG_PATH_MODULE}"/snmp* | tail -n1 | awk '{print $1}' || true)
+  lSNMP_UP_tmp=$(wc -l "${LOG_PATH_MODULE}"/snmp* | tail -n1 | awk '{print $1}' || echo 0)
 
   if [[ "${lSNMP_UP_tmp}" -gt 20 ]]; then
     SNMP_UP=1
