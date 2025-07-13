@@ -78,6 +78,16 @@ S13_weak_func_check()
           else
             function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
           fi
+        elif [[ "${lBIN_FILE}" =~ Intel\ i386 ]]; then
+          if [[ "${THREADED}" -eq 1 ]]; then
+            function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+            local lTMP_PID="$!"
+            store_kill_pids "${lTMP_PID}"
+            lWAIT_PIDS_S13_ARR+=( "${lTMP_PID}" )
+          else
+            function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+          fi
+
         elif [[ "${lBIN_FILE}" =~ 32-bit.*ARM ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then
             function_check_ARM32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
