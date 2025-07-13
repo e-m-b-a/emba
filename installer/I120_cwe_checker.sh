@@ -63,7 +63,7 @@ I120_cwe_checker() {
 
         # Ghidra
         if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
-        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERS}_build/ghidra_${GHIDRA_VERS}_PUBLIC_${GHIDRA_REL_DATE}.zip -Sf -o external/ghidra.zip
+        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_"${GHIDRA_VERS}"_build/ghidra_"${GHIDRA_VERS}"_PUBLIC_"${GHIDRA_REL_DATE}".zip -Sf -o external/ghidra.zip
         mkdir external/ghidra 2>/dev/null
         unzip -qo external/ghidra.zip -d external/ghidra
         # if [[ "${IN_DOCKER}" -eq 1 ]]; then
