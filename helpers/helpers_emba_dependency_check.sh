@@ -100,7 +100,6 @@ prepare_docker_home_dir() {
     # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share/composer/.htaccess "${HOME}"/.local/share/composer/
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share/cwe_checker/* "${HOME}"/.local/share/cwe_checker/
-    export PATH=${PATH}:"${HOME}"/.cargo/bin/
   fi
 }
 
@@ -588,17 +587,21 @@ dependency_check()
       # check this - currently cyclone is installed in this dir in our docker image:
       export PATH=${PATH}:/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/
     fi
-    export OBJDUMP="${EXT_DIR}""/objdump"
+    export OBJDUMP="${EXT_DIR}/objdump"
 
-    if [[ -d "${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC" ]]; then
-      export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
-    elif [[ -d "${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC" ]]; then
-      export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC"
+    if [[ -d "${EXT_DIR}/ghidra/ghidra_10.3.1_PUBLIC" ]]; then
+      export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_10.3.1_PUBLIC"
+    elif [[ -d "${EXT_DIR}/ghidra/ghidra_10.2.3_PUBLIC" ]]; then
+      export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_10.2.3_PUBLIC"
+    elif [[ -d "${EXT_DIR}/ghidra/ghidra_11.4_PUBLIC" ]]; then
+      export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_11.4_PUBLIC"
+    else
+      print_output "[-] WARNING: No GHIDRA installation found"
     fi
   fi
 
   if [[ "${USE_DOCKER}" -eq 0  && "${CONTAINER_NUMBER}" -ne 2 ]]; then
-    check_dep_file "cve-bin-tool" "${EXT_DIR}""/cve-bin-tool/cve_bin_tool/cli.py"
+    check_dep_file "cve-bin-tool" "${EXT_DIR}/cve-bin-tool/cve_bin_tool/cli.py"
     preparing_cve_bin_tool &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
@@ -608,7 +611,9 @@ dependency_check()
     prepare_docker_home_dir
 
     if [[ -d "${HOME}"/.cargo/bin ]]; then
-      export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
+      export PATH=${PATH}:"${HOME}"/.cargo/bin/
+      # currently not needed as we are installing the jdk via package manager
+      # :"${EXT_DIR}"/jdk/bin/
     fi
   fi
 

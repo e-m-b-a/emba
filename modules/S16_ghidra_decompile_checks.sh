@@ -113,7 +113,7 @@ S16_ghidra_decompile_checks()
   if [[ "$(find "${LOG_PATH_MODULE}" -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
     # shellcheck disable=SC2126
-    lVULN_COUNTER=$(wc -l < "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 || true)
+    lVULN_COUNTER=$(wc -l "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 | awk '{print $1}' || echo 0)
   fi
   if [[ "${lVULN_COUNTER}" -gt 0 ]]; then
     print_ln

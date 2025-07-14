@@ -24,7 +24,7 @@ P10_vmdk_extractor() {
     module_log_init "${FUNCNAME[0]}"
     module_title "VMDK (Virtual Machine Disk) extractor"
     pre_module_reporter "${FUNCNAME[0]}"
-    EXTRACTION_DIR="${LOG_DIR}"/firmware/vmdk_extractor/
+    EXTRACTION_DIR="${LOG_DIR}"/firmware/vmdk_extractor
 
     vmdk_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 

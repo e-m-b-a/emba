@@ -161,6 +161,8 @@ S115_usermode_emulator() {
               lEMULATOR="qemu-x86_64-static"
             elif [[ "${lBIN_FILE}" =~ Intel\ 80386 ]]; then
               lEMULATOR="qemu-i386-static"
+            elif [[ "${lBIN_FILE}" =~ Intel\ i386 ]]; then
+              lEMULATOR="qemu-i386-static"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ LSB.*ARM ]]; then
               lEMULATOR="qemu-arm-static"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ MSB.*ARM ]]; then

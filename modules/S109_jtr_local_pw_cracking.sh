@@ -40,7 +40,6 @@ S109_jtr_local_pw_cracking() {
   local lJTR_TIMEOUT="3600"
   # optional wordlist for JTR - if no wordlist is there JTR runs in default mode
   local lJTR_WORDLIST="${CONFIG_DIR}/jtr_wordlist.txt"
-  local lHASH_DESCRIPTION=""
   local lJTR_FORMATS_ARR=()
   local lJTR_FORMAT=""
   local lPID=""
@@ -54,21 +53,19 @@ S109_jtr_local_pw_cracking() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ -f "${lPW_FILE_S107}" ]]; then
-    mapfile -t lHASHES_S107_ARR < <(cut -d\; -f1,2,3 "${lPW_FILE_S107}" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
+    mapfile -t lHASHES_S107_ARR < <(cut -d\; -f1,2 "${lPW_FILE_S107}" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
   fi
 
   if [[ -f "${lPW_FILE}" ]]; then
-    mapfile -t lHASHES_S108_ARR < <(cut -d\; -f1,2,3 "${lPW_FILE}" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
+    mapfile -t lHASHES_S108_ARR < <(cut -d\; -f2,3 "${lPW_FILE}" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
 
     lHASHES_ARR=("${lHASHES_S107_ARR[@]}" "${lHASHES_S108_ARR[@]}")
 
     for lHASH in "${lHASHES_ARR[@]}"; do
-      lHASH_DESCRIPTION=$(basename "$(echo "${lHASH}" | cut -d\; -f1)")
-      lHASH_SOURCE=$(basename "$(echo "${lHASH}" | cut -d\; -f2)")
-      lHASH=$(echo "${lHASH}" | cut -d\; -f3 | tr -d \")
+      lHASH_SOURCE=$(basename "$(echo "${lHASH}" | cut -d\; -f1)")
+      lHASH=$(echo "${lHASH}" | cut -d\; -f2 | tr -d \")
 
       [[ "${lHASH}" == *"BEGIN"*"KEY"* ]] && continue
-      [[ "${lHASH_DESCRIPTION}" == *"private key found"* ]] && continue
 
       if echo "${lHASH}" | cut -d: -f1-3 | grep -q "::[0-9]"; then
         # nosemgrep
