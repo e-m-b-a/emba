@@ -38,11 +38,11 @@ F10_license_summary() {
   if [[ "${#lSBOMs_ARR[@]}" -gt 0 ]]; then
     for lSBOM_FILE in "${lSBOMs_ARR[@]}"; do
 
-      lPRODUCT=$(jq -r .name "${lSBOM_FILE}")
+      lPRODUCT=$(jq -r .name "${lSBOM_FILE}" || print_error "[-] F10 - name extraction failed for ${lSBOM_FILE}")
       if [[ -z "${lPRODUCT}" ]]; then
         continue
       fi
-      lVERSION=$(jq -r .version "${lSBOM_FILE}")
+      lVERSION=$(jq -r .version "${lSBOM_FILE}" || print_error "[-] F10 - version extraction failed for ${lSBOM_FILE}")
       mapfile -t lLICENSE_ARR < <(jq -r '.licenses[]?.license.name' "${lSBOM_FILE}")
       if [[ "${#lLICENSE_ARR[@]}" -eq 0 ]]; then
         lLICENSE_ARR+=("No license identified")

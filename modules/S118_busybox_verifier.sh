@@ -107,14 +107,14 @@ S118_busybox_verifier()
     local lBB_VERSION=""
     lBB_VERSION=$(jq -r .version "${lBB_SBOM_JSON}" || print_error "[-] S118 - BB version extraction failed for ${lBB_SBOM_JSON}")
     local lBB_PRODUCT=""
-    lBB_PRODUCT=$(jq -r .name "${lBB_SBOM_JSON}")
+    lBB_PRODUCT=$(jq -r .name "${lBB_SBOM_JSON}" || print_error "[-] S118 - BB name extraction failed for ${lBB_SBOM_JSON}")
     lBB_PRODUCT=${lBB_PRODUCT,,}
     local lBB_VENDOR=""
-    lBB_VENDOR=$(jq -r .supplier.name "${lBB_SBOM_JSON}")
+    lBB_VENDOR=$(jq -r .supplier.name "${lBB_SBOM_JSON}" || print_error "[-] S118 - BB supplier.name extraction failed for ${lBB_SBOM_JSON}")
     lBB_VENDOR=${lBB_VENDOR,,}
 
     local lBB_BIN=""
-    lBB_BIN="$(jq -r '.properties[]? | select(.name | test("source_path")) | .value' "${lBB_SBOM_JSON}")"
+    lBB_BIN="$(jq -r '.properties[]? | select(.name | test("source_path")) | .value' "${lBB_SBOM_JSON}" || print_error "[-] S118 - BB source_path extraction failed for ${lBB_SBOM_JSON}")"
     lBB_BIN="${lBB_BIN#\'}"
     lBB_BIN="${lBB_BIN%\'}"
     if ! [[ -f "${lBB_BIN}" ]]; then

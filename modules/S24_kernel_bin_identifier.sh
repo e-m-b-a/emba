@@ -183,7 +183,7 @@ binary_kernel_check_threader() {
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
-        print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
+        # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
         disable_strict_mode "${STRICT_MODE}" 0
         extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
         lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"

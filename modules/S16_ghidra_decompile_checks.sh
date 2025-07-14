@@ -345,5 +345,7 @@ s16_semgrep_logger() {
   write_csv_gpt_tmp "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${GPT_QUESTION}" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "" ""
   write_anchor_gpt "${lGPT_ANCHOR}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}"/"${lHARUSPEX_FILE_NAME}"
 
-  cat "${lSEMGREPLOG_TMP}" >> "${lSEMGREPLOG_TXT}"
+  if [[ -f "${lSEMGREPLOG_TMP}" ]]; then
+    cat "${lSEMGREPLOG_TMP}" >> "${lSEMGREPLOG_TXT}"
+  fi
 }

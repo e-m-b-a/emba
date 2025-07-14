@@ -2507,7 +2507,7 @@ check_online_stat() {
   # wait 20 secs after boot before starting pinging
   sleep 20
 
-  local lMAX_PING_CNT=70
+  local lMAX_PING_CNT=120
   # we write the results to a tmp file. This is needed to only have the results of the current emulation round
   # for further processing available
   # we try pinging the system for 30 times with 5 secs sleeptime in between
@@ -2571,13 +2571,13 @@ check_online_stat() {
 
     lMAX_NMAP_RETRIES=10
     while [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -lt "${MIN_TCP_SERV}" ]]; do
-      lCNT=$((lCNT+1))
       if [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
         print_ln
         print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
         write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
         print_ln
       fi
+      lCNT=$((lCNT+1))
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - ${lCNT}/${lMAX_NMAP_RETRIES}.\n" "no_log"
       sleep 60
       # we store our Nmap logs in dedicated files (${lCNT}_nmap_log_file):
