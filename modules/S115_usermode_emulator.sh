@@ -184,12 +184,14 @@ S115_usermode_emulator() {
             elif [[ "${lBIN_FILE}" =~ 32-bit\ MSB.*PowerPC ]]; then
               lEMULATOR="qemu-ppc-static"
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB executable, Altera Nios II"* ]]; then
+              # the latest qemu package from kali does not include the nios2 emulator anymore
               lEMULATOR="qemu-nios2-static"
               if ! command -v "${lEMULATOR}" > /dev/null; then
                 print_output "[-] No working NIOS2 emulator found for ${BIN_}"
                 continue
               fi
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB shared object, Altera Nios II"* ]]; then
+              # the latest qemu package from kali does not include the nios2 emulator anymore
               lEMULATOR="qemu-nios2-static"
               if ! command -v "${lEMULATOR}" > /dev/null; then
                 print_output "[-] No working NIOS2 emulator found for ${BIN_}"
