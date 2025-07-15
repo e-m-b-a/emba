@@ -420,9 +420,12 @@ extract_kernel_arch() {
   local lKERNEL_ELF_PATH="${1:-}"
   export ORIG_K_ARCH=""
 
-  ORIG_K_ARCH=$(file -b "${lKERNEL_ELF_PATH}")
+  ORIG_K_ARCH=$(grep "${lKERNEL_ELF_PATH}" "${P99_CSV_LOG}" | cut -d ';' -f3 || true)
 
   if [[ "${ORIG_K_ARCH}" == *"ARM aarch64"* ]]; then
+    # for ARM -> ARM aarch64 to ARM64
+    ORIG_K_ARCH="ARM64"
+  elif [[ "${ORIG_K_ARCH}" == *"ARM64"* ]]; then
     # for ARM -> ARM aarch64 to ARM64
     ORIG_K_ARCH="ARM64"
   elif [[ "${ORIG_K_ARCH}" == *"ARM32"* ]]; then
