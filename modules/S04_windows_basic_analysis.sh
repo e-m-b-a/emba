@@ -131,9 +131,9 @@ S04_windows_basic_analysis() {
 
   mapfile -t lEXE_ARCHIVES_ARR < <(grep "PE32\|MSI" "${P99_CSV_LOG}" | sort -u || true)
 
-  if [[ -v lEXE_ARCHIVES_ARR[@] ]] ; then
+  if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
-      lEXE_ARCHIVE="${lEXE_ARCHIVE/;*}"
+      lEXE_ARCHIVE=$(echo "${lEXE_ARCHIVE}" | cut -d ';' -f2)
       lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
 
       sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"
