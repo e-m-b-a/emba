@@ -420,15 +420,28 @@ extract_kernel_arch() {
   local lKERNEL_ELF_PATH="${1:-}"
   export ORIG_K_ARCH=""
 
-  ORIG_K_ARCH=$(file "${lKERNEL_ELF_PATH}" | cut -d, -f2)
+  ORIG_K_ARCH=$(file -b "${lKERNEL_ELF_PATH}")
 
-  # for ARM -> ARM aarch64 to ARM64
-  ORIG_K_ARCH=${ORIG_K_ARCH/ARM\ aarch64/arm64}
-  # for MIPS64 -> MIPS64 to MIPS
-  ORIG_K_ARCH=${ORIG_K_ARCH/MIPS64/MIPS}
-  ORIG_K_ARCH=${ORIG_K_ARCH/*PowerPC*/powerpc}
+  if [[ "${ORIG_K_ARCH}" == *"ARM aarch64"* ]]; then
+    # for ARM -> ARM aarch64 to ARM64
+    ORIG_K_ARCH="ARM64"
+  elif [[ "${ORIG_K_ARCH}" == *"ARM32"* ]]; then
+    ORIG_K_ARCH="ARM"
+  fi
+  if [[ "${ORIG_K_ARCH}" == *"MIPS64"* ]]; then
+    # for MIPS64 -> MIPS64 to MIPS
+    ORIG_K_ARCH="MIPS"
+  fi
+  if [[ "${ORIG_K_ARCH}" == *"PowerPC"* ]]; then
+    ORIG_K_ARCH="powerpc"
+  fi
+  if [[ "${ORIG_K_ARCH}" == *"Altera Nios II"* ]]; then
+    ORIG_K_ARCH="nios2"
+  fi
+  if [[ "${ORIG_K_ARCH}" == *"Intel"* ]]; then
+    ORIG_K_ARCH="x86"
+  fi
 
-  # ORIG_K_ARCH=$(echo "${ORIG_K_ARCH}" | tr -d ' ' | tr "[:upper:]" "[:lower:]")
   ORIG_K_ARCH="${ORIG_K_ARCH,,}"
   ORIG_K_ARCH="${ORIG_K_ARCH//\ }"
   print_output "[+] Identified kernel architecture ${ORANGE}${ORIG_K_ARCH}${NC}"
