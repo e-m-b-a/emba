@@ -81,7 +81,7 @@ S116_qemu_version_detection() {
       done
       print_ln "no_log"
 
-      [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
+      wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
     fi
     lNEG_LOG=$(grep -c "Version information found" "${LOG_FILE}" || echo 0)
   fi

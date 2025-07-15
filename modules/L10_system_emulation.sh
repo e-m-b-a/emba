@@ -548,7 +548,7 @@ main_emulation() {
     lINIT_FNAME=$(basename "${lINIT_FILE}")
     # this is the main init entry - we modify it later for special cases:
     export KINIT="init=/firmadyne/preInit.sh"
-    lINIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
+    lINIT_OUT="${MNT_POINT}/firmadyne/preInit.sh"
 
     sub_module_title "[*] Processing init file ${ORANGE}${lINIT_FILE} (${lINDEX}/${#lINIT_FILES_ARR[@]})${NC}"
     if ! mount | grep -q "${MNT_POINT}"; then
@@ -649,52 +649,59 @@ main_emulation() {
 
     if (grep -q "preInit.sh" "${MNT_POINT}""${lINIT_FILE}"); then
       # if have our own backup init script we need to remove our own entries now
-      sed -i -r 's/(.*preInit.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
-      sed -i -r 's/(.*init_service.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
-      sed -i -r 's/(.*network.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
-      sed -i -r 's/(.*run_service.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's%(.*preInit.sh.*)%\#\ \1%' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's%(/firmadyne/init_service.sh.*)%\#\ \1%' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's%(/firmadyne/network.sh.*)%\#\ \1%' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's%(/firmadyne/run_service.sh.*)%\#\ \1%' "${MNT_POINT}""${lINIT_FILE}"
     fi
 
     if [[ "${lINIT_OUT}" != *"preInit.sh" ]]; then
-      if ! (grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
-        echo "/firmadyne/preInit.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
+      if ( grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
+        print_output "[*] preInit.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
+        sed -i '/\/firmadyne\/preInit\.sh\ &/d' "${lINIT_OUT}"
       fi
-    fi
-    if ! ( grep -q "/firmadyne/init_service.sh" "${lINIT_OUT}"); then
-      if [[ -f "${MNT_POINT}/firmadyne/startup_service" ]]; then
-        while read -r lSERVICE_NAME; do
-          print_output "[*] Created init service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
-        done < "${MNT_POINT}/firmadyne/startup_service"
-        echo "/firmadyne/init_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the init_service entry to ${lINIT_OUT}"
-      fi
+      echo "/firmadyne/preInit.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
     fi
 
-    if ! (grep -q "/firmadyne/network.sh" "${lINIT_OUT}"); then
-      print_output "[*] Add network.sh entry to ${ORANGE}${lINIT_OUT}${NC}"
-
-      echo "" >> "${lINIT_OUT}" || true
-      echo "/firmadyne/network.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
-    else
-      print_output "[*] network.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
+    if ( grep -q "/firmadyne/init_service.sh" "${lINIT_OUT}"); then
+      print_output "[*] init_server.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
+      sed -i '/\/firmadyne\/init_service\.sh\ &/d' "${lINIT_OUT}"
+    fi
+    if [[ -f "${MNT_POINT}/firmadyne/startup_service" ]]; then
+      while read -r lSERVICE_NAME; do
+        print_output "[*] Created init service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
+      done < "${MNT_POINT}/firmadyne/startup_service"
+      echo "/firmadyne/init_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the init_service entry to ${lINIT_OUT}"
     fi
 
-    if ! ( grep -q "/firmadyne/run_service.sh" "${lINIT_OUT}"); then
-      if [[ -f "${MNT_POINT}/firmadyne/service" ]]; then
-        while read -r lSERVICE_NAME; do
-          print_output "[*] Created service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
-        done < "${MNT_POINT}/firmadyne/service"
-        echo "/firmadyne/run_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
-      fi
-    else
-      print_output "[*] run_service.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
+    if ( grep -q "/firmadyne/network.sh" "${lINIT_OUT}"); then
+      print_output "[*] network.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
+      sed -i '/\/firmadyne\/network\.sh\ &/d' "${lINIT_OUT}"
+    fi
+
+    print_output "[*] Add network.sh entry to ${ORANGE}${lINIT_OUT}${NC}"
+    echo "" >> "${lINIT_OUT}" || true
+    echo "/firmadyne/network.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
+
+    if ( grep -q "/firmadyne/run_service.sh" "${lINIT_OUT}"); then
+      print_output "[*] run_service.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
+      sed -i '/\/firmadyne\/run_service\.sh\ &/d' "${lINIT_OUT}"
+    fi
+    if [[ -f "${MNT_POINT}/firmadyne/service" ]]; then
+      while read -r lSERVICE_NAME; do
+        print_output "[*] Created service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
+      done < "${MNT_POINT}/firmadyne/service"
+      echo "/firmadyne/run_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
     fi
 
     # ensure we have not sleep entry and it is not the EMBA backup init script
+    if ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}"); then
+      print_output "[*] busybox sleep 36000 entry already available in init ${ORANGE}${lINIT_OUT}${NC}  -> removing now"
+      sed -i '/\/firmadyne\/busybox\ sleep\ 36000/d' "${lINIT_OUT}"
+    fi
     if ! ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}") && ! (grep -q "Execute EMBA " "${lINIT_OUT}"); then
       # trendnet TEW-828DRU_1.0.7.2, etc...
       echo "/firmadyne/busybox sleep 36000" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
-    else
-      print_output "[*] busybox sleep entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
 
     print_ln
