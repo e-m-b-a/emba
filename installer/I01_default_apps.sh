@@ -28,7 +28,7 @@ I01_default_apps(){
     print_tool_info "qemu-user-static" 0 "qemu-mips-static"
     # new qemu builds do not include the nios2 emulator anymore. We need to download the following package
     # and extract the nios2 emulator
-    print_file_info "qemu-user-static" "Debian qemu-user-static v7.2" "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" "external/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb"
+    print_file_info "qemu-user-static" "Debian qemu-user-static v7.2 for NIOS II support" "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" "external/qemu-user-static_7.2.deb"
     # print_tool_info "pylint" 1 # not used anymore
     # libguestfs-tools is needed to mount vmdk images
     print_tool_info "libguestfs-tools" 1
@@ -46,6 +46,7 @@ I01_default_apps(){
     print_tool_info "strace" 1
 
     print_tool_info "rpm" 1
+    print_tool_info "curl" 1
 
     # python3.10-request
     print_tool_info "python3-pip" 1
@@ -85,19 +86,20 @@ I01_default_apps(){
         echo
         apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-        download_file "Debian qemu-user-static v7.2" "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" "external/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb"
-        if (dpkg -c "external/qemu-user-static_7.2+dfsg-7+deb12u12_amd64.deb" | grep "/usr/bin/qemu-nios2-static"); then
-          dpkg-deb -xv "external/qemu-user-static_7.2+dfsg-7+deb12u12_amd64.deb" "external/tmp-extract" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
-          if [[ -f "external/tmp-extract/usr/bin/qemu-nios2-static" ]]; then
-            cp "external/tmp-extract/usr/bin/qemu-nios2-static" "/usr/bin/qemu-nios2-static" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
-            rm -rf "external/tmp-extract/"
-            rm -rf "external/qemu-user-static_7.2+dfsg-7+deb12u12_amd64.deb"
-          else
-            echo "[-] Installation of qemu-nios2-static failed"
-            exit 1
-          fi
+        echo "[*] Installing qemu-nios2 support ..."
+        # the qemu-nios2-static binary was removed from latest debian packages
+        # we download an older package and extract the binary
+        curl -L "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" -o "external/qemu-user-static_7.2.deb"
+        echo "[*] Extracting qemu-user-static package ..."
+        dpkg-deb -xv "external/qemu-user-static_7.2.deb" "external/tmp-extract" || true
+        if [[ -f "external/tmp-extract/usr/bin/qemu-nios2-static" ]]; then
+          echo "[*] Installing nios2 qemu binary ..."
+          cp "external/tmp-extract/usr/bin/qemu-nios2-static" "/usr/bin/qemu-nios2-static" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
+          rm -rf "external/tmp-extract/"
+          rm -rf "external/qemu-user-static_7.2.deb"
+          echo "[+] Installation of qemu-nios2-static finished"
         else
-          echo -e "${RED}${BOLD}WARNING: NIOS2 qemu-user-static emulator not available.${NC}"
+          echo "[-] Installation of qemu-nios2-static failed"
           exit 1
         fi
 

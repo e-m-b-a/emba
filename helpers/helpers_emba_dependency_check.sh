@@ -593,6 +593,8 @@ dependency_check()
       export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_10.3.1_PUBLIC"
     elif [[ -d "${EXT_DIR}/ghidra/ghidra_10.2.3_PUBLIC" ]]; then
       export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_10.2.3_PUBLIC"
+    elif [[ -d "${EXT_DIR}/ghidra/ghidra_11.3.2_PUBLIC" ]]; then
+      export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_11.3.2_PUBLIC"
     elif [[ -d "${EXT_DIR}/ghidra/ghidra_11.4_PUBLIC" ]]; then
       export GHIDRA_PATH="${EXT_DIR}/ghidra/ghidra_11.4_PUBLIC"
     else
