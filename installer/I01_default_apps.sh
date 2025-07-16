@@ -26,7 +26,10 @@ I01_default_apps(){
     print_tool_info "tree" 1
     print_tool_info "device-tree-compiler" 1
     print_tool_info "qemu-user-static" 0 "qemu-mips-static"
-    #print_tool_info "pylint" 1 # not used anymore
+    # new qemu builds do not include the nios2 emulator anymore. We need to download the following package
+    # and extract the nios2 emulator
+    print_file_info "qemu-user-static" "Debian qemu-user-static v7.2" "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" "external/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb"
+    # print_tool_info "pylint" 1 # not used anymore
     # libguestfs-tools is needed to mount vmdk images
     print_tool_info "libguestfs-tools" 1
     print_tool_info "ent" 1
@@ -81,6 +84,22 @@ I01_default_apps(){
       y|Y )
         echo
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+        download_file "Debian qemu-user-static v7.2" "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" "external/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb"
+        if (dpkg -c "external/qemu-user-static_7.2+dfsg-7+deb12u12_amd64.deb" | grep "/usr/bin/qemu-nios2-static"); then
+          dpkg-deb -xv "external/qemu-user-static_7.2+dfsg-7+deb12u12_amd64.deb" "external/tmp-extract" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
+          if [[ -f "external/tmp-extract/usr/bin/qemu-nios2-static" ]]; then
+            cp "external/tmp-extract/usr/bin/qemu-nios2-static" "/usr/bin/qemu-nios2-static" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
+            rm -rf "external/tmp-extract/"
+            rm -rf "external/qemu-user-static_7.2+dfsg-7+deb12u12_amd64.deb"
+          else
+            echo "[-] Installation of qemu-nios2-static failed"
+            exit 1
+          fi
+        else
+          echo -e "${RED}${BOLD}WARNING: NIOS2 qemu-user-static emulator not available.${NC}"
+          exit 1
+        fi
 
         # install brew installer - used later for cyclonex in IF20 installer
         echo "[*] Installing linuxbrew ..."
