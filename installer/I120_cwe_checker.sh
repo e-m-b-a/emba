@@ -22,8 +22,8 @@ I120_cwe_checker() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     export INSTALL_APP_LIST=()
 
-    GHIDRA_VERS="11.4"
-    GHIDRA_REL_DATE="20250620"
+    GHIDRA_VERS="11.3.2"
+    GHIDRA_REL_DATE="20250415"
 
     print_tool_info "unzip" 1
     print_tool_info "git" 1
