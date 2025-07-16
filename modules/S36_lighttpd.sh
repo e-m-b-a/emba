@@ -135,12 +135,21 @@ lighttpd_binary_analysis() {
   fi
   if [[ "${#lLIGHT_SBOMs_ARR[@]}" -gt 0 ]]; then
     # lets do a quick vulnerability check on our lighttpd version
+    lLIGHT_VERSIONS_DONE_ARR=()
     for lLIGHT_SBOM_JSON in "${lLIGHT_SBOMs_ARR[@]}"; do
+      print_output "[*] Testing lighttpd json: ${lLIGHT_SBOM_JSON}"
       local lPRODUCT_VERSION=""
       local lPRODUCT_NAME=""
       local lVENDOR_ARR=()
       local lPRODUCT_ARR=()
       lPRODUCT_VERSION=$(jq --raw-output '.version' "${lLIGHT_SBOM_JSON}" || print_error "[-] S36 - lighttpd version extraction failed for ${lLIGHT_SBOM_JSON}")
+      print_output "[*] Identified version for ${lLIGHT_SBOM_JSON} - ${lPRODUCT_VERSION}"
+      if [[ "${lLIGHT_VERSIONS_DONE_ARR[*]}" == *"${lPRODUCT_VERSION}"* ]]; then
+        print_output "[*] Found duplicate for ${lLIGHT_SBOM_JSON} - ${lPRODUCT_VERSION}"
+        continue
+      fi
+      lLIGHT_VERSIONS_DONE_ARR+=("${lPRODUCT_VERSION}")
+      print_output "[*] Adjusted done array for ${lLIGHT_SBOM_JSON} - ${lPRODUCT_VERSION} - ${lLIGHT_VERSIONS_DONE_ARR[*]}"
       local lORIG_SOURCE="${PACKAGING_SYSTEM}"
       local lBOM_REF=""
       lBOM_REF=$(jq -r '."bom-ref"' "${lLIGHT_SBOM_JSON}" || true)
