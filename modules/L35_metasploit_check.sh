@@ -93,7 +93,7 @@ check_live_metasploit() {
   # lARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${lD_END}" | tr '[:upper:]' '[:lower:]')"
   lARCH_END="${ARCH,,}""${lD_END,,}"
 
-  timeout --preserve-status --signal SIGINT -k 60 2000 msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${lPORTS}" "${lARCH_END}"| tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true
+  timeout --signal SIGINT -k 60 60m msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${lPORTS}" "${lARCH_END}"| tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true
 
   if [[ -f "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt ]] && [[ $(grep -a -i -c "Vulnerability identified for module" "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt) -gt 0 ]]; then
     write_csv_log "Source" "Module" "CVE" "ARCH_END" "IP_ADDRESS" "PORTS"

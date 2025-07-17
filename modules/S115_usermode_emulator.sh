@@ -183,9 +183,23 @@ S115_usermode_emulator() {
               lEMULATOR="qemu-mips64-static"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ MSB.*PowerPC ]]; then
               lEMULATOR="qemu-ppc-static"
-            elif [[ "${lBIN_FILE}" == "ELF 32-bit LSB executable, Altera Nios II" ]]; then
+            elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB executable, Altera Nios II"* ]]; then
+              # the latest qemu package from kali does not include the nios2 emulator anymore
               lEMULATOR="qemu-nios2-static"
-            elif [[ "${lBIN_FILE}" == "ELF 32-bit LSB shared object, QUALCOMM DSP6" ]]; then
+              if ! command -v "${lEMULATOR}" > /dev/null; then
+                print_output "[-] No working NIOS2 emulator found for ${BIN_}"
+                continue
+              fi
+            elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB shared object, Altera Nios II"* ]]; then
+              # the latest qemu package from kali does not include the nios2 emulator anymore
+              lEMULATOR="qemu-nios2-static"
+              if ! command -v "${lEMULATOR}" > /dev/null; then
+                print_output "[-] No working NIOS2 emulator found for ${BIN_}"
+                continue
+              fi
+            elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB executable, QUALCOMM DSP6"* ]]; then
+              lEMULATOR="qemu-hexagon-static"
+            elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB shared object, QUALCOMM DSP6"* ]]; then
               lEMULATOR="qemu-hexagon-static"
             else
               print_output "[-] No working emulator found for ${BIN_}"
@@ -286,7 +300,7 @@ prepare_emulator() {
       print_ln "no_log"
       print_output "[!] Is the qemu package installed?"
       print_output "$(indent "We can't find it!")"
-      print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
+      print_output "$(indent "$(red "Terminating Emulation module now.\\n")")"
       exit 1
     else
       cp "$(command -v "${lEMULATOR}")" "${lR_PATH}" || (print_output "[-] Issues in copy emulator process for emulator ${lEMULATOR}" && return)

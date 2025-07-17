@@ -56,7 +56,7 @@ S60_cert_file_check()
           lCERT_LOG="${LOG_PATH_MODULE}/cert_details_${lCERT_NAME}.txt"
           write_log "[*] Cert file: ${lCERT_ENTRY}\n" "${lCERT_LOG}"
           timeout --preserve-status --signal SIGINT 10 openssl storeutl -noout -text -certs "${lCERT_ENTRY}" 2>/dev/null >> "${lCERT_LOG}" || true
-          lNESTED_CERT_CNT=$(tail -n 1 < "${lCERT_LOG}" | grep -o '[0-9]\+')
+          lNESTED_CERT_CNT=$(tail -n 1 < "${lCERT_LOG}" | grep -o '[0-9]\+' || true)
           if ! [[ "${lNESTED_CERT_CNT}" =~ ^[0-9]+$ ]]; then
             print_output "[-] Something went wrong for certificate ${lCERT_ENTRY}" "no_log"
             continue

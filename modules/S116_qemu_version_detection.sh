@@ -81,7 +81,7 @@ S116_qemu_version_detection() {
       done
       print_ln "no_log"
 
-      [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
+      wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
     fi
     lNEG_LOG=$(grep -c "Version information found" "${LOG_FILE}" || echo 0)
   fi
@@ -129,6 +129,7 @@ version_detection_thread() {
     for lVERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
       for lEMULATION_LOG_ENTRY in "${lSTRICT_LOGS_ARR[@]}"; do
         lVERSION_IDENTIFIED=$(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lEMULATION_LOG_ENTRY}" | sort -u || true)
+        lVERSION_IDENTIFIED="${lVERSION_IDENTIFIED//[![:print:]]/}"
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -a -h "Emulating binary:" "${lEMULATION_LOG_ENTRY}" | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
@@ -138,14 +139,14 @@ version_detection_thread() {
               lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
             fi
             if [[ -n "${lBINARY_ENTRY}" ]]; then
-              print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_ENTRY}"
+              print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_ENTRY}"
               if version_parsing_logging "${S09_CSV_LOG}" "S116_qemu_version_detection" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
                 # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
                 continue
               fi
               continue 2
             else
-              print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} without a valid binary path -> Check this entry (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_ENTRY}"
+              print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} without a valid binary path -> Check this entry (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_ENTRY}"
             fi
 
           done
@@ -161,6 +162,7 @@ version_detection_thread() {
       readarray -t lLOGS_DETECTED_ARR < <(grep -a -l -E "${lVERSION_IDENTIFIER}" "${lLOG_PATH_MODULE_S115}"/qemu_tmp*.txt 2>/dev/null || true)
       for lEMULATION_LOG_MATCH in "${lLOGS_DETECTED_ARR[@]}"; do
         lVERSION_IDENTIFIED=$(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lEMULATION_LOG_MATCH}" | sort -u || true)
+        lVERSION_IDENTIFIED="${lVERSION_IDENTIFIED//[![:print:]]/}"
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${lEMULATION_LOG_MATCH}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
@@ -170,14 +172,14 @@ version_detection_thread() {
               lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
             fi
             if [[ -n "${lBINARY_ENTRY}" ]]; then
-              print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_MATCH}"
+              print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_MATCH}"
               if version_parsing_logging "${S09_CSV_LOG}" "S116_qemu_version_detection" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
                 # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
                 continue
               fi
               continue 2
             else
-              print_output "[+] Version information found ${RED}""${lVERSION_IDENTIFIED}""${NC}${GREEN} without a valid binary path -> Check this entry (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_MATCH}"
+              print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} without a valid binary path -> Check this entry (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_MATCH}"
             fi
           done
         fi
