@@ -9,6 +9,12 @@ This repository contains code to automate building a dedicated VM for [EMBA](htt
 
 [Repository](https://github.com/SySS-Research/emba-builder)
 
+## Python modules for EMBA
+
+The Python runner module `S28_python_run` allows users to run Python scripts as EMBA modules. Recommended use cases for this is module code which requires a lot of complex string or data manipulation, as such operations can get quite difficult to implement and later read when using Bash.
+
+[Repository](https://github.com/B1TC0R3/emba/tree/master)
+
 ## EMBAbox
 
 This repo provides a Vagrantfile to simply test and to evaluate [EMBA](https://github.com/e-m-b-a/emba)
