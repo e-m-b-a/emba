@@ -56,7 +56,7 @@ F02_toolchain() {
 
   local lNEG_LOG=0
 
-  mapfile -t lKERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | grep -v -e '^$' | sort -u || true)
+  mapfile -t lKERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | grep -v -e '^$' | grep -v "^;" | sort -u || true)
   mapfile -t lKERNEL_V_ARR_S25 < <(tail -n +2 "${CSV_DIR}"/s25_*.csv 2>/dev/null | cut -d\; -f2 | grep -v -e '^$' | sort -u || true)
   mapfile -t lKERNEL_STRING_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | grep -v -e '^$' | sort -u || true)
 
