@@ -328,7 +328,7 @@ cve_bin_tool_threader() {
   local lWAIT_PIDS_F17_ARR_2=()
 
   if [[ "${#lrPRODUCT_ARR[@]}" -eq 0 ]]; then
-    print_output "[-] No product name available for ${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}"
+    print_output "[-] No product name available for ${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "no_log"
     return
   fi
 

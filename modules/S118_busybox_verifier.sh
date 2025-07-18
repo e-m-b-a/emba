@@ -336,7 +336,7 @@ get_cve_busybox_data() {
 
   lPRODUCT_VERSION=$(jq --raw-output '.version' "${lBB_SBOM_JSON}" || print_error "[-] S118 - No SBOM version data extracted for ${lBB_SBOM_JSON}")
   if [[ -z "${lPRODUCT_VERSION}" ]]; then
-    continue
+    return
   fi
 
   local lVULN_CNT=""
