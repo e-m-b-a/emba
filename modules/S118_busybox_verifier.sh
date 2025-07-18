@@ -327,14 +327,17 @@ get_cve_busybox_data() {
   local lPRODUCT_ARR=()
   local lPRODUCT_VERSION=""
 
-  mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' "${lBB_SBOM_JSON}")
+  mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' "${lBB_SBOM_JSON}" || print_error "[-] S118 - No SBOM vendor data extracted for ${lBB_SBOM_JSON}")
   if [[ "${#lVENDOR_ARR[@]}" -eq 0 ]]; then
     lVENDOR_ARR+=("NOTDEFINED")
   fi
   # shellcheck disable=SC2034
-  mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' "${lBB_SBOM_JSON}")
+  mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' "${lBB_SBOM_JSON}" || print_error "[-] S118 - No SBOM product data extracted for ${lBB_SBOM_JSON}")
 
-  lPRODUCT_VERSION=$(jq --raw-output '.version' "${lBB_SBOM_JSON}")
+  lPRODUCT_VERSION=$(jq --raw-output '.version' "${lBB_SBOM_JSON}" || print_error "[-] S118 - No SBOM version data extracted for ${lBB_SBOM_JSON}")
+  if [[ -z "${lPRODUCT_VERSION}" ]]; then
+    return
+  fi
 
   local lVULN_CNT=""
   local lWAIT_PIDS_S118_ARR=()

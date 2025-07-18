@@ -448,7 +448,7 @@ box_updaters() {
   if [[ -z "${PID_SYSTEM_LOAD}" && ${STATUS_BAR_BOX_COUNT} -gt 0 ]] ; then
     update_box_system_load &
     export PID_SYSTEM_LOAD="$!"
-    echo "${PID_SYSTEM_LOAD}" > "${TMP_DIR}"/PID_SYSTEM_LOAD.log
+    echo "${PID_SYSTEM_LOAD}" > "${TMP_DIR}"/PID_SYSTEM_LOAD.log 2>/dev/null
   elif [[ -n "${PID_SYSTEM_LOAD}" && ${STATUS_BAR_BOX_COUNT} -le 0 ]] ; then
     kill_box_pid "${PID_SYSTEM_LOAD}" &
     export PID_SYSTEM_LOAD=""
@@ -457,7 +457,7 @@ box_updaters() {
   if [[ -z "${PID_STATUS}" && ${STATUS_BAR_BOX_COUNT} -gt 1 ]] ; then
     update_box_status &
     export PID_STATUS="$!"
-    echo "${PID_STATUS}" > "${TMP_DIR}"/PID_STATUS.log
+    echo "${PID_STATUS}" > "${TMP_DIR}"/PID_STATUS.log 2>/dev/null
   elif [[ -n "${PID_STATUS}" && ${STATUS_BAR_BOX_COUNT} -le 1 ]] ; then
     kill_box_pid "${PID_STATUS}" &
     export PID_STATUS=""
@@ -466,7 +466,7 @@ box_updaters() {
   if [[ -z "${PID_MODULES}" && ${STATUS_BAR_BOX_COUNT} -gt 2 ]] ; then
     update_box_modules &
     export PID_MODULES="$!"
-    echo "${PID_MODULES}" > "${TMP_DIR}"/PID_MODULES.log
+    echo "${PID_MODULES}" > "${TMP_DIR}"/PID_MODULES.log 2>/dev/null
   elif [[ -n "${PID_MODULES}" && ${STATUS_BAR_BOX_COUNT} -le 2 ]] ; then
     kill_box_pid "${PID_MODULES}" &
     export PID_MODULES=""
@@ -475,7 +475,7 @@ box_updaters() {
   if [[ -z "${PID_STATUS_2}" && ${STATUS_BAR_BOX_COUNT} -gt 3 ]] ; then
     update_box_status_2 &
     export PID_STATUS_2="$!"
-    echo "${PID_STATUS_2}" > "${TMP_DIR}"/PID_STATUS_2.log
+    echo "${PID_STATUS_2}" > "${TMP_DIR}"/PID_STATUS_2.log 2>/dev/null
   elif [[ -n "${PID_STATUS_2}" && ${STATUS_BAR_BOX_COUNT} -le 3 ]] ; then
     kill_box_pid "${PID_STATUS_2}" &
     export PID_STATUS_2=""

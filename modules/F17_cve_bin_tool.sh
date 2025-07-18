@@ -326,6 +326,12 @@ cve_bin_tool_threader() {
   local -n lrVENDOR_ARR="${4:-}"
   local -n lrPRODUCT_ARR="${5:-}"
   local lWAIT_PIDS_F17_ARR_2=()
+
+  if [[ "${#lrPRODUCT_ARR[@]}" -eq 0 ]]; then
+    print_output "[-] No product name available for ${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "no_log"
+    return
+  fi
+
   local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
   write_log "product,vendor,version,bom-ref" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
   for lVENDOR in "${lrVENDOR_ARR[@]}"; do
