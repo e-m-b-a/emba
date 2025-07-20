@@ -147,7 +147,9 @@ S08_submodule_bsd_package_parser() {
       if ! [[ -d "${TMP_DIR}"/pkg_tmp ]]; then
         mkdir "${TMP_DIR}"/pkg_tmp || true
       fi
+
       tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}"/pkg_tmp || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
+
       mapfile -t lPKG_FILES_ARR < <(find "${TMP_DIR}"/pkg_tmp)
       # add package files to properties
       if [[ "${#lPKG_FILES_ARR[@]}" -gt 0 ]]; then
