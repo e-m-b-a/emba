@@ -86,8 +86,12 @@ output_overview() {
   # EMBA details
   local lSBOM_TOOL_VERS=""
   lSBOM_TOOL_VERS="$(cat "${CONFIG_DIR}"/VERSION.txt)"
-  if [[ -f "${INVOCATION_PATH}"/.git/refs/heads/master ]]; then
-    lSBOM_TOOL_VERS+="-$(cat "${INVOCATION_PATH}"/.git/refs/heads/master)"
+  if [[ -d "${INVOCATION_PATH}/.git" ]]; then
+    git config --global --add safe.directory "${INVOCATION_PATH}"
+    lCURRENT_GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo "NA")
+    if [[ -f "${INVOCATION_PATH}/.git/refs/heads/${lCURRENT_GIT_BRANCH}" ]]; then
+      lSBOM_TOOL_VERS+=" / branch ${lCURRENT_GIT_BRANCH} / commit $(cat "${INVOCATION_PATH}"/.git/refs/heads/${lCURRENT_GIT_BRANCH})"
+    fi
   fi
   print_output "[+] EMBA version: ""${ORANGE}""${lSBOM_TOOL_VERS}""${NC}"
   write_csv_log "EMBA_version" "${lSBOM_TOOL_VERS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
