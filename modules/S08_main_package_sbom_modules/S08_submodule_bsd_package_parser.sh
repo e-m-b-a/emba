@@ -140,7 +140,10 @@ S08_submodule_bsd_package_parser() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+
       if ! [[ -d "${TMP_DIR}"/pkg_tmp ]]; then
         mkdir "${TMP_DIR}"/pkg_tmp || true
       fi

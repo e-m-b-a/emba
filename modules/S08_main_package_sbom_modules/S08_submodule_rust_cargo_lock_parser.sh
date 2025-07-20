@@ -121,6 +121,8 @@ S08_submodule_rust_cargo_lock_parser() {
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lRST_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "source:${lAPP_SOURCE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

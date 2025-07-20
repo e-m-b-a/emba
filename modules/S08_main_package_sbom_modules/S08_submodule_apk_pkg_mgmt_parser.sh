@@ -153,6 +153,8 @@ apk_pkg_analysis_threader() {
   local lPROP_ARRAY_INIT_ARR=()
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
   lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
   mapfile -t lAPP_DEPS_ARR < <(grep "^D:" "${lAPK_PACKAGE_FILE_TMP}" | tr ' ' '\n' | sort -u || true)

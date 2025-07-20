@@ -191,6 +191,8 @@ ipk_package_parser_threader() {
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lIPK_ARCHIVE}" )
   lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
   lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
   # Add dependencies to properties

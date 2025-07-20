@@ -161,6 +161,8 @@ rpm_pkg_mgmt_analysis_threader() {
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
+  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
 
   if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
     for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do

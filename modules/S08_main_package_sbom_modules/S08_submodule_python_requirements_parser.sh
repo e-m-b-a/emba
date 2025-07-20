@@ -167,6 +167,8 @@ python_requirements_threader() {
   local lPROP_ARRAY_INIT_ARR=()
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
   lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

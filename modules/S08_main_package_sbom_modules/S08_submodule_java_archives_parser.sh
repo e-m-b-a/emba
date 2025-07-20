@@ -192,6 +192,8 @@ S08_submodule_java_archives_parser() {
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "vendor_clear:${lAPP_VENDOR_CLEAR}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
