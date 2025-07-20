@@ -90,7 +90,7 @@ output_overview() {
     git config --global --add safe.directory "${INVOCATION_PATH}"
     lCURRENT_GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo "NA")
     if [[ -f "${INVOCATION_PATH}/.git/refs/heads/${lCURRENT_GIT_BRANCH}" ]]; then
-      lSBOM_TOOL_VERS+=" / branch ${lCURRENT_GIT_BRANCH} / commit $(cat "${INVOCATION_PATH}"/.git/refs/heads/${lCURRENT_GIT_BRANCH})"
+      lSBOM_TOOL_VERS+=" / branch ${lCURRENT_GIT_BRANCH} / commit $(cat "${INVOCATION_PATH}/.git/refs/heads/${lCURRENT_GIT_BRANCH}")"
     fi
   fi
   print_output "[+] EMBA version: ""${ORANGE}""${lSBOM_TOOL_VERS}""${NC}"
