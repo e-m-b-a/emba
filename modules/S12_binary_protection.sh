@@ -97,8 +97,8 @@ binary_protection_threader() {
     lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(PIE\ enabled)/${GREEN_}&${NC_}/g")
   elif [[ "${lCSV_BIN_OUT}" == *"DSO"* ]]; then
     lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(DSO)/${ORANGE_}&${NC_}/g")
-  elif [[ "$(echo "${lCSV_BIN_OUT}" | cut -d\; -f1)" == "REL" ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | awk -F ';' -v repl="${ORANGE_}REL${NC_}" '$1 == "REL"{OFS = ";"; $1=repl}1')
+  elif [[ "$(echo "${lCSV_BIN_OUT}" | cut -d\; -f4)" == "REL" ]]; then
+    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | awk -F ';' -v repl="${ORANGE_}REL${NC_}" '$4 == "REL"{OFS = ";"; $4=repl}1')
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No Canary found"* ]]; then
