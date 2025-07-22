@@ -278,7 +278,7 @@ web_access_crawler() {
   [[ -v CURL_CREDS ]] && local lCURL_OPTS_ARR+=( "${CURL_CREDS}" )
   local lCRAWLED_ARR=()
   local lCRAWLED_VULNS_ARR=()
-  local lCURL_RET=""
+  local lCURL_RET="000:0"
   local lCRAWL_RESP_200=0
   local lCRAWL_RESP_401=0
   local lC_VULN=""
@@ -309,19 +309,44 @@ web_access_crawler() {
   print_ln
 
   disable_strict_mode "${STRICT_MODE}" 0
+
+  # just in case our web server is not available we try it multiple times
+  # if we fail in reaching it, we return
+  local lCNT=0
+  local lRETRY_MAX=20
+  # if we fail the return code is usually 000 and the size is 0
+  while [[ "${CURL_RET}" == "000:0" ]]; do
+    if [[ "${lCNT}" -ge "${lRETRY_MAX}" ]]; then
+      # we break here and we return later on with a print_output
+      break
+    fi
+    lCNT=$((lCNT+1))
+    print_output "[*] Checking for return values on web server access #${lCNT}/${lRETRY_MAX}" "no_log"
+    sleep 10
+    lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
+  done
+
   # the refernce size is used for identifying incorrect 200 ok results
   local lCURL_RET=""
-  lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}""://""${lIP_}":"${lPORT_}""/EMBA/""${RANDOM}""/""${RANDOM}"."${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
-  CURL_RET_CODE="$(echo "${lCURL_RET}" | cut -d: -f1 || true)"
+  lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
+  CURL_RET_CODE="${lCURL_RET//:*}"
   if [[ "${CURL_RET_CODE}" -eq 200 ]]; then
     # we only use the reponse size if we get a 200 ok on a non existing site
     # otherwise we set it to "NA" which means that we do need to check the response size on further requests
-    HTTP_RAND_REF_SIZE="$(echo "${lCURL_RET}" | cut -d: -f2 || true)"
+    HTTP_RAND_REF_SIZE="${lCURL_RET//*:}"
     print_output "[*] HTTP status detection - 200 ok on random site with reference size: ${HTTP_RAND_REF_SIZE}"
   else
     HTTP_RAND_REF_SIZE="NA"
+    print_output "[*] HTTP status detection failed with invalid return code: ${CURL_RET_CODE}/${HTTP_RAND_REF_SIZE}"
   fi
+
   print_output "[*] Init CURL_RET: ${lCURL_RET} / ${HTTP_RAND_REF_SIZE}" "no_log"
+
+  if [[ "${CURL_RET_CODE}" == "000:0" ]]; then
+    # this is usually hit if everything was going wrong
+    print_output "[*] Invalid hit ${lCURL_RET} / ${HTTP_RAND_REF_SIZE} - stopping now"
+    return
+  fi
 
   local lHOME_=""
   lHOME_=$(pwd)
