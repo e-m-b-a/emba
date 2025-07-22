@@ -315,7 +315,7 @@ web_access_crawler() {
   local lCNT=0
   local lRETRY_MAX=20
   # if we fail the return code is usually 000 and the size is 0
-  while [[ "${CURL_RET}" == "000:0" ]]; do
+  while [[ "${lCURL_RET}" == "000:0" ]]; do
     if [[ "${lCNT}" -ge "${lRETRY_MAX}" ]]; then
       # we break here and we return later on with a print_output
       break
