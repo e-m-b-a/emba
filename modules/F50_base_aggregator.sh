@@ -955,20 +955,18 @@ get_data() {
     MSF_VERIFIED=$(grep -v -c "Source" "${L35_CSV_LOG}" || true)
   fi
   if [[ -d "${F17_LOG_DIR}" ]]; then
-    F17_VERSIONS_IDENTIFIED=$(wc -l "${F17_LOG_DIR}/vuln_summary.txt")
-    F17_VERSIONS_IDENTIFIED="${F17_VERSIONS_IDENTIFIED/\ *}"
-    CRITICAL_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
+    F17_VERSIONS_IDENTIFIED=$(wc -l < "${F17_LOG_DIR}/vuln_summary.txt")
+    CRITICAL_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
     CVE_COUNTER=$((CVE_COUNTER+CRITICAL_CVE_COUNTER))
-    HIGH_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)
+    HIGH_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)
     CVE_COUNTER=$((CVE_COUNTER+HIGH_CVE_COUNTER))
-    MEDIUM_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,MEDIUM" || true)
+    MEDIUM_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,MEDIUM" || true)
     CVE_COUNTER=$((CVE_COUNTER+MEDIUM_CVE_COUNTER))
-    LOW_CVE_COUNTER=$(cut -d ',' -f5,6 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,LOW" || true)
+    LOW_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,LOW" || true)
     CVE_COUNTER=$((CVE_COUNTER+LOW_CVE_COUNTER))
   fi
   if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
-    KNOWN_EXPLOITED_COUNTER=$(wc -l "${F17_LOG_DIR}"/KEV.txt)
-    KNOWN_EXPLOITED_COUNTER=${KNOWN_EXPLOITED_COUNTER/\ *}
+    KNOWN_EXPLOITED_COUNTER=$(wc -l < "${F17_LOG_DIR}"/KEV.txt)
   fi
   if [[ -d "${F17_LOG_DIR}/cve_sum" ]]; then
     # nosemgrep
