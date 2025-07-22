@@ -173,13 +173,13 @@ windows_exifparser_threader() {
     fi
   fi
 
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR//\.exe}:${lAPP_NAME//\.exe}:${lAPP_VERS:-*}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR%.exe}:${lAPP_NAME%.exe}:${lAPP_VERS:-*}:*:*:*:*:*:*"
 
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="windows-based"
   fi
 
-  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "exe" "${lAPP_NAME//\.exe}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+  lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "exe" "${lAPP_NAME%.exe}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
 
   local lSTRIPPED_VERSION="::${lAPP_NAME//\.exe}:${lAPP_VERS:-NA}"
 
@@ -188,6 +188,8 @@ windows_exifparser_threader() {
   lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
   [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR%.exe}" )
+  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME%.exe}" )
   lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

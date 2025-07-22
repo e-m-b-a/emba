@@ -430,9 +430,10 @@ extract_kernel_arch() {
     ORIG_K_ARCH="ARM64"
   elif [[ "${ORIG_K_ARCH}" == *"ARM32"* ]]; then
     ORIG_K_ARCH="ARM"
+  elif [[ "${ORIG_K_ARCH}" == *"ELF 32"*"ARM"* ]]; then
+    ORIG_K_ARCH="ARM"
   fi
-  if [[ "${ORIG_K_ARCH}" == *"MIPS64"* ]]; then
-    # for MIPS64 -> MIPS64 to MIPS
+  if [[ "${ORIG_K_ARCH}" == *"MIPS"* ]]; then
     ORIG_K_ARCH="MIPS"
   fi
   if [[ "${ORIG_K_ARCH}" == *"PowerPC"* ]]; then

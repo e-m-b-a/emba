@@ -186,7 +186,12 @@ run_modules() {
   else
     # in full emulation mode we need to ensure that module s24 is always running
     if [[ "${MODULE_GROUP}" == "S" ]] && [[ "${FULL_EMULATION}" -eq 1 ]] && [[ ! "${SELECT_MODULES[*]}" =~ [sS]24 ]]; then
-      print_output "[*] Automatically enable module S24 for system emulation mode"
+      print_output "[*] Automatically enable mandatory module S24 for system emulation mode"
+      SELECT_MODULES+=("S24")
+    fi
+
+    if [[ "${MODULE_GROUP}" == "S" ]] && [[ "${SELECT_MODULES[*]}" =~ [sS]26 ]] && [[ ! "${SELECT_MODULES[*]}" =~ [sS]24 ]]; then
+      print_output "[*] Automatically enable mandatory module S24 for S26 module"
       SELECT_MODULES+=("S24")
     fi
 

@@ -49,7 +49,9 @@ S24_kernel_bin_identifier()
   wait_for_pid "${lWAIT_PIDS_S24_main[@]}"
   # shellcheck disable=SC2153
   find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -exec cat {} \; | tee -a "${LOG_FILE}"
-  lNEG_LOG=$(wc -l < "${S24_CSV_LOG}" 2>/dev/null || echo 0)
+  if [[ -f "${S24_CSV_LOG}" ]]; then
+    lNEG_LOG=$(wc -l < "${S24_CSV_LOG}" 2>/dev/null || echo 0)
+  fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }

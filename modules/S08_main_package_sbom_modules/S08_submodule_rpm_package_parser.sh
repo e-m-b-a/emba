@@ -121,6 +121,8 @@ S08_submodule_rpm_package_parser() {
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       # add dependencies to properties

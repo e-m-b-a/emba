@@ -113,6 +113,8 @@ S08_submodule_alpine_apk_package_parser() {
       local lPROP_ARRAY_INIT_ARR=()
       lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
       lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
       lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
       mapfile -t lAPK_FILES_ARR < <(find "${TMP_DIR}"/apk)

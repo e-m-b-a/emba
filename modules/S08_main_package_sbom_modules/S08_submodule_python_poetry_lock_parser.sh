@@ -126,6 +126,8 @@ S08_submodule_python_poetry_lock_parser() {
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_LCK_ARCHIVE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
+        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
+        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
         lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
 
         local lCNT=0

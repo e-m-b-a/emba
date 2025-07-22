@@ -63,7 +63,7 @@ F02_toolchain() {
   mapfile -t lCOMPILE_FILES_ARR < <(tail -n +2 "${CSV_DIR}"/s95_*.csv 2>/dev/null | cut -d\; -f2 | grep "libstdc++.so.6." | sort -u || true)
 
   mapfile -t lBINARY_DETAILS_ARR < <(tail -n +2 "${CSV_DIR}"/p99_*.csv 2>/dev/null | cut -d\; -f4,7 | cut -d\, -f1-3 | grep "ELF" | grep -v -e '^$' | sort -u || true)
-  mapfile -t lBINARY_FLAGS_ARR < <(tail -n +2 "${CSV_DIR}"/p99_*.csv 2>/dev/null | cut -d\; -f5 | grep -v -e '^$' | tr ',' '\n' | grep -v "unknown" | sort -u || true)
+  mapfile -t lBINARY_FLAGS_ARR < <(tail -n +2 "${CSV_DIR}"/p99_*.csv 2>/dev/null | cut -d\; -f5 | grep -v -e '^$' | tr ',' '\n' | grep -v "unknown\|NA" | sort -u || true)
   mapfile -t lBINARY_COMPILER_GUESSED_ARR < <(cut -d\; -f6 "${CSV_DIR}"/p99_*.csv 2>/dev/null | grep -v -e '^$' | tr ',' '\n' | grep "GCC\|Buildroot\|GNU" | awk '{print $1,$2,$3}' | tr -d ':' | sort -u || true)
   # results in some entries like the following
   # GCC (Buildroot 2012.11.1)
