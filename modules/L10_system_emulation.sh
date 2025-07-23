@@ -1609,9 +1609,10 @@ get_networking_details_emulation() {
       print_output "[*] Possible interface candidate detected: ${ORANGE}${lINTERFACE_CAND}${NC}"
       # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
       local lIP_ADDRESS_HEX=()
-      lINTERFACE_CAND=$(echo "${lINTERFACE_CAND//[![:print:]]/}" | tr ' ' '\n' | grep ifa | cut -d: -f2 | sed 's/0x//')
+      local lIP_CAND=""
+      lIP_CAND=$(echo "${lINTERFACE_CAND//[![:print:]]/}" | tr ' ' '\n' | grep ifa | cut -d: -f2 | sed 's/0x//')
       # shellcheck disable=SC2001
-      mapfile -t lIP_ADDRESS_HEX < <(echo "${lINTERFACE_CAND:0:8}" | sed 's/../0x&\n/g')
+      mapfile -t lIP_ADDRESS_HEX < <(echo "${lIP_CAND:0:8}" | sed 's/../0x&\n/g')
       # lIP_ADDRESS_HEX -> c0a80001
       # as I don't get it to change the hex ip to dec with printf, we do it the poor way:
       local lIP=""
