@@ -1651,11 +1651,13 @@ get_networking_details_emulation() {
 
       # filter for non usable IP addresses:
       if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127."* ]]; then
-        print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC}"
+        print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC} / ${ORANGE}${lINTERFACE_CAND}${NC}"
         DETECTED_IP=1
         # get the network device from our interface candidate
         lNETWORK_DEVICE="$(echo "${lINTERFACE_CAND}" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 || true)"
+        print_output "[*] lNETWORK_DEVICE -1: ${lNETWORK_DEVICE}"
         lNETWORK_DEVICE="${lNETWORK_DEVICE//[![:print:]]/}"
+        print_output "[*] lNETWORK_DEVICE -2: ${lNETWORK_DEVICE}"
         # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
