@@ -1632,7 +1632,7 @@ get_networking_details_emulation() {
       if [[ "${D_END,,}" == "eb" ]]; then
         IP_ADDRESS_="${lIP}"
       elif [[ "${D_END,,}" == "el" ]]; then
-        IP_ADDRESS_=$(echo "${lIP}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
+        IP_ADDRESS_=$(echo "${lIP//[![:print:]]/}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
       fi
 
       # handle IP addresses 0.0.0.0 somehow:
