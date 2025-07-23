@@ -1659,6 +1659,7 @@ get_networking_details_emulation() {
         # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
+        print_output "[*] DEBUG-0: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / lBRIDGE_INTERFACES: ${lBRIDGE_INTERFACES[*]} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
 
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
           # if the network device is not a eth it is a bridge interface
