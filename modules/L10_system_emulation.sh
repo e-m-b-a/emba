@@ -1659,19 +1659,10 @@ get_networking_details_emulation() {
         # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
-        print_output "[*] DEBUG-0: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
-        print_bar
-        print_output "[*] DEBUG-0: Possible interface detected: lBRIDGE_INTERFACES: "
-        print_bar
-        for int in ${lBRIDGE_INTERFACES[@]}; do
-          print_output "[*] Bridge interface $int"
-        done
-        print_bar
 
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
           # if the network device is not a eth it is a bridge interface
           # if we have lBRIDGE_INTERFACES we also check it here (this way we can correct the br interface entry):
-          print_output "[*] DEBUG: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / lBRIDGE_INTERFACES: ${lBRIDGE_INTERFACES[*]} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
           if [[ "${lNETWORK_DEVICE}" != *"eth"* ]] || [[ "${#lBRIDGE_INTERFACES[@]}" -gt 0 ]]; then
             print_output "[*] Possible br interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
             lNETWORK_MODE="bridge"
