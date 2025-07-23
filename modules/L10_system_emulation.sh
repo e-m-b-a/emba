@@ -1663,10 +1663,11 @@ get_networking_details_emulation() {
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
           # if the network device is not a eth it is a bridge interface
           # if we have lBRIDGE_INTERFACES we also check it here (this way we can correct the br interface entry):
-          if ! [[ "${lNETWORK_DEVICE}" == *"eth"* ]] || [[ -v lBRIDGE_INTERFACES[@] ]]; then
+          print_output "[*] DEBUG: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / lBRIDGE_INTERFACES: ${lBRIDGE_INTERFACES[*]} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
+          if [[ "${lNETWORK_DEVICE}" != *"eth"* ]] || [[ "${#lBRIDGE_INTERFACES[@]}" -gt 0 ]]; then
             print_output "[*] Possible br interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
             lNETWORK_MODE="bridge"
-            if [[ -v lBRIDGE_INTERFACES[@] ]]; then
+            if [[ "${#lBRIDGE_INTERFACES[@]}" -gt 0 ]]; then
               for lBRIDGE_INT in "${lBRIDGE_INTERFACES[@]}"; do
                 # lBRIDGE_INT -> br_add_if[PID: 494 (brctl)]: br:br0 dev:eth0.1
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
@@ -1937,7 +1938,7 @@ iterate_vlans() {
   local lVLAN_INFO=""
 
   for lVLAN_INFO in "${lVLAN_INFOS_ARR[@]}"; do
-    print_output "[*] Analyzing VLAN details ${ORANGE}${lVLAN_INFO}${NC}" "no_log"
+    print_output "[*] Analyzing VLAN details ${ORANGE}${lVLAN_INFO}${NC}"
     if ! [[ "${lVLAN_INFO}" == *"register_vlan_dev"* ]]; then
       continue
     fi
