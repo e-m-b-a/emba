@@ -1656,14 +1656,14 @@ get_networking_details_emulation() {
         DETECTED_IP=1
         # get the network device from our interface candidate
         lNETWORK_DEVICE="$(echo "${lINTERFACE_CAND}" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 || true)"
-        print_output "[*] lNETWORK_DEVICE -1: ${lNETWORK_DEVICE}"
-        lNETWORK_DEVICE="${lNETWORK_DEVICE//[![:print:]]/}"
-        print_output "[*] lNETWORK_DEVICE -2: ${lNETWORK_DEVICE}"
         # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
         print_output "[*] DEBUG-0: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
-        print_output "[*] DEBUG-0: Possible interface detected: lBRIDGE_INTERFACES: ${lBRIDGE_INTERFACES[@]}"
+        print_output "[*] DEBUG-0: Possible interface detected: lBRIDGE_INTERFACES: "
+        for int in ${lBRIDGE_INTERFACES[@]}; do
+          print_outpu "[*] Bridge interface $int"
+        done
 
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
           # if the network device is not a eth it is a bridge interface
