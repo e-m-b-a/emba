@@ -1610,7 +1610,7 @@ get_networking_details_emulation() {
       # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
       local lIP_ADDRESS_HEX=()
       local lIP_CAND=""
-      lIP_CAND=$(echo "${lINTERFACE_CAND//[![:print:]]/}" | tr ' ' '\n' | grep ifa | cut -d: -f2 | sed 's/0x//')
+      lIP_CAND=$(echo "${lINTERFACE_CAND}" | tr ' ' '\n' | grep ifa | cut -d: -f2 | sed 's/0x//')
       # shellcheck disable=SC2001
       mapfile -t lIP_ADDRESS_HEX < <(echo "${lIP_CAND:0:8}" | sed 's/../0x&\n/g')
       # lIP_ADDRESS_HEX -> c0a80001
@@ -1633,7 +1633,7 @@ get_networking_details_emulation() {
       if [[ "${D_END,,}" == "eb" ]]; then
         IP_ADDRESS_="${lIP}"
       elif [[ "${D_END,,}" == "el" ]]; then
-        IP_ADDRESS_=$(echo "${lIP//[![:print:]]/}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
+        IP_ADDRESS_=$(echo "${lIP}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
       fi
 
       # handle IP addresses 0.0.0.0 somehow:
@@ -1660,10 +1660,13 @@ get_networking_details_emulation() {
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
         print_output "[*] DEBUG-0: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
+        print_bar
         print_output "[*] DEBUG-0: Possible interface detected: lBRIDGE_INTERFACES: "
+        print_bar
         for int in ${lBRIDGE_INTERFACES[@]}; do
           print_output "[*] Bridge interface $int"
         done
+        print_bar
 
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
           # if the network device is not a eth it is a bridge interface
