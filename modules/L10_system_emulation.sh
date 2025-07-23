@@ -1662,7 +1662,7 @@ get_networking_details_emulation() {
         print_output "[*] DEBUG-0: Possible interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
         print_output "[*] DEBUG-0: Possible interface detected: lBRIDGE_INTERFACES: "
         for int in ${lBRIDGE_INTERFACES[@]}; do
-          print_outpu "[*] Bridge interface $int"
+          print_output "[*] Bridge interface $int"
         done
 
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
