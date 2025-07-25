@@ -36,14 +36,14 @@ S23_lua_check()
   for lLUA_SCRIPT in "${lS23_LUA_SCRIPTS_ARR[@]}" ; do
     if [[ "${THREADED}" -eq 1 ]]; then
       # linting check:
-      s23_luacheck "${lLUA_SCRIPT/;*}" &
+      s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S23_ARR
       continue
     else
-      s23_luacheck "${lLUA_SCRIPT}"
+      s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)"
     fi
   done
 
@@ -161,3 +161,4 @@ s23_luacheck() {
     write_csv_log "$(print_path "${lLUA_SCRIPT_}")" "${lLUA_ISSUES}" "0" "${lCFF}"
   fi
 }
+

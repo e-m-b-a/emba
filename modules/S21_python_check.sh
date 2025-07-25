@@ -43,21 +43,21 @@ S21_python_check()
       if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
         # if we have the base linux config file we only test non known Linux binaries
         # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lPY_SCRIPT/;*}" 2> /dev/null)
+        lNAME=$(basename "$(echo "${lPY_SCRIPT}" | cut -d';' -f2)" 2> /dev/null)
         if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           continue
         fi
       fi
       ((lS21_PY_SCRIPTS+=1))
       if [[ "${THREADED}" -eq 1 ]]; then
-        s21_script_bandit "${lPY_SCRIPT/;*}" &
+        s21_script_bandit "$(echo "${lPY_SCRIPT}" | cut -d';' -f2)" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S21_ARR+=( "${lTMP_PID}" )
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S21_ARR
         continue
       else
-        s21_script_bandit "${lPY_SCRIPT/;*}"
+        s21_script_bandit "$(echo "${lPY_SCRIPT}" | cut -d';' -f2)"
       fi
     done
 
@@ -139,3 +139,4 @@ s21_script_bandit() {
     echo "${lVULNS}" >> "${TMP_DIR}"/S21_VULNS.tmp
   fi
 }
+
