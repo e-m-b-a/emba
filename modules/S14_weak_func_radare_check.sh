@@ -142,7 +142,18 @@ S14_weak_func_radare_check()
           else
             radare_function_check_hexagon "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
           fi
-
+        elif [[ "${lBIN_FILE}" == *"Tricore"* ]]; then
+          print_output "[-] Tricore architecture currenlty not fully supported."
+          print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"
+          print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
+          # if [[ "${THREADED}" -eq 1 ]]; then
+          #   radare_function_check_tricore "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          #   local lTMP_PID="$!"
+          #   store_kill_pids "${lTMP_PID}"
+          #   lWAIT_PIDS_S14_ARR+=( "${lTMP_PID}" )
+          # else
+          #   radare_function_check_tricore "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+          # fi
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"
@@ -268,6 +279,53 @@ radare_function_check_MIPS() {
   done
   echo "${lSTRCPY_CNT}" >> "${TMP_DIR}"/S14_STRCPY_CNT.tmp
 }
+
+radare_function_check_tricore() {
+  local lBINARY_="${1:-}"
+  shift 1
+  local lVULNERABLE_FUNCTIONS_ARR=("$@")
+  local lBIN_NAME=""
+  lBIN_NAME=$(basename "${lBINARY_}" 2> /dev/null)
+  local lSTRCPY_CNT=0
+  local lFUNCTION=""
+  export NETWORKING=0
+
+  if ! [[ -f "${lBINARY_}" ]]; then
+    return
+  fi
+
+  for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
+    NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+    radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
+    if [[ "${lFUNCTION}" == "mmap" ]] ; then
+      # For the mmap check we need the disasm after the call
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${lBINARY_}" 2>/dev/null | grep -A 20 "^l[wd] .*${lFUNCTION}""(gp)" >> "${FUNC_LOG}" || true
+    else
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${lBINARY_}" 2>/dev/null | grep -A 20 -B 25 "^l[wd] .*${lFUNCTION}""(gp)" >> "${FUNC_LOG}" || true
+    fi
+    ! [[ -f "${FUNC_LOG}" ]] && continue
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
+      radare_color_output "${lFUNCTION}" "${FUNC_LOG}"
+
+      COUNT_FUNC="$(grep -c "l[wd].*""${lFUNCTION}" "${FUNC_LOG}" 2> /dev/null || true)"
+      if [[ "${lFUNCTION}" == "strcpy" ]] ; then
+        COUNT_STRLEN=$(grep -c "l[wd].*strlen" "${FUNC_LOG}" 2> /dev/null || true)
+        lSTRCPY_CNT=$((lSTRCPY_CNT+COUNT_FUNC))
+      elif [[ "${lFUNCTION}" == "mmap" ]] ; then
+        # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
+        # Check this. This test is very rough:
+        # TODO: check this in radare2
+        # COUNT_MMAP_OK=$(grep -c ",-1$" "${FUNC_LOG}"  2> /dev/null)
+        COUNT_MMAP_OK="NA"
+      fi
+      radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
+      radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+    fi
+  done
+  echo "${lSTRCPY_CNT}" >> "${TMP_DIR}"/S14_STRCPY_CNT.tmp
+}
+
 
 radare_function_check_ARM64() {
   local lBINARY_="${1:-}"

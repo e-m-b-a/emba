@@ -141,6 +141,12 @@ S13_weak_func_check()
             print_output "[-] The binaries will be analysed from radare2 module s14"
             lERR_PRINTED=1
           fi
+        elif [[ "${lBIN_FILE}" == *"Tricore"* ]]; then
+          if [[ "${lERR_PRINTED}" -eq 0 ]]; then
+            print_output "[-] Tricore architecture is currently not supported from objdump"
+            print_output "[-] The binaries will be analysed from radare2 module s14"
+            lERR_PRINTED=1
+          fi
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"

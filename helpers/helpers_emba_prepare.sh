@@ -244,6 +244,7 @@ architecture_check() {
     local lARCH_RISCV_CNT=0
     local lARCH_PPC64_CNT=0
     local lARCH_QCOM_DSP6_CNT=0
+    local lARCH_TRICORE_CNT=0
     local lD_END_LE_CNT=0
     local lD_END_BE_CNT=0
     export ARM_HF=0
@@ -277,11 +278,12 @@ architecture_check() {
     lARCH_NIOS2_CNT=$(grep -c "Altera Nios II" "${P99_CSV_LOG}" || true)
     lARCH_RISCV_CNT=$(grep -c "UCB RISC-V" "${P99_CSV_LOG}" || true)
     lARCH_QCOM_DSP6_CNT=$(grep -c "QUALCOMM DSP6" "${P99_CSV_LOG}" || true)
+    lARCH_TRICORE_CNT=$(grep -c "Tricore" "${P99_CSV_LOG}" || true)
 
     lD_END_BE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "MSB" || true)
     lD_END_LE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "LSB" || true)
 
-    if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT)) -gt 0 ]] ; then
+    if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT+lARCH_TRICORE_CNT)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture Count")")"
       if [[ ${lARCH_MIPS_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""${lARCH_MIPS_CNT}")")" ; fi
       if [[ ${lARCH_MIPS64R2_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64r2     ""${lARCH_MIPS64R2_CNT}")")" ; fi
@@ -297,63 +299,98 @@ architecture_check() {
       if [[ ${lARCH_NIOS2_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""${lARCH_NIOS2_CNT}")")" ; fi
       if [[ ${lARCH_RISCV_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "RISC-V        ""${lARCH_RISCV_CNT}")")" ; fi
       if [[ ${lARCH_QCOM_DSP6_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Qualcom DSP6  ""${lARCH_QCOM_DSP6_CNT}")")" ; fi
+      if [[ ${lARCH_TRICORE_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Tricore       ""${lARCH_TRICORE_CNT}")")" ; fi
 
-      if [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      if [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC_CNT} ]] && \
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && \
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && \
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS"
-      elif [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_ARM_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X86_CNT} ]] && \
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="ARM"
-      elif [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_ARM_CNT} ]] && \
-        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X86_CNT} ]] && \
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_ARM_CNT} ]] && \
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="ARM64"
-      elif [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_X64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_X86_CNT} ]] && \
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="x64"
-      elif [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_X86_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM_CNT} ]] && \
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="x86"
-      elif [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_PPC_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="PPC"
-      elif [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="NIOS2"
-      elif [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64R2"
-      elif [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64_3"
-      elif [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64N32"
-      elif [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64v1"
-      elif [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="RISCV"
-      elif [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+      elif [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="PPC64"
-      elif [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC64_CNT} ]]; then
+      elif [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="QCOM_DSP6"
+      elif [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_X64_CNT} ]] && \
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
+        D_ARCH="TRICORE"
       else
         D_ARCH="unknown"
       fi

@@ -496,15 +496,15 @@ generate_info_file() {
 
   if [[ -z "${lCUSTOM_SUB_PATH}" ]] ; then
     if [[ "${LOG_DIR_MODULE}" !=  "${lSRC_FILE_NAME}" ]]; then
-      lINFO_PATH="${ABS_HTML_PATH}""/${LOG_DIR_MODULE}/""${lSRC_FILE_NAME}"
+      lINFO_PATH="${ABS_HTML_PATH}/${LOG_DIR_MODULE}/${lSRC_FILE_NAME}"
       # INFO: now we have another directory depth and we need to adjust the html header
       lDEPTH_HTML_HEADER="./../.."
     else
-      lINFO_PATH="${ABS_HTML_PATH}""/${LOG_DIR_MODULE}"
+      lINFO_PATH="${ABS_HTML_PATH}/${LOG_DIR_MODULE}"
       lDEPTH_HTML_HEADER="./.."
     fi
   else
-    lINFO_PATH="${ABS_HTML_PATH}""/${LOG_DIR_MODULE}/""${lCUSTOM_SUB_PATH}"
+    lINFO_PATH="${ABS_HTML_PATH}/${LOG_DIR_MODULE}/""${lCUSTOM_SUB_PATH}"
   fi
 
   local lRES_PATH="${lINFO_PATH}""/res"
@@ -588,14 +588,17 @@ generate_report_file() {
   if ! ( grep -a -o -i -q "$(basename "${lREPORT_FILE%."${lREPORT_FILE##*.}"}")"" nothing reported" "${lREPORT_FILE}" ) ; then
     lHTML_FILE="$(basename "${lREPORT_FILE%."${lREPORT_FILE##*.}"}"".html" 2>/dev/null || true)"
     if [[ ${lSUPPL_FILE_GEN} -eq 1 ]] ; then
-      cp "./helpers/base.html" "${ABS_HTML_PATH}${SUPPL_PATH_HTML}""/""${lHTML_FILE}" || true
+      cp "./helpers/base.html" "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}/${lHTML_FILE}" || true
     else
-      cp "./helpers/base.html" "${ABS_HTML_PATH}""/""${lHTML_FILE}" || true
+      cp "./helpers/base.html" "${ABS_HTML_PATH%/}/${lHTML_FILE}" || true
     fi
-    local lTMP_FILE="${ABS_HTML_PATH}""${TEMP_PATH}""/""${lHTML_FILE}"
+    local lTMP_FILE="${ABS_HTML_PATH%/}/${TEMP_PATH}/${lHTML_FILE}"
+    if [[ ! -d "${ABS_HTML_PATH%/}/${TEMP_PATH}" ]]; then
+      mkdir "${ABS_HTML_PATH%/}/${TEMP_PATH}"
+    fi
 
     # parse log content and add to html file
-    lLINE_NUMBER_REP_NAV=$(grep -a -n "navigation start" "${ABS_HTML_PATH}""/""${lHTML_FILE}" | cut -d":" -f1)
+    lLINE_NUMBER_REP_NAV=$(grep -a -n "navigation start" "${ABS_HTML_PATH%/}/${lHTML_FILE}" | cut -d":" -f1)
 
     cp "${lREPORT_FILE}" "${lTMP_FILE}" || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "${lTMP_FILE}"
