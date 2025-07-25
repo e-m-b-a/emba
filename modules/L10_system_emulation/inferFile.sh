@@ -33,7 +33,7 @@ if ("${EMBA_BOOT}"); then
       arr+=(/init)
     fi
   fi
-  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc" -o -name "rc"); do
+  for FILE in $("${BUSYBOX}" find / -name "init" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "preinitMT" -o -name "linuxrc" -o -name "rc"); do
     "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     arr+=("${FILE}")
   done

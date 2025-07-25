@@ -1,0 +1,10 @@
+{
+    "_comment": "The CPU architecture of the chip. Valid values are those that Ghidra accepts as processor IDs.",
+    "processor_id": "tricore:LE:32:default",
+    "_comment_1": "The base address, where the contents of the binary would be mapped on the chip, as a hexadecimal number.",
+    "flash_base_address": "0x08000000",
+    "_comment_2": "The base address, of the RAM memory region as a hexadecimal number.",
+    "ram_base_address": "0x20000000",
+    "_comment_3": "The size of the RAM memory region (in bytes) as a hexadecimal number.",
+    "ram_size": "0x00030000"
+}

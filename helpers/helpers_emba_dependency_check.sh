@@ -681,6 +681,8 @@ architecture_dep_check() {
     lARCH_STR="riscv"
   elif [[ "${ARCH}" == "QCOM_DSP6" ]] ; then
     lARCH_STR="qcom_dsp6"
+  elif [[ "${ARCH}" == "TRICORE" ]] ; then
+    lARCH_STR="tricore"
   else
     lARCH_STR="unknown"
   fi
