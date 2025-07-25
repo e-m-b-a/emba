@@ -136,6 +136,8 @@ cwe_checker_threaded() {
   local lADDRESSES=""
   local lCWE_TOTAL_CNT=0
   local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
+  local lCWE_CHECKER_BARE_METAL_CFG=""
+  local lCWE_CHECKER_OPTS_ARR=()
 
   local lNAME=""
   lNAME=$(basename "${lBINARY}")
@@ -144,8 +146,14 @@ cwe_checker_threaded() {
   local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${lNAME}"".txt"
   lBINARY=$(readlink -f "${lBINARY}")
 
+  if [[ $(grep -F "$(escape_echo "${lBINARY}")" "${P99_CSV_LOG}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
+    print_output "[*] Tricore processor detected - adjusting Ghidra parameters" "no_log"
+    lCWE_CHECKER_BARE_METAL_CFG="${CONFIG_DIR}/cwe_checker_tricore.json"
+    lCWE_CHECKER_OPTS_ARR+=("--bare-metal-config" "${lCWE_CHECKER_BARE_METAL_CFG}")
+  fi
+
   ulimit -Sv "${lMEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log || true
+  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log "${lCWE_CHECKER_OPTS_ARR[@]}" || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${lBINARY}")""${NC}" "no_log"
 
