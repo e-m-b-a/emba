@@ -64,7 +64,7 @@ cwe_check() {
   local lBINS_CHECKED_ARR=()
 
   local lBINARIES_ARR=()
-  if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
+  if [[ "$(wc -l < "${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l < "${S14_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
