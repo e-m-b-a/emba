@@ -143,7 +143,7 @@ S14_weak_func_radare_check()
             radare_function_check_hexagon "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
           fi
         elif [[ "${lBIN_FILE}" == *"Tricore"* ]]; then
-          print_output "[-] Tricore architecture currenlty not fully supported."
+          print_output "[-] Tricore architecture currently not fully supported."
           print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
           # if [[ "${THREADED}" -eq 1 ]]; then

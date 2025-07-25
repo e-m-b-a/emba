@@ -158,7 +158,7 @@ ghidra_analyzer() {
   fi
 
   if [[ $(grep -F "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
-    print_output "[*] Tricore processore detected - adjusting Ghidra parameters" "no_log"
+    print_output "[*] Tricore processor detected - adjusting Ghidra parameters" "no_log"
     lGHIDRA_OPTS_ARR+=("-processor" "tricore:LE:32:default" "-cspec" "default")
   fi
 
