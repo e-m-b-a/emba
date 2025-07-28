@@ -400,7 +400,7 @@ check_kconfig() {
   fi
 
   write_log "[*] Testing kernel configuration file ${ORANGE}${lKCONFIG_FILE}${NC} with kconfig-hardened-check (architecture ${lKCONFIG_ARCH})." "${lLOG_FILE}"
-  lKCONF_LOG="${LOG_PATH_MODULE}/kconfig_hardening_check_$(basename "${lKCONFIG_FILE}").log"
+  lKCONF_LOG="${LOG_PATH_MODULE}/kconfig_hardening_check_$(basename "${lKCONFIG_FILE}")_${RANDOM}.log"
   "${lKCONF_HARD_CHECKER}" -c "${lKCONFIG_FILE}" | tee -a "${lKCONF_LOG}" || true
   if [[ -f "${lKCONF_LOG}" ]]; then
     lFAILED_KSETTINGS=$(grep -c "FAIL: " "${lKCONF_LOG}" || true)
