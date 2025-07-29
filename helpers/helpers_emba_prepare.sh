@@ -191,7 +191,7 @@ binary_architecture_threader() {
     # noreorder, pic, cpic, o32, mips32
     local lREADELF_H_ARR=()
 
-    mapfile -t lREADELF_H_ARR < <(readelf -h "${lBINARY}" 2>/dev/null || true)
+    mapfile -t lREADELF_H_ARR < <(readelf -W -h "${lBINARY}" 2>/dev/null || true)
 
     lD_FLAGS_CNT=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Flags:" || true)
     lD_FLAGS_CNT="${lD_FLAGS_CNT// /}"
@@ -213,7 +213,7 @@ binary_architecture_threader() {
     lD_DATA="${lD_DATA/*Data:/}"
     lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
 
-    lD_ARCH_GUESSED=$(readelf -p .comment "${lBINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
+    lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
