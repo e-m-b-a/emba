@@ -220,6 +220,7 @@ set_log_paths() {
   export S13_CSV_LOG="${CSV_DIR}/s13_weak_func_check.csv"
   export S14_LOG="${LOG_DIR}/s14_weak_func_radare_check.txt"
   export S14_CSV_LOG="${CSV_DIR}/s14_weak_func_radare_check.csv"
+  export S15_CSV_LOG="${CSV_DIR}/s15_radare_decompile_checks.csv"
   export S16_LOG="${LOG_DIR}/s16_ghidra_decompile_checks.txt"
   export S17_LOG="${LOG_DIR}/s17_cwe_checker.txt"
   export S17_CSV_LOG="${CSV_DIR}/s17_apk_check.csv"
