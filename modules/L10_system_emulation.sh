@@ -216,7 +216,7 @@ L10_system_emulation() {
         print_output "[-] ${ORANGE}WARNING:${NC} No archive path found in logs ... restarting emulation process for further analysis not possible" "no_log"
       fi
     fi
-   fi
+  fi
 
   module_end_log "${FUNCNAME[0]}" "${lMODULE_END}"
 }
@@ -1046,7 +1046,7 @@ emulation_with_config() {
           # we restart the emulation with the identified IP address for a maximum of one time
           if [[ $(grep -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
             if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
-              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${NC} needed and executed"
+              print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed and executed"
               lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
               IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
               emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
@@ -2834,7 +2834,9 @@ reset_network_emulation() {
   else
     lEXECUTE_tmp="${lEXECUTE}"
   fi
-  write_script_exec "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    write_script_exec "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  fi
 
   if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Removing VLAN" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     print_output "Removing VLAN..." "no_log"
@@ -2847,7 +2849,9 @@ reset_network_emulation() {
     lEXECUTE_tmp="${lEXECUTE}"
   fi
   if [[ -v HOSTNETDEV_0 ]]; then
-    write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+    if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+      write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+    fi
   fi
 
   if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Deleting TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
@@ -2860,7 +2864,9 @@ reset_network_emulation() {
   else
     lEXECUTE_tmp="${lEXECUTE}"
   fi
-  write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  fi
 }
 
 write_script_exec() {

@@ -120,8 +120,12 @@ os_identification() {
     write_csv_log "${lOS_}" "NA" "APK verified" "NA"
   fi
 
-  rm "${LOG_PATH_MODULE}/strings_firmware.txt" || true
-  rm "${LOG_PATH_MODULE}/all_strings_firmware.txt" || true
+  if [[ -f "${LOG_PATH_MODULE}/strings_firmware.txt" ]]; then
+    rm "${LOG_PATH_MODULE}/strings_firmware.txt" || true
+  fi
+  if [[ -f "${LOG_PATH_MODULE}/all_strings_firmware.txt" ]]; then
+    rm "${LOG_PATH_MODULE}/all_strings_firmware.txt" || true
+  fi
 }
 
 os_detection_thread_per_os() {
@@ -130,17 +134,17 @@ os_detection_thread_per_os() {
   local lOS_=""
 
   OS_COUNTER[${lOS}]=0
-  OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/all_strings_firmware.txt" 2> /dev/null || true)"))
+  OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/all_strings_firmware.txt" 2>/dev/null || echo 0)"))
   if [[ -f "${LOG_DIR}"/p60_firmware_bin_extractor.txt ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_DIR}"/p60_firmware_bin_extractor.txt 2> /dev/null || true)" ))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_DIR}"/p60_firmware_bin_extractor.txt 2>/dev/null || echo 0)" ))
   fi
-  OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/strings_firmware.txt" || true)" ))
+  OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/strings_firmware.txt" 2>/dev/null || echo 0)" ))
 
   if [[ ${lOS} == "VxWorks\|Wind" ]]; then
     OS_COUNTER_VxWorks="${OS_COUNTER[${lOS}]}"
   fi
   if [[ ${lOS} == *"CPU "* || ${lOS} == "ADONIS" || ${lOS} == "CP443" ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "Original Siemens Equipment" "${LOG_PATH_MODULE}/strings_firmware.txt" || true)" ))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "Original Siemens Equipment" "${LOG_PATH_MODULE}/strings_firmware.txt" || echo 0)" ))
   fi
 
   if [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]] ; then

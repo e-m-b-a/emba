@@ -682,6 +682,7 @@ build_cpe_identifier() {
     lCPE_IDENTIFIER+='*:'
     lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
   done
+  lCPE_IDENTIFIER+='*'
 
   echo "${lCPE_IDENTIFIER}"
 }
