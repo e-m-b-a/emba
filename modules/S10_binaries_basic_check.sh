@@ -41,10 +41,10 @@ S10_binaries_basic_check()
     print_output "[*] Interesting functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
     while read -r lBINARY; do
       lBIN_COUNT=$((lBIN_COUNT+1))
-      mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -s --use-dynamic "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
+      mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -W -s --use-dynamic "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
       # Fallback: just in case the dynamic section not working -> check static relocations
       if [[ "${#lVUL_FUNC_RESULT_ARR[@]}" -eq 0 ]] ; then
-        mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -s "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
+        mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -W -s "${lBINARY}" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
       fi
       if [[ "${#lVUL_FUNC_RESULT_ARR[@]}" -gt 0 ]] ; then
         print_ln
