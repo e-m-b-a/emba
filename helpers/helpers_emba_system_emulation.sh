@@ -27,6 +27,7 @@ restart_emulation() {
     return
   fi
 
+  # shellcheck disable=SC2153
   if ! [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
     print_output "[!] Warning: Auto-maintaining not possible - emulation archive not available"
     return
@@ -103,6 +104,7 @@ system_online_check() {
 
   # STATE_CHECK_MECHANISM is exported by l10
 
+  # shellcheck disable=SC2153
   echo "online check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
     echo "Ping check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
