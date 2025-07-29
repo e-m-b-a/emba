@@ -107,7 +107,7 @@ radare_decompilation() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/decompilation_vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_decomp_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"

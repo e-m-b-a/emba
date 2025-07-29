@@ -203,9 +203,9 @@ radare_function_check_PPC32() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -249,7 +249,7 @@ radare_function_check_MIPS() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -295,7 +295,7 @@ radare_function_check_tricore() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -341,7 +341,7 @@ radare_function_check_ARM64() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -386,7 +386,7 @@ radare_function_check_ARM32() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -431,9 +431,9 @@ radare_function_check_hexagon() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -s --use-dynamic "${lBINARY_}" | grep -q "${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf -W -s --use-dynamic "${lBINARY_}" | grep -q "${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -477,9 +477,9 @@ radare_function_check_x86() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -523,9 +523,9 @@ radare_function_check_x86_64() {
     return
   fi
 
-  NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then

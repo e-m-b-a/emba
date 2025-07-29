@@ -201,7 +201,7 @@ binary_kernel_check_threader() {
         lK_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
 
         if [[ "${lK_FILE}" == *"ELF"* ]]; then
-          lK_SYMBOLS="$(readelf -s "${lFILE_PATH}" | grep -c "FUNC\|OBJECT" || true)"
+          lK_SYMBOLS="$(readelf -W -s "${lFILE_PATH}" | grep -c "FUNC\|OBJECT" || true)"
 
           [[ "${lK_FILE}" == *"LSB"* ]] && lK_ARCH_END="EL"
           [[ "${lK_FILE}" == *"MSB"* ]] && lK_ARCH_END="EB"
