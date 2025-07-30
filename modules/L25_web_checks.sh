@@ -348,7 +348,7 @@ web_access_crawler() {
     fi
     lCNT=$((lCNT+1))
     print_output "[*] Checking for return values on web server access #${lCNT}/${lRETRY_MAX}" "no_log"
-    print_output "[*] lCURL_OPTS_ARR: ${lCURL_OPTS_ARR[@]}"
+    print_output "[*] lCURL_OPTS_ARR: ${lCURL_OPTS_ARR[*]}"
     print_output "[*] lPROTO: ${lPROTO}"
     sleep 10
     lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
