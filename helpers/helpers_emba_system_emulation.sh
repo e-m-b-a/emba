@@ -94,9 +94,9 @@ service_online_check() {
     done
   else
     [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] No network services detected for recovery ..." "no_log"
-    return 1 
+    return 1
   fi
-  return 1 
+  return 1
 }
 
 system_online_check() {
