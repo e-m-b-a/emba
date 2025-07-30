@@ -163,6 +163,7 @@ print_output() {
         fi
       else
         safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        echo "DEBUG: [REF] ${lREF_LINK}"
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
           safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi

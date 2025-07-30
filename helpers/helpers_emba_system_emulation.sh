@@ -36,7 +36,7 @@ restart_emulation() {
   print_output "[!] Warning: System with ${ORANGE}${lIP_ADDRESS}${MAGENTA} not responding." "no_log"
   print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
 
-  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_RESTART_CNT}" ]]; then
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
     print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
     return 1
   fi
@@ -84,8 +84,8 @@ service_online_check() {
   local lSERVICE=""
 
   # we log how often we restart the system
-  # if we are running into restarting the service more then MAX_RESTART_CNT we return 1
-  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_RESTART_CNT}" ]]; then
+  # if we are running into restarting the service more then MAX_SYSTEM_RESTART_CNT we return 1
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
     print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
     return 1
   fi
@@ -117,7 +117,7 @@ system_online_check() {
 
   # STATE_CHECK_MECHANISM is exported by l10
 
-  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_RESTART_CNT}" ]]; then
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
     print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
     return 1
   fi
