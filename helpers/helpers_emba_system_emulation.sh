@@ -27,6 +27,7 @@ restart_emulation() {
     return
   fi
 
+  # shellcheck disable=SC2153
   if ! [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
     print_output "[!] Warning: Auto-maintaining not possible - emulation archive not available"
     return
@@ -34,30 +35,68 @@ restart_emulation() {
 
   print_output "[!] Warning: System with ${ORANGE}${lIP_ADDRESS}${MAGENTA} not responding." "no_log"
   print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
+  echo "[*] $(date) - system emulation restarting ..." >> "${TMP_DIR}/emulation_restarting.log"
+  if [[ "$(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log")" -gt 10 ]]; then
+    print_output "[!] WARNING: Restarting system multiple times ..."
+  fi
 
   stopping_emulation_process "${lIMAGE_NAME}"
   [[ "${lRESTART_SCAN}" -eq 0 ]] && reset_network_emulation 2
 
   check_qemu_instance_l10
 
-  # what an ugly hack - probably we are going to improve this later on
   pushd "${ARCHIVE_PATH}" || { print_output "[-] Emulation archive path not found"; return 1; }
   ./run.sh &
   popd || { print_output "[-] EMBA path not available?"; return 1; }
 
   if [[ "${lSTATE_CHECK_MECHANISM}" == "PING" ]]; then
-    ping_check "${lIP_ADDRESS}" 1
-    return "$?"
+    if ping_check "${lIP_ADDRESS}" 1; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 1; then
+        return 0
+      fi
+    fi
   elif [[ "${lSTATE_CHECK_MECHANISM}" == "HPING" ]]; then
-    hping_check "${lIP_ADDRESS}" 1
-    return "$?"
-  elif [[ "${lSTATE_CHECK_MECHANISM}" == "TCP" ]]; then
-    # local PORT=80
-    print_output "[-] TCP check currently not implemented!" "no_log"
-    # tcp_check "${lIP_ADDRESS}" "${PORT}"
+    if hping_check "${lIP_ADDRESS}" 1; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 1; then
+        return 0
+      fi
+    fi
+  fi
+  return 1
+}
+
+service_online_check() {
+  local lARCHIVE_PATH="${1:-}"
+  local lIP_ADDRESS="${2:-}"
+  # print details or do it silent
+  local lPRINT_OUTPUT="${3:-1}"
+
+  local lMAX_CNT=100
+  local lCNT=0
+
+  local lNMAP_SERV_TCP_ARR=()
+  local lSERVICE=""
+
+  mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -h -E "[0-9]+/open/tcp" "${lARCHIVE_PATH}/"*"_nmap_"*".gnmap" | cut -d '/' -f1 | sort -u || true)
+  if [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]]; then
+    # we try this for lMAX_CNT times:
+    while [[ "${lCNT}" -lt "${lMAX_CNT}" ]]; do
+      # running through our extracted services and check if one of them is available via netcat
+      for lSERVICE in "${lNMAP_SERV_TCP_ARR[@]}"; do
+        if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}"; then
+          [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
+          return 0
+        fi
+      done
+      [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for responsive network services on ${ORANGE}${lIP_ADDRESS} - #${lCNT}/${lMAX_CNT}${NC}" "no_log"
+      sleep 10
+      lCNT=$((lCNT+1))
+    done
+  else
+    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] No network services detected for recovery ..." "no_log"
     return 1
   fi
-  return 0
+  return 1
 }
 
 system_online_check() {
@@ -65,19 +104,27 @@ system_online_check() {
 
   # STATE_CHECK_MECHANISM is exported by l10
 
+  # shellcheck disable=SC2153
+  echo "online check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
-    ping_check "${lIP_ADDRESS}" 0
-    return "$?"
+    echo "Ping check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
+    ping -c 1 "${lIP_ADDRESS}"
+    if ping_check "${lIP_ADDRESS}" 0; then
+      echo "service check for ${lIP_ADDRESS}"
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0; then
+        echo "service check for ${lIP_ADDRESS} passed"
+        return 0
+      fi
+    fi
   elif [[ "${STATE_CHECK_MECHANISM:-PING}" == "HPING" ]]; then
-    hping_check "${lIP_ADDRESS}" 0
-    return "$?"
-  elif [[ "${STATE_CHECK_MECHANISM:-PING}" == "TCP" ]]; then
-    # local PORT=80
-    print_output "[-] TCP check is not implemented. Falling back to HPING check." "no_log"
-    # tcp_check "${lIP_ADDRESS}" "${PORT}"
-    hping_check "${lIP_ADDRESS}" 0
-    return "$?"
+    if hping_check "${lIP_ADDRESS}" 0; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0; then
+        return 0
+      fi
+    fi
   fi
+  echo "online check for ${lIP_ADDRESS} NOT passed"
+  return 1
 }
 
 hping_check() {
@@ -119,12 +166,13 @@ ping_check() {
   local lPRINT_OUTPUT="${2:-1}"
   local lCOUNTER=0
   local lRESTARTER=0
+  local lMAX_RETRY_CNT=50
 
   while ! ping -c 1 "${lIP_ADDRESS}" &> /dev/null; do
     lRESTARTER=1
-    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ..." "no_log"
+    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... #${lCOUNTER}/${lMAX_RETRY_CNT}" "no_log"
     ((lCOUNTER+=1))
-    if [[ "${lCOUNTER}" -gt 50 ]]; then
+    if [[ "${lCOUNTER}" -gt "${lMAX_RETRY_CNT}" ]]; then
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
     fi
