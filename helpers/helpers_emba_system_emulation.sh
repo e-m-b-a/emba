@@ -96,7 +96,7 @@ service_online_check() {
     while [[ "${lCNT}" -lt "${lMAX_CNT}" ]]; do
       # running through our extracted services and check if one of them is available via netcat
       for lSERVICE in "${lNMAP_SERV_TCP_ARR[@]}"; do
-        if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}"; then
+        if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}" >/dev/null; then
           [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
           return 0
         fi
