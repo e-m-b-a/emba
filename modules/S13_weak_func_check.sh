@@ -366,9 +366,9 @@ function_check_ARM64() {
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
-      "${OBJDUMP}" -b binary -m aarch64 -D "${lBINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      "${OBJDUMP}" -D "${lBINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
-      "${OBJDUMP}" -b binary -m aarch64 -D "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      "${OBJDUMP}" -D "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l 2>/dev/null < "${FUNC_LOG}") -gt 0 ]] ; then
