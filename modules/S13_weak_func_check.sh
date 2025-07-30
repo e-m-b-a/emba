@@ -213,9 +213,9 @@ function_check_NIOS2() {
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 20 "call.*${lFUNC_ADDR}" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 20 "call.*${lFUNC_ADDR}" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "call.*${lFUNC_ADDR}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 2 -B 20 "call.*${lFUNC_ADDR}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
@@ -262,9 +262,9 @@ function_check_PPC32() {
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 20 "bl.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 20 "bl.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "bl.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 2 -B 20 "bl.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
@@ -317,9 +317,11 @@ function_check_MIPS() {
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        "${OBJDUMP}" -d -b binary -m mips "${lBINARY_}" | grep -A 20 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D -b binary -m mips "${lBINARY_}" | grep -A 20 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ >> "${FUNC_LOG}" || true
+        # "${OBJDUMP}" -d "${lBINARY_}" | grep -A 20 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ >> "${FUNC_LOG}" || true
       else
-        "${OBJDUMP}" -d -b binary -m mips "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D -b binary -m mips "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
+        # "${OBJDUMP}" -d "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
@@ -364,12 +366,12 @@ function_check_ARM64() {
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
-      "${OBJDUMP}" -d -b binary -m aarch64 "${lBINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      "${OBJDUMP}" -b binary -m aarch64 -D "${lBINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
-      "${OBJDUMP}" -d -b binary -m aarch64 "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      "${OBJDUMP}" -b binary -m aarch64 -D "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l 2>/dev/null < "${FUNC_LOG}") -gt 0 ]] ; then
       sed -i -r "s/^.*:.*(${lFUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" || true
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
       if [[ "${lFUNCTION}" == "strcpy" ]] ; then
@@ -411,9 +413,9 @@ function_check_ARM32() {
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
-      "${OBJDUMP}" -d "${lBINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      "${OBJDUMP}" -D "${lBINARY_}" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
-      "${OBJDUMP}" -d "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      "${OBJDUMP}" -D "${lBINARY_}" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
@@ -459,9 +461,9 @@ function_check_x86() {
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 2 -B 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
@@ -507,9 +509,9 @@ function_check_x86_64() {
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        "${OBJDUMP}" -d "${lBINARY_}" | grep -E -A 2 -B 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" -D "${lBINARY_}" | grep -E -A 2 -B 20 "call.*<${lFUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
