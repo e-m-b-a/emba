@@ -136,9 +136,6 @@ set_defaults() {
   EMBA_ICON=$(realpath "${HELP_DIR}"/emba.svg)
   export WSL=0    # wsl environment detected
   export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
-                  # currently the extracted results are not further used. The current implementation
-                  # is for evaluation purposes
-
   export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
   export NVD_DIR="${EXT_DIR}"/nvd-json-data-feeds

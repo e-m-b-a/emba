@@ -135,23 +135,27 @@ check_live_nmap_basic() {
 
       if [[ -f "${S09_CSV_LOG}" ]]; then
         # Let's check if we have already found details about this service in our other modules (S09, S115/S116)
-        mapfile -t lS09_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"${lSERVICE_NAME}"'/' "${S09_CSV_LOG}" | sort -u || true)
+        mapfile -t lS09_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$3 $4 ~ /'"${lSERVICE_NAME}"'/' "${S09_CSV_LOG}" | sort -u || true)
         if [[ "${#lS09_L15_CHECK_ARR[@]}" -gt 0 ]]; then
           for lS09_L15_MATCH in "${lS09_L15_CHECK_ARR[@]}"; do
-            echo "${lS09_L15_MATCH}" >> "${L15_CSV_LOG}"
-            lS09_L15_MATCH=$(echo "${lS09_L15_MATCH}" | cut -d ';' -f3)
-            print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${lS09_L15_MATCH}${NC}"
+            lS09_L15_MATCH=$(echo "${lS09_L15_MATCH}" | cut -d ';' -f4)
+            if ! grep -q ";${lS09_L15_MATCH};" "${L15_CSV_LOG}"; then
+              print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${lS09_L15_MATCH}${NC}"
+              echo "${lS09_L15_MATCH}" >> "${L15_CSV_LOG}"
+            fi
           done
         fi
       fi
 
       if [[ -f "${S116_CSV_LOG}" ]]; then
-        mapfile -t lS116_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"${lSERVICE_NAME}"'/' "${S116_CSV_LOG}" | sort -u || true)
+        mapfile -t lS116_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$3 $4 ~ /'"${lSERVICE_NAME}"'/' "${S116_CSV_LOG}" | sort -u || true)
         if [[ "${#lS116_L15_CHECK_ARR[@]}" -gt 0 ]]; then
           for lS116_L15_MATCH in "${lS116_L15_CHECK_ARR[@]}"; do
-            echo "${lS116_L15_MATCH}" >> "${L15_CSV_LOG}"
-            lS116_L15_MATCH=$(echo "${lS116_L15_MATCH}" | cut -d ';' -f3)
-            print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${lS116_L15_MATCH}${NC}"
+            lS116_L15_MATCH=$(echo "${lS116_L15_MATCH}" | cut -d ';' -f4)
+            if ! grep -q ";${lS116_L15_MATCH};" "${L15_CSV_LOG}"; then
+              print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${lS116_L15_MATCH}${NC}"
+              echo "${lS116_L15_MATCH}" >> "${L15_CSV_LOG}"
+            fi
           done
         fi
       fi

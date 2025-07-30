@@ -45,9 +45,10 @@ restart_emulation() {
 
   check_qemu_instance_l10
 
-  pushd "${ARCHIVE_PATH}" || { print_output "[-] Emulation archive path not found"; return 1; }
+  # what an ugly hack - probably we are going to improve this later on
+  pushd "${ARCHIVE_PATH}" >/dev/null || { print_output "[-] Emulation archive path not found"; return 1; }
   ./run.sh &
-  popd || { print_output "[-] EMBA path not available?"; return 1; }
+  popd >/dev/null || { print_output "[-] EMBA path not available?"; return 1; }
 
   if [[ "${lSTATE_CHECK_MECHANISM}" == "PING" ]]; then
     if ping_check "${lIP_ADDRESS}" 1; then
