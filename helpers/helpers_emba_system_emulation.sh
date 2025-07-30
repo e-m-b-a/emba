@@ -35,7 +35,7 @@ restart_emulation() {
 
   print_output "[!] Warning: System with ${ORANGE}${lIP_ADDRESS}${MAGENTA} not responding." "no_log"
   print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
-  echo "[*] $(date) - system emulation restarting ..." >> "${TMP_DIR}/emulation_restarting.log"
+  write_log "[*] $(date) - system emulation restarting ..." "${TMP_DIR}/emulation_restarting.log"
   if [[ "$(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log")" -gt 10 ]]; then
     print_output "[!] WARNING: Restarting system multiple times ..."
   fi
@@ -105,14 +105,10 @@ system_online_check() {
   # STATE_CHECK_MECHANISM is exported by l10
 
   # shellcheck disable=SC2153
-  echo "online check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
-    echo "Ping check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
     ping -c 1 "${lIP_ADDRESS}"
     if ping_check "${lIP_ADDRESS}" 0; then
-      echo "service check for ${lIP_ADDRESS}"
       if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0; then
-        echo "service check for ${lIP_ADDRESS} passed"
         return 0
       fi
     fi
@@ -123,7 +119,6 @@ system_online_check() {
       fi
     fi
   fi
-  echo "online check for ${lIP_ADDRESS} NOT passed"
   return 1
 }
 

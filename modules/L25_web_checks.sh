@@ -18,7 +18,6 @@
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 L25_web_checks() {
-
   export WEB_RESULTS=0
   export CHROME_HEADLESS_BIN=""
 
@@ -26,7 +25,7 @@ L25_web_checks() {
     module_log_init "${FUNCNAME[0]}"
     module_title "Web server analysis of emulated device"
     pre_module_reporter "${FUNCNAME[0]}"
-    export CURL_CREDS_ARR=""
+    export CURL_CREDS_ARR=()
 
     if [[ -v IP_ADDRESS_ ]]; then
       if ! system_online_check "${IP_ADDRESS_}" ; then
@@ -337,7 +336,7 @@ web_access_crawler() {
   disable_strict_mode "${STRICT_MODE}" 0
 
   # just in case our web server is not available we try it multiple times
-  # if we fail in reaching it, we return
+  # if we fail in reaching it, we return later on checking "${CURL_RET_CODE}" == "000:0"
   local lCNT=0
   local lRETRY_MAX=20
   # if we fail the return code is usually 000 and the size is 0
@@ -346,12 +345,17 @@ web_access_crawler() {
       # we break here and we return later on with a print_output
       break
     fi
-    lCNT=$((lCNT+1))
     print_output "[*] Checking for return values on web server access #${lCNT}/${lRETRY_MAX}" "no_log"
-    print_output "[*] lCURL_OPTS_ARR: ${lCURL_OPTS_ARR[*]}"
-    print_output "[*] lPROTO: ${lPROTO}"
-    sleep 10
+    for elem in "${lCURL_OPTS_ARR[@]}"; do
+      print_output "[*] Testing curl with option ${elem}"
+    done
+
     lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
+    if [[ "${lCNT}" -ne 0 ]]; then
+      # don't wait on first round
+      sleep 10
+    fi
+    lCNT=$((lCNT+1))
   done
 
   # the refernce size is used for identifying incorrect 200 ok results
@@ -365,7 +369,7 @@ web_access_crawler() {
     print_output "[*] HTTP status detection - 200 ok on random site with reference size: ${HTTP_RAND_REF_SIZE}"
   else
     HTTP_RAND_REF_SIZE="NA"
-    print_output "[*] HTTP status detection failed with invalid return code: ${CURL_RET_CODE}/${HTTP_RAND_REF_SIZE}"
+    print_output "[*] HTTP status detection failed with non 200ok return code: ${CURL_RET_CODE}/${HTTP_RAND_REF_SIZE}"
   fi
 
   print_output "[*] Init CURL_RET: ${lCURL_RET} / ${HTTP_RAND_REF_SIZE}" "no_log"
