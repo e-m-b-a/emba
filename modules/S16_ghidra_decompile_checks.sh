@@ -50,10 +50,10 @@ S16_ghidra_decompile_checks()
   fi
 
   local lBINARIES_ARR=()
-  if [[ -f "${S13_CSV_LOG}" ]] || [[ -f "${S14_CSV_LOG}" ]]; then
+  if [[ "$(wc -l 2>/dev/null < "${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null < "${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null < "${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
+    mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   else
     mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
   fi
@@ -144,6 +144,7 @@ ghidra_analyzer() {
   local lWAIT_PIDS_S16_1=()
   # just in case Ghidra hangs on a binary
   local lGHIDRA_TIMEOUT=7200
+  local lGHIDRA_OPTS_ARR=()
 
   if ! [[ -f "${lBINARY}" ]]; then
     return
@@ -156,10 +157,18 @@ ghidra_analyzer() {
     return
   fi
 
+  if [[ $(grep -F "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
+    print_output "[*] Tricore processor detected - adjusting Ghidra parameters" "no_log"
+    lGHIDRA_OPTS_ARR+=("-processor" "tricore:LE:32:default" "-cspec" "default")
+  fi
+
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local lIDENTIFIER="${RANDOM}"
+  if [[ ! -d "${LOG_PATH_MODULE}" ]]; then
+    mkdir "${LOG_PATH_MODULE}"
+  fi
 
-  timeout --preserve-status --signal SIGINT "${lGHIDRA_TIMEOUT}" "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
+  timeout --preserve-status --signal SIGINT "${lGHIDRA_TIMEOUT}" "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex "${lGHIDRA_OPTS_ARR[@]}" || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then

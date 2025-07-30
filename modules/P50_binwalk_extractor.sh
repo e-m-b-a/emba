@@ -116,10 +116,12 @@ linux_basic_identification() {
   if ! [[ -d "${lFIRMWARE_PATH_CHECK}" ]]; then
     return
   fi
-  if [[ -n "${lIDENTIFIER}" ]]; then
-    lLINUX_PATH_COUNTER_BINWALK="$(grep "${lIDENTIFIER}" "${P99_CSV_LOG}" | grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" || true)"
-  else
-    lLINUX_PATH_COUNTER_BINWALK="$(grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" "${P99_CSV_LOG}" || true)"
+  if [[ -f "${P99_CSV_LOG}" ]]; then
+    if [[ -n "${lIDENTIFIER}" ]]; then
+      lLINUX_PATH_COUNTER_BINWALK="$(grep "${lIDENTIFIER}" "${P99_CSV_LOG}" | grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" || true)"
+    else
+      lLINUX_PATH_COUNTER_BINWALK="$(grep -c "/bin/\|/busybox;\|/shadow;\|/passwd;\|/sbin/\|/etc/" "${P99_CSV_LOG}" || true)"
+    fi
   fi
   echo "${lLINUX_PATH_COUNTER_BINWALK}"
 }

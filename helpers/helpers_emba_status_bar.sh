@@ -196,7 +196,7 @@ update_box_status() {
     lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${lBOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" || true)
     local lRUNTIME=0
     # lRUNTIME="$(date -d@"$(( "$(date +%s)" - "${lDATE_STR}" ))" -u +%H:%M:%S)"
     lRUNTIME=$(show_runtime 1)

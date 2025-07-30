@@ -141,6 +141,12 @@ S13_weak_func_check()
             print_output "[-] The binaries will be analysed from radare2 module s14"
             lERR_PRINTED=1
           fi
+        elif [[ "${lBIN_FILE}" == *"Tricore"* ]]; then
+          if [[ "${lERR_PRINTED}" -eq 0 ]]; then
+            print_output "[-] Tricore architecture is currently not supported from objdump"
+            print_output "[-] The binaries will be analysed from radare2 module s14"
+            lERR_PRINTED=1
+          fi
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"
@@ -194,14 +200,14 @@ function_check_NIOS2() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r "${lBINARY_}" --use-dynamic | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
-      NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    if ( readelf -W -r "${lBINARY_}" --use-dynamic | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
-      lFUNC_ADDR=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "${lFUNCTION}" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
+      lFUNC_ADDR=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "${lFUNCTION}" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
       if [[ -z "${lFUNC_ADDR}" ]] || [[ "${lFUNC_ADDR}" == "00000000" ]]; then
         continue
       fi
-      lSTRLEN_ADDR=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
+      lSTRLEN_ADDR=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
 
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -249,8 +255,8 @@ function_check_PPC32() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r "${lBINARY_}" --use-dynamic | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
-      NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    if ( readelf -W -r "${lBINARY_}" --use-dynamic | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -299,12 +305,12 @@ function_check_MIPS() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    lFUNC_ADDR=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "${lFUNCTION}" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    lFUNC_ADDR=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "${lFUNCTION}" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
     if [[ -z "${lFUNC_ADDR}" ]] || [[ "${lFUNC_ADDR}" == "00000000" ]]; then
       continue
     fi
-    lSTRLEN_ADDR=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
-    NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    lSTRLEN_ADDR=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     if [[ -n "${lFUNC_ADDR}" ]] ; then
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
@@ -353,7 +359,7 @@ function_check_ARM64() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -400,7 +406,7 @@ function_check_ARM32() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -446,8 +452,8 @@ function_check_x86() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
-      NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -494,8 +500,8 @@ function_check_x86_64() {
   fi
 
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
-      NETWORKING=$(readelf -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"

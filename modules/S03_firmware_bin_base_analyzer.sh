@@ -65,7 +65,9 @@ S03_firmware_bin_base_analyzer() {
 
   [[ -f "${TMP_DIR}"/s03_arch.tmp ]] && binary_architecture_reporter
 
-  [[ "$(wc -l < "${TMP_DIR}"/s03.tmp)" -gt 0 ]] && lNEG_LOG=1
+  if [[ -f "${TMP_DIR}"/s03.tmp ]]; then
+    [[ "$(wc -l < "${TMP_DIR}"/s03.tmp)" -gt 0 ]] && lNEG_LOG=1
+  fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }

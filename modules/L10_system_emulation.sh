@@ -284,7 +284,7 @@ create_emulation_filesystem() {
   local lNVRAM_FILE_LIST=()
   local lNVRAM_FILE=""
   local lCURRENT_DIR=""
-  export DEVICE=""
+  export DEVICE="NA"
   export IMAGE_NAME=""
   IMAGE_NAME="$(basename "${lROOT_PATH}")_${lARCH_END}-${RANDOM}"
 
@@ -307,19 +307,24 @@ create_emulation_filesystem() {
   echo -e "o\nn\np\n1\n\n\nw" | /sbin/fdisk "${LOG_PATH_MODULE}/${IMAGE_NAME}"
 
   print_output "[*] Identify Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC}"
-  DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
-  if [[ "${DEVICE}" == "NA" ]]; then
+  local lCNT=0
+  while [[ "${DEVICE:-NA}" == "NA" ]]; do
+    DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
+    lCNT=$((lCNT+1))
+    if [[ "${DEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
+      print_output "[-] No Qemu Image device identified - return from ${FUNCNAME[0]}"
+      return
+    fi
+    if [[ "${DEVICE:-NA}" != "NA" ]]; then
+      break
+    fi
     print_output "[*] Info: Initial identification for Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC} failed ... trying again"
     losetup || tee -a "${LOG_FILE}"
     losetup -D
     sleep 5
     losetup || tee -a "${LOG_FILE}"
-    DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
-  fi
-  if [[ "${DEVICE}" == "NA" ]]; then
-    print_output "[-] No Qemu Image device identified"
-    return
-  fi
+  done
+
   print_output "[*] Qemu Image device: ${ORANGE}${DEVICE}${NC}"
   sleep 1
   print_output "[*] Device mapper created at ${ORANGE}${DEVICE}${NC}"
@@ -537,7 +542,6 @@ main_emulation() {
   local lINIT_OUT=""
   local lINIT_FNAME=""
   export IPS_INT_VLAN=()
-  local lDEVICE=""
   export ICMP=""
   export TCP_0=""
   export TCP=""
@@ -545,6 +549,7 @@ main_emulation() {
   local lINIT_FILE=""
 
   for lINIT_FILE in "${lINIT_FILES_ARR[@]}"; do
+    local lDEVICE="NA"
     lINIT_FNAME=$(basename "${lINIT_FILE}")
     # this is the main init entry - we modify it later for special cases:
     export KINIT="init=/firmadyne/preInit.sh"
@@ -552,15 +557,16 @@ main_emulation() {
 
     sub_module_title "[*] Processing init file ${ORANGE}${lINIT_FILE} (${lINDEX}/${#lINIT_FILES_ARR[@]})${NC}"
     if ! mount | grep -q "${MNT_POINT}"; then
-      lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
-      if [[ "${lDEVICE}" == "NA" ]]; then
+      local lCNT=0
+      while [[ "${lDEVICE:-NA}" == "NA" ]]; do
         lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
-      fi
-      if [[ "${lDEVICE}" == "NA" ]]; then
-        print_output "[-] No Qemu Image device identified"
-        break
-      fi
-      sleep 1
+        lCNT=$((lCNT+1))
+        if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
+          print_output "[-] No Qemu Image device identified - continue now with next init entry"
+          continue 2
+        fi
+        sleep 5
+      done
       print_output "[*] Device mapper created at ${ORANGE}${lDEVICE}${NC}"
       print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
       mount "${lDEVICE}" "${MNT_POINT}" || true
@@ -642,7 +648,6 @@ main_emulation() {
 
     local lFS_MOUNTS_ARR=()
     lFS_MOUNTS_ARR=( "${lFS_MOUNTS_INIT_ARR[@]}" "${lFS_MOUNTS_FS_ARR[@]}" )
-    # eval "lFS_MOUNTS_ARR=($(for i in "${lFS_MOUNTS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
     mapfile -t lFS_MOUNTS_ARR < <(printf "%s\n" "${lFS_MOUNTS_ARR[@]}" | sort -u)
 
     handle_fs_mounts "${lINIT_FILE}" "${lFS_MOUNTS_ARR[@]}"
@@ -1177,7 +1182,6 @@ handle_fs_mounts() {
       fi
     done
 
-    # eval "lNEWPATH_ARR=($(for i in "${lNEWPATH_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
     mapfile -t lNEWPATH_ARR < <(printf "%s\n" "${lNEWPATH_ARR[@]}" | sort -u)
 
     for lN_PATH in "${lNEWPATH_ARR[@]}"; do
@@ -1596,23 +1600,22 @@ get_networking_details_emulation() {
     done
 
     if [[ -v lBRIDGE_INTERFACES[@] ]]; then
-      # eval "lBRIDGE_INTERFACES=($(for i in "${lBRIDGE_INTERFACES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
       mapfile -t lBRIDGE_INTERFACES < <(printf "%s\n" "${lBRIDGE_INTERFACES[@]}" | sort -u)
       print_ln
     fi
 
     for lINTERFACE_CAND in "${lINTERFACE_CANDIDATES[@]}"; do
+      lINTERFACE_CAND="${lINTERFACE_CAND//[![:print:]]/}"
       print_output "[*] Possible interface candidate detected: ${ORANGE}${lINTERFACE_CAND}${NC}"
       # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
       local lIP_ADDRESS_HEX=()
-      mapfile -t lIP_ADDRESS_HEX < <(echo "${lINTERFACE_CAND}" | tr ' ' '\n' | grep ifa | cut -d: -f2 | tr -dc '[:print:]' | sed 's/0x//' | sed 's/../0x&\n/g')
+      local lIP_CAND=""
+      lIP_CAND=$(echo "${lINTERFACE_CAND}" | tr ' ' '\n' | grep ifa | cut -d: -f2 | sed 's/0x//')
+      # shellcheck disable=SC2001
+      mapfile -t lIP_ADDRESS_HEX < <(echo "${lIP_CAND:0:8}" | sed 's/../0x&\n/g')
       # lIP_ADDRESS_HEX -> c0a80001
       # as I don't get it to change the hex ip to dec with printf, we do it the poor way:
       local lIP=""
-      if [[ "${#lIP_ADDRESS_HEX[@]}" -gt 4 ]]; then
-        print_output "[-] Warning: detected IP address looks not correct ${lINTERFACE_CAND} - ${#lIP_ADDRESS_HEX[@]}" "no_log"
-        print_output "[-] ${lIP_ADDRESS_HEX[*]}" "no_log"
-      fi
       local lCNT=0
       for _IPs in "${lIP_ADDRESS_HEX[@]}"; do
         lCNT=$((lCNT+1))
@@ -1649,11 +1652,10 @@ get_networking_details_emulation() {
 
       # filter for non usable IP addresses:
       if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127."* ]]; then
-        print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC}"
+        print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC} / ${ORANGE}${lINTERFACE_CAND}${NC}"
         DETECTED_IP=1
         # get the network device from our interface candidate
         lNETWORK_DEVICE="$(echo "${lINTERFACE_CAND}" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 || true)"
-        lNETWORK_DEVICE="${lNETWORK_DEVICE//[![:print:]]/}"
         # lINTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
         #                   __inet_insert_ifa[PID: 899 (udhcpc)]: device:eth0 ifa:0xbea48f41
         # lNETWORK_DEVICE -> eth0, eth1.1, br0 ...
@@ -1661,10 +1663,10 @@ get_networking_details_emulation() {
         if [[ -n "${lNETWORK_DEVICE}" ]]; then
           # if the network device is not a eth it is a bridge interface
           # if we have lBRIDGE_INTERFACES we also check it here (this way we can correct the br interface entry):
-          if ! [[ "${lNETWORK_DEVICE}" == *"eth"* ]] || [[ -v lBRIDGE_INTERFACES[@] ]]; then
+          if [[ "${lNETWORK_DEVICE}" != *"eth"* ]] || [[ "${#lBRIDGE_INTERFACES[@]}" -gt 0 ]]; then
             print_output "[*] Possible br interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC} / IP: ${ORANGE}${IP_ADDRESS_}${NC}"
             lNETWORK_MODE="bridge"
-            if [[ -v lBRIDGE_INTERFACES[@] ]]; then
+            if [[ "${#lBRIDGE_INTERFACES[@]}" -gt 0 ]]; then
               for lBRIDGE_INT in "${lBRIDGE_INTERFACES[@]}"; do
                 # lBRIDGE_INT -> br_add_if[PID: 494 (brctl)]: br:br0 dev:eth0.1
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
@@ -1935,7 +1937,7 @@ iterate_vlans() {
   local lVLAN_INFO=""
 
   for lVLAN_INFO in "${lVLAN_INFOS_ARR[@]}"; do
-    print_output "[*] Analyzing VLAN details ${ORANGE}${lVLAN_INFO}${NC}" "no_log"
+    print_output "[*] Analyzing VLAN details ${ORANGE}${lVLAN_INFO}${NC}"
     if ! [[ "${lVLAN_INFO}" == *"register_vlan_dev"* ]]; then
       continue
     fi
@@ -2064,7 +2066,7 @@ write_network_config_to_filesystem() {
   local lNETWORK_DEVICE="${4:-}"
   local lIP_ADDRESS="${5:-}"
 
-  local lDEVICE=""
+  local lDEVICE="NA"
   local lFILE_PATH_MISSING=""
   local lFILENAME_MISSING=""
   local lDIR_NAME_MISSING=""
@@ -2072,14 +2074,16 @@ write_network_config_to_filesystem() {
 
   # mount filesystem again for network config:
   print_output "[*] Identify Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${lIMAGE_NAME}${NC}"
-  lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${lIMAGE_NAME}")"
-  if [[ "${lDEVICE}" == "NA" ]]; then
+  local lCNT=0
+  while [[ "${lDEVICE:-NA}" == "NA" ]]; do
     lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${lIMAGE_NAME}")"
-  fi
-  if [[ "${lDEVICE}" == "NA" ]]; then
-    print_output "[-] No Qemu Image device identified"
-    return
-  fi
+    lCNT=$((lCNT+1))
+    if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
+      print_output "[-] No Qemu Image device identified - return from ${FUNCNAME[0]}"
+      return
+    fi
+    sleep 5
+  done
   sleep 1
   print_output "[*] Device mapper created at ${ORANGE}${lDEVICE}${NC}"
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
@@ -2095,7 +2099,6 @@ write_network_config_to_filesystem() {
 
     # if there were missing files found -> we try to fix this now
     if [[ -v MISSING_FILES[@] ]]; then
-      # eval "MISSING_FILES=($(for i in "${MISSING_FILES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
       mapfile -t MISSING_FILES < <(printf "%s\n" "${MISSING_FILES[@]}" | sort -u)
 
       for lFILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
@@ -2152,15 +2155,16 @@ nvram_check() {
 
   # mount filesystem again for network config:
   print_output "[*] Identify Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${lIMAGE_NAME}${NC}"
-  lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${lIMAGE_NAME}")"
-  if [[ "${lDEVICE}" == "NA" ]]; then
+  local lCNT=0
+  while [[ "${lDEVICE:-NA}" == "NA" ]]; do
     lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${lIMAGE_NAME}")"
-  fi
-  if [[ "${lDEVICE}" == "NA" ]]; then
-    print_output "[-] No Qemu Image device identified"
-    return
-  fi
-  sleep 1
+    lCNT=$((lCNT+1))
+    if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
+      print_output "[-] No Qemu Image device identified - return from ${FUNCNAME[0]}"
+      return
+    fi
+    sleep 5
+  done
 
   print_output "[*] Device mapper created at ${ORANGE}${lDEVICE}${NC}"
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
@@ -2738,17 +2742,24 @@ create_emulation_archive() {
   local lARCHIVE_PATH="${3:-}"
   local lIPS_INT_VLAN_CFG_mod="${4:-}"
   local lARCH_NAME=""
+  local lDEVICE="NA"
 
   if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
     # we only copy the kernel and the firmware image to the archive if FINAL_FW_RM is not set
     cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_error "[-] Error in kernel copy procedure"
 
     # we need to ensure that the EMBA_config_state file gets removed
-    lDEVICE="$(add_partition_emulation "${lIMAGE}")"
-    if [[ "${lDEVICE}" == "NA" ]]; then
+    local lCNT=0
+    while [[ "${lDEVICE:-NA}" == "NA" ]]; do
       lDEVICE="$(add_partition_emulation "${lIMAGE}")"
-    fi
-    sleep 1
+      lCNT=$((lCNT+1))
+      if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
+        print_output "[-] No Qemu Image device identified - return now from ${FUNCNAME[0]}"
+        return
+      fi
+      sleep 5
+    done
+
     mount "${lDEVICE}" "${MNT_POINT}" || true
     rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
     umount_qemu_image "${lDEVICE}"

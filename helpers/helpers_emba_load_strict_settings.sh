@@ -43,7 +43,7 @@ enable_strict_mode() {
     # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
     # shellcheck source=./installer/wickStrictModeFail.sh
     # shellcheck disable=SC1091
-    source ./installer/wickStrictModeFail.sh
+    source "${INVOCATION_PATH}"/installer/wickStrictModeFail.sh
     load_strict_mode_settings
     # just in case the error is very early we have not log directory
     if [[ -d "${LOG_DIR:-}" ]]; then
