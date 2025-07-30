@@ -80,6 +80,7 @@ set_defaults() {
   export QEMU_KILL_SIZE="10M"
   export L10_KERNEL_V_LONG="4.14.336"
   export L10_BB_VER="1.36.1"
+  export MAX_SYSTEM_RESTART_CNT=20  # how often we try to restart the system if it is not available anymore
   export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
                                 # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
                                 # binary which results in long runtimes

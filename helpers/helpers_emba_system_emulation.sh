@@ -35,6 +35,12 @@ restart_emulation() {
 
   print_output "[!] Warning: System with ${ORANGE}${lIP_ADDRESS}${MAGENTA} not responding." "no_log"
   print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
+
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_RESTART_CNT}" ]]; then
+    print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
+    return 1
+  fi
+
   write_log "[*] $(date) - system emulation restarting ..." "${TMP_DIR}/emulation_restarting.log"
   if [[ "$(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log")" -gt 10 ]]; then
     print_output "[!] WARNING: Restarting system multiple times ..."
@@ -77,6 +83,13 @@ service_online_check() {
   local lNMAP_SERV_TCP_ARR=()
   local lSERVICE=""
 
+  # we log how often we restart the system
+  # if we are running into restarting the service more then MAX_RESTART_CNT we return 1
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_RESTART_CNT}" ]]; then
+    print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
+    return 1
+  fi
+
   mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -h -E "[0-9]+/open/tcp" "${lARCHIVE_PATH}/"*"_nmap_"*".gnmap" | cut -d '/' -f1 | sort -u || true)
   if [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]]; then
     # we try this for lMAX_CNT times:
@@ -103,6 +116,11 @@ system_online_check() {
   local lIP_ADDRESS="${1:-}"
 
   # STATE_CHECK_MECHANISM is exported by l10
+
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_RESTART_CNT}" ]]; then
+    print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
+    return 1
+  fi
 
   # shellcheck disable=SC2153
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
