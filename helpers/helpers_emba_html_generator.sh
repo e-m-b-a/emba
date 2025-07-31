@@ -101,7 +101,7 @@ add_link_tags() {
             lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
             lREF_LINK="$(echo "${lREF_LINK}" | cut -d"#" -f1 || true)"
           fi
-          print_output "[*] REF link ${lREF_LINK} found in ${lLINK_FILE}" "no_log"
+          # print_output "[*] REF link ${lREF_LINK} found in ${lLINK_FILE}" "no_log"
           # generate reference file
           generate_info_file "${lREF_LINK}" "${lBACK_LINK}" &
           lWAIT_PIDS_WR+=( "$!" )

@@ -304,24 +304,39 @@ function_check_MIPS() {
     return
   fi
 
+  local lOBJDUMP_PARAM_ARR=("-d")
+  # if we have less than 3 lines of output we do not have disassembled code and we try
+  # again with another set of options
+  if [[ "$("${OBJDUMP}" -d "${lBINARY_}" | wc -l)" -lt 4 ]]; then
+    if [[ "$("${OBJDUMP}" -D -b binary -m mips "${lBINARY_}" | wc -l)" -ge 4 ]]; then
+      print_output "[*] Objdump binary mips mode for ${lBINARY_}" "no_log"
+      local lOBJDUMP_PARAM_ARR=("-D" "-b" "binary" "-m" "mips")
+    fi
+  fi
+
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    lFUNC_ADDR=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "${lFUNCTION}" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    local lREADELF_PARAM_ARR=("-W" "-a")
+    lFUNC_ADDR=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E \ "${lFUNCTION}" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    if [[ -z "${lFUNC_ADDR}" ]] || [[ "${lFUNC_ADDR}" == "00000000" ]]; then
+      lFUNC_ADDR=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" --use-dynamic 2>/dev/null | grep -E \ "${lFUNCTION}" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+      if [[ -n "${lFUNC_ADDR}" ]] && [[ "${lFUNC_ADDR}" != "00000000" ]]; then
+        lREADELF_PARAM_ARR+=("--use-dynamic")
+      fi
+    fi
     if [[ -z "${lFUNC_ADDR}" ]] || [[ "${lFUNC_ADDR}" == "00000000" ]]; then
       continue
     fi
-    lSTRLEN_ADDR=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
-    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    lSTRLEN_ADDR=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    NETWORKING=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     if [[ -n "${lFUNC_ADDR}" ]] ; then
       export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        "${OBJDUMP}" -D -b binary -m mips "${lBINARY_}" | grep -A 20 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ >> "${FUNC_LOG}" || true
-        # "${OBJDUMP}" -d "${lBINARY_}" | grep -A 20 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" "${lOBJDUMP_PARAM_ARR[@]}" "${lBINARY_}" | grep -A 20 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ >> "${FUNC_LOG}" || true
       else
-        "${OBJDUMP}" -D -b binary -m mips "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
-        # "${OBJDUMP}" -d "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
+        "${OBJDUMP}" "${lOBJDUMP_PARAM_ARR[@]}" "${lBINARY_}" | grep -A 2 -B 25 "${lFUNC_ADDR}""(gp)" | sed s/-"${lFUNC_ADDR}"\(gp\)/"${lFUNCTION}"/ | sed s/-"${lSTRLEN_ADDR}"\(gp\)/strlen/ >> "${FUNC_LOG}" || true
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 0 ]] ; then
