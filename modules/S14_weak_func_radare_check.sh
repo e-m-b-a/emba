@@ -192,9 +192,9 @@ identify_readelf_params() {
   local -n lnREADELF_PARAM_ARR="${1:-}"
 
   local lFUNC_TEST=""
-  lFUNC_TEST=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E "${lFUNCTION}" 2>/dev/null || true)
+  lFUNC_TEST=$(readelf "${lBINARY_}" "${lnREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E "${lFUNCTION}" 2>/dev/null || true)
   if [[ -z "${lFUNC_TEST}" ]] || [[ "${lFUNC_TEST}" == "00000000" ]]; then
-    lFUNC_TEST=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" --use-dynamic 2>/dev/null | grep -E "${lFUNCTION}" 2>/dev/null || true)
+    lFUNC_TEST=$(readelf "${lBINARY_}" "${lnREADELF_PARAM_ARR[@]}" --use-dynamic 2>/dev/null | grep -E "${lFUNCTION}" 2>/dev/null || true)
     if [[ -n "${lFUNC_TEST}" ]] && [[ "${lFUNC_TEST}" != "00000000" ]]; then
       lnREADELF_PARAM_ARR+=("--use-dynamic")
     fi
