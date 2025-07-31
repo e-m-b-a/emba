@@ -184,12 +184,12 @@ ghidra_analyzer() {
     return
   fi
 
-  local lSEMGREPLOG="${LOG_PATH_MODULE}"/semgrep_"${lNAME}".json
+  local lSEMGREPLOG="${LOG_PATH_MODULE}/semgrep_${lNAME}_${RANDOM}.json"
+  if [[ -f "${lSEMGREPLOG}" ]]; then
+    local lSEMGREPLOG="${LOG_PATH_MODULE}/semgrep_${lNAME}_${RANDOM}.json"
+  fi
   local lSEMGREPLOG_CSV="${lSEMGREPLOG/\.json/\.csv}"
   local lSEMGREPLOG_TXT="${lSEMGREPLOG/\.json/\.log}"
-  if [[ -f "${lSEMGREPLOG}" ]]; then
-    local lSEMGREPLOG="${LOG_PATH_MODULE}"/semgrep_"${lNAME}"_"${RANDOM}".json
-  fi
 
   if [[ -f "${S12_LOG}" ]]; then
     # we start the log file with the binary protection mechanisms
