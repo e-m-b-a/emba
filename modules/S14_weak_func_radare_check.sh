@@ -188,6 +188,19 @@ S14_weak_func_radare_check()
   module_end_log "${FUNCNAME[0]}" "${lFCT_CNT}"
 }
 
+identify_readelf_params() {
+  local -n lnREADELF_PARAM_ARR="${1:-}"
+
+  local lFUNC_TEST=""
+  lFUNC_TEST=$(readelf "${lBINARY_}" "${lnREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E "${lFUNCTION}" 2>/dev/null || true)
+  if [[ -z "${lFUNC_TEST}" ]] || [[ "${lFUNC_TEST}" == "00000000" ]]; then
+    lFUNC_TEST=$(readelf "${lBINARY_}" "${lnREADELF_PARAM_ARR[@]}" --use-dynamic 2>/dev/null | grep -E "${lFUNCTION}" 2>/dev/null || true)
+    if [[ -n "${lFUNC_TEST}" ]] && [[ "${lFUNC_TEST}" != "00000000" ]]; then
+      lnREADELF_PARAM_ARR+=("--use-dynamic")
+    fi
+  fi
+}
+
 radare_function_check_PPC32() {
   local lBINARY_="${1:-}"
   shift 1
@@ -203,9 +216,12 @@ radare_function_check_PPC32() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -248,8 +264,11 @@ radare_function_check_MIPS() {
     return
   fi
 
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -294,8 +313,11 @@ radare_function_check_tricore() {
     return
   fi
 
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -341,7 +363,10 @@ radare_function_check_ARM64() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -386,7 +411,10 @@ radare_function_check_ARM32() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -431,9 +459,12 @@ radare_function_check_hexagon() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -W -s --use-dynamic "${lBINARY_}" | grep -q "${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | grep -q "${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -477,9 +508,12 @@ radare_function_check_x86() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then
@@ -523,9 +557,12 @@ radare_function_check_x86_64() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local lREADELF_PARAM_ARR=("-W" "-a")
+  identify_readelf_params "lREADELF_PARAM_ARR"
+
+  NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ( readelf -W -r --use-dynamic "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
+    if ( readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]] ; then

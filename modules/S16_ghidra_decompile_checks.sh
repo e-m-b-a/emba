@@ -184,13 +184,12 @@ ghidra_analyzer() {
     return
   fi
 
-  print_output "[*] Semgrep analysis on decompiled code from binary ${ORANGE}${lNAME}${NC}" "no_log"
-  local lSEMGREPLOG="${LOG_PATH_MODULE}"/semgrep_"${lNAME}".json
+  local lSEMGREPLOG="${LOG_PATH_MODULE}/semgrep_${lNAME}_${RANDOM}.json"
+  if [[ -f "${lSEMGREPLOG}" ]]; then
+    local lSEMGREPLOG="${LOG_PATH_MODULE}/semgrep_${lNAME}_${RANDOM}.json"
+  fi
   local lSEMGREPLOG_CSV="${lSEMGREPLOG/\.json/\.csv}"
   local lSEMGREPLOG_TXT="${lSEMGREPLOG/\.json/\.log}"
-  if [[ -f "${lSEMGREPLOG}" ]]; then
-    local lSEMGREPLOG="${LOG_PATH_MODULE}"/semgrep_"${lNAME}"_"${RANDOM}".json
-  fi
 
   if [[ -f "${S12_LOG}" ]]; then
     # we start the log file with the binary protection mechanisms
@@ -220,7 +219,19 @@ ghidra_analyzer() {
     lS16_SEMGREP_ISSUES=$(wc -l < "${lSEMGREPLOG_CSV}" || true)
 
     if [[ "${lS16_SEMGREP_ISSUES}" -gt 0 ]]; then
-      print_output "[+] Found ""${ORANGE}""${lS16_SEMGREP_ISSUES}"" issues""${GREEN}"" in native binary ""${ORANGE}""${lNAME}""${NC}" "" "${lSEMGREPLOG_TXT}"
+      # check for known linux files
+      if [[ -f "${BASE_LINUX_FILES}" ]]; then
+        # if we have the base linux config file we are checking it:
+        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+          # shellcheck disable=SC2153
+          print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (common linux file: yes)${NC}" "" "${lSEMGREPLOG_TXT}"
+        else
+          print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (${ORANGE}common linux file: no${GREEN})${NC}" "" "${lSEMGREPLOG_TXT}"
+        fi
+      else
+        print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${NC}" "" "${lSEMGREPLOG_TXT}"
+      fi
+
       # highlight security findings in the main semgrep log:
       # sed -i -r "s/.*external\.semgrep-rules-0xdea.*/\x1b[32m&\x1b[0m/" "${lSEMGREPLOG}"
       lGPT_PRIO_=$((lGPT_PRIO_+1))
@@ -295,7 +306,7 @@ s16_semgrep_logger() {
   local lHARUSPEX_FILE_NAME=""
 
   lHARUSPEX_FILE_NAME="$(basename "${lHARUSPEX_FILE}")"
-  local lSEMGREPLOG_TMP="${lSEMGREPLOG/\.json/}"_"${lNAME}"_"${lHARUSPEX_FILE_NAME}".tmp
+  local lSEMGREPLOG_TMP="${lSEMGREPLOG/\.json/}_${lNAME}_${lHARUSPEX_FILE_NAME::100}_${RANDOM}.tmp"
 
   if [[ ! -f "${lSEMGREPLOG_CSV}" ]]; then
     return

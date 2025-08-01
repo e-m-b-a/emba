@@ -80,10 +80,10 @@ cut_path() {
 }
 
 path_attr() {
-  if [[ -L "${1}" ]] ;  then
-    echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g) -> %l")"
+  if [[ -L "${1:-}" ]] ;  then
+    echo -e " $(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g) -> %l")"
   elif [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
-    echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g)")"
+    echo -e " $(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g)")"
   fi
 }
 

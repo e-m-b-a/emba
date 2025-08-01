@@ -35,7 +35,13 @@ restart_emulation() {
 
   print_output "[!] Warning: System with ${ORANGE}${lIP_ADDRESS}${MAGENTA} not responding." "no_log"
   print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
-  echo "[*] $(date) - system emulation restarting ..." >> "${TMP_DIR}/emulation_restarting.log"
+
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
+    print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
+    return 1
+  fi
+
+  write_log "[*] $(date) - system emulation restarting ..." "${TMP_DIR}/emulation_restarting.log"
   if [[ "$(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log")" -gt 10 ]]; then
     print_output "[!] WARNING: Restarting system multiple times ..."
   fi
@@ -45,9 +51,9 @@ restart_emulation() {
 
   check_qemu_instance_l10
 
-  pushd "${ARCHIVE_PATH}" || { print_output "[-] Emulation archive path not found"; return 1; }
+  pushd "${ARCHIVE_PATH}" >/dev/null || { print_output "[-] Emulation archive path not found"; return 1; }
   ./run.sh &
-  popd || { print_output "[-] EMBA path not available?"; return 1; }
+  popd >/dev/null || { print_output "[-] EMBA path not available?"; return 1; }
 
   if [[ "${lSTATE_CHECK_MECHANISM}" == "PING" ]]; then
     if ping_check "${lIP_ADDRESS}" 1; then
@@ -77,13 +83,20 @@ service_online_check() {
   local lNMAP_SERV_TCP_ARR=()
   local lSERVICE=""
 
+  # we log how often we restart the system
+  # if we are running into restarting the service more then MAX_SYSTEM_RESTART_CNT we return 1
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
+    print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
+    return 1
+  fi
+
   mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -h -E "[0-9]+/open/tcp" "${lARCHIVE_PATH}/"*"_nmap_"*".gnmap" | cut -d '/' -f1 | sort -u || true)
   if [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]]; then
     # we try this for lMAX_CNT times:
     while [[ "${lCNT}" -lt "${lMAX_CNT}" ]]; do
       # running through our extracted services and check if one of them is available via netcat
       for lSERVICE in "${lNMAP_SERV_TCP_ARR[@]}"; do
-        if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}"; then
+        if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}" >/dev/null; then
           [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
           return 0
         fi
@@ -104,15 +117,16 @@ system_online_check() {
 
   # STATE_CHECK_MECHANISM is exported by l10
 
+  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
+    print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
+    return 1
+  fi
+
   # shellcheck disable=SC2153
-  echo "online check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
-    echo "Ping check for ${lIP_ADDRESS} via ${STATE_CHECK_MECHANISM}"
     ping -c 1 "${lIP_ADDRESS}"
     if ping_check "${lIP_ADDRESS}" 0; then
-      echo "service check for ${lIP_ADDRESS}"
       if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0; then
-        echo "service check for ${lIP_ADDRESS} passed"
         return 0
       fi
     fi
@@ -123,7 +137,6 @@ system_online_check() {
       fi
     fi
   fi
-  echo "online check for ${lIP_ADDRESS} NOT passed"
   return 1
 }
 
@@ -168,9 +181,9 @@ ping_check() {
   local lRESTARTER=0
   local lMAX_RETRY_CNT=50
 
-  while ! ping -c 1 "${lIP_ADDRESS}" &> /dev/null; do
+  while ! ping -c 1 "${lIP_ADDRESS}"; do
     lRESTARTER=1
-    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... #${lCOUNTER}/${lMAX_RETRY_CNT}" "no_log"
+    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... ping check #${lCOUNTER}/${lMAX_RETRY_CNT}" "no_log"
     ((lCOUNTER+=1))
     if [[ "${lCOUNTER}" -gt "${lMAX_RETRY_CNT}" ]]; then
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"

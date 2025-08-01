@@ -242,9 +242,10 @@ emba_updater() {
   print_output "[*] EMBA update starting ..." "no_log"
   local lHOME_DIR=""
   lHOME_DIR=$(pwd)
+  local lUPDATE_TIMEOUT="360s"
 
   if [[ -d ./.git ]]; then
-    git pull origin master
+    timeout "${lUPDATE_TIMEOUT}" git pull origin master
   else
     print_output "[-] WARNING: Can't update non git version of EMBA" "no_log"
   fi
@@ -255,7 +256,7 @@ emba_updater() {
     print_output "[*] EMBA update - EPSS database update" "no_log"
     cd "${EXT_DIR}"/EPSS-data || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
     if [[ -d ./.git ]]; then
-      git pull
+      timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update EPSS database" "no_log"
     fi
@@ -268,7 +269,7 @@ emba_updater() {
     print_output "[*] EMBA update - CVE database update" "no_log"
     cd "${NVD_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
     if [[ -d ./.git ]]; then
-      git pull
+      timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update CVE database" "no_log"
     fi

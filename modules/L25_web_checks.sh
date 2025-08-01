@@ -18,7 +18,6 @@
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 L25_web_checks() {
-
   export WEB_RESULTS=0
   export CHROME_HEADLESS_BIN=""
 
@@ -26,6 +25,7 @@ L25_web_checks() {
     module_log_init "${FUNCNAME[0]}"
     module_title "Web server analysis of emulated device"
     pre_module_reporter "${FUNCNAME[0]}"
+    export CURL_CREDS_ARR=()
 
     if [[ -v IP_ADDRESS_ ]]; then
       if ! system_online_check "${IP_ADDRESS_}" ; then
@@ -75,19 +75,31 @@ main_web_check() {
           # we make a screenshot for every web server
           make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "https"
         else
-          print_output "[-] System not responding - No screenshot possible"
+          if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
+            make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "https"
+          else
+            print_output "[-] System not responding - No screenshot possible"
+          fi
         fi
 
         if system_online_check "${lIP_ADDRESS_}" ; then
           testssl_check "${lIP_ADDRESS_}" "${lPORT}"
         else
-          print_output "[-] System not responding - No SSL test possible"
+          if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
+            testssl_check "${lIP_ADDRESS_}" "${lPORT}"
+          else
+            print_output "[-] System not responding - No SSL test possible"
+          fi
         fi
 
         if system_online_check "${lIP_ADDRESS_}" ; then
           web_access_crawler "${lIP_ADDRESS_}" "${lPORT}" "${lSSL}"
         else
-          print_output "[-] System not responding - Not performing crawler checks"
+          if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
+            web_access_crawler "${lIP_ADDRESS_}" "${lPORT}" "${lSSL}"
+          else
+            print_output "[-] System not responding - Not performing crawler checks"
+          fi
         fi
 
         # but we only test the server with Nikto and other long running tools once
@@ -111,20 +123,32 @@ main_web_check() {
         if system_online_check "${lIP_ADDRESS_}" ; then
           check_for_basic_auth_init "${lIP_ADDRESS_}" "${lPORT}"
         else
-          print_output "[-] System not responding - No basic auth check possible"
+          if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
+            check_for_basic_auth_init "${lIP_ADDRESS_}" "${lPORT}"
+          else
+            print_output "[-] System not responding - No basic auth check possible"
+          fi
         fi
 
         if system_online_check "${lIP_ADDRESS_}" ; then
           # we make a screenshot for every web server
           make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "http"
         else
-          print_output "[-] System not responding - No screenshot possible"
+          if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
+            make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "http"
+          else
+            print_output "[-] System not responding - No screenshot possible"
+          fi
         fi
 
         if system_online_check "${lIP_ADDRESS_}" ; then
           web_access_crawler "${lIP_ADDRESS_}" "${lPORT}" "${lSSL}"
         else
-          print_output "[-] System not responding - Not performing crawler checks"
+          if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
+            web_access_crawler "${lIP_ADDRESS_}" "${lPORT}" "${lSSL}"
+          else
+            print_output "[-] System not responding - Not performing crawler checks"
+          fi
         fi
 
         if [[ "${lWEB_DONE}" -eq 0 ]]; then
@@ -174,7 +198,7 @@ check_for_basic_auth_init() {
   local lCREDS="NA"
   local lBASIC_AUTH=0
 
-  lBASIC_AUTH=$(find "${LOG_DIR}"/l15_emulated_checks_nmap/ -name "nmap*" -exec grep -i "401 Unauthorized" {} \; | wc -l)
+  lBASIC_AUTH=$(find "${LOG_DIR}"/l15_emulated_checks_nmap/ -type f -name "*_nmap_*" -exec grep -i "401 Unauthorized" {} \; | wc -l)
 
   if [[ "${lBASIC_AUTH}" -gt 0 ]]; then
     disable_strict_mode "${STRICT_MODE}" 1
@@ -202,7 +226,7 @@ check_for_basic_auth_init() {
     enable_strict_mode "${STRICT_MODE}" 1
     if [[ "${lCURL_RET}" != 22 ]] && [[ "${lCREDS}" != "NA" ]]; then
       print_output "[+] Basic auth credentials for web server found: ${ORANGE}${lCREDS}${NC}"
-      export CURL_CREDS=(-u "${lCREDS}")
+      CURL_CREDS_ARR=("--user" "${lCREDS}")
     fi
   else
     print_output "[*] No basic auth found in Nmap logs"
@@ -266,16 +290,17 @@ check_curl_ret() {
 }
 
 web_access_crawler() {
-  local lIP_="${1}"
-  local lPORT_="${2}"
-  local lSSL_="${3}"
+  local lIP_="${1:-}"
+  local lPORT_="${2:-}"
+  local lSSL_="${3:-}"
+
   local lPROTO=""
   local lWEB_FILE=""
   local lWEB_DIR_L1=""
   local lWEB_DIR_L2=""
   local lWEB_DIR_L3=""
-  local lCURL_OPTS_ARR=( -sS --noproxy '*' )
-  [[ -v CURL_CREDS ]] && local lCURL_OPTS_ARR+=( "${CURL_CREDS}" )
+  local lCURL_OPTS_ARR=( "-sS" "--noproxy" '*' )
+  [[ "${#CURL_CREDS_ARR[@]}" -gt 0 ]] && local lCURL_OPTS_ARR+=( "${CURL_CREDS_ARR[@]}" )
   local lCRAWLED_ARR=()
   local lCRAWLED_VULNS_ARR=()
   local lCURL_RET="000:0"
@@ -311,7 +336,7 @@ web_access_crawler() {
   disable_strict_mode "${STRICT_MODE}" 0
 
   # just in case our web server is not available we try it multiple times
-  # if we fail in reaching it, we return
+  # if we fail in reaching it, we return later on checking "${CURL_RET_CODE}" == "000:0"
   local lCNT=0
   local lRETRY_MAX=20
   # if we fail the return code is usually 000 and the size is 0
@@ -320,10 +345,14 @@ web_access_crawler() {
       # we break here and we return later on with a print_output
       break
     fi
-    lCNT=$((lCNT+1))
     print_output "[*] Checking for return values on web server access #${lCNT}/${lRETRY_MAX}" "no_log"
-    sleep 10
+
     lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
+    if [[ "${lCNT}" -ne 0 ]]; then
+      # don't wait on first round
+      sleep 10
+    fi
+    lCNT=$((lCNT+1))
   done
 
   # the refernce size is used for identifying incorrect 200 ok results
@@ -337,7 +366,7 @@ web_access_crawler() {
     print_output "[*] HTTP status detection - 200 ok on random site with reference size: ${HTTP_RAND_REF_SIZE}"
   else
     HTTP_RAND_REF_SIZE="NA"
-    print_output "[*] HTTP status detection failed with invalid return code: ${CURL_RET_CODE}/${HTTP_RAND_REF_SIZE}"
+    print_output "[*] HTTP status detection failed with non 200ok return code: ${CURL_RET_CODE}/${HTTP_RAND_REF_SIZE}"
   fi
 
   print_output "[*] Init CURL_RET: ${lCURL_RET} / ${HTTP_RAND_REF_SIZE}" "no_log"

@@ -21,6 +21,7 @@
   ],
   "version_extraction": [
     "sed -r 's/BusyBox\\ http\\ ([0-9](\\.[0-9]+)+?)$/:busybox:busybox:\\1/'",
+    "sed -r 's/BusyBox\\ telnetd\\ ([0-9](\\.[0-9]+)+?)$/:busybox:busybox:\\1/'",
     "sed -r 's/BusyBox\\ v([0-9](\\.[0-9]+)+?).*/:busybox:busybox:\\1/'",
     "sed -r 's/BusyBox\\ v([0-9](\\.[0-9]+)+?)\\ .*/:busybox:busybox:\\1/'"
   ],
@@ -28,7 +29,8 @@
     "NA"
   ],
   "live_grep_commands": [
-    "^BusyBox\\ http\\ [0-9](\\.[0-9]+)+?$"
+    "^BusyBox\\ http\\ [0-9](\\.[0-9]+)+?$",
+    "^BusyBox\\ telnetd\\ [0-9](\\.[0-9]+)+?$"
   ],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],
