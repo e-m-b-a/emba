@@ -306,7 +306,7 @@ s16_semgrep_logger() {
   local lHARUSPEX_FILE_NAME=""
 
   lHARUSPEX_FILE_NAME="$(basename "${lHARUSPEX_FILE}")"
-  local lSEMGREPLOG_TMP="${lSEMGREPLOG/\.json/}"_"${lNAME}"_"${lHARUSPEX_FILE_NAME}".tmp
+  local lSEMGREPLOG_TMP="${lSEMGREPLOG/\.json/}"_"${lNAME}"_"${lHARUSPEX_FILE_NAME::100}_${RANDOM}.tmp"
 
   if [[ ! -f "${lSEMGREPLOG_CSV}" ]]; then
     return
