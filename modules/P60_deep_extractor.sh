@@ -30,7 +30,7 @@ P60_deep_extractor() {
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   # If we already know it is a linux (RTOS -> 0) or it is UEFI (UEFI_VERIFIED -> 1) we do not need to run
   # the deep extractor
-  if [[ "${RTOS}" -eq 0 ]] || [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${DJI_DETECTED}" -eq 1 ]] || [[ "${DISABLE_DEEP:-0}" -eq 1 ]]; then
+  if [[ "${RTOS:-1}" -eq 0 ]] || [[ "${UEFI_VERIFIED:-0}" -eq 1 ]] || [[ "${DJI_DETECTED:-0}" -eq 1 ]] || [[ "${DISABLE_DEEP:-0}" -eq 1 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -186,6 +186,7 @@ deeper_extractor_helper() {
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
     MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
+    # deeper_extractor_threader "${lFILE_TMP}" >> "${LOG_PATH_MODULE}/tmp_out_${MD5_DONE_DEEP}" &
     deeper_extractor_threader "${lFILE_TMP}" &
     lBIN_PID="$!"
     lWAIT_PIDS_P60_init+=( "${lBIN_PID}" )
@@ -196,6 +197,8 @@ deeper_extractor_helper() {
 
 deeper_extractor_threader() {
   local lFILE_TMP="${1:-}"
+
+  local lFILE_DETAILS=""
   lFILE_DETAILS=$(file -b "${lFILE_TMP}")
   if [[ "${lFILE_DETAILS}" == *"text"* ]]; then
     return
@@ -205,99 +208,51 @@ deeper_extractor_threader() {
   print_output "$(indent "$(orange "${lFILE_DETAILS}")")"
   print_output "$(indent "$(orange "$(md5sum "${lFILE_TMP}")")")"
 
-  # do a quick check if EMBA should handle the file or we give it to unblob:
+  # do a quick check if EMBA should handle the file or we give it to the default extractor (binwalk or unblob):
   # fw_bin_detector is a function from p02
   fw_bin_detector "${lFILE_TMP}"
 
   if [[ "${VMDK_DETECTED}" -eq 1 ]]; then
-    vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted" &
-    lBIN_PID="$!"
-    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
+    vmdk_extractor "${lFILE_TMP}" "${lFILE_TMP}_vmdk_extracted"
     # now handled via unblob
     # elif [[ "${UBI_IMAGE}" -eq 1 ]]; then
-    #  if [[ "${THREADED}" -eq 1 ]]; then
-    #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted" &
-    #    lBIN_PID="$!"
-    #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    #  else
-    #    ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted"
-    #  fi
+    #   ubi_extractor "${lFILE_TMP}" "${lFILE_TMP}_ubi_extracted"
     # now handled via unblob
     # elif [[ "${DLINK_ENC_DETECTED}" -eq 1 ]]; then
-    #  if [[ "${THREADED}" -eq 1 ]]; then
-    #    dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted" &
-    #    lBIN_PID="$!"
-    #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    #  else
-    #    dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted"
-    #  fi
+    #   dlink_SHRS_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_shrs_extracted"
     # now handled via unblob
     # elif [[ "${DLINK_ENC_DETECTED}" -eq 2 ]]; then
-    #  if [[ "${THREADED}" -eq 1 ]]; then
-    #    dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted" &
-    #    lBIN_PID="$!"
-    #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    #  else
-    #    dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted"
-    #  fi
-    elif [[ "${EXT_IMAGE}" -eq 1 ]]; then
-      ext_extractor "${lFILE_TMP}" "${lFILE_TMP}_ext_extracted" &
-      lBIN_PID="$!"
-      lWAIT_PIDS_P60+=( "${lBIN_PID}" )
+    #   dlink_enc_img_extractor "${lFILE_TMP}" "${lFILE_TMP}_enc_img_extracted"
+  elif [[ "${EXT_IMAGE}" -eq 1 ]]; then
+    ext_extractor "${lFILE_TMP}" "${lFILE_TMP}_ext_extracted"
     # now handled via unblob
     # elif [[ "${ENGENIUS_ENC_DETECTED}" -ne 0 ]]; then
-    #  if [[ "${THREADED}" -eq 1 ]]; then
-    #    engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted" &
-    #    lBIN_PID="$!"
-    #    lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    #  else
-    #    engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted"
-    #  fi
-    elif [[ "${BSD_UFS}" -ne 0 ]]; then
-        ufs_extractor "${lFILE_TMP}" "${lFILE_TMP}_bsd_ufs_extracted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    elif [[ "${ANDROID_OTA}" -ne 0 ]]; then
-        android_ota_extractor "${lFILE_TMP}" "${lFILE_TMP}_android_ota_extracted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    elif [[ "${OPENSSL_ENC_DETECTED}" -ne 0 ]]; then
-        foscam_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_foscam_enc_extracted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    elif [[ "${BUFFALO_ENC_DETECTED}" -ne 0 ]]; then
-        buffalo_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_buffalo_enc_extracted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    elif [[ "${ZYXEL_ZIP}" -ne 0 ]]; then
-        zyxel_zip_extractor "${lFILE_TMP}" "${lFILE_TMP}_zyxel_enc_extracted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    elif [[ "${QCOW_DETECTED}" -ne 0 ]]; then
-        qcow_extractor "${lFILE_TMP}" "${lFILE_TMP}_qemu_qcow_extracted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
-    elif [[ "${BMC_ENC_DETECTED}" -ne 0 ]]; then
-        bmc_extractor "${lFILE_TMP}" "${lFILE_TMP}_bmc_decrypted" &
-        lBIN_PID="$!"
-        lWAIT_PIDS_P60+=( "${lBIN_PID}" )
+    #   engenius_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_engenius_extracted"
+    # fi
+  elif [[ "${BSD_UFS}" -ne 0 ]]; then
+    ufs_extractor "${lFILE_TMP}" "${lFILE_TMP}_bsd_ufs_extracted"
+  elif [[ "${ANDROID_OTA}" -ne 0 ]]; then
+    android_ota_extractor "${lFILE_TMP}" "${lFILE_TMP}_android_ota_extracted"
+  elif [[ "${OPENSSL_ENC_DETECTED}" -ne 0 ]]; then
+    foscam_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_foscam_enc_extracted"
+  elif [[ "${BUFFALO_ENC_DETECTED}" -ne 0 ]]; then
+    buffalo_enc_extractor "${lFILE_TMP}" "${lFILE_TMP}_buffalo_enc_extracted"
+  elif [[ "${ZYXEL_ZIP}" -ne 0 ]]; then
+    zyxel_zip_extractor "${lFILE_TMP}" "${lFILE_TMP}_zyxel_enc_extracted"
+  elif [[ "${QCOW_DETECTED}" -ne 0 ]]; then
+    qcow_extractor "${lFILE_TMP}" "${lFILE_TMP}_qemu_qcow_extracted"
+  elif [[ "${BMC_ENC_DETECTED}" -ne 0 ]]; then
+    bmc_extractor "${lFILE_TMP}" "${lFILE_TMP}_bmc_decrypted"
+  else
+    # configure the extractor to use in the default configuration file
+    # or via scanning profile
+    # EMBA usually uses unblob as default for the deep extractor
+    if [[ "${DEEP_EXTRACTOR}" == "binwalk" ]]; then
+      binwalker_matryoshka "${lFILE_TMP}" "${lFILE_TMP}_binwalk_extracted"
     else
-      # configure the extractor to use in the default configuration file
-      # or via scanning profile
-      # EMBA usually uses unblob as default for the deep extractor
-      if [[ "${DEEP_EXTRACTOR}" == "binwalk" ]]; then
-        binwalker_matryoshka "${lFILE_TMP}" "${lFILE_TMP}_binwalk_extracted" &
-        lBIN_PID="$!"
-      else
-        # default case to Unblob
-        unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 0 &
-        lBIN_PID="$!"
-      fi
-      lWAIT_PIDS_P60+=( "${lBIN_PID}" )
+      # default case to Unblob
+      unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 0
     fi
-
-  max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_P60
-
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_P60[@]}"
+  fi
 }
 
