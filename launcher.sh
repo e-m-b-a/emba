@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner
 
-# Description:  Zenity based EMBA launcher with basic wizzard functionality
+# Description:  Zenity based EMBA launcher with basic wizard functionality
 #               start with ./launcher.sh from the EMBA installation directory
 
 EMBA_PROFILE="default-scan.emba"
@@ -45,8 +45,8 @@ fi
 
 EMBA_BASE_LOG_DIR=$(zenity --file-selection --directory --icon=./helpers/emba.svg --title="EMBA firmware analysis - base log directory" 2>/dev/null)
 if [[ -z "${EMBA_BASE_LOG_DIR}" ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="WARNING: NO base log directory choosen ..." 2>/dev/null &
-  print_output "[-] WARNING: NO base log directory choosen ..." "no_log"
+  zenity --info --icon=./helpers/emba.svg --text="WARNING: NO base log directory chosen ..." 2>/dev/null &
+  print_output "[-] WARNING: NO base log directory chosen ..." "no_log"
   exit 1
 fi
 
@@ -68,7 +68,7 @@ if [[ -z "${FW_VERSION}" ]]; then
   print_output "[-] WARNING: NO firmware version available ..." "no_log"
   exit 1
 fi
-if ! [[ "${FW_VERSION}" =~ ^[a-zA-Z0-9./_:\+'-']+$ ]]; then
+if ! [[ "${FW_VERSION}" =~ ^[a-zA-Z0-9./_:+'-']+$ ]]; then
   zenity --info --icon=./helpers/emba.svg --text="Invalid input detected - versions aka 1.2.3-a:b only" 2>/dev/null &
   print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
   exit 1
