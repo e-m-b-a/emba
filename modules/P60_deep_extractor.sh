@@ -179,7 +179,6 @@ deeper_extractor_helper() {
   local lFILE_MD5=""
   local lFILE_DETAILS=""
   local lBIN_PID=""
-  local lWAIT_PIDS_P60=()
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
