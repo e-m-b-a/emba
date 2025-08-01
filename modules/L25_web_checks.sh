@@ -346,9 +346,6 @@ web_access_crawler() {
       break
     fi
     print_output "[*] Checking for return values on web server access #${lCNT}/${lRETRY_MAX}" "no_log"
-    for elem in "${lCURL_OPTS_ARR[@]}"; do
-      print_output "[*] Testing curl with option ${elem}"
-    done
 
     lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
     if [[ "${lCNT}" -ne 0 ]]; then
