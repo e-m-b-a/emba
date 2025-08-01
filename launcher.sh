@@ -16,6 +16,8 @@
 # Description:  Zenity based EMBA launcher with basic wizzard functionality
 #               start with ./launcher.sh from the EMBA installation directory
 
+EMBA_PROFILE="default-scan.emba"
+
 if ! command -v zenity >/dev/null ; then
   echo "[-] WARNING: zenity package not installed"
   echo "[*] Install it with sudo apt-get install zenity"
@@ -84,7 +86,7 @@ if zenity --question --icon=./helpers/emba.svg --title="EMBA firmware analysis" 
   print_output "[*] Using vendor name for analysis: ${FW_VENDOR}" "no_log"
   print_output "[*] Using firmware version for analysis: ${FW_VERSION}" "no_log"
 
-  sudo ./emba -l "${EMBA_LOG_DIR}" -f "${FIRMWARE_FILE}" -p ./scan-profiles/default-scan.emba -X "${FW_VERSION}" -Y "${FW_VENDOR}" -y
+  sudo ./emba -l "${EMBA_LOG_DIR}" -f "${FIRMWARE_FILE}" -p ./scan-profiles/"${EMBA_PROFILE}" -X "${FW_VERSION}" -Y "${FW_VENDOR}" -y
   EMBA_RET=$?
   if [[ "${EMBA_RET}" -eq 0 ]]; then
     if zenity --progress --text="EMBA run was successful - opening web report?" --percentage=100 2>/dev/null; then
