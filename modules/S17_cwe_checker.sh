@@ -100,30 +100,25 @@ cwe_check() {
     fi
     lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
 
-    if [[ "${THREADED}" -eq 1 ]]; then
-      # while s09 is running we throttle this module:
-      local lMAX_MOD_THREADS=$(("$(nproc || echo 1)" / 3))
-      if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
-        local lMAX_MOD_THREADS=1
-      fi
-      cwe_checker_threaded "${lBIN_TO_CHECK}" &
-      local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S17+=( "${lTMP_PID}" )
-      max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S17
-    else
-      cwe_checker_threaded "${lBIN_TO_CHECK}"
+    # while s09 is running we throttle this module:
+    local lMAX_MOD_THREADS=$(("$(nproc || echo 1)" / 3))
+    if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
+      local lMAX_MOD_THREADS=1
     fi
+    cwe_checker_threaded "${lBIN_TO_CHECK}" &
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S17+=( "${lTMP_PID}" )
+    max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S17
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
       print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
       print_output "[*] For complete analysis enable FULL_TEST." "no_log"
       break
     fi
   done
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S17[@]}"
+  wait_for_pid "${lWAIT_PIDS_S17[@]}"
 }
 
 cwe_checker_threaded() {
@@ -165,7 +160,20 @@ cwe_checker_threaded() {
     # this is the logging after every tested file
     if [[ ${#lCWE_OUT[@]} -ne 0 ]] ; then
       print_ln
-      print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+
+      # check for known linux files
+      if [[ -f "${BASE_LINUX_FILES}" ]]; then
+        # if we have the base linux config file we are checking it:
+        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+          # shellcheck disable=SC2153
+          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN}):${NC}" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+        else
+          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${RED}common linux file: no${GREEN}):${NC}" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+        fi
+      else
+        print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:${NC}" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+      fi
+
       for lCWE_LINE in "${lCWE_OUT[@]}"; do
         lCWE="$(echo "${lCWE_LINE}" | awk '{print $1}')"
         lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"

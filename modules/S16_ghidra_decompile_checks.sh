@@ -59,10 +59,10 @@ S16_ghidra_decompile_checks()
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
+    lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
       if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
@@ -86,31 +86,30 @@ S16_ghidra_decompile_checks()
       continue
     fi
     # print_output "[*] Testing ${lBIN_TO_CHECK} with ghidra/semgrep"
-    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
-    if [[ "${THREADED}" -eq 1 ]]; then
-      ghidra_analyzer "${lBIN_TO_CHECK}" &
-      lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
-      max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" lWAIT_PIDS_S16_ARR
-    else
-      ghidra_analyzer "${lBIN_TO_CHECK}"
+    if [[ -d "/tmp/haruspex_${lNAME}" ]]; then
+      print_output "[*] Info: Temporary directory already exists for binary ${ORANGE}${lNAME}${NC} - skipping analysis" "no_log"
+      continue
     fi
+    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    ghidra_analyzer "${lBIN_TO_CHECK}" &
+    lTMP_PID="$!"
+    lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
+    max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" lWAIT_PIDS_S16_ARR
 
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
-    if [[ "${#lBINS_CHECKED_ARR[@]}" -gt "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+    if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
       print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now." "no_log"
-      print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+      print_output "[*] For complete analysis enable FULL_TEST option in your scanning profile." "no_log"
       break
     fi
   done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" || true)
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
+  wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
   # cleanup - remove the rest without issues now
   rm -r /tmp/haruspex_* 2>/dev/null || true
 
-  if [[ "$(find "${LOG_PATH_MODULE}" -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
     # shellcheck disable=SC2126
     lVULN_COUNTER=$(wc -l "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 | awk '{print $1}' || echo 0)
@@ -153,7 +152,7 @@ ghidra_analyzer() {
   lNAME=$(basename "${lBINARY}" 2> /dev/null)
 
   if [[ -d "/tmp/haruspex_${lNAME}" ]]; then
-    print_output "[-] WARNING: Temporary directory already exists for binary ${ORANGE}${lNAME}${NC} - skipping analysis" "no_log"
+    print_output "[*] Info: Temporary directory already exists for binary ${ORANGE}${lNAME}${NC} - skipping analysis" "no_log"
     return
   fi
 
@@ -224,9 +223,9 @@ ghidra_analyzer() {
         # if we have the base linux config file we are checking it:
         if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           # shellcheck disable=SC2153
-          print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (common linux file: yes)${NC}" "" "${lSEMGREPLOG_TXT}"
+          print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN})${NC}" "" "${lSEMGREPLOG_TXT}"
         else
-          print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (${ORANGE}common linux file: no${GREEN})${NC}" "" "${lSEMGREPLOG_TXT}"
+          print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (${RED}common linux file: no${GREEN})${NC}" "" "${lSEMGREPLOG_TXT}"
         fi
       else
         print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${NC}" "" "${lSEMGREPLOG_TXT}"
@@ -254,26 +253,18 @@ ghidra_analyzer() {
       mkdir "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}"
     fi
     for lHARUSPEX_FILE in "${lHARUSPEX_FILE_ARR[@]}"; do
-      if [[ ${THREADED} -eq 1 ]]; then
-        # threading is currently not working because of mangled output
-        # we need to rewrite the logging functionality in here to provide threading
-        s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}" &
-        local lTMP_PID="$!"
-        lWAIT_PIDS_S16_1+=( "${lTMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S16_1
-      else
-        s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}"
-      fi
+      # threading is currently not working because of mangled output
+      # we need to rewrite the logging functionality in here to provide threading
+      s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}" &
+      local lTMP_PID="$!"
+      lWAIT_PIDS_S16_1+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S16_1
     done
 
-    if [[ ${THREADED} -eq 1 ]]; then
-      wait_for_pid "${lWAIT_PIDS_S16_1[@]}"
-      s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}" &
-      local lTMP_PID="$!"
-      lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
-    else
-      s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}"
-    fi
+    wait_for_pid "${lWAIT_PIDS_S16_1[@]}"
+    s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}" &
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
   fi
 }
 
