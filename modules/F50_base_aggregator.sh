@@ -618,21 +618,18 @@ binary_fct_output() {
 
   # cwe-checker and semgrep results per binary
   if [[ -f "${LOG_DIR}"/s17_cwe_checker/cwe_"${BINARY}".log ]]; then
-    lBINS_CWE_CHCK_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}""/s17_cwe_checker/cwe_""${BINARY}"".log" || true)
+    lBINS_CWE_CHCK_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}/s17_cwe_checker/cwe_${BINARY}.log" || true)
   fi
-  if [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".csv ]]; then
-    lBINS_SEMGREP_CNT=$(wc -l < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" || true)
-  fi
+  lBINS_SEMGREP_CNT=$(wc -l < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local lFCT_LINK=""
-    if [[ "${lBINS_SEMGREP_CNT}" -gt 0 ]] && [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log ]]; then
-      # lFCT_LINK="${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log
+    if [[ "${lBINS_SEMGREP_CNT}" -gt 0 ]]; then
       lFCT_LINK="s16"
     else
       lFCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${lBINS_FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
     fi
-    [[ "${lBINS_SEMGREP_CNT}" -eq 0 ]] && lBINS_SEMGREP_CNT="NA"
-    [[ "${lBINS_CWE_CHCK_CNT}" -eq 0 ]] && lBINS_CWE_CHCK_CNT="NA"
+    [[ "${lBINS_SEMGREP_CNT:-0}" -eq 0 ]] && lBINS_SEMGREP_CNT="NA"
+    [[ "${lBINS_CWE_CHCK_CNT:-0}" -eq 0 ]] && lBINS_CWE_CHCK_CNT="NA"
 
     # if we have the base linux config file we are checking it:
     if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
