@@ -238,7 +238,7 @@ l15_version_detector_threader() {
     if [[ -n ${lVERSION_IDENTIFIED} ]]; then
       print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${GREEN} in emulated service ${ORANGE}${lSERVICE}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${lTYPE}${GREEN})."
       export TYPE="${lTYPE}"
-      if version_parsing_logging "${S09_CSV_LOG}" "L15_emulated_checks_nmap" "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+      if version_parsing_logging "${S09_CSV_LOG}" "L15_emulated_checks_nmap" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
         # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next service -> return"
         return
       fi
