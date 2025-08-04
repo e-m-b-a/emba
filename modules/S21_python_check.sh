@@ -15,6 +15,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Checks for bugs, stylistic errors, etc. in python scripts, then it lists the found error types.
+#               For bandit configuration the ./config/bandit.yaml file can be adjusted
 
 S21_python_check()
 {
@@ -96,7 +97,7 @@ s21_script_bandit() {
 
   lSCRIPT_NAME=$(basename "${lPY_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
   lPY_LOG="${LOG_PATH_MODULE}""/bandit_""${lSCRIPT_NAME}"".txt"
-  bandit "${lPY_SCRIPT_}" > "${lPY_LOG}" 2> /dev/null || true
+  bandit -c "${CONFIG_DIR}/bandit.yaml" "${lPY_SCRIPT_}" > "${lPY_LOG}" 2> /dev/null || true
 
   lVULNS=$(grep -c ">> Issue: " "${lPY_LOG}" 2> /dev/null || true)
   if [[ "${lVULNS}" -ne 0 ]] ; then
