@@ -946,11 +946,16 @@ check_qemu_kernel_output() {
   lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//*\ }
 
   if [[ "${lQEMU_RUN_TIME_KERNEL}" -lt "${lKERNEL_MIN_RUNTIME}" ]]; then
-    print_output "[!] WARNING: QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment"
+    local lE_MESSAGE="[-] WARNING: QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment:"
+
+    print_output "${lE_MESSAGE}"
+    print_error "${lE_MESSAGE}"
+
     print_output "$(indent "$(orange "$(grep -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -10 || true)")")"
-    print_output "$(indent "$(orange lARCHIVE_PATH: "${lARCHIVE_PATH}" - lIMAGE_NAME: "${lIMAGE_NAME}" - lNETWORK_MODE: "${lNETWORK_MODE}" - lETH_INT: "${lETH_INT}" - lVLAN_ID: "${lVLAN_ID}" - lINIT_FILE: "${lINIT_FILE}" - lNETWORK_DEVICE: "${lNETWORK_DEVICE}")")"
-    print_error "[*] WARNING: L10 QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment"
-    print_error "[*] lARCHIVE_PATH: ${lARCHIVE_PATH} - lIMAGE_NAME: ${lIMAGE_NAME} - lNETWORK_MODE: ${lNETWORK_MODE} - lETH_INT: ${lETH_INT} - lVLAN_ID: ${lVLAN_ID} - lINIT_FILE: ${lINIT_FILE} - lNETWORK_DEVICE: ${lNETWORK_DEVICE}"
+
+    lE_MESSAGE="lARCHIVE_PATH: ${lARCHIVE_PATH} - lIMAGE_NAME: ${lIMAGE_NAME} - lNETWORK_MODE: ${lNETWORK_MODE} - lETH_INT: ${lETH_INT} - lVLAN_ID: ${lVLAN_ID} - lINIT_FILE: ${lINIT_FILE} - lNETWORK_DEVICE: ${lNETWORK_DEVICE}"
+    print_output "$(indent "$(orange "${lE_MESSAGE}")")"
+    print_error "[-] ${lE_MESSAGE}"
   fi
 }
 
