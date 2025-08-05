@@ -25,14 +25,13 @@
     "dropbear_ssh"
   ],
   "version_extraction": [
-    "sed -r 's/Dropbear\\ SSH\\ multi-purpose\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
     "sed -r 's/Dropbear\\ SSH\\ multi-purpose\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
-    "sed -r 's/Dropbear\\ client\\ ([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
-    "sed -r 's/Dropbear\\ multi-purpose\\ version\\ ([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ client\\ ([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ multi-purpose\\ version\\ ([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
     "sed -r 's/Dropbear\\ sshd\\ (20[0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
-    "sed -r 's/Dropbear\\ sshd\\ ([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
-    "sed -r 's/Dropbear\\ sshd\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'",
-    "sed -r 's/Dropbear\\ v([0-9]+(\\.[0-9]+)+?)$/:dropbear_ssh_project:dropbear_ssh:\\1/'"
+    "sed -r 's/Dropbear\\ sshd\\ ([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ sshd\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/Dropbear\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'"
   ],
   "affected_paths": [
     "NA"
