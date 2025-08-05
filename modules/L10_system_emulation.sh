@@ -747,7 +747,7 @@ main_emulation() {
 
     local lF_STARTUP=0
     if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
-      check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}"
+      check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
       cat "${LOG_PATH_MODULE}"/qemu.initial.serial.log >> "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
       write_link "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
 
@@ -779,7 +779,7 @@ main_emulation() {
 
         print_output "[*] Firmware ${ORANGE}${IMAGE_NAME}${NC} finished for identification of the network configuration"
         if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
-          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}"
+          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
           mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_new_init.log
           write_link "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_new_init.log
         else
@@ -805,7 +805,7 @@ main_emulation() {
         local lCOUNTING_2nd=0
         local lF_STARTUP=0
         if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
-          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}"
+          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
           print_output "[*] qemu.initial.serial.log detected and checking for STARTUP and Service data"
           # now we need to check if something is better now or we should switch back to the original init
           lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
@@ -919,7 +919,7 @@ main_emulation() {
 # Function to check the kernel log entries.
 # We have seen multiple times that the kernel just stops responding and we do not get logs
 # This prints a warning message and also a message to the error log for further processing.
-# check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.final.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}"
+# check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.final.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
 check_qemu_kernel_output() {
   local lQEMU_LOG_TO_CHECK="${1:-}"
   local lARCHIVE_PATH="${2:-}"
@@ -929,13 +929,17 @@ check_qemu_kernel_output() {
   local lVLAN_ID="${6:-}"
   local lINIT_FILE="${7:-}"
   local lNETWORK_DEVICE="${8:-}"
+  local lPANIC_CNT="${9:-0}"
+  # if we have a kernel panic we do not need to further analyze the logs
+  [[ "${lPANIC_CNT}" -gt 0 ]] && return
 
   local lKERNEL_MIN_RUNTIME=300
-
   local lQEMU_RUN_TIME_KERNEL=0
+
   lQEMU_RUN_TIME_KERNEL=$(grep -o -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -1 || true)
   lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//\.*}
   lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//*\ }
+
   if [[ "${lQEMU_RUN_TIME_KERNEL}" -lt "${lKERNEL_MIN_RUNTIME}" ]]; then
     print_output "[!] WARNING: QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment"
     print_output "$(indent "$(orange "$(grep -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -10 || true)")")"
