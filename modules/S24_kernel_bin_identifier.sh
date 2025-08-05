@@ -350,7 +350,7 @@ dump_config() {
 
       lCFG_MD5=$(md5sum "${TMP1}" | awk '{print $1}')
       if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
-        KCONFIG_EXTRACTED="${LOG_PATH_MODULE}/kernel_config_extracted_$(basename "${lIMG_}").tmp"
+        KCONFIG_EXTRACTED="${LOG_PATH_MODULE}/kernel_config_extracted_$(basename "${lIMG_}").log"
         cp "${TMP1}" "${KCONFIG_EXTRACTED}"
         KCFG_MD5_ARR+=("${lCFG_MD5}")
         # return value of 4 means we are done and we are going back to the main function of this module for the next file

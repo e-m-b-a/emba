@@ -747,7 +747,7 @@ main_emulation() {
 
     local lF_STARTUP=0
     if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
-      check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
+      check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}" "${SYS_ONLINE:-0}" "${TCP:-NA}"
       cat "${LOG_PATH_MODULE}"/qemu.initial.serial.log >> "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
       write_link "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
 
@@ -779,7 +779,7 @@ main_emulation() {
 
         print_output "[*] Firmware ${ORANGE}${IMAGE_NAME}${NC} finished for identification of the network configuration"
         if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
-          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
+          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}" "${SYS_ONLINE:-0}" "${TCP:-NA}"
           mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_new_init.log
           write_link "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_new_init.log
         else
@@ -805,7 +805,7 @@ main_emulation() {
         local lCOUNTING_2nd=0
         local lF_STARTUP=0
         if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
-          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
+          check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}" "${SYS_ONLINE:-0}" "${TCP:-NA}"
           print_output "[*] qemu.initial.serial.log detected and checking for STARTUP and Service data"
           # now we need to check if something is better now or we should switch back to the original init
           lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
@@ -919,7 +919,7 @@ main_emulation() {
 # Function to check the kernel log entries.
 # We have seen multiple times that the kernel just stops responding and we do not get logs
 # This prints a warning message and also a message to the error log for further processing.
-# check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.final.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}"
+# check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.final.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}" "${SYS_ONLINE:-0}" "${TCP:-NA}"
 check_qemu_kernel_output() {
   local lQEMU_LOG_TO_CHECK="${1:-}"
   local lARCHIVE_PATH="${2:-}"
@@ -930,8 +930,13 @@ check_qemu_kernel_output() {
   local lINIT_FILE="${7:-}"
   local lNETWORK_DEVICE="${8:-}"
   local lPANIC_CNT="${9:-0}"
+  local lSYS_ONLINE="${10:-0}"
+  local lTCP="${11:-NA}"
+
   # if we have a kernel panic we do not need to further analyze the logs
   [[ "${lPANIC_CNT}" -gt 0 ]] && return
+  [[ "${lSYS_ONLINE}" -gt 0 ]] && return
+  [[ "${lTCP}" == "TCP ok" ]] && return
 
   local lKERNEL_MIN_RUNTIME=300
   local lQEMU_RUN_TIME_KERNEL=0
@@ -1020,7 +1025,7 @@ emulation_with_config() {
   cleanup_emulator "${IMAGE_NAME}"
 
   if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
-    check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.final.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}"
+    check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.final.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" 0 "${SYS_ONLINE:-0}" "${TCP:-NA}"
     mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log
   fi
 

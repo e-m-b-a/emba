@@ -155,7 +155,7 @@ exe_extractor() {
     mkdir "${lEXTRACTION_DIR}"
   fi
 
-  7z x -o"${lEXTRACTION_DIR}" "${lFIRMWARE_PATH}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log || print_error "[-] Windows exe extraction failed"
+  7z x -o"${lEXTRACTION_DIR}" "${lFIRMWARE_PATH}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log || print_error "[-] Windows exe extraction via 7zip failed"
 
   if [[ -s "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log ]]; then
     cat "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log >> "${LOG_FILE}"
@@ -163,7 +163,7 @@ exe_extractor() {
     # Error handling. If we have errors on exe extraction we try binwalk
     if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
       print_ln
-      print_output "[*] Windows exe extraction error detected -> using binwalk as fallback extraction mechanism"
+      print_output "[*] Windows exe extraction error via 7zip detected -> using binwalk as fallback extraction mechanism"
       binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
 
       print_ln
