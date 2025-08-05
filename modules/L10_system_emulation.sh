@@ -2625,7 +2625,7 @@ check_online_stat() {
     local lCNT=1
     local lMAX_NMAP_RETRIES=10
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
-    if grep "open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
+    if grep -q "open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
       tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
     fi
 

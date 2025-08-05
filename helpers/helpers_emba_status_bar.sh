@@ -31,7 +31,7 @@ draw_box() {
   shopt -s checkwinsize
 
   local lLINES=""
-  [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null|| true)
+  [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
 
   local lBOX_W="${1:-0}"
   local lBOX_TITLE="${2:-}"
@@ -50,7 +50,7 @@ draw_arrows() {
   local lARROW_L="${1:-0}"
   local lARROWS=""
   local lLINES=""
-  [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null|| true)
+  [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
 
   lARROWS+="\e[$((lLINES - 3));${lARROW_L}f \033[1m>\033[0m"
   lARROWS+="\e[$((lLINES - 2));${lARROW_L}f \033[1m>\033[0m"
@@ -115,9 +115,9 @@ update_box_system_load() {
     local lCPU_LOG_STR=""
     local lCPU_LOG_IDLE=""
     lCPU_LOG_IDLE="$(vmstat 1 2 | tail -1 | awk '{print $15}')"
-    lCPU_LOG_STR="$(system_load_util_str "$((100-"${lCPU_LOG_IDLE}"))" 0 2> /dev/null || true)"
+    lCPU_LOG_STR="$(system_load_util_str "$((100-"${lCPU_LOG_IDLE}"))" 0 2>/dev/null || true)"
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      sed -i "2s/.*/${lCPU_LOG_STR}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+      sed -i "2s/.*/${lCPU_LOG_STR}/" "${STATUS_TMP_PATH}" 2>/dev/null || true
     fi
   }
 
@@ -125,17 +125,17 @@ update_box_system_load() {
 
   local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
   fi
   while [[ "${lBOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null|| true)
+    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
     local lMEM_PERCENTAGE_STR=""
     lMEM_PERCENTAGE_STR="$(system_load_util_str "$(LANG=en free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
     local lDISK_PERCENTAGE_STR=""
     lDISK_PERCENTAGE_STR="$(system_load_util_str "$(df "${LOG_DIR}" | tail -1 | awk '{print substr($5, 1, length($5)-1)}')" 2)"
     local lACTUAL_CPU=0
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      lACTUAL_CPU="$(sed '2q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lACTUAL_CPU="$(sed '2q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
     else
       lACTUAL_CPU=0
     fi
@@ -143,7 +143,7 @@ update_box_system_load() {
     update_cpu &
     sleep .2
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -178,12 +178,12 @@ update_box_status() {
   local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    lDATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lDATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
   fi
   if [[ "${lDATE_STR}" == "" ]] ; then
     lDATE_STR="$(date +%s)"
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      sed -i "3s/^$/${lDATE_STR}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+      sed -i "3s/^$/${lDATE_STR}/" "${STATUS_TMP_PATH}" 2>/dev/null || true
     fi
   fi
 
@@ -193,14 +193,14 @@ update_box_status() {
 
   local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
   fi
   while [[ "${lBOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null|| true)
+    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
     local lRUNTIME=0
     # lRUNTIME="$(date -d@"$(( "$(date +%s)" - "${lDATE_STR}" ))" -u +%H:%M:%S)"
     lRUNTIME=$(show_runtime 1)
-    lLOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
+    lLOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2>/dev/null | cut -d$'\t' -f1 2>/dev/null || true)"
     # if we are running in a docker environment, we can count the processes withing our containers:
     if [[ -n "${MAIN_CONTAINER}" ]]; then
       lRUN_EMBA_PROCESSES="$(docker exec "${MAIN_CONTAINER}" ps 2>/dev/null | wc -l || true)"
@@ -215,7 +215,7 @@ update_box_status() {
     printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( lLINES - 3 ))" "$(status_util_str 0 "${lRUNTIME}")" "$(( lLINES - 2 ))" "$(status_util_str 1 "${lLOG_DIR_SIZE}")" "$(( lLINES - 1 ))" "$(status_util_str 2 "${lRUN_EMBA_PROCESSES}")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -258,12 +258,12 @@ update_box_modules() {
   local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    lCOUNT_MODULES="$(sed '4q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lCOUNT_MODULES="$(sed '4q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
   fi
   if [[ ${lCOUNT_MODULES} -eq 0 || "${lCOUNT_MODULES}" == "" ]] ; then
-    mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "*.sh" 2> /dev/null)
+    mapfile -t lMODULES_EMBA_ARR < <(find "${MOD_DIR}" -maxdepth 1 -name "*.sh" 2>/dev/null)
     if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-      mapfile -t lMODULES_LOCAL_ARR < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2> /dev/null)
+      mapfile -t lMODULES_LOCAL_ARR < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2>/dev/null)
     fi
     lMODULES_ARR=( "${lMODULES_EMBA_ARR[@]}" "${lMODULES_LOCAL_ARR[@]}" )
     for lMODULE_FILE in "${lMODULES_ARR[@]}" ; do
@@ -288,23 +288,23 @@ update_box_modules() {
       fi
     done
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      sed -i "4s/^$/${lCOUNT_MODULES}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+      sed -i "4s/^$/${lCOUNT_MODULES}/" "${STATUS_TMP_PATH}" 2>/dev/null || true
     fi
   fi
 
   local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
   fi
   while [[ "${lBOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null|| true)
-    lSTARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
-    lFINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
-    lLAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
+    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
+    lSTARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2>/dev/null || true )"
+    lFINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2>/dev/null | grep -vc "Quest container finished" || true )"
+    lLAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2>/dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
     printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( lLINES - 3 ))" "$(module_util_str 0 "$((lSTARTED_MODULE_STR - lFINISHED_MODULE_STR))")" "$(( lLINES - 2 ))" "$(module_util_str 1 "${lLAST_FINISHED_MODULE_STR}")" "$(( lLINES - 1 ))" "$(module_util_str 2 "${lFINISHED_MODULE_STR}/${lCOUNT_MODULES}")" || true
     sleep 1
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -351,25 +351,25 @@ update_box_status_2() {
   local lBOX_SIZE=0
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
   fi
 
   while [[ "${lBOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null|| true)
+    [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
 
-    lPHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
+    lPHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2>/dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
     [[ "${lPHASE_STR}" == "Pre" ]] && lPHASE_STR="Extraction"
     [[ "${lPHASE_STR}" == "Testing" ]] && lPHASE_STR="Analysis"
     [[ "${lPHASE_STR}" == "System" ]] && lPHASE_STR="Emulation"
 
-    lERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2> /dev/null || true )"
+    lERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2>/dev/null || true )"
     if [[ "${lERROR_STR}" == "/0" || "${lERROR_STR}" == "/" ]] ; then
       lERROR_STR=""
     fi
     printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( lLINES - 3 ))" "$(status_2_util_str 0 "${lPHASE_STR}")" "$(( lLINES - 2 ))" "$(status_2_util_str 1 "${lMODE_STR}${lERROR_STR}")" "$(( lLINES - 1 ))" "$(status_2_util_str 2 "")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+      lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"
     fi
     if check_emba_ended; then
       exit
@@ -388,7 +388,7 @@ remove_status_bar() {
   [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
-    sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+    sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2>/dev/null || true
   fi
 
   if [[ "${PID_SYSTEM_LOAD:-}" =~ ^[0-9]+$ ]]; then
@@ -537,7 +537,7 @@ initial_status_bar() {
 
   tail -f "${LOG_DIR}"/emba.log &
   local lTAIL_PID="$!"
-  disown "${lTAIL_PID}" 2> /dev/null || true
+  disown "${lTAIL_PID}" 2>/dev/null || true
 
   # create new tmp file with empty lines
   STATUS_TMP_PATH="${TMP_DIR}/status"
@@ -576,7 +576,7 @@ initial_status_bar() {
     fi
   fi
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
-    sed -i "1s/.*/${STATUS_BAR_BOX_COUNT}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
+    sed -i "1s/.*/${STATUS_BAR_BOX_COUNT}/" "${STATUS_TMP_PATH}" 2>/dev/null || true
   fi
   lINITIAL_STR+="\e[H"
   # set cursor and boxes
