@@ -73,6 +73,12 @@ S109_jtr_local_pw_cracking() {
         continue
       fi
 
+      if echo "${lHASH}" | cut -d: -f1-4 | grep -q ":::"; then
+        # nosemgrep
+        # removing entries: root:::0:99999:7:::
+        continue
+      fi
+
       if [[ "${lHASH}" == "\$"*"\$"* ]]; then
         print_output "[*] Found password data ${ORANGE}${lHASH}${NC} for further processing in ${ORANGE}${lHASH_SOURCE}${NC}"
         # put ontop if linux-hash
