@@ -464,8 +464,8 @@ version_parsing_logging() {
     check_for_s08_csv_log "${S08_CSV_LOG}"
 
     if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
-      lSHA256_CHECKSUM="$(sha256sum "${lBINARY_PATH}" | awk '{print $1}')"
-      lSHA512_CHECKSUM="$(sha512sum "${lBINARY_PATH}" | awk '{print $1}')"
+      [[ -f "${lBINARY_PATH}" ]] && lSHA256_CHECKSUM="$(sha256sum "${lBINARY_PATH}" | awk '{print $1}')"
+      [[ -f "${lBINARY_PATH}" ]] && lSHA512_CHECKSUM="$(sha512sum "${lBINARY_PATH}" | awk '{print $1}')"
       lBIN_ARCH=$(echo "${lBIN_FILE_DETAILS}" | cut -d ',' -f2)
       lBIN_ARCH=${lBIN_ARCH#\ }
     fi

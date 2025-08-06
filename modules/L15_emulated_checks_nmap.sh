@@ -212,6 +212,9 @@ l15_version_detector_threader() {
   local lTYPE="${3:-}"
 
   local lVERSION_IDENTIFIED=""
+  export PACKAGING_SYSTEM="system_emulation"
+  # lBINARY_ENTRY is needed for populating the source path in the final SBOM
+  local lBINARY_ENTRY="NA;${PACKAGING_SYSTEM};NA;NA;NA;NA;NA;NA;NA"
 
   # print_output "[*] Testing json config ${ORANGE}${lVERSION_JSON_CFG}${NC}" "no_log"
   local lRULE_IDENTIFIER=""
@@ -235,8 +238,7 @@ l15_version_detector_threader() {
     if [[ -n ${lVERSION_IDENTIFIED} ]]; then
       print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${GREEN} in emulated service ${ORANGE}${lSERVICE}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${lTYPE}${GREEN})."
       export TYPE="${lTYPE}"
-      export PACKAGING_SYSTEM="system_emulation"
-      if version_parsing_logging "${S09_CSV_LOG}" "L15_emulated_checks_nmap" "${lVERSION_IDENTIFIED}" "NA" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+      if version_parsing_logging "${S09_CSV_LOG}" "L15_emulated_checks_nmap" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
         # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next service -> return"
         return
       fi

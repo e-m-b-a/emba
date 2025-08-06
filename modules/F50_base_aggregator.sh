@@ -620,7 +620,7 @@ binary_fct_output() {
   if [[ -f "${LOG_DIR}"/s17_cwe_checker/cwe_"${BINARY}".log ]]; then
     lBINS_CWE_CHCK_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}/s17_cwe_checker/cwe_${BINARY}.log" || true)
   fi
-  lBINS_SEMGREP_CNT=$(wc -l < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
+  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local lFCT_LINK=""
     if [[ "${lBINS_SEMGREP_CNT}" -gt 0 ]]; then
@@ -952,7 +952,7 @@ get_data() {
     MSF_VERIFIED=$(grep -v -c "Source" "${L35_CSV_LOG}" || true)
   fi
   if [[ -d "${F17_LOG_DIR}" ]]; then
-    F17_VERSIONS_IDENTIFIED=$(wc -l < "${F17_LOG_DIR}/vuln_summary.txt")
+    F17_VERSIONS_IDENTIFIED=$(wc -l 2>/dev/null < "${F17_LOG_DIR}/vuln_summary.txt")
     CRITICAL_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
     CVE_COUNTER=$((CVE_COUNTER+CRITICAL_CVE_COUNTER))
     HIGH_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)
@@ -963,7 +963,7 @@ get_data() {
     CVE_COUNTER=$((CVE_COUNTER+LOW_CVE_COUNTER))
   fi
   if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
-    KNOWN_EXPLOITED_COUNTER=$(wc -l < "${F17_LOG_DIR}"/KEV.txt)
+    KNOWN_EXPLOITED_COUNTER=$(wc -l 2>/dev/null < "${F17_LOG_DIR}"/KEV.txt)
   fi
   if [[ -d "${F17_LOG_DIR}/cve_sum" ]]; then
     # nosemgrep
