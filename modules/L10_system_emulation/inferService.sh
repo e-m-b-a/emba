@@ -165,6 +165,7 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG} -mode 1 -upnp 1 -daemon\n" >> /firmadyne/service
         done
         "${BUSYBOX}" echo -e -n "${BINARY} -a 0.0.0.0 -m 3 -D -d 3\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e -n "${BINARY} -daemon -br br0 -mode 1 -upnp 1\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnp" ]; then
       if ! "${BUSYBOX}" grep -q "${BINARY}" /firmadyne/service 2>/dev/null; then

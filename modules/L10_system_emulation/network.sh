@@ -58,15 +58,16 @@ if ("${EMBA_NET}"); then
 
     # netgear WNR2000 bridge command
     CNT=1
+    MAX_CNT=15
     while (true); do
-      echo "[*] Waiting until brctl shows up our ${NET_BRIDGE} - CNT: ${CNT} / 15"
+      echo "[*] Waiting until brctl shows up our ${NET_BRIDGE:-br0} - CNT: ${CNT} / ${MAX_CNT}"
       "${BUSYBOX}" sleep 5
-      if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE}"); then
-        echo "[+] brctl showed up our ${NET_BRIDGE} - CNT: ${CNT} / 15 -> proceeding"
+      if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE:-br0}"); then
+        echo "[+] brctl showed up our ${NET_BRIDGE:-br0} - CNT: ${CNT} / ${MAX_CNT} -> proceeding"
         break
       fi
-      if [ "${CNT}" -gt 15 ]; then
-        echo "[-] brctl does not showed up our ${NET_BRIDGE} - CNT: ${CNT} / 15 -> proceeding"
+      if [ "${CNT}" -ge "${MAX_CNT}" ]; then
+        echo "[-] brctl does not showed up our ${NET_BRIDGE:-br0} - CNT: ${CNT} / ${MAX_CNT} -> proceeding"
         break
       fi
       CNT=$((CNT+1))
@@ -76,7 +77,7 @@ if ("${EMBA_NET}"); then
 
     if [ "${ACTION}" = "normal" ]; then
       # shellcheck disable=SC2016
-      IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+      IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE:-br0}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
       if ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
         "${BUSYBOX}" echo -e "[*] Identified IP address: ${ORANGE}${IP} / mode: normal${NC}"
       else
@@ -84,8 +85,8 @@ if ("${EMBA_NET}"); then
         "${BUSYBOX}" echo -e "[*] Setting default IP address: ${ORANGE}${IP} / mode: normal${NC}"
       fi
       # tplink TL-WA860RE_EU_UK_US__V5_171116
-      # "${BUSYBOX}" brctl addbr "${NET_BRIDGE}"
-      # "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
+      # "${BUSYBOX}" brctl addbr "${NET_BRIDGE:-br0}"
+      # "${BUSYBOX}" ifconfig "${NET_BRIDGE:-br0}" "${IP}"
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" "${IP}" up
       # "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
     elif [ "${ACTION}" = "interface" ]; then
@@ -102,7 +103,7 @@ if ("${EMBA_NET}"); then
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" "${IP}" up
     elif [ "${ACTION}" = "reload" ]; then
       # this mode is not used by EMBA
-      "${BUSYBOX}" ifconfig "${NET_BRIDGE}" 192.168.0.1
+      "${BUSYBOX}" ifconfig "${NET_BRIDGE:-br0}" 192.168.0.1
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
     elif [ "${ACTION}" = "bridge" ]; then
       # unexpected intercept by another bridge
@@ -116,11 +117,11 @@ if ("${EMBA_NET}"); then
       fi
 
       # shellcheck disable=SC2016
-      IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
-      "${BUSYBOX}" ip addr show "${NET_BRIDGE}"
+      IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE:-br0}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+      "${BUSYBOX}" ip addr show "${NET_BRIDGE:-br0}"
       if ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
-        "${BUSYBOX}" echo -e "[*] Identified IP address: ${ORANGE}${IP} / mode: bridge / net_bridge: ${NET_BRIDGE} / net_interface: ${NET_INTERFACE}${NC}"
-        "${BUSYBOX}" ip addr show "${NET_BRIDGE}"
+        "${BUSYBOX}" echo -e "[*] Identified IP address: ${ORANGE}${IP} / mode: bridge / net_bridge: ${NET_BRIDGE:-br0} / net_interface: ${NET_INTERFACE}${NC}"
+        "${BUSYBOX}" ip addr show "${NET_BRIDGE:-br0}"
       else
         IP=$("${BUSYBOX}" cat /firmadyne/ip_default)
         "${BUSYBOX}" echo -e "[*] Setting default IP address: ${ORANGE}${IP} / mode: bridge${NC}"
@@ -132,13 +133,13 @@ if ("${EMBA_NET}"); then
         IP="192.168.0.1"
       fi
 
-      if ! ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -q "${NET_BRIDGE}"); then
+      if ! ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -q "${NET_BRIDGE:-br0}"); then
         # just in case our bridge is not created automatically
-        "${BUSYBOX}" brctl addbr "${NET_BRIDGE}"
+        "${BUSYBOX}" brctl addbr "${NET_BRIDGE:-br0}"
       fi
 
-      "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
-      "${BUSYBOX}" brctl addif "${NET_BRIDGE}" eth0
+      "${BUSYBOX}" ifconfig "${NET_BRIDGE:-br0}" "${IP}"
+      "${BUSYBOX}" brctl addif "${NET_BRIDGE:-br0}" eth0
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
     fi
   fi
