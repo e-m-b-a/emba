@@ -15,8 +15,8 @@
     "^Dropbear\\ client\\ [0-9]\\.[0-9]+$",
     "^Dropbear\\ multi-purpose\\ version\\ 20[0-9][0-9]\\.[0-9][0-9]$",
     "^Dropbear\\ multi-purpose\\ version\\ [0-9]\\.[0-9]+$",
-    "^Dropbear\\ sshd\\ v20[0-9][0-9]\\.[0-9][0-9]$",
-    "^Dropbear\\ v20[0-9][0-9]\\.[0-9][0-9]$"
+    "^Dropbear\\ sshd\\ (v)?20[0-9][0-9]\\.[0-9][0-9].*",
+    "^Dropbear\\ v20[0-9][0-9]\\.[0-9][0-9].*"
   ],
   "vendor_names": [
     "dropbear_ssh_project"

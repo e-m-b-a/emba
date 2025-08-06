@@ -797,7 +797,7 @@ main() {
           write_log "[*] $(print_date) - EMBA quest container ${lQUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${lQUEST_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
         fi
 
-        while [[ "$( docker container inspect -f '{{.State.Status}}' "${lMAIN_CONTAINER_}" )" == "running" ]]; do
+        while [[ "$( docker container inspect -f '{{.State.Status}}' "${lMAIN_CONTAINER_}" 2>/dev/null)" == "running" ]]; do
           sleep 1
         done
         remove_status_bar
@@ -807,7 +807,7 @@ main() {
         if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
           cat "${LOG_DIR}"/f50_base_aggregator.txt
         fi
-        D_RETURN=$(docker inspect "${lMAIN_CONTAINER_}" --format='{{.State.ExitCode}}')
+        D_RETURN=$(docker inspect "${lMAIN_CONTAINER_}" --format='{{.State.ExitCode}}' 2>/dev/null)
       fi
     fi
     enable_strict_mode "${STRICT_MODE}" 0
