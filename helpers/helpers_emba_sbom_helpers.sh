@@ -91,22 +91,26 @@ build_sbom_json_hashes_arr() {
   fi
 
   # hashes of the source file that is currently tested:
-  lMD5_CHECKSUM="$(md5sum "${lBINARY}" | awk '{print $1}')"
-  lSHA256_CHECKSUM="$(sha256sum "${lBINARY}" | awk '{print $1}')"
-  lSHA512_CHECKSUM="$(sha512sum "${lBINARY}" | awk '{print $1}')"
+  if [[ -f "${lBINARY}" ]]; then
+    lMD5_CHECKSUM="$(md5sum "${lBINARY}" | awk '{print $1}')"
+    lSHA256_CHECKSUM="$(sha256sum "${lBINARY}" | awk '{print $1}')"
+    lSHA512_CHECKSUM="$(sha512sum "${lBINARY}" | awk '{print $1}')"
 
-  # temp array with only one set of hash values
-  local lHASHES_ARRAY_INIT=("alg=MD5")
-  lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
-  HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    # temp array with only one set of hash values
+    local lHASHES_ARRAY_INIT=("alg=MD5")
+    lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
+    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
 
-  lHASHES_ARRAY_INIT=("alg=SHA-256")
-  lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
-  HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    lHASHES_ARRAY_INIT=("alg=SHA-256")
+    lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
+    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
 
-  lHASHES_ARRAY_INIT=("alg=SHA-512")
-  lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
-  HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    lHASHES_ARRAY_INIT=("alg=SHA-512")
+    lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
+    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+  else
+    print_output "[*] No real binary detected for ${lBINARY} - no checksums for the SBOM generated" "no_log"
+  fi
 
   # check if we already have results which are duplicates and does not need to be logged
   # we check all SBOM results for the same file hash and afterwards for name and version
