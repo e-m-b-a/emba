@@ -19,9 +19,7 @@ get_date() {
   "${BUSYBOX}" date
 }
 
-if ! [ -f /dev/null ]; then
-  "${BUSYBOX}" mknod -m 666 /dev/null c 1 3
-fi
+"${BUSYBOX}" mknod -m 666 /dev/null c 1 3 2>/dev/null
 
 # we should build a real and useful PATH ... currently it is just guessing
 export PATH="${PATH}":/bin/:/sbin/:/usr/bin/:/usr/sbin:/usr/local/bin:/usr/local/sbin
