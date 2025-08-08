@@ -24,17 +24,28 @@ S23_lua_check()
   local lS23_LUA_VULNS=0
   local lS23_LUA_ISSUES=0
   local lLUA_SCRIPT=""
-  local lS23_LUA_SCRIPTS_ARR=()
   local lWAIT_PIDS_S23_ARR=()
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnerabilities detected" "common linux file"
-  # The s23_luaseccheck is better in identification of the lua scripts
-  # Todo: make the lua identification available for the complete module
-  mapfile -t lS23_LUA_SCRIPTS_ARR < <(grep ".lua;" "${P99_CSV_LOG}" | sort -u || true)
+
+  export LUA_CGI_FILES_ARR=()
+  local lLUA_CGI_FILES_ARR_2=()
+  local lLUA_CGI_FILES_ARR_3=()
+
+  # find scripts with cgilua as contend:
+  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. "%" 2>/dev/null || true | cut -d : -f1' | sort -u || true)
+  # extract lua scripts that are known as lua scripts in out P99_CSV_LOG
+  mapfile -t lLUA_CGI_FILES_ARR_2 < <(grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  # find files with lua in the name and some lua content
+  mapfile -t lLUA_CGI_FILES_ARR_3 < <(grep "\.lua;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+
+  LUA_CGI_FILES_ARR=( "${LUA_CGI_FILES_ARR[@]}" "${lLUA_CGI_FILES_ARR_2[@]}" "${lLUA_CGI_FILES_ARR_3[@]}" )
+
+  mapfile -t LUA_CGI_FILES_ARR < <(printf "%s\n" "${LUA_CGI_FILES_ARR[@]}" | sort -u)
 
   sub_module_title "LUA linter checks module"
 
-  for lLUA_SCRIPT in "${lS23_LUA_SCRIPTS_ARR[@]}" ; do
+  for lLUA_SCRIPT in "${LUA_CGI_FILES_ARR[@]}" ; do
     # linting check:
     s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
     local lTMP_PID="$!"
@@ -61,7 +72,7 @@ S23_lua_check()
   fi
   if [[ "${lS23_LUA_ISSUES}" -gt 1 ]]; then
     print_ln
-    print_output "[+] Found ${ORANGE}${lS23_LUA_ISSUES} coding issues${GREEN} in ${ORANGE}${#lS23_LUA_SCRIPTS_ARR[@]}${GREEN} lua files.${NC}"
+    print_output "[+] Found ${ORANGE}${lS23_LUA_ISSUES} coding issues${GREEN} in ${ORANGE}${#LUA_CGI_FILES_ARR[@]}${GREEN} lua files.${NC}"
   fi
 
   write_log ""
@@ -76,23 +87,8 @@ s23_luaseccheck() {
   local lENTRY=""
   local lQUERY_ENTRIES_ARR=()
   local lQUERY_FILE=""
-  export LUA_CGI_FILES_ARR=()
-  local lLUA_CGI_FILES_ARR_2=()
-  local lLUA_CGI_FILES_ARR_3=()
 
   sub_module_title "LUA Security checks module"
-
-  # first, check for all lua files in the firmware
-
-  # find scripts with cgilua as contend:
-  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. "%" 2>/dev/null || true | cut -d : -f1' | sort -u || true)
-  # extract lua scripts that are known as lua scripts in out P99_CSV_LOG
-  mapfile -t lLUA_CGI_FILES_ARR_2 < <(grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
-  # find files with lua in the name and some lua content
-  mapfile -t lLUA_CGI_FILES_ARR_3 < <(find "${FIRMWARE_PATH}" -type f -name "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'grep -l lua "%" || true')
-  LUA_CGI_FILES_ARR=( "${LUA_CGI_FILES_ARR[@]}" "${lLUA_CGI_FILES_ARR_2[@]}" "${lLUA_CGI_FILES_ARR_3[@]}" )
-
-  mapfile -t LUA_CGI_FILES_ARR < <(printf "%s\n" "${LUA_CGI_FILES_ARR[@]}" | sort -u)
 
   # walk through all lua files for analysis
   for lQUERY_FILE in "${LUA_CGI_FILES_ARR[@]}"; do
