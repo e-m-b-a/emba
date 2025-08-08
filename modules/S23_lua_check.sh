@@ -89,7 +89,7 @@ s23_luaseccheck() {
   # extract lua scripts that are known as lua scripts in out P99_CSV_LOG
   mapfile -t lLUA_CGI_FILES_ARR_2 < <(grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   # find files with lua in the name and some lua content
-  mapfile -t lLUA_CGI_FILES_ARR_3 < <(find "${FIRMWARE_PATH}" -type f -name "*.lua" -exec grep -l lua {} \;)
+  mapfile -t lLUA_CGI_FILES_ARR_3 < <(find "${FIRMWARE_PATH}" -type f -name "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'grep -l lua "%" || true')
   LUA_CGI_FILES_ARR=( "${LUA_CGI_FILES_ARR[@]}" "${lLUA_CGI_FILES_ARR_2[@]}" "${lLUA_CGI_FILES_ARR_3[@]}" )
 
   mapfile -t LUA_CGI_FILES_ARR < <(printf "%s\n" "${LUA_CGI_FILES_ARR[@]}" | sort -u)
