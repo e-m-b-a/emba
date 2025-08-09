@@ -66,14 +66,14 @@ P65_package_extractor() {
       lDISK_SPACE_CRIT=1
     fi
 
-    mapfile -t lFILES_POST_PACKAGE_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
+    mapfile -t lFILES_POST_PACKAGE_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw")
 
     if [[ "${#lFILES_POST_PACKAGE_ARR[@]}" -gt "${FILES_PRE_PACKAGE}" ]]; then
       sub_module_title "Firmware package extraction details"
       print_ln
       print_output "[*] Found ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files."
 
-      print_output "[*] Adjusting the backend with ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files ... take a break" "no_log"
+      print_output "[*] Adjusting the backend from ${ORANGE}${FILES_PRE_PACKAGE}${NC} to ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} entries ... take a break" "no_log"
 
       for lBINARY in "${lFILES_POST_PACKAGE_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
@@ -192,7 +192,7 @@ ipk_extractor() {
       done
     done
 
-    lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw" | wc -l )
     print_ln "no_log"
     print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_IPK}${NC} files extracted."
     if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
