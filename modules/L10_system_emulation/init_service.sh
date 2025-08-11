@@ -51,9 +51,12 @@ if ("${EMBA_ETC}"); then
       # shellcheck disable=SC3060
       "${BUSYBOX}" ls -l "${SERVICE/\ *}"
       # BINARY variable could be something like: binary parameter parameter ...
-      # shellcheck disable=SC2086
-      # "${BUSYBOX}" sh ${SERVICE} &  # nosemgrep
       ${SERVICE} &  # nosemgrep
+      "${BUSYBOX}" sleep 5
+      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}") ); then
+        # shellcheck disable=SC2086
+        "${BUSYBOX}" sh ${SERVICE} &  # nosemgrep
+      fi
     else
       "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${SERVICE_NAME}${NC} already started ..."
     fi

@@ -1831,10 +1831,10 @@ get_networking_details_emulation() {
         fi
         # this is a default (fallback) entry with the correct ip address:
         l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
-        store_interface_details "${IP_ADDRESS_}" "br0" "eth0" "NONE" "default" "${l_NW_ENTRY_PRIO}"
+        store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE:-br0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "default" "${l_NW_ENTRY_PRIO}"
         # this is a default (fallback) entry with the correct ip address:
         l_NW_ENTRY_PRIO=1
-        store_interface_details "${IP_ADDRESS_}" "eth0" "eth0" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
+        store_interface_details "${IP_ADDRESS_}" "${lETH_INT:-eth0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "interface" "${l_NW_ENTRY_PRIO}"
       fi
     done
 
