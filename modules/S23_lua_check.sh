@@ -125,8 +125,8 @@ s23_luaseccheck() {
     # The following grep command checks for variants of the following patterns
     #   os.execute("some_command" .. variable)
     #   os.execute(string.format("sleep %d", tonumber(sec)))
-    #   os.execute(cmd)
-    if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -q "os.execute\(.*\.\..*\)\|os.execute\(.*\%.*\)\|os.execute\([[:alnum:]]+\)" "${lQUERY_FILE}"; then
+    #   os.execute(asdf_cmd)
+    if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "os\.execute\(.*\.\..*\)|os\.execute\(.*\%.*\)|os\.execute\([[:alnum:]_]+\)" "${lQUERY_FILE}"; then
       # command exec - not our parameter but we check it
       print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible command execution for review."
       copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
