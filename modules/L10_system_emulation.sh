@@ -1683,11 +1683,20 @@ get_networking_details_emulation() {
         IP_ADDRESS_=$(echo "${lIP}" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
       fi
 
+      # we try to extract a backup IP address from the nvram log
+      # afterwards we can use this ip if we have a bridge interface with "0.0.0.0"
+      local lNVRAM_BACKUP_IP=""
+      lNVRAM_BACKUP_IP=$(grep -E -h "nvram_get_buf.*[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}"/qemu.initial.serial.log \
+        | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -v "0\.0\.0\.0\|127\.0\.\|255\." | sort -u | head -1)
+
       # handle IP addresses 0.0.0.0 somehow:
       if [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
         local lADJUST_PRIO+=-1
         # we use one of the idenfied IP addresses. If no IP address available we switch to default 192.168.0.1
-        if [[ -s "${L10_SYS_EMU_RESULTS}" ]]; then
+        if [[ "${lNVRAM_BACKUP_IP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          IP_ADDRESS_="${lNVRAM_BACKUP_IP}"
+          print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
+        elif [[ -s "${L10_SYS_EMU_RESULTS}" ]]; then
           IP_ADDRESS_=$(cut -d\; -f8 "${L10_SYS_EMU_RESULTS}" | sort -u | tail -n1)
           IP_ADDRESS_="${IP_ADDRESS_/*\ /}"
           print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
@@ -1831,7 +1840,7 @@ get_networking_details_emulation() {
         fi
         # this is a default (fallback) entry with the correct ip address:
         l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
-        store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE:-br0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "default" "${l_NW_ENTRY_PRIO}"
+        store_interface_details "${IP_ADDRESS_}" "br0" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "default" "${l_NW_ENTRY_PRIO}"
         # this is a default (fallback) entry with the correct ip address:
         l_NW_ENTRY_PRIO=1
         store_interface_details "${IP_ADDRESS_}" "${lETH_INT:-eth0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "interface" "${l_NW_ENTRY_PRIO}"
