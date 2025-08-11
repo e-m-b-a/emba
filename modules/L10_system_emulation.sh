@@ -1687,7 +1687,7 @@ get_networking_details_emulation() {
       # afterwards we can use this ip if we have a bridge interface with "0.0.0.0"
       local lNVRAM_BACKUP_IP=""
       lNVRAM_BACKUP_IP=$(grep -E -h "nvram_get_buf.*[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}"/qemu.initial.serial.log \
-        | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -v "0\.0\.0\.0\|127\.0\.\|255\." | sort -u | head -1)
+        | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -v "0\.0\.0\.0\|127\.0\.\|255\." | sort -u | head -1 || true)
 
       # handle IP addresses 0.0.0.0 somehow:
       if [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
