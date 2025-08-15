@@ -168,6 +168,8 @@ unblobber() {
   local lVERBOSE="${3:-0}"
   local lUNBLOB_BIN="unblob"
   local lTIMEOUT="300m"
+  local lUNBLOB_LOG=""
+  lUNBLOB_LOG="${LOG_PATH_MODULE}/unblob_$(basename "${lFIRMWARE_PATH}")_${RANDOM}.log"
 
   if [[ "${DIFF_MODE}" -ne 1 ]]; then
     sub_module_title "Analyze binary firmware $(basename "${lFIRMWARE_PATH}") with unblob"
@@ -182,11 +184,11 @@ unblobber() {
   if [[ "${lVERBOSE}" -eq 1 ]]; then
     # Warning: the safe_logging is very slow.
     # TODO: We need to check on this!
-    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
+    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -v -k --log "${lUNBLOB_LOG}" -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
       |& safe_logging "${LOG_FILE}" 0 || true
   else
     local COLUMNS=""
-    COLUMNS=100 timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
+    COLUMNS=100 timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${lUNBLOB_LOG}" -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
       |& safe_logging "${LOG_FILE}" 0 || true
   fi
 }

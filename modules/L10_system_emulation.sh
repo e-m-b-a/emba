@@ -1707,7 +1707,7 @@ get_networking_details_emulation() {
       fi
 
       # filter for non usable IP addresses:
-      if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127."* ]]; then
+      if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127.0.0."* ]]; then
         print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC} / ${ORANGE}${lINTERFACE_CAND}${NC}"
         DETECTED_IP=1
         # get the network device from our interface candidate
