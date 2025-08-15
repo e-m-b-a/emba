@@ -47,7 +47,8 @@ S23_lua_check()
 
   for lLUA_SCRIPT in "${LUA_CGI_FILES_ARR[@]}" ; do
     # linting check:
-    s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
+    # s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
+    s23_luacheck "${lLUA_SCRIPT}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S23_ARR
@@ -63,7 +64,7 @@ S23_lua_check()
 
   lS23_LUA_ISSUES=$(wc -l 2>/dev/null < "${S23_CSV_LOG}")
   # extract the not 0 results of the vulnerabilities
-  lS23_LUA_VULNS=$(cut -d ';' -f 3 "${S23_CSV_LOG}" | grep -v -c "^0$")
+  lS23_LUA_VULNS=$(cut -d ';' -f 3 "${S23_CSV_LOG}" 2>/dev/null | grep -v -c "^0$" || true)
 
   # first line is the header
   if [[ "${lS23_LUA_VULNS}" -gt 1 ]]; then
