@@ -184,7 +184,7 @@ output_details() {
   fi
 
   if [[ "${S20_SHELL_VULNS:-0}" -gt 0 ]]; then
-    print_output "[+] Found ""${ORANGE}""${S20_SHELL_VULNS}"" issues""${GREEN}"" in ""${ORANGE}""${S20_SCRIPTS}""${GREEN}"" shell scripts.""${NC}"
+    print_output "[+] Found ${ORANGE}${S20_SHELL_VULNS} issues${GREEN} in ${ORANGE}${S20_SCRIPTS}${GREEN} shell scripts.${NC}"
     write_link "s20"
     write_csv_log "shell_scripts" "${S20_SCRIPTS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     write_csv_log "shell_script_vulns" "${S20_SHELL_VULNS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -215,6 +215,20 @@ output_details() {
     write_link "s22"
     write_csv_log "php_ini_issues" "${S22_PHP_INI_ISSUES}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     write_csv_log "php_ini_configs" "${S22_PHP_INI_CONFIGS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    lDATA_GENERATED=1
+  fi
+  if [[ "${S23_LUA_ISSUES:-0}" -gt 0 ]]; then
+    print_output "[+] Found ${ORANGE}${S23_LUA_ISSUES:-0} coding issues${GREEN} in ${ORANGE}${S23_LUA_SCRIPTS}${GREEN} lua scripts.${NC}"
+    write_link "s23"
+    write_csv_log "lua_scripts" "${S23_LUA_SCRIPTS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    write_csv_log "lua_script_issues" "${S23_LUA_ISSUES}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    lDATA_GENERATED=1
+  fi
+  if [[ "${S23_LUA_VULNS:-0}" -gt 0 ]]; then
+    print_output "[+] Found ${ORANGE}${S23_LUA_VULNS:-0} potential security issues${GREEN} in ${ORANGE}${S23_LUA_SCRIPTS}${GREEN} lua scripts.${NC}"
+    write_link "s23"
+    write_csv_log "lua_scripts" "${S23_LUA_SCRIPTS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    write_csv_log "lua_script_vulns" "${S23_LUA_VULNS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     lDATA_GENERATED=1
   fi
   if [[ "${YARA_CNT:-0}" -gt 0 ]]; then
@@ -769,6 +783,9 @@ get_data() {
   export S22_PHP_SCRIPTS=0
   export S22_PHP_INI_ISSUES=0
   export S22_PHP_INI_CONFIGS=0
+  export S23_LUA_SCRIPTS=0
+  export S23_LUA_ISSUES=0
+  export S23_LUA_VULNS=0
   export S24_FAILED_KSETTINGS=0
   export S16_GHIDRA_SEMGREP=0
   export S16_BINS_CHECKED=0
@@ -875,6 +892,11 @@ get_data() {
     S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f4 || true)
     S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f5 || true)
     S22_PHP_VULNS_SEMGREP=$(grep -a "\[\*\]\ Statistics1:" "${S22_LOG}" | cut -d: -f2 || true)
+  fi
+  if [[ -f "${S23_LOG}" ]]; then
+    S23_LUA_ISSUES=$(grep -a "\[\*\]\ Statistics:" "${S23_LOG}" | cut -d: -f2 || true)
+    S23_LUA_VULNS=$(grep -a "\[\*\]\ Statistics:" "${S23_LOG}" | cut -d: -f3 || true)
+    S23_LUA_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "${S23_LOG}" | cut -d: -f4 || true)
   fi
   if [[ -f "${S24_LOG}" ]]; then
     # we currently only respect one kernel settings analysis in our final aggregator.
