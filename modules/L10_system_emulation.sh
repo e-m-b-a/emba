@@ -208,7 +208,9 @@ L10_system_emulation() {
           STATE_CHECK_MECHANISM="HPING"
         fi
         # we should get TCP="ok" and SYS_ONLINE=1 back
-        if ! restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+        if restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+          print_output "[+] System recovery was successful. Further live analysis possible for IP ${lIP_ADDRESS}"
+        else
           print_output "[-] System recovery went wrong. No further analysis possible"
         fi
         export IP_ADDRESS_="${lIP_ADDRESS}"
