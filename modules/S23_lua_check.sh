@@ -22,45 +22,63 @@ S23_lua_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local lS23_LUA_VULNS=0
+  local lS23_LUA_ISSUES=0
   local lLUA_SCRIPT=""
-  local lS23_LUA_SCRIPTS_ARR=()
-  export S23_ISSUE_FOUND=0
   local lWAIT_PIDS_S23_ARR=()
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnerabilities detected" "common linux file"
-  # mapfile -t lS23_LUA_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null || true' | sort -u -k1,1 | cut -d\  -f3 || true)
-  mapfile -t lS23_LUA_SCRIPTS_ARR < <(grep ".lua;" "${P99_CSV_LOG}" | sort -u || true)
+
+  export LUA_CGI_FILES_ARR=()
+  local lLUA_CGI_FILES_ARR_2=()
+  local lLUA_CGI_FILES_ARR_3=()
+
+  # find scripts with cgilua as contend:
+  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. "%" 2>/dev/null || true | cut -d : -f1' | sort -u || true)
+  # extract lua scripts that are known as lua scripts in out P99_CSV_LOG
+  mapfile -t lLUA_CGI_FILES_ARR_2 < <(grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  # find files with lua in the name and some lua content
+  mapfile -t lLUA_CGI_FILES_ARR_3 < <(grep "\.lua;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+
+  LUA_CGI_FILES_ARR=( "${LUA_CGI_FILES_ARR[@]}" "${lLUA_CGI_FILES_ARR_2[@]}" "${lLUA_CGI_FILES_ARR_3[@]}" )
+
+  mapfile -t LUA_CGI_FILES_ARR < <(printf "%s\n" "${LUA_CGI_FILES_ARR[@]}" | sort -u)
 
   sub_module_title "LUA linter checks module"
 
-  for lLUA_SCRIPT in "${lS23_LUA_SCRIPTS_ARR[@]}" ; do
-    if [[ "${THREADED}" -eq 1 ]]; then
-      # linting check:
-      s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
-      local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S23_ARR
-      continue
-    else
-      s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)"
-    fi
+  for lLUA_SCRIPT in "${LUA_CGI_FILES_ARR[@]}" ; do
+    # linting check:
+    # s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
+    s23_luacheck "${lLUA_SCRIPT}" &
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S23_ARR
+    continue
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S23_ARR[@]}"
+  wait_for_pid "${lWAIT_PIDS_S23_ARR[@]}"
 
   # simple lua checks to identify files which should be analysed in more detail
+  # we should thread this in the future
   print_ln
   s23_luaseccheck
 
-  if [[ "${lS23_LUA_VULNS}" -gt 0 ]]; then
+  lS23_LUA_ISSUES=$(wc -l 2>/dev/null < "${S23_CSV_LOG}")
+  # extract the not 0 results of the vulnerabilities
+  lS23_LUA_VULNS=$(cut -d ';' -f 3 "${S23_CSV_LOG}" 2>/dev/null | grep -v -c "^0$" || true)
+
+  # first line is the header
+  if [[ "${lS23_LUA_VULNS}" -gt 1 ]]; then
     print_ln
-    print_output "[+] Found ""${ORANGE}""${lS23_LUA_VULNS}"" security issues""${GREEN}"" in ""${ORANGE}""${#LUA_CGI_FILES_ARR[@]}""${GREEN}"" lua files""${NC}""\\n"
+    print_output "[+] Found ${ORANGE}${lS23_LUA_VULNS} possible security issues${GREEN} in ${ORANGE}${#LUA_CGI_FILES_ARR[@]}${GREEN} lua files.${NC}"
+  fi
+  if [[ "${lS23_LUA_ISSUES}" -gt 1 ]]; then
+    print_ln
+    print_output "[+] Found ${ORANGE}${lS23_LUA_ISSUES} coding issues${GREEN} in ${ORANGE}${#LUA_CGI_FILES_ARR[@]}${GREEN} lua files.${NC}"
   fi
 
   write_log ""
-  write_log "[*] Statistics:${lS23_LUA_VULNS}:${#LUA_CGI_FILES_ARR[@]}"
-  module_end_log "${FUNCNAME[0]}" "${S23_ISSUE_FOUND}"
+  write_log "[*] Statistics:${lS23_LUA_ISSUES}:${lS23_LUA_VULNS}:${#LUA_CGI_FILES_ARR[@]}"
+  module_end_log "${FUNCNAME[0]}" "${lS23_LUA_ISSUES}"
 }
 
 # this is a very basic checker for LUA issues
@@ -70,12 +88,10 @@ s23_luaseccheck() {
   local lENTRY=""
   local lQUERY_ENTRIES_ARR=()
   local lQUERY_FILE=""
-  export LUA_CGI_FILES_ARR=()
 
   sub_module_title "LUA Security checks module"
 
-  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. "%" 2>/dev/null || true | cut -d : -f1' | sort -u || true)
-
+  # walk through all lua files for analysis
   for lQUERY_FILE in "${LUA_CGI_FILES_ARR[@]}"; do
     local lISSUES_FILE=0
 
@@ -92,7 +108,8 @@ s23_luaseccheck() {
         lS23_LUA_VULNS=$((lS23_LUA_VULNS+1))
         lISSUES_FILE=$((lISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${lENTRY}${GREEN} in file ${ORANGE}${lQUERY_FILE}${GREEN} with file access capabilities."
-        S23_ISSUE_FOUND=1
+        copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+        sed -i -r "s/.*io\.(p)?open.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
         lGPT_PRIO_=$((lGPT_PRIO_+1))
       fi
       if grep "${lENTRY}" "${lQUERY_FILE}" | grep -q "os.execute"; then
@@ -100,19 +117,29 @@ s23_luaseccheck() {
         lS23_LUA_VULNS=$((lS23_LUA_VULNS+1))
         lISSUES_FILE=$((lISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${lENTRY}${GREEN} in file ${ORANGE}${lQUERY_FILE}${GREEN} with command execution capabilities."
-        S23_ISSUE_FOUND=1
+        copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+        sed -i -r "s/.*os\.execute.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
         lGPT_PRIO_=$((lGPT_PRIO_+1))
       fi
     done
-    if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -q "os.execute" "${lQUERY_FILE}"; then
+
+    # The following grep command checks for variants of the following patterns
+    #   os.execute("some_command" .. variable)
+    #   os.execute(string.format("sleep %d", tonumber(sec)))
+    #   os.execute(asdf_cmd)
+    if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "os\.execute\(.*\.\..*\)|os\.execute\(.*\%.*\)|os\.execute\([[:alnum:]_]+\)" "${lQUERY_FILE}"; then
       # command exec - not our parameter but we check it
-      print_output "[*] Found lua file ${ORANGE}${lQUERY_FILE}${NC} with possible command execution for review."
-      S23_ISSUE_FOUND=1
+      print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible command execution for review."
+      copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      sed -i -r "s/.*os\.execute.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      lISSUES_FILE=$((lISSUES_FILE+1))
     fi
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "io\.(p)?open" "${lQUERY_FILE}"; then
       # command exec - not our parameter but we check it
-      print_output "[*] Found lua file ${ORANGE}${lQUERY_FILE}${NC} with possible file access for review."
-      S23_ISSUE_FOUND=1
+      print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible file access for review."
+      copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      sed -i -r "s/.*io\.(p)?open.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      lISSUES_FILE=$((lISSUES_FILE+1))
     fi
 
     if [[ "${lISSUES_FILE}" -gt 0 ]]; then
@@ -142,7 +169,6 @@ s23_luacheck() {
 
   lLUA_ISSUES=$(strip_color_codes "$(grep Total "${lLUA_LOG}" | awk '{print $2}' 2> /dev/null || true)")
   if [[ "${lLUA_ISSUES}" -gt 0 ]] ; then
-    S23_ISSUE_FOUND=1
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""

@@ -78,7 +78,6 @@ S115_usermode_emulator() {
 
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_ln
-      lNEG_LOG=1
       print_output "[*] Detected root path: ${ORANGE}${R_PATH}${NC}"
       if [[ -f "${HELP_DIR}"/fix_bins_lnk_emulation.sh ]] && [[ $(find "${R_PATH}" -type l | wc -l) -lt 10 ]]; then
         print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
@@ -108,7 +107,7 @@ S115_usermode_emulator() {
         # to do this, we remove unhandled_file entries
         if [[ -d "${SBOM_LOG_PATH}" ]]; then
           if grep -lr '"alg":"MD5","content":"'"${lBIN_MD5_}" "${SBOM_LOG_PATH}"/* | grep -qv "unhandled_file"; then
-            print_output "[*] Already found SBOM results for ${lBINARY} ... skip emulation tests" "no_log"
+            print_output "[*] Already found SBOM results for ${lBINARY} ... skip emulation tests"
             continue
           fi
         fi
@@ -118,7 +117,13 @@ S115_usermode_emulator() {
         fi
       done
 
+      if [[ "${#lBIN_EMU_ARR[@]}" -eq 0 ]]; then
+        print_output "[*] Found ${ORANGE}${#lBIN_EMU_ARR[@]}${NC} unique executables in root directory: ${ORANGE}${R_PATH}${NC} (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC}) -> No further testing possible."
+        continue
+      fi
+
       print_output "[*] Testing ${ORANGE}${#lBIN_EMU_ARR[@]}${NC} unique executables in root directory: ${ORANGE}${R_PATH}${NC} (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
+      lNEG_LOG=1
 
       local lCPU_CNT=1
       lCPU_CNT="$(nproc || echo 1)"

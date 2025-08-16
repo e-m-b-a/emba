@@ -184,7 +184,10 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         # let's try upnpd with a basic configuration:
         "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} ppp0 eth0${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} ppp0 eth0\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} eth0 eth0${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} eth0 eth0\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} br0${NC}"
+        "${BUSYBOX}" echo -e -n "${BINARY} br0\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "ftpd" ]; then
       if ! "${BUSYBOX}" grep -q "${BINARY} -D" /firmadyne/service 2>/dev/null; then
