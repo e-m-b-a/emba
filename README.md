@@ -86,3 +86,23 @@ We welcome [pull requests](https://github.com/e-m-b-a/emba/pulls) and [issues](h
 [The core EMBA Team](https://github.com/orgs/e-m-b-a/people)
 
 [Contributors](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md)
+
+***
+
+**Sponsor EMBA and EMBArk:**
+
+The _EMBA_ environment is free and open source!
+
+We put a lot of time and energy into these tools and related research to make this happen. It's now possible for you to contribute as a sponsor!
+
+If you like _EMBA_ you have the chance to support future development by becoming a [Sponsor](https://github.com/sponsors/e-m-b-a)
+
+Thank You [:heart: Get a Sponsor](https://github.com/sponsors/e-m-b-a)  
+You can also buy us some beer here [:heart: Buy me a coffee](https://www.buymeacoffee.com/securefirmware)
+
+To show your love for EMBA with nice shirts or other merch you can check our [Spreadshop](https://emba-firmware-analyzer.myspreadshop.de/)
+
+***
+<p align="center"><b>EMBA - firmware security scanning at its best</b></p>
+
+***
