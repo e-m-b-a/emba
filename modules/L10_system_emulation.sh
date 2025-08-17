@@ -943,7 +943,7 @@ check_qemu_kernel_output() {
   local lKERNEL_MIN_RUNTIME=300
   local lQEMU_RUN_TIME_KERNEL=0
 
-  lQEMU_RUN_TIME_KERNEL=$(grep -o -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -1 || true)
+  lQEMU_RUN_TIME_KERNEL=$(grep -a -o -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -1 || true)
   lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//\.*}
   lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//*\ }
 
@@ -953,7 +953,7 @@ check_qemu_kernel_output() {
     print_output "${lE_MESSAGE}"
     print_error "${lE_MESSAGE}"
 
-    print_output "$(indent "$(orange "$(grep -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -10 || true)")")"
+    print_output "$(indent "$(orange "$(grep -a -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -10 || true)")")"
 
     lE_MESSAGE="lARCHIVE_PATH: ${lARCHIVE_PATH} - lIMAGE_NAME: ${lIMAGE_NAME} - lNETWORK_MODE: ${lNETWORK_MODE} - lETH_INT: ${lETH_INT} - lVLAN_ID: ${lVLAN_ID} - lINIT_FILE: ${lINIT_FILE} - lNETWORK_DEVICE: ${lNETWORK_DEVICE}"
     print_output "$(indent "$(orange "${lE_MESSAGE}")")"

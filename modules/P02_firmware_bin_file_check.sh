@@ -354,7 +354,9 @@ fw_bin_detector() {
   fi
   if [[ "${lFILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"PE32+ executable"* ]] || [[ "${lFILE_BIN_OUT}" == *"MSI Installer"* ]]; then
     print_output "[+] Identified Windows executable"
-    export DISABLE_DEEP=1
+    # Do not disable the deep extractor. If disabled we will not find hidden layers in exe files
+    # e.g.: D-Link/dtlwe_r602b_04b0_4706_v1.0.0.1_190801_release_01.04.eu_.exe
+    # export DISABLE_DEEP=1
     export WINDOWS_EXE=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" || print_error "[-] Windows executable copy process failed"
