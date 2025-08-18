@@ -430,8 +430,11 @@ copy_and_link_file() {
     if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
       mkdir -p "$(dirname "${lDST_FILE}")" || true
     fi
-    if [[ -f "${lSRC_FILE}" ]]; then
-      cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
+    # we only copy if the lDST_FILE is not already there
+    if ! [[ -f "${lDST_FILE}" ]]; then
+      if [[ -f "${lSRC_FILE}" ]]; then
+        cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
+      fi
     fi
     if [[ -f "${lDST_FILE}" ]]; then
       write_link "${lDST_FILE}"

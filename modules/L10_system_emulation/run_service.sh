@@ -96,8 +96,8 @@ if ("${EMBA_ETC}"); then
 
           "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}Telnetd - ${_BINARY}${NC} debugging service ..."
           # shellcheck disable=SC2086
-          "${BUSYBOX}" sh ${_BINARY} & # nosemgrep
-          # ${_BINARY} &
+          # "${BUSYBOX}" sh ${_BINARY} & # nosemgrep
+          ${_BINARY} &
           continue
         fi
       fi
@@ -112,7 +112,13 @@ if ("${EMBA_ETC}"); then
 
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME} - ${_BINARY}${NC} service ..."
         # BINARY variable could be something like: binary parameter parameter ...
+        # shellcheck disable=SC2086
         ${_BINARY} &
+        "${BUSYBOX}" sleep 5
+        if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
+          # shellcheck disable=SC2086
+          "${BUSYBOX}" sh ${_BINARY} &
+        fi
         # strip only the real binary including path:
         _BINARY_TMP=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d ' ' -f1)
         "${BUSYBOX}" ls -l "${_BINARY_TMP}"

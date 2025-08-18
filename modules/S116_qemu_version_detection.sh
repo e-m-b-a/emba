@@ -83,7 +83,7 @@ S116_qemu_version_detection() {
 
       wait_for_pid "${lWAIT_PIDS_S116_ARR[@]}"
     fi
-    lNEG_LOG=$(grep -c "Version information found" "${LOG_FILE}" || echo 0)
+    lNEG_LOG=$(grep -c "Version information found" "${LOG_FILE}" || true)
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"

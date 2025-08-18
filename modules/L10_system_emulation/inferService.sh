@@ -31,6 +31,30 @@ if [ -e /etc/manual.starter ]; then
   fi
 fi
 
+# ZyXEL boa quick starter - ZyXEL_latest/NBG2105_V1.00_AAGU.2_C0.zip
+# needs to be started as initial service
+if [ -e "/bin/boa" ]; then
+  if ! "${BUSYBOX}" grep -q boa /firmadyne/startup_service 2>/dev/null; then
+    "${BUSYBOX}" echo -e "[*] Writing EMBA service starter for ${ORANGE}/bin/boa${NC}"
+    for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
+      "${BUSYBOX}" echo -e -n "/bin/boa -f ${BOA_CONFIG}\n" >> /firmadyne/startup_service
+    done
+    "${BUSYBOX}" chmod +x /bin/boa
+  fi
+fi
+# ZyXEL boa quick starter - ZyXEL_latest/WRE2205_1.00_AAES.3_C0.zip
+# needs to be started as initial service
+if [ -e "/bin/webs" ]; then
+  if ! "${BUSYBOX}" grep -q webs /firmadyne/startup_service 2>/dev/null; then
+    "${BUSYBOX}" echo -e "[*] Writing EMBA service starter for ${ORANGE}/bin/webs${NC}"
+    for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
+      "${BUSYBOX}" echo -e -n "/bin/webs -f ${BOA_CONFIG}\n" >> /firmadyne/startup_service
+    done
+    "${BUSYBOX}" chmod +x /bin/webs
+  fi
+fi
+
+
 # we search for possible init startup directories and iterate them later for possible init scripts
 # the /firmadyne/startup_service are only tried to startup once during bootup
 for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*.d*"); do
@@ -78,10 +102,9 @@ done
 
 if [ -e /bin/boa ]; then
   if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}/bin/boa${NC}"
-    "${BUSYBOX}" echo -e -n "/bin/boa\n" >> /firmadyne/service
-    "${BUSYBOX}" chmod +x /bin/boa
     for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
+      "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}/bin/boa - ${BOA_CONFIG}${NC}"
+      "${BUSYBOX}" echo -e -n "/bin/boa -f ${BOA_CONFIG}\n" >> /firmadyne/service
       # extract the directory index from config and search for it in the filesystem - this is needed to start boa with the correct
       # web root directory
       # shellcheck disable=SC2016
@@ -96,6 +119,18 @@ if [ -e /bin/boa ]; then
         "${BUSYBOX}" echo -e -n "/bin/boa -p ${DIR_INDEX_FS} -c ${BOA_CONFIG}\n" >> /firmadyne/service
       done
     done
+
+    # no config detected -> we try to start a basic boa
+    if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
+      if [ -d "/web" ]; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}/bin/boa -c /web -d${NC}"
+        "${BUSYBOX}" echo -e -n "/bin/boa -c /web -d\n" >> /firmadyne/service
+      else
+        "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}/bin/boa${NC}"
+        "${BUSYBOX}" echo -e -n "/bin/boa\n" >> /firmadyne/service
+      fi
+    fi
+    "${BUSYBOX}" chmod +x /bin/boa
   fi
 fi
 
@@ -162,7 +197,7 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         for WSCD_CONFIG in $("${BUSYBOX}" find / -name "*wscd*.conf" -type f); do
           "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} - ${WSCD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG}\n" >> /firmadyne/service
-          "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG} -mode 1 -upnp 1 -daemon\n" >> /firmadyne/service
+          "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG} -mode 1 -upnp 1 -daemon -br br0\n" >> /firmadyne/service
         done
         "${BUSYBOX}" echo -e -n "${BINARY} -a 0.0.0.0 -m 3 -D -d 3\n" >> /firmadyne/service
         "${BUSYBOX}" echo -e -n "${BINARY} -daemon -br br0 -mode 1 -upnp 1\n" >> /firmadyne/service
@@ -184,7 +219,10 @@ for BINARY in $("${BUSYBOX}" find / -name "*lighttpd" -type f -o -name "upnp" -t
         # let's try upnpd with a basic configuration:
         "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} ppp0 eth0${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} ppp0 eth0\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} eth0 eth0${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} eth0 eth0\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e "[*] Writing EMBA process starter for ${ORANGE}${BINARY} br0${NC}"
+        "${BUSYBOX}" echo -e -n "${BINARY} br0\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "ftpd" ]; then
       if ! "${BUSYBOX}" grep -q "${BINARY} -D" /firmadyne/service 2>/dev/null; then
