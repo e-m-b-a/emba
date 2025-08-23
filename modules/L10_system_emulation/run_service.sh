@@ -33,7 +33,7 @@ NC="\033[0m"
 "${BUSYBOX}" cat /firmadyne/service
 
 if ("${EMBA_ETC}"); then
-  INITIAL_DELAY=30
+  INITIAL_DELAY=20
   # first, the system should do the job by itself
   # after 100sec we jump in with our service helpers
   "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting ${INITIAL_DELAY} sec before helpers starting services in emulated environment...${NC}"
@@ -51,7 +51,7 @@ if ("${EMBA_ETC}"); then
   "${BUSYBOX}" echo -e "${ORANGE}[*] Starting EMBA services ...${NC}"
   while (true); do
     while IFS= read -r _BINARY; do
-      "${BUSYBOX}" sleep 5
+      "${BUSYBOX}" sleep 1
       "${BUSYBOX}" echo -e "${NC}[*] $(get_date) - Environment details ..."
 
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
@@ -114,7 +114,8 @@ if ("${EMBA_ETC}"); then
         # BINARY variable could be something like: binary parameter parameter ...
         # shellcheck disable=SC2086
         ${_BINARY} &
-        "${BUSYBOX}" sleep 5
+
+        "${BUSYBOX}" sleep 1
         if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
           # shellcheck disable=SC2086
           "${BUSYBOX}" sh ${_BINARY} &
@@ -142,11 +143,12 @@ if ("${EMBA_ETC}"); then
       # Do this only if we have some network_type configuration which means we are not in the network discovery mode
       # None means we are in network discovery mode
       ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
+
       # /tmp/EMBA_config_state is filled from modules/L10_system_emulation/network.sh
-      if [ "${ACTION}" != "None" ] && ("${BUSYBOX}" grep -q "network config finished" /tmp/EMBA_config_state); then
+      if [ "${ACTION}" != "None" ] && ("${BUSYBOX}" grep -q "network config finished" /tmp/EMBA_config_state 2>/dev/null); then
         # shellcheck disable=SC2016
-        IP=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
-        if ! ("${BUSYBOX}" echo "${IP}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
+        IP_CURRENT=$("${BUSYBOX}" ip addr show | "${BUSYBOX}" grep "inet " | "${BUSYBOX}" grep -v "127\.0\.0\." | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+        if ! ("${BUSYBOX}" echo "${IP_CURRENT}" | "${BUSYBOX}" grep -E -q "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"); then
           "${BUSYBOX}" echo -e "${ORANGE}[*] WARNING: Looks as we lost our network configuration -> reconfiguration starting now ...${NC}"
           /firmadyne/network.sh 1
         fi
