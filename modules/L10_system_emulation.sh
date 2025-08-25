@@ -1002,7 +1002,7 @@ emulation_with_config() {
     kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
   fi
 
-  kill "${lALIVE_PID}"
+  kill "${lALIVE_PID}" || true
 
   # set default state
   ICMP="not ok"
@@ -1436,7 +1436,7 @@ identify_networking_emulation() {
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
 
-  kill "${lALIVE_PID}"
+  kill "${lALIVE_PID}" || true
   print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
   stopping_emulation_process "${lIMAGE_NAME}"
   cleanup_emulator "${lIMAGE_NAME}"
@@ -1465,10 +1465,14 @@ run_kpanic_identification_single() {
   local lLOG_FILE="${1:-}"
   local lIMAGE_NAME="${2:-}"
 
+  if ! [[ -f "${lLOG_FILE}" ]]; then
+    return
+  fi
+
   lKPANIC=$(tail -n 20 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
   if [[ "${lKPANIC}" -gt 0 ]]; then
     print_output "[*] Kernel Panic detected - stopping emulation"
-    tail -n 20 "${lLOG_FILE}" | grep -a "Kernel panic - " | tee -a "${LOG_FILE}"
+    tail -n 20 "${lLOG_FILE}" | grep -a "Kernel panic - " | tee -a "${LOG_FILE}" || true
     print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
     stopping_emulation_process "${lIMAGE_NAME}"
     pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
@@ -2126,7 +2130,8 @@ setup_network_emulation() {
       # we need to solve the netmask better! Currently it is very rough
       write_script_exec "ip addr add ${lHOSTIP}/8 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
     else
-      write_script_exec "ip addr add ${lHOSTIP}/24 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
+      # is this working?
+      write_script_exec "ip addr add ${lHOSTIP}/8 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
     fi
     write_script_exec "ifconfig -a" "${ARCHIVE_PATH}"/run.sh 1
     write_script_exec "route -n" "${ARCHIVE_PATH}"/run.sh 1
@@ -2685,7 +2690,7 @@ check_online_stat() {
       print_output "[-] Probably the IP address of the system has changed."
       local lIP_ADDRESS_TMP_ARR=()
       mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" \
-        | grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u)
+        | grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
       for lIP_ADDRESS_TMP in "${lIP_ADDRESS_TMP_ARR[@]}"; do
         if [[ "${lIP_ADDRESS_TMP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           print_output "[*] Testing for changed IP address ${lIP_ADDRESS_TMP}"
@@ -2698,7 +2703,7 @@ check_online_stat() {
 
     print_ln
     local lCNT=1
-    local lMAX_NMAP_RETRIES=10
+    local lMAX_NMAP_RETRIES=15
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
     if grep -q "open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
       tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
