@@ -61,7 +61,7 @@ for INIT_DIR in $("${BUSYBOX}" find / -type d -name "*init*.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${INIT_DIR}" -type f); do
     # currently we only use some services for startup
     # if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "web\|http\|ftp\|upnp\|apache\|service\|nvram\|telnet\|ssh\|snmp\|rcS\|init\|event"; then
-    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "reboot\|reset\|halt\|shutdown\|restart"; then
+    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "reboot\|reset\|halt\|shutdown\|firewall\|iptables"; then
       continue
     fi
     if [ -e "${SERVICE}" ]; then
@@ -78,7 +78,7 @@ done
 # the /firmadyne/startup_service are only tried to startup once during bootup
 for RC_DIR in $("${BUSYBOX}" find / -type d -name "*rc.d*"); do
   for SERVICE in $("${BUSYBOX}" find "${RC_DIR}" -type f); do
-    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "reboot\|reset\|halt\|shutdown\|restart"; then
+    if "${BUSYBOX}" basename "${SERVICE}" | "${BUSYBOX}" grep -q "reboot\|reset\|halt\|shutdown\|firewall\|iptables"; then
       continue
     fi
     if [ -e "${SERVICE}" ]; then

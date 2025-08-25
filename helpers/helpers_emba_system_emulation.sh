@@ -179,7 +179,7 @@ ping_check() {
   local lPRINT_OUTPUT="${2:-1}"
   local lCOUNTER=0
   local lRESTARTER=0
-  local lMAX_RETRY_CNT=50
+  local lMAX_RETRY_CNT=100
 
   while ! ping -c 1 "${lIP_ADDRESS}"; do
     lRESTARTER=1

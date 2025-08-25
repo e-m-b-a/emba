@@ -676,7 +676,7 @@ detect_root_dir_helper() {
       fi
     done
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/sh//"' || true)
-    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/sh" | cut -d ';' -f2 | sed -E 's/\/.?bin\/sh.*//' | sort -u || true)
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/sh;" | cut -d ';' -f2 | sed -E 's/\/.?bin\/sh.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=( "${lR_PATH}" )

@@ -106,7 +106,7 @@ if [ -s /firmadyne/init_tmp ]; then
     if [ -z "${entry}" ]; then
       continue
     fi
-    if ! "${BUSYBOX}" grep -q "${entry}" /firmadyne/init; then
+    if ! "${BUSYBOX}" grep -q -E "^${entry}$" /firmadyne/init; then
       "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
     fi
   done < /firmadyne/init_tmp
