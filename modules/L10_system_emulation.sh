@@ -2199,14 +2199,14 @@ write_network_config_to_filesystem() {
         [[ "${lFILENAME_MISSING}" =~ \* ]] && continue
         print_output "[*] Found missing area ${ORANGE}${lFILE_PATH_MISSING}${NC} in filesystem ... trying to fix this now"
         lDIR_NAME_MISSING=$(dirname "${lFILE_PATH_MISSING}")
-        if ! [[ -d "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" ]]; then
+        if ! [[ -d "${MNT_POINT}/${lDIR_NAME_MISSING#/}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}/${lDIR_NAME_MISSING#/}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
+          mkdir -p "${MNT_POINT}/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
         fi
-        lFOUND_MISSING=$(find "${MNT_POINT}" -name "${lFILENAME_MISSING}" | head -1 || true)
-        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}" ]]; then
-          print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}${NC}) ... trying to fix this now"
-          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}""/${lDIR_NAME_MISSING#/}"/ || true
+        lFOUND_MISSING=$(find "${MNT_POINT}" -type f -name "${lFILENAME_MISSING}" | head -1 || true)
+        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFILENAME_MISSING}" ]]; then
+          print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFILENAME_MISSING}${NC}) ... trying to fix this now"
+          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}/${lDIR_NAME_MISSING#/}"/ || true
         fi
       done
     fi
