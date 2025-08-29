@@ -2663,8 +2663,6 @@ check_online_stat() {
     fi
   done
 
-  print_output "[*] Ping checks done ... lSYS_ONLINE: ${lSYS_ONLINE}"
-
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
     print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
