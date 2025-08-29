@@ -2122,17 +2122,8 @@ setup_network_emulation() {
 
     write_script_exec "ip link set ${HOSTNETDEV_0} up" "${ARCHIVE_PATH}"/run.sh 1
 
-    # we have seen systems configuring 127.x.y.z on bridge interface
-    # to handle such addresses we need to ensure the netmask for lo is
-    # adjusted to something 255.255.255.0 instead of the usual 255.0.0.0
-    if [[ "${lIP_ADDRESS}" == "127."* ]]; then
-      ifconfig lo 127.0.0.1 netmask 255.255.255.0
-      # we need to solve the netmask better! Currently it is very rough
-      write_script_exec "ip addr add ${lHOSTIP}/8 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
-    else
-      # is this working?
-      write_script_exec "ip addr add ${lHOSTIP}/8 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
-    fi
+    write_script_exec "ip addr add ${lHOSTIP}/8 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
+
     write_script_exec "ifconfig -a" "${ARCHIVE_PATH}"/run.sh 1
     write_script_exec "route -n" "${ARCHIVE_PATH}"/run.sh 1
   fi

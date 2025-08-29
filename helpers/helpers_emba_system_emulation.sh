@@ -232,7 +232,7 @@ check_emulation_port() {
   local lPORT_NR="${2:-}"
 
   print_output "    ""${lTOOL_NAME}"" - \\c" "no_log"
-  if netstat -anpt | grep -q ":${lPORT_NR}\ "; then
+  if netstat -anpt | grep -q ":${lPORT_NR}[[:space:]] "; then
     echo -e "${RED}""not ok""${NC}"
     echo -e "${RED}""    System emulation services detected - check for running Qemu processes""${NC}"
     export DEP_ERROR=1
