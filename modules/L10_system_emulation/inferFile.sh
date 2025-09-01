@@ -115,8 +115,7 @@ fi
 # finally we check busybox for linuxrc
 # if the applet is available in busybox we also check for a valid link and re-create it if it is not available
 # Afterwards, we add it to our init detection as last entry
-mapfile -t POSSIBLE_BUSYBOX_ARR < <("${BUSYBOX}" find / -type f -name "busybox")
-for POSSIBLE_BUSYBOX in "${POSSIBLE_BUSYBOX_ARR[@]}"; do
+for POSSIBLE_BUSYBOX in $("${BUSYBOX}" find / -name "busybox" -type f); do
   if "${BUSYBOX}" strings "${POSSIBLE_BUSYBOX}" | "${BUSYBOX}" grep "linuxrc"; then
     if [[ ! -f "/bin/linuxrc" ]] && [[ ! -L "/bin/linuxrc" ]]; then
       echo "[*] Re-creating BusyBox applet link for /bin/linuxrc"
