@@ -97,7 +97,9 @@ L10_system_emulation() {
             STATE_CHECK_MECHANISM="HPING"
           fi
           # we should get TCP="ok" and SYS_ONLINE=1 back
-          if ! restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+          if restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[+] System recovery was successful. Further live analysis possible for IP ${lIP_ADDRESS}"
+          else
             print_output "[-] System recovery went wrong. No further analysis possible"
           fi
         else
@@ -864,6 +866,7 @@ main_emulation() {
       local lNETWORK_DEVICE=""
       local lNW_ENTRY_PRIO=0
       local lIPS_INT_VLAN_TMP=()
+      local lMAX_NET_CFG=10
 
       # sort it
       mapfile -t IPS_INT_VLAN < <(printf "%s\n" "${IPS_INT_VLAN[@]}" | sort -t ';' -k 1,1r -k 5,5n)
@@ -882,6 +885,12 @@ main_emulation() {
         fi
         lIPS_INT_VLAN_TMP+=( "${lNW_ENTRY_PRIO}"\;"${lIP_CFG}"\;"${lINTERFACE_CFG}"\;"${lNETWORK_INTERFACE_CFG}"\;"${lVLAN_CFG}"\;"${lCFG_CFG}" )
         print_output "$(indent "$(orange "${lIP_CFG}"" - ""${lINTERFACE_CFG}"" - ""${lNETWORK_INTERFACE_CFG}"" - ""${lVLAN_CFG}"" - ""${lCFG_CFG}"" - ""${lNW_ENTRY_PRIO}")")"
+        if [[ "${#lIPS_INT_VLAN_TMP[@]}" -ge "${lMAX_NET_CFG}" ]]; then
+          print_output "[*] INFO: More then ${lMAX_NET_CFG} detected -> adding a default backup config and testing only ${lMAX_NET_CFG} most relevant configuration options"
+          lIPS_INT_VLAN_TMP+=( "1;192.168.0.1;br0;eth0;NONE;default" )
+          print_output "$(indent "$(orange "192.168.0.1 - br0 - eth0 - NONE - default - 1")")"
+          break
+        fi
       done
       print_ln
 
@@ -915,7 +924,7 @@ main_emulation() {
     ((lINDEX+=1))
   done
 
-  delete_device_entry "${IMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
+  delete_device_entry "${IMAGE_NAME}" "${lDEVICE:-NA}" "${MNT_POINT}"
 }
 
 # Function to check the kernel log entries.
@@ -948,16 +957,10 @@ check_qemu_kernel_output() {
   lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//*\ }
 
   if [[ "${lQEMU_RUN_TIME_KERNEL}" -lt "${lKERNEL_MIN_RUNTIME}" ]]; then
-    local lE_MESSAGE="[-] WARNING: QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment:"
-
-    print_output "${lE_MESSAGE}"
-    print_error "${lE_MESSAGE}"
-
+    print_output "[-] WARNING: QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment:"
     print_output "$(indent "$(orange "$(grep -a -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -10 || true)")")"
-
-    lE_MESSAGE="lARCHIVE_PATH: ${lARCHIVE_PATH} - lIMAGE_NAME: ${lIMAGE_NAME} - lNETWORK_MODE: ${lNETWORK_MODE} - lETH_INT: ${lETH_INT} - lVLAN_ID: ${lVLAN_ID} - lINIT_FILE: ${lINIT_FILE} - lNETWORK_DEVICE: ${lNETWORK_DEVICE}"
-    print_output "$(indent "$(orange "${lE_MESSAGE}")")"
-    print_error "[-] ${lE_MESSAGE}"
+    print_output "$(indent "lARCHIVE_PATH: ${lARCHIVE_PATH} - lIMAGE_NAME: ${lIMAGE_NAME} - lNETWORK_MODE: ${lNETWORK_MODE}")"
+    print_output "$(indent "lETH_INT: ${lETH_INT} - lVLAN_ID: ${lVLAN_ID} - lINIT_FILE: ${lINIT_FILE} - lNETWORK_DEVICE: ${lNETWORK_DEVICE}")"
   fi
 }
 
@@ -999,7 +1002,7 @@ emulation_with_config() {
     kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
   fi
 
-  kill "${lALIVE_PID}"
+  kill "${lALIVE_PID}" || true
 
   # set default state
   ICMP="not ok"
@@ -1024,6 +1027,12 @@ emulation_with_config() {
 
     # remove tmp files for next round
     rm "${TMP_DIR}"/online_stats.tmp || true
+  fi
+
+  # if our ip address has changed during analysis we restore this ip address now
+  if [[ -f "${TMP_DIR}/emulation_changed_ip_address.tmp" ]]; then
+    IP_ADDRESS_="$(cat "${TMP_DIR}/emulation_changed_ip_address.tmp")"
+    rm "${TMP_DIR}/emulation_changed_ip_address.tmp" || true
   fi
 
   write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lVLAN_ID}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
@@ -1095,10 +1104,10 @@ emulation_with_config() {
       if [[ "${lTMP_IP}" != "${IP_ADDRESS_}" ]]; then
         # check every ip address for our used interfaces (ethX/brX)
         # if we find a typical used interface with the changed IP address we will check it again
-        if (grep -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
+        if (grep -a -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
           print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${MAGENTA} to address ${ORANGE}${lTMP_IP}${NC}"
           # we restart the emulation with the identified IP address for a maximum of one time
-          if [[ $(grep -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
+          if [[ $(grep -a -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
             if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
               print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed and executed"
               lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
@@ -1427,7 +1436,7 @@ identify_networking_emulation() {
   local lPID="$!"
   disown "${lPID}" 2> /dev/null || true
 
-  kill "${lALIVE_PID}"
+  kill "${lALIVE_PID}" || true
   print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
   stopping_emulation_process "${lIMAGE_NAME}"
   cleanup_emulator "${lIMAGE_NAME}"
@@ -1456,10 +1465,14 @@ run_kpanic_identification_single() {
   local lLOG_FILE="${1:-}"
   local lIMAGE_NAME="${2:-}"
 
+  if ! [[ -f "${lLOG_FILE}" ]]; then
+    return
+  fi
+
   lKPANIC=$(tail -n 20 "${lLOG_FILE}" | grep -a -c "Kernel panic - " || true)
   if [[ "${lKPANIC}" -gt 0 ]]; then
     print_output "[*] Kernel Panic detected - stopping emulation"
-    tail -n 20 "${lLOG_FILE}" | grep -a "Kernel panic - " | tee -a "${LOG_FILE}"
+    tail -n 20 "${lLOG_FILE}" | grep -a "Kernel panic - " | tee -a "${LOG_FILE}" || true
     print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
     stopping_emulation_process "${lIMAGE_NAME}"
     pkill -9 -f tail.*-F.*"${lLOG_FILE}" &>/dev/null || true
@@ -2108,7 +2121,9 @@ setup_network_emulation() {
     write_script_exec "echo -e \"Bringing up HOSTIP ${ORANGE}${lHOSTIP}${NC} / IP address ${ORANGE}${lIP_ADDRESS}${NC} / TAPDEV ${ORANGE}${TAPDEV_0}${NC}.\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
     write_script_exec "ip link set ${HOSTNETDEV_0} up" "${ARCHIVE_PATH}"/run.sh 1
-    write_script_exec "ip addr add ${lHOSTIP}/24 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
+
+    write_script_exec "ip addr add ${lHOSTIP}/8 dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
+
     write_script_exec "ifconfig -a" "${ARCHIVE_PATH}"/run.sh 1
     write_script_exec "route -n" "${ARCHIVE_PATH}"/run.sh 1
   fi
@@ -2175,14 +2190,14 @@ write_network_config_to_filesystem() {
         [[ "${lFILENAME_MISSING}" =~ \* ]] && continue
         print_output "[*] Found missing area ${ORANGE}${lFILE_PATH_MISSING}${NC} in filesystem ... trying to fix this now"
         lDIR_NAME_MISSING=$(dirname "${lFILE_PATH_MISSING}")
-        if ! [[ -d "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" ]]; then
+        if ! [[ -d "${MNT_POINT}/${lDIR_NAME_MISSING#/}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}/${lDIR_NAME_MISSING#/}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}""/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
+          mkdir -p "${MNT_POINT}/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
         fi
-        lFOUND_MISSING=$(find "${MNT_POINT}" -name "${lFILENAME_MISSING}" | head -1 || true)
-        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}" ]]; then
-          print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFOUND_MISSING}${NC}) ... trying to fix this now"
-          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}""/${lDIR_NAME_MISSING#/}"/ || true
+        lFOUND_MISSING=$(find "${MNT_POINT}" -type f -name "${lFILENAME_MISSING}" | head -1 || true)
+        if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFILENAME_MISSING}" ]]; then
+          print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFILENAME_MISSING}${NC}) ... trying to fix this now"
+          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}/${lDIR_NAME_MISSING#/}"/ || true
         fi
       done
     fi
@@ -2591,6 +2606,37 @@ check_online_stat() {
       lSYS_ONLINE=1
     fi
 
+    # we check for alternative ip addresses found in our Qemu logs
+    # Usually these are extracted from the output of ifconfig in qemu logs
+    # we check for these ip addresses via ping/hping and if such an IP address is working
+    # we can use this address for further analysis
+    if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
+      local lIP_ADDRESS_TMP_ARR=()
+      mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" \
+        | grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
+      for lIP_ADDRESS_TMP in "${lIP_ADDRESS_TMP_ARR[@]}"; do
+        if [[ "${lIP_ADDRESS_TMP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          print_output "[*] Testing for changed IP address ${lIP_ADDRESS_TMP}" "no_log"
+          if ping -c 1 "${lIP_ADDRESS_TMP}" &> /dev/null; then
+            print_output "[+] Host with changed ip address ${ORANGE}${lIP_ADDRESS_TMP}${GREEN} is reachable via ICMP."
+            print_output "[*] Changing testing ip address to ${ORANGE}${lIP_ADDRESS_TMP}${NC}."
+            ping -c 1 "${lIP_ADDRESS_TMP}" | tee -a "${LOG_FILE}" || true
+            print_ln
+            write_log "${GREEN}[+] Host with changed ip address ${ORANGE}${lIP_ADDRESS_TMP}${GREEN} is reachable via ICMP." "${TMP_DIR}"/online_stats.tmp
+            lSYS_ONLINE=1
+            lIP_ADDRESS="${lIP_ADDRESS_TMP}"
+            # let us store the information of a changed ip address for later
+            write_log "${lIP_ADDRESS}" "${TMP_DIR}/emulation_changed_ip_address.tmp"
+            break
+          fi
+          if [[ "$(hping3 -n -c 1 "${lIP_ADDRESS_TMP}" 2>/dev/null | grep -c "^len=")" -gt 0 ]]; then
+            print_output "[+] Host with changed ip address ${ORANGE}${lIP_ADDRESS_TMP}${GREEN} is reachable via hping."
+            print_output "[!] NOT further handled"
+          fi
+        fi
+      done
+    fi
+
     # and as second check we can use hping
     if [[ "$(hping3 -n -c 1 "${lIP_ADDRESS}" 2>/dev/null | grep -c "^len=")" -gt 0 ]]; then
       print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable on TCP port 0 via hping."
@@ -2631,10 +2677,22 @@ check_online_stat() {
     if ! ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}"; then
       print_output "[-] Warning: System was already available but it does not respond to ping anymore."
       print_output "[-] Probably the IP address of the system has changed."
+      local lIP_ADDRESS_TMP_ARR=()
+      mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" \
+        | grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
+      for lIP_ADDRESS_TMP in "${lIP_ADDRESS_TMP_ARR[@]}"; do
+        if [[ "${lIP_ADDRESS_TMP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          print_output "[*] Testing for changed IP address ${lIP_ADDRESS_TMP}"
+          if ping -c 1 "${lIP_ADDRESS_TMP}" &> /dev/null; then
+            print_output "[*] System available via changed IP address ${lIP_ADDRESS_TMP}"
+          fi
+        fi
+      done
     fi
+
     print_ln
     local lCNT=1
-    local lMAX_NMAP_RETRIES=10
+    local lMAX_NMAP_RETRIES=15
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
     if grep -q "open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
       tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"

@@ -106,11 +106,26 @@ if [ -s /firmadyne/init_tmp ]; then
     if [ -z "${entry}" ]; then
       continue
     fi
-    if ! "${BUSYBOX}" grep -q "${entry}" /firmadyne/init; then
+    if ! "${BUSYBOX}" grep -q -E "^${entry}$" /firmadyne/init; then
       "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
     fi
   done < /firmadyne/init_tmp
 fi
+
+# finally we check busybox for linuxrc
+# if the applet is available in busybox we also check for a valid link and re-create it if it is not available
+# Afterwards, we add it to our init detection as last entry
+for POSSIBLE_BUSYBOX in $("${BUSYBOX}" find / -name "busybox" -type f); do
+  if "${BUSYBOX}" strings "${POSSIBLE_BUSYBOX}" | "${BUSYBOX}" grep -q "linuxrc"; then
+    if [[ ! -f "/bin/linuxrc" ]] && [[ ! -L "/bin/linuxrc" ]]; then
+      # echo "[*] Re-creating BusyBox applet link for /bin/linuxrc"
+      "${BUSYBOX}" ln -s /bin/busybox /bin/linuxrc
+    fi
+    if ! "${BUSYBOX}" grep -q -E "^/bin/linuxrc$" /firmadyne/init; then
+      "${BUSYBOX}" echo "/bin/linuxrc" >> /firmadyne/init
+    fi
+  fi
+done
 
 # finally add the EMBA default/backup entry, print it and remove the temp file
 "${BUSYBOX}" echo '/firmadyne/preInit.sh' >> /firmadyne/init

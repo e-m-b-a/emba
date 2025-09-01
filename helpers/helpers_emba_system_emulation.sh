@@ -179,7 +179,7 @@ ping_check() {
   local lPRINT_OUTPUT="${2:-1}"
   local lCOUNTER=0
   local lRESTARTER=0
-  local lMAX_RETRY_CNT=50
+  local lMAX_RETRY_CNT=100
 
   while ! ping -c 1 "${lIP_ADDRESS}"; do
     lRESTARTER=1
@@ -232,7 +232,7 @@ check_emulation_port() {
   local lPORT_NR="${2:-}"
 
   print_output "    ""${lTOOL_NAME}"" - \\c" "no_log"
-  if netstat -anpt | grep -q "${lPORT_NR}"; then
+  if netstat -anpt | grep -q ":${lPORT_NR}[[:space:]] "; then
     echo -e "${RED}""not ok""${NC}"
     echo -e "${RED}""    System emulation services detected - check for running Qemu processes""${NC}"
     export DEP_ERROR=1
