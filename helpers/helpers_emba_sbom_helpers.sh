@@ -260,6 +260,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
   if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
     local lTMP_IDENTIFIER="${RANDOM}"
+    [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
     # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
     jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" > "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
     lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
