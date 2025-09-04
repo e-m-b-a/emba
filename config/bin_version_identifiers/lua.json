@@ -8,6 +8,7 @@
   ],
   "grep_commands": [
     "^Lua\\ [0-9](\\.[0-9]+)+?\\ \\ Copyright\\ .*",
+    "LuaVersion:\\ Lua\\ [0-9](\\.[0-9]+)+?\\ \\ Copyright\\ .*",
     "^\\$Lua:\\ Lua\\ [0-9](\\.[0-9]+)+?\\ .*",
     "^liblua\\.so\\.[0-9](\\.[0-9]+)+?$"
   ],
@@ -19,7 +20,6 @@
   ],
   "version_extraction": [
     "sed -r 's/.*Lua\\ ([0-9](\\.[0-9]+)+?)\\ .*/:lua:lua:\\1/'",
-    "sed -r 's/^Lua\\ ([0-9](\\.[0-9]+)+?)\\ \\ .*/:lua:lua:\\1/'",
     "sed -r 's/liblua\\.so\\.([0-9](\\.[0-9]+)+?)$/:lua:lua:\\1/'"
   ],
   "affected_paths": [

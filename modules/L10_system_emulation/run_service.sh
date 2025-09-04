@@ -118,7 +118,7 @@ if ("${EMBA_ETC}"); then
         "${BUSYBOX}" sleep 1
         if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
           # shellcheck disable=SC2086
-          "${BUSYBOX}" sh ${_BINARY} &
+          "${BUSYBOX}" ${_BINARY} &
         fi
         # strip only the real binary including path:
         _BINARY_TMP=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d ' ' -f1)
