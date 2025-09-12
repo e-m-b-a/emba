@@ -131,7 +131,12 @@ s23_luaseccheck() {
       # command exec - not our parameter but we check it
       print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible command execution for review."
       copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
-      sed -i -r "s/.*os\.execute.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      # os\.execute\(.*\.\..*\)
+      sed -i -r "s/.*os\.execute\(.*\.\..*\)/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      # os\.execute\(.*\%.*\)
+      sed -i -r "s/.*os\.execute\(.*\%.*\)/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      # os\.execute\([[:alnum:]_]+\)
+      sed -i -r "s/.*os\.execute\([[:alnum:]_]+\)/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
       lISSUES_FILE=$((lISSUES_FILE+1))
     fi
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "io\.(p)?open" "${lQUERY_FILE}"; then
