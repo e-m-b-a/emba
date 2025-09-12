@@ -78,8 +78,8 @@ L10_system_emulation() {
         print_output "[*] Found finished emulation process - trying to recover old emulation process"
 
         lEMULATION_ENTRY="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1)"
-        lIP_ADDRESS=$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
-        lIMAGE_DIR="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+        lIP_ADDRESS=$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f9 | awk '{print $3}')
+        lIMAGE_DIR="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f11)"
         ARCHIVE_PATH="${OLD_LOG_DIR}""/""${lIMAGE_DIR}"
 
         print_output "[*] Recovered IP address: ${ORANGE}${lIP_ADDRESS}${NC}"
@@ -190,8 +190,8 @@ L10_system_emulation() {
       lSYS_EMUL_POS_ENTRY="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "${lSYS_EMUL_POS_ENTRY}")")"
 
-      lIP_ADDRESS=$(echo "${lSYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
-      lIMAGE_DIR="$(echo "${lSYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+      lIP_ADDRESS=$(echo "${lSYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f9 | awk '{print $3}')
+      lIMAGE_DIR="$(echo "${lSYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f11)"
       ARCHIVE_PATH="${LOG_PATH_MODULE}""/""${lIMAGE_DIR}"
 
       print_ln
