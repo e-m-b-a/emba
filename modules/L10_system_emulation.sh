@@ -909,7 +909,7 @@ main_emulation() {
           # later on we are running the same process again
           switch_inits "${KINIT}"
         fi
-        if [[ $(grep -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge "${MIN_TCP_SERV}" ]]; then
+        if [[ $(grep -h "\/tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge "${MIN_TCP_SERV}" ]]; then
           break 2
         fi
       done
@@ -1056,10 +1056,10 @@ emulation_with_config() {
     print_ln
 
     if [[ "${TCP}" == "ok" ]]; then
-      if [[ $(grep -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge "${MIN_TCP_SERV}" ]]; then
-        print_output "[+] Network services are available - no further emulation runs are needed" "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+      if [[ $(grep -h "\/tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge "${MIN_TCP_SERV}" ]]; then
+        print_output "[+] More than ${MIN_TCP_SERV} TCP based Network services are available - no further emulation runs are needed" "" "${ARCHIVE_PATH}/${NMAP_LOG}"
       else
-        print_output "[+] Network services are available - further emulation runs are needed." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
+        print_output "[+] Less than ${MIN_TCP_SERV} TCP based Network services are available - further emulation runs are needed." "" "${ARCHIVE_PATH}/${NMAP_LOG}"
       fi
       print_ln
     fi
@@ -1107,7 +1107,7 @@ emulation_with_config() {
         if (grep -a -B1 "inet addr:${lTMP_IP}" "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | grep -q "^eth\|^br"); then
           print_output "[!] WARNING: Detected possible IP address change during emulation process from ${ORANGE}${IP_ADDRESS_}${MAGENTA} to address ${ORANGE}${lTMP_IP}${NC}"
           # we restart the emulation with the identified IP address for a maximum of one time
-          if [[ $(grep -a -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
+          if [[ $(grep -a -h "\/tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -lt "${MIN_TCP_SERV}" ]]; then
             if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
               print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed and executed"
               lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
@@ -1550,7 +1550,7 @@ run_network_id_emulation() {
   print_ln
 
   # timeout ensures we are able to end this somewhere in the future - just in case something goes wrong
-  write_script_exec "timeout --preserve-status --signal SIGINT 6000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" /tmp/do_not_create_run.sh 2
+  write_script_exec "timeout --preserve-status --signal SIGINT 2000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" /tmp/do_not_create_run.sh 2
 }
 
 get_networking_details_emulation() {
@@ -2569,7 +2569,7 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
-  write_script_exec "timeout --preserve-status --signal SIGINT 6000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
+  write_script_exec "timeout --preserve-status --signal SIGINT 2000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
 }
 
 check_online_stat() {
@@ -2699,10 +2699,14 @@ check_online_stat() {
     fi
 
     lMAX_NMAP_RETRIES=10
-    while [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -lt "${MIN_TCP_SERV}" ]]; do
+    # at the end we are primarly interested in TCP based network services. This means we stop after reaching
+    # our MIN_TCP_SERV threshold
+    while [[ "$(grep -c "\/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -lt "${MIN_TCP_SERV}" ]]; do
+      # just to ensure we also detect udp services we can check them here and print a nice message that we have something:
       if [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
         print_ln
         print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
+        grep -c "/udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" >> "${LOG_FILE}"
         write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
         print_ln
       fi
@@ -2713,7 +2717,7 @@ check_online_stat() {
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
       # ensure we have the last results also in our main Nmap log file:
       # cp "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
-      if grep -q "open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
+      if grep -q "/open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
         tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
       fi
       [[ "${lCNT}" -ge "${lMAX_NMAP_RETRIES}" ]] && break
@@ -3203,15 +3207,18 @@ write_results() {
   local lR_PATH_mod=""
   lR_PATH_mod="${lR_PATH/${LOG_DIR}/}"
   local lTCP_SERV_CNT=0
+  local lSERVICES=""
 
   lTCP_SERV_CNT="$(grep -h "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
+  # to get an overview of which services are available
+  lSERVICES="$(grep -h "\/udp.*open\ \|\/tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ',' || true)"
 
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   lARCHIVE_PATH="$(echo "${lARCHIVE_PATH}" | rev | cut -d '/' -f1 | rev)"
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
+    write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services cnt;available network services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
   fi
-  write_log "${lFIRMWARE_PATH_orig:-NA};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
+  write_log "${lFIRMWARE_PATH_orig:-NA};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};${lSERVICES%,};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 

@@ -26,7 +26,8 @@ I01_default_apps(){
     print_tool_info "make" 1
     print_tool_info "tree" 1
     print_tool_info "device-tree-compiler" 1
-    print_tool_info "qemu-user-static" 0 "qemu-mips-static"
+    # print_tool_info "qemu-user-static" 0 "qemu-mips-static"
+    print_tool_info "qemu-user" 0
     # new qemu builds do not include the nios2 emulator anymore. We need to download the following package
     # and extract the nios2 emulator
     print_file_info "qemu-user-static" "Debian qemu-user-static v7.2 for NIOS II support" "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" "external/qemu-user-static_7.2.deb"
