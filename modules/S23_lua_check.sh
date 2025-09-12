@@ -128,15 +128,17 @@ s23_luaseccheck() {
     #   os.execute(string.format("sleep %d", tonumber(sec)))
     #   os.execute(asdf_cmd)
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "os\.execute\(.*\.\..*\)|os\.execute\(.*\%.*\)|os\.execute\([[:alnum:]_]+\)" "${lQUERY_FILE}"; then
-      # command exec - not our parameter but we check it
+      local lLOG_QUERYFILE="${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
       print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible command execution for review."
-      copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
-      # os\.execute\(.*\.\..*\)
-      sed -i -r "s/.*os\.execute\(.*\.\..*\)/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
-      # os\.execute\(.*\%.*\)
-      sed -i -r "s/.*os\.execute\(.*\%.*\)/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
-      # os\.execute\([[:alnum:]_]+\)
-      sed -i -r "s/.*os\.execute\([[:alnum:]_]+\)/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      copy_and_link_file "${lQUERY_FILE}" "${lLOG_QUERYFILE}"
+      if [[ -f "${lLOG_QUERYFILE}" ]]; then
+        # os\.execute\(.*\.\..*\)
+        sed -i -r "s/.*os\.execute\(.*\.\..*\)/\x1b[32m&\x1b[0m/" "${lLOG_QUERYFILE}"
+        # os\.execute\(.*\%.*\)
+        sed -i -r "s/.*os\.execute\(.*\%.*\)/\x1b[32m&\x1b[0m/" "${lLOG_QUERYFILE}"
+        # os\.execute\([[:alnum:]_]+\)
+        sed -i -r "s/.*os\.execute\([[:alnum:]_]+\)/\x1b[32m&\x1b[0m/" "${lLOG_QUERYFILE}"
+      fi
       lISSUES_FILE=$((lISSUES_FILE+1))
     fi
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "io\.(p)?open" "${lQUERY_FILE}"; then
