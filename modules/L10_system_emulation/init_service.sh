@@ -36,8 +36,8 @@ if ("${EMBA_ETC}"); then
   "${BUSYBOX}" sleep 5
 
   "${BUSYBOX}" echo -e "${ORANGE}[*] Starting initial EMBA services ...${NC}"
-  while IFS= read -r SERVICE; do
 
+  while IFS= read -r SERVICE; do
     SERVICE_NAME=$("${BUSYBOX}" echo "${SERVICE}" | "${BUSYBOX}" cut -d\  -f1)
     SERVICE_NAME=$("${BUSYBOX}" basename "${SERVICE_NAME}")
 

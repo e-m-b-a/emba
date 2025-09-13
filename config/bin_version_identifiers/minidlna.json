@@ -12,6 +12,9 @@
     "'MiniDLNA is already running. EXITING.\"&&\"^[0-9](\\.[0-9]+)?+$\"'",
     "^Starting\\ MiniDLNA\\ version\\ [0-9](\\.[0-9]+)+?"
   ],
+  "live_grep_commands": [
+    "^MiniDLNA\\ [0-9](\\.[0-9]+)+?\\ "
+  ],
   "vendor_names": [
     "minidlna_project"
   ],
@@ -25,9 +28,6 @@
   ],
   "affected_paths": [
     "NA"
-  ],
-  "live_grep_commands": [
-    "^MiniDLNA\\ [0-9](\\.[0-9]+)+?\\ "
   ],
   "strict_grep_commands": [],
   "zgrep_grep_commands": [],
