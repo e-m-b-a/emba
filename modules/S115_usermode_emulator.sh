@@ -155,7 +155,7 @@ S115_usermode_emulator() {
               lMAX_THREADS_S115=$((3*"${lCPU_CNT:-1}"))
             fi
           fi
-          if [[ "${BIN_}" != './qemu-'*'-static' ]]; then
+          if [[ "${BIN_}" != './qemu-'* ]]; then
             lBIN_FILE=$(file -b "${FULL_BIN_PATH}")
             if [[ "${lBIN_FILE}" =~ version\ .\ (FreeBSD) ]]; then
               # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
@@ -163,31 +163,31 @@ S115_usermode_emulator() {
               lEMULATOR="NA"
               continue
             elif [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
-              lEMULATOR="qemu-x86_64-static"
+              lEMULATOR="qemu-x86_64"
             elif [[ "${lBIN_FILE}" =~ Intel\ 80386 ]]; then
-              lEMULATOR="qemu-i386-static"
+              lEMULATOR="qemu-i386"
             elif [[ "${lBIN_FILE}" =~ Intel\ i386 ]]; then
-              lEMULATOR="qemu-i386-static"
+              lEMULATOR="qemu-i386"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ LSB.*ARM ]]; then
-              lEMULATOR="qemu-arm-static"
+              lEMULATOR="qemu-arm"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ MSB.*ARM ]]; then
-              lEMULATOR="qemu-armeb-static"
+              lEMULATOR="qemu-armeb"
             elif [[ "${lBIN_FILE}" =~ 64-bit\ LSB.*ARM\ aarch64 ]]; then
-              lEMULATOR="qemu-aarch64-static"
+              lEMULATOR="qemu-aarch64"
             elif [[ "${lBIN_FILE}" =~ 64-bit\ MSB.*ARM\ aarch64 ]]; then
-              lEMULATOR="qemu-aarch64_be-static"
+              lEMULATOR="qemu-aarch64_be"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ LSB.*MIPS ]]; then
-              lEMULATOR="qemu-mipsel-static"
+              lEMULATOR="qemu-mipsel"
             elif [[ "${lBIN_FILE}" == "ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1" ]]; then
-              lEMULATOR="qemu-mipsn32-static"
+              lEMULATOR="qemu-mipsn32"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ MSB.*MIPS ]]; then
-              lEMULATOR="qemu-mips-static"
+              lEMULATOR="qemu-mips"
             elif [[ "${lBIN_FILE}" =~ 64-bit\ LSB.*MIPS ]]; then
-              lEMULATOR="qemu-mips64el-static"
+              lEMULATOR="qemu-mips64el"
             elif [[ "${lBIN_FILE}" =~ 64-bit\ MSB.*MIPS ]]; then
-              lEMULATOR="qemu-mips64-static"
+              lEMULATOR="qemu-mips64"
             elif [[ "${lBIN_FILE}" =~ 32-bit\ MSB.*PowerPC ]]; then
-              lEMULATOR="qemu-ppc-static"
+              lEMULATOR="qemu-ppc"
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB executable, Altera Nios II"* ]]; then
               # the latest qemu package from kali does not include the nios2 emulator anymore
               lEMULATOR="qemu-nios2-static"
@@ -203,9 +203,9 @@ S115_usermode_emulator() {
                 continue
               fi
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB executable, QUALCOMM DSP6"* ]]; then
-              lEMULATOR="qemu-hexagon-static"
+              lEMULATOR="qemu-hexagon"
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB shared object, QUALCOMM DSP6"* ]]; then
-              lEMULATOR="qemu-hexagon-static"
+              lEMULATOR="qemu-hexagon"
             else
               print_output "[-] No working emulator found for ${BIN_}"
               lEMULATOR="NA"

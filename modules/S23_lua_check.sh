@@ -177,6 +177,10 @@ s23_luacheck() {
   luacheck "${lLUA_SCRIPT_}" > "${lLUA_LOG}" 2> /dev/null || true
 
   lLUA_ISSUES=$(strip_color_codes "$(grep Total "${lLUA_LOG}" | awk '{print $2}' 2> /dev/null || true)")
+  if [[ ! "${lLUA_ISSUES}" =~ ^[0-9]+$ ]] ; then
+    print_output "[-] lLUA_ISSUES: ${lLUA_ISSUES}"
+    print_output "[*] lLUA_LOG: ${lLUA_LOG} - $(strip_color_codes $(grep Total ${lLUA_LOG} | awk '{print $2}' || true)) - end"
+  fi
   if [[ "${lLUA_ISSUES}" -gt 0 ]] ; then
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
