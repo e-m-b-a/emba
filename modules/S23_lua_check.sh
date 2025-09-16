@@ -130,7 +130,8 @@ s23_luaseccheck() {
     #   os.execute(string.format("sleep %d", tonumber(sec)))
     #   os.execute(asdf_cmd)
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "os\.execute\(.*\.\..*\)|os\.execute\(.*\%.*\)|os\.execute\([[:alnum:]_]+\)" "${lQUERY_FILE}"; then
-      local lLOG_QUERYFILE="${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      local lLOG_QUERYFILE=""
+      lLOG_QUERYFILE="${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
       print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible command execution for review."
       copy_and_link_file "${lQUERY_FILE}" "${lLOG_QUERYFILE}"
       if [[ -f "${lLOG_QUERYFILE}" ]]; then
@@ -177,10 +178,6 @@ s23_luacheck() {
   luacheck "${lLUA_SCRIPT_}" > "${lLUA_LOG}" 2> /dev/null || true
 
   lLUA_ISSUES=$(strip_color_codes "$(grep Total "${lLUA_LOG}" | awk '{print $2}' 2> /dev/null || true)")
-  if [[ ! "${lLUA_ISSUES}" =~ ^[0-9]+$ ]] ; then
-    print_output "[-] lLUA_ISSUES: ${lLUA_ISSUES}"
-    print_output "[*] lLUA_LOG: ${lLUA_LOG} - $(strip_color_codes $(grep Total ${lLUA_LOG} | awk '{print $2}' || true)) - end"
-  fi
   if [[ "${lLUA_ISSUES}" -gt 0 ]] ; then
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
