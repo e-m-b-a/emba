@@ -53,7 +53,7 @@ I108_stacs_password_search() {
 
         # deactivate python venv for stacs - this is needed to bypass the pydantic dependency clash with semgrep
         # we install stacs in the system and semgrep into the virtual environment
-        deactivate
+        deactivate destructive
         pip_install "setuptools" "-U"
         pip_install "stacs"
         activate_pipenv "./external/emba_venv"

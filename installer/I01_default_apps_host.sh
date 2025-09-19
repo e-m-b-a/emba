@@ -22,12 +22,12 @@ I01_default_apps_host() {
   echo -e "\\nTo use EMBA, some applications must be installed and some data (database for CVS for example) downloaded and parsed."
   echo -e "\\n""${ORANGE}""${BOLD}""These applications will be installed/updated:""${NC}"
   print_tool_info "jq" 1
-  print_tool_info "shellcheck" 1
+  print_tool_info "shellcheck" 1 "shellcheck" "ShellCheck"
   print_tool_info "unzip" 1
   print_tool_info "bc" 1
   print_tool_info "coreutils" 1
-  print_tool_info "ncurses-bin" 1
-  print_tool_info "libnotify-bin" 1
+  print_tool_info "ncurses-bin" 1 "tput" "ncurses"
+  print_tool_info "libnotify-bin" 1 "notify-send" "libnotify"
   print_tool_info "inotify-tools" 1
   print_tool_info "dbus-x11" 1
   # as we need it for multiple tools we can install it by default
@@ -49,7 +49,13 @@ I01_default_apps_host() {
   case ${ANSWER:0:1} in
     y|Y )
       echo
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      if [[ ${#INSTALL_APP_LIST[@]} -gt 0 ]]; then
+        if [[ "${RHEL_OS}" -eq 1 ]]; then
+          dnf install -y "${INSTALL_APP_LIST[@]}"
+        else
+          apt-get install "${INSTALL_APP_LIST[@]}" -y
+        fi
+      fi
       pip_install "requests" "-U"
 
       if ! command -v "${DOCKER_COMPOSE[@]}" > /dev/null; then

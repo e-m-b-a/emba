@@ -40,45 +40,88 @@ module_title()
   echo -e "\\n\\n""${MODULE_TITLE_FORMAT}"
 }
 
-# print_tool_info a b c
+# print_tool_info a b c [d]
 # a = application name (by apt)
 # b = no update, if already installed -> 0
 #     update, if already installed -> 1
 # c = if given: check if this application is on the system instead of a
+# d = if given: use this as the package name on RHEL systems
 
 print_tool_info(){
+  # Use the Debian name ($1) as the display title for consistency in the logs
   echo -e "\\n""${ORANGE}""${BOLD}""${1:-}""${NC}"
-  TOOL_INFO="$(apt show "${1:-}" 2> /dev/null)"
-  if echo "${TOOL_INFO}" | grep -q "Description:" 2>/dev/null ; then
-    echo -e "$(echo "${TOOL_INFO}" | grep "Description:")"
-    SIZE=$(apt show "${1:-}" 2>/dev/null | grep Download-Size | cut -d: -f2 || true)
+
+  local PKG_NAME="$1"
+  # If we are on RHEL and the 4th argument is provided, use it as the package name
+  if [[ "${RHEL_OS}" -eq 1 ]] && [[ -n "${4:-}" ]]; then
+    PKG_NAME="$4"
+  fi
+
+  local TOOL_INFO
+  local IS_INSTALLED=0
+
+  if [[ "${RHEL_OS}" -eq 1 ]]; then
+    TOOL_INFO="$(dnf info "${PKG_NAME}" 2> /dev/null)"
+  else
+    TOOL_INFO="$(apt show "${PKG_NAME}" 2> /dev/null)"
+  fi
+
+  if [[ -n "${TOOL_INFO}" ]] ; then
+    local DESC
+    DESC="$(echo "${TOOL_INFO}" | grep -E "^Description[[:space:]]*:" || true | head -n 1)"
+    if [[ -n "${DESC}" ]]; then
+        echo -e "${DESC}"
+    fi
+
+    local SIZE
+    if [[ "${RHEL_OS}" -eq 1 ]]; then
+      SIZE=$(echo "${TOOL_INFO}" | grep -E "^Size[[:space:]]*:" | cut -d: -f2 || true)
+    else
+      SIZE=$(echo "${TOOL_INFO}" | grep "Download-Size" | cut -d: -f2 || true)
+    fi
     if [[ -n "${SIZE}" ]]; then
       echo -e "Download-Size:${SIZE}"
     fi
-    if echo "${TOOL_INFO}" | grep -E "^E:\ "; then
-      echo -e "${RED}""${1:-}"" was not identified and is not installable.""${NC}"
+
+    local COMMAND_
+    if [[ -n ${3+x} ]] ; then
+      COMMAND_="${3:-}"
     else
-      COMMAND_=""
-      if [[ -n ${3+x} ]] ; then
-        COMMAND_="${3:-}"
+      # Default to the OS-specific package name
+      COMMAND_="${PKG_NAME}"
+    fi
+
+    if ( command -v "${COMMAND_}" > /dev/null); then
+      IS_INSTALLED=1
+    elif [[ "${RHEL_OS}" -eq 1 ]]; then
+      if rpm -q "${PKG_NAME}" &> /dev/null; then IS_INSTALLED=1; fi
+    else
+      if ( dpkg -s "${PKG_NAME}" 2> /dev/null | grep -q "Status: install ok installed" ); then IS_INSTALLED=1; fi
+    fi
+
+    if [[ "${IS_INSTALLED}" -eq 1 ]]; then
+      local UPDATE_AVAILABLE=0
+      if [[ "${RHEL_OS}" -eq 1 ]]; then
+        dnf check-update "${PKG_NAME}" &> /dev/null
+        if [[ $? -eq 100 ]]; then UPDATE_AVAILABLE=1; fi
       else
-        COMMAND_="${1:-}"
+        local UPDATE
+        UPDATE=$(LANG=en apt-cache policy "${PKG_NAME}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+        if [[ "${UPDATE}" -ne 1 ]] ; then UPDATE_AVAILABLE=1; fi
       fi
-      if ( command -v "${COMMAND_}" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-        UPDATE=$(LANG=en apt-cache policy "${1}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
-        if [[ "${UPDATE}" -eq 1 ]] ; then
-          echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}"
-        else
-          echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}"
-          INSTALL_APP_LIST+=("${1:-}")
-        fi
+      
+      if [[ "${UPDATE_AVAILABLE}" -eq 1 ]]; then
+        echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}" # Use $1 for display
+        INSTALL_APP_LIST+=("${PKG_NAME}")
       else
-        echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}"
-        INSTALL_APP_LIST+=("${1:-}")
+        echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}" # Use $1 for display
       fi
+    else
+      echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}" # Use $1 for display
+      INSTALL_APP_LIST+=("${PKG_NAME}")
     fi
   else
-    echo -e "${RED}""${1:-}"" is not available anymore - installation can't proceed.""${NC}"
+    echo -e "${RED}""${1:-}"" is not available in repositories - installation can't proceed.""${NC}"
     exit 1
   fi
 }
