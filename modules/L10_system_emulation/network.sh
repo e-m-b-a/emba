@@ -69,6 +69,7 @@ if ("${EMBA_NET}"); then
         break
       fi
       if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_INTERFACE}"); then
+        # shellcheck disable=SC2016
         NET_BRIDGE=$("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_INTERFACE}" | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" head -1)
         "${BUSYBOX}" echo -e "${GREEN}[+] brctl showed up a bridge and our interface binding ${NET_INTERFACE} - CNT: ${CNT} / ${MAX_CNT} -> adjusting bridge configuration to ${NET_BRIDGE} and proceeding${NC}"
         "${BUSYBOX}" brctl show
