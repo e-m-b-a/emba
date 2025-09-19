@@ -121,6 +121,7 @@ debian_status_files_analysis_threader() {
 
   lPACKAGE=$(grep "^Package: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
   lPACKAGE=$(clean_package_details "${lPACKAGE/Package:\ }")
+  [[ -z "${lPACKAGE}" ]] && return
 
   lAPP_MAINT=$(grep "^Maintainer: " "${lDPKG_PACKAGE_FILE_TMP}" || true)
   lAPP_MAINT=${lAPP_MAINT/Maintainer:\ }

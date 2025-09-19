@@ -92,6 +92,7 @@ S08_submodule_ruby_gem_archive_parser() {
       lAPP_NAME=$(grep '^name: ' "${TMP_DIR}"/gems/metadata || true)
       lAPP_NAME=${lAPP_NAME/name:\ }
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      [[ -z "${lAPP_NAME}" ]] && continue
 
       lAPP_LIC="NA"
       # lAPP_LIC=$(grep '^licenses' "${TMP_DIR}"/gems/metadata || true)

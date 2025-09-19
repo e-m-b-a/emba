@@ -102,6 +102,7 @@ S08_submodule_c_conanfile_txt_parser() {
         fi
         lAPP_NAME=${lCONAN_ENTRY/\/*}
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_LIC="NA"
 

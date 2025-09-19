@@ -167,6 +167,8 @@ S08_submodule_java_archives_parser() {
         lAPP_NAME="$(basename -s .jar "${lJAVA_ARCHIVE}")"
       fi
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      [[ -z "${lAPP_NAME}" ]] && continue
+
       # if we have a vendor id but no app_vendor we are going to use the deprecated id:
       if [[ -z "${lAPP_VENDOR}" && -n "${lAPP_VENDOR_ID}" ]]; then
         # print_output "[*] Using lAPP_VENDOR_ID (${lAPP_VENDOR_ID}) as vendor for ${lJAVA_ARCHIVE}" "no_log"

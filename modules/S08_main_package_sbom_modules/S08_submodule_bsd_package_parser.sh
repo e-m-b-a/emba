@@ -95,6 +95,8 @@ S08_submodule_bsd_package_parser() {
 
       lAPP_NAME=$(jq -r '.name' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      [[ -z "${lAPP_NAME}" ]] && continue
+      [[ "${lAPP_NAME}" == "null" ]] && continue
 
       lAPP_ARCH=$(jq -cr '.arch' "${TMP_DIR}"/+COMPACT_MANIFEST || true)
       lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")

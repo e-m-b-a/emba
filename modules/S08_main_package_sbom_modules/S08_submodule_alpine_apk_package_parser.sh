@@ -85,6 +85,7 @@ S08_submodule_alpine_apk_package_parser() {
       lAPP_NAME=$(grep '^pkgname = ' "${TMP_DIR}"/apk/.PKGINFO || true)
       lAPP_NAME=${lAPP_NAME/pkgname\ =\ }
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      [[ -z "${lAPP_NAME}" ]] && continue
 
       lAPP_LIC=$(grep '^license = ' "${TMP_DIR}"/apk/.PKGINFO || true)
       lAPP_LIC=${lAPP_LIC/license\ =\ }
