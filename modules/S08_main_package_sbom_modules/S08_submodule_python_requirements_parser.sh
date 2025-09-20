@@ -137,6 +137,7 @@ python_requirements_threader() {
     lAPP_VERS=""
   fi
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+  [[ -z "${lAPP_NAME}" ]] && return
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 

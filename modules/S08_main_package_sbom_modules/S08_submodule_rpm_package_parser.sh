@@ -77,6 +77,7 @@ S08_submodule_rpm_package_parser() {
       lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+      [[ -z "${lAPP_NAME}" ]] && continue
 
       lAPP_LIC=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^License" || true)
       lAPP_LIC=${lAPP_LIC/*:\ /}

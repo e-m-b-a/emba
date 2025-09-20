@@ -86,7 +86,7 @@ S06_distribution_identification()
           # print_output "[*] lIDENTIFIER: ${lIDENTIFIER}"
           lFILENAME=$(basename "${lFILE,,}")
 
-          if [[ $(basename "${lFILE}") == "image_sign" ]]; then
+          if [[ $(basename "${lFILE}") == "image_sign" || $(basename "${lFILE}") == "fw_sign" ]]; then
             # dlink image_sign file handling
             lIDENTIFIER=$(dlink_image_sign "${lIDENTIFIER}")
           fi

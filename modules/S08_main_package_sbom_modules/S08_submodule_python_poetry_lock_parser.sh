@@ -92,6 +92,7 @@ S08_submodule_python_poetry_lock_parser() {
         lAPP_NAME=${lPOETRY_ENTRY/|*}
         lAPP_NAME=${lAPP_NAME/name\ =\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_LIC="NA"
 

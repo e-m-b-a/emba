@@ -244,12 +244,14 @@ output_details() {
     lDATA_GENERATED=1
   fi
 
-  lUSER_EMUL_CNT=$(cut -d\; -f1 "${CSV_DIR}"/s116_qemu_version_detection.csv 2>/dev/null | grep -v "binary/file" | sort -u | wc -l || true)
-  if [[ "${lUSER_EMUL_CNT:-0}" -gt 0 ]]; then
-    print_output "[+] Found ""${ORANGE}""${lUSER_EMUL_CNT}""${GREEN}"" successful emulated processes ${ORANGE}(${GREEN}user mode emulation${ORANGE})${GREEN}.""${NC}"
-    write_link "s116"
-    write_csv_log "user_emulation_state" "${lUSER_EMUL_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-    lDATA_GENERATED=1
+  if [[ -d "${SBOM_LOG_PATH}" ]]; then
+    lUSER_EMUL_CNT=$(find "${SBOM_LOG_PATH}" -name "user_mode_bin_analysis*" | wc -l || true)
+    if [[ "${lUSER_EMUL_CNT:-0}" -gt 0 ]]; then
+      print_output "[+] Found ""${ORANGE}""${lUSER_EMUL_CNT}""${GREEN}"" successful emulated processes ${ORANGE}(${GREEN}user mode emulation${ORANGE})${GREEN}.""${NC}"
+      write_link "s116"
+      write_csv_log "user_emulation_state" "${lUSER_EMUL_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      lDATA_GENERATED=1
+    fi
   fi
 
   if [[ "${lGPT_RESULTS_CNT:-0}" -gt 0 ]]; then
@@ -258,11 +260,11 @@ output_details() {
     write_csv_log "AI results" "${lGPT_RESULTS_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
 
-  if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR:-0}" -gt 0 ]]; then
+  if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR_CNT:-0}" -gt 0 ]]; then
     lSTATE_FOR_OUTPUT="${ORANGE}(""${GREEN}""booted"
     lEMU_STATE_FOR_CSV="booted"
-    if [[ "${IP_ADDR}" -gt 0 ]]; then
-      lSTATE_FOR_OUTPUT="${lSTATE_FOR_OUTPUT}""${ORANGE} / ""${GREEN}""IP address detected (mode: ${ORANGE}${MODE}${GREEN})"
+    if [[ "${IP_ADDR_CNT}" -gt 0 ]]; then
+      lSTATE_FOR_OUTPUT="${lSTATE_FOR_OUTPUT}""${ORANGE} / ""${GREEN}""IP address detected (mode: ${ORANGE}${L10_EMULATION_MODE}${GREEN})"
       lEMU_STATE_FOR_CSV="${lEMU_STATE_FOR_CSV}"";IP_DET"
     fi
     if [[ "${ICMP:-0}" -gt 0 || "${TCP_0:-0}" -gt 0 ]]; then
@@ -809,8 +811,8 @@ get_data() {
   export BOOTED=0
   export ICMP=0
   export TCP_0=0
-  export IP_ADDR=0
-  export MODE=""
+  export IP_ADDR_CNT=0
+  export L10_EMULATION_MODE=""
   export SNMP_UP=0
   export WEB_UP=0
   export ROUTERSPLOIT_VULN=0
@@ -959,9 +961,9 @@ get_data() {
     ICMP=$(grep -c "ICMP ok;" "${L10_SYS_EMU_RESULTS}" || true)
     TCP_0=$(grep -c "TCP-0 ok;" "${L10_SYS_EMU_RESULTS}" || true)
     TCP=$(grep -c "TCP ok;" "${L10_SYS_EMU_RESULTS}" || true)
-    IP_ADDR=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | grep -E -c "IP\ address:\ [0-9]+" || true)
+    IP_ADDR_CNT=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | grep -E -c "IP\ address:\ [0-9]+" || true)
     # we make something like this: "bridge-default-normal"
-    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f9 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
+    L10_EMULATION_MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f10 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "${L20_LOG}" ]]; then
     # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "${L15_LOG}" | cut -d: -f2 || true)

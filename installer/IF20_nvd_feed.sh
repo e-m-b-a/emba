@@ -44,7 +44,11 @@ IF20_nvd_feed() {
 
         if [[ -d external/nvd-json-data-feeds ]]; then
           cd external/nvd-json-data-feeds || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
-          git pull
+          if [[ -d .git ]]; then
+            git pull || echo "Could not update NVD CVE data feed ... Please check it manually"
+          else
+            echo "WARNING: No git repo for NVD datbase found - NVD update failed"
+          fi
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
         else
           git clone --depth 1 -b main https://github.com/EMBA-support-repos/nvd-json-data-feeds.git external/nvd-json-data-feeds || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
@@ -52,7 +56,11 @@ IF20_nvd_feed() {
 
         if [[ -d external/EPSS-data ]]; then
           cd external/EPSS-data || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )
-          git pull || echo "Could not update NIST EPSS data feed ... Please check it manually"
+          if [[ -d .git ]]; then
+            git pull || echo "Could not update NIST EPSS data feed ... Please check it manually"
+          else
+            echo "WARNING: No git repo for EPSS datbase found - EPSS update failed"
+          fi
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )
         else
           git clone --depth 1 -b main https://github.com/EMBA-support-repos/EPSS-data.git external/EPSS-data || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )

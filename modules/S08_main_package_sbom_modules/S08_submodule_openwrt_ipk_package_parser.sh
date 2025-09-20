@@ -149,6 +149,7 @@ ipk_package_parser_threader() {
   lAPP_NAME=$(grep "Package: " "${lIPK_LOG_PATH}/control" || true)
   lAPP_NAME=${lAPP_NAME/*:\ }
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+  [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_ARCH=$(grep "Architecture: " "${lIPK_LOG_PATH}/control" || true)
   lAPP_ARCH=${lAPP_ARCH/*:\ }

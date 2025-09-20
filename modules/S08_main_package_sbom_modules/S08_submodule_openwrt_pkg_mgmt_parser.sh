@@ -77,6 +77,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
 
         lAPP_NAME=$(grep "^Package: " "${lPACKAGE_FILE}" | awk '{print $2}' || true)
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPACKAGE_FILE}" | awk '{print $2}' || true)
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")

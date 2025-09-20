@@ -117,9 +117,11 @@ node_js_package_lock_threader() {
   local lAPP_DEP=""
 
   lAPP_NAME=$(echo "${lAPP_NAME}" | rev | cut -d '/' -f1 | rev)
-  [[ -z "${lAPP_NAME}" ]] && return
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+  [[ -z "${lAPP_NAME}" ]] && return
+  [[ "${lAPP_NAME}" == "null" ]] && return
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+  [[ -z "${lAPP_VERS}" ]] && return
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
   lAPP_VENDOR="${lAPP_NAME}"

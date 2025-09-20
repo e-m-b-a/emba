@@ -113,6 +113,7 @@ apk_pkg_analysis_threader() {
 
   lAPP_NAME=$(grep "^P:" "${lAPK_PACKAGE_FILE_TMP}" || true)
   lAPP_NAME=$(clean_package_details "${lAPP_NAME/P:}")
+  [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_VERS=$(grep "^V:" "${lAPK_PACKAGE_FILE_TMP}" || true)
   lAPP_VERS=${lAPP_VERS/V:}

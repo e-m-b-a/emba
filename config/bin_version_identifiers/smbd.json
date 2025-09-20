@@ -10,6 +10,13 @@
   "grep_commands": [
     "'^smbd version %s started.$&&\"^[2-5]\\.[0-9]+\\.[0-9]+$\"'"
   ],
+  "strict_grep_commands": [
+    "^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$",
+    "^Version\\ [2-5]\\.[0-9]+\\.[0-9]+[a-z]$"
+  ],
+  "live_grep_commands": [
+    "Samba\\ smbd\\ [2-5]\\.[0-9]+\\.[0-9]+\\ \\(workgroup: [A-Za-z]+\\)"
+  ],
   "vendor_names": [
     "samba"
   ],
@@ -25,13 +32,6 @@
   "affected_paths": [
     "NA",
     "smbd"
-  ],
-  "strict_grep_commands": [
-    "^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$",
-    "^Version\\ [2-5]\\.[0-9]+\\.[0-9]+[a-z]$"
-  ],
-  "live_grep_commands": [
-    "Samba\\ smbd\\ 3\\.6\\.25 \\(workgroup: [A-Za-z]+\\)"
   ],
   "zgrep_grep_commands": [],
   "emulation_only_grep_commands": []

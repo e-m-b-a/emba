@@ -36,8 +36,8 @@ S40_weak_perm_check() {
   local lETC_ARR=""
   lETC_ARR=("$(mod_path "/ETC_PATHS")")
 
-  readarray -t lSETUID_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'md5sum "%"' | sort -u -k1,1 | cut -d\  -f3 || true)
-  readarray -t lSETGID_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -2000 -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'md5sum "%"' | sort -u -k1,1 | cut -d\  -f3 || true)
+  readarray -t lSETUID_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -user root -perm -4000 -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'md5sum "%"' | sort -u -k1,1 | cut -d\  -f3 || true)
+  readarray -t lSETGID_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -user root -perm -2000 -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'md5sum "%"' | sort -u -k1,1 | cut -d\  -f3 || true)
   readarray -t lWORLD_WRITE_FILES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -perm -o+w -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'md5sum "%"' | sort -u -k1,1 | cut -d\  -f3 || true)
   # -perm -600 ! -perm 600 -> find files with at least -rw --- --- but do not have exactly these permissions
   # => we look for higher permissions
