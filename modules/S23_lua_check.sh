@@ -46,13 +46,13 @@ S23_lua_check()
   sub_module_title "LUA linter checks module"
 
   for lLUA_SCRIPT in "${LUA_CGI_FILES_ARR[@]}" ; do
+    [[ ! -f "${lLUA_SCRIPT}" ]] && continue
     # linting check:
     # s23_luacheck "$(echo "${lLUA_SCRIPT}" | cut -d';' -f2)" &
     s23_luacheck "${lLUA_SCRIPT}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S23_ARR+=( "${lTMP_PID}" )
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S23_ARR
-    continue
   done
 
   wait_for_pid "${lWAIT_PIDS_S23_ARR[@]}"
@@ -63,15 +63,16 @@ S23_lua_check()
   s23_luaseccheck
 
   lS23_LUA_ISSUES=$(wc -l 2>/dev/null < "${S23_CSV_LOG}")
+  # remove the csv header:
+  [[ "${lS23_LUA_ISSUES}" -gt 0 ]] && ((lS23_LUA_ISSUES--))
   # extract the not 0 results of the vulnerabilities
-  lS23_LUA_VULNS=$(cut -d ';' -f 3 "${S23_CSV_LOG}" 2>/dev/null | grep -v -c "^0$" || true)
+  lS23_LUA_VULNS=$(cut -d ';' -f 3 "${S23_CSV_LOG}" 2>/dev/null | tail +2 | grep -v -c "^0$" || true)
 
-  # first line is the header
-  if [[ "${lS23_LUA_VULNS}" -gt 1 ]]; then
+  if [[ "${lS23_LUA_VULNS}" -gt 0 ]]; then
     print_ln
     print_output "[+] Found ${ORANGE}${lS23_LUA_VULNS} possible security issues${GREEN} in ${ORANGE}${#LUA_CGI_FILES_ARR[@]}${GREEN} lua files.${NC}"
   fi
-  if [[ "${lS23_LUA_ISSUES}" -gt 1 ]]; then
+  if [[ "${lS23_LUA_ISSUES}" -gt 0 ]]; then
     print_ln
     print_output "[+] Found ${ORANGE}${lS23_LUA_ISSUES} coding issues${GREEN} in ${ORANGE}${#LUA_CGI_FILES_ARR[@]}${GREEN} lua files.${NC}"
   fi
@@ -93,6 +94,7 @@ s23_luaseccheck() {
 
   # walk through all lua files for analysis
   for lQUERY_FILE in "${LUA_CGI_FILES_ARR[@]}"; do
+    [[ ! -f "${lQUERY_FILE}" ]] && continue
     local lISSUES_FILE=0
 
     mapfile -t lQUERY_ENTRIES_ARR < <(grep -E "=.*cgilua\.QUERY" "${lQUERY_FILE}" | tr ' ' '\n' | sed 's/.*cgilua.QUERY.//' \
@@ -103,7 +105,7 @@ s23_luaseccheck() {
       [[ -z "${lENTRY}" ]] && continue
       ! [[ "${lENTRY}" =~ ^[a-zA-Z0-9_-]+$ ]] && continue
 
-      if grep "${lENTRY}" "${lQUERY_FILE}" | grep -E -q "io\.(p)?open"; then
+      if grep "${lENTRY}" "${lQUERY_FILE}" 2>/dev/null | grep -E -q "io\.(p)?open"; then
         # possible file access
         lS23_LUA_VULNS=$((lS23_LUA_VULNS+1))
         lISSUES_FILE=$((lISSUES_FILE+1))
@@ -112,7 +114,7 @@ s23_luaseccheck() {
         sed -i -r "s/.*io\.(p)?open.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
         lGPT_PRIO_=$((lGPT_PRIO_+1))
       fi
-      if grep "${lENTRY}" "${lQUERY_FILE}" | grep -q "os.execute"; then
+      if grep "${lENTRY}" "${lQUERY_FILE}" 2>/dev/null | grep -q "os.execute"; then
         # command exec - critical
         lS23_LUA_VULNS=$((lS23_LUA_VULNS+1))
         lISSUES_FILE=$((lISSUES_FILE+1))
@@ -128,10 +130,18 @@ s23_luaseccheck() {
     #   os.execute(string.format("sleep %d", tonumber(sec)))
     #   os.execute(asdf_cmd)
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "os\.execute\(.*\.\..*\)|os\.execute\(.*\%.*\)|os\.execute\([[:alnum:]_]+\)" "${lQUERY_FILE}"; then
-      # command exec - not our parameter but we check it
+      local lLOG_QUERYFILE=""
+      lLOG_QUERYFILE="${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
       print_output "[+] Found lua file ${ORANGE}${lQUERY_FILE}${GREEN} with possible command execution for review."
-      copy_and_link_file "${lQUERY_FILE}" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
-      sed -i -r "s/.*os\.execute.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/$(basename "${lQUERY_FILE}").log"
+      copy_and_link_file "${lQUERY_FILE}" "${lLOG_QUERYFILE}"
+      if [[ -f "${lLOG_QUERYFILE}" ]]; then
+        # os\.execute\(.*\.\..*\)
+        sed -i -r "s/.*os\.execute\(.*\.\..*\)/\x1b[32m&\x1b[0m/" "${lLOG_QUERYFILE}"
+        # os\.execute\(.*\%.*\)
+        sed -i -r "s/.*os\.execute\(.*\%.*\)/\x1b[32m&\x1b[0m/" "${lLOG_QUERYFILE}"
+        # os\.execute\([[:alnum:]_]+\)
+        sed -i -r "s/.*os\.execute\([[:alnum:]_]+\)/\x1b[32m&\x1b[0m/" "${lLOG_QUERYFILE}"
+      fi
       lISSUES_FILE=$((lISSUES_FILE+1))
     fi
     if [[ "${lISSUES_FILE}" -eq 0 ]] && grep -E -q "io\.(p)?open" "${lQUERY_FILE}"; then

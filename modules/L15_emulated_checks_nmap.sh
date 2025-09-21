@@ -186,6 +186,7 @@ l15_version_detector() {
   local lTYPE="${2:-}"
 
   local lVERSION_IDENTIFIER_ARR=()
+  local lVERSION_IDENTIFIER_ARR_tmp=()
   local lVERSION_IDENTIFIER=""
 
   print_output "[*] Testing detected service ${ORANGE}${lSERVICE}${NC}" "no_log"
@@ -232,6 +233,8 @@ l15_version_detector_threader() {
   mapfile -t lCSV_REGEX_ARR < <(jq -r .version_extraction[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
   local lVERSION_IDENTIFIER_ARR=()
   mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  mapfile -t lVERSION_IDENTIFIER_ARR_tmp < <(jq -r .live_grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
+  lVERSION_IDENTIFIER_ARR+=("${lVERSION_IDENTIFIER_ARR_tmp[@]}")
 
   for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
     lVERSION_IDENTIFIED=$(echo "${lSERVICE}" | grep -o -a -E "${lVERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
