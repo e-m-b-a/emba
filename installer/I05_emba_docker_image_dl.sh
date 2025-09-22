@@ -44,7 +44,7 @@ I05_emba_docker_image_dl() {
 
     case ${ANSWER:0:1} in
       y|Y )
-	if [[ ${#INSTALL_APP_LIST[@]} -gt 0 ]]; then
+       if [[ ${#INSTALL_APP_LIST[@]} -gt 0 ]]; then
           if [[ "${RHEL_OS}" -eq 1 ]]; then
             dnf install -y --setopt=install_weak_deps=false "${INSTALL_APP_LIST[@]}"
           else

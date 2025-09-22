@@ -145,8 +145,7 @@ while getopts CdDFghlrsc: OPT ; do
       export CONTAINER="${OPTARG}"
       ;;
     *)
-      echo -e "${RED}""${BOLD}""Invalid option""${NC}"
-      echo -e "${OPT}"
+      echo -e "${RED}${BOLD}Invalid option: ${OPT}${NC}"
       print_help
       exit 1
       ;;
@@ -299,12 +298,7 @@ create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
 if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
-  # First, detect the operating system family
-  # shellcheck source=/dev/null
-  source /etc/os-release
-
-  # Check for RHEL-family systems (Rocky, RHEL, CentOS, Fedora, etc.)
-  if [[ "$ID_LIKE" == *"rhel"* ]] || [[ "$ID_LIKE" == *"fedora"* ]] || [[ "$ID" == "rhel" ]] || [[ "$ID" == "rocky" ]]; then
+  if [[ "${RHEL_OS}" -eq 1 ]]; then
     echo "RHEL/Rocky system detected. Installing Docker using dnf..."
     # Install dnf-utils which provides the 'dnf config-manager' command
     dnf install -y 'dnf-command(config-manager)'
@@ -314,12 +308,11 @@ if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; 
     dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
   # The original logic for Debian-family systems (Debian, Ubuntu, Kali, etc.)
-  elif [[ "$ID_LIKE" == *"debian"* ]] || [[ "$ID" == "debian" ]] || [[ "$ID" == "ubuntu" ]]; then
+  else
     echo "Debian/Ubuntu system detected. Installing Docker using apt..."
     # OS debian is for Kali Linux
     OS="debian"
     [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
-    # Add Docker's official GPG key:
     apt-get install -y ca-certificates curl gnupg
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/"${OS}"/gpg -o /etc/apt/keyrings/docker.asc
@@ -336,13 +329,8 @@ if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; 
     fi
     apt-get update -y
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-  else
-    echo "ERROR: Unsupported operating system detected: $ID"
-    exit 1
   fi
 
-  # This export should happen after a successful installation on any OS
   export DOCKER_COMPOSE=("docker" "compose")
 elif command -v docker-compose > /dev/null ; then
   echo -e "\n${ORANGE}""${BOLD}""WARNING: Old docker-compose installation found""${NC}"

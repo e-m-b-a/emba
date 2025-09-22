@@ -48,7 +48,6 @@ module_title()
 # d = if given: use this as the package name on RHEL systems
 
 print_tool_info(){
-  # Use the Debian name ($1) as the display title for consistency in the logs
   echo -e "\\n""${ORANGE}""${BOLD}""${1:-}""${NC}"
 
   local PKG_NAME="$1"
@@ -87,7 +86,6 @@ print_tool_info(){
     if [[ -n ${3+x} ]] ; then
       COMMAND_="${3:-}"
     else
-      # Default to the OS-specific package name
       COMMAND_="${PKG_NAME}"
     fi
 
