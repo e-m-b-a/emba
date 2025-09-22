@@ -305,6 +305,7 @@ if [[ ${LIST_DEP} -eq 0 ]] ; then
     sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
   fi
   if [[ "${RHEL_OS}" -eq 1 ]]; then
+    dnf install epel-release -y
     dnf update -y
   else
     apt-get -y update
@@ -330,6 +331,9 @@ if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; 
     dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     # Install Docker Engine and plugins. Allow erasing because we want to use docker instead of podman
     dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin --allowerasing
+    systemctl start docker
+    systemctl enable docker
+
 
   # The original logic for Debian-family systems (Debian, Ubuntu, Kali, etc.)
   else
