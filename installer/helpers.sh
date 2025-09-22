@@ -68,7 +68,7 @@ print_tool_info(){
 
   if [[ -n "${TOOL_INFO}" ]] ; then
     local DESC
-    DESC="$(echo "${TOOL_INFO}" | grep -E "^Description[[:space:]]*:" || true | head -n 1)"
+    DESC="$(echo "${TOOL_INFO}" | grep -E "^Description[[:space:]]*:" | head -n 1 || true)"
     if [[ -n "${DESC}" ]]; then
         echo -e "${DESC}"
     fi
