@@ -108,7 +108,7 @@ print_tool_info(){
         UPDATE=$(LANG=en apt-cache policy "${PKG_NAME}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
         if [[ "${UPDATE}" -ne 1 ]] ; then UPDATE_AVAILABLE=1; fi
       fi
-      
+
       if [[ "${UPDATE_AVAILABLE}" -eq 1 ]]; then
         echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}"
         INSTALL_APP_LIST+=("${PKG_NAME}")
