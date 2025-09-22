@@ -41,7 +41,7 @@ module_title()
   echo -e "\\n\\n""${MODULE_TITLE_FORMAT}"
 }
 
-# print_tool_info a b c [d]
+# print_tool_info a b [c] [d]
 # a = application name (by apt)
 # b = no update, if already installed -> 0
 #     update, if already installed -> 1
@@ -110,13 +110,13 @@ print_tool_info(){
       fi
       
       if [[ "${UPDATE_AVAILABLE}" -eq 1 ]]; then
-        echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}" # Use $1 for display
+        echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}"
         INSTALL_APP_LIST+=("${PKG_NAME}")
       else
-        echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}" # Use $1 for display
+        echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}"
       fi
     else
-      echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}" # Use $1 for display
+      echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}"
       INSTALL_APP_LIST+=("${PKG_NAME}")
     fi
   else
