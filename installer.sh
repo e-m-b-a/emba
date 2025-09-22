@@ -328,8 +328,8 @@ if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; 
     dnf install -y 'dnf-command(config-manager)'
     # Add the official Docker repository
     dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-    # Install Docker Engine and plugins
-    dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    # Install Docker Engine and plugins. Allow erasing because we want to use docker instead of podman
+    dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin --allowerasing
 
   # The original logic for Debian-family systems (Debian, Ubuntu, Kali, etc.)
   else
