@@ -426,19 +426,17 @@ copy_and_link_file() {
   local lSRC_FILE="${1:-}"
   local lDST_FILE="${2:-}"
 
-  if [[ ${HTML} -eq 1 ]] ; then
-    if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
-      mkdir -p "$(dirname "${lDST_FILE}")" || true
+  if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
+    mkdir -p "$(dirname "${lDST_FILE}")" || true
+  fi
+  # we only copy if the lDST_FILE is not already there
+  if ! [[ -f "${lDST_FILE}" ]]; then
+    if [[ -f "${lSRC_FILE}" ]]; then
+      cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
     fi
-    # we only copy if the lDST_FILE is not already there
-    if ! [[ -f "${lDST_FILE}" ]]; then
-      if [[ -f "${lSRC_FILE}" ]]; then
-        cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
-      fi
-    fi
-    if [[ -f "${lDST_FILE}" ]]; then
-      write_link "${lDST_FILE}"
-    fi
+  fi
+  if [[ -f "${lDST_FILE}" ]]; then
+    write_link "${lDST_FILE}"
   fi
 }
 

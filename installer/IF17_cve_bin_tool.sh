@@ -52,7 +52,7 @@ IF17_cve_bin_tool() {
         echo "[*] Preparing test data ..."
         # preparing test data to ensure our CVE database is working as expected
         echo "product,vendor,version" > "./cve_bin_tool_health_check.csv"
-        echo "busybox,NOTDEFINED,1.14.1" >> "./cve_bin_tool_health_check.csv"
+        echo "linux_kernel,linux,2.6.36" >> "./cve_bin_tool_health_check.csv"
 
         if ! [[ -d "${HOME}"/.cache/cve-bin-tool ]]; then
           mkdir "${HOME}"/.cache/cve-bin-tool
@@ -67,8 +67,9 @@ IF17_cve_bin_tool() {
           # testing import
           python3 ./cve_bin_tool/cli.py -i ./cve_bin_tool_health_check.csv --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o /tmp/cve_bin_tool_health_check_results || true
 
-          echo "[*] CVE query results for busybox query after initial import:"
-          cat "/tmp/cve_bin_tool_health_check_results.csv"
+          echo "[*] CVE query results for busybox query after initial import (should be around 2886):"
+          wc -l "/tmp/cve_bin_tool_health_check_results.csv"
+          # should be around 2886
           rm "/tmp/cve_bin_tool_health_check_results.csv"
         else
           echo "[-] WARNING: No CVE database update file available from installer directory /installer/cve-database.db"
@@ -79,8 +80,9 @@ IF17_cve_bin_tool() {
         # testing db update
         python3 ./cve_bin_tool/cli.py -i ./cve_bin_tool_health_check.csv --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o /tmp/cve_bin_tool_health_check_results || true
 
-        echo "[*] CVE query results for busybox query after database update:"
-        cat /tmp/cve_bin_tool_health_check_results.csv
+        echo "[*] CVE query results for busybox query after database update (should be around 2888):"
+        wc -l /tmp/cve_bin_tool_health_check_results.csv
+        # should be around 2888
         rm /tmp/cve_bin_tool_health_check_results.csv
 
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )

@@ -64,6 +64,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
         lAPP_VERS=${lAPP_VERS/*:\ }
@@ -130,6 +131,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
         lAPP_VERS=${lAPP_VERS/*:\ }
@@ -214,6 +216,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_VERS=${lAPP_VERS/*:\ }
@@ -278,6 +281,7 @@ S08_submodule_python_pip_package_mgmt_parser() {
         lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_NAME=${lAPP_NAME/*:\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
+        [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
         lAPP_VERS=${lAPP_VERS/*:\ }

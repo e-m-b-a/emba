@@ -114,6 +114,7 @@ perl_cpanfiles_analysis_threader() {
   lPACKAGE=${lPACKAGE//\'}
   lPACKAGE=${lPACKAGE//\"}
   lPACKAGE=${lPACKAGE//,}
+  [[ -z "${lPACKAGE}" ]] && return
 
   if [[ "${lPACKAGE_VERSION}" =~ .*requires.*\ \=\>\ .* ]]; then
     lVERSION=${lPACKAGE_VERSION/*=>}

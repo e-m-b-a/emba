@@ -129,6 +129,7 @@ windows_exifparser_threader() {
     lAPP_NAME=${lAPP_NAME/*:\ }
     lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   fi
+  [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_VENDOR=$(grep "Company Name" "${lEXIF_LOG}" || true)
   lAPP_VENDOR=${lAPP_VENDOR/*:\ }

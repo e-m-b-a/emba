@@ -50,6 +50,7 @@ export IN_DOCKER=0
 export LIST_DEP=0
 export FULL=0
 export REMOVE=0
+export FORCE=0
 # other os stuff
 export OTHER_OS=0
 export UBUNTU_OS=0
@@ -97,31 +98,35 @@ if [[ "$#" -lt 1 ]] || [[ "$#" -gt 2 ]]; then
   exit 1
 fi
 
-while getopts CdDFghlrsc: OPT ; do
+while getopts CdDfFghlrsc: OPT ; do
   case ${OPT} in
     d)
       export DOCKER_SETUP=1
       export CVE_SEARCH=0
-      echo -e "${GREEN}""${BOLD}""Install all dependencies for EMBA in default/docker mode""${NC}"
+      echo -e "${GREEN}${BOLD}Install all dependencies for EMBA in default/docker mode${NC}"
       ;;
     D)
       export IN_DOCKER=1
       export DOCKER_SETUP=0
       export CVE_SEARCH=0
-      echo -e "${GREEN}""${BOLD}""Install EMBA in docker image - used for building a docker image""${NC}"
+      echo -e "${GREEN}${BOLD}Install EMBA in docker image - used for building a docker image${NC}"
+      ;;
+    f)
+      export FORCE=1
+      echo -e "${GREEN}${BOLD}Forcing install - bypassing multiple checks${NC}"
       ;;
     F)
       export FULL=1
       export DOCKER_SETUP=0
       export CVE_SEARCH=1
-      echo -e "${GREEN}""${BOLD}""Install all dependecies for developer mode""${NC}"
+      echo -e "${GREEN}${BOLD}Install all dependecies for developer mode${NC}"
       ;;
     g)
       export DOCKER_SETUP=1
       export GH_ACTION=1
       export CVE_SEARCH=0
-      echo -e "${GREEN}""${BOLD}""Install all dependecies for EMBA test via Github actions""${NC}"
-      echo -e "${GREEN}""${BOLD}""This mode is a default installation without populating the CVE-search database""${NC}"
+      echo -e "${GREEN}${BOLD}Install all dependecies for EMBA test via Github actions${NC}"
+      echo -e "${GREEN}${BOLD}This mode is a default installation without populating the CVE-search database${NC}"
       ;;
     h)
       print_help
@@ -131,21 +136,22 @@ while getopts CdDFghlrsc: OPT ; do
       export LIST_DEP=1
       export CVE_SEARCH=0
       export DOCKER_SETUP=0
-      echo -e "${GREEN}""${BOLD}""List all dependecies (Warning: deprecated feature)""${NC}"
+      echo -e "${GREEN}${BOLD}List all dependecies (Warning: deprecated feature)${NC}"
       ;;
     r)
       export REMOVE=1
-      echo -e "${GREEN}""${BOLD}""Remove EMBA from the system""${NC}"
+      echo -e "${GREEN}${BOLD}Remove EMBA from the system${NC}"
       ;;
     s)
       export SSL_REPOS=1
-      echo -e "${GREEN}""${BOLD}""HTTPS repos are used for installation""${NC}"
+      echo -e "${GREEN}${BOLD}HTTPS repos are used for installation${NC}"
       ;;
     c)
       export CONTAINER="${OPTARG}"
       ;;
     *)
       echo -e "${RED}${BOLD}Invalid option: ${OPT}${NC}"
+      echo -e "${RED}${BOLD}Invalid option${NC}"
       print_help
       exit 1
       ;;
@@ -162,7 +168,9 @@ fi
 
 if [[ "${LIST_DEP}" -eq 1 ]]; then
   echo -e "\n${ORANGE}WARNING: This feature is deprecated and not maintained anymore.${NC}"
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  if [[ "${FORCE}" -ne 1 ]]; then
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
 fi
 
 # WSL support - currently experimental!
@@ -171,7 +179,9 @@ if grep -q -i wsl /proc/version; then
   echo -e "\n${ORANGE}INFO: WSL is currently experimental!${NC}"
   echo -e "\n${ORANGE}Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites${NC}"
   echo -e "\n${ORANGE}WARNING: If you are using WSL2, disable docker integration from the docker-desktop daemon!${NC}"
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  if [[ "${FORCE}" -ne 1 ]]; then
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
   WSL=1
 fi
 
@@ -191,13 +201,17 @@ elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
     echo -e "\\n""${RED}""EMBA is not fully supported on Ubuntu 20.04 LTS.""${NC}"
     echo -e "${RED}""For EMBA installation you need to update docker-compose manually. See also https://github.com/e-m-b-a/emba/issues/247""${NC}"
     echo -e "\\n""${ORANGE}""Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites""${NC}"
-    read -p "If you have updated docker-compose you can press any key to continue ..." -n1 -s -r
+    if [[ "${FORCE}" -ne 1 ]]; then
+      read -p "If you have updated docker-compose you can press any key to continue ..." -n1 -s -r
+    fi
     OTHER_OS=0  # installation procedure identical to kali install
     UBUNTU_OS=0 # installation procedure identical to kali install
   else
     echo -e "\n${ORANGE}WARNING: compatibility of distribution/version unknown!${NC}"
     OTHER_OS=1
-    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    if [[ "${FORCE}" -ne 1 ]]; then
+      read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    fi
   fi
 else
   OTHER_OS=0
@@ -206,12 +220,16 @@ fi
 
 if ! uname -m | grep -q "x86_64" 2>/dev/null; then
   echo -e "\n${ORANGE}WARNING: Architecture probably unsupported!${NC}"
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  if [[ "${FORCE}" -ne 1 ]]; then
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
 fi
 
 if ! grep -q "ssse3" /proc/cpuinfo 2>/dev/null; then
   echo -e "\n${ORANGE}WARNING: CPU type and feature set probably unsupported - Missing SSSE3 support detected!${NC}"
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  if [[ "${FORCE}" -ne 1 ]]; then
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
 fi
 
 if ! [[ ${EUID} -eq 0 ]] && [[ ${LIST_DEP} -eq 0 ]] ; then
@@ -248,7 +266,9 @@ if [[ "${IN_DOCKER}" -eq 0 ]]; then
     echo ""
     df -h || true
     echo ""
-    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    if [[ "${FORCE}" -ne 1 ]]; then
+      read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    fi
   fi
 
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
@@ -256,7 +276,9 @@ if [[ "${IN_DOCKER}" -eq 0 ]]; then
     echo -e "\\n""${ORANGE}""EMBA installation in default mode needs a minimum of 4Gig of RAM""${NC}"
     echo -e "\\n""${ORANGE}""Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites""${NC}"
     echo ""
-    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    if [[ "${FORCE}" -ne 1 ]]; then
+      read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    fi
   fi
 fi
 
@@ -272,7 +294,9 @@ if [[ ${LIST_DEP} -eq 0 ]] ; then
     echo -e "\\n""${ORANGE}""WARNING: external directory available: ./external""${NC}"
     echo -e "${ORANGE}""Please remove it before proceeding ...""${NC}"
     echo ""
-    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    if [[ "${FORCE}" -ne 1 ]]; then
+      read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    fi
   fi
 
   echo -e "\\n""${ORANGE}""Update package lists.""${NC}"
@@ -338,7 +362,9 @@ elif command -v docker-compose > /dev/null ; then
   echo -e "${ORANGE}Please check the installed docker packages the following way: dpkg -l | grep docker.${NC}"
   echo -e "${ORANGE}Afterwards it can be cleaned up via apt-get the following way:${NC}"
   echo -e "${ORANGE}$ sudo apt-get remove docker docker-compose docker.io python3-docker${NC}"
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  if [[ "${FORCE}" -ne 1 ]]; then
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
   export DOCKER_COMPOSE=("docker-compose")
   # if we do not have the docker command it probably is a more modern system and we need to install the docker-cli package
   if ! command -v docker > /dev/null; then
@@ -363,7 +389,9 @@ if command -v docker > /dev/null; then
       echo -e "\n${ORANGE}WARNING: compatibility of the used docker-compose version is unknown!${NC}"
       echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.${NC}"
       echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites${NC}"
-      read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+      if [[ "${FORCE}" -ne 1 ]]; then
+        read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+      fi
     fi
   fi
 fi
@@ -374,7 +402,9 @@ if ! [[ -v DOCKER_COMPOSE[@] ]]; then
   echo -e "${ORANGE}If you are running into installation issues please check your docker installation${NC}"
   echo -e "${ORANGE}and ensure the docker and docker compose command are available in your system path.${NC}"
   echo ""
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  if [[ "${FORCE}" -ne 1 ]]; then
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
 fi
 
 # initial installation of the host environment:
