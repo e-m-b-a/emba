@@ -151,7 +151,6 @@ while getopts CdDfFghlrsc: OPT ; do
       ;;
     *)
       echo -e "${RED}${BOLD}Invalid option: ${OPT}${NC}"
-      echo -e "${RED}${BOLD}Invalid option${NC}"
       print_help
       exit 1
       ;;
