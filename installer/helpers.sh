@@ -51,73 +51,73 @@ module_title()
 print_tool_info(){
   echo -e "\\n""${ORANGE}""${BOLD}""${1:-}""${NC}"
 
-  local PKG_NAME="$1"
+  local lPKG_NAME="$1"
   # If we are on RHEL and the 4th argument is provided, use it as the package name
   if [[ "${RHEL_OS}" -eq 1 ]] && [[ -n "${4:-}" ]]; then
-    PKG_NAME="$4"
+    lPKG_NAME="$4"
   fi
 
-  local TOOL_INFO
-  local IS_INSTALLED=0
+  local lTOOL_INFO=""
+  local lIS_INSTALLED=0
 
   if [[ "${RHEL_OS}" -eq 1 ]]; then
-    TOOL_INFO="$(dnf info "${PKG_NAME}" 2> /dev/null)"
+    lTOOL_INFO="$(dnf info "${lPKG_NAME}" 2> /dev/null)"
   else
-    TOOL_INFO="$(apt show "${PKG_NAME}" 2> /dev/null)"
+    lTOOL_INFO="$(apt show "${lPKG_NAME}" 2> /dev/null)"
   fi
 
-  if [[ -n "${TOOL_INFO}" ]] ; then
-    local DESC
-    DESC="$(echo "${TOOL_INFO}" | grep -E "^Description[[:space:]]*:" | head -n 1 || true)"
-    if [[ -n "${DESC}" ]]; then
-        echo -e "${DESC}"
+  if [[ -n "${lTOOL_INFO}" ]] ; then
+    local lDESC=""
+        lDESC="$(echo "${lTOOL_INFO}" | grep -E "^Description[[:space:]]*:" | head -n 1 || true)"
+    if [[ -n "${lDESC}" ]]; then
+        echo -e "${lDESC}"
     fi
 
-    local SIZE
+    local lSIZE=""
     if [[ "${RHEL_OS}" -eq 1 ]]; then
-      SIZE=$(echo "${TOOL_INFO}" | grep -E "^Size[[:space:]]*:" | cut -d: -f2 || true)
+      lSIZE=$(echo "${lTOOL_INFO}" | grep -E "^Size[[:space:]]*:" | cut -d: -f2 | head -n 1 || true)
     else
-      SIZE=$(echo "${TOOL_INFO}" | grep "Download-Size" | cut -d: -f2 || true)
+      lSIZE=$(echo "${lTOOL_INFO}" | grep "Download-Size" | cut -d: -f2 || true)
     fi
-    if [[ -n "${SIZE}" ]]; then
-      echo -e "Download-Size:${SIZE}"
+    if [[ -n "${lSIZE}" ]]; then
+      echo -e "Download-Size:${lSIZE}"
     fi
 
-    local COMMAND_
+    local lCOMMAND_=""
     if [[ -n ${3+x} ]] ; then
-      COMMAND_="${3:-}"
+      lCOMMAND_="${3:-}"
     else
-      COMMAND_="${PKG_NAME}"
+      lCOMMAND_="${lPKG_NAME}"
     fi
 
-    if ( command -v "${COMMAND_}" > /dev/null); then
-      IS_INSTALLED=1
+    if ( command -v "${lCOMMAND_}" > /dev/null); then
+      lIS_INSTALLED=1
     elif [[ "${RHEL_OS}" -eq 1 ]]; then
-      if rpm -q "${PKG_NAME}" &> /dev/null; then IS_INSTALLED=1; fi
+      if rpm -q "${lPKG_NAME}" &> /dev/null; then lIS_INSTALLED=1; fi
     else
-      if ( dpkg -s "${PKG_NAME}" 2> /dev/null | grep -q "Status: install ok installed" ); then IS_INSTALLED=1; fi
+      if ( dpkg -s "${lPKG_NAME}" 2> /dev/null | grep -q "Status: install ok installed" ); then lIS_INSTALLED=1; fi
     fi
 
-    if [[ "${IS_INSTALLED}" -eq 1 ]]; then
-      local UPDATE_AVAILABLE=0
+    if [[ "${lIS_INSTALLED}" -eq 1 ]]; then
+      local lUPDATE_AVAILABLE=0
       if [[ "${RHEL_OS}" -eq 1 ]]; then
-        dnf check-update "${PKG_NAME}" &> /dev/null
-        if [[ $? -eq 100 ]]; then UPDATE_AVAILABLE=1; fi
+        dnf check-update "${lPKG_NAME}" &> /dev/null
+        if [[ $? -eq 100 ]]; then lUPDATE_AVAILABLE=1; fi
       else
-        local UPDATE
-        UPDATE=$(LANG=en apt-cache policy "${PKG_NAME}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
-        if [[ "${UPDATE}" -ne 1 ]] ; then UPDATE_AVAILABLE=1; fi
+        local lUPDATE=0
+        lUPDATE=$(LANG=en apt-cache policy "${lPKG_NAME}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+        if [[ "${lUPDATE}" -ne 1 ]] ; then lUPDATE_AVAILABLE=1; fi
       fi
 
-      if [[ "${UPDATE_AVAILABLE}" -eq 1 ]]; then
+      if [[ "${lUPDATE_AVAILABLE}" -eq 1 ]]; then
         echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}"
-        INSTALL_APP_LIST+=("${PKG_NAME}")
+        INSTALL_APP_LIST+=("${lPKG_NAME}")
       else
         echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}"
       fi
     else
       echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}"
-      INSTALL_APP_LIST+=("${PKG_NAME}")
+      INSTALL_APP_LIST+=("${lPKG_NAME}")
     fi
   else
     echo -e "${RED}""${1:-}"" is not available in repositories - installation can't proceed.""${NC}"
