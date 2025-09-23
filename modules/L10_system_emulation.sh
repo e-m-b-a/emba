@@ -209,11 +209,16 @@ L10_system_emulation() {
           print_output "[*] Testing system recovery with hping instead of ping" "no_log"
           STATE_CHECK_MECHANISM="HPING"
         fi
-        # we should get TCP="ok" and SYS_ONLINE=1 back
-        if restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
-          print_output "[+] System recovery was successful. Further live analysis possible for IP ${lIP_ADDRESS}"
+
+        if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
+          # we should get TCP="ok" and SYS_ONLINE=1 back
+          if restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[+] System recovery was successful. Further live analysis possible for IP ${lIP_ADDRESS}."
+          else
+            print_output "[-] System recovery went wrong. No further analysis possible."
+          fi
         else
-          print_output "[-] System recovery went wrong. No further analysis possible"
+          print_output "[*] System recovery not possible - FINAL_FW_RM option set! No further analysis possible."
         fi
         export IP_ADDRESS_="${lIP_ADDRESS}"
       else
@@ -2569,7 +2574,23 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
+  date +%s > "${TMP_DIR}/emu_starter.log"
   write_script_exec "timeout --preserve-status --signal SIGINT 2000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
+}
+
+get_emu_runtime() {
+  local lEMU_START_DATE=""
+  local lCURRENT_DATE=""
+  local lRUN_TIME=""
+
+  if [[ -f "${TMP_DIR}/emu_starter.log" ]]; then
+    lEMU_START_DATE=$(cat "${TMP_DIR}/emu_starter.log")
+    lCURRENT_DATE="$(date +%s)"
+    lRUN_TIME=$((lCURRENT_DATE-lEMU_START_DATE))
+  else
+    lRUN_TIME="NA"
+  fi
+  echo "${lRUN_TIME}"
 }
 
 check_online_stat() {
@@ -2591,12 +2612,16 @@ check_online_stat() {
   # wait 20 secs after boot before starting pinging
   sleep 20
 
-  local lMAX_PING_CNT=120
+  # lMAX_PING_CNT is a backup to get out in case something goes weird
+  local lMAX_PING_CNT=240
+  local lMAX_RUN_TIME=900
+  local lRUN_TIME=""
+  lRUN_TIME=$(get_emu_runtime)
   # we write the results to a tmp file. This is needed to only have the results of the current emulation round
   # for further processing available
-  # we try pinging the system for 30 times with 5 secs sleeptime in between
+  # we try pinging the system for 10mins with 5 secs sleeptime in between
   # if the system is reachable we go ahead
-  while [[ "${lPING_CNT}" -lt "${lMAX_PING_CNT}" && "${lSYS_ONLINE}" -eq 0 ]]; do
+  while [[ "${lRUN_TIME}" -lt "${lMAX_RUN_TIME}" && "${lSYS_ONLINE}" -eq 0 ]]; do
     # lets use the default ping command first
     if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
       print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
@@ -2657,18 +2682,23 @@ check_online_stat() {
 
     lPING_CNT=$((lPING_CNT+1))
     if [[ "${lSYS_ONLINE}" -eq 0 ]]; then
-      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s) - max cnt ${lMAX_PING_CNT}." "no_log"
+      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s) - runtime $(date -ud@"${lRUN_TIME}" +%H:%M:%S)." "no_log"
       lSYS_ONLINE=0
       sleep 5
     fi
+    if [[ "${lPING_CNT}" -gt "${lMAX_PING_CNT}" ]]; then
+      print_output "[!] Max ping count reached after runtime $(date -ud@"${lRUN_TIME}" +%H:%M:%S) - proceeding now"
+      break
+    fi
+    lRUN_TIME=$(get_emu_runtime)
   done
 
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
     print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
   else
-    print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
-    sleep 60
+    print_output "[*] Give the system another 30 seconds to ensure the boot process is finished.\n" "no_log"
+    sleep 30
     print_output "[*] Default Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
     # write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
@@ -2698,7 +2728,8 @@ check_online_stat() {
       tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
     fi
 
-    lMAX_NMAP_RETRIES=10
+    lMAX_NMAP_RETRIES=40
+    lRUN_TIME=$(get_emu_runtime)
     # at the end we are primarly interested in TCP based network services. This means we stop after reaching
     # our MIN_TCP_SERV threshold
     while [[ "$(grep -c "\/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -lt "${MIN_TCP_SERV}" ]]; do
@@ -2720,7 +2751,14 @@ check_online_stat() {
       if grep -q "/open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
         tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
       fi
+      # lMAX_NMAP_RETRIES is as backup to exit somehow from this loop
       [[ "${lCNT}" -ge "${lMAX_NMAP_RETRIES}" ]] && break
+
+      # runtime checks is the prefered way to exit now
+      lRUN_TIME=$(get_emu_runtime)
+      if [[ "${lRUN_TIME}" -gt "${lMAX_RUN_TIME}" ]]; then
+        break
+      fi
     done
     # get a backup of our current results and add the later nmap scans to this file for the web report
     cp "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}/${lNMAP_LOG}"
@@ -2840,7 +2878,6 @@ check_online_stat() {
     fi
   fi
 
-  print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
   stopping_emulation_process "${lIMAGE_NAME}"
   cleanup_emulator "${lIMAGE_NAME}"
 

@@ -51,7 +51,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" ls -l "${SERVICE/\ *}"
       # BINARY variable could be something like: binary parameter parameter ...
       ${SERVICE} &  # nosemgrep
-      "${BUSYBOX}" sleep 1
+      "${BUSYBOX}" sleep 5
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}") ); then
         # shellcheck disable=SC2086
         "${BUSYBOX}" sh ${SERVICE} &  # nosemgrep

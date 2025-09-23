@@ -115,7 +115,7 @@ if ("${EMBA_ETC}"); then
         # shellcheck disable=SC2086
         ${_BINARY} &
 
-        "${BUSYBOX}" sleep 1
+        "${BUSYBOX}" sleep 2
         if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
           # shellcheck disable=SC2086
           "${BUSYBOX}" sh ${_BINARY} &
