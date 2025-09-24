@@ -102,11 +102,11 @@ print_tool_info(){
       local lUPDATE_AVAILABLE=0
       if [[ "${RHEL_OS}" -eq 1 ]]; then
         dnf check-update "${lPKG_NAME}" &> /dev/null
-        if [[ $? -eq 100 ]]; then lUPDATE_AVAILABLE=1; fi
+        [[ $? -eq 100 ]] && lUPDATE_AVAILABLE=1
       else
         local lUPDATE=0
         lUPDATE=$(LANG=en apt-cache policy "${lPKG_NAME}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
-        if [[ "${lUPDATE}" -ne 1 ]] ; then lUPDATE_AVAILABLE=1; fi
+        [[ "${lUPDATE}" -ne 1 ]] && lUPDATE_AVAILABLE=1
       fi
 
       if [[ "${lUPDATE_AVAILABLE}" -eq 1 ]]; then
