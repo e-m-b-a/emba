@@ -1,4 +1,7 @@
 name: Update EMBA VERSION.txt
+permissions:
+  contents: read
+  pull-requests: write
 
 on:
   schedule:
