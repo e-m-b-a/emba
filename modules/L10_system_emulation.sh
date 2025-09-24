@@ -2498,9 +2498,14 @@ run_emulated_system() {
       # fallback - we connect id 0
       lNET_NUM=0
     fi
+    if [[ "${lNET_NUM}" -gt 5 ]]; then
+      print_output "[*] NET_NUM ${lNET_NUM} issues -> setting default NET_NUM to 0"
+      lNET_NUM=0
+    fi
 
     # 6 Interfaces -> 0-5
     for lNET_ID in {0..5}; do
+      print_output "[*] Network ID ${lNET_ID} connector / lNET_NUM: ${lNET_NUM}"
       if [[ "${lNET_ID}" == "${lNET_NUM}" ]];then
         # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
@@ -2509,6 +2514,7 @@ run_emulated_system() {
       else
         # only 0-3 are handled via placeholder interfaces
         if [[ "${lNET_ID}" -gt 3 ]]; then
+          print_output "[*] Network ID ${lNET_ID} bypass"
           continue
         fi
         # on ARM we have currently only one interface and we need to connect this to the host
@@ -2524,9 +2530,11 @@ run_emulated_system() {
   fi
 
   if [[ -z "${lQEMU_NETWORK}" ]]; then
-    print_output "[!] No network interface config created ... stop further emulation"
-    print_output "[-] No firmware emulation ${ORANGE}${ARCH}${NC} / ${ORANGE}${lIMAGE_NAME}${NC} possible"
-    return
+    print_output "[!] No network interface config created ... creating backup configuration"
+    lNET_ID=0
+    print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
+    lQEMU_NETWORK+=" -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
+    lQEMU_NETWORK+=" -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
   fi
 
   # dirty workaround to fill the KERNEL which is used later on

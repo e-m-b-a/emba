@@ -47,7 +47,7 @@ IF20_nvd_feed() {
           if [[ -d .git ]]; then
             git pull || echo "Could not update NVD CVE data feed ... Please check it manually"
           else
-            echo "WARNING: No git repo for NVD datbase found - NVD update failed"
+            echo "WARNING: No git repo for NVD database found - NVD update failed"
           fi
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
         else
@@ -59,7 +59,7 @@ IF20_nvd_feed() {
           if [[ -d .git ]]; then
             git pull || echo "Could not update NIST EPSS data feed ... Please check it manually"
           else
-            echo "WARNING: No git repo for EPSS datbase found - EPSS update failed"
+            echo "WARNING: No git repo for EPSS database found - EPSS update failed"
           fi
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component NIST EPSS data feed" && exit 1 )
         else
