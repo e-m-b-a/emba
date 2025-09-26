@@ -26,7 +26,7 @@ P23_qemu_qcow_mounter() {
 
 
     local lEXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_extractor/
-    local lFIRMWARE_PATHx=""
+#    local lFIRMWARE_PATHx=""
 
 #    if [[ "${IN_DOCKER}" -eq 1 ]]; then
 #      # we need rw access to firmware -> in docker container we need to copy
