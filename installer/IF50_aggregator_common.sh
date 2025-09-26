@@ -68,5 +68,5 @@ IF50_aggregator_common() {
   fi
   # we were running into issues that this package was removed somehow during the installation process
   # Todo: figure out why and solve it somehow
-  apt-get install p7zip-full -y
+  apt-get install 7zip -y
 }

@@ -112,18 +112,23 @@ if [ -s /firmadyne/init_tmp ]; then
   done < /firmadyne/init_tmp
 fi
 
-# finally we check busybox for linuxrc
+# finally we check busybox for linuxrc and /bin/init
 # if the applet is available in busybox we also check for a valid link and re-create it if it is not available
 # Afterwards, we add it to our init detection as last entry
 for POSSIBLE_BUSYBOX in $("${BUSYBOX}" find / -name "busybox" -type f); do
   if "${BUSYBOX}" strings "${POSSIBLE_BUSYBOX}" | "${BUSYBOX}" grep -q "linuxrc"; then
     if [[ ! -f "/bin/linuxrc" ]] && [[ ! -L "/bin/linuxrc" ]]; then
-      # echo "[*] Re-creating BusyBox applet link for /bin/linuxrc"
+      "${BUSYBOX}" echo "[*] Re-creating BusyBox applet link for /bin/linuxrc"
       "${BUSYBOX}" ln -s /bin/busybox /bin/linuxrc
     fi
     if ! "${BUSYBOX}" grep -q -E "^/bin/linuxrc$" /firmadyne/init; then
       "${BUSYBOX}" echo "/bin/linuxrc" >> /firmadyne/init
     fi
+  fi
+  if [[ ! -f "/bin/init" ]] && [[ ! -L "/bin/init" ]]; then
+    "${BUSYBOX}" echo "[*] Re-creating BusyBox applet link for /bin/init"
+    "${BUSYBOX}" ln -s /bin/busybox /bin/init
+    "${BUSYBOX}" echo "/bin/init" >> /firmadyne/init
   fi
 done
 

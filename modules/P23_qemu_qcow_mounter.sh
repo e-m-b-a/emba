@@ -25,24 +25,24 @@ P23_qemu_qcow_mounter() {
     pre_module_reporter "${FUNCNAME[0]}"
 
 
-    local lEXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_mount_filesystem/
+    local lEXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_extractor/
     local lFIRMWARE_PATHx=""
 
-    if [[ "${IN_DOCKER}" -eq 1 ]]; then
-      # we need rw access to firmware -> in docker container we need to copy
-      # the firmware to TMP_DIR and use this for extraction
-      # afterwards we are going to remove this path
-      cp /firmware "${TMP_DIR}"
-      lFIRMWARE_PATHx="${TMP_DIR}"/firmware
-    else
-      lFIRMWARE_PATHx="${FIRMWARE_PATH}"
-    fi
+#    if [[ "${IN_DOCKER}" -eq 1 ]]; then
+#      # we need rw access to firmware -> in docker container we need to copy
+#      # the firmware to TMP_DIR and use this for extraction
+#      # afterwards we are going to remove this path
+#      cp /firmware "${TMP_DIR}"
+#      lFIRMWARE_PATHx="${TMP_DIR}"/firmware
+#    else
+#      lFIRMWARE_PATHx="${FIRMWARE_PATH}"
+#    fi
 
-    qcow_extractor "${lFIRMWARE_PATHx}" "${lEXTRACTION_DIR}"
+    qcow_extractor_7zip "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -f "${TMP_DIR}"/firmware ]]; then
-      rm "${TMP_DIR}"/firmware
-    fi
+#    if [[ -f "${TMP_DIR}"/firmware ]]; then
+#      rm "${TMP_DIR}"/firmware
+#    fi
 
     if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
@@ -51,6 +51,40 @@ P23_qemu_qcow_mounter() {
     fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
   fi
+}
+
+qcow_extractor_7zip() {
+  local lQCOW_PATH="${1:-}"
+  local lEXTRACTION_DIR="${2:-}"
+
+  local lFILES_QCOW_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
+
+  if ! [[ -f "${lQCOW_PATH}" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
+  sub_module_title "Qemu QCOW 7zip filesystem extractor"
+
+  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}"
+
+  mapfile -t lFILES_QCOW_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
+
+  print_output "[*] Extracted ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files from the firmware image."
+  print_output "[*] Populating backend data for ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files ... could take some time" "no_log"
+
+  for lBINARY in "${lFILES_QCOW_ARR[@]}"; do
+    binary_architecture_threader "${lBINARY}" "P23_qemu_qcow_mounter" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+  done
+  wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+  write_csv_log "Qemu QCOW filesystem extractor" "${lQCOW_PATH}" "${lEXTRACTION_DIR}" "${#lFILES_QCOW_ARR[@]}" "NA"
 }
 
 qcow_extractor() {
