@@ -38,7 +38,7 @@ P23_qemu_qcow_mounter() {
 #      lFIRMWARE_PATHx="${FIRMWARE_PATH}"
 #    fi
 
-    qcow_extractor_7zip "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
+    qcow_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
 #    if [[ -f "${TMP_DIR}"/firmware ]]; then
 #      rm "${TMP_DIR}"/firmware
@@ -53,7 +53,7 @@ P23_qemu_qcow_mounter() {
   fi
 }
 
-qcow_extractor_7zip() {
+qcow_extractor() {
   local lQCOW_PATH="${1:-}"
   local lEXTRACTION_DIR="${2:-}"
 
@@ -68,7 +68,33 @@ qcow_extractor_7zip() {
 
   sub_module_title "Qemu QCOW 7zip filesystem extractor"
 
-  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}"
+  local l7ZIP_LOG_FILE=""
+  local l7ZIP_BROKEN_LINKS_ARR=()
+  local l7ZIP_BROKEN_LNK=""
+  local l7ZIP_BROKEN_LNK_TARGET=""
+
+  l7ZIP_LOG_FILE="${LOG_PATH_MODULE}/7z_extraction_$(basename "${lQCOW_PATH}").log"
+  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}" |& tee -a "${l7ZIP_LOG_FILE}"
+
+  mapfile -t l7ZIP_BROKEN_LINKS_ARR < <(grep "Dangerous link via another link was ignored" "${l7ZIP_LOG_FILE}")
+  if [[ "${#l7ZIP_BROKEN_LINKS_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Identified non extracted symlinks - trying to recover them now"
+    for l7ZIP_BROKEN_LNK in "${l7ZIP_BROKEN_LINKS_ARR[@]}"; do
+      print_output "[*] Trying to recover link: ${ORANGE}${l7ZIP_BROKEN_LNK}${NC}"
+      # ERROR: Dangerous link via another link was ignored : lib/ld64-uClibc.so.0 : ld64-uClibc.so.1
+      # lib/ld64-uClibc.so.0 : ld64-uClibc.so.1
+      l7ZIP_BROKEN_LNK=${l7ZIP_BROKEN_LNK/ERROR: Dangerous link via another link was ignored : }
+      # lib/ld64-uClibc.so.0
+      l7ZIP_BROKEN_LNK_SOURCE=${l7ZIP_BROKEN_LNK% :*}
+      # ld64-uClibc.so.1
+      l7ZIP_BROKEN_LNK_TARGET_NAME=${l7ZIP_BROKEN_LNK##*:\ }
+      find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1
+      l7ZIP_BROKEN_LNK_SOURCE=$(find "${lEXTRACTION_DIR}" -path "*${l7ZIP_BROKEN_LNK_SOURCE}" | sort -u | head -1)
+      rm "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+      l7ZIP_BROKEN_LNK_TARGET=$(find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1)
+      ln -s -r "${l7ZIP_BROKEN_LNK_TARGET}" "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+    done
+  fi
 
   mapfile -t lFILES_QCOW_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
 
@@ -83,11 +109,16 @@ qcow_extractor_7zip() {
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
+  print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
+  find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+  print_ln
+
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
   write_csv_log "Qemu QCOW filesystem extractor" "${lQCOW_PATH}" "${lEXTRACTION_DIR}" "${#lFILES_QCOW_ARR[@]}" "NA"
 }
 
-qcow_extractor() {
+### DEPRECATED and replaced by 7z extractor
+qcow_extractor_nbd_mnt() {
   local lQCOW_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
