@@ -80,9 +80,13 @@ IF17_cve_bin_tool() {
         # testing db update
         python3 ./cve_bin_tool/cli.py -i ./cve_bin_tool_health_check.csv --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o /tmp/cve_bin_tool_health_check_results || true
 
-        echo "[*] CVE query results for busybox query after database update (should be around 2888):"
-        wc -l /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
-        rm /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
+        if [[ -f /tmp/cve_bin_tool_health_check_results.csv ]]; then
+          echo "[*] CVE query results for busybox query after database update (should be around 2888):"
+          wc -l /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
+          rm /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
+        else
+          echo "[-] WARNING: No CVE search results available - manual checks needed!"
+        fi
 
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
         echo "[*] Exporting CVE database"

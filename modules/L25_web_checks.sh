@@ -71,7 +71,7 @@ main_web_check() {
       # handle first https and afterwards http
       if [[ "${lSERVICE}" == *"ssl|http"* ]] || [[ "${lSERVICE}" == *"ssl/http"* ]];then
         lSSL=1
-        if system_online_check "${lIP_ADDRESS_}"; then
+        if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
           # we make a screenshot for every web server
           make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "https"
         else
@@ -82,7 +82,7 @@ main_web_check() {
           fi
         fi
 
-        if system_online_check "${lIP_ADDRESS_}" ; then
+        if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
           testssl_check "${lIP_ADDRESS_}" "${lPORT}"
         else
           if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
@@ -92,7 +92,7 @@ main_web_check() {
           fi
         fi
 
-        if system_online_check "${lIP_ADDRESS_}" ; then
+        if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
           web_access_crawler "${lIP_ADDRESS_}" "${lPORT}" "${lSSL}"
         else
           if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
@@ -106,7 +106,7 @@ main_web_check() {
         # Note: this is not a full vulnerability scan. The checks are running only for
         # a limited time! At the end the tester needs to perform further investigation!
         if [[ "${lWEB_DONE}" -eq 0 ]]; then
-          if system_online_check "${lIP_ADDRESS_}" ; then
+          if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
             sub_module_title "Nikto web server analysis for ${ORANGE}${lIP_ADDRESS_}:${lPORT}${NC}"
             timeout --preserve-status --signal SIGINT 600 "${EXT_DIR}"/nikto/program/nikto.pl -timeout 3 -nointeractive -maxtime 8m -ssl -port "${lPORT}" -host "${lIP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${lIP_ADDRESS_}".txt || true
             cat "${LOG_PATH_MODULE}"/nikto-scan-"${lIP_ADDRESS_}".txt >> "${LOG_FILE}"
@@ -120,7 +120,7 @@ main_web_check() {
         fi
       elif [[ "${lSERVICE}" == *"http"* ]];then
         lSSL=0
-        if system_online_check "${lIP_ADDRESS_}" ; then
+        if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
           check_for_basic_auth_init "${lIP_ADDRESS_}" "${lPORT}"
         else
           if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
@@ -130,7 +130,7 @@ main_web_check() {
           fi
         fi
 
-        if system_online_check "${lIP_ADDRESS_}" ; then
+        if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
           # we make a screenshot for every web server
           make_web_screenshot "${lIP_ADDRESS_}" "${lPORT}" "http"
         else
@@ -141,7 +141,7 @@ main_web_check() {
           fi
         fi
 
-        if system_online_check "${lIP_ADDRESS_}" ; then
+        if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
           web_access_crawler "${lIP_ADDRESS_}" "${lPORT}" "${lSSL}"
         else
           if restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
@@ -152,8 +152,7 @@ main_web_check() {
         fi
 
         if [[ "${lWEB_DONE}" -eq 0 ]]; then
-
-          if system_online_check "${lIP_ADDRESS_}" ; then
+          if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
             sub_module_title "Nikto web server analysis for ${ORANGE}${lIP_ADDRESS_}:${lPORT}${NC}"
             timeout --preserve-status --signal SIGINT 600 "${EXT_DIR}"/nikto/program/nikto.pl -timeout 3 -nointeractive -maxtime 8m -port "${lPORT}" -host "${lIP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${lIP_ADDRESS_}".txt || true
             cat "${LOG_PATH_MODULE}"/nikto-scan-"${lIP_ADDRESS_}".txt >> "${LOG_FILE}"
@@ -430,7 +429,7 @@ web_access_crawler() {
         lCRAWLED_ARR+=( "${lWEB_DIR_L3}/${lWEB_FILE}" )
       fi
 
-      if ! system_online_check "${lIP_ADDRESS_}" ; then
+      if ! system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
         if ! restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing web crawling"
           enable_strict_mode "${STRICT_MODE}" 0

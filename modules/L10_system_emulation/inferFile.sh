@@ -33,6 +33,7 @@ if ("${EMBA_BOOT}"); then
       arr+=(/init)
     fi
   fi
+
   for FILE in $("${BUSYBOX}" find / -name "init" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "preinitMT" -o -name "linuxrc" -o -name "rc"); do
     "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     arr+=("${FILE}")
@@ -125,12 +126,16 @@ for POSSIBLE_BUSYBOX in $("${BUSYBOX}" find / -name "busybox" -type f); do
       "${BUSYBOX}" echo "/bin/linuxrc" >> /firmadyne/init
     fi
   fi
-  if [[ ! -f "/bin/init" ]] && [[ ! -L "/bin/init" ]]; then
-    "${BUSYBOX}" echo "[*] Re-creating BusyBox applet link for /bin/init"
-    "${BUSYBOX}" ln -s /bin/busybox /bin/init
+done
+
+# add the backup /bin/init entry at the end of our init files
+if [[ ! -f "/bin/init" ]] && [[ ! -L "/bin/init" ]]; then
+  "${BUSYBOX}" echo "[*] Re-creating BusyBox applet link for /bin/init"
+  "${BUSYBOX}" ln -s /bin/busybox /bin/init
+  if ! "${BUSYBOX}" grep -q -E "^/bin/init$" /firmadyne/init; then
     "${BUSYBOX}" echo "/bin/init" >> /firmadyne/init
   fi
-done
+fi
 
 # finally add the EMBA default/backup entry, print it and remove the temp file
 "${BUSYBOX}" echo '/firmadyne/preInit.sh' >> /firmadyne/init

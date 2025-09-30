@@ -57,13 +57,13 @@ restart_emulation() {
 
   if [[ "${lSTATE_CHECK_MECHANISM}" == "PING" ]]; then
     if ping_check "${lIP_ADDRESS}" 1; then
-      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 1; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 1 "NA"; then
         return 0
       fi
     fi
   elif [[ "${lSTATE_CHECK_MECHANISM}" == "HPING" ]]; then
     if hping_check "${lIP_ADDRESS}" 1; then
-      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 1; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 1 "NA"; then
         return 0
       fi
     fi
@@ -76,6 +76,8 @@ service_online_check() {
   local lIP_ADDRESS="${2:-}"
   # print details or do it silent
   local lPRINT_OUTPUT="${3:-1}"
+  # lNW_SERVICE -> if set we check the availability of this service
+  local lNW_SERVICE="${4:-NA}"
 
   local lMAX_CNT=100
   local lCNT=0
@@ -98,7 +100,12 @@ service_online_check() {
       for lSERVICE in "${lNMAP_SERV_TCP_ARR[@]}"; do
         if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}" >/dev/null; then
           [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
-          return 0
+          # we exit for our relevant service is reachable
+          # or we have no service that is relevant. This means we can
+          # return as soon as some service is up and running
+          if [[ "${lNW_SERVICE}" == "NA" ]] || [[ "${lSERVICE}" == "${lNW_SERVICE}" ]]; then
+            return 0
+          fi
         fi
       done
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for responsive network services on ${ORANGE}${lIP_ADDRESS} - #${lCNT}/${lMAX_CNT}${NC}" "no_log"
@@ -114,6 +121,8 @@ service_online_check() {
 
 system_online_check() {
   local lIP_ADDRESS="${1:-}"
+  # lNW_SERVICE -> if set we check the availability of this service
+  local lNW_SERVICE="${2:-NA}"
 
   # STATE_CHECK_MECHANISM is exported by l10
 
@@ -126,13 +135,13 @@ system_online_check() {
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
     ping -c 1 "${lIP_ADDRESS}"
     if ping_check "${lIP_ADDRESS}" 0; then
-      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0 "${lNW_SERVICE}"; then
         return 0
       fi
     fi
   elif [[ "${STATE_CHECK_MECHANISM:-PING}" == "HPING" ]]; then
     if hping_check "${lIP_ADDRESS}" 0; then
-      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0 "${lNW_SERVICE}"; then
         return 0
       fi
     fi
