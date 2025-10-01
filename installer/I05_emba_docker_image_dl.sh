@@ -20,7 +20,7 @@ I05_emba_docker_image_dl() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 0 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
-    # print_tool_info "docker.io" 1
+    # print_tool_info "docker.io" 1 "docker" "docker-ce"
 
     echo -e "\\n""${ORANGE}""${BOLD}""embeddedanalyzer/emba docker image""${NC}"
     echo -e "Description: EMBA docker images used for firmware analysis."
@@ -44,7 +44,13 @@ I05_emba_docker_image_dl() {
 
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+       if [[ ${#INSTALL_APP_LIST[@]} -gt 0 ]]; then
+          if [[ "${RHEL_OS}" -eq 1 ]]; then
+            dnf install -y --setopt=install_weak_deps=false "${INSTALL_APP_LIST[@]}"
+          else
+            apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+          fi
+        fi
 
         if ! pgrep dockerd; then
           echo -e "\\n""${RED}""${BOLD}""Docker daemon not running! Please check it manually and try again""${NC}"

@@ -41,45 +41,86 @@ module_title()
   echo -e "\\n\\n""${MODULE_TITLE_FORMAT}"
 }
 
-# print_tool_info a b c
+# print_tool_info a b [c] [d]
 # a = application name (by apt)
 # b = no update, if already installed -> 0
 #     update, if already installed -> 1
 # c = if given: check if this application is on the system instead of a
+# d = if given: use this as the package name on RHEL systems
 
 print_tool_info(){
   echo -e "\\n""${ORANGE}""${BOLD}""${1:-}""${NC}"
-  TOOL_INFO="$(apt show "${1:-}" 2> /dev/null)"
-  if echo "${TOOL_INFO}" | grep -q "Description:" 2>/dev/null ; then
-    echo -e "$(echo "${TOOL_INFO}" | grep "Description:")"
-    SIZE=$(apt show "${1:-}" 2>/dev/null | grep Download-Size | cut -d: -f2 || true)
-    if [[ -n "${SIZE}" ]]; then
-      echo -e "Download-Size:${SIZE}"
+
+  local lPKG_NAME="$1"
+  # If we are on RHEL and the 4th argument is provided, use it as the package name
+  if [[ "${RHEL_OS}" -eq 1 ]] && [[ -n "${4:-}" ]]; then
+    lPKG_NAME="$4"
+  fi
+
+  local lTOOL_INFO=""
+  local lIS_INSTALLED=0
+
+  if [[ "${RHEL_OS}" -eq 1 ]]; then
+    lTOOL_INFO="$(dnf info "${lPKG_NAME}" 2> /dev/null)"
+  else
+    lTOOL_INFO="$(apt show "${lPKG_NAME}" 2> /dev/null)"
+  fi
+
+  if [[ -n "${lTOOL_INFO}" ]] ; then
+    local lDESC=""
+        lDESC="$(echo "${lTOOL_INFO}" | grep -E "^Description[[:space:]]*:" | head -n 1 || true)"
+    if [[ -n "${lDESC}" ]]; then
+        echo -e "${lDESC}"
     fi
-    if echo "${TOOL_INFO}" | grep -E "^E:\ "; then
-      echo -e "${RED}""${1:-}"" was not identified and is not installable.""${NC}"
+
+    local lSIZE=""
+    if [[ "${RHEL_OS}" -eq 1 ]]; then
+      lSIZE=$(echo "${lTOOL_INFO}" | grep -E "^Size[[:space:]]*:" | cut -d: -f2 | head -n 1 || true)
     else
-      COMMAND_=""
-      if [[ -n ${3+x} ]] ; then
-        COMMAND_="${3:-}"
+      lSIZE=$(echo "${lTOOL_INFO}" | grep "Download-Size" | cut -d: -f2 || true)
+    fi
+    if [[ -n "${lSIZE}" ]]; then
+      echo -e "Download-Size:${lSIZE}"
+    fi
+
+    local lCOMMAND_=""
+    if [[ -n ${3+x} ]] ; then
+      lCOMMAND_="${3:-}"
+    else
+      lCOMMAND_="${lPKG_NAME}"
+    fi
+
+    if ( command -v "${lCOMMAND_}" > /dev/null); then
+      lIS_INSTALLED=1
+    elif [[ "${RHEL_OS}" -eq 1 ]]; then
+      if rpm -q "${lPKG_NAME}" &> /dev/null; then lIS_INSTALLED=1; fi
+    else
+      if ( dpkg -s "${lPKG_NAME}" 2> /dev/null | grep -q "Status: install ok installed" ); then lIS_INSTALLED=1; fi
+    fi
+
+    if [[ "${lIS_INSTALLED}" -eq 1 ]]; then
+      local lUPDATE_AVAILABLE=0
+      if [[ "${RHEL_OS}" -eq 1 ]]; then
+        dnf check-update "${lPKG_NAME}" &> /dev/null
+        [[ $? -eq 100 ]] && lUPDATE_AVAILABLE=1
       else
-        COMMAND_="${1:-}"
+        local lUPDATE=0
+        lUPDATE=$(LANG=en apt-cache policy "${lPKG_NAME}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+        [[ "${lUPDATE}" -ne 1 ]] && lUPDATE_AVAILABLE=1
       fi
-      if ( command -v "${COMMAND_}" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-        UPDATE=$(LANG=en apt-cache policy "${1}" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
-        if [[ "${UPDATE}" -eq 1 ]] ; then
-          echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}"
-        else
-          echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}"
-          INSTALL_APP_LIST+=("${1:-}")
-        fi
+
+      if [[ "${lUPDATE_AVAILABLE}" -eq 1 ]]; then
+        echo -e "${ORANGE}""${1:-}"" will be updated.""${NC}"
+        INSTALL_APP_LIST+=("${lPKG_NAME}")
       else
-        echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}"
-        INSTALL_APP_LIST+=("${1:-}")
+        echo -e "${GREEN}""${1:-}"" won't be updated.""${NC}"
       fi
+    else
+      echo -e "${ORANGE}""${1:-}"" will be newly installed.""${NC}"
+      INSTALL_APP_LIST+=("${lPKG_NAME}")
     fi
   else
-    echo -e "${RED}""${1:-}"" is not available anymore - installation can't proceed.""${NC}"
+    echo -e "${RED}""${1:-}"" is not available in repositories - installation can't proceed.""${NC}"
     exit 1
   fi
 }

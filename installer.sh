@@ -54,6 +54,7 @@ export FORCE=0
 # other os stuff
 export OTHER_OS=0
 export UBUNTU_OS=0
+export RHEL_OS=0
 export WSL=0
 export GH_ACTION=0
 export SSL_REPOS=0
@@ -149,7 +150,7 @@ while getopts CdDfFghlrsc: OPT ; do
       export CONTAINER="${OPTARG}"
       ;;
     *)
-      echo -e "${RED}${BOLD}Invalid option${NC}"
+      echo -e "${RED}${BOLD}Invalid option: ${OPT}${NC}"
       print_help
       exit 1
       ;;
@@ -184,7 +185,9 @@ if grep -q -i wsl /proc/version; then
 fi
 
 # distribution check
-if ! grep -Eq "ID(_LIKE)?=(\")?(ubuntu)?( )?(debian)?" /etc/os-release 2>/dev/null ; then
+if grep -Eq "ID(_LIKE)?=.*(rhel|fedora|rocky|centos)" /etc/os-release 2>/dev/null; then
+  RHEL_OS=1
+elif ! grep -Eq "ID(_LIKE)?=(\")?(ubuntu)?( )?(debian)?" /etc/os-release 2>/dev/null ; then
   echo -e "\\n""${RED}""EMBA only supports debian based distributions!""${NC}\\n"
   print_help
   exit 1
@@ -300,36 +303,61 @@ if [[ ${LIST_DEP} -eq 0 ]] ; then
     sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
     sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
   fi
-  apt-get -y update
+  if [[ "${RHEL_OS}" -eq 1 ]]; then
+    dnf install epel-release -y
+    dnf update -y
+  else
+    apt-get -y update
+  fi
 fi
 
 # setup the python virtual environment in external directory
 # external is also setup in the docker image
-apt-get -y install python3-venv
+if [[ "${RHEL_OS}" -eq 1 ]]; then
+  dnf install -y python3-virtualenv
+else
+  apt-get -y install python3-venv
+fi
 create_pipenv "./external/emba_venv"
 activate_pipenv "./external/emba_venv"
 
 if ! command -v docker > /dev/null || ! command -v docker compose > /dev/null ; then
-  # OS debian is for Kali Linux
-  OS="debian"
-  [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
-  # Add Docker's official GPG key:
-  apt-get install -y ca-certificates curl gnupg
-  install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/"${OS}"/gpg -o /etc/apt/keyrings/docker.asc
-  chmod a+r /etc/apt/keyrings/docker.asc
-  # Add the repository to Apt sources:
-  if [[ "${UBUNTU_OS}" -eq 1 ]]; then
-    # shellcheck source=/dev/null
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
-    $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  if [[ "${RHEL_OS}" -eq 1 ]]; then
+    echo "RHEL/Rocky system detected. Installing Docker using dnf..."
+    # Install dnf-utils which provides the 'dnf config-manager' command
+    dnf install -y 'dnf-command(config-manager)'
+    # Add the official Docker repository
+    dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    # Install Docker Engine and plugins. Allow erasing because we want to use docker instead of podman
+    dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin --allowerasing
+    systemctl start docker
+    systemctl enable docker
+
+
+  # The original logic for Debian-family systems (Debian, Ubuntu, Kali, etc.)
   else
-    # probably a kali linux
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
-    bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    echo "Debian/Ubuntu system detected. Installing Docker using apt..."
+    # OS debian is for Kali Linux
+    OS="debian"
+    [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
+    apt-get install -y ca-certificates curl gnupg
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/"${OS}"/gpg -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+    # Add the repository to Apt sources:
+    if [[ "${UBUNTU_OS}" -eq 1 ]]; then
+      # shellcheck source=/dev/null
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
+      $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    else
+      # probably a kali linux
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${OS} \
+      bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    fi
+    apt-get update -y
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   fi
-  apt-get update -y
-  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
   export DOCKER_COMPOSE=("docker" "compose")
 elif command -v docker-compose > /dev/null ; then
   echo -e "\n${ORANGE}""${BOLD}""WARNING: Old docker-compose installation found""${NC}"
@@ -447,7 +475,7 @@ if [[ "${IN_DOCKER}" -ne 1 ]]; then
   IF20_nvd_feed
 fi
 
-deactivate
+deactivate destructive
 
 cd "${HOME_PATH}" || exit 1
 

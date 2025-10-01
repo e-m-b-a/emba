@@ -40,7 +40,11 @@ IF50_aggregator_common() {
 
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        if [[ "${RHEL_OS}" -eq 1 ]]; then
+          dnf install -y --setopt=install_weak_deps=false "${INSTALL_APP_LIST[@]}"
+        else
+          apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        fi
         pip_install "cve_searchsploit"
 
         # we try to avoid downloading the exploit-database multiple times:
@@ -68,5 +72,10 @@ IF50_aggregator_common() {
   fi
   # we were running into issues that this package was removed somehow during the installation process
   # Todo: figure out why and solve it somehow
-  apt-get install 7zip -y
+
+  if [[ "${RHEL_OS}" -eq 1 ]]; then
+    dnf install -y p7zip p7zip-plugins
+  else
+    apt-get install 7zip -y
+  fi
 }
