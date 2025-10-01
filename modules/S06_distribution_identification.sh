@@ -150,6 +150,7 @@ S06_distribution_identification()
             fi
             lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lIDENTIFIER}" )
             lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
+            lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_MAINT}" )
             lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

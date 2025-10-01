@@ -60,6 +60,7 @@ IL15_emulated_checks_init() {
     #   pip3 install upnpclient --no-dependencies lxml
     print_pip_info "lxml" "5.3.1"
     print_pip_info "upnpclient"
+    print_pip_info "dateutils"
     print_pip_info "beautifulsoup4"
 
     # chromium headless shell
@@ -101,6 +102,7 @@ IL15_emulated_checks_init() {
       pip_install "lxml==5.3.1"
       # pip_install helper function does not support further parameters
       # Todo: fix this
+      pip_install "dateutils"
       pip3 install "upnpclient" --no-dependencies lxml
       ;;
     esac

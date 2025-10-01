@@ -209,11 +209,16 @@ L10_system_emulation() {
           print_output "[*] Testing system recovery with hping instead of ping" "no_log"
           STATE_CHECK_MECHANISM="HPING"
         fi
-        # we should get TCP="ok" and SYS_ONLINE=1 back
-        if restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
-          print_output "[+] System recovery was successful. Further live analysis possible for IP ${lIP_ADDRESS}"
+
+        if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
+          # we should get TCP="ok" and SYS_ONLINE=1 back
+          if restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[+] System recovery was successful. Further live analysis possible for IP ${lIP_ADDRESS}."
+          else
+            print_output "[-] System recovery went wrong. No further analysis possible."
+          fi
         else
-          print_output "[-] System recovery went wrong. No further analysis possible"
+          print_output "[*] System recovery not possible - FINAL_FW_RM option set! No further analysis possible."
         fi
         export IP_ADDRESS_="${lIP_ADDRESS}"
       else
@@ -2493,9 +2498,14 @@ run_emulated_system() {
       # fallback - we connect id 0
       lNET_NUM=0
     fi
+    if [[ "${lNET_NUM}" -gt 5 ]]; then
+      print_output "[*] NET_NUM ${lNET_NUM} issues -> setting default NET_NUM to 0"
+      lNET_NUM=0
+    fi
 
     # 6 Interfaces -> 0-5
     for lNET_ID in {0..5}; do
+      print_output "[*] Network ID ${lNET_ID} connector / lNET_NUM: ${lNET_NUM}"
       if [[ "${lNET_ID}" == "${lNET_NUM}" ]];then
         # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
@@ -2504,6 +2514,7 @@ run_emulated_system() {
       else
         # only 0-3 are handled via placeholder interfaces
         if [[ "${lNET_ID}" -gt 3 ]]; then
+          print_output "[*] Network ID ${lNET_ID} bypass"
           continue
         fi
         # on ARM we have currently only one interface and we need to connect this to the host
@@ -2519,9 +2530,11 @@ run_emulated_system() {
   fi
 
   if [[ -z "${lQEMU_NETWORK}" ]]; then
-    print_output "[!] No network interface config created ... stop further emulation"
-    print_output "[-] No firmware emulation ${ORANGE}${ARCH}${NC} / ${ORANGE}${lIMAGE_NAME}${NC} possible"
-    return
+    print_output "[!] No network interface config created ... creating backup configuration"
+    lNET_ID=0
+    print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
+    lQEMU_NETWORK+=" -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
+    lQEMU_NETWORK+=" -netdev tap,id=net${lNET_ID},ifname=${TAPDEV_0},script=no"
   fi
 
   # dirty workaround to fill the KERNEL which is used later on
@@ -2569,7 +2582,23 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
+  date +%s > "${TMP_DIR}/emu_starter.log"
   write_script_exec "timeout --preserve-status --signal SIGINT 2000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
+}
+
+get_emu_runtime() {
+  local lEMU_START_DATE=""
+  local lCURRENT_DATE=""
+  local lRUN_TIME=""
+
+  if [[ -f "${TMP_DIR}/emu_starter.log" ]]; then
+    lEMU_START_DATE=$(cat "${TMP_DIR}/emu_starter.log")
+    lCURRENT_DATE="$(date +%s)"
+    lRUN_TIME=$((lCURRENT_DATE-lEMU_START_DATE))
+  else
+    lRUN_TIME="NA"
+  fi
+  echo "${lRUN_TIME}"
 }
 
 check_online_stat() {
@@ -2591,12 +2620,16 @@ check_online_stat() {
   # wait 20 secs after boot before starting pinging
   sleep 20
 
-  local lMAX_PING_CNT=120
+  # lMAX_PING_CNT is a backup to get out in case something goes weird
+  local lMAX_PING_CNT=240
+  local lMAX_RUN_TIME=900
+  local lRUN_TIME=""
+  lRUN_TIME=$(get_emu_runtime)
   # we write the results to a tmp file. This is needed to only have the results of the current emulation round
   # for further processing available
-  # we try pinging the system for 30 times with 5 secs sleeptime in between
+  # we try pinging the system for 10mins with 5 secs sleeptime in between
   # if the system is reachable we go ahead
-  while [[ "${lPING_CNT}" -lt "${lMAX_PING_CNT}" && "${lSYS_ONLINE}" -eq 0 ]]; do
+  while [[ "${lRUN_TIME}" -lt "${lMAX_RUN_TIME}" && "${lSYS_ONLINE}" -eq 0 ]]; do
     # lets use the default ping command first
     if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
       print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
@@ -2657,18 +2690,23 @@ check_online_stat() {
 
     lPING_CNT=$((lPING_CNT+1))
     if [[ "${lSYS_ONLINE}" -eq 0 ]]; then
-      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s) - max cnt ${lMAX_PING_CNT}." "no_log"
+      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s) - runtime $(date -ud@"${lRUN_TIME}" +%H:%M:%S)." "no_log"
       lSYS_ONLINE=0
       sleep 5
     fi
+    if [[ "${lPING_CNT}" -gt "${lMAX_PING_CNT}" ]]; then
+      print_output "[!] Max ping count reached after runtime $(date -ud@"${lRUN_TIME}" +%H:%M:%S) - proceeding now"
+      break
+    fi
+    lRUN_TIME=$(get_emu_runtime)
   done
 
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
     print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
   else
-    print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
-    sleep 60
+    print_output "[*] Give the system another 30 seconds to ensure the boot process is finished.\n" "no_log"
+    sleep 30
     print_output "[*] Default Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
     # write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
@@ -2698,7 +2736,8 @@ check_online_stat() {
       tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
     fi
 
-    lMAX_NMAP_RETRIES=10
+    lMAX_NMAP_RETRIES=40
+    lRUN_TIME=$(get_emu_runtime)
     # at the end we are primarly interested in TCP based network services. This means we stop after reaching
     # our MIN_TCP_SERV threshold
     while [[ "$(grep -c "\/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -lt "${MIN_TCP_SERV}" ]]; do
@@ -2720,7 +2759,14 @@ check_online_stat() {
       if grep -q "/open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
         tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
       fi
+      # lMAX_NMAP_RETRIES is as backup to exit somehow from this loop
       [[ "${lCNT}" -ge "${lMAX_NMAP_RETRIES}" ]] && break
+
+      # runtime checks is the prefered way to exit now
+      lRUN_TIME=$(get_emu_runtime)
+      if [[ "${lRUN_TIME}" -gt "${lMAX_RUN_TIME}" ]]; then
+        break
+      fi
     done
     # get a backup of our current results and add the later nmap scans to this file for the web report
     cp "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}/${lNMAP_LOG}"
@@ -2840,7 +2886,6 @@ check_online_stat() {
     fi
   fi
 
-  print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
   stopping_emulation_process "${lIMAGE_NAME}"
   cleanup_emulator "${lIMAGE_NAME}"
 
@@ -2926,123 +2971,6 @@ create_emulation_archive() {
     fi
   else
     print_output "[-] No run script created ..."
-  fi
-}
-
-# EXECUTE: 0 -> just write script
-# EXECUTE: 1 -> execute and write script
-# EXECUTE: 2 -> just execute
-reset_network_emulation() {
-  local lIMAGE_NAME="${1:-0}"
-  local lEXECUTE="${2:-0}"
-
-  local lEXECUTE_tmp=0
-
-  if ! [[ -v lIMAGE_NAME ]] || ! [[ -v ARCHIVE_PATH ]]; then
-    return
-  fi
-
-  # Todo: handle network shutdown also on restarted tests
-  if [[ "${RESTART}" -ne 0 ]]; then
-    return
-  fi
-
-  if [[ "${lEXECUTE}" -ne 0 ]]; then
-    print_output "[*] Stopping Qemu emulation ..." "no_log"
-    pkill -9 -f "qemu-system-.*${lIMAGE_NAME}.*" || true &>/dev/null
-  fi
-
-  if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Deleting route" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    write_script_exec "echo -e \"Deleting route ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
-  fi
-  if [[ -v HOSTNETDEV_0 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip route flush dev" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    print_output "[*] Deleting route..." "no_log"
-    write_script_exec "ip route flush dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE}"
-  fi
-
-  if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Bringing down TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    print_output "[*] Bringing down TAP device..." "no_log"
-    write_script_exec "echo -e \"Bringing down TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
-  fi
-  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    lEXECUTE_tmp=1
-  else
-    lEXECUTE_tmp="${lEXECUTE}"
-  fi
-  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    write_script_exec "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
-  fi
-
-  if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Removing VLAN" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    print_output "Removing VLAN..." "no_log"
-    write_script_exec "echo -e \"Removing VLAN ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
-  fi
-
-  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    lEXECUTE_tmp=1
-  else
-    lEXECUTE_tmp="${lEXECUTE}"
-  fi
-  if [[ -v HOSTNETDEV_0 ]]; then
-    if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-      write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
-    fi
-  fi
-
-  if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Deleting TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
-    write_script_exec "echo -e \"Deleting TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
-  fi
-
-  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    lEXECUTE_tmp=1
-  else
-    lEXECUTE_tmp="${lEXECUTE}"
-  fi
-  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
-  fi
-}
-
-write_script_exec() {
-  local lCOMMAND="${1:-}"
-  # SCRIPT_WRITE: File to write
-  local lSCRIPT_WRITE="${2:-}"
-
-  # EXECUTE: 0 -> just write script
-  # EXECUTE: 1 -> execute and write script
-  # EXECUTE: 2 -> just execute
-  local lEXECUTE="${3:-0}"
-  local lPID=""
-
-  if [[ "${lEXECUTE}" -ne 0 ]];then
-    eval "${lCOMMAND}" || true &
-    lPID="$!"
-    disown "${lPID}" 2> /dev/null || true
-  fi
-
-  if [[ "${lEXECUTE}" -ne 2 ]];then
-    if ! [[ -f "${lSCRIPT_WRITE}" ]]; then
-      # just in case we have our script not already there we set it up now
-      echo "#!/bin/bash -p" > "${lSCRIPT_WRITE}"
-    fi
-
-    # for the final script we need to adjust the paths:
-    if [[ "${lCOMMAND}" == *"qemu-system-"* ]]; then
-      # fix path for kernel: /external/EMBA_Live_bins/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
-      # shellcheck disable=SC2001
-      lCOMMAND=$(echo "${lCOMMAND}" | sed 's#-kernel\ .*\/EMBA_Live_bins\/#-kernel\ .\/#g')
-      # shellcheck disable=SC2001
-      lCOMMAND=$(echo "${lCOMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
-      # shellcheck disable=SC2001
-      lCOMMAND=$(echo "${lCOMMAND}" | sed "s|\"${LOG_PATH_MODULE:-}\"|\.|g")
-      # remove the timeout from the qemu startup command
-      lCOMMAND="${lCOMMAND#timeout --preserve-status --signal SIGINT [[:digit:]]* }"
-      # remove the tail kill command
-      lCOMMAND="${lCOMMAND% ; pkill -9 -f tail.*-F.*.}"
-    fi
-
-    echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
   fi
 }
 

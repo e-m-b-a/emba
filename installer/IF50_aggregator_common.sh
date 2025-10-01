@@ -72,9 +72,10 @@ IF50_aggregator_common() {
   fi
   # we were running into issues that this package was removed somehow during the installation process
   # Todo: figure out why and solve it somehow
+
   if [[ "${RHEL_OS}" -eq 1 ]]; then
     dnf install -y p7zip p7zip-plugins
   else
-    apt-get install p7zip-full -y
+    apt-get install 7zip -y
   fi
 }

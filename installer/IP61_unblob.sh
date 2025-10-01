@@ -37,7 +37,7 @@ IP61_unblob() {
     print_tool_info "lz4"
     print_tool_info "lziprecover" 1
     print_tool_info "lzop" 1
-    print_tool_info "p7zip-full" 1
+    print_tool_info "7zip" 1
     print_tool_info "unar" 1
     print_tool_info "xz-utils" 1
     print_tool_info "zlib1g-dev" 1

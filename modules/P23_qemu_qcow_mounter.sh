@@ -25,24 +25,24 @@ P23_qemu_qcow_mounter() {
     pre_module_reporter "${FUNCNAME[0]}"
 
 
-    local lEXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_mount_filesystem/
-    local lFIRMWARE_PATHx=""
+    local lEXTRACTION_DIR="${LOG_DIR}"/firmware/qemu_qcow_extractor/
+#    local lFIRMWARE_PATHx=""
 
-    if [[ "${IN_DOCKER}" -eq 1 ]]; then
-      # we need rw access to firmware -> in docker container we need to copy
-      # the firmware to TMP_DIR and use this for extraction
-      # afterwards we are going to remove this path
-      cp /firmware "${TMP_DIR}"
-      lFIRMWARE_PATHx="${TMP_DIR}"/firmware
-    else
-      lFIRMWARE_PATHx="${FIRMWARE_PATH}"
-    fi
+#    if [[ "${IN_DOCKER}" -eq 1 ]]; then
+#      # we need rw access to firmware -> in docker container we need to copy
+#      # the firmware to TMP_DIR and use this for extraction
+#      # afterwards we are going to remove this path
+#      cp /firmware "${TMP_DIR}"
+#      lFIRMWARE_PATHx="${TMP_DIR}"/firmware
+#    else
+#      lFIRMWARE_PATHx="${FIRMWARE_PATH}"
+#    fi
 
-    qcow_extractor "${lFIRMWARE_PATHx}" "${lEXTRACTION_DIR}"
+    qcow_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -f "${TMP_DIR}"/firmware ]]; then
-      rm "${TMP_DIR}"/firmware
-    fi
+#    if [[ -f "${TMP_DIR}"/firmware ]]; then
+#      rm "${TMP_DIR}"/firmware
+#    fi
 
     if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
@@ -54,6 +54,71 @@ P23_qemu_qcow_mounter() {
 }
 
 qcow_extractor() {
+  local lQCOW_PATH="${1:-}"
+  local lEXTRACTION_DIR="${2:-}"
+
+  local lFILES_QCOW_ARR=()
+  local lBINARY=""
+  local lWAIT_PIDS_P99_ARR=()
+
+  if ! [[ -f "${lQCOW_PATH}" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
+  sub_module_title "Qemu QCOW 7zip filesystem extractor"
+
+  local l7ZIP_LOG_FILE=""
+  local l7ZIP_BROKEN_LINKS_ARR=()
+  local l7ZIP_BROKEN_LNK=""
+  local l7ZIP_BROKEN_LNK_TARGET=""
+
+  l7ZIP_LOG_FILE="${LOG_PATH_MODULE}/7z_extraction_$(basename "${lQCOW_PATH}").log"
+  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}" |& tee -a "${l7ZIP_LOG_FILE}"
+
+  mapfile -t l7ZIP_BROKEN_LINKS_ARR < <(grep "Dangerous link via another link was ignored" "${l7ZIP_LOG_FILE}")
+  if [[ "${#l7ZIP_BROKEN_LINKS_ARR[@]}" -gt 0 ]]; then
+    print_output "[*] Identified non extracted symlinks - trying to recover them now"
+    for l7ZIP_BROKEN_LNK in "${l7ZIP_BROKEN_LINKS_ARR[@]}"; do
+      print_output "[*] Trying to recover link: ${ORANGE}${l7ZIP_BROKEN_LNK}${NC}"
+      # ERROR: Dangerous link via another link was ignored : lib/ld64-uClibc.so.0 : ld64-uClibc.so.1
+      # lib/ld64-uClibc.so.0 : ld64-uClibc.so.1
+      l7ZIP_BROKEN_LNK=${l7ZIP_BROKEN_LNK/ERROR: Dangerous link via another link was ignored : }
+      # lib/ld64-uClibc.so.0
+      l7ZIP_BROKEN_LNK_SOURCE=${l7ZIP_BROKEN_LNK% :*}
+      # ld64-uClibc.so.1
+      l7ZIP_BROKEN_LNK_TARGET_NAME=${l7ZIP_BROKEN_LNK##*:\ }
+      find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1
+      l7ZIP_BROKEN_LNK_SOURCE=$(find "${lEXTRACTION_DIR}" -path "*${l7ZIP_BROKEN_LNK_SOURCE}" | sort -u | head -1)
+      rm "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+      l7ZIP_BROKEN_LNK_TARGET=$(find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1)
+      ln -s -r "${l7ZIP_BROKEN_LNK_TARGET}" "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+    done
+  fi
+
+  mapfile -t lFILES_QCOW_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
+
+  print_output "[*] Extracted ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files from the firmware image."
+  print_output "[*] Populating backend data for ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files ... could take some time" "no_log"
+
+  for lBINARY in "${lFILES_QCOW_ARR[@]}"; do
+    binary_architecture_threader "${lBINARY}" "P23_qemu_qcow_mounter" &
+    local lTMP_PID="$!"
+    store_kill_pids "${lTMP_PID}"
+    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+  done
+  wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+  print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR}${NC}) as base directory:"
+  find "${lEXTRACTION_DIR}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
+  print_ln
+
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
+  write_csv_log "Qemu QCOW filesystem extractor" "${lQCOW_PATH}" "${lEXTRACTION_DIR}" "${#lFILES_QCOW_ARR[@]}" "NA"
+}
+
+### DEPRECATED and replaced by 7z extractor
+qcow_extractor_nbd_mnt() {
   local lQCOW_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
