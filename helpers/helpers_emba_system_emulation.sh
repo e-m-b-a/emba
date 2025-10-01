@@ -71,6 +71,122 @@ restart_emulation() {
   return 1
 }
 
+# EXECUTE: 0 -> just write script
+# EXECUTE: 1 -> execute and write script
+# EXECUTE: 2 -> just execute
+reset_network_emulation() {
+  local lIMAGE_NAME="${1:-0}"
+  local lEXECUTE="${2:-0}"
+
+  local lEXECUTE_tmp=0
+
+  if ! [[ -v lIMAGE_NAME ]] || ! [[ -v ARCHIVE_PATH ]]; then
+    return
+  fi
+
+  # Todo: handle network shutdown also on restarted tests
+  if [[ "${RESTART}" -ne 0 ]]; then
+    return
+  fi
+
+  if [[ "${lEXECUTE}" -ne 0 ]]; then
+    print_output "[*] Stopping Qemu emulation ..." "no_log"
+    pkill -9 -f "qemu-system-.*${lIMAGE_NAME}.*" || true &>/dev/null
+  fi
+
+  if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Deleting route" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    write_script_exec "echo -e \"Deleting route ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
+  fi
+  if [[ -v HOSTNETDEV_0 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip route flush dev" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    print_output "[*] Deleting route..." "no_log"
+    write_script_exec "ip route flush dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE}"
+  fi
+
+  if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Bringing down TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    print_output "[*] Bringing down TAP device..." "no_log"
+    write_script_exec "echo -e \"Bringing down TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
+  fi
+  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    lEXECUTE_tmp=1
+  else
+    lEXECUTE_tmp="${lEXECUTE}"
+  fi
+  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    write_script_exec "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  fi
+
+  if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Removing VLAN" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    print_output "Removing VLAN..." "no_log"
+    write_script_exec "echo -e \"Removing VLAN ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
+  fi
+
+  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    lEXECUTE_tmp=1
+  else
+    lEXECUTE_tmp="${lEXECUTE}"
+  fi
+  if [[ -v HOSTNETDEV_0 ]]; then
+    if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+      write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+    fi
+  fi
+
+  if [[ "${lEXECUTE}" -eq 1 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "Deleting TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
+    write_script_exec "echo -e \"Deleting TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
+  fi
+  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    lEXECUTE_tmp=1
+  else
+    lEXECUTE_tmp="${lEXECUTE}"
+  fi
+  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  fi
+}
+
+write_script_exec() {
+  local lCOMMAND="${1:-}"
+  # SCRIPT_WRITE: File to write
+  local lSCRIPT_WRITE="${2:-}"
+
+  # EXECUTE: 0 -> just write script
+  # EXECUTE: 1 -> execute and write script
+  # EXECUTE: 2 -> just execute
+  local lEXECUTE="${3:-0}"
+  local lPID=""
+
+  if [[ "${lEXECUTE}" -ne 0 ]];then
+    eval "${lCOMMAND}" || true &
+    lPID="$!"
+    disown "${lPID}" 2> /dev/null || true
+  fi
+
+  if [[ "${lEXECUTE}" -ne 2 ]];then
+    if ! [[ -f "${lSCRIPT_WRITE}" ]]; then
+      # just in case we have our script not already there we set it up now
+      echo "#!/bin/bash -p" > "${lSCRIPT_WRITE}"
+    fi
+
+    # for the final script we need to adjust the paths:
+    if [[ "${lCOMMAND}" == *"qemu-system-"* ]]; then
+      # fix path for kernel: /external/EMBA_Live_bins/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
+      # shellcheck disable=SC2001
+      lCOMMAND=$(echo "${lCOMMAND}" | sed 's#-kernel\ .*\/EMBA_Live_bins\/#-kernel\ .\/#g')
+      # shellcheck disable=SC2001
+      lCOMMAND=$(echo "${lCOMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
+      # shellcheck disable=SC2001
+      lCOMMAND=$(echo "${lCOMMAND}" | sed "s|\"${LOG_PATH_MODULE:-}\"|\.|g")
+      # remove the timeout from the qemu startup command
+      lCOMMAND="${lCOMMAND#timeout --preserve-status --signal SIGINT [[:digit:]]* }"
+      # remove the tail kill command
+      lCOMMAND="${lCOMMAND% ; pkill -9 -f tail.*-F.*.}"
+    fi
+
+    echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
+  fi
+}
+
 service_online_check() {
   local lARCHIVE_PATH="${1:-}"
   local lIP_ADDRESS="${2:-}"
