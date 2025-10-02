@@ -103,6 +103,7 @@ IL15_emulated_checks_init() {
       # pip_install helper function does not support further parameters
       # Todo: fix this
       pip_install "dateutils"
+      pip_install "ifaddr"
       pip3 install "upnpclient" --no-dependencies lxml
       ;;
     esac
