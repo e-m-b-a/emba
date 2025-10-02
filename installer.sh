@@ -468,12 +468,20 @@ if [[ "${CVE_SEARCH}" -ne 1 ]] || [[ "${DOCKER_SETUP}" -ne 1 ]] || [[ "${IN_DOCK
   IF17_cve_bin_tool
 
   IF50_aggregator_common
+
+  if [[ -f "${INSTALLER_DIR}/EMBA_python_imports.sh" ]]; then
+    # testing and fixing python imports
+    python_imports_check 1 "./external/emba_venv"
+  else
+    echo -e "\\n${MAGENTA}${BOLD}INFO: Python imports checker not available!${NC}"
+  fi
 fi
 
 if [[ "${IN_DOCKER}" -ne 1 ]]; then
   # NVD CVE data feed is always installed on the host:
   IF20_nvd_feed
 fi
+
 
 deactivate destructive
 
