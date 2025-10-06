@@ -38,7 +38,6 @@ IF20_nvd_feed() {
         echo -e "\\n""${MAGENTA}""Check if the NVD JSON data feed is already installed and populated.""${NC}"
         if [[ "${GH_ACTION}" -eq 1 ]]; then
           echo "[*] Github action - not installing NVD database"
-          echo "GH_action:true" > ./config/gh_action || true
           return
         fi
 

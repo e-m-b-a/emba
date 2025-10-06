@@ -60,7 +60,6 @@ IF17_cve_bin_tool() {
 
         if [[ "${GH_ACTION}" -eq 1 ]]; then
           echo "[*] Github action - not installing cve-bin-tool database"
-          echo "GH_action:true" > ./config/gh_action || true
           return
         fi
 
