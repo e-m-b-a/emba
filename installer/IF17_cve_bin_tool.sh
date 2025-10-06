@@ -58,6 +58,11 @@ IF17_cve_bin_tool() {
           mkdir "${HOME}"/.cache/cve-bin-tool
         fi
 
+        if [[ "${GH_ACTION}" -eq 1 ]]; then
+          echo "[*] Github action - not installing cve-bin-tool database"
+          return
+        fi
+
         if [[ -f /installer/cve-database.db ]]; then
           echo "[*] Testing the CVE database with the following test data:"
           cat ./cve_bin_tool_health_check.csv

@@ -57,6 +57,9 @@ export UBUNTU_OS=0
 export RHEL_OS=0
 export WSL=0
 export GH_ACTION=0
+if [[ -f ./config/gh_action ]]; then
+  export GH_ACTION=1
+fi
 export SSL_REPOS=0
 
 ## Color definition
@@ -468,6 +471,13 @@ if [[ "${CVE_SEARCH}" -ne 1 ]] || [[ "${DOCKER_SETUP}" -ne 1 ]] || [[ "${IN_DOCK
   IF17_cve_bin_tool
 
   IF50_aggregator_common
+
+  if [[ -f "${INSTALLER_DIR}/EMBA_python_imports.sh" ]]; then
+    # testing and fixing python imports
+    python_imports_check 1 "./external/emba_venv"
+  else
+    echo -e "\\n${MAGENTA}${BOLD}INFO: Python imports checker not available!${NC}"
+  fi
 fi
 
 if [[ "${IN_DOCKER}" -ne 1 ]]; then
