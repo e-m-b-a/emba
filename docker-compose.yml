@@ -40,7 +40,7 @@ services:
     environment:
         - USER
         - CONTAINER_NUMBER=1
-    network_mode: host
+    # network_mode: host
     devices:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
