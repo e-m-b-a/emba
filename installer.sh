@@ -485,7 +485,6 @@ if [[ "${IN_DOCKER}" -ne 1 ]]; then
   IF20_nvd_feed
 fi
 
-
 deactivate destructive
 
 cd "${HOME_PATH}" || exit 1
