@@ -40,6 +40,6 @@ jobs:
             mkdir ./external
             python3 -m venv "./external/emba_venv"
             source "./external/emba_venv/bin/activate"
-            echo "GH_action:true" > ./config/gh_action
+            echo "GH_action:true" > ./installer/gh_action
             sudo docker-compose build --no-cache --pull
             NO_UPDATE_CHECK=1 sudo -E ./emba -d 2 -y

@@ -57,7 +57,7 @@ export UBUNTU_OS=0
 export RHEL_OS=0
 export WSL=0
 export GH_ACTION=0
-if [[ -f ./config/gh_action ]]; then
+if [[ -f ./installer/gh_action ]]; then
   export GH_ACTION=1
 fi
 export SSL_REPOS=0
