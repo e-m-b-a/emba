@@ -36,10 +36,10 @@ IF20_nvd_feed() {
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component NVD and EPSS data feed" && exit 1 )
 
         echo -e "\\n""${MAGENTA}""Check if the NVD JSON data feed is already installed and populated.""${NC}"
-        if [[ "${GH_ACTION}" -eq 1 ]]; then
-          echo "[*] Github action - not installing NVD database"
-          return
-        fi
+        # if [[ "${GH_ACTION}" -eq 1 ]]; then
+        #  echo "[*] Github action - not installing NVD database"
+        #  return
+        # fi
 
         if [[ -d external/nvd-json-data-feeds ]]; then
           cd external/nvd-json-data-feeds || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
