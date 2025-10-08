@@ -305,7 +305,7 @@ ping_check() {
   local lIP_ADDRESS="${1:-}"
   # print details or do it silent
   local lPRINT_OUTPUT="${2:-1}"
-  local lCOUNTER=0
+  local lCOUNTER=1
   local lRESTARTER=0
   local lMAX_RETRY_CNT=100
 
