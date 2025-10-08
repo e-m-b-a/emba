@@ -883,7 +883,7 @@ main_emulation() {
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
           print_output "$(indent "Duplicate: ${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")"
         fi
-        print_output "$(indent "$(orange "${lIP_CFG}"" - ""${lINTERFACE_CFG}"" - ""${lNETWORK_INTERFACE_CFG}"" - ""${lVLAN_CFG}"" - ""${lCFG_CFG}"" - ""${lNW_ENTRY_PRIO}")")"
+        print_output "$(indent "$(orange "${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")")"
       done
 
       # sort it
@@ -902,7 +902,7 @@ main_emulation() {
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
           print_output "$(indent "Duplicate: ${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")"
         fi
-        print_output "$(indent "$(orange "${lIP_CFG}"" - ""${lINTERFACE_CFG}"" - ""${lNETWORK_INTERFACE_CFG}"" - ""${lVLAN_CFG}"" - ""${lCFG_CFG}"" - ""${lNW_ENTRY_PRIO}")")"
+        print_output "$(indent "$(orange "${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")")"
       done
 
 
@@ -1741,7 +1741,7 @@ get_networking_details_emulation() {
 
       # handle IP addresses 0.0.0.0 somehow:
       if [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
-        lADJUST_PRIO=$((lADJUST_PRIO+-2))
+        lADJUST_PRIO=$((lADJUST_PRIO-2))
         # we use one of the idenfied IP addresses. If no IP address available we switch to default 192.168.0.1
         if [[ "${lNVRAM_BACKUP_IP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           IP_ADDRESS_="${lNVRAM_BACKUP_IP}"
