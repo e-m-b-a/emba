@@ -21,10 +21,13 @@ restart_emulation() {
   # restart_scan is used to indicate a restarted scan. For this we do not need to restart the network
   local lRESTART_SCAN="${3:-0}"
   local lSTATE_CHECK_MECHANISM="${4:-"PING"}"
+  local lRESTART_FORCE="${5:-0}"
 
-  if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
-    print_output "[+] System with ${ORANGE}${lIP_ADDRESS}${GREEN} responding again - probably it recovered automatically.${NC}" "no_log"
-    return
+  if [[ "${lRESTART_FORCE}" -eq 0 ]]; then
+    if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
+      print_output "[+] System with ${ORANGE}${lIP_ADDRESS}${GREEN} responding again - probably it recovered automatically.${NC}" "no_log"
+      return
+    fi
   fi
 
   # shellcheck disable=SC2153
