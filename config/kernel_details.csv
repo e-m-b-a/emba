@@ -5547,6 +5547,8 @@ linux-6.12.48;19-Sep-2025
 linux-6.12.49;25-Sep-2025
 linux-6.12.5;14-Dec-2024
 linux-6.12.50;02-Oct-2025
+linux-6.12.51;06-Oct-2025
+linux-6.12.52;12-Oct-2025
 linux-6.12.6;19-Dec-2024
 linux-6.12.7;27-Dec-2024
 linux-6.12.8;02-Jan-2025
@@ -5591,6 +5593,8 @@ linux-6.15.9;01-Aug-2025
 linux-6.15;26-May-2025
 linux-6.16.1;15-Aug-2025
 linux-6.16.10;02-Oct-2025
+linux-6.16.11;06-Oct-2025
+linux-6.16.12;12-Oct-2025
 linux-6.16.2;20-Aug-2025
 linux-6.16.3;23-Aug-2025
 linux-6.16.4;28-Aug-2025
@@ -5600,6 +5604,8 @@ linux-6.16.7;11-Sep-2025
 linux-6.16.8;19-Sep-2025
 linux-6.16.9;25-Sep-2025
 linux-6.16;28-Jul-2025
+linux-6.17.1;06-Oct-2025
+linux-6.17.2;12-Oct-2025
 linux-6.17;29-Sep-2025
 linux-6.2.1;25-Feb-2023
 linux-6.2.10;06-Apr-2023
@@ -5676,6 +5682,8 @@ linux-6.6.107;19-Sep-2025
 linux-6.6.108;25-Sep-2025
 linux-6.6.109;02-Oct-2025
 linux-6.6.11;10-Jan-2024
+linux-6.6.110;06-Oct-2025
+linux-6.6.111;12-Oct-2025
 linux-6.6.12;15-Jan-2024
 linux-6.6.13;20-Jan-2024
 linux-6.6.14;25-Jan-2024
