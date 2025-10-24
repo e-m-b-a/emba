@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "'^Fatal: program compiled against libxml %d using libxml %d$\"&&\"^2[0-9]{4}$\"'"
+      "'\"^Fatal: program compiled against libxml %d using libxml %d$\"AND\"^2[0-9]{4}$\"'"
    ],
    "vendor_names": [
       "xmlsoft"

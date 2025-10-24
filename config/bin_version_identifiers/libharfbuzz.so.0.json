@@ -7,7 +7,7 @@
       "MIT"
    ],
    "grep_commands": [
-      "'^void hb_serialize_context_t::resolve_links()$\"&&\"^hb_blob_destroy$\"&&\"^[0-9]\\.[0-9](\\.[0-9]+)+?$\"'"
+      "'\"^void hb_serialize_context_t::resolve_links()$\"AND\"^hb_blob_destroy$\"AND\"^[0-9]\\.[0-9](\\.[0-9]+)+?$\"'"
    ],
    "vendor_names": [
       "harfbuzz_project"
