@@ -9,7 +9,7 @@
     "SSH-OpenSSH"
   ],
   "grep_commands": [
-    "'^ssh_msg_recv: read: bad msg_len %u$\"&&\"^OpenSSH_[0-9.]+p[0-9]$\"'",
+    "'\"^ssh_msg_recv: read: bad msg_len %u$\"AND\"^OpenSSH_[0-9.]+p[0-9]$\"'",
     "OpenSSH_[0-9](\\.[0-9]+)+?([a-z][0-9]+)?,\\ ",
     "OpenSSH_[0-9](\\.[0-9]+)+?([a-z][0-9]+)?\\ "
   ],

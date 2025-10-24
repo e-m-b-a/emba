@@ -8,7 +8,7 @@
     "GPL-2.0-or-later"
   ],
   "grep_commands": [
-    "'^ccrypt$\"&&\"^\\%s\\ \\%s\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.$\"&&\"[0-9](\\.[0-9]+)+?\"",
+    "'\"^ccrypt$\"AND\"^\\%s\\ \\%s\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\.$\"AND\"[0-9](\\.[0-9]+)+?\"",
     "ccrypt\\ [0-9](\\.[0-9]+)+?\\.\\ Secure\\ encryption\\ and\\ decryption\\ of\\ files\\ and\\ streams\\."
   ],
   "vendor_names": [

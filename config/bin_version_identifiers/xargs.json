@@ -7,7 +7,7 @@
       "GPL-3.0-only"
    ],
    "grep_commands": [
-      "'^xargs$\"&&\"^environment\\ is\\ too\\ large\\ for\\ exec$\"&&\"[0-9](\\.[0-9]+)+?\"'"
+      "'\"^xargs$\"AND\"^environment\\ is\\ too\\ large\\ for\\ exec$\"AND\"[0-9](\\.[0-9]+)+?\"'"
    ],
    "vendor_names": [
       "NA"

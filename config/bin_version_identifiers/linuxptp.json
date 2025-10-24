@@ -7,7 +7,7 @@
       "GPL-2.0-only"
    ],
    "grep_commands": [
-      "'^PTP_CLOCK_GETCAPS$\"&&\"^PTP_PIN_SETFUNC2\\ failed:\\ \\%m$\"&&\"^[0-9](\\.[0-9]+)+?$\"'"
+      "'\"^PTP_CLOCK_GETCAPS$\"AND\"^PTP_PIN_SETFUNC2\\ failed:\\ \\%m$\"AND\"^[0-9](\\.[0-9]+)+?$\"'"
    ],
    "vendor_names": [
       "linuxptp_project"

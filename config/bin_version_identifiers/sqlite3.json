@@ -8,7 +8,7 @@
     "public-domain"
   ],
   "grep_commands": [
-    "'^sqlite3_version$\"&&\"^sqlite3_bind_parameter_index$\"&&\"^3(\\.[0-9]+)?+$\"'",
+    "'\"^sqlite3_version$\"AND\"^sqlite3_bind_parameter_index$\"AND\"^3(\\.[0-9]+)?+$\"'",
     "SQLite\\ version\\ 3(\\.[0-9]+)+?"
   ],
   "vendor_names": [

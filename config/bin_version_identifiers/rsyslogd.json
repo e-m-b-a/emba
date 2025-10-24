@@ -8,7 +8,7 @@
     "unknown"
   ],
   "grep_commands": [
-    "':\\ module\\ compiled\\ with\\ rsyslog\\ version\\ \\%s.$\"&&\"^[0-9]\\.[0-9]+(\\.[0-9]+)+?$\"'",
+    "'\":\\ module\\ compiled\\ with\\ rsyslog\\ version\\ \\%s.$\"AND\"^[0-9]\\.[0-9]+(\\.[0-9]+)+?$\"'",
     "^liblogging-stdlog\\ version\\ [0-9](\\.[0-9]+)+?$",
     "^rsyslogd\\ [0-9](\\.[0-9]+)+?\\ runtime\\ debug\\ support\\ -\\ help\\ requested,\\ rsyslog\\ terminates$",
     "rsyslogd\\ [0-9](\\.[0-9]+)+?,\\ compiled\\ with:$"
