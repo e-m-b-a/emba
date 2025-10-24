@@ -96,7 +96,7 @@ s22_vuln_check_semgrep() {
     lS22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "${lPHP_SEMGREP_LOG}" | awk '{print $2}' || true)
 
     if [[ "${lS22_SEMGREP_VULNS}" -gt 0 ]]; then
-      print_output "[+] Found ${ORANGE}${S22_SEMGREP_ISSUES} issues${GREEN} (${ORANGE}${lS22_SEMGREP_VULNS} vulnerabilites${GREEN}) in ${ORANGE}${lS22_SEMGREP_SCRIPTS}${GREEN} php files${NC}" "" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
+      print_output "[+] Found ${ORANGE}${S22_SEMGREP_ISSUES} issues${GREEN} (${ORANGE}${lS22_SEMGREP_VULNS} vulnerabilities${GREEN}) in ${ORANGE}${lS22_SEMGREP_SCRIPTS}${GREEN} php files${NC}" "" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
     elif [[ "${S22_SEMGREP_ISSUES}" -gt 0 ]]; then
       print_output "[+] Found ${ORANGE}${S22_SEMGREP_ISSUES} issues${GREEN} in ${ORANGE}${lS22_SEMGREP_SCRIPTS}${GREEN} php files${NC}" "" "${lPHP_SEMGREP_LOG/\.log/\.pretty\.log}"
     else
