@@ -7,7 +7,6 @@
     "unknown"
   ],
   "grep_commands": [
-    "'\"LIBTASN1 ERROR:\"AND\"^[0-9](\\.[0-9]+)?+$\"'",
     "'\"LIBTASN1 ERROR:\"AND\"^[0-9](\\.[0-9]+)?+$\"'"
   ],
   "vendor_names": [
