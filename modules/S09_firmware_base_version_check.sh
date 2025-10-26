@@ -817,7 +817,7 @@ bin_string_checker() {
     # print_output "[*] Testing ${lBINARY_PATH}" "no_log"
     for (( j=0; j<${#lVERSION_IDENTIFIERS_ARR[@]}; j++ )); do
       local lVERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR["${j}"]}"
-      # print_output "[*] 1: Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
+      # print_output "[*] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
       local lVERSION_IDENTIFIED=""
       [[ -z "${lVERSION_IDENTIFIER}" ]] && continue
       # this is a workaround to handle the new multi_grep
