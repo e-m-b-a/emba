@@ -976,7 +976,7 @@ get_data() {
     MSF_VERIFIED=$(grep -v -c "Source" "${L35_CSV_LOG}" || true)
   fi
   if [[ -d "${F17_LOG_DIR}" ]]; then
-    F17_VERSIONS_IDENTIFIED=$(wc -l 2>/dev/null < "${F17_LOG_DIR}/vuln_summary.txt")
+    F17_VERSIONS_IDENTIFIED=$(wc -l 2>/dev/null < "${F17_LOG_DIR}/vuln_summary.txt" || true)
     CRITICAL_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
     CVE_COUNTER=$((CVE_COUNTER+CRITICAL_CVE_COUNTER))
     HIGH_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)

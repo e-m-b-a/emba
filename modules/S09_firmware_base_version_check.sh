@@ -751,9 +751,7 @@ bin_string_checker() {
   # remove the ' from the multi_grep identifiers:
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\'}"
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#\'}"
-  # nosemgrep
-  local IFS='&&'
-  IFS='&&' read -r -a lVERSION_IDENTIFIERS_ARR <<< "${lVERSION_IDENTIFIER}"
+  mapfile -t lVERSION_IDENTIFIERS_ARR < <(echo "${lVERSION_IDENTIFIER//AND/$'\n'}")
 
   local lPURL_IDENTIFIER="NA"
   local lOS_IDENTIFIED=""
@@ -819,6 +817,7 @@ bin_string_checker() {
     # print_output "[*] Testing ${lBINARY_PATH}" "no_log"
     for (( j=0; j<${#lVERSION_IDENTIFIERS_ARR[@]}; j++ )); do
       local lVERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR["${j}"]}"
+      # print_output "[*] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
       local lVERSION_IDENTIFIED=""
       [[ -z "${lVERSION_IDENTIFIER}" ]] && continue
       # this is a workaround to handle the new multi_grep
@@ -828,7 +827,7 @@ bin_string_checker() {
       fi
       if [[ ${RTOS} -eq 0 ]]; then
         if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]] ; then
-          # print_output "[*] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
+          # print_output "[!] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then

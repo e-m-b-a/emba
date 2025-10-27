@@ -57,6 +57,7 @@ F17_cve_bin_tool() {
   # first round is primarly for removing duplicates, unhandled_file entries and printing a quick initial overview for the html report
   # 2nd round is for the real testing
   local lWAIT_PIDS_TEMP=()
+  [[ ! -d "${LOG_PATH_MODULE}/tmp/" ]] && mkdir -p "${LOG_PATH_MODULE}/tmp/"
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     sbom_preprocessing_threader "${lSBOM_ENTRY}" &
     local lTMP_PID="$!"
@@ -65,6 +66,8 @@ F17_cve_bin_tool() {
     local lNEG_LOG=1
   done
   wait_for_pid "${lWAIT_PIDS_TEMP[@]}"
+
+  cat "${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed."* > "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" || print_output "[-] Some pre-processing error occured"
 
   print_bar
 
@@ -97,6 +100,7 @@ F17_cve_bin_tool() {
     local lPRODUCT_ARR=()
     local lPRODUCT_VERSION=""
     local lPRODUCT_NAME=""
+    # print_output "[*] lSBOM_ENTRY: ${lSBOM_ENTRY}"
     lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
 
     # extract all our possible vendor names and product names:
@@ -312,10 +316,11 @@ sbom_preprocessing_threader() {
   lANCHOR="cve_${lANCHOR:0:20}"
 
   # ensure this product/version combination is not already in our testing array:
-  if (grep -q "\"name\":\"${lPRODUCT_NAME}\",\"version\":\"${lPRODUCT_VERSION}\"" "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" 2>/dev/null); then
+  if (grep -q "\"name\":\"${lPRODUCT_NAME}\",\"version\":\"${lPRODUCT_VERSION}\"" "${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed.*" 2>/dev/null); then
     return
   fi
-  echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
+
+  echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed.${lBOM_REF}"
   print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 }
 

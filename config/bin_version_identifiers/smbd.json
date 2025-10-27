@@ -8,7 +8,7 @@
     "GPL-3.0-only"
   ],
   "grep_commands": [
-    "'^smbd version %s started.$&&\"^[2-5]\\.[0-9]+\\.[0-9]+$\"'"
+    "'\"^smbd version %s started.$\"AND\"^[2-5]\\.[0-9]+\\.[0-9]+$\"'"
   ],
   "strict_grep_commands": [
     "^Version\\ [2-5]\\.[0-9]+\\.[0-9]+$",

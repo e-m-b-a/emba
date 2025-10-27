@@ -9,7 +9,7 @@
     "unknown"
   ],
   "grep_commands": [
-    "'^GZIP$\"&&\"^Written\\ by\\ Jean-loup\\ Gailly\\.$\"&&\"^Report\\ bugs\\ to\\ <bug-gzip@gnu\\.org>\\.$\"&&\"^[1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"'",
+    "'\"^GZIP$\"AND\"^Written\\ by\\ Jean-loup\\ Gailly\\.$\"AND\"^Report\\ bugs\\ to\\ <bug-gzip@gnu\\.org>\\.$\"AND\"^[1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$\"'",
     "gzip\\ [1-2]\\.[0-9]{1,2}(\\.[0-9]{1,2})?$"
   ],
   "vendor_names": [
