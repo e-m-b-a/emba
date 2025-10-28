@@ -61,6 +61,7 @@ check_basic_upnp() {
   local lINTERFACE_ARR=("$@")
   local lINTERFACE=""
 
+  local lPORT_SERVICE=""
   local lPORT=""
   local lTCP_UDP=""
   local lSERVICE=""
@@ -70,11 +71,14 @@ check_basic_upnp() {
   # we check for UPnP services in our Nmap logs and ensure we can reach a UPnP service
   for lPORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
     lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
-    lTCP_UDP=$(echo "${lPORT_SERVICE}" | cut -d/ -f2 | tr -d "[:blank:]")
+    # 23/tcp telnet => tcp telnet
+    lTCP_UDP="${lPORT_SERVICE/*\/}"
+    # tcp telnet => tcp
+    lTCP_UDP="${lTCP_UDP/\ *}"
     lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
-    print_output "[*] UPnP reachability check for ${ORANGE}${lPORT_SERVICE} - ${lPORT} - ${IP_ADDRESS_}${NC}" "no_log"
-    if [[ "${lSERVICE}" == *"upnp"* && "${lTCP_UDP}" == "tcp" ]]; then
-      print_output "[*] Testing UPnP reachability for ${ORANGE}${lPORT_SERVICE} - ${lPORT} - ${IP_ADDRESS_}${NC}" "no_log"
+    print_output "[*] UPnP reachability check for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}"
+    if [[ "${lSERVICE}" == *"upnp"* && "${lTCP_UDP}" == *"tcp"* ]]; then
+      print_output "[*] Testing UPnP reachability for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}" "no_log"
       if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing further UPnP checks"
