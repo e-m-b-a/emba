@@ -1623,6 +1623,8 @@ get_networking_details_emulation() {
     local lMISSING_FILES_TMP=()
     local lMISSING_DIRS_TMP=()
     local lSERVICE_NAME=""
+    local lADJUST_PRIO=0  # adjust priority for detected network configuration
+    local l_NW_ENTRY_PRIO=1
 
     mapfile -t lINTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //' \
      | sort -u | grep -v "device:lo ifa:0x0100007f" | grep -v -E " = -[0-9][0-9]" | sed 's/\[.*\]\ EMBA.*//' || true)
@@ -1699,8 +1701,8 @@ get_networking_details_emulation() {
     fi
 
     for lINTERFACE_CAND in "${lINTERFACE_CANDIDATES[@]}"; do
-      local l_NW_ENTRY_PRIO=1
-      local lADJUST_PRIO=0  # adjust priority for detected network configuration
+      l_NW_ENTRY_PRIO=1
+      lADJUST_PRIO=0  # adjust priority for detected network configuration
 
       lINTERFACE_CAND="${lINTERFACE_CAND//[![:print:]]/}"
       print_output "[*] Possible interface candidate detected: ${ORANGE}${lINTERFACE_CAND}${NC}"
