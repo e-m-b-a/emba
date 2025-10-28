@@ -207,21 +207,21 @@ check_basic_hnap_jnap() {
         fi
       fi
 
-      if [[ $(grep -h -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
+      if [[ $(grep -h -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
         print_ln
         # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/hnap-discovery-check.txt
         sed 's/></>\n</g' "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt | tee -a "${LOG_FILE}"
         print_ln
 
-        HNAP_UP=$(grep -h -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt | awk '{sum += $1 } END { print sum }' || true)
+        HNAP_UP=$(grep -h -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }' || true)
       fi
 
-      if [[ $(grep -h -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
+      if [[ $(grep -h -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
         print_ln
         tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt
         print_ln
 
-        JNAP_UP=$(grep -h -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt | awk '{sum += $1 } END { print sum }' || true)
+        JNAP_UP=$(grep -h -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }' || true)
       fi
 
 
