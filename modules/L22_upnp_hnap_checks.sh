@@ -61,7 +61,32 @@ check_basic_upnp() {
   local lINTERFACE_ARR=("$@")
   local lINTERFACE=""
 
+  local lPORT_SERVICE=""
+  local lPORT=""
+  local lTCP_UDP=""
+  local lSERVICE=""
+
   sub_module_title "UPnP enumeration for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
+
+  # we check for UPnP services in our Nmap logs and ensure we can reach a UPnP service
+  for lPORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
+    lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
+    # 23/tcp telnet => tcp telnet
+    lTCP_UDP="${lPORT_SERVICE/*\/}"
+    # tcp telnet => tcp
+    lTCP_UDP="${lTCP_UDP/\ *}"
+    lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
+    print_output "[*] UPnP reachability check for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}"
+    if [[ "${lSERVICE}" == *"upnp"* && "${lTCP_UDP}" == *"tcp"* ]]; then
+      print_output "[*] Testing UPnP reachability for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}" "no_log"
+      if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+          print_output "[-] System not responding - Not performing further UPnP checks"
+          return
+        fi
+      fi
+    fi
+  done
 
   if command -v upnpc > /dev/null; then
     for lINTERFACE in "${lINTERFACE_ARR[@]}"; do
@@ -99,6 +124,7 @@ check_basic_hnap_jnap() {
 
       lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
       lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
+      print_output "[*] Analyzing service ${ORANGE}${lPORT_SERVICE} - ${lPORT} - ${IP_ADDRESS_}${NC}" "no_log"
       if [[ "${lSERVICE}" == "unknown" ]] || [[ "${lSERVICE}" == "tcpwrapped" ]]; then
         continue
       fi
@@ -119,37 +145,87 @@ check_basic_hnap_jnap() {
         return
       fi
 
+      if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+          print_output "[-] System not responding - Not performing further HNAP checks"
+          return
+        fi
+      fi
+
       # we use the following JNAP-Action for identifying JNAP services on Linksys routers:
       local lJNAP_ACTION="X-JNAP-Action: http://cisco.com/jnap/core/GetDeviceInfo"
       if [[ "${lSSL}" -eq 0 ]]; then
         # HNAP
-        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${lPORT}"/HNAP/ >> "${LOG_PATH_MODULE}"/hnap-discovery-check.txt || true
-        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${lPORT}"/HNAP1/ >> "${LOG_PATH_MODULE}"/hnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${lPORT}"/HNAP/ >> \
+          "${LOG_PATH_MODULE}"/hnap-discovery-check-"${lPORT}".txt || true
+        if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System not responding - Not performing further HNAP checks"
+            return
+          fi
+        fi
+
+        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${lPORT}"/HNAP1/ >> \
+          "${LOG_PATH_MODULE}"/hnap-discovery-check-"${lPORT}".txt || true
+        if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System not responding - Not performing further HNAP checks"
+            return
+          fi
+        fi
         # JNAP
-        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "{}" http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >> "${LOG_PATH_MODULE}"/jnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "{}" http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >> \
+          "${LOG_PATH_MODULE}"/jnap-discovery-check-"${lPORT}".txt || true
+        if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System not responding - Not performing further HNAP checks"
+            return
+          fi
+        fi
       else
         # HNAP - SSL
-        curl -v -L -k --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${lPORT}"/HNAP/ >> "${LOG_PATH_MODULE}"/hnap-discovery-check.txt || true
-        curl -v -L -k --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${lPORT}"/HNAP1/ >> "${LOG_PATH_MODULE}"/hnap-discovery-check.txt || true
+        curl -v -L -k --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${lPORT}"/HNAP/ >> \
+          "${LOG_PATH_MODULE}"/hnap-discovery-check-"${lPORT}".txt || true
+        if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System not responding - Not performing further HNAP checks"
+            return
+          fi
+        fi
+        curl -v -L -k --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${lPORT}"/HNAP1/ >> \
+          "${LOG_PATH_MODULE}"/hnap-discovery-check-"${lPORT}".txt || true
+        if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System not responding - Not performing further HNAP checks"
+            return
+          fi
+        fi
         # JNAP - SSL
-        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >> "${LOG_PATH_MODULE}"/jnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >> \
+          "${LOG_PATH_MODULE}"/jnap-discovery-check-"${lPORT}".txt || true
+        if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System not responding - Not performing further HNAP checks"
+            return
+          fi
+        fi
       fi
 
-      if [[ -s "${LOG_PATH_MODULE}"/hnap-discovery-check.txt ]]; then
+      if [[ $(grep -h -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
         print_ln
         # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/hnap-discovery-check.txt
-        sed 's/></>\n</g' "${LOG_PATH_MODULE}"/hnap-discovery-check.txt | tee -a "${LOG_FILE}"
+        sed 's/></>\n</g' "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt | tee -a "${LOG_FILE}"
         print_ln
 
-        HNAP_UP=$(grep -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check.txt || true)
+        HNAP_UP=$(grep -h -c "HNAP1" "${LOG_PATH_MODULE}"/hnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }' || echo 0)
       fi
 
-      if [[ -s "${LOG_PATH_MODULE}"/jnap-discovery-check.txt ]]; then
+      if [[ $(grep -h -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
         print_ln
-        tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/jnap-discovery-check.txt
+        tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt
         print_ln
 
-        JNAP_UP=$(grep -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check.txt || true)
+        JNAP_UP=$(grep -h -c "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-*.txt 2>/dev/null | awk '{sum += $1 } END { print sum }' || echo 0)
       fi
 
 
