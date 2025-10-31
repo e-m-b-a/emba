@@ -103,6 +103,8 @@ for entry in "${arr_prio[@]}"; do
   "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
 done
 if [ -s /firmadyne/init_tmp ]; then
+  # let's sort the current results first
+  "${BUSYBOX}" sort -u /firmadyne/init_tmp > /firmadyne/init_tmp_sorted
   while read -r entry; do
     if [ -z "${entry}" ]; then
       continue
@@ -110,7 +112,7 @@ if [ -s /firmadyne/init_tmp ]; then
     if ! "${BUSYBOX}" grep -q -E "^${entry}$" /firmadyne/init; then
       "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
     fi
-  done < /firmadyne/init_tmp
+  done < /firmadyne/init_tmp_sorted
 fi
 
 # finally we check busybox for linuxrc and /bin/init
