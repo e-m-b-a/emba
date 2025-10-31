@@ -2773,8 +2773,8 @@ check_online_stat() {
       # just to ensure we also detect udp services we can check them here and print a nice message that we have something:
       if [[ "$(grep -c "udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}")" -gt 0 ]]; then
         print_ln
-        print_output "[+] Already dedected running network services via Nmap ... further detection active - CNT: ${lCNT}"
-        grep -c "/udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" >> "${LOG_FILE}"
+        print_output "[+] Already detected running network services via Nmap ... further detection active - CNT: ${lCNT}"
+        # grep -c "/udp.*open\ \|/tcp.*open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" >> "${LOG_FILE}"
         write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
         print_ln
       fi
