@@ -61,8 +61,8 @@ check_live_nmap_basic() {
 
   sub_module_title "Nmap portscans for emulated system with IP ${ORANGE}${lIP_ADDRESS}${NC}"
 
-  cp "${ARCHIVE_PATH}"/*_nmap_emba_[0-9]-"${lIP_ADDRESS}"*.gnmap "${LOG_PATH_MODULE}" 2>/dev/null || true
-  cp "${ARCHIVE_PATH}"/*_nmap_emba_[0-9]-"${lIP_ADDRESS}"*.nmap "${LOG_PATH_MODULE}" 2>/dev/null || true
+  cp "${ARCHIVE_PATH}"/*nmap_emba_[0-9]-"${lIP_ADDRESS}"*.gnmap "${LOG_PATH_MODULE}" 2>/dev/null || true
+  cp "${ARCHIVE_PATH}"/*nmap_emba_[0-9]-"${lIP_ADDRESS}"*.nmap "${LOG_PATH_MODULE}" 2>/dev/null || true
 
   # find all Nmap results
   mapfile -t lNMAP_RESULT_FILES_ARR < <(find "${LOG_PATH_MODULE}" -name "*.nmap")
