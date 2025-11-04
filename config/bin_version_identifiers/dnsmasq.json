@@ -12,7 +12,8 @@
     "dnsmasq\\ [0-9]\\.[0-9]+$"
   ],
   "vendor_names": [
-    "NA"
+    "dnsmasq",
+    "thekelleys"
   ],
   "product_names": [
     "dnsmasq"

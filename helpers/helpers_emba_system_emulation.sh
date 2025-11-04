@@ -307,13 +307,12 @@ ping_check() {
   local lPRINT_OUTPUT="${2:-1}"
   local lCOUNTER=1
   local lRESTARTER=0
-  local lMAX_RETRY_CNT=100
 
   while ! ping -c 1 "${lIP_ADDRESS}"; do
     lRESTARTER=1
-    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... ping check #${lCOUNTER}/${lMAX_RETRY_CNT}" "no_log"
+    [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... ping check #${lCOUNTER}/${MAX_PING_RETRY_CNT}" "no_log"
     ((lCOUNTER+=1))
-    if [[ "${lCOUNTER}" -gt "${lMAX_RETRY_CNT}" ]]; then
+    if [[ "${lCOUNTER}" -gt "${MAX_PING_RETRY_CNT}" ]]; then
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
     fi
