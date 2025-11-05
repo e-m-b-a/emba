@@ -112,7 +112,7 @@ check_basic_upnp() {
   done
 
   if [[ -f "${LOG_PATH_MODULE}"/upnp-discovery-check.txt ]]; then
-    UPNP_UP=$(grep -c "desc\|IGD" "${LOG_PATH_MODULE}"/upnp-discovery-check.txt || echo 0)
+    UPNP_UP=$(grep "desc\|IGD" "${LOG_PATH_MODULE}"/upnp-discovery-check.txt | grep -v -c "No IGD" || echo 0)
     if [[ ${UPNP_UP} -gt 0 ]]; then
       print_ln
       tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/upnp-discovery-check.txt
