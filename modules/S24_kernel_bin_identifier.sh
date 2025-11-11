@@ -219,7 +219,9 @@ binary_kernel_check_threader() {
         enable_strict_mode "${STRICT_MODE}" 0
 
         local lCFG_CNT=0
-        lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+        if [[ -f "${lKCONFIG_EXTRACTED}" ]]; then
+          lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+        fi
         # double check we really have a Kernel config extracted
         if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ "${lCFG_CNT}" -gt 50 ]]; then
           write_log "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
