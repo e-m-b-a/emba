@@ -218,24 +218,24 @@ binary_kernel_check_threader() {
         lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
         enable_strict_mode "${STRICT_MODE}" 0
 
+        local lCFG_CNT=0
+        lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+        # double check we really have a Kernel config extracted
+        if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ "${lCFG_CNT}" -gt 50 ]]; then
+          write_log "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
+          write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
+          check_kconfig "${lKCONFIG_EXTRACTED}" "${lK_ARCH}" "${lLOG_FILE}"
+        else
+          write_log "[-] No valid kernel configuration extracted from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
+          write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
+        fi
+
         for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
-          local lCFG_CNT=0
           # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
 
           lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
           demess_kv_version "${lK_VER_TMP}"
           # -> KV_ARR
-          # double check we really have a Kernel config extracted
-          if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
-            lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
-            write_log "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
-            write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
-            check_kconfig "${lKCONFIG_EXTRACTED}" "${lK_ARCH}" "${lLOG_FILE}"
-          else
-            write_log "[-] No valid kernel configuration extracted from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
-            write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
-          fi
-
           # we should only get one element back, but as array
           for lK_VER_CLEAN in "${KV_ARR[@]}"; do
             if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
