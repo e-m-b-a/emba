@@ -70,7 +70,6 @@ binary_kernel_check_threader() {
   local lKCONFIG_EXTRACTED="NA"
   local lK_VER_CLEAN="NA"
   local lK_INIT="NA"
-  local lCFG_CNT=0
   local lK_SYMBOLS=0
   local lK_ARCH="NA"
   local lK_ARCH_END="NA"
@@ -191,39 +190,41 @@ binary_kernel_check_threader() {
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
+        # we are using lBINARY_ENTRY which is already populated with our ELF data
+        lK_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
+
+        if [[ "${lK_FILE}" == *"ELF"* ]]; then
+          lK_SYMBOLS="$(readelf -W -s "${lFILE_PATH}" | grep -c "FUNC\|OBJECT" || true)"
+
+          [[ "${lK_FILE}" == *"LSB"* ]] && lK_ARCH_END="EL"
+          [[ "${lK_FILE}" == *"MSB"* ]] && lK_ARCH_END="EB"
+
+          [[ "${lK_FILE}" == *"MIPS"* ]] && lK_ARCH="MIPS"
+          [[ "${lK_FILE}" == *"ARM"* ]] && lK_ARCH="ARM"
+          [[ "${lK_FILE}" == *"80386"* ]] && lK_ARCH="x86"
+          [[ "${lK_FILE}" == *"x86-64"* ]] && lK_ARCH="x64"
+          [[ "${lK_FILE}" == *"PowerPC"* ]] && lK_ARCH="PPC"
+          [[ "${lK_FILE}" == *"UCB RISC-V"* ]] && lK_ARCH="RISCV"
+          [[ "${lK_FILE}" == *"QUALCOMM DSP6"* ]] && lK_ARCH="QCOM_DSP6"
+        else
+          # fallback
+          lK_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
+          [[ "${lK_ARCH: -2}" == "le" ]] && lK_ARCH_END="EL"
+          [[ "${lK_ARCH: -2}" == "be" ]] && lK_ARCH_END="EB"
+        fi
+
+        disable_strict_mode "${STRICT_MODE}" 0
+        extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
+        lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
+        enable_strict_mode "${STRICT_MODE}" 0
+
         for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
+          local lCFG_CNT=0
           # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
-          disable_strict_mode "${STRICT_MODE}" 0
-          extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
-          lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
-          enable_strict_mode "${STRICT_MODE}" 0
 
           lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
           demess_kv_version "${lK_VER_TMP}"
           # -> KV_ARR
-          # we are using lBINARY_ENTRY which is already populated with our ELF data
-          lK_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
-
-          if [[ "${lK_FILE}" == *"ELF"* ]]; then
-            lK_SYMBOLS="$(readelf -W -s "${lFILE_PATH}" | grep -c "FUNC\|OBJECT" || true)"
-
-            [[ "${lK_FILE}" == *"LSB"* ]] && lK_ARCH_END="EL"
-            [[ "${lK_FILE}" == *"MSB"* ]] && lK_ARCH_END="EB"
-
-            [[ "${lK_FILE}" == *"MIPS"* ]] && lK_ARCH="MIPS"
-            [[ "${lK_FILE}" == *"ARM"* ]] && lK_ARCH="ARM"
-            [[ "${lK_FILE}" == *"80386"* ]] && lK_ARCH="x86"
-            [[ "${lK_FILE}" == *"x86-64"* ]] && lK_ARCH="x64"
-            [[ "${lK_FILE}" == *"PowerPC"* ]] && lK_ARCH="PPC"
-            [[ "${lK_FILE}" == *"UCB RISC-V"* ]] && lK_ARCH="RISCV"
-            [[ "${lK_FILE}" == *"QUALCOMM DSP6"* ]] && lK_ARCH="QCOM_DSP6"
-          else
-            # fallback
-            lK_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
-            [[ "${lK_ARCH: -2}" == "le" ]] && lK_ARCH_END="EL"
-            [[ "${lK_ARCH: -2}" == "be" ]] && lK_ARCH_END="EB"
-          fi
-
           # double check we really have a Kernel config extracted
           if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
             lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
