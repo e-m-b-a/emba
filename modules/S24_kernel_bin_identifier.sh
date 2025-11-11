@@ -70,7 +70,6 @@ binary_kernel_check_threader() {
   local lKCONFIG_EXTRACTED="NA"
   local lK_VER_CLEAN="NA"
   local lK_INIT="NA"
-  local lCFG_CNT=0
   local lK_SYMBOLS=0
   local lK_ARCH="NA"
   local lK_ARCH_END="NA"
@@ -120,13 +119,13 @@ binary_kernel_check_threader() {
   mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
 
   for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-    lVERSION_IDENTIFIED=$(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}"| sort -u || true)
+    mapfile -t lVERSION_IDENTIFIED_ARR < <(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}"| sort -u || true)
 
-    if [[ -n "${lVERSION_IDENTIFIED}" ]]; then
+    if [[ "${#lVERSION_IDENTIFIED_ARR[@]}" -gt 0 ]]; then
       write_log "" "${lLOG_FILE}"
-      write_log "[+] Possible Linux Kernel found: ${ORANGE}${lFILE_PATH} / ${lVERSION_IDENTIFIED}${NC}" "${lLOG_FILE}"
-      write_log "" "${lLOG_FILE}"
-      write_log "$(indent "$(orange "${lVERSION_IDENTIFIED}")")" "${lLOG_FILE}"
+      for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
+        write_log "[+] Possible Linux Kernel found: ${ORANGE}${lFILE_PATH} / ${lVERSION_IDENTIFIED}${NC}" "${lLOG_FILE}"
+      done
       write_log "" "${lLOG_FILE}"
 
       # rough init entry detection
@@ -165,7 +164,9 @@ binary_kernel_check_threader() {
             write_log "" "${lLOG_FILE}"
             write_log "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}" "${lLOG_FILE}"
             export CONFIDENCE_LEVEL=4
-            version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"
+            for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
+              version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"
+            done
             # from now on we can work with our generated elf file
             lFILE_PATH+=".elf"
           else
@@ -176,27 +177,19 @@ binary_kernel_check_threader() {
         write_log "" "${lLOG_FILE}"
       fi
 
-      # if we have not elf file created and logged we now log the original kernel
+      # if we have no elf file created and logged we now log the original kernel
       # in case we have an elf file lFILE_PATH was already included in the SBOM
-      if [[ ! -f "${lFILE_PATH}" ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
-        if version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
-          # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} for non ELF kernel -> continue to next binary"
-          # continue 2
-          return
-        fi
+      if [[ ! -f "${lFILE_PATH}.elf" ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
+        for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
+          if version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
+            # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} for non ELF kernel -> continue to next binary"
+            return
+          fi
+        done
       fi
 
       # ensure this is only done in non SBOM_MINIMAL mode
       if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
-        # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
-        disable_strict_mode "${STRICT_MODE}" 0
-        extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
-        lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
-        enable_strict_mode "${STRICT_MODE}" 0
-
-        lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
-        demess_kv_version "${lK_VER_TMP}"
-        # -> KV_ARR
         # we are using lBINARY_ENTRY which is already populated with our ELF data
         lK_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
 
@@ -220,9 +213,17 @@ binary_kernel_check_threader() {
           [[ "${lK_ARCH: -2}" == "be" ]] && lK_ARCH_END="EB"
         fi
 
-        # double check we really have a Kernel config extracted
-        if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ $(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}") -gt 50 ]]; then
+        disable_strict_mode "${STRICT_MODE}" 0
+        extract_kconfig "${lFILE_PATH}" "${lLOG_FILE}"
+        lKCONFIG_EXTRACTED="${KCONFIG_EXTRACTED}"
+        enable_strict_mode "${STRICT_MODE}" 0
+
+        local lCFG_CNT=0
+        if [[ -f "${lKCONFIG_EXTRACTED}" ]]; then
           lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+        fi
+        # double check we really have a Kernel config extracted
+        if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ "${lCFG_CNT}" -gt 50 ]]; then
           write_log "[+] Extracted kernel configuration (${ORANGE}${lCFG_CNT} configuration entries${GREEN}) from ${ORANGE}$(basename "${lFILE_PATH}")${NC}" "${lLOG_FILE}"
           write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
           check_kconfig "${lKCONFIG_EXTRACTED}" "${lK_ARCH}" "${lLOG_FILE}"
@@ -231,18 +232,27 @@ binary_kernel_check_threader() {
           write_link "${lKCONFIG_EXTRACTED}" "${lLOG_FILE}"
         fi
 
-        # we should only get one element back, but as array
-        for lK_VER_CLEAN in "${KV_ARR[@]}"; do
-          if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
-            for lK_INIT in "${lK_INITS_ARR[@]}"; do
-              if [[ "${lCFG_CNT}" -lt 50 ]]; then
-                lKCONFIG_EXTRACTED="NA"
-              fi
-              write_csv_log "${lFILE_PATH}" "${lK_VER_CLEAN}" "${lBIN_FILE:-NA}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
-            done
-          else
-            write_csv_log "${lFILE_PATH}" "${lK_VER_CLEAN}" "${lBIN_FILE:-NA}" "NA" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
-          fi
+        for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
+          # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
+
+          lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
+          demess_kv_version "${lK_VER_TMP}"
+          # -> KV_ARR
+          # we should only get one element back, but as array
+          for lK_VER_CLEAN in "${KV_ARR[@]}"; do
+            if [[ "${#lK_INITS_ARR[@]}" -gt 0 ]]; then
+              for lK_INIT in "${lK_INITS_ARR[@]}"; do
+                # one dirty check if this could be a real config
+                # without 50 config entries this is probably something different
+                if [[ "${lCFG_CNT}" -lt 50 ]]; then
+                  lKCONFIG_EXTRACTED="NA"
+                fi
+                write_csv_log "${lFILE_PATH}" "${lK_VER_CLEAN}" "${lBIN_FILE:-NA}" "${lK_INIT}" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
+              done
+            else
+              write_csv_log "${lFILE_PATH}" "${lK_VER_CLEAN}" "${lBIN_FILE:-NA}" "NA" "${lKCONFIG_EXTRACTED}" "${lK_SYMBOLS}" "${lK_ARCH}" "${lK_ARCH_END}"
+            fi
+          done
         done
       fi
     # ASCII kernel config files:
