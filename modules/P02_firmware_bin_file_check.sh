@@ -37,6 +37,8 @@ P02_firmware_bin_file_check() {
   if [[ -f "${FIRMWARE_PATH}" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     get_fw_file_details "${FIRMWARE_PATH}"
     generate_entropy_graph "${FIRMWARE_PATH}"
+  elif [[ -d "${FIRMWARE_PATH}" ]] && [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
+    get_fw_dir_details "${FIRMWARE_PATH}"
   fi
 
   local lFILE_LS_OUT=""
@@ -55,6 +57,14 @@ P02_firmware_bin_file_check() {
   fi
 
   module_end_log "${FUNCNAME[0]}" 1
+}
+
+get_fw_dir_details() {
+  local lFIRMWARE_PATH_DIR="${1:-}"
+  # we create a log file with all file hashes of the firmware directory
+  # this is needed to check the firmware directory on a possible restart against this
+  # file and decide if we can restart a firmware analysis process or not
+  find "${lFIRMWARE_PATH_DIR}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' > "${LOG_PATH_MODULE}/firmware_hashes.log" || true
 }
 
 get_fw_file_details() {
