@@ -210,7 +210,7 @@ ghidra_analyzer() {
     fi
   done
 
-  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea /tmp/haruspex_"${lNAME}"/* >> "${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
+  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea/rules /tmp/haruspex_"${lNAME}"/* >> "${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
 
   # check if there are more details in our log (not only the header with the binary protections)
   if [[ "$(wc -l < "${lSEMGREPLOG}")" -gt 0 ]]; then
