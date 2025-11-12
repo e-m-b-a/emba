@@ -124,7 +124,7 @@ S16_ghidra_decompile_checks()
     mapfile -t lVULN_CATS_ARR < <(grep -h -o "external.semgrep-rules-0xdea.rules.c.raptor-[a-zA-Z0-9_\-]*" "${LOG_PATH_MODULE}"/semgrep_*.csv | sort -u)
     for lVULN_CATEGORY in "${lVULN_CATS_ARR[@]}"; do
       lVULN_CAT_CNT=$(grep -h -o "${lVULN_CATEGORY}" "${LOG_PATH_MODULE}"/semgrep_*.csv | wc -l)
-      local lVULN_CATEGORY_STRIPPED=${lVULN_CATEGORY//external.semgrep-rules-0xdea.c.raptor-/}
+      local lVULN_CATEGORY_STRIPPED=${lVULN_CATEGORY//external.semgrep-rules-0xdea.rules.c.raptor-/}
       print_output "$(indent "${GREEN}${lVULN_CATEGORY_STRIPPED}${ORANGE} - ${lVULN_CAT_CNT} times.${NC}")"
     done
     print_bar
