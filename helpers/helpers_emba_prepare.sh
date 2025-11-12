@@ -71,6 +71,13 @@ log_folder() {
         # the found analysis is for the same firmware
         lPOSSIBLE_RESTART=1
       fi
+    elif [[ -f "${P02_LOG_DIR}"/firmware_hashes.log ]] && [[ -d "${FIRMWARE_PATH}" ]]; then
+      print_output "[*] Found firmware directory and hashes file -> checking against the provided firmware directory (${FIRMWARE_PATH}) if a restart would be possible" "no_log"
+      find "${FIRMWARE_PATH}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' > "${P02_LOG_DIR}/firmware_hashes_restarter.log" || true
+      # we just diff the file checksums to have a quick idea if we can restart the scan or not
+      if diff -q "${P02_LOG_DIR}/firmware_hashes.log" "${P02_LOG_DIR}/firmware_hashes_restarter.log"; then
+        lPOSSIBLE_RESTART=1
+      fi
     fi
     echo -e "\\n${ORANGE}Delete content of log directory: ${LOG_DIR} ?${NC}\\n"
     if [[ "${lNOT_FINISHED}" -eq 1 ]] && [[ "${lPOSSIBLE_RESTART}" -eq 1 ]]; then
