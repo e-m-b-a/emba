@@ -248,6 +248,16 @@ fw_bin_detector() {
     lUEFI_CHECK=0
     write_csv_log "Qemu QCOW firmware detected" "yes" "NA"
   fi
+  if [[ "${lFILE_BIN_OUT}" == *"Debian binary package"* ]]; then
+    print_output "[+] Identified Debian package archive file - using package extraction module"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.deb" || print_error "[-] Deb package copy process failed"
+    write_csv_log "DEB" "yes" "NA"
+  fi
+  if [[ "${lFILE_BIN_OUT}" == *"RPM v3.0 bin"* ]]; then
+    print_output "[+] Identified RPM package archive file - using package extraction module"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.rpm" || print_error "[-] RPM package copy process failed"
+    write_csv_log "RPM" "yes" "NA"
+  fi
   if [[ "${lFILE_BIN_OUT}" == *"VMware4 disk image"* ]]; then
     print_output "[+] Identified VMWware VMDK archive file - using VMDK extraction module"
     export VMDK_DETECTED=1
@@ -324,7 +334,7 @@ fw_bin_detector() {
     # looks like we have only and ELF file to test
     print_output "[+] Identified ELF file - performing binary tests on this ELF file"
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] Binary file copy process failed"
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.elf" || print_error "[-] Binary file copy process failed"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Perl script text executable"* ]]; then

@@ -171,6 +171,8 @@ unblobber() {
   local lUNBLOB_LOG=""
   lUNBLOB_LOG="${LOG_PATH_MODULE}/unblob_$(basename "${lFIRMWARE_PATH}")_${RANDOM}.log"
 
+  lVERBOSE=1
+
   if [[ "${DIFF_MODE}" -ne 1 ]]; then
     sub_module_title "Analyze binary firmware $(basename "${lFIRMWARE_PATH}") with unblob"
   fi
