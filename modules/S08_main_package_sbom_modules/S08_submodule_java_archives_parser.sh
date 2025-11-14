@@ -304,7 +304,7 @@ S08_java_pom_xml_handling() {
         lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/<\/*\.version>/}
         lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/*\.version>}
         lAPP_VERS=$(clean_package_versions "${lAPP_NAME_PROPERTIES_VERSION}")
-        lAPP_NAME="${lAPP_NAME_PROPERITES_NAME}"
+        lAPP_NAME="${lAPP_NAME_PROPERTIES_NAME}"
         local lAPP_LIC="NA"
         local lAPP_DESC="NA"
 
