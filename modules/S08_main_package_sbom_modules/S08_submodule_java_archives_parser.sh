@@ -143,13 +143,15 @@ S08_submodule_java_archives_parser() {
       if [[ "${#lPOM_XML_ARR[@]}" -gt 0 ]]; then
         # lets analyse every pom.xml for versions and names:
         for lPOM_XML in "${lPOM_XML_ARR[@]}"; do
+          # main version detection:
           lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\) 2>/dev/null)
           lAPP_NAME_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/artifactId//text\(\) 2>/dev/null)
           lAPP_NAME_CLEAR_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/name//text\(\) 2>/dev/null)
+          lAPP_NAME_DESC_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/description//text\(\) 2>/dev/null)
+          lAPP_NAME_LIC_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/licenses/license/name//text\(\) 2>/dev/null)
           if [[ -n "${lAPP_VERS_POM_XML}" ]]; then
-            print_output "[*] Identified pom.xml file ${lPOM_XML} including version ${lAPP_VERS_POM_XML} / name ${lAPP_NAME_POM_XML} / ${lAPP_NAME_CLEAR_POM_XML}"
+            write_log "[*] Identified pom.xml file ${lPOM_XML} including version ${lAPP_VERS_POM_XML} / name ${lAPP_NAME_POM_XML} / ${lAPP_NAME_CLEAR_POM_XML:-NA} / ${lAPP_NAME_DESC_POM_XML:-NA} / license ${lAPP_NAME_LIC_POM_XML:-NA}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
             # for the dependencies we can check for pom.xml
-            unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" >> "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
             # We could do something like the following to extract the dependencies
               # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
               # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
@@ -160,6 +162,20 @@ S08_submodule_java_archives_parser() {
             lAPP_NAME="${lAPP_NAME_POM_XML}"
             # Todo: write SBOM entries
           fi
+
+          # lets check also versions in properties:
+          # xpath -e "project/properties/*[contains(name(),'version')]"
+          local lAPP_NAME_PROPERITES_VERS_POM_XML=()
+          mapfile -t lAPP_NAME_PROPERITES_VERS_POM_XML < <(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e "project/properties/*[contains(name(),'.version')]" 2>/dev/null)
+          for lAPP_NAME_PROPERITES_VERSION in "${lAPP_NAME_PROPERITES_VERS_POM_XML[@]}"; do
+            # e.g.: <spotbugs.version>4.8.6.0</spotbugs.version>
+            lAPP_NAME_PROPERITES_NAME=${lAPP_NAME_PROPERITES_VERSION/\.version*}
+            # e.g.: <spotbugs
+            lAPP_NAME_PROPERITES_NAME=${lAPP_NAME_PROPERITES_NAME//<}
+            lAPP_NAME_PROPERITES_VERSION=${lAPP_NAME_PROPERITES_VERSION/<\/*\.version>/}
+            lAPP_NAME_PROPERITES_VERSION=${lAPP_NAME_PROPERITES_VERSION/*\.version>}
+            write_log "[*] Identified pom.xml file ${lPOM_XML} including properties version ${lAPP_NAME_PROPERITES_VERSION} / name ${lAPP_NAME_PROPERITES_NAME}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          done
         done
       fi
 
@@ -211,7 +227,7 @@ S08_submodule_java_archives_parser() {
       # create component entry - this allows adding entries very flexible:
       build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_VENDOR:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
-      write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_log "[*] Java archive details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - name ${ORANGE}${lAPP_NAME:-NA} / ${lIMPLEMENT_TITLE:-NA}${NC} - version ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
     done
