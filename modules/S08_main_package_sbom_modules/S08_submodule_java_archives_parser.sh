@@ -294,13 +294,13 @@ S08_java_pom_xml_handling() {
 
       # lets check also versions in properties:
       # xpath -e "project/properties/*[contains(name(),'version')]"
-      local lAPP_NAME_PROPERITES_VERS_POM_XML=()
-      mapfile -t lAPP_NAME_PROPERITES_VERS_POM_XML < <(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e "project/properties/*[contains(name(),'.version')]" 2>/dev/null)
-      for lAPP_NAME_PROPERTIES_VERSION in "${lAPP_NAME_PROPERITES_VERS_POM_XML[@]}"; do
+      local lAPP_NAME_PROPERTIES_VERS_POM_XML=()
+      mapfile -t lAPP_NAME_PROPERTIES_VERS_POM_XML < <(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e "project/properties/*[contains(name(),'.version')]" 2>/dev/null)
+      for lAPP_NAME_PROPERTIES_VERSION in "${lAPP_NAME_PROPERTIES_VERS_POM_XML[@]}"; do
         # e.g.: <spotbugs.version>4.8.6.0</spotbugs.version>
-        lAPP_NAME_PROPERITES_NAME=${lAPP_NAME_PROPERTIES_VERSION/\.version*}
+        lAPP_NAME_PROPERTIES_NAME=${lAPP_NAME_PROPERTIES_VERSION/\.version*}
         # e.g.: <spotbugs
-        lAPP_NAME_PROPERITES_NAME=${lAPP_NAME_PROPERITES_NAME//<}
+        lAPP_NAME_PROPERTIES_NAME=${lAPP_NAME_PROPERTIES_NAME//<}
         lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/<\/*\.version>/}
         lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/*\.version>}
         lAPP_VERS=$(clean_package_versions "${lAPP_NAME_PROPERTIES_VERSION}")
