@@ -246,10 +246,10 @@ preparing_cve_bin_tool() {
   # first: import the database
   if [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA config directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" >/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --offline --import "${CONFIG_DIR}/cve-database.db" >/dev/null || true
   elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA docker external directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" >/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --offline --import "${EXT_DIR}/cve-bin-tool/cve-database.db" >/dev/null || true
   fi
 
   # 2nd: check the database

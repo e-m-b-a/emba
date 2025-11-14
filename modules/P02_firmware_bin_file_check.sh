@@ -251,11 +251,21 @@ fw_bin_detector() {
   if [[ "${lFILE_BIN_OUT}" == *"Debian binary package"* ]]; then
     print_output "[+] Identified Debian package archive file - using package extraction module"
     cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.deb" || print_error "[-] Deb package copy process failed"
+    export DISABLE_DEEP=1
     write_csv_log "DEB" "yes" "NA"
   fi
+  if [[ "${lFILE_BIN_OUT}" == *"Java archive data"* ]]; then
+    print_output "[+] Identified Java archive package - using package extraction module"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" || print_error "[-] Deb package copy process failed"
+     write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
+    export DISABLE_DEEP=1
+    write_csv_log "JAR" "yes" "NA"
+  fi
+
   if [[ "${lFILE_BIN_OUT}" == *"RPM v3.0 bin"* ]]; then
     print_output "[+] Identified RPM package archive file - using package extraction module"
     cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.rpm" || print_error "[-] RPM package copy process failed"
+    export DISABLE_DEEP=1
     write_csv_log "RPM" "yes" "NA"
   fi
   if [[ "${lFILE_BIN_OUT}" == *"VMware4 disk image"* ]]; then

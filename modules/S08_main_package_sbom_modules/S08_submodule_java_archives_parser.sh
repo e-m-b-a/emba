@@ -137,29 +137,30 @@ S08_submodule_java_archives_parser() {
         lAPP_VERS="${lAPP_VERS_ALT}"
       fi
 
-      local lPOM_XML=""
-      lPOM_XML=$(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
-      if [[ -n "${lPOM_XML}" ]]; then
-        lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\) 2>/dev/null)
-        if [[ -z "${lAPP_VERS_POM_XML}" ]]; then
-          # for the dependencies we can check for pom.xml
-          write_log "============================================" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
-          write_log "[*] Found pom.xml metadata in ${lJAVA_ARCHIVE}. Further dependency analysis is currently not supported" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
-          write_log "[*] Please open an issue at https://github.com/e-m-b-a/emba/issues and provide the Java package" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
-          write_log "[*] Further details:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
-          unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" >> "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
-          # We could do something like the following to extract the dependencies
-            # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
-            # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
-            # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
-        elif [[ -z "${lAPP_VERS}" ]]; then
-          # if we have extracted some version from pom.xml and we have not extracted something from META-INF/MANIFEST.MF
-          # then we are going to use the pom.xml version
-          # we have also seen multiple versions 1.2.3.release which we are going to cleanup a bit
-          lAPP_VERS="${lAPP_VERS_POM_XML}"
-          lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-          lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
-        fi
+      local lPOM_XML_ARR=()
+      # extract all the pom.xml meta files
+      mapfile -t lPOM_XML_ARR < <(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
+      if [[ "${#lPOM_XML_ARR[@]}" -gt 0 ]]; then
+        # lets analyse every pom.xml for versions and names:
+        for lPOM_XML in "${lPOM_XML_ARR[@]}"; do
+          lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\) 2>/dev/null)
+          lAPP_NAME_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/artifactId//text\(\) 2>/dev/null)
+          lAPP_NAME_CLEAR_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/name//text\(\) 2>/dev/null)
+          if [[ -n "${lAPP_VERS_POM_XML}" ]]; then
+            print_output "[*] Identified pom.xml file ${lPOM_XML} including version ${lAPP_VERS_POM_XML} / name ${lAPP_NAME_POM_XML} / ${lAPP_NAME_CLEAR_POM_XML}"
+            # for the dependencies we can check for pom.xml
+            unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" >> "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}-notes.txt"
+            # We could do something like the following to extract the dependencies
+              # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
+              # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
+              # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
+            lAPP_VERS="${lAPP_VERS_POM_XML}"
+            lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+            lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+            lAPP_NAME="${lAPP_NAME_POM_XML}"
+            # Todo: write SBOM entries
+          fi
+        done
       fi
 
       if [[ -z "${lAPP_NAME}" ]]; then
