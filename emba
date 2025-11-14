@@ -725,7 +725,7 @@ main() {
     # try it 10 times before exit
     local lCNT_DOCK=0
     for lCNT_DOCK in {1..10}; do
-      if ! docker images | grep -qE "embeddedanalyzer/emba[[:space:]]"; then
+      if ! docker images | grep -qE "embeddedanalyzer/emba"; then
         sleep 1
       else
         break
