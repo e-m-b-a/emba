@@ -345,6 +345,11 @@ cve_bin_tool_threader() {
     for lPROD in "${lrPRODUCT_ARR[@]}"; do
       lPROD="${lPROD#\'}"
       lPROD="${lPROD%\'}"
+      if [[ "${lVENDOR}" == "NOTDEFINED" && "${#lPROD}" -lt 4 ]]; then
+        print_output "[-] WARNING: No vendor (${lVENDOR}) identified and a short product name ${lPROD} -> CVE queries would be very false positive prone."
+        print_output "[-] WARNING: ${lPROD} -> No CVE queries performed."
+        continue
+      fi
       write_log "${lPROD},${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
     done
   done
