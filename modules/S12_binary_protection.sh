@@ -33,7 +33,7 @@ S12_binary_protection()
     lCSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
     lCSV_LOG="${CSV_DIR}""/""${lCSV_LOG}"
 
-    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;FILE" >> "${lCSV_LOG}"
+    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >> "${lCSV_LOG}"
     printf "\t%-13.13s  %-16.16s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
       "RELRO" "CANARY" "NX" "PIE" "RPATH" "RUNPATH" "SYMBOLS" "FORTIFY" "FILE" | tee -a "${TMP_DIR}"/s12.tmp
 
