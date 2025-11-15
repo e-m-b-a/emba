@@ -416,7 +416,7 @@ radare_function_check_ARM32() {
 
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
-    if ! readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | grep -q -E "FUNC[[:space:]]+.*[[:space:]]+UND[[:space:]]+.*${lFUNCTION}"; then
+    if ! readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -q -E "FUNC[[:space:]]+.*[[:space:]]+UND[[:space:]]+.*${lFUNCTION}"; then
       continue
     fi
     FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
