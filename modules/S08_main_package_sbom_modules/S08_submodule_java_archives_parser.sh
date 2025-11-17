@@ -43,6 +43,8 @@ S08_submodule_java_archives_parser() {
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
+  local lJ_JAVA_FILE_NAME=""
+  local lPOM_CHECKED_ARR=()
 
   mapfile -t lJAVA_ARCHIVES_ARR < <(grep "\.jar;\|\.war;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
@@ -62,6 +64,7 @@ S08_submodule_java_archives_parser() {
       if [[ ! "${lJ_FILE}" == *"Java archive data"* && ! "${lJ_FILE}" == *"Zip archive"* ]]; then
         continue
       fi
+      lJ_JAVA_FILE_NAME=$(basename "${lJAVA_ARCHIVE}")
 
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
@@ -71,8 +74,52 @@ S08_submodule_java_archives_parser() {
       fi
       lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
 
-      S08_java_manifest_handling "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}"
-      S08_java_pom_xml_handling "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}"
+      # Check the MANIFEST file
+      if unzip -l "${lJAVA_ARCHIVE}" -- *META-INF/MANIFEST.MF &>/dev/null; then
+        local lJAVA_MANIFEST_FILE="${LOG_PATH_MODULE}/Java_${lJ_JAVA_FILE_NAME}_MANIFEST.MF"
+        unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF > "${lJAVA_MANIFEST_FILE}"
+        if [[ -s "${lJAVA_MANIFEST_FILE}" ]]; then
+          S08_java_manifest_handling "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lJAVA_MANIFEST_FILE}"
+        fi
+      fi
+
+      # check for pom.xml meta files
+      if unzip -l "${lJAVA_ARCHIVE}" -- *pom.xml &>/dev/null ; then
+        local lPOM_XML_ARR=()
+        local lPOM_XML=""
+        local lPOM_MD5=""
+        # extract all the pom.xml meta files
+        mapfile -t lPOM_XML_ARR < <(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
+        if [[ "${#lPOM_XML_ARR[@]}" -gt 0 ]]; then
+          write_log "[*] Found ${ORANGE}${#lPOM_XML_ARR[@]}${NC} Java pom.xml:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          for lPOM_XML in "${lPOM_XML_ARR[@]}" ; do
+            write_log "$(indent "$(orange "$(print_path "${lPOM_XML}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          done
+
+          write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_log "[*] Analyzing ${ORANGE}${#lPOM_XML_ARR[@]}${NC} Java pom.xml:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+          write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+          # lets analyse every pom.xml for versions and names:
+          for lPOM_XML in "${lPOM_XML_ARR[@]}"; do
+            local lJAVA_POM_XML_FILE="${LOG_PATH_MODULE}/Java_${lJ_JAVA_FILE_NAME}_POM_${RANDOM}.xml"
+            unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" > "${lJAVA_POM_XML_FILE}"
+
+            # if we have found multiple status files but all are the same -> we do not need to test duplicates
+            lPOM_MD5="$(md5sum "${lJAVA_POM_XML_FILE}" | awk '{print $1}')"
+            if [[ "${lPOM_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+              print_output "[*] ${ORANGE}${lJAVA_POM_XML_FILE}${NC} already analyzed" "no_log"
+              continue
+            fi
+            lPOM_CHECKED_ARR+=( "${lPOM_MD5}" )
+
+            if [[ -s "${lJAVA_POM_XML_FILE}" ]]; then
+              S08_java_pom_xml_handling "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lJAVA_POM_XML_FILE}"
+            fi
+          done
+        fi
+      fi
     done
 
     if [[ "${POS_RES}" -eq 0 ]]; then
@@ -80,6 +127,29 @@ S08_submodule_java_archives_parser() {
     fi
   else
     write_log "[-] No JAVA package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+  fi
+
+  # our first attempt was to extract the pom.xml files directly from the java files
+  # the following approach is using already available pom.xml files (we can see this in source code repos)
+  mapfile -t lJAVA_POM_XML_ARR < <(grep "pom\.xml;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+
+  if [[ "${#lJAVA_POM_XML_ARR[@]}" -gt 0 ]] ; then
+    write_log "[*] Found ${ORANGE}${#lJAVA_POM_XML_ARR[@]}${NC} Java pom.xml:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    for lJAVA_POM in "${lJAVA_POM_XML_ARR[@]}" ; do
+      write_log "$(indent "$(orange "$(print_path "${lJAVA_POM}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    done
+
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[*] Analyzing ${ORANGE}${#lJAVA_POM_XML_ARR[@]}${NC} Java pom.xml:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+
+    for lJAVA_POM_XML in "${lJAVA_POM_XML_ARR[@]}" ; do
+      S08_java_pom_xml_handling "${lPACKAGING_SYSTEM}" "${lJAVA_POM_XML}" "${lJAVA_POM_XML}"
+    done
+    if [[ "${POS_RES}" -eq 0 ]]; then
+      write_log "[-] No JAVA pom.xml found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    fi
   fi
 
   write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -94,12 +164,7 @@ S08_submodule_java_archives_parser() {
 S08_java_manifest_handling() {
   local lPACKAGING_SYSTEM="${1:-}"
   local lJAVA_ARCHIVE="${2:-}"
-
-  # Check the MANIFEST file
-  if ! unzip -l "${lJAVA_ARCHIVE}" -- *META-INF/MANIFEST.MF >/dev/null; then
-    print_output "[-] No Java MANIFEST.MF file for analysis identified"
-    return
-  fi
+  local lJAVA_MANIFEST_FILE="${3:-}"
 
   local lAPP_NAME=""
   local lAPP_LIC=""
@@ -114,14 +179,14 @@ S08_java_manifest_handling() {
   # the complete naming in the manifest files is a big mess
   # probably we need some dictionary to parse the names somehow and generate something
   # that is usable for CVE queries
-  lAPP_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Application-Name" | head -1 || true)
+  lAPP_NAME=$(grep "Application-Name" "${lJAVA_MANIFEST_FILE}" | head -1 || true)
   lAPP_NAME=${lAPP_NAME/*:\ /}
 
-  lAPP_LIC=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "License" | head -1 || true)
+  lAPP_LIC=$(grep "License" "${lJAVA_MANIFEST_FILE}" | head -1 || true)
   lAPP_LIC=${lAPP_LIC/*:\ /}
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
-  lAPP_VENDOR_CLEAR=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Vendor: " | sort -u | head -1 || true)
+  lAPP_VENDOR_CLEAR=$(grep "Vendor: " "${lJAVA_MANIFEST_FILE}" | sort -u | head -1 || true)
   lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR#*:\ }
   lAPP_VENDOR_CLEAR=${lAPP_VENDOR_CLEAR//[![:print:]]/}
   lAPP_VENDOR=$(clean_package_details "${lAPP_VENDOR_CLEAR}")
@@ -129,7 +194,7 @@ S08_java_manifest_handling() {
   # e.g.: The Apache Software Foundation -> apache
 
   # we check for the deprecated vendor id:
-  lAPP_VENDOR_ID=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Vendor-Id: " | sort -u | head -1 || true)
+  lAPP_VENDOR_ID=$(grep "Implementation-Vendor-Id: " "${lJAVA_MANIFEST_FILE}" | sort -u | head -1 || true)
   lAPP_VENDOR_ID=${lAPP_VENDOR_ID#*:\ }
   # we have seen some vendor ids like org.apache.shiro -> should end up in apache:shiro:version
   lAPP_VENDOR_ID=${lAPP_VENDOR_ID#org\.}
@@ -138,21 +203,21 @@ S08_java_manifest_handling() {
   lAPP_VENDOR_ID=$(clean_package_details "${lAPP_VENDOR_ID}")
 
   # alternative package names
-  lIMPLEMENT_TITLE=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Title" | head -1 || true)
+  lIMPLEMENT_TITLE=$(grep "Implementation-Title" "${lJAVA_MANIFEST_FILE}" | head -1 || true)
   lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE#*:\ }
   lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE//\ }
   lIMPLEMENT_TITLE=${lIMPLEMENT_TITLE//::/_}
   lIMPLEMENT_TITLE=$(clean_package_details "${lIMPLEMENT_TITLE}")
-  lBUNDLE_NAME=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Name:" | head -1 || true)
+  lBUNDLE_NAME=$(grep "Bundle-Name:" "${lJAVA_MANIFEST_FILE}" | head -1 || true)
   lBUNDLE_NAME=${lBUNDLE_NAME#*:\ }
   lBUNDLE_NAME=${lBUNDLE_NAME//::/_}
   lBUNDLE_NAME=$(clean_package_details "${lBUNDLE_NAME}")
 
-  lAPP_VERS=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Implementation-Version" | head -1 || true)
+  lAPP_VERS=$(grep "Implementation-Version" "${lJAVA_MANIFEST_FILE}" | head -1 || true)
   lAPP_VERS=${lAPP_VERS#*:\ }
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
-  lAPP_VERS_ALT=$(unzip -p "${lJAVA_ARCHIVE}" META-INF/MANIFEST.MF | grep "Bundle-Version" | head -1 || true)
+  lAPP_VERS_ALT=$(grep "Bundle-Version" "${lJAVA_MANIFEST_FILE}" | head -1 || true)
   lAPP_VERS_ALT=${lAPP_VERS_ALT#*:\ }
   lAPP_VERS_ALT=$(clean_package_details "${lAPP_VERS_ALT}")
   lAPP_VERS_ALT=$(clean_package_versions "${lAPP_VERS_ALT}")
@@ -195,6 +260,67 @@ S08_java_manifest_handling() {
   POS_RES=1
 }
 
+S08_java_pom_xml_handling() {
+  local lPACKAGING_SYSTEM="${1:-}"
+  local lJAVA_ARCHIVE="${2:-}"
+  local lJAVA_POM_XML="${3:-}"
+
+  local lPOM_XML_ARR=()
+  local lPOM_XML=""
+  local lAPP_VERS_POM_XML=""
+  local lAPP_NAME_POM_XML=""
+  local lAPP_NAME_CLEAR_POM_XML=""
+  local lAPP_NAME_DESC_POM_XML=""
+  local lAPP_NAME_LIC_POM_XML=""
+  local lAPP_VERS=""
+  local lAPP_NAME=""
+  local lAPP_VENDOR=""
+  local lAPP_NAME_PROPERTIES_VERSION=""
+  local lAPP_NAME_PROPERTIES_NAME=""
+
+  # main version detection in pom.xml -> project->version:
+  lAPP_VERS_POM_XML=$(xpath -e project/version//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
+  lAPP_NAME_POM_XML=$(xpath -e project/artifactId//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
+  lAPP_NAME_CLEAR_POM_XML=$(xpath -e project/name//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
+  lAPP_NAME_DESC_POM_XML=$(xpath -e project/description//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
+  lAPP_NAME_LIC_POM_XML=$(xpath -e project/licenses/license/name//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
+  if [[ -n "${lAPP_VERS_POM_XML}" ]]; then
+    # for the dependencies we can check for pom.xml
+    # We could do something like the following to extract the dependencies
+      # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
+      # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
+      # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
+    lAPP_VERS="${lAPP_VERS_POM_XML}"
+    lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
+    lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
+    lAPP_NAME="${lAPP_NAME_POM_XML}"
+
+    write_log "[*] Java pom.xml details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${lJAVA_POM_XML} - version ${lAPP_VERS} / name ${lAPP_NAME} / ${lAPP_NAME_CLEAR_POM_XML:-NA} / ${lAPP_NAME_DESC_POM_XML:-NA} / license ${lAPP_NAME_LIC_POM_XML:-NA}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    S08_java_generate_sbom_entry "${lJAVA_ARCHIVE}" "${lPACKAGING_SYSTEM}-pom_xml" "${lAPP_VENDOR:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lAPP_NAME_DESC_POM_XML:-NA}" "${lAPP_NAME_LIC_POM_XML}"
+    POS_RES=1
+  fi
+
+  # lets check also versions in properties:
+  # xpath -e "project/properties/*[contains(name(),'version')]"
+  local lAPP_NAME_PROPERTIES_VERS_POM_XML=()
+  mapfile -t lAPP_NAME_PROPERTIES_VERS_POM_XML < <(xpath -e "project/properties/*[contains(name(),'.version')]" "${lJAVA_POM_XML}" 2>/dev/null)
+  for lAPP_NAME_PROPERTIES_VERSION in "${lAPP_NAME_PROPERTIES_VERS_POM_XML[@]}"; do
+    # e.g.: <spotbugs.version>4.8.6.0</spotbugs.version>
+    lAPP_NAME_PROPERTIES_NAME=${lAPP_NAME_PROPERTIES_VERSION/\.version*}
+    # e.g.: <spotbugs
+    lAPP_NAME_PROPERTIES_NAME=${lAPP_NAME_PROPERTIES_NAME//<}
+    lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/<\/*\.version>/}
+    lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/*\.version>}
+    lAPP_VERS=$(clean_package_versions "${lAPP_NAME_PROPERTIES_VERSION}")
+    lAPP_NAME="${lAPP_NAME_PROPERTIES_NAME}"
+    local lAPP_LIC="NA"
+    local lAPP_DESC="NA"
+
+    write_log "[*] Java pom.xml details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${lJAVA_POM_XML} - version ${lAPP_VERS} / name ${lAPP_NAME}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    S08_java_generate_sbom_entry "${lJAVA_ARCHIVE}" "${lPACKAGING_SYSTEM}-pom_xml" "${lAPP_VENDOR:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lAPP_DESC}" "${lAPP_LIC}"
+    POS_RES=1
+  done
+}
 
 S08_java_generate_sbom_entry() {
   local lJAVA_ARCHIVE="${1:-}"
@@ -205,23 +331,28 @@ S08_java_generate_sbom_entry() {
   local lAPP_DESC="${6:-}"
   local lAPP_LIC="${7:-}"
 
-  lMD5_CHECKSUM="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
-  lSHA256_CHECKSUM="$(sha256sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
-  lSHA512_CHECKSUM="$(sha512sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+  local lOS_IDENTIFIED="generic"
+  local lAPP_MAINT=""
+  local lAPP_ARCH=""
+
+  if [[ -f "${lJAVA_ARCHIVE}" ]]; then
+    lMD5_CHECKSUM="$(md5sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+    lSHA256_CHECKSUM="$(sha256sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+    lSHA512_CHECKSUM="$(sha512sum "${lJAVA_ARCHIVE}" | awk '{print $1}')"
+  fi
 
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
 
-  if [[ -z "${lOS_IDENTIFIED}" ]]; then
-    lOS_IDENTIFIED="generic"
-  fi
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "java" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
   local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-  # add the python requirement path information to our properties array:
+  # add the java archive path information to our properties array:
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
+  if [[ -f "${lJAVA_ARCHIVE}" ]]; then
+    lPROP_ARRAY_INIT_ARR+=( "source_path:${lJAVA_ARCHIVE}" )
+  fi
   lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
   lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
   lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
@@ -231,7 +362,7 @@ S08_java_generate_sbom_entry() {
 
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
-  if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM}-manifest"; then
+  if ! build_sbom_json_hashes_arr "${lJAVA_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM}"; then
     write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
     return
   fi
@@ -242,76 +373,4 @@ S08_java_generate_sbom_entry() {
   write_csv_log "${lPACKAGING_SYSTEM}" "${lJAVA_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
 }
 
-S08_java_pom_xml_handling() {
-  local lPACKAGING_SYSTEM="${1:-}"
-  local lJAVA_ARCHIVE="${2:-}"
 
-  # check for pom.xml meta files
-  if ! unzip -l "${lJAVA_ARCHIVE}" -- *pom.xml >/dev/null; then
-    print_output "[-] No Java pom.xml file for analysis identified"
-    return
-  fi
-
-  local lPOM_XML_ARR=()
-  local lPOM_XML=""
-  local lAPP_VERS_POM_XML=""
-  local lAPP_NAME_CLEAR_POM_XML=""
-  local lAPP_NAME_DESC_POM_XML=""
-  local lAPP_NAME_LIC_POM_XML=""
-  local lAPP_VERS=""
-  local lAPP_NAME=""
-  local lAPP_VENDOR=""
-  local lAPP_NAME_PROPERTIES_VERSION=""
-  local lAPP_NAME_PROPERTIES_NAME=""
-
-  # extract all the pom.xml meta files
-  mapfile -t lPOM_XML_ARR < <(unzip -l "${lJAVA_ARCHIVE}" | awk '{print $4}' | grep pom.xml || true)
-  if [[ "${#lPOM_XML_ARR[@]}" -gt 0 ]]; then
-    # lets analyse every pom.xml for versions and names:
-    for lPOM_XML in "${lPOM_XML_ARR[@]}"; do
-      # main version detection in pom.xml -> project->version:
-      lAPP_VERS_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/version//text\(\) 2>/dev/null)
-      lAPP_NAME_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/artifactId//text\(\) 2>/dev/null)
-      lAPP_NAME_CLEAR_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/name//text\(\) 2>/dev/null)
-      lAPP_NAME_DESC_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/description//text\(\) 2>/dev/null)
-      lAPP_NAME_LIC_POM_XML=$(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/licenses/license/name//text\(\) 2>/dev/null)
-      if [[ -n "${lAPP_VERS_POM_XML}" ]]; then
-        # for the dependencies we can check for pom.xml
-        # We could do something like the following to extract the dependencies
-          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies
-          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency
-          # unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e project/dependencies/dependency[1]/version
-        lAPP_VERS="${lAPP_VERS_POM_XML}"
-        lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
-        lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
-        lAPP_NAME="${lAPP_NAME_POM_XML}"
-
-        write_log "[*] Java pom.xml details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${lPOM_XML} - version ${lAPP_VERS} / name ${lAPP_NAME} / ${lAPP_NAME_CLEAR_POM_XML:-NA} / ${lAPP_NAME_DESC_POM_XML:-NA} / license ${lAPP_NAME_LIC_POM_XML:-NA}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        # Todo: write SBOM entries
-        S08_java_generate_sbom_entry "${lJAVA_ARCHIVE}" "${lPACKAGING_SYSTEM}-pom_xml" "${lAPP_VENDOR:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lAPP_NAME_DESC_POM_XML:-NA}" "${lAPP_NAME_LIC_POM_XML}"
-        POS_RES=1
-      fi
-
-      # lets check also versions in properties:
-      # xpath -e "project/properties/*[contains(name(),'version')]"
-      local lAPP_NAME_PROPERTIES_VERS_POM_XML=()
-      mapfile -t lAPP_NAME_PROPERTIES_VERS_POM_XML < <(unzip -p "${lJAVA_ARCHIVE}" "${lPOM_XML}" | xpath -e "project/properties/*[contains(name(),'.version')]" 2>/dev/null)
-      for lAPP_NAME_PROPERTIES_VERSION in "${lAPP_NAME_PROPERTIES_VERS_POM_XML[@]}"; do
-        # e.g.: <spotbugs.version>4.8.6.0</spotbugs.version>
-        lAPP_NAME_PROPERTIES_NAME=${lAPP_NAME_PROPERTIES_VERSION/\.version*}
-        # e.g.: <spotbugs
-        lAPP_NAME_PROPERTIES_NAME=${lAPP_NAME_PROPERTIES_NAME//<}
-        lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/<\/*\.version>/}
-        lAPP_NAME_PROPERTIES_VERSION=${lAPP_NAME_PROPERTIES_VERSION/*\.version>}
-        lAPP_VERS=$(clean_package_versions "${lAPP_NAME_PROPERTIES_VERSION}")
-        lAPP_NAME="${lAPP_NAME_PROPERTIES_NAME}"
-        local lAPP_LIC="NA"
-        local lAPP_DESC="NA"
-
-        write_log "[*] Java pom.xml details: ${ORANGE}${lJAVA_ARCHIVE}${NC} - ${lPOM_XML} - version ${lAPP_VERS} / name ${lAPP_NAME}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        S08_java_generate_sbom_entry "${lJAVA_ARCHIVE}" "${lPACKAGING_SYSTEM}-pom_xml" "${lAPP_VENDOR:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lAPP_DESC}" "${lAPP_LIC}"
-        POS_RES=1
-      done
-    done
-  fi
-}
