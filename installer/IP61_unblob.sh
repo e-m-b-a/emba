@@ -129,14 +129,14 @@ IP61_unblob() {
         #  cp -pr "${HOME}"/.cache external/unblob/root_cache
         #  rm -rf "${HOME}"/.cache || true
         # fi
-	echo "[*] Cloning unblob"
+        echo "[*] Cloning unblob"
         git clone https://github.com/onekey-sec/unblob.git external/unblob
-        cd external/unblob
+        cd external/unblob || exit 1
         # ./install-deps.sh
-	echo "[*] Building unblob"
-	pip3 install -e . --break-system-packages
+        echo "[*] Building unblob"
+        pip3 install -e . --break-system-packages
 
-	echo "[*] Testing unblob installation"
+        echo "[*] Testing unblob installation"
         if command -v unblob > /dev/null; then
           unblob --show-external-dependencies
           echo -e "${GREEN}unblob installed successfully${NC}"
@@ -144,7 +144,7 @@ IP61_unblob() {
         else
           echo -e "${ORANGE}unblob installation failed - check it manually${NC}"
           echo
-	  exit 1
+          exit 1
         fi
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component unblob" && exit 1 )
       ;;
