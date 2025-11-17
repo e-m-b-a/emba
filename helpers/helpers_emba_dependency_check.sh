@@ -260,7 +260,7 @@ preparing_cve_bin_tool() {
   if [[ -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv" ]]; then
     if [[ $(wc -l < "${TMP_DIR}/cve_bin_tool_health_check_results.csv") -gt 10 ]]; then
       echo "cve-bin-tool database preparation finished" >> "${TMP_DIR}/tmp_state_data.log"
-      print_output "[+] cve-bin-tool database preparation finished and suceeded" "no_log"
+      print_output "[+] cve-bin-tool database preparation finished and succeeded" "no_log"
     else
       echo "cve-bin-tool database preparation finished" >> "${TMP_DIR}/tmp_state_data.log"
       print_output "[*] cve-bin-tool database preparation finished - possible malfunction identified" "no_log"

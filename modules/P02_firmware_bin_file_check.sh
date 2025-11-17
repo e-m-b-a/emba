@@ -257,7 +257,7 @@ fw_bin_detector() {
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Java archive data"* ]]; then
     print_output "[+] Identified Java archive package - using package extraction module"
-    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" || print_error "[-] Deb package copy process failed"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" || print_error "[-] Java archive copy process failed"
     write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     export DISABLE_DEEP=1
     write_csv_log "JAR" "yes" "NA"
