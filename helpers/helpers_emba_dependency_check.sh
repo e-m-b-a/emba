@@ -246,10 +246,10 @@ preparing_cve_bin_tool() {
   # first: import the database
   if [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA config directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" >/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" &>/dev/null || true
   elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA docker external directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" >/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" &>/dev/null || true
   fi
 
   # 2nd: check the database
@@ -258,8 +258,13 @@ preparing_cve_bin_tool() {
   python3 "${lCVE_BIN_TOOL}" -i "${TMP_DIR}/cve_bin_tool_health_check.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${TMP_DIR}/cve_bin_tool_health_check_results" >/dev/null || true
 
   if [[ -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv" ]]; then
-    echo "cve-bin-tool database preparation finished" >> "${TMP_DIR}/tmp_state_data.log"
-    print_output "[+] cve-bin-tool database preparation finished" "no_log"
+    if [[ $(wc -l < "${TMP_DIR}/cve_bin_tool_health_check_results.csv") -gt 10 ]]; then
+      echo "cve-bin-tool database preparation finished" >> "${TMP_DIR}/tmp_state_data.log"
+      print_output "[+] cve-bin-tool database preparation finished and succeeded" "no_log"
+    else
+      echo "cve-bin-tool database preparation finished" >> "${TMP_DIR}/tmp_state_data.log"
+      print_output "[*] cve-bin-tool database preparation finished - possible malfunction identified" "no_log"
+    fi
     rm -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv"
   else
     print_output "[-] cve-bin-tool database preparation failed - No CVE queries possible" "no_log"

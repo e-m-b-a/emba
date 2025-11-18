@@ -35,66 +35,62 @@ P65_package_extractor() {
   local lFILES_POST_PACKAGE_ARR=()
   export WAIT_PIDS_P20=()
 
-  if [[ "${#ROOT_PATH[@]}" -gt 0 && "${RTOS}" -eq 0 ]]; then
-    FILES_PRE_PACKAGE=$(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw" | wc -l)
-    if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
-      deb_extractor
-    else
-      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(print_date) - Ending extraction processes - no deb extraction performed" "main"
-      lDISK_SPACE_CRIT=1
-    fi
-    if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
-      ipk_extractor
-    else
-      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(print_date) - Ending extraction processes - no ipk extraction performed" "main"
-      lDISK_SPACE_CRIT=1
-    fi
-    if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
-      apk_extractor
-    else
-      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(print_date) - Ending extraction processes - no apk extraction performed" "main"
-      lDISK_SPACE_CRIT=1
-    fi
-    if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
-      rpm_extractor
-    else
-      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(print_date) - Ending extraction processes - no rpm extraction performed" "main"
-      lDISK_SPACE_CRIT=1
-    fi
-
-    mapfile -t lFILES_POST_PACKAGE_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw")
-
-    if [[ "${#lFILES_POST_PACKAGE_ARR[@]}" -gt "${FILES_PRE_PACKAGE}" ]]; then
-      sub_module_title "Firmware package extraction details"
-      print_ln
-      print_output "[*] Found ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files."
-
-      print_output "[*] Adjusting the backend from ${ORANGE}${FILES_PRE_PACKAGE}${NC} to ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} entries ... take a break" "no_log"
-
-      for lBINARY in "${lFILES_POST_PACKAGE_ARR[@]}" ; do
-        binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-        local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
-      done
-
-      local lLINUX_PATH_COUNTER_PCK=0
-      lLINUX_PATH_COUNTER_PCK=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
-
-      wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
-
-      print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_PCK}${NC}."
-      print_ln
-      tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
-      print_output "[*] Before package extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after package extraction we have now ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files extracted."
-      lNEG_LOG=1
-    fi
+  FILES_PRE_PACKAGE=$(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw" | wc -l)
+  if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
+    deb_extractor
   else
-    print_output "[*] As there is no root directory detected it is not possible to process package archives"
+    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+    print_output "[!] $(print_date) - Ending extraction processes - no deb extraction performed" "main"
+    lDISK_SPACE_CRIT=1
+  fi
+  if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
+    ipk_extractor
+  else
+    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+    print_output "[!] $(print_date) - Ending extraction processes - no ipk extraction performed" "main"
+    lDISK_SPACE_CRIT=1
+  fi
+  if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
+    apk_extractor
+  else
+    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+    print_output "[!] $(print_date) - Ending extraction processes - no apk extraction performed" "main"
+    lDISK_SPACE_CRIT=1
+  fi
+  if [[ "${lDISK_SPACE_CRIT}" -ne 1 ]]; then
+    rpm_extractor
+  else
+    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+    print_output "[!] $(print_date) - Ending extraction processes - no rpm extraction performed" "main"
+    lDISK_SPACE_CRIT=1
+  fi
+
+  mapfile -t lFILES_POST_PACKAGE_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw")
+
+  if [[ "${#lFILES_POST_PACKAGE_ARR[@]}" -gt "${FILES_PRE_PACKAGE}" ]]; then
+    sub_module_title "Firmware package extraction details"
+    print_ln
+    print_output "[*] Found ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files."
+
+    print_output "[*] Adjusting the backend from ${ORANGE}${FILES_PRE_PACKAGE}${NC} to ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} entries ... take a break" "no_log"
+
+    for lBINARY in "${lFILES_POST_PACKAGE_ARR[@]}" ; do
+      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    done
+
+    local lLINUX_PATH_COUNTER_PCK=0
+    lLINUX_PATH_COUNTER_PCK=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
+
+    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_PCK}${NC}."
+    print_ln
+    tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
+    print_output "[*] Before package extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after package extraction we have now ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files extracted."
+    lNEG_LOG=1
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -218,6 +214,7 @@ deb_extractor() {
     print_output "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} debian archives - extracting them to the root directories ..."
     for lR_PATH in "${ROOT_PATH[@]}"; do
       for lDEB in "${lDEB_ARCHIVES_ARR[@]}"; do
+        print_output "[*] Extracting ${lDEB} to ${lR_PATH}"
         if [[ "${THREADED}" -eq 1 ]]; then
           extract_deb_extractor_helper "${lDEB}" "${lR_PATH}" &
           WAIT_PIDS_P20+=( "$!" )

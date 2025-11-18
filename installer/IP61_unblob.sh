@@ -53,9 +53,9 @@ IP61_unblob() {
     # print_pip_info "cmake"
     print_tool_info "python3-lief" 1
     # print_pip_info "unblob"
-    print_tool_info "unblob" 1
+    # print_tool_info "unblob" 1
 
-    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-5/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
     # print_file_info "libext2fs2_1.47.0-3.ok2_amd64.deb" "libext2fs2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libext2fs2_1.47.0-3.ok2_amd64.deb" "external/libext2fs2_1.47.0-3.ok2_amd64.deb"
     # print_file_info "e2fsprogs_1.47.0-3.ok2_amd64.deb" "e2fsprogs_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/e2fsprogs_1.47.0-3.ok2_amd64.deb" "external/e2fsprogs_1.47.0-3.ok2_amd64.deb"
@@ -77,12 +77,13 @@ IP61_unblob() {
 
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component unblob" && exit 1 )
 
-        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-5/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
         # download_file "libext2fs2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libext2fs2_1.47.0-3.ok2_amd64.deb" "external/libext2fs2_1.47.0-3.ok2_amd64.deb"
         # download_file "libss2_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/libss2_1.47.0-3.ok2_amd64.deb" "external/libss2_1.47.0-3.ok2_amd64.deb"
         # download_file "e2fsprogs_1.47.0-3.ok2_amd64.deb" "https://github.com/onekey-sec/e2fsprogs/releases/download/v1.47.0-3.ok2/e2fsprogs_1.47.0-3.ok2_amd64.deb" "external/e2fsprogs_1.47.0-3.ok2_amd64.deb"
 
         dpkg -i external/sasquatch_1.0_amd64.deb
+        rm external/sasquatch_1.0_amd64.deb
         # dpkg -i external/libss2_1.47.0-3.ok2_amd64.deb
         # dpkg -i external/libext2fs2_1.47.0-3.ok2_amd64.deb
         # dpkg -i external/e2fsprogs_1.47.0-3.ok2_amd64.deb
@@ -128,15 +129,24 @@ IP61_unblob() {
         #  cp -pr "${HOME}"/.cache external/unblob/root_cache
         #  rm -rf "${HOME}"/.cache || true
         # fi
+        echo "[*] Cloning unblob"
+        git clone https://github.com/onekey-sec/unblob.git external/unblob
+        cd external/unblob || exit 1
+        # ./install-deps.sh
+        echo "[*] Building unblob"
+        pip3 install -e . --break-system-packages
 
-        if command -v unblob > /dev/null ; then
+        echo "[*] Testing unblob installation"
+        if command -v unblob > /dev/null; then
           unblob --show-external-dependencies
-          echo -e "${GREEN}""unblob installed successfully""${NC}"
+          echo -e "${GREEN}unblob installed successfully${NC}"
           echo
         else
-          echo -e "${ORANGE}""unblob installation failed - check it manually""${NC}"
+          echo -e "${ORANGE}unblob installation failed - check it manually${NC}"
           echo
+          exit 1
         fi
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component unblob" && exit 1 )
       ;;
     esac
   fi

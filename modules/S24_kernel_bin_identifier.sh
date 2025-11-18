@@ -31,7 +31,7 @@ S24_kernel_bin_identifier()
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
-  # write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
+  write_csv_log "file path" "Kernel version stripped" "file output" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
   local lWAIT_PIDS_S24_main=()
   # just in case s09 has not already created the strings output directory

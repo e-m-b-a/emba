@@ -248,6 +248,28 @@ fw_bin_detector() {
     lUEFI_CHECK=0
     write_csv_log "Qemu QCOW firmware detected" "yes" "NA"
   fi
+  if [[ "${lFILE_BIN_OUT}" == *"Debian binary package"* ]]; then
+    print_output "[+] Identified Debian package archive file - using package extraction module"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.deb" || print_error "[-] Deb package copy process failed"
+    write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.deb" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
+    export DISABLE_DEEP=1
+    write_csv_log "DEB" "yes" "NA"
+  fi
+  if [[ "${lFILE_BIN_OUT}" == *"Java archive data"* ]]; then
+    print_output "[+] Identified Java archive package - using package extraction module"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" || print_error "[-] Java archive copy process failed"
+    write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.jar" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
+    export DISABLE_DEEP=1
+    write_csv_log "JAR" "yes" "NA"
+  fi
+
+  if [[ "${lFILE_BIN_OUT}" == *"RPM v3.0 bin"* ]]; then
+    print_output "[+] Identified RPM package archive file - using package extraction module"
+    cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.rpm" || print_error "[-] RPM package copy process failed"
+    write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.rpm" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
+    export DISABLE_DEEP=1
+    write_csv_log "RPM" "yes" "NA"
+  fi
   if [[ "${lFILE_BIN_OUT}" == *"VMware4 disk image"* ]]; then
     print_output "[+] Identified VMWware VMDK archive file - using VMDK extraction module"
     export VMDK_DETECTED=1
@@ -324,7 +346,8 @@ fw_bin_detector() {
     # looks like we have only and ELF file to test
     print_output "[+] Identified ELF file - performing binary tests on this ELF file"
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
-      cp "${lCHECK_FILE}" "${LOG_DIR}"/firmware/ || print_error "[-] Binary file copy process failed"
+      cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.elf" || print_error "[-] Binary file copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.elf" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Perl script text executable"* ]]; then
@@ -332,6 +355,7 @@ fw_bin_detector() {
     export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.pl" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.pl" || print_error "[-] Perl script file copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.pl" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"PHP script,"* ]]; then
@@ -339,6 +363,7 @@ fw_bin_detector() {
     export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.php" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.php" || print_error "[-] PHP script file copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.php" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Python script,"* ]]; then
@@ -346,6 +371,7 @@ fw_bin_detector() {
     export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.py" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.py" || print_error "[-] Python script file copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.py" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"shell script,"* ]]; then
@@ -353,12 +379,14 @@ fw_bin_detector() {
     export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.sh" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.sh" || print_error "[-] Shell script file copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.sh" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     fi
   fi
   if [[ "${lFILE_BIN_OUT}" == *"Android package (APK),"* ]]; then
     print_output "[+] Identified Android APK package - performing APK checks"
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.apk" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.apk" || print_error "[-] APK file copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.apk" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
       export DISABLE_DEEP=1
     fi
   fi
@@ -370,6 +398,7 @@ fw_bin_detector() {
     export WINDOWS_EXE=1
     if ! [[ -f "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" ]]; then
       cp "${lCHECK_FILE}" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" || print_error "[-] Windows executable copy process failed"
+      write_csv_log_to_path "${P99_CSV_LOG}" "P02_firmware_bin_file_check" "${LOG_DIR}/firmware/${lCHECK_FILE_NAME}.exe" "NA" "NA" "NA" "NA" "NA" "${lFILE_BIN_OUT}" "${MD5_CHECKSUM}"
     fi
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
