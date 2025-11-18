@@ -2110,7 +2110,7 @@ setup_network_emulation() {
     BR_NUM="${lNETWORK_DEVICE/br}"
     BR_NUM="${BR_NUM//[![:print:]]/}"
   fi
-  if [[ "${lETH_INT}" == *"eth"* ]]; then
+  if [[ "${lETH_INT}" =~ .*eth[0-9]+.* ]]; then
     ETH_NUM="${lETH_INT/eth}"
     ETH_NUM="${ETH_NUM//[![:print:]]/}"
   fi

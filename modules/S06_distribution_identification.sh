@@ -257,6 +257,8 @@ get_csv_rule_distri() {
   lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER}" | sed -r 's/.*\(yocto:project:reference:distro\):([0-9]+(\.[0-9]+)+?):\(.*\)$/:yoctoproject:yocto:\1/')"
   # Buildroot 2022.01.01
   lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER}" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/:buildroot:buildroot:\1/')"
+  # AXIS OS (based on Poky from the Yocto Project) 12.7.53
+  lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER}" | sed -r 's/(axis) os \(based on .* from the yocto project\) ([0-9]+(\.[0-9]+)+?)/\1:\2/')"
   #   MikroTik routerOS V2.4 (c) 1999-2001       http://mikrotik.com/
   lVERSION_IDENTIFIER="$(safe_echo "${lVERSION_IDENTIFIER}" | sed -r 's/.*mikrotik\ routeros\ v([0-9]\.[0-9]+).*/:mikrotik:routeros:\1/')"
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER// /:}"
