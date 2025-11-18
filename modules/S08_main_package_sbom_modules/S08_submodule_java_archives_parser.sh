@@ -282,7 +282,7 @@ S08_java_pom_xml_handling() {
   lAPP_VERS_POM_XML=$(xpath -e project/version//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
   lAPP_NAME_POM_XML=$(xpath -e project/artifactId//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
   lAPP_NAME_CLEAR_POM_XML=$(xpath -e project/name//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
-  lAPP_NAME_DESC_POM_XML=$(xpath -e project/description//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
+  lAPP_NAME_DESC_POM_XML=$(xpath -e project/description//text\(\) "${lJAVA_POM_XML}" 2>/dev/null | tr '\n' ' ')
   lAPP_NAME_LIC_POM_XML=$(xpath -e project/licenses/license/name//text\(\) "${lJAVA_POM_XML}" 2>/dev/null)
   if [[ -n "${lAPP_VERS_POM_XML}" ]]; then
     # for the dependencies we can check for pom.xml
