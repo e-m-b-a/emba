@@ -361,7 +361,7 @@ S09_identifier_threadings() {
     # print_output "[*] FIRMWARE: ${FIRMWARE} / RTOS: ${RTOS} / FIRMWARE_PATH: ${FIRMWARE_PATH} / FIRMWARE_PATH_BAK: ${FIRMWARE_PATH_BAK}" "no_log"
 
     # original firmware file:
-    if [[ ${RTOS} -eq 1 ]]; then
+    if [[ ${RTOS} -eq 1 && -f "${FIRMWARE_PATH_BAK}" ]]; then
       # in RTOS mode we also test the original firmware file
 
       lMD5_SUM=$(md5sum "${FIRMWARE_PATH_BAK}")

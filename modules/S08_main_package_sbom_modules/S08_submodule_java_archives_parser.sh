@@ -108,7 +108,7 @@ S08_submodule_java_archives_parser() {
 
             # if we have found multiple status files but all are the same -> we do not need to test duplicates
             lPOM_MD5="$(md5sum "${lJAVA_POM_XML_FILE}" | awk '{print $1}')"
-            if [[ "${lPOM_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+            if [[ "${lPOM_CHECKED_ARR[*]}" == *"${lPOM_MD5}"* ]]; then
               print_output "[*] ${ORANGE}${lJAVA_POM_XML_FILE}${NC} already analyzed" "no_log"
               continue
             fi
