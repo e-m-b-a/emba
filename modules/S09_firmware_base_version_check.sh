@@ -678,7 +678,7 @@ build_cpe_identifier() {
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lBIN_VENDOR:-*}:${lBIN_NAME:-*}:${lBIN_VERS:-*}:"
   lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
 
-  while [[ "${lCPE_LENGTH}" -lt 13 ]]; do
+  while [[ "${lCPE_LENGTH}" -lt 14 ]]; do
     lCPE_IDENTIFIER+='*:'
     lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
   done
