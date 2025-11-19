@@ -258,14 +258,18 @@ build_sbom_json_component_arr() {
   fi
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
-#  if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
-#    local lTMP_IDENTIFIER="${RANDOM}"
-#    [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
-#    # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
-#    jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" > "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
-#    lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
-#    rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
-#  fi
+
+  # TODO: License information is currently disabled for Dependency Track compatibility.
+  #       Set SBOM_INCLUDE_LICENSE=true to include license data in SBOM output.
+  #       Re-enable when the EMBA SBOM is fully supported by Dependency Track.
+  if [[ "${SBOM_INCLUDE_LICENSE:-false}" == "true" ]] && [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
+    local lTMP_IDENTIFIER="${RANDOM}"
+    [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
+    # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
+    jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" > "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
+    lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
+    rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
+  fi
   lCOMPONENT_ARR+=( "scope=${lAPP_SCOPE}" )
   lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
   lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
