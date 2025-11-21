@@ -34,6 +34,8 @@ Q20_dependency_track_connector() {
       sleep 5
     done
 
+    print_output "[*] Waiting for SBOM to upload ..." "no_log"
+
     # we need to wait until the SBOM module is finished:
     while ! grep -q "F15_cyclonedx_sbom finished" "${LOG_DIR}/${MAIN_LOG_FILE}"; do
       if grep -q "Test ended on " "${LOG_DIR}/${MAIN_LOG_FILE}"; then
@@ -62,7 +64,7 @@ dep_track_upload_sbom() {
 
   print_output "[*] Dependency Track upload to ${ORANGE}http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}${NC}"
   print_output "$(indent "Dependency Track upload ${ORANGE}projectName=${lFW_TESTED}${NC}")"
-  print_output "$(indent "Dependency Track upload ${ORANGE}projectVersion=${FW_VERSION:-NOT-DEFINED}${NC}")"
+  print_output "$(indent "Dependency Track upload ${ORANGE}projectVersion=${FW_VERSION:-unknown}${NC}")"
   print_output "$(indent "Dependency Track upload ${ORANGE}bom=@${EMBA_SBOM_JSON}${NC}")"
 
   lHTTP_CODE=$(curl -X "POST" "http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}" \
@@ -70,13 +72,16 @@ dep_track_upload_sbom() {
         -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
         -F "autoCreate=true" \
         -F "projectName=${lFW_TESTED}" \
-        -F "projectVersion=${FW_VERSION:-NOT-DEFINED}" \
+        -F "projectVersion=${FW_VERSION:-unknown}" \
+        -F "projectTags=${DEPENDENCY_TRACK_TAGS}" \
         -F "bom=@${EMBA_SBOM_JSON}" \
         -o "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
-  if [[ "${lHTTP_CODE}" -ne 200 ]] ; then
+  if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
+    print_output "[+] SBOM upload to Dependency Track environment was successful"
+  else
     print_output "[-] ${MAGENTA}WARNING: Dependency Track SBOM upload failed!${NC}"
-    tee -a "${LOG_FILE}" < "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt"
   fi
+  tee -a "${LOG_FILE}" < "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt"
 }
 

@@ -34,7 +34,6 @@ set_defaults() {
   export DISABLE_DEEP=0
   export DEEP_EXTRACTOR="unblob"  # binwalk/unblob
   export DEEP_EXT_DEPTH=4
-  export FACT_EXTRACTOR=0
   export FIRMWARE=0
   export FORCE=0
   export FORMAT_LOG=0
@@ -170,7 +169,7 @@ set_defaults() {
   # -> just comment the submodule that should not be used
   # usually this should be done via a scan-profile
   export S08_MODULES_ARR=()
-  S08_MODULES_ARR=( "S08_submodule_debian_pkg_mgmt_parser" )
+  S08_MODULES_ARR+=( "S08_submodule_debian_pkg_mgmt_parser" )
   S08_MODULES_ARR+=( "S08_submodule_deb_package_parser" )
   S08_MODULES_ARR+=( "S08_submodule_openwrt_pkg_mgmt_parser" )
   S08_MODULES_ARR+=( "S08_submodule_openwrt_ipk_package_parser" )
