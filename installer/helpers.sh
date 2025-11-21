@@ -21,7 +21,7 @@ print_help()
   echo -e "\\n""${CYAN}""USAGE""${NC}"
   echo -e "${CYAN}""-d""${NC}""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "${CYAN}""-D""${NC}""         Only used via docker-compose for building EMBA docker container"
-  echo -e "${CYAN}""-F""${NC}""         Developer installation (for running on your host in developer mode)"
+  echo -e "${CYAN}""-F""${NC}""         Developer installation (for running on your host in developer mode - deprecated and unsupported)"
   echo -e "${CYAN}""-f""${NC}""         Bypass multiple checks (for headless installations)"
   echo -e "${CYAN}""-g""${NC}""         Install all dependencies for EMBA tests via Github actions (CVE-search database not populated)""${NC}"
   echo -e "${CYAN}""-h""${NC}""         Print this help message"

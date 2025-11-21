@@ -346,6 +346,19 @@ dependency_check()
         done < "${CONFIG_DIR}/gpt_config.env"
       fi
     fi
+
+    # load the dependency track connection details from config
+    if [[ -f "${CONFIG_DIR}/dependencytrack.env" ]]; then
+      if grep -v -q "#" "${CONFIG_DIR}/dependencytrack.env"; then
+        # readin dependencytrack.env
+        while read -r LINE; do
+          if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
+            export "$(echo "${LINE}" | xargs)"
+          fi
+        done < "${CONFIG_DIR}/dependencytrack.env"
+      fi
+    fi
+
     if [[ "${IN_DOCKER}" -eq 0 ]]; then
       local lONLINE_CHECK_FILE="${EXT_DIR}""/onlinechecker/EMBA_VERSION.txt"
     else

@@ -96,18 +96,24 @@ build_sbom_json_hashes_arr() {
     lSHA256_CHECKSUM="$(sha256sum "${lBINARY}" | awk '{print $1}')"
     lSHA512_CHECKSUM="$(sha512sum "${lBINARY}" | awk '{print $1}')"
 
-    # temp array with only one set of hash values
-    local lHASHES_ARRAY_INIT=("alg=MD5")
-    lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
-    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    if [[ -n "${lMD5_CHECKSUM}" ]]; then
+      # temp array with only one set of hash values
+      local lHASHES_ARRAY_INIT=("alg=MD5")
+      lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
+      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    fi
 
-    lHASHES_ARRAY_INIT=("alg=SHA-256")
-    lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
-    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    if [[ -n "${lSHA256_CHECKSUM}" ]]; then
+      lHASHES_ARRAY_INIT=("alg=SHA-256")
+      lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
+      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    fi
 
-    lHASHES_ARRAY_INIT=("alg=SHA-512")
-    lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
-    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    if [[ -n "${lSHA512_CHECKSUM}" ]]; then
+      lHASHES_ARRAY_INIT=("alg=SHA-512")
+      lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
+      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    fi
   else
     print_output "[*] No real binary detected for ${lBINARY} - no checksums for the SBOM generated" "no_log"
   fi
@@ -258,7 +264,11 @@ build_sbom_json_component_arr() {
   fi
   lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
   lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
-  if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
+
+  # TODO: License information is currently disabled for Dependency Track compatibility.
+  #       Set SBOM_INCLUDE_LICENSE=true to include license data in SBOM output.
+  #       Re-enable when the EMBA SBOM is fully supported by Dependency Track.
+  if [[ "${SBOM_INCLUDE_LICENSE:-false}" == "true" ]] && [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
     local lTMP_IDENTIFIER="${RANDOM}"
     [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
     # we should not work with the tmp file trick but otherwise jo does not handle our json correctly

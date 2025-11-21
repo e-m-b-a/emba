@@ -130,9 +130,11 @@ S08_submodule_rust_cargo_lock_parser() {
         # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
         # final array with all hash values
         export HASHES_ARR=()
-        local lHASHES_ARRAY_INIT=("alg=SHA-256")
-        lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
-        HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+        if [[ -n "${lSHA256_CHECKSUM}" ]]; then
+          local lHASHES_ARRAY_INIT=("alg=SHA-256")
+          lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
+          HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+        fi
 
         # create component entry - this allows adding entries very flexible:
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
