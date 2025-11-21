@@ -122,7 +122,7 @@ while getopts CdDfFghlrsc: OPT ; do
       export FULL=1
       export DOCKER_SETUP=0
       export CVE_SEARCH=1
-      echo -e "${GREEN}${BOLD}Install all dependecies for developer mode (deprecated and not supported anymore)${NC}"
+      echo -e "${GREEN}${BOLD}Install all dependencies for developer mode (deprecated and not supported anymore)${NC}"
       ;;
     g)
       export DOCKER_SETUP=1

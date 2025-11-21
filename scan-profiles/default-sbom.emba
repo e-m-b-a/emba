@@ -17,7 +17,6 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
-DEPENDENCY_TRACK_TAGS+=",ASDF"
 
 # multiple sbom only optimisations
 SBOM_MINIMAL=1

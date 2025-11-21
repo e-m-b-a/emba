@@ -68,14 +68,14 @@ dep_track_upload_sbom() {
   print_output "$(indent "Dependency Track upload ${ORANGE}bom=@${EMBA_SBOM_JSON}${NC}")"
 
   lHTTP_CODE=$(curl -X "POST" "http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}" \
-        -H 'Content-Type: multipart/form-data' \
-        -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
-        -F "autoCreate=true" \
-        -F "projectName=${lFW_TESTED}" \
-        -F "projectVersion=${FW_VERSION:-unknown}" \
-        -F "projectTags=${DEPENDENCY_TRACK_TAGS}" \
-        -F "bom=@${EMBA_SBOM_JSON}" \
-        -o "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
+    -H 'Content-Type: multipart/form-data' \
+    -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
+    -F "autoCreate=true" \
+    -F "projectName=${lFW_TESTED}" \
+    -F "projectVersion=${FW_VERSION:-unknown}" \
+    -F "projectTags=${DEPENDENCY_TRACK_TAGS}" \
+    -F "bom=@${EMBA_SBOM_JSON}" \
+    -o "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
   if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
     print_output "[+] SBOM upload to Dependency Track environment was successful"

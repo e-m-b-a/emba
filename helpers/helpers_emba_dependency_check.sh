@@ -347,10 +347,10 @@ dependency_check()
       fi
     fi
 
-    # load the Dependecy Track connection details from config
+    # load the dependency track connection details from config
     if [[ -f "${CONFIG_DIR}/dependencytrack.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/dependencytrack.env"; then
-        # readin gpt_config.env
+        # readin dependencytrack.env
         while read -r LINE; do
           if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
             export "$(echo "${LINE}" | xargs)"
