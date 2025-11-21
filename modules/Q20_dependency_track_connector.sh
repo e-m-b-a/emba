@@ -60,11 +60,10 @@ dep_track_upload_sbom() {
     lFW_TESTED=$(basename "${lFW_TESTED}")
   fi
 
-  print_output "[*] Dependency Track upload to http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}"
-  print_output "[*] Dependency Track upload X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}"
-  print_output "[*] Dependency Track upload projectName=${lFW_TESTED}"
-  print_output "[*] Dependency Track upload projectVersion=${FW_VERSION:-NOT-DEFINED}"
-  print_output "[*] Dependency Track upload bom=@${EMBA_SBOM_JSON}"
+  print_output "[*] Dependency Track upload to ${ORANGE}http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}${NC}"
+  print_output "$(indent "Dependency Track upload ${ORANGE}projectName=${lFW_TESTED}${NC}")"
+  print_output "$(indent "Dependency Track upload ${ORANGE}projectVersion=${FW_VERSION:-NOT-DEFINED}${NC}")"
+  print_output "$(indent "Dependency Track upload ${ORANGE}bom=@${EMBA_SBOM_JSON}${NC}")"
 
   lHTTP_CODE=$(curl -X "POST" "http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}" \
         -H 'Content-Type: multipart/form-data' \
@@ -76,7 +75,7 @@ dep_track_upload_sbom() {
         -o "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
   if [[ "${lHTTP_CODE}" -ne 200 ]] ; then
-    print_output "[-] Something went wrong with the Dependency Track SBOM upload"
+    print_output "[-] ${MAGENTA}WARNING: Dependency Track SBOM upload failed!${NC}"
     tee -a "${LOG_FILE}" < "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt"
   fi
 }
