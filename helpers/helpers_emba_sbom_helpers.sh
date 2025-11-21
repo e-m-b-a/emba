@@ -96,18 +96,24 @@ build_sbom_json_hashes_arr() {
     lSHA256_CHECKSUM="$(sha256sum "${lBINARY}" | awk '{print $1}')"
     lSHA512_CHECKSUM="$(sha512sum "${lBINARY}" | awk '{print $1}')"
 
-    # temp array with only one set of hash values
-    local lHASHES_ARRAY_INIT=("alg=MD5")
-    lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
-    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    if [[ -n "${lMD5_CHECKSUM}" ]]; then
+      # temp array with only one set of hash values
+      local lHASHES_ARRAY_INIT=("alg=MD5")
+      lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
+      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    fi
 
-    lHASHES_ARRAY_INIT=("alg=SHA-256")
-    lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
-    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    if [[ -n "${lSHA256_CHECKSUM}" ]]; then
+      lHASHES_ARRAY_INIT=("alg=SHA-256")
+      lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
+      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    fi
 
-    lHASHES_ARRAY_INIT=("alg=SHA-512")
-    lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
-    HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    if [[ -n "${lSHA512_CHECKSUM}" ]]; then
+      lHASHES_ARRAY_INIT=("alg=SHA-512")
+      lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
+      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+    fi
   else
     print_output "[*] No real binary detected for ${lBINARY} - no checksums for the SBOM generated" "no_log"
   fi
