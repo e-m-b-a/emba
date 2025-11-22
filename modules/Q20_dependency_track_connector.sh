@@ -75,13 +75,13 @@ dep_track_upload_sbom() {
     -F "projectVersion=${FW_VERSION:-unknown}" \
     -F "projectTags=${DEPENDENCY_TRACK_TAGS}" \
     -F "bom=@${EMBA_SBOM_JSON}" \
-    -o "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
+    -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
   if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
     print_output "[+] SBOM upload to Dependency Track environment was successful"
   else
     print_output "[-] ${MAGENTA}WARNING: Dependency Track SBOM upload failed!${NC}"
   fi
-  tee -a "${LOG_FILE}" < "${TMP_DIR}/${DEPENDENCY_TRACK_HOST_IP}_sbom_upload_response.txt"
+  tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt"
 }
 
