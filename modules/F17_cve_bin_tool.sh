@@ -43,8 +43,7 @@ F17_cve_bin_tool() {
 
   print_output "[*] Loading SBOM ..." "no_log"
 
-  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" 
-  cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline --sbom-type cyclonedx --sbom-output "${LOG_PATH_MODULE}/cve-bin-tool-sbom.json" > "${LOG_PATH_MODULE}/cve-bin-tool-sbom.log"
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline --sbom-type cyclonedx --sbom-output "${LOG_PATH_MODULE}/cve-bin-tool-sbom.json" > "${LOG_PATH_MODULE}/cve-bin-tool-sbom.log"
 
   if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
     print_error "[-] No SBOM available!"
@@ -317,6 +316,14 @@ cve_bin_tool_proc() {
   if [[ -f "${LOG_PATH_MODULE}/cve-bin-tool.csv" ]]; then
     print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
     while read -r lCVE_LINE; do
+      # lORIG_SOURCE=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $10}' <<< '$lCVE_LINE')
+      # lPRODUCT_NAME=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $2}' <<< '$lCVE_LINE')
+      # lVERS=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $3}' <<< '$lCVE_LINE')
+      lORIG_SOURCE=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $10}' <<< "$lCVE_LINE")
+      lORIG_SOURCE=${lORIG_SOURCE//\,/ }
+      lPRODUCT_NAME=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $2}' <<< "$lCVE_LINE")
+      lVERS=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $3}' <<< "$lCVE_LINE")
+
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
