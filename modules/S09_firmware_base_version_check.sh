@@ -307,7 +307,7 @@ S09_identifier_threadings() {
           continue
         fi
         for lVERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
-          # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER}"
+          # print_output "[*] Testing STRICT identifier ${lVERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             print_ln "no_log"
