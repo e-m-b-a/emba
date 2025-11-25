@@ -72,6 +72,7 @@ dep_track_upload_sbom() {
     print_output "$(indent "Dependency Track tags to use: ${ORANGE}${DEPENDENCY_TRACK_TAGS}${NC}")"
   fi
 
+  # upload SBOM
   lHTTP_CODE=$(curl -X "POST" "http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}" \
     -H 'Content-Type: multipart/form-data' \
     -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \

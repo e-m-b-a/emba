@@ -90,7 +90,7 @@ F14_tag_builder() {
 
   mapfile -t lTAGs_ARR < <(printf "%s\n" "${lTAGs_ARR[@]}" | sort -u)
 
-  jo -p tags=$(jo -a "${lTAGs_ARR[@]}") > "${LOG_PATH_MODULE}"/tags.json
+  jo -p "tags=$(jo -a "${lTAGs_ARR[@]}")" > "${LOG_PATH_MODULE}"/tags.json
   if [[ -f "${LOG_PATH_MODULE}"/tags.json ]]; then
     print_output "[*] Generated tags:" "" "${LOG_PATH_MODULE}"/tags.json
     for lTAG in "${lTAGs_ARR[@]}"; do
