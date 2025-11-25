@@ -34,7 +34,7 @@ log_folder() {
     export RESTART=0          # indicator for testing unfinished tests again
     local lNOT_FINISHED=0      # identify unfinished firmware tests
     local lPOSSIBLE_RESTART=0  # used for testing the checksums of the firmware with stored checksum
-    local lUSER_ANSWER="n"
+    local lUSER_ANSWER="y"
     local lD_LOG_FILES_ARR=()
     local lD_LOG_FILE=""
     local lSTORED_SHA512=""
@@ -84,11 +84,12 @@ log_folder() {
       print_output "[*] If you answer with ${ORANGE}n${NC}o, EMBA tries to process the unfinished test${NC}" "no_log"
     fi
 
-    if [[ ${OVERWRITE_LOG} -eq 1 ]] ; then
-      lUSER_ANSWER="y"
-    else
-      read -p "(Y/n)  " -r lUSER_ANSWER
-    fi
+    # if [[ ${OVERWRITE_LOG} -eq 1 ]] ; then
+    #   lUSER_ANSWER="y"
+    # else
+    #   read -p "(Y/n)  " -r lUSER_ANSWER
+    # fi
+    lUSER_ANSWER="y"
     case ${lUSER_ANSWER:0:1} in
         y|Y|"" )
           if mount | grep "${LOG_DIR}" | grep -e "proc\|sys\|run" > /dev/null; then
@@ -135,7 +136,8 @@ log_folder() {
       echo -e "        ""$(orange "${lD_LOG_FILE}")"
     done
     echo -e "\\n${ORANGE}Continue to run EMBA and ignore this warning?${NC}\\n"
-    read -p "(Y/n)  " -r lUSER_ANSWER
+    # read -p "(Y/n)  " -r lUSER_ANSWER
+    lUSER_ANSWER="y"
     case ${lUSER_ANSWER:0:1} in
         y|Y|"" )
           print_ln "no_log"

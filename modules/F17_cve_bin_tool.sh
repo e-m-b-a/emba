@@ -37,13 +37,19 @@ F17_cve_bin_tool() {
   local lNEG_LOG=0
   local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
 
+  chmod +w "${LOG_PATH_MODULE}"
   mkdir "${LOG_PATH_MODULE}/json/" || true
   mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
-  print_output "[*] Loading SBOM ..." "no_log"
-
   # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline --sbom-type cyclonedx --sbom-output "${LOG_PATH_MODULE}/cve-bin-tool-sbom.json" > "${LOG_PATH_MODULE}/cve-bin-tool-sbom.log"
+  print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} starting ..." "no_log"
+  local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  python3 "${lCVE_BIN_TOOL}" "${FIRMWARE_PATH_BAK}" --offline -l debug -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" 2>&1 || true
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -l debug -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" 2>&1 || true
+  print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} finished ..." "no_log"
+  
+  print_output "[*] Loading SBOM ..." "no_log"
 
   if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
     print_error "[-] No SBOM available!"
@@ -205,17 +211,22 @@ F17_cve_bin_tool() {
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
   done < "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 
-  # wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
+  wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
   # merge with cve-bin-tool found CVEs
-  cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log"
-  cve_bin_tool_proc &
-  local lTMP_PID="$!"
-  store_kill_pids "${lTMP_PID}"
-  lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
-  max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} starting ..." "no_log"
+  # local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  # python3 "${lCVE_BIN_TOOL}" "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" || true
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log"
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} finished ..." "no_log"
 
-  wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
+  cve_bin_tool_proc 
+  # local lTMP_PID="$!"
+  # store_kill_pids "${lTMP_PID}"
+  # lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
+  # max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
+
+  # wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
   print_output "[*] Generating final VEX vulnerability json ..." "no_log"
 
@@ -299,8 +310,14 @@ cve_bin_tool_proc() {
   local lORIG_SOURCE="cve-bin-tool-scan-results"
   local lPRODUCT_NAME="the-scanned-software"
   local -n lrVENDOR_ARR="${4:-}"
-  local lWAIT_PIDS_F17_ARR_2=()
+  local lWAIT_PIDS_F17_ARR_3=()
 
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} starting ..." "no_log"
+  # local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  # python3 "${lCVE_BIN_TOOL}" "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" || true
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log"
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} finished ..." "no_log"
+  
   if ! [[ -d "${LOG_PATH_MODULE}/cve_sum/" ]]; then
     mkdir "${LOG_PATH_MODULE}/cve_sum/"
   fi
@@ -311,10 +328,10 @@ cve_bin_tool_proc() {
     mkdir "${LOG_PATH_MODULE}/exploit/"
   fi
 
-  # print_output "[*] Vulnerability details - Preliminary basic CVE scan results:"
+  print_output "[*] cve-bin-tool scan result process starting ...." "no_log"
 
   if [[ -f "${LOG_PATH_MODULE}/cve-bin-tool.csv" ]]; then
-    print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
+    print_output "[*] cve-bin-tool-proc - Identification of possible Exploits, EPSS and further details ..." "no_log"
     while read -r lCVE_LINE; do
       # lORIG_SOURCE=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $10}' <<< '$lCVE_LINE')
       # lPRODUCT_NAME=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $2}' <<< '$lCVE_LINE')
@@ -327,11 +344,11 @@ cve_bin_tool_proc() {
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_F17_ARR_2+=( "${lTMP_PID}" )
-      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
+      lWAIT_PIDS_F17_ARR_3+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_3
     done < <(tail -n +2 "${LOG_PATH_MODULE}/cve-bin-tool.csv")
   fi
-  wait_for_pid "${lWAIT_PIDS_F17_ARR_2[@]}"
+  wait_for_pid "${lWAIT_PIDS_F17_ARR_3[@]}"
 
   # lets start the final logging
 
@@ -414,6 +431,7 @@ cve_bin_tool_proc() {
     tee -a "${LOG_FILE}" < "${lBIN_LOG}"
   fi
 
+  print_output "[*] cve-bin-tool scan result process finished ...." "no_log"
 }
 
 sbom_preprocessing_threader() {
@@ -514,7 +532,9 @@ cve_bin_tool_threader() {
     mkdir "${LOG_PATH_MODULE}/exploit/"
   fi
 
-  python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
+  print_output "[*] cve-bin-tool scan SBOM ${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" "no_log"
+
+  python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" -l debug --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
 
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
     rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
