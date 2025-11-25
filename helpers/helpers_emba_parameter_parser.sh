@@ -109,9 +109,10 @@ emba_parameter_parsing() {
         check_path_input "${OPTARG}"
         export LOG_DIR=""
         LOG_DIR="$(escape_echo "${OPTARG}")"
-        export TMP_DIR="${LOG_DIR}""/tmp"
-        export CSV_DIR="${LOG_DIR}""/csv_logs"
-        export JSON_DIR="${LOG_DIR}""/json_logs"
+        export TMP_DIR="${LOG_DIR}/tmp"
+        export CSV_DIR="${LOG_DIR}/csv_logs"
+        export JSON_DIR="${LOG_DIR}/json_logs"
+        export BASIC_DATA_LOG_DIR="${LOG_DIR}/basic_data"
         ;;
       m)
         check_alnum "${OPTARG}"

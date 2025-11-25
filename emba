@@ -432,9 +432,9 @@ main() {
     # 2nd try with the original user:
     PROXY_SETTINGS="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http_proxy=http" | cut -d = -f2 | sort -u | head -1)"
   else
-    if [[ -f "${LOG_DIR}"/orig_user.log ]]; then
-      if grep -q "PROXY: http" "${LOG_DIR}"/orig_user.log; then
-        PROXY_SETTINGS="$(grep "PROXY: http" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
+    if [[ -f "${BASIC_DATA_LOG_DIR}"/orig_user.log ]]; then
+      if grep -q "PROXY: http" "${BASIC_DATA_LOG_DIR}"/orig_user.log; then
+        PROXY_SETTINGS="$(grep "PROXY: http" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
       fi
     fi
   fi
@@ -526,12 +526,12 @@ main() {
       print_output "[*] $(print_date) - Original user: ${ORANGE}${SUDO_USER:-${USER}}${NC}" "no_log"
       print_output "[*] $(print_date) - Notification process started with PID ${ORANGE}${NOTIFICATION_PID}${NC}" "no_log"
       PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2 || true)"
-      echo "${SUDO_USER:-${USER}}" > "${LOG_DIR}"/orig_user.log
+      echo "${SUDO_USER:-${USER}}" > "${BASIC_DATA_LOG_DIR}"/orig_user.log
       {
         echo "UID: $(id -u "${SUDO_USER:-${USER}}")"
         echo "GID: $(id -g "${SUDO_USER:-${USER}}")"
         echo "PROXY: ${PROXY}"
-      } >> "${LOG_DIR}"/orig_user.log
+      } >> "${BASIC_DATA_LOG_DIR}"/orig_user.log
     fi
 
     if [[ "${IN_DOCKER}" -eq 0 ]]; then
@@ -738,14 +738,15 @@ main() {
 
     print_output "[*] $(print_date) - EMBA initializes docker container.\\n" "no_log"
 
+
     if [[ "${ONLY_DEP}" -eq 0 ]]; then
       # store some details that we do not have in the docker container:
-      echo "${FIRMWARE_PATH}" >> "${TMP_DIR}"/fw_name.log
+      echo "${FIRMWARE_PATH}" >> "${BASIC_DATA_LOG_DIR}"/fw_name.log
       if [[ "${DIFF_MODE}" -gt 0 ]]; then
-        echo "${FIRMWARE_PATH1}" >> "${TMP_DIR}"/fw_name.log
+        echo "${FIRMWARE_PATH1}" >> "${BASIC_DATA_LOG_DIR}"/fw_name.log
       fi
-      echo "${LOG_DIR}" >> "${TMP_DIR}"/emba_log_dir.log
-      echo "${EMBA_COMMAND}" >> "${TMP_DIR}"/emba_command.log
+      echo "${LOG_DIR}" >> "${BASIC_DATA_LOG_DIR}"/emba_log_dir.log
+      echo "${EMBA_COMMAND}" >> "${BASIC_DATA_LOG_DIR}"/emba_command.log
     fi
 
     write_notification "EMBA starting docker container"

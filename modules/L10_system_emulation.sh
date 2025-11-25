@@ -3147,9 +3147,9 @@ set_network_config() {
 }
 
 write_results() {
-  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/fw_name.log ]]; then
+  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${BASIC_DATA_LOG_DIR}"/fw_name.log ]]; then
     local lFIRMWARE_PATH_orig=""
-    lFIRMWARE_PATH_orig="$(cat "${TMP_DIR}"/fw_name.log)"
+    lFIRMWARE_PATH_orig="$(cat "${BASIC_DATA_LOG_DIR}"/fw_name.log)"
   fi
 
   local lARCHIVE_PATH="${1:-}"

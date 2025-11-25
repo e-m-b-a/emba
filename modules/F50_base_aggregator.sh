@@ -64,12 +64,12 @@ output_overview() {
     print_output "[+] Additional notes: ""${ORANGE}""${FW_NOTES}""${NC}"
     write_csv_log "FW_notes" "${FW_NOTES}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
-  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
+  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${BASIC_DATA_LOG_DIR}"/fw_name.log ]] && [[ -f "${BASIC_DATA_LOG_DIR}"/emba_command.log ]]; then
     local lFW_PATH_ORIG_ARR=()
     local lFW_PATH_ORIG=""
     # we need to rewrite this firmware path to the original path
-    mapfile -t lFW_PATH_ORIG_ARR < <(sort -u "${TMP_DIR}"/fw_name.log)
-    lEMBA_COMMAND_ORIG="$(sort -u "${TMP_DIR}"/emba_command.log)"
+    mapfile -t lFW_PATH_ORIG_ARR < <(sort -u "${BASIC_DATA_LOG_DIR}"/fw_name.log)
+    lEMBA_COMMAND_ORIG="$(sort -u "${BASIC_DATA_LOG_DIR}"/emba_command.log)"
     for lFW_PATH_ORIG in "${lFW_PATH_ORIG_ARR[@]}"; do
       print_output "[+] Tested firmware:""${ORANGE}"" ""${lFW_PATH_ORIG}""${NC}"
       write_csv_log "FW_path" "${lFW_PATH_ORIG}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"

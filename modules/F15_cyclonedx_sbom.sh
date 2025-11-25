@@ -49,12 +49,12 @@ F15_cyclonedx_sbom() {
     local lDEP_FILE_ID=""
     local lDEP_FILES_ARR=()
 
-    if [[ -f "${TMP_DIR}"/fw_name.log ]] && [[ -f "${TMP_DIR}"/emba_command.log ]]; then
-      lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log | head -n 1)
-      if [[ $(sort -u "${TMP_DIR}"/fw_name.log | wc -l) -gt 1 ]]; then
+    if [[ -f "${BASIC_DATA_LOG_DIR}"/fw_name.log ]] && [[ -f "${BASIC_DATA_LOG_DIR}"/emba_command.log ]]; then
+      lFW_PATH=$(sort -u "${BASIC_DATA_LOG_DIR}"/fw_name.log | head -n 1)
+      if [[ $(sort -u "${BASIC_DATA_LOG_DIR}"/fw_name.log | wc -l) -gt 1 ]]; then
         print_output "[*] Warning: Multiple firmware paths detected in fw_name.log. Using the first entry: ${lFW_PATH}"
       fi
-      # lEMBA_COMMAND=$(sort -u "${TMP_DIR}"/emba_command.log)
+      # lEMBA_COMMAND=$(sort -u "${BASIC_DATA_LOG_DIR}"/emba_command.log)
     else
       lFW_PATH="${FIRMWARE_PATH_BAK}"
     fi
