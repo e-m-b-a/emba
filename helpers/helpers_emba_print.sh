@@ -167,6 +167,8 @@ print_output() {
           safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
+    # else
+    #   safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
     fi
   else
     safe_echo "${lOUTPUT}"
@@ -887,7 +889,8 @@ module_end_log() {
   if [[ "${DISABLE_NOTIFICATIONS}" -eq 0 ]]; then
     write_notification "Module ${lMODULE_MAIN_NAME} finished"
   fi
-  print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main"
+  local lFILE_NAME=$(echo "${lMODULE_MAIN_NAME}" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
+  print_output "[*] $(print_date) - ${lFILE_NAME^} finished" "main"
 }
 
 strip_color_codes() {
