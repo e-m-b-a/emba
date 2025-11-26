@@ -167,8 +167,6 @@ print_output() {
           safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
-    # else
-    #   safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
     fi
   else
     safe_echo "${lOUTPUT}"
