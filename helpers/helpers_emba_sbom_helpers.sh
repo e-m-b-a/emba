@@ -17,12 +17,12 @@
 #
 
 # first: build the properties path array
-# This can be used for the binary path (souce_path) and for paths extracted from a
+# This can be used for the binary path (source_path) and for paths extracted from a
 # package like deb or rpm (path). Additionally, it is commonly used for the architecture
 # and further meta data like the version identifier
 # parameter: array with all the properties in the form
 #   "path:the_path_to_log"
-#   "other_propertie:the_property_to_log"
+#   "other_properties:the_property_to_log"
 # returns global array PROPERTIES_JSON_ARR
 build_sbom_json_properties_arr() {
   local lPROPERTIES_ARRAY_INIT_ARR=("$@")
@@ -146,7 +146,7 @@ build_sbom_json_hashes_arr() {
       # write_log "[*] Testing for duplicates ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
       lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
       lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")
-      lDUP_RAND_ID="${RANDOM}"
+      local lDUP_RAND_ID="${RANDOM}"
       # we test the current version against the stored version. But as we often have a version from a package manager like
       # 1.2.3-deb-123abc and from the binary level we have only 1.2.3
       # To handle these cases we check against the version ^1.2.3*
@@ -168,6 +168,7 @@ build_sbom_json_hashes_arr() {
         fi
 
         # extract the confidence level from the json and compare it to our current level:
+        local lCONFIDENCE_LEVEL_JSON=""
         lCONFIDENCE_LEVEL_JSON=$(jq -r '.properties[] | select(.name | endswith(":confidence")).value' "${lDUP_CHECK_FILE}" || true)
         if [[ "${lCONFIDENCE_LEVEL}" != "NA" ]] && [[ "${lCONFIDENCE_LEVEL_JSON:-NA}" != "NA" ]]; then
           write_log "[*] lCONFIDENCE_LEVEL: ${lCONFIDENCE_LEVEL} / lCONFIDENCE_LEVEL_JSON: $(get_confidence_value "${lCONFIDENCE_LEVEL_JSON}")" "${SBOM_LOG_PATH}"/duplicates.txt
@@ -313,10 +314,10 @@ translate_vendor() {
 }
 
 check_for_s08_csv_log() {
-  lS08_CSV_LOG="${1:-}"
+  local lS08_CSV_LOG="${1:-}"
   if [[ ! -f "${lS08_CSV_LOG}" ]]; then
     # using write_log as this always works
-    write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifier;PURL;SBOM comoponent reference;Description" "${lS08_CSV_LOG}"
+    write_log "Packaging system;package file;MD5/SHA-256/SHA-512;package;original version;stripped version;license;maintainer;architecture;CPE identifier;PURL;SBOM component reference;Description" "${lS08_CSV_LOG}"
   fi
 }
 
@@ -370,7 +371,7 @@ distri_check() {
     lOS_IDENTIFIED=${lOS_IDENTIFIED,,}
     # if it looks like an os then we are happy for now :)
     # for the future we can do some further checks if it is some debian for debs and some rpm based for rpm systems
-    if [[ "${lOS_IDENTIFIED}" =~ ^[a-z]+-[a-z]+$ ]]; then
+    if [[ "${lOS_IDENTIFIED}" =~ ^[a-z]+-[0-9a-z.]+$ ]]; then
       break
     fi
   done

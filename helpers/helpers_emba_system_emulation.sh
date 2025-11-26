@@ -78,8 +78,8 @@ restart_emulation() {
 # EXECUTE: 1 -> execute and write script
 # EXECUTE: 2 -> just execute
 reset_network_emulation() {
-  local lIMAGE_NAME="${1:-0}"
-  local lEXECUTE="${2:-0}"
+  local lIMAGE_NAME="${1:-}"
+  local lEXECUTE="${2:-}"
 
   local lEXECUTE_tmp=0
 
@@ -181,9 +181,9 @@ write_script_exec() {
       # shellcheck disable=SC2001
       lCOMMAND=$(echo "${lCOMMAND}" | sed "s|\"${LOG_PATH_MODULE:-}\"|\.|g")
       # remove the timeout from the qemu startup command
-      lCOMMAND="${lCOMMAND#timeout --preserve-status --signal SIGINT [[:digit:]]* }"
+      lCOMMAND="${lCOMMAND#timeout --preserve-status --signal SIGINT [0-9]* }"
       # remove the tail kill command
-      lCOMMAND="${lCOMMAND% ; pkill -9 -f tail.*-F.*.}"
+      lCOMMAND="${lCOMMAND% ; pkill -9 -f tail.*-F.*}"
     fi
 
     echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
@@ -252,7 +252,6 @@ system_online_check() {
 
   # shellcheck disable=SC2153
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
-    ping -c 1 "${lIP_ADDRESS}"
     if ping_check "${lIP_ADDRESS}" 0; then
       if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0 "${lNW_SERVICE}"; then
         return 0

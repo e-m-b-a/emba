@@ -473,7 +473,7 @@ var_checker() {
   local MODE="${1:-}"
   local RET_ISSUES=0
 
-  echo -e "\\n""${ORANGE}""${BOLD}""EMBA variable declation scope check for ${MODE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+  echo -e "\\n""${ORANGE}""${BOLD}""EMBA variable declaration scope check for ${MODE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
 
   disable_strict_mode 1
   "${HELP_DIR}"/var_check.sh "${MODE}"
@@ -508,7 +508,7 @@ fi
 summary
 
 if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
+  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]] || \
