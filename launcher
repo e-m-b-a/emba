@@ -30,11 +30,9 @@ if ! [[ -d ./external ]]; then
   exit 1
 fi
 
-# Allow profile override via command-line argument or environment variable
+# Allow profile override via command-line argument
 if [[ -n "$1" ]]; then
   EMBA_PROFILE="$1"
-elif [[ -n "${EMBA_PROFILE}" ]]; then
-  EMBA_PROFILE="${EMBA_PROFILE}"
 else
   EMBA_PROFILE="default-scan.emba"
 fi
