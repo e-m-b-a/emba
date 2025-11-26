@@ -56,9 +56,10 @@ Q20_dependency_track_connector() {
 dep_track_upload_sbom() {
   local lHTTP_CODE=""
   local lFW_TESTED="${FW_DEVICE}"
+  local lDEPENDENCY_TRACK_TAGS=""
 
-  if [[ -z "${lFW_TESTED}" ]] && [[ -f "${TMP_DIR}"/fw_name.log ]]; then
-    lFW_TESTED=$(sort -u "${TMP_DIR}/fw_name.log" | head -1)
+  if [[ -z "${lFW_TESTED}" ]] && [[ -f "${BASIC_DATA_LOG_DIR}"/fw_name.log ]]; then
+    lFW_TESTED=$(sort -u "${BASIC_DATA_LOG_DIR}/fw_name.log" | head -1)
     lFW_TESTED=$(basename "${lFW_TESTED}")
   fi
 
@@ -66,22 +67,43 @@ dep_track_upload_sbom() {
   print_output "$(indent "Dependency Track upload ${ORANGE}projectName=${lFW_TESTED}${NC}")"
   print_output "$(indent "Dependency Track upload ${ORANGE}projectVersion=${FW_VERSION:-unknown}${NC}")"
   print_output "$(indent "Dependency Track upload ${ORANGE}bom=@${EMBA_SBOM_JSON}${NC}")"
+  if [[ -f "${F14_JSON_LOG}" ]]; then
+    lDEPENDENCY_TRACK_TAGS=$(jq -r .tags[] "${F14_JSON_LOG}" | tr '\n' ',')
+    lDEPENDENCY_TRACK_TAGS="${lDEPENDENCY_TRACK_TAGS%,}"
+    print_output "$(indent "Dependency Track tags to use: ${ORANGE}${lDEPENDENCY_TRACK_TAGS}${NC}")"
+  fi
 
+  # upload SBOM
   lHTTP_CODE=$(curl -X "POST" "http://${DEPENDENCY_TRACK_HOST_IP}/${DEPENDENCY_TRACK_API}" \
     -H 'Content-Type: multipart/form-data' \
     -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
     -F "autoCreate=true" \
     -F "projectName=${lFW_TESTED}" \
     -F "projectVersion=${FW_VERSION:-unknown}" \
-    -F "projectTags=${DEPENDENCY_TRACK_TAGS}" \
+    -F "projectTags=${lDEPENDENCY_TRACK_TAGS:-EMBA,firmware}" \
     -F "bom=@${EMBA_SBOM_JSON}" \
     -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
-  if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
+  if [[ "${lHTTP_CODE}" -eq 200 ]] && grep -q token "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt" 2>/dev/null; then
+    # with the following request we check for our UUID and build a link
+    lHTTP_CODE=$(curl "http://${DEPENDENCY_TRACK_HOST_IP}/api/v1/project?name=${lFW_TESTED}&sortName=lastBomImport&sortOrder=desc&offset=0&limit=1" \
+      -H 'Content-Type: multipart/form-data' \
+      -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
+      -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" --write-out "%{http_code}" || true)
+
     print_output "[+] SBOM upload to Dependency Track environment was successful"
+    if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
+      lPROJ_UUID=$(jq -r .[].uuid "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" || true)
+      # should be something like 830e6820-751a-4656-8274-08227c17cf62
+      if [[ "${lPROJ_UUID}" =~ [0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+ ]]; then
+        write_link "http://${DEPENDENCY_TRACK_HOST_IP}/projects/${lPROJ_UUID}"
+        print_output "[*] Found dependency track project UUID ${lPROJ_UUID}:"
+        jq -r . "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" | tee -a "${LOG_FILE}"
+      fi
+    fi
   else
     print_output "[-] ${MAGENTA}WARNING: Dependency Track SBOM upload failed!${NC}"
   fi
-  tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt"
+  # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt"
 }
 

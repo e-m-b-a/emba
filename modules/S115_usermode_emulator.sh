@@ -717,7 +717,7 @@ emulate_binary() {
   write_log "\\n\\nFor reproducing the EMBA user-mode emulation mechanism, the following commands could be used as starting point:" "${lLOG_FILE_BIN}"
   write_log "\\n - Start EMBA docker container with the firmware directory as log directory:" "${lLOG_FILE_BIN}"
   local lFW_PATH=""
-  lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log | head -1)
+  lFW_PATH=$(sort -u "${BASIC_DATA_LOG_DIR}"/fw_name.log | head -1)
   write_log "      # ${ORANGE}EMBA=\".\" FIRMWARE=\"${lFW_PATH:-"/absolute/path/to/firmware"}\" LOG=\"/absolute/path/to/EMBA/log/directory\" docker-compose run emba${NC}" "${lLOG_FILE_BIN}"
   write_log "\\n - Change your working directory to the root directory of your firmware:" "${lLOG_FILE_BIN}"
   write_log "      # ${ORANGE}cd ${lR_PATH}${NC}" "${lLOG_FILE_BIN}"

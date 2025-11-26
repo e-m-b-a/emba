@@ -216,6 +216,9 @@ create_log_dir() {
   if ! [[ -d "${JSON_DIR}" ]]; then
     mkdir "${JSON_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create JSON log directory" "no_log" && exit 1)
   fi
+  if ! [[ -d "${BASIC_DATA_LOG_DIR}" ]]; then
+    mkdir "${BASIC_DATA_LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create basic log directory" "no_log" && exit 1)
+  fi
 
   if ! [[ -f "${MAIN_LOG}" ]]; then
     touch "${MAIN_LOG}" || true

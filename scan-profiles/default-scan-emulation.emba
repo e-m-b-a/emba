@@ -19,7 +19,7 @@ export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
 export FULL_EMULATION=1
-export SELECT_MODULES+=( "S05" "S21" "S22" "S23" "S24" "F50" )
+export SELECT_MODULES+=( "S05" "S21" "S22" "S23" "S24" "F14" "F50" )
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0

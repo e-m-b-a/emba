@@ -19,12 +19,13 @@
 
 STRICT_MODE=1
 
-INSTALLER_DIR="./installer"
-HELP_DIR="./helpers"
-MOD_DIR="./modules"
-MOD_DIR_LOCAL="./modules_local"
-CONF_DIR="./config"
-EXT_DIR="./external"
+INVOCATION_PATH="$(dirname "${0}")"
+INSTALLER_DIR="${INVOCATION_PATH}/installer"
+HELP_DIR="${INVOCATION_PATH}/helpers"
+MOD_DIR="${INVOCATION_PATH}/modules"
+MOD_DIR_LOCAL="${INVOCATION_PATH}/modules_local"
+CONF_DIR="${INVOCATION_PATH}/config"
+EXT_DIR="${INVOCATION_PATH}/external"
 REP_DIR="${CONF_DIR}/report_templates"
 
 if [[ "${STRICT_MODE}" -eq 1 ]]; then

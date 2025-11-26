@@ -310,13 +310,13 @@ restore_permissions() {
   local lORIG_UID=""
   local lORIG_GID=""
 
-  if [[ -f "${LOG_DIR}"/orig_user.log ]]; then
-    lORIG_USER=$(head -1 "${LOG_DIR}"/orig_user.log)
+  if [[ -f "${BASIC_DATA_LOG_DIR}"/orig_user.log ]]; then
+    lORIG_USER=$(head -1 "${BASIC_DATA_LOG_DIR}"/orig_user.log)
     print_output "[*] $(print_date) - Restoring directory permissions for user: ${ORANGE}${lORIG_USER}${NC}" "no_log"
-    lORIG_UID="$(grep "UID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
-    lORIG_GID="$(grep "GID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
+    lORIG_UID="$(grep "UID" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
+    lORIG_GID="$(grep "GID" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
     chown "${lORIG_UID}":"${lORIG_GID}" "${LOG_DIR}" -R || true
-    rm "${LOG_DIR}"/orig_user.log || true
+    # rm "${BASIC_DATA_LOG_DIR}"/orig_user.log || true
   fi
 }
 

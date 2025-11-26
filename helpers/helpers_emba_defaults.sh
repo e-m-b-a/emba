@@ -100,6 +100,7 @@ set_defaults() {
   export OVERWRITE_LOG=0        # automatically overwrite log directory, if necessary
   export MAX_EXT_SPACE=110000   # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
   export LOG_DIR="${INVOCATION_PATH}""/logs"
+  export BASIC_DATA_LOG_DIR="${LOG_DIR}/basic_data"
   # export ERROR_LOG="${LOG_DIR}/emba_error.log"  # This variable is reserved for logging errors. It is currently disabled but can be enabled for debugging purposes in the future.
   export TMP_DIR="${LOG_DIR}/tmp"
   export CSV_DIR="${LOG_DIR}/csv_logs"
@@ -264,6 +265,7 @@ set_log_paths() {
   export L25_LOG="${LOG_DIR}/l25_web_checks.txt"
   export L25_CSV_LOG="${CSV_DIR}/l25_web_checks.csv"
   export L35_CSV_LOG="${CSV_DIR}/l35_metasploit_check.csv"
+  export F14_JSON_LOG="${LOG_DIR}/f14_tag_builder/tags.json"
   export F15_LOG="${LOG_DIR}/f15_cyclonedx_sbom.txt"
   export F15_CSV_LOG="${CSV_DIR}/f15_cyclonedx_sbom.csv"
   export F17_LOG_DIR="${LOG_DIR}/f17_cve_bin_tool"
