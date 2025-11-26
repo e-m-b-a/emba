@@ -90,7 +90,6 @@ dep_track_upload_sbom() {
       -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
       -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" --write-out "%{http_code}" || true)
 
-
     print_output "[+] SBOM upload to Dependency Track environment was successful"
     if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
       lPROJ_UUID=$(jq -r .[].uuid "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" || true)

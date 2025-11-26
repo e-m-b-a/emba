@@ -37,7 +37,7 @@ DEEP_EXT_DEPTH=1
 SBOM_MAX_FILE_LOG=500
 
 # main SBOM modules
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F14" "F15" )
 
 # SBOM with user-mode emulation enabled (QEMULATION=1):
 export QEMULATION=1

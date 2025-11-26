@@ -33,7 +33,9 @@ F14_tag_builder() {
   # architecture
   if [[ -f "${P99_LOG}" ]]; then
     lARCH="$(grep -a "\[\*\]\ Statistics:" "${P99_LOG}" | cut -d: -f2 | grep -v "NA" || true)"
-    lTAGs_ARR+=("${lARCH}")
+    if [[ -n "${lARCH}" ]]; then
+      lTAGs_ARR+=("${lARCH}")
+    fi
   fi
 
   # scripting languages
@@ -44,7 +46,7 @@ F14_tag_builder() {
     fi
   fi
   if [[ -f "${S21_LOG}" ]]; then
-    if [[ $(grep -a "\[\*\]\ Statistics:" "${S21_LOG}" | cut -d: -f2 || true) ]]; then
+    if [[ $(grep -a "\[\*\]\ Statistics:" "${S21_LOG}" | cut -d: -f2 || true) -gt 0 ]]; then
       lTAGs_ARR+=("Python")
     fi
   fi

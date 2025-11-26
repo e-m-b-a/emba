@@ -17,12 +17,12 @@
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q02_openai_question() {
+  module_log_init "${FUNCNAME[0]}"
+  export CHATGPT_RESULT_CNT=0
   if [[ "${GPT_OPTION}" -gt 0 ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
-    module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
     module_title "AI analysis via OpenAI"
     pre_module_reporter "${FUNCNAME[0]}"
-    export CHATGPT_RESULT_CNT=0
 
     # we wait until there arer entries in the question csv
     while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
@@ -48,8 +48,8 @@ Q02_openai_question() {
     done
 
     unset OPENAI_API_KEY
-    module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
   fi
+  module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
 }
 
 # looks through the modules and finds chatgpt questions inside the csv

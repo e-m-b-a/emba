@@ -36,7 +36,7 @@ DEEP_EXT_DEPTH=1
 # change this to something smaller to not report all the files
 SBOM_MAX_FILE_LOG=500
 
-export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F15" )
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "F14" "F15" )
 
 # VEX is created by module F17 -> enable it here
 # export SELECT_MODULES+=( "F17" "F50" )
