@@ -63,7 +63,7 @@ def init_args
   raise ArgumentError, "Missing a VNC port" if args[:port].empty?
 
   print_status("VNC host: #{args[:host]}")
-  print_status("VNC ports #{args[:port]}")
+  print_status("VNC port: #{args[:port]}")
 
   return args
 end
