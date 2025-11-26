@@ -56,6 +56,7 @@ Q20_dependency_track_connector() {
 dep_track_upload_sbom() {
   local lHTTP_CODE=""
   local lFW_TESTED="${FW_DEVICE}"
+  local lDEPENDENCY_TRACK_TAGS=""
 
   if [[ -z "${lFW_TESTED}" ]] && [[ -f "${BASIC_DATA_LOG_DIR}"/fw_name.log ]]; then
     lFW_TESTED=$(sort -u "${BASIC_DATA_LOG_DIR}/fw_name.log" | head -1)
@@ -67,9 +68,9 @@ dep_track_upload_sbom() {
   print_output "$(indent "Dependency Track upload ${ORANGE}projectVersion=${FW_VERSION:-unknown}${NC}")"
   print_output "$(indent "Dependency Track upload ${ORANGE}bom=@${EMBA_SBOM_JSON}${NC}")"
   if [[ -f "${F14_JSON_LOG}" ]]; then
-    DEPENDENCY_TRACK_TAGS=$(jq -r .tags[] "${F14_JSON_LOG}" | tr '\n' ',')
-    DEPENDENCY_TRACK_TAGS="${DEPENDENCY_TRACK_TAGS%,}"
-    print_output "$(indent "Dependency Track tags to use: ${ORANGE}${DEPENDENCY_TRACK_TAGS}${NC}")"
+    lDEPENDENCY_TRACK_TAGS=$(jq -r .tags[] "${F14_JSON_LOG}" | tr '\n' ',')
+    lDEPENDENCY_TRACK_TAGS="${lDEPENDENCY_TRACK_TAGS%,}"
+    print_output "$(indent "Dependency Track tags to use: ${ORANGE}${lDEPENDENCY_TRACK_TAGS}${NC}")"
   fi
 
   # upload SBOM
@@ -79,7 +80,7 @@ dep_track_upload_sbom() {
     -F "autoCreate=true" \
     -F "projectName=${lFW_TESTED}" \
     -F "projectVersion=${FW_VERSION:-unknown}" \
-    -F "projectTags=${DEPENDENCY_TRACK_TAGS:-EMBA,firmware}" \
+    -F "projectTags=${lDEPENDENCY_TRACK_TAGS:-EMBA,firmware}" \
     -F "bom=@${EMBA_SBOM_JSON}" \
     -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
