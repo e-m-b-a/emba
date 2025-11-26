@@ -33,8 +33,7 @@ IP61_unblob() {
     print_tool_info "git" 1
     # print_tool_info "img2simg" 1
     print_tool_info "android-sdk-libsparse-utils" 1
-    print_tool_info "liblzo2-dev" 1
-    print_tool_info "lz4"
+    print_tool_info "lz4" 1
     print_tool_info "lziprecover" 1
     print_tool_info "lzop" 1
     print_tool_info "7zip" 1

@@ -97,7 +97,6 @@ P55_unblob_extractor() {
       for lBINARY in "${lFILES_UNBLOB_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
       done
 
@@ -137,7 +136,6 @@ P55_unblob_extractor() {
       for lBINARY in "${lFILES_BINWALK_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
       done
 

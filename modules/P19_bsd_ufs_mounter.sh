@@ -43,7 +43,7 @@ P19_bsd_ufs_mounter() {
 ufs_extractor() {
   local lUFS_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
-  local lTMP_UFS_MOUNT="${TMP_DIR}""/ufs_mount_${RANDOM}"
+  local lTMP_UFS_MOUNT="$(mktemp -d "${TMP_DIR}/ufs_mount_XXXXXX")"
   local lFILES_UFS_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
@@ -55,15 +55,12 @@ ufs_extractor() {
 
   sub_module_title "UFS filesystem extractor"
 
-  mkdir -p "${lTMP_UFS_MOUNT}" 2>/dev/null || true
   print_output "[*] Trying to mount ${ORANGE}${lUFS_PATH_}${NC} to ${ORANGE}${lTMP_UFS_MOUNT}${NC} directory"
   # modprobe ufs
   if ! lsmod | grep -q "^ufs[[:space:]]"; then
     print_output "[-] WARNING: Ufs kernel module probably not loaded - trying to proceed"
   fi
-  mount -r -t ufs -o ufstype=ufs2 "${lUFS_PATH_}" "${lTMP_UFS_MOUNT}"
-
-  if mount | grep -q ufs_mount; then
+  if mount -r -t ufs -o ufstype=ufs2 "${lUFS_PATH_}" "${lTMP_UFS_MOUNT}"; then
     print_output "[*] Copying ${ORANGE}${lTMP_UFS_MOUNT}${NC} to firmware tmp directory (${ORANGE}${lEXTRACTION_DIR_}${NC})"
     mkdir -p "${lEXTRACTION_DIR_}" 2>/dev/null || true
     cp -pri "${lTMP_UFS_MOUNT}"/* "${lEXTRACTION_DIR_}" 2>/dev/null || true
@@ -79,7 +76,6 @@ ufs_extractor() {
     for lBINARY in "${lFILES_UFS_ARR[@]}" ; do
       binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -89,6 +85,8 @@ ufs_extractor() {
     umount "${lTMP_UFS_MOUNT}" 2>/dev/null || true
 
     detect_root_dir_helper "${lEXTRACTION_DIR_}"
+  else
+    print_output "[-] Error in mounting ${ORANGE}${lUFS_PATH_}${NC} to ${ORANGE}${lTMP_UFS_MOUNT}${NC}"
   fi
   rm -r "${lTMP_UFS_MOUNT}"
 }

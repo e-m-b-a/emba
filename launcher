@@ -14,9 +14,7 @@
 # Author(s): Michael Messner
 
 # Description:  Zenity based EMBA launcher with basic wizard functionality
-#               start with ./launcher.sh from the EMBA installation directory
-
-EMBA_PROFILE="default-scan.emba"
+#               start with ./launcher from the EMBA installation directory
 
 if ! command -v zenity >/dev/null ; then
   echo "[-] WARNING: zenity package not installed"
@@ -32,51 +30,62 @@ if ! [[ -d ./external ]]; then
   exit 1
 fi
 
+# Allow profile override via command-line argument or environment variable
+if [[ -n "$1" ]]; then
+  EMBA_PROFILE="$1"
+elif [[ -n "${EMBA_PROFILE}" ]]; then
+  EMBA_PROFILE="${EMBA_PROFILE}"
+else
+  EMBA_PROFILE="default-scan.emba"
+fi
+
+
 # shellcheck source=./helpers/helpers_emba_print.sh
 source ./helpers/helpers_emba_print.sh
+ICON_PATH="./helpers/emba.svg"
 
-FIRMWARE_FILE=$(zenity --file-selection --icon=./helpers/emba.svg --title="EMBA firmware analysis - Firmware file" 2>/dev/null)
+FIRMWARE_FILE=$(zenity --file-selection --icon="${ICON_PATH}" --title="EMBA firmware analysis - Firmware file" 2>/dev/null)
 
 if [[ -z "${FIRMWARE_FILE}" ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="WARNING: NO firmware file available ..." 2>/dev/null &
+  zenity --info --icon="${ICON_PATH}" --text="WARNING: NO firmware file available ..." 2>/dev/null &
   print_output "[-] WARNING: NO firmware file available ..." "no_log"
   exit 1
 fi
 
-EMBA_BASE_LOG_DIR=$(zenity --file-selection --directory --icon=./helpers/emba.svg --title="EMBA firmware analysis - base log directory" 2>/dev/null)
+EMBA_BASE_LOG_DIR=$(zenity --file-selection --directory --icon="${ICON_PATH}" --title="EMBA firmware analysis - base log directory" 2>/dev/null)
 if [[ -z "${EMBA_BASE_LOG_DIR}" ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="WARNING: NO base log directory chosen ..." 2>/dev/null &
+  zenity --info --icon="${ICON_PATH}" --text="WARNING: NO base log directory chosen ..." 2>/dev/null &
   print_output "[-] WARNING: NO base log directory chosen ..." "no_log"
   exit 1
 fi
 
-FW_VENDOR=$(zenity --entry --icon=./helpers/emba.svg --title="Add Firmware vendor" --text="Enter vendor of firmware:" 2>/dev/null)
+FW_VENDOR=$(zenity --entry --icon="${ICON_PATH}" --title="Add Firmware vendor" --text="Enter vendor of firmware:" 2>/dev/null)
 if [[ -z "${FW_VENDOR}" ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="WARNING: NO vendor name available ..." 2>/dev/null &
+  zenity --info --icon="${ICON_PATH}" --text="WARNING: NO vendor name available ..." 2>/dev/null &
   print_output "[-] WARNING: NO vendor name available ..." "no_log"
   exit 1
 fi
 if ! [[ "${FW_VENDOR}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="Invalid input detected - alphanumerical only" 2>/dev/null &
+  zenity --info --icon="${ICON_PATH}" --text="Invalid input detected - alphanumerical only" 2>/dev/null &
   print_output "[-] Invalid input detected - alphanumerical only" "no_log"
   exit 1
 fi
 
-FW_VERSION=$(zenity --entry --icon=./helpers/emba.svg --title="Add Firmware version" --text="Enter version of firmware:" 2>/dev/null)
+FW_VERSION=$(zenity --entry --icon="${ICON_PATH}" --title="Add Firmware version" --text="Enter version of firmware:" 2>/dev/null)
 if [[ -z "${FW_VERSION}" ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="WARNING: NO firmware version available ..." 2>/dev/null &
+  zenity --info --icon="${ICON_PATH}" --text="WARNING: NO firmware version available ..." 2>/dev/null &
   print_output "[-] WARNING: NO firmware version available ..." "no_log"
   exit 1
 fi
-if ! [[ "${FW_VERSION}" =~ ^[a-zA-Z0-9./_:+'-']+$ ]]; then
-  zenity --info --icon=./helpers/emba.svg --text="Invalid input detected - versions aka 1.2.3-a:b only" 2>/dev/null &
+if ! [[ "${FW_VERSION}" =~ ^[a-zA-Z0-9./_:+\'\ -]+$ ]]; then
+  zenity --info --icon="${ICON_PATH}" --text="Invalid input detected - versions aka 1.2.3-a:b only" 2>/dev/null &
   print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
   exit 1
 fi
 
-if zenity --question --icon=./helpers/emba.svg --title="EMBA firmware analysis" --text="Would you like to start the EMBA firmware analysis process?" 2>/dev/null; then
+if zenity --question --icon="${ICON_PATH}" --title="EMBA firmware analysis" --text="Would you like to start the EMBA firmware analysis process?" 2>/dev/null; then
   if ! sudo -nv; then
-    zenity --info --icon=./helpers/emba.svg --text="Root privileges are requested via sudo on cli" 2>/dev/null &
+    zenity --info --icon="${ICON_PATH}" --text="Root privileges are requested via sudo on CLI" 2>/dev/null &
   fi
 
   EMBA_LOG_DIR="emba_logs_$(basename "${FIRMWARE_FILE}")"
@@ -86,10 +95,10 @@ if zenity --question --icon=./helpers/emba.svg --title="EMBA firmware analysis" 
   print_output "[*] Using vendor name for analysis: ${FW_VENDOR}" "no_log"
   print_output "[*] Using firmware version for analysis: ${FW_VERSION}" "no_log"
 
-  sudo ./emba -l "${EMBA_LOG_DIR}" -f "${FIRMWARE_FILE}" -p ./scan-profiles/"${EMBA_PROFILE}" -X "${FW_VERSION}" -Y "${FW_VENDOR}" -y
+  sudo ./emba -l "${EMBA_LOG_DIR}" -f "${FIRMWARE_FILE}" -p "./scan-profiles/${EMBA_PROFILE}" -X "${FW_VERSION}" -Y "${FW_VENDOR}" -y
   EMBA_RET=$?
   if [[ "${EMBA_RET}" -eq 0 ]]; then
-    if zenity --progress --text="EMBA run was successful - opening web report?" --percentage=100 2>/dev/null; then
+    if zenity --progress --text="EMBA run was successful. Open the web report?" --percentage=100 2>/dev/null; then
       if command -v firefox >/dev/null ; then
         firefox "${EMBA_LOG_DIR}/html-report/index.html" &
       else
@@ -97,11 +106,11 @@ if zenity --question --icon=./helpers/emba.svg --title="EMBA firmware analysis" 
       fi
     fi
   else
-    zenity --error --icon=./helpers/emba.svg --text="EMBA error - check cli output" 2>/dev/null
+    zenity --error --icon="${ICON_PATH}" --text="EMBA error - check CLI output" 2>/dev/null
     exit 1
   fi
 else
-  zenity --info --icon=./helpers/emba.svg --text="EMBA not started - help dialog printed on CLI" 2>/dev/null &
+  zenity --info --icon="${ICON_PATH}" --text="EMBA not started - help dialog printed on CLI" 2>/dev/null &
   ./emba -h
   exit 1
 fi

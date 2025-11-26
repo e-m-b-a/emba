@@ -6,12 +6,12 @@ def help_me
     This Metasploit RC script is part of the firmware analyzer EMBA.
     The script runs through multiple Metasploit VNC modules and tests them against
     the host under test.
-    You can also setup the emulated device afterwards manually and check the 
+    You can also setup the emulated device afterwards manually and check the
     Metasploit RC script against it with the following arguments.
 
   Usage:
     ./msfconsole -r [rc_path] [ip_address] [port]
-    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1 9000
+    ./msfconsole -r ./helpers/l23_vnc_msf_check.rc 127.0.0.1 9000
   |
 
   help = help.gsub(/^\t/, '')
@@ -63,7 +63,7 @@ def init_args
   raise ArgumentError, "Missing a VNC port" if args[:port].empty?
 
   print_status("VNC host: #{args[:host]}")
-  print_status("VNC ports: #{args[:port]}")
+  print_status("VNC ports #{args[:port]}")
 
   return args
 end

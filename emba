@@ -125,7 +125,7 @@ run_modules() {
       local lMOD_FIN=0
       if ( file -b "${lMODULE_FILE}" | grep -q "shell script" ) && ! [[ "${lMODULE_FILE}" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
-          # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
+          # we are able to enable/disable threading on module basis in the pre-checker modules with the header:
           # export PRE_THREAD_ENA=1/0
           # shellcheck source=/dev/null
           source "${lMODULE_FILE}"
@@ -585,7 +585,7 @@ main() {
       export OUTPUT_DIR="${FIRMWARE_PATH}"
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -f "${FIRMWARE_PATH1}" ]]; then
       DIFF_MODE=1
-      print_output "[*] $(print_date) - Multiple firmware binarie detected." "no_log"
+      print_output "[*] $(print_date) - Multiple firmware binaries detected." "no_log"
       print_output "    EMBA starts in firmware diff mode." "no_log"
     elif [[ "${RESCAN_SBOM}" -eq 1 ]]; then
       print_output "[*] $(print_date) - Rescan SBOM mode detected." "no_log"
@@ -641,7 +641,7 @@ main() {
     fi
 
     if [[ "${KERNEL}" -ne 1 ]] && [[ ${FIRMWARE} -eq 1 ]]; then
-      # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
+      # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamically)
       set_exclude
     fi
 
@@ -869,7 +869,7 @@ main() {
       run_modules "Q" "${THREADED}" "0" &
       export Q_MOD_PID="$!"
     elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${lQUEST_CONTAINER_} failed the dependancy check" "main"
+      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" || print_output "[*] Quest container ${QUEST_CONTAINER} failed the dependency check" "main"
     fi
   fi
 
@@ -891,7 +891,7 @@ main() {
 
     run_modules "P" "${THREADED}" "0"
 
-    # if we running threaded we ware going to wait for the slow guys here
+    # if we running threaded we are going to wait for the slow guys here
     [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
 
     print_ln "no_log"

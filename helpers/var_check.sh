@@ -29,6 +29,7 @@ else
 fi
 
 UNKNOWN_VARS_CNT_ALL=0
+
 for MODULE in "${SCRIPTS_TO_TEST[@]}"; do
   if [[ "${MODULE}" == *"modules/L10_system_emulation/"* ]]; then
     continue
@@ -91,7 +92,7 @@ if [[ "${UNKNOWN_VARS_CNT_ALL}" -gt 0 ]]; then
   print_output "[*] Fix these issues before pushing to repo" "no_log"
   exit "${UNKNOWN_VARS_CNT_ALL}"
 else
-  print_output "[+] No indirect global function usage detected ..." "no_log"
+  print_output "[+] No indirect global variables usage detected ..." "no_log"
   exit 0
 fi
 

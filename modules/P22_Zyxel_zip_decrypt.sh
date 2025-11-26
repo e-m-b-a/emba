@@ -146,7 +146,6 @@ zyxel_zip_extractor() {
         for lBINARY in "${lFILES_ZYXEL_ARR[@]}" ; do
           binary_architecture_threader "${lBINARY}" "P22_Zyxel_zip_decrypt" &
           local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
           lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
         done
         wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -174,7 +173,6 @@ zyxel_zip_extractor() {
           for lBINARY in "${lFILES_ZYXEL_ARR[@]}" ; do
             binary_architecture_threader "${lBINARY}" "P22_Zyxel_zip_decrypt" &
             local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
             lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
           done
           wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"

@@ -354,7 +354,7 @@ web_access_crawler() {
     lCNT=$((lCNT+1))
   done
 
-  # the refernce size is used for identifying incorrect 200 ok results
+  # the reference size is used for identifying incorrect 200 ok results
   local lCURL_RET=""
   lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
   CURL_RET_CODE="${lCURL_RET//:*}"

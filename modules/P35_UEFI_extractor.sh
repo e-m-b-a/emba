@@ -66,7 +66,6 @@ P35_UEFI_extractor() {
       for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -107,7 +106,6 @@ P35_UEFI_extractor() {
       for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -200,7 +198,6 @@ ami_extractor() {
     for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
       binary_architecture_threader "${lBINARY}" "P35_UEFI_extractor" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"

@@ -272,7 +272,7 @@ check_bootloader()
   mapfile -t lOBSD_PATH2_ARR < <(grep "/boot;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lOBSD_FILE1 in "${lOBSD_PATH1_ARR[@]}" ; do
     for lOBSD_FILE2 in "${lOBSD_PATH2_ARR[@]}" ; do
-      if [[ -f "${lOBSD_FILE2}" ]] && [[ -f "${lOBSD_FILE2}" ]] ; then
+      if [[ -f "${lOBSD_FILE1}" ]] && [[ -f "${lOBSD_FILE2}" ]] ; then
         lCHECK=1
         print_output "[+] Found first and second stage bootstrap in ""$(print_path "${lOBSD_FILE1}")"" and ""$(print_path "${lOBSD_FILE2}")"" (OpenBSD)"
         lBOOTLOADER="OpenBSD"

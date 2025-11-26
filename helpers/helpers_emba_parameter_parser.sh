@@ -101,7 +101,7 @@ emba_parameter_parsing() {
         export KERNEL_CONFIG=""
         KERNEL_CONFIG="$(escape_echo "${OPTARG}")"
         if [[ "${FIRMWARE}" -ne 1 ]]; then
-          # this is little hack to enable kernel config only checks
+          # this is a little hack to enable kernel config only checks
           export FIRMWARE_PATH="${KERNEL_CONFIG}"
         fi
         ;;

@@ -105,7 +105,7 @@ system_load_util_str() {
 
 # Update first box "SYSTEM LOAD"
 # we need to use the tmp file for the cpu load, because it takes about a second to get the information and therefore we
-# load this information in the background, write it to the file in a rythm of .2s and when needed, it will be readed from it
+# load this information in the background, write it to the file in a rhythm of .2s and when needed, it will be read from it
 update_box_system_load() {
   shopt -s checkwinsize
 
@@ -300,7 +300,7 @@ update_box_modules() {
     [[ -f "${TMP_DIR}/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}/LINES.log" 2>/dev/null || true)
     lSTARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2>/dev/null || true )"
     lFINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2>/dev/null | grep -vc "Quest container finished" || true )"
-    lLAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2>/dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
+    lLAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2>/dev/null | grep -v "Quest container finished" | tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
     printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( lLINES - 3 ))" "$(module_util_str 0 "$((lSTARTED_MODULE_STR - lFINISHED_MODULE_STR))")" "$(( lLINES - 2 ))" "$(module_util_str 1 "${lLAST_FINISHED_MODULE_STR}")" "$(( lLINES - 1 ))" "$(module_util_str 2 "${lFINISHED_MODULE_STR}/${lCOUNT_MODULES}")" || true
     sleep 1
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
@@ -532,7 +532,7 @@ initial_status_bar() {
   if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
     touch "${LOG_DIR}"/emba.log
   fi
-  # resets adn clears the screen for the status bar
+  # resets and clears the screen for the status bar
   printf "\x1Bc"
 
   tail -f "${LOG_DIR}"/emba.log &

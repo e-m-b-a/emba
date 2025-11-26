@@ -109,7 +109,6 @@ buffalo_enc_extractor() {
       for lBINARY in "${lFILES_BUFFALO_ARR[@]}" ; do
         binary_architecture_threader "${lBINARY}" "P21_buffalo_decryptor" &
         local lTMP_PID="$!"
-        store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
