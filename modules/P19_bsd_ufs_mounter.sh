@@ -44,7 +44,7 @@ ufs_extractor() {
   local lUFS_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_UFS_MOUNT=""
-  lTMP_UFS_MOUNT="$(mktemp -d "${TMP_DIR}/ufs_mount_XXXXXX")"
+  lTMP_UFS_MOUNT="$(mktemp -d "${TMP_DIR}/ufs_mount_XXXXXX")" || { print_output "[-] Failed to create temporary directory"; return; }
   local lFILES_UFS_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()

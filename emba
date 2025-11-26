@@ -869,7 +869,7 @@ main() {
       run_modules "Q" "${THREADED}" "0" &
       export Q_MOD_PID="$!"
     elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" || print_output "[*] Quest container ${QUEST_CONTAINER} failed the dependency check" "main"
+      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${QUEST_CONTAINER} failed the dependency check" "main"
     fi
   fi
 
