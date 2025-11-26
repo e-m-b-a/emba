@@ -38,7 +38,7 @@ L23_vnc_checks() {
           return
         fi
       fi
-      # we cound the output from multiple files and so we can't just use -h or other fake tweaks
+      # we count the output from multiple files and so we can't just use -h or other fake tweaks
       if [[ "$(grep -c "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap 2>/dev/null | cut -d ':' -f2 | awk '{s+=$1} END {print s}')" -gt 0 ]]; then
         mapfile -t lVNC_PORT_ARR < <(grep -h "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u || true)
         for lVNC_PORT in "${lVNC_PORT_ARR[@]}"; do
