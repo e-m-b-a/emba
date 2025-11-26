@@ -41,8 +41,11 @@ IF17_cve_bin_tool() {
 
         # cve-bin-tool installation
         echo -e "${ORANGE}""${BOLD}""Install cve-bin-tool""${NC}"
-        git clone https://github.com/EMBA-support-repos/cve-bin-tool.git external/cve-bin-tool
+        # git clone https://github.com/EMBA-support-repos/cve-bin-tool.git external/cve-bin-tool
+	git clone https://github.com/jni2000/cve-bin-tool.git external/cve-bin-tool
+	## git clone https://github.com/intel/cve-bin-tool.git external/cve-bin-tool
         cd external/cve-bin-tool || ( echo "Could not install EMBA component cve-bin-tool" && exit 1 )
+	# git checkout v3.4
         pip install -U -r requirements.txt
         python3 -m pip install -e .
 

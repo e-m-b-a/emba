@@ -28,6 +28,7 @@ F17_cve_bin_tool() {
 
   local lEMBA_SBOM_JSON="${EMBA_SBOM_JSON}"
   local lSBOM_ARR=()
+  local lSBOM_ARR_EXT=()
   local lSBOM_ENTRY=""
   local lWAIT_PIDS_F17_ARR=()
   local lVEX_JSON_ENTRIES_ARR=()
@@ -36,10 +37,18 @@ F17_cve_bin_tool() {
   local lNEG_LOG=0
   local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
 
+  chmod +w "${LOG_PATH_MODULE}"
   mkdir "${LOG_PATH_MODULE}/json/" || true
   mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
   mkdir "${LOG_PATH_MODULE}/exploit/" || true
 
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline --sbom-type cyclonedx --sbom-output "${LOG_PATH_MODULE}/cve-bin-tool-sbom.json" > "${LOG_PATH_MODULE}/cve-bin-tool-sbom.log"
+  print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} starting ..." "no_log"
+  local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  python3 "${lCVE_BIN_TOOL}" "${FIRMWARE_PATH_BAK}" --offline -l debug -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" 2>&1 || true
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -l debug -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" 2>&1 || true
+  print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} finished ..." "no_log"
+  
   print_output "[*] Loading SBOM ..." "no_log"
 
   if ! [[ -f "${lEMBA_SBOM_JSON}" ]]; then
@@ -50,6 +59,13 @@ F17_cve_bin_tool() {
 
   # read each item in the JSON array to an item in the Bash array
   readarray -t lSBOM_ARR < <(jq --compact-output '.components[]' "${lEMBA_SBOM_JSON}" || print_error "[-] SBOM loading error - Vulnerability analysis not available")
+
+  if [[ -f "${LOG_PATH_MODULE}/cve-bin-tool-sbom.json" ]]; then
+    readarray -t lSBOM_ARR_EXT < <(jq --compact-output '.components[]' "${LOG_PATH_MODULE}/cve-bin-tool-sbom.json" || print_error "[-] Extended SBOM loading error - Vulnerability analysis not available")
+    lSBOM_ARR+=("${lSBOM_ARR_EXT[@]}")
+  fi
+
+
 
   sub_module_title "Software inventory overview"
   print_output "[*] Analyzing ${#lSBOM_ARR[@]} SBOM components ..." "no_log"
@@ -197,6 +213,21 @@ F17_cve_bin_tool() {
 
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
+  # merge with cve-bin-tool found CVEs
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} starting ..." "no_log"
+  # local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  # python3 "${lCVE_BIN_TOOL}" "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" || true
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log"
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} finished ..." "no_log"
+
+  cve_bin_tool_proc 
+  # local lTMP_PID="$!"
+  # store_kill_pids "${lTMP_PID}"
+  # lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
+  # max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
+
+  # wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
+
   print_output "[*] Generating final VEX vulnerability json ..." "no_log"
 
   # Handle rescan mode: preserve existing files as "previous" versions and use standard names for new files
@@ -271,6 +302,136 @@ F17_cve_bin_tool() {
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
+}
+
+cve_bin_tool_proc() {
+  local lBOM_REF="SODIACS-Basic-CVE-Scan"
+  local lVERS="NA"
+  local lORIG_SOURCE="cve-bin-tool-scan-results"
+  local lPRODUCT_NAME="the-scanned-software"
+  local -n lrVENDOR_ARR="${4:-}"
+  local lWAIT_PIDS_F17_ARR_3=()
+
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} starting ..." "no_log"
+  # local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
+  # python3 "${lCVE_BIN_TOOL}" "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log" || true
+  # cve-bin-tool "${FIRMWARE_PATH_BAK}" --offline -f csv -o "${LOG_PATH_MODULE}/cve-bin-tool.csv" > "${LOG_PATH_MODULE}/cve-bin-tool.log"
+  # print_output "[*] cve-bin-tool scan of ${FIRMWARE_PATH_BAK} finished ..." "no_log"
+  
+  if ! [[ -d "${LOG_PATH_MODULE}/cve_sum/" ]]; then
+    mkdir "${LOG_PATH_MODULE}/cve_sum/"
+  fi
+  if ! [[ -d "${LOG_PATH_MODULE}/json/" ]]; then
+    mkdir "${LOG_PATH_MODULE}/json/"
+  fi
+  if ! [[ -d "${LOG_PATH_MODULE}/exploit/" ]]; then
+    mkdir "${LOG_PATH_MODULE}/exploit/"
+  fi
+
+  print_output "[*] cve-bin-tool scan result process starting ...." "no_log"
+
+  if [[ -f "${LOG_PATH_MODULE}/cve-bin-tool.csv" ]]; then
+    print_output "[*] cve-bin-tool-proc - Identification of possible Exploits, EPSS and further details ..." "no_log"
+    while read -r lCVE_LINE; do
+      # lORIG_SOURCE=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $10}' <<< '$lCVE_LINE')
+      # lPRODUCT_NAME=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $2}' <<< '$lCVE_LINE')
+      # lVERS=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $3}' <<< '$lCVE_LINE')
+      lORIG_SOURCE=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $10}' <<< "$lCVE_LINE")
+      lORIG_SOURCE=${lORIG_SOURCE//\,/ }
+      lPRODUCT_NAME=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $2}' <<< "$lCVE_LINE")
+      lVERS=$(awk -v FPAT='([^,]+)|(\"[^\"]+\")' '{print $3}' <<< "$lCVE_LINE")
+
+      tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
+      local lTMP_PID="$!"
+      store_kill_pids "${lTMP_PID}"
+      lWAIT_PIDS_F17_ARR_3+=( "${lTMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_3
+    done < <(tail -n +2 "${LOG_PATH_MODULE}/cve-bin-tool.csv")
+  fi
+  wait_for_pid "${lWAIT_PIDS_F17_ARR_3[@]}"
+
+  # lets start the final logging
+
+  # now we have our nice formatted logs somewhere over here: "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+  # lets build the final log for every binary:
+  local lBIN_LOG="${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}_finished.txt"
+  # write_log "" "${lBIN_LOG}"
+
+  local lANCHOR=""
+  lANCHOR="${lPRODUCT_NAME//\'}_${lVERS}"
+  lANCHOR="cve_${lANCHOR:0:20}"
+  # write_log "[*] Vulnerability details for ${ORANGE}${lPRODUCT_NAME}${NC} / version ${ORANGE}${lVERS}${NC} / source ${ORANGE}${lORIG_SOURCE}${NC}:" "${lBIN_LOG}"
+  # write_anchor "${lANCHOR}" "${lBIN_LOG}"
+
+  # local lEXPLOIT_COUNTER_VERSION=0
+  # local lCVE_COUNTER_VERSION=0
+  # local lCVE_COUNTER_VERIFIED=0
+
+  # find all SODIACS basic CVE scan results files, e.g. SODIACS-Basic-CVE-Scan_gcc_4.9.2.txt
+  local lCSV_FILES=()
+
+  while lIFS= read -r -d '' lCSV_FILE; do
+    lCSV_FILES+=("$lCSV_FILE")
+  done < <(find "${LOG_PATH_MODULE}/cve_sum" -maxdepth 1 -type f -name "SODIACS-Basic-CVE-Scan_*.txt" -print0)
+
+  write_log "" "${lBIN_LOG}"
+
+  for f in "${lCSV_FILES[@]}"; do
+    local lBASE_FILE=$(basename "$f")
+    local lCORE="${lBASE_FILE#SODIACS-Basic-CVE-Scan_}"
+    lCORE="${lCORE%.txt}"
+    local lPRODUCT_NAME_N="${lCORE%%_*}"
+    local lVERS_N="${lCORE#*_}"
+
+    # local lANCHOR=""
+    # lANCHOR="${lPRODUCT_NAME_N//\'}_${lVERS_N}"
+    # lANCHOR="cve_${lANCHOR:0:20}"
+    write_log "[*] Vulnerability details for ${ORANGE}${lPRODUCT_NAME_N}${NC} / version ${ORANGE}${lVERS_N}${NC} / source ${ORANGE}${lORIG_SOURCE}${NC}:" "${lBIN_LOG}"
+    write_anchor "${lANCHOR}" "${lBIN_LOG}"
+
+    local lEXPLOIT_COUNTER_VERSION=0
+    local lCVE_COUNTER_VERSION=0
+    local lCVE_COUNTER_VERIFIED=0
+
+
+    lEXPLOIT_COUNTER_VERSION=$(grep -c "Exploit (" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME_N}_${lVERS_N}.txt" || true)
+    lCVE_COUNTER_VERSION=$(grep -c -E "CVE-[0-9]+-[0-9]+" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME_N}_${lVERS_N}.txt" || true)
+    lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION}"
+
+    if [[ "${lEXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
+      write_log "" "${lBIN_LOG}"
+      # write detailed log
+      cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME_N}_${lVERS_N}.txt" >> "${lBIN_LOG}"
+      write_log "" "${lBIN_LOG}"
+      write_log "[+] Identified ${RED}${BOLD}${lCVE_COUNTER_VERIFIED}${GREEN} CVEs and ${RED}${BOLD}${lEXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${lPRODUCT_NAME_N}${GREEN} with version ${ORANGE}${lVERS_N}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
+
+      # write summary log:
+      printf "[${MAGENTA}+${NC}]${MAGENTA} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME_N}" "${lVERS_N}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    elif [[ "${lCVE_COUNTER_VERSION}" -gt 0 ]]; then
+      write_log "" "${lBIN_LOG}"
+      cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME_N}_${lVERS_N}.txt" >> "${lBIN_LOG}"
+      write_log "" "${lBIN_LOG}"
+      write_log "[+] Identified ${ORANGE}${BOLD}${lCVE_COUNTER_VERIFIED}${GREEN} CVEs in ${ORANGE}${lPRODUCT_NAME_N}${GREEN} with version ${ORANGE}${lVERS_N}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
+
+      # write summary log:
+      printf "[${ORANGE}+${NC}]${ORANGE} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME_N}" "${lVERS_N}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    else
+      write_log "[+] Identified ${GREEN}${BOLD}${lCVE_COUNTER_VERIFIED:-0}${GREEN} CVEs in ${ORANGE}${lPRODUCT_NAME_N}${GREEN} with version ${ORANGE}${lVERS_N}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
+      printf "[${GREEN}+${NC}]${GREEN} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME_N}" "${lVERS_N}" "${lCVE_COUNTER_VERIFIED:-0}" "${lEXPLOIT_COUNTER_VERSION:-0}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    fi
+    write_log "\\n-----------------------------------------------------------------\\n" "${lBIN_LOG}"
+
+    # we can now delete the temp log file
+    # if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME_N}_${lVERS_N}.txt" ]]; then
+    #   rm "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME_N}_${lVERS_N}.txt" || true
+    # fi
+  done
+  # now, lets write the main f20 log file with the results of the current binary:
+  if [[ -f "${lBIN_LOG}" ]]; then
+    tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+  fi
+
+  print_output "[*] cve-bin-tool scan result process finished ...." "no_log"
 }
 
 sbom_preprocessing_threader() {
@@ -371,11 +532,13 @@ cve_bin_tool_threader() {
     mkdir "${LOG_PATH_MODULE}/exploit/"
   fi
 
-  python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
+  print_output "[*] cve-bin-tool scan SBOM ${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" "no_log"
 
-#  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
-#    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
-#  fi
+  python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" -l debug --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
+
+  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
+    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
+  fi
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
