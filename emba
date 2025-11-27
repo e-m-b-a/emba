@@ -774,7 +774,7 @@ main() {
         local lQUEST_CONTAINER_=""
         lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
         export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
-	print_output "[*] $(print_date) - Quest container starting" "main"
+        print_output "[*] $(print_date) - Quest container starting" "main"
         print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
       fi
 
