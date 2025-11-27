@@ -60,7 +60,6 @@ P99_prepare_analyzer() {
     for lBINARY in "${lFILES_ARR[@]}" ; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"

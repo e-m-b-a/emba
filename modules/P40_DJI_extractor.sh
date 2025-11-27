@@ -113,7 +113,6 @@ dji_imah_firmware_extractor() {
     for lBINARY in "${lFILES_UNBLOB_ARR[@]}" ; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -213,7 +212,6 @@ dji_imah_firmware_extractor() {
           ls -1lh "${lBINARY}" | grep -v "total [0-9]" | tee -a "${LOG_FILE}" || true
           binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
           local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
           lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
         done
         wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -250,7 +248,6 @@ dji_imah_firmware_extractor() {
             for lBINARY in "${lUB_EXTRACTED_FILES_ARR[@]}" ; do
               binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
               local lTMP_PID="$!"
-              store_kill_pids "${lTMP_PID}"
               lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
             done
             wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
@@ -345,7 +342,6 @@ dji_xv4_firmware_extractor() {
   for lBINARY in "${lFILES_DJI_XV4_ARR[@]}" ; do
     binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
     local lTMP_PID="$!"
-    store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"

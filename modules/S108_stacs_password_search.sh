@@ -26,7 +26,7 @@ S108_stacs_password_search()
   local lSTACS_RULES_DIR="${EXT_DIR}"/stacs-rules
   local lSTACS_LOG_FILE="${LOG_PATH_MODULE}"/stacs_pw_hashes.json
   local lELEMENTS=0
-  local lELEMENTS_=0
+  local lCRED_CNT=0
   local lPW_PATH=""
   local lPW_HASH=""
   local lPW_HASH_REAL=""
@@ -44,10 +44,10 @@ S108_stacs_password_search()
 
     if [[ -f "${lSTACS_LOG_FILE}" && $(jq ".runs[0] .results[] | .message[]" "${lSTACS_LOG_FILE}" | wc -l) -gt 0 ]]; then
       print_ln
-      lELEMENTS_="$(jq ".runs[0] .results[] .message.text" "${lSTACS_LOG_FILE}" | wc -l)"
-      print_output "[+] Found ${ORANGE}${lELEMENTS_}${GREEN} credential areas:"
+      lCRED_CNT="$(jq ".runs[0] .results[] .message.text" "${lSTACS_LOG_FILE}" | wc -l)"
+      print_output "[+] Found ${ORANGE}${lCRED_CNT}${GREEN} credential areas:"
       write_csv_log "Message" "PW_PATH" "PW_HASH" "PW_HASH_real"
-      lELEMENTS=$((lELEMENTS_-1))
+      lELEMENTS=$((lCRED_CNT-1))
 
       for ELEMENT in $(seq 0 "${lELEMENTS}"); do
         lMESSAGE=$(jq ".runs[0] .results[${ELEMENT}] .message.text" "${lSTACS_LOG_FILE}" | grep -v null || true)

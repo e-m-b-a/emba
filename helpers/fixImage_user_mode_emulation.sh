@@ -1,7 +1,38 @@
 #!/bin/sh
 
-# This script is based on the firmadyne script:
-# https://github.com/firmadyne/firmadyne/blob/master/scripts/fixImage.sh
+###########################################################################
+# fixImage_user_mode_emulation.sh
+#
+# Purpose:
+#   This script prepares a firmware image for user-mode emulation by ensuring
+#   the presence of essential system files and directories, and by replacing
+#   or backing up certain files as needed. It is based on the original
+#   firmadyne fixImage.sh script.
+#
+# Usage:
+#   This script is intended to be run inside a chrooted firmware environment or
+#   similar environment, typically as part of an automated firmware analysis
+#   or emulation setup via EMBA. It should be executed with sufficient privileges
+#   to modify system files and directories.
+#
+# Parameters:
+#   None. All actions are hardcoded for standard system locations.
+#
+# Environment:
+#   - Requires a statically-compiled busybox binary at /busybox.
+#   - Expects to run in a Linux-compatible filesystem layout.
+#
+# Modifications:
+#   - Creates or modifies /etc/TZ and /etc/hosts if missing.
+#   - Ensures /etc and /var/run directories exist.
+#   - Provides utility functions for backing up, renaming, and removing files.
+#
+# Reference:
+#   Based on: https://github.com/firmadyne/firmadyne/blob/master/scripts/fixImage.sh
+#
+# Author: Original: firmadyne authors
+#         Modifications: Michael Messner
+###########################################################################
 
 # use busybox statically-compiled version of all binaries
 BUSYBOX="/busybox"
@@ -70,16 +101,18 @@ else
     echo "[*] No root user found, creating root user with shell '/bin/sh'"
     # nosemgrep
     echo "root::0:0:root:/root:/bin/sh" > "${PASSWD}"
-    "${BUSYBOX}" [ ! -d '/root' ] && "${BUSYBOX}" mkdir /root
+    if [ ! -d '/root' ]; then
+      "${BUSYBOX}" mkdir /root
+    fi
   fi
 
-  if [ -z "$(${BUSYBOX} grep -Es '^root:' "${PASSWD}" |${BUSYBOX} grep -Es ':/bin/sh$')" ] ; then
+  if ! "${BUSYBOX}" grep -Esq '^root:.*:/bin/sh$' "${PASSWD}"; then
     echo "[*] Fixing shell for root user"
     "${BUSYBOX}" sed -ir 's/^(root:.*):[^:]+$/\1:\/bin\/sh/' "${PASSWD}"
   fi
 
   if [ -n "$(${BUSYBOX} grep -Es '^root:[^:]+' "${PASSWD}")" ] || [ -n "$(${BUSYBOX} grep -Es '^root:[^:]+' "${SHADOW}")" ]; then
-    echo "[*] Unlocking and blanking default root password. (*May not work since some routers reset the password back to default when booting)"
+    echo "[*] Unlocking and blanking default root password. (Note: Some routers may reset the password back to default on boot)"
     "${BUSYBOX}" sed -ir 's/^(root:)[^:]+:/\1:/' "${PASSWD}"
     "${BUSYBOX}" sed -ir 's/^(root:)[^:]+:/\1:/' "${SHADOW}"
   fi

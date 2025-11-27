@@ -103,7 +103,6 @@ vmdk_extractor() {
     for lBINARY in "${lVMDK_FILES_ARR[@]}" ; do
       binary_architecture_threader "${lBINARY}" "P10_vmdk_extractor" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"

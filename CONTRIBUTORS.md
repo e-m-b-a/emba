@@ -1,6 +1,6 @@
 # EMBA - CONTRIBUTORS
 
-==========================================================================================
+***
 
 The EMBA project is very thankful to the individuals who contributed to the project.
 
@@ -20,7 +20,7 @@ Want to contribute as well? Here are some suggestions:
 
 See [CONTRIBUTING.md](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.md) for more details.
 
-==========================================================================================
+***
 
 ## Contributors
 
@@ -42,5 +42,5 @@ These people have contributed to EMBA:
 * [nightlark](https://github.com/nightlark)
 
 
-==========================================================================================
+***
   [EMBA - Embedded Analyzer](https://www.securefirmware.de)

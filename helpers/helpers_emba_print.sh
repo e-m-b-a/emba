@@ -377,7 +377,7 @@ write_json_module_log() {
   done
   echo -n "]" >> "${lJSON_LOG}"
 
-  # as our json is not beautifull we remove all \n and further formatting should be done via jq
+  # as our json is not beautiful we remove all \n and further formatting should be done via jq
   tr -d '\n' < "${lJSON_LOG}" > "${lJSON_LOG/\.tmp/\.json}"
   find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete || true
   rm "${lJSON_LOG}" || true
@@ -722,9 +722,9 @@ print_help()
   echo -e "${CYAN}""-z""${NC}""                Adds ANSI color codes to log"
   echo -e "\\nFirmware details"
   echo -e "${CYAN}""-X [version]""${NC}""      Firmware version (versions aka 1.2.3-a:b only)"
-  echo -e "${CYAN}""-Y [vendor]""${NC}""       Firmware vendor (alphanummerical values only)"
-  echo -e "${CYAN}""-Z [device]""${NC}""       Device (alphanummerical values only)"
-  echo -e "${CYAN}""-N [notes]""${NC}""        Testing notes (alphanummerical values only)"
+  echo -e "${CYAN}""-Y [vendor]""${NC}""       Firmware vendor (alphanumerical values only)"
+  echo -e "${CYAN}""-Z [device]""${NC}""       Device (alphanumerical values only)"
+  echo -e "${CYAN}""-N [notes]""${NC}""        Testing notes (alphanumerical values only)"
   echo -e "\\nHelp"
   echo -e "${CYAN}""-h""${NC}""                Prints this help message"
 
@@ -909,7 +909,7 @@ banner_printer() {
   fi
 }
 
-# write notfication is the central notification area
+# write notification is the central notification area
 # if you want to print a notification via the notification system
 # call this function with the message as parameter
 write_notification() {

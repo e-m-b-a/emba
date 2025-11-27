@@ -43,7 +43,7 @@ It also sketches the typical integration process of patches.
 - If you are using an additional binary make sure it's available on the system before calling it
   - Include it into the dependency check and in the installer
 
-- All functions use snake_case (e.g. `test_xyz()`). One blank lines between functions.
+- All functions use snake_case (e.g. `test_xyz()`). One blank line between functions.
 
 - Variables: Variables should be capitalized, with underscore as word separator (e.g. `PROCESS_EXISTS=1`)
 
@@ -88,6 +88,6 @@ It also sketches the typical integration process of patches.
 
 - Code tests: Use shellcheck and semgrep to test your code
 
-- Code tests: The included `./check_project.sh` script performs multiple coding checks automatically. It is highly recommend to run this script before initiating a PR.
+- Code tests: The included `./check_project.sh` script performs multiple coding checks automatically. It is highly recommended to run this script before initiating a PR.
 
 - Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct (new code has to be STRICT mode compatible and needs to pass shellcheck and semgrep tests).

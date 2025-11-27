@@ -57,13 +57,12 @@ def select_payload(exploit,arch)
   elsif payloads.include?(generic)
     return generic
   else
-    # WTF? This exploit supports NONE of our favorite payloads?
-    # What kinda BS is this? We return a linux payload:
+    # This exploit does not support any of the preferred payloads. Falling back to default linux payload:
     return linux
   end
 end
 
-def exploit_checker(host,ports,architecture)
+def exploit_checker(host, ports, architecture)
   print_status("Checking host #{host} with identified ports #{ports}...")
   framework.exploits.each { |name,mod|
     mod = framework.modules.create("#{name}")

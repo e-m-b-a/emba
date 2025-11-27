@@ -62,7 +62,7 @@ I13_disasm() {
 
         if ! [[ -f "external/capa" ]]; then
           download_file "Capa" "https://github.com/mandiant/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip" "external/capa-v${CAPA_VERSION}-linux.zip"
-          unzip external/capa-v"${CAPA_VERSION}"-linux.zip -d external || ( echo "Could not install EMBA component Capa" && exit 1 )
+          unzip external/capa-v"${CAPA_VERSION}"-linux.zip -d external || { echo "Could not install EMBA component Capa";  exit 1; }
           rm external/capa-v"${CAPA_VERSION}"-linux.zip
         fi
 
@@ -70,11 +70,11 @@ I13_disasm() {
           download_file "${BINUTIL_VERSION_NAME}" "https://ftp.gnu.org/gnu/binutils/${BINUTIL_VERSION_NAME}.tar.gz" "external/${BINUTIL_VERSION_NAME}.tar.gz"
           if [[ -f "external/${BINUTIL_VERSION_NAME}.tar.gz" ]] ; then
             tar -zxf external/"${BINUTIL_VERSION_NAME}".tar.gz -C external
-            cd external/"${BINUTIL_VERSION_NAME}"/ || ( echo "Could not install EMBA component binutils" && exit 1 )
+            cd external/"${BINUTIL_VERSION_NAME}"/ || { echo "Could not install EMBA component binutils"; exit 1; }
             echo -e "${ORANGE}""${BOLD}""Compile objdump""${NC}"
             ./configure --enable-targets=all
             make
-            cd "${HOME_PATH}" || ( echo "Could not install EMBA component binutils" && exit 1 )
+            cd "${HOME_PATH}" || { echo "Could not install EMBA component binutils"; exit 1; }
           fi
           if [[ -f "external/${BINUTIL_VERSION_NAME}/binutils/objdump" ]] ; then
             mv "external/${BINUTIL_VERSION_NAME}/binutils/objdump" "external/objdump"
@@ -94,12 +94,12 @@ I13_disasm() {
         echo -e "${ORANGE}""${BOLD}""Install radare2""${NC}"
         # apt-get install radare2 libradare2-dev libradare2-common libradare2-5.0.0 -y
         git clone https://github.com/radareorg/radare2.git external/radare2
-        cd external/radare2 || ( echo "Could not install EMBA component radare2" && exit 1 )
+        cd external/radare2 || { echo "Could not install EMBA component radare2"; exit 1; }
         # we remove the line to execute the script again as sudo user (non root)
         # this mechanism is not working with our docker container and results in an endless loop
         sed -i '/exec sudo -u.*install.sh \$\*/d' sys/install.sh
         sys/install.sh
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component radare2" && exit 1 )
+        cd "${HOME_PATH}" || { echo "Could not install EMBA component radare2"; exit 1; }
 
         echo -e "${ORANGE}""${BOLD}""Install radare2 package r2dec""${NC}"
         # r2pm init

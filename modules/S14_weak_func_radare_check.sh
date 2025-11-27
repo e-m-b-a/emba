@@ -83,7 +83,7 @@ S14_weak_func_radare_check()
             store_kill_pids "${lTMP_PID}"
             lWAIT_PIDS_S14_ARR+=( "${lTMP_PID}" )
           else
-            radare_function_check_x86
+            radare_function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
           fi
         elif [[ "${lBIN_FILE}" =~ Intel\ i386 ]]; then
           if [[ "${THREADED}" -eq 1 ]]; then
@@ -92,7 +92,7 @@ S14_weak_func_radare_check()
             store_kill_pids "${lTMP_PID}"
             lWAIT_PIDS_S14_ARR+=( "${lTMP_PID}" )
           else
-            radare_function_check_x86
+            radare_function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
           fi
 
         elif [[ "${lBIN_FILE}" =~ 32-bit.*ARM ]]; then

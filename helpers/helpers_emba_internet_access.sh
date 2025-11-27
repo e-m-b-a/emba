@@ -25,7 +25,7 @@ kernel_downloader() {
   local LOG_FILE="${LOG_PATH_MODULE}/kernel_downloader.log"
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
-    mkdir "${lKERNEL_ARCH_PATH}"
+    mkdir -p "${lKERNEL_ARCH_PATH}"
   fi
 
   # we wait until the s24 module is finished and hopefully shows us a kernel version
@@ -47,7 +47,7 @@ kernel_downloader() {
   fi
 
   if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}"
+    mkdir -p "${LOG_PATH_MODULE}"
   fi
   # now we should have a csv log with a kernel version:
   if ! [[ -f "${S24_CSV_LOG}" ]]; then
@@ -58,7 +58,7 @@ kernel_downloader() {
   local lK_VERSIONS_ARR=()
   local lK_VERSION=""
 
-  mapfile -t lK_VERSIONS_ARR < <(cut -d\; -f2 "${S24_CSV_LOG}" | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
+  mapfile -t lK_VERSIONS_ARR < <(cut -d ';' -f2 "${S24_CSV_LOG}" | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
   print_output "[*] $(print_date) - Detected kernel details:"
   mapfile -t lKERNEL_DETAILS_TMP_ARR < "${S24_CSV_LOG}"
   for lKERNEL_DETAILS_TMP_ENTRY in "${lKERNEL_DETAILS_TMP_ARR[@]}"; do
@@ -108,7 +108,7 @@ kernel_downloader() {
       print_output "[*] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC}"
 
       if ! [[ -d "${TMP_DIR}" ]]; then
-        mkdir "${TMP_DIR}"
+        mkdir -p "${TMP_DIR}"
       fi
 
       disable_strict_mode "${STRICT_MODE}" 0

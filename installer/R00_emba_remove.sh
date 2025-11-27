@@ -58,7 +58,7 @@ R00_emba_remove() {
     echo -e "\\n""${ORANGE}""Removing mongod sources.list configuration""${NC}"
     rm /etc/apt/sources.list.d/mongodb-org-4.4.list
   fi
-  apt-get update -y
+  apt-get update
   systemctl daemon-reload
   echo -e "\\n""${ORANGE}""Removing EMBA docker image""${NC}"
   docker image rm embeddedanalyzer/emba -f

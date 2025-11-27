@@ -25,12 +25,10 @@ fi
 source ./helpers/helpers_emba_print.sh
 
 KERNEL_RELEASES_URL="https://mirrors.edge.kernel.org/pub/linux/kernel/"
-KERNEL_RELEASES_FILE="/tmp/kernel_releases.log"
+KERNEL_RELEASES_FILE=$(mktemp) || { print_output "[-] Failed to create temporary file" "no_log"; exit 1; }
 KERNEL_OUTPUT_CSV="./config/kernel_details.csv"
 
-curl -s "${KERNEL_RELEASES_URL}" > "${KERNEL_RELEASES_FILE}"
-
-if ! [[ -f "${KERNEL_RELEASES_FILE}" ]]; then
+if ! curl -sf "${KERNEL_RELEASES_URL}" > "${KERNEL_RELEASES_FILE}"; then
   print_output "[-] Error downloading ${KERNEL_RELEASES_FILE}" "no_log"
   exit 1
 fi
@@ -54,6 +52,8 @@ mapfile -t KERNEL_VER_ARR < <(grep "<a href=\"linux-[0-9].*.tar.gz" "${KERNEL_RE
 for KERNEL_ENTRY in "${KERNEL_VER_ARR[@]}"; do
   KERNEL_VER=${KERNEL_ENTRY/*\">}
   KERNEL_VER=${KERNEL_VER/.tar.gz*}
+  # Validate that KERNEL_VER is not empty
+  [[ -z "${KERNEL_VER}" ]] && continue
   KERNEL_RELEASE=${KERNEL_ENTRY/*<\/a>}
   KERNEL_RELEASE=$(echo "${KERNEL_RELEASE}" | awk '{print $1}')
   print_output "[*] Kernel version: ${ORANGE}${KERNEL_VER}${NC} / release date: ${ORANGE}${KERNEL_RELEASE}${NC}" "no_log"
