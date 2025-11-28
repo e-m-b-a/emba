@@ -100,7 +100,6 @@ radare_decompilation() {
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
   local lSTRCPY_CNT=0
-  export COUNT_FUNC=0
   export NETWORKING=""
 
   if ! [[ -f "${lBINARY}" ]]; then
@@ -109,6 +108,7 @@ radare_decompilation() {
 
   NETWORKING=$(readelf -W -a "${lBINARY}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
+    export COUNT_FUNC=0
     FUNC_LOG="${LOG_PATH_MODULE}""/decompilation_vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_decomp_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
@@ -133,8 +133,11 @@ radare_decompilation() {
       # from S14_weak_func_radare_check
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       radare_decomp_output_function_details "${lBINARY}" "${lFUNCTION}"
-    else
-      rm "${FUNC_LOG}" || true
+    fi
+
+    if [[ "${COUNT_FUNC}" -eq 0 ]]; then
+      [[ -f "${FUNC_LOG}" ]] && rm "${FUNC_LOG}"
+      continue
     fi
   done
   echo "${lSTRCPY_CNT}" >> "${TMP_DIR}"/S15_STRCPY_CNT.tmp
