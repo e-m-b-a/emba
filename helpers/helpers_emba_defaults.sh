@@ -89,7 +89,7 @@ set_defaults() {
 
   export SHELLCHECK=1
 
-  export GPT_OPTION=0           # 0 -> off 1-> unpayed plan 2 -> no rate-limit
+  export GPT_OPTION=0           # 0 -> off 1-> unpaid plan 2 -> no rate-limit
   export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
   export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
 

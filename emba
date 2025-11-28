@@ -614,7 +614,7 @@ main() {
     if [[ ${THREADED} -eq 1 ]] && [[ "${MAX_MOD_THREADS}" -eq 0 ]]; then
       # the maximum threads per modules - if this value does not match adjust it via
       # local MAX_MOD_THREADS=123 in module area
-      export MAX_MOD_THREADS="$(( 2* "$(nproc)" ))"
+      export MAX_MOD_THREADS="$(( 2 * "$(nproc)" ))"
     fi
 
     # setup non threaded mode:
@@ -953,7 +953,7 @@ main() {
     else
       print_output "[!] $(print_date) - Testing phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
-    write_notification "Testing phase finished"
+    write_notification "Testing phase started"
 
     run_modules "S" "${THREADED}" "${HTML}"
 

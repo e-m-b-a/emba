@@ -22,13 +22,13 @@ SYMLINK_THRESHOLD=10
 ROOT_DIR="${1:-}"
 if ! [[ -d "${ROOT_DIR}" ]]; then
   echo "[-] No valid root directory provided - Fix links and bin permissions failed"
-  exit
+  exit 1
 fi
 
 BUSYBOX_PATH="$(command -v busybox)"
 if [[ -z "${BUSYBOX_PATH}" ]]; then
   echo "[-] BusyBox not found on host ... exit helper script"
-  exit
+  exit 1
 fi
 cp "${BUSYBOX_PATH}" "${ROOT_DIR}"
 chmod +x "${ROOT_DIR}"/busybox
@@ -51,12 +51,9 @@ for POSSIBLE_EXE in "${POSSIBLE_EXES_ARR[@]}"; do
 done
 
 HOME_DIR="$(pwd)"
-if [[ -d "${ROOT_DIR}" ]]; then
-  cd "${ROOT_DIR}" || exit 1
-else
-  exit 1
-fi
+cd "${ROOT_DIR}" || exit 1
 
+# Only process dead symlinks if the number of symlinks is greater than or equal to the threshold.
 if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
   echo ""
   echo "[*] Identifying possible dead symlinks"
@@ -84,14 +81,14 @@ if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
     DIR_ORIG_FILE=$(dirname "${POSSIBLE_DEAD_SYMLNK}")
     [[ -z "${DIR_ORIG_FILE}" ]] && continue
     if ! [[ -d "${DIR_ORIG_FILE}" ]] && ! [[ -L "${DIR_ORIG_FILE}" ]]; then
-      echo "[*] Directory to unknown detected: ${POSSIBLE_DEAD_SYMLNK} -> ${DIR_ORIG_FILE}"
+      echo "[*] Directory link to unknown target detected: ${POSSIBLE_DEAD_SYMLNK} -> ${DIR_ORIG_FILE}"
     fi
 
     TMP_LNK_ORIG=$(strings "${POSSIBLE_DEAD_SYMLNK}")
     [[ -z "${TMP_LNK_ORIG}" ]] && TMP_LNK_ORIG=$(cat "${POSSIBLE_DEAD_SYMLNK}")
     [[ -z "${TMP_LNK_ORIG}" ]] && continue
 
-    if [[  ${TMP_LNK_ORIG:0:1} == "/" ]]; then
+    if [[ ${TMP_LNK_ORIG:0:1} == "/" ]]; then
       # if we have an absolute path we can just use it
       LNK_TARGET=".""${TMP_LNK_ORIG}"
       # sometimes the directory of the final dest does not exist - lets check and create it
@@ -105,7 +102,7 @@ if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
     fi
 
     if ! [[ -f "${LNK_TARGET}" ]] && ! [[ -d "${LNK_TARGET}" ]] && ! [[ -L "${LNK_TARGET}" ]]; then
-      # if we have not target we need some indicator that this is a real link target
+      # if we have no target we need some indicator that this is a real link target
       # we check for a / in the dead symlink.
       ! [[ "${TMP_LNK_ORIG}" == *"/"* ]] && continue
       echo "[*] Unknown or non existent target detected: ${POSSIBLE_DEAD_SYMLNK} -> ${LNK_TARGET}"

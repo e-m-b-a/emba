@@ -84,10 +84,10 @@ S08_submodule_python_pipfile_lock() {
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then
-      write_log "[-] No Python pipfile.log packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+      write_log "[-] No Python pipfile.lock packages found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     fi
   else
-    write_log "[-] No Python pipfile.logk package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
+    write_log "[-] No Python pipfile.lock package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   fi
 
   write_log "[*] ${lPACKAGING_SYSTEM} sub-module finished" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
