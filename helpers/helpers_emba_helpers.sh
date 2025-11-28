@@ -103,6 +103,135 @@ check_emba_ended() {
   return 1
 }
 
+# -----------------------------------------------------------
+# Function: parse_emba_log_to_csv INPUT_LOG OUTPUT_CSV
+# -----------------------------------------------------------
+# Reads an EMBA log file and extracts:
+#   module name, start time, finish time, duration
+# Saves results to a CSV file.
+# -----------------------------------------------------------
+parse_emba_log_to_csv() {
+    local INPUT_LOG=$1
+    local OUTPUT_CSV=$2
+
+    if [[ -z "${INPUT_LOG:-}" || -z "${OUTPUT_CSV:-}" ]]; then
+        print_output "[!] Usage: parse_emba_log_to_csv INPUT_LOG OUTPUT_CSV" "no_log"
+        return 1
+    fi
+    if [[ ! -f "$INPUT_LOG" ]]; then
+        print_output "[-] Error: input log file not found: $INPUT_LOG" "no_log"
+        return 1
+    fi
+
+    if (( BASH_VERSINFO[0] < 4 )); then
+        print_output "[-] Error: parse_emba_log_to_csv requires bash 4 or newer (have ${BASH_VERSION})" "no_log"
+        return 1
+    fi
+
+    # Helper: convert timestamp string like
+    # "Wed Nov 26 13:10:24 EST 2025" to epoch seconds
+    _emba_ts_to_epoch() {
+        local ts="$1"
+        local epoch
+        # On Kali, GNU date is available
+        if epoch=$(date -d "$ts" +%s 2>/dev/null); then
+            printf '%s\n' "$epoch"
+            return 0
+        fi
+        return 1
+    }
+
+    declare -A start_ts
+    declare -A start_str
+    declare -A finish_ts
+    declare -A finish_str
+
+    while IFS= read -r line; do
+        # Strip possible Windows-style \r
+        line=${line%$'\r'}
+
+        # We only care about lines that have " - "
+        [[ "$line" == *" - "* ]] || continue
+
+        # Ignore blacklist / not executed lines
+        if [[ "$line" == *"not executed - blacklist triggered"* ]]; then
+            continue
+        fi
+
+        # Drop everything up to the first closing bracket: [...] <timestamp> - ...
+        # This also skips color ESC sequences in the bracket part.
+        local rest="${line#*]}"       # remove up to ']'
+        rest=${rest# }                # strip a single leading space if present
+
+        # Now rest should be like:
+        # "Wed Nov 26 13:10:24 EST 2025 - S26_kernel_vuln_verifier starting"
+        local ts=${rest%% - *}
+        local msg=${rest#* - }
+
+        # Normalize any trailing spaces
+        ts=${ts## }
+        ts=${ts%% }
+        msg=${msg## }
+        msg=${msg%% }
+
+        # START
+        if [[ "$msg" == *" starting" ]]; then
+            local module=${msg% starting}
+            local epoch
+            if ! epoch=$(_emba_ts_to_epoch "$ts"); then
+                # Uncomment for debug:
+                # echo "WARN: could not parse start ts: '$ts' (line: $line)" >&2
+                continue
+            fi
+            start_ts["$module"]=$epoch
+            start_str["$module"]=$ts
+            continue
+        fi
+
+        # FINISHED
+        if [[ "$msg" == *" finished" ]]; then
+            local module=${msg% finished}
+            local epoch
+            if ! epoch=$(_emba_ts_to_epoch "$ts"); then
+                # echo "WARN: could not parse finish ts: '$ts' (line: $line)" >&2
+                continue
+            fi
+            finish_ts["$module"]=$epoch
+            finish_str["$module"]=$ts
+            continue
+        fi
+
+        # Other lines (phases, Quest container, etc.) ignored
+    done < "$INPUT_LOG"
+
+    # CSV header
+    echo 'module,start_time,finish_time,duration_seconds,duration_hms' > "$OUTPUT_CSV"
+
+    # For each module with both start & finish, compute duration
+    for module in "${!start_ts[@]}"; do
+        [[ -n "${finish_ts[$module]:-}" ]] || continue
+
+        local s=${start_ts[$module]}
+        local f=${finish_ts[$module]}
+        (( f >= s )) || continue
+
+        local dur=$(( f - s ))
+        local dur_hms
+        printf -v dur_hms '%02d:%02d:%02d' \
+            $((dur / 3600)) $(((dur % 3600) / 60)) $((dur % 60))
+
+        printf '"%s","%s","%s","%s","%s"\n' \
+            "$module" \
+            "${start_str[$module]}" \
+            "${finish_str[$module]}" \
+            "$dur" \
+            "$dur_hms" \
+            >> "$OUTPUT_CSV"
+    done
+
+    return 0
+}
+
 # $1 - 1 some interrupt detected
 # $1 - 0 default exit 0
 cleaner() {
@@ -236,6 +365,10 @@ cleaner() {
     print_output "[!] Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     exit 1
   fi
+
+  parse_emba_log_to_csv "${LOG_DIR}/emba.log" "${LOG_DIR}/emba_performance.csv" || {
+    print_output "[-] parse_emba_log_to_csv failed" "no_log"
+  }
 }
 
 emba_updater() {
