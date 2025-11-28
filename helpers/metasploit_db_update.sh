@@ -19,13 +19,14 @@
 set -euo pipefail
 
 if [[ -z "${1:-}" ]]; then
-  echo "Usage: $0 <metasploit_installation_directory>"
+  echo "Usage: $(basename "$0") <metasploit_installation_directory>"
+  echo "Example: $(basename "$0") /usr/share/metasploit-framework/"
   exit 1
 fi
 
 EMBA_CONFIG_PATH="./config"
 MSF_DB_PATH="${EMBA_CONFIG_PATH}"/msf_cve-db.txt
-MSF_MOD_PATH="${1:-}"
+MSF_MOD_PATH="${1}"
 
 ## Color definition
 GREEN="\033[0;32m"
