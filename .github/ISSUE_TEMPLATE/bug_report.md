@@ -6,7 +6,7 @@ labels: ''
 assignees: ''
 
 ---
-_INFO: Please take some time for your bug report. Without clear and reproducable steps, your bug report can't be handled! Please ensure that you provided the needed details like the used firmware file, the expected behavior and the steps to reproduce your results. Without the needed details we are not able to reproduce and fix the bug!_
+_INFO: Please take some time for your bug report. Without clear and reproducible steps, your bug report can't be handled! Please ensure that you provided the needed details like the used firmware file, the expected behavior and the steps to reproduce your results. Without the needed details we are not able to reproduce and fix the bug!_
 
 **Describe the bug**
 A clear and concise description of what the bug is.

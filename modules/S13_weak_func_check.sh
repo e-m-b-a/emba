@@ -685,7 +685,7 @@ print_top10_statistics() {
         for lBINARY in "${lRESULTS_ARR[@]}" ; do
           lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
-          [[ ! "${lF_COUNTER}" =~ [0-9]* ]] && continue
+          [[ ! "${lF_COUNTER}" =~ ^[0-9]+$ ]] && continue
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
             # if we have the base linux config file we are checking it:
