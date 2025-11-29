@@ -27,18 +27,24 @@ See [CONTRIBUTING.md](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.m
 These people have contributed to EMBA:
 
 * [Michael Messner (original author, maintainer)](https://github.com/m-1-k-3)
-* [Pascal Eckmann (original author)](https://github.com/p4cx)
 * [Benedikt Kuehne (EMBArk maintainer)](https://github.com/BenediktMKuehne)
+* [Pascal Eckmann (original co-author)](https://github.com/p4cx)
 * [HoxhaEndri](https://github.com/HoxhaEndri)
 * [Arnold Unterauer](https://github.com/Anemosx)
 * [seanog8](https://github.com/seanog8)
 * [Stefan Haboeck](https://github.com/StefanHaboeck)
+* [Jeff-Rowell](https://github.com/Jeff-Rowell)
+* [jurrejelle](https://github.com/jurrejelle)
 * [jblu42](https://github.com/jblu42)
 * [413x8](https://github.com/413x8)
+* [0xr3act0r](https://github.com/0xr3act0r)
 * [floyd-fuh](https://github.com/floyd-fuh)
+* [waiwai24](https://github.com/waiwai24)
 * [firmianay](https://github.com/firmianay)
 * [mj138](https://github.com/mj138)
+* [chconil](https://github.com/chconil)
 * [Grezzo](https://github.com/Grezzo)
+* [starrysky1004](https://github.com/starrysky1004)
 * [nightlark](https://github.com/nightlark)
 
 
