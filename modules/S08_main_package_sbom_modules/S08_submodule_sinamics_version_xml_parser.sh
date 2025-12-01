@@ -60,10 +60,10 @@ S08_submodule_sinamics_version_xml_parser() {
     for lVERSION_XML_FILE in "${lVERSION_XML_ARR[@]}" ; do
       lR_FILE=$(file -b "${lVERSION_XML_FILE}")
       if [[ ! "${lR_FILE}" == *"XML"* ]]; then
-        print_output "[!] NOT Testing ${lVERSION_XML_FILE} - ${lR_FILE}"
+        # print_output "[!] NOT Testing ${lVERSION_XML_FILE} - ${lR_FILE}"
         continue
       fi
-      print_output "[*] Testing ${lVERSION_XML_FILE} - ${lR_FILE}"
+      # print_output "[*] Testing ${lVERSION_XML_FILE} - ${lR_FILE}"
 
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lXML_MD5="$(md5sum "${lVERSION_XML_FILE}" | awk '{print $1}')"
@@ -74,13 +74,13 @@ S08_submodule_sinamics_version_xml_parser() {
       lXML_CHECKED_ARR+=( "${lXML_MD5}" )
 
       lXML_CHECK=$(xpath -e versions/Component/FirmwareBasis/ComponentContainer/ "${lVERSION_XML_FILE}" 2>/dev/null | grep -c "<Component category=")
-      print_output "[*] Identified ${lXML_CHECK} XML nodes" "no_log"
+      # print_output "[*] Identified ${lXML_CHECK} XML nodes" "no_log"
       [[ "${lXML_CHECK}" -lt 1 ]] && continue
 
       for lCNT in $(seq "${lXML_CHECK}"); do
-        print_output "[*] Testing XML node: ${lCNT}" "no_log"
-        xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" || true 
-        xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"]/IntVersion "${lVERSION_XML_FILE}" 2>/dev/null || true
+        # print_output "[*] Testing XML node: ${lCNT}" "no_log"
+        # xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" || true
+        # xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"]/IntVersion "${lVERSION_XML_FILE}" 2>/dev/null || true
 
         # xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component[24] {} \; 2>/dev/null | grep "\<Component\ category=\"" | cut -d '"' -f2
         lAPP_NAME=$(xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" | cut -d '"' -f2 || true)
