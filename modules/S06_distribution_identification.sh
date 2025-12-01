@@ -62,6 +62,7 @@ S06_distribution_identification()
       mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         local lLOG_DEST_PATH=""
+        local lSINUMERIK_VERSION=""
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
@@ -104,11 +105,22 @@ S06_distribution_identification()
             print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
             copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
-            write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
             lOS_IDENTIFIED=$(distri_check)
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
             write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
+            write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
+          fi
+
+          # For Siemens Sinumerik devices we only get the name from the initial identification
+          # Afterwards we need to check the VERSIONS.XML for the rest of the needed data
+          if [[ "${lIDENTIFIER}" == *"siemens:sinumerik_"* ]]; then
+            # <ExtVersionString>6.4 HF4</ExtVersionString>
+            lSINUMERIK_VERSION=$(xpath -e versions/Component/FirmwareBasis/ExtVersionString//text\(\) "${lFILE}" 2>/dev/null)
+            if [[ -n "${lSINUMERIK_VERSION}" ]]; then
+              lIDENTIFIER="${lIDENTIFIER,,}:${lSINUMERIK_VERSION/\ /:}"
+              lCSV_RULE=":${lIDENTIFIER}"
+            fi
           fi
 
           # check if not zero and not only spaces
@@ -118,6 +130,11 @@ S06_distribution_identification()
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               write_csv_log "${lFILE}" "dlink" "${lIDENTIFIER}" "${lCSV_RULE}"
+            elif [[ -n "${lSINUMERIK_VERSION}" ]]; then
+              lOS_IDENTIFIED="Siemens_Sinumerik"
+              print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Siemens Sinumerik detection"
+              copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
+              write_csv_log "${lFILE}" "Sinumerik" "${lIDENTIFIER}" "${lCSV_RULE}"
             else
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
