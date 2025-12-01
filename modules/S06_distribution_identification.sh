@@ -62,7 +62,7 @@ S06_distribution_identification()
       mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         local lLOG_DEST_PATH=""
-        local lSINUMERIK_VERSION=""
+        local lSINAMICS_VERSION=""
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
@@ -112,13 +112,13 @@ S06_distribution_identification()
             write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
           fi
 
-          # For Siemens Sinumerik devices we only get the name from the initial identification
+          # For Siemens Sinamics devices we only get the name from the initial identification
           # Afterwards we need to check the VERSIONS.XML for the rest of the needed data
-          if [[ "${lIDENTIFIER}" == *"siemens:sinumerik_"* ]]; then
+          if [[ "${lIDENTIFIER}" == *"siemens:sinamics_"* ]]; then
             # <ExtVersionString>6.4 HF4</ExtVersionString>
-            lSINUMERIK_VERSION=$(xpath -e versions/Component/FirmwareBasis/ExtVersionString//text\(\) "${lFILE}" 2>/dev/null)
-            if [[ -n "${lSINUMERIK_VERSION}" ]]; then
-              lIDENTIFIER="${lIDENTIFIER,,}:${lSINUMERIK_VERSION/\ /:}"
+            lSINAMICS_VERSION=$(xpath -e versions/Component/FirmwareBasis/ExtVersionString//text\(\) "${lFILE}" 2>/dev/null)
+            if [[ -n "${lSINAMICS_VERSION}" ]]; then
+              lIDENTIFIER="${lIDENTIFIER,,}:${lSINAMICS_VERSION/\ /:}"
               lCSV_RULE=":${lIDENTIFIER}"
             fi
           fi
@@ -130,11 +130,11 @@ S06_distribution_identification()
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               write_csv_log "${lFILE}" "dlink" "${lIDENTIFIER}" "${lCSV_RULE}"
-            elif [[ -n "${lSINUMERIK_VERSION}" ]]; then
-              lOS_IDENTIFIED="Siemens_Sinumerik"
-              print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Siemens Sinumerik detection"
+            elif [[ -n "${lSINAMICS_VERSION}" ]]; then
+              lOS_IDENTIFIED="Siemens_Sinamics"
+              print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Siemens Sinamics detection"
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
-              write_csv_log "${lFILE}" "Sinumerik" "${lIDENTIFIER}" "${lCSV_RULE}"
+              write_csv_log "${lFILE}" "Sinamics" "${lIDENTIFIER}" "${lCSV_RULE}"
             else
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
