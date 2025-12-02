@@ -22,6 +22,9 @@ S08_submodule_sinamics_version_xml_parser() {
 
   sub_module_title "Siemens Sinamics VERSIONS.XML identification" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
+  local lXMLLINT_OPTS_ARR=()
+  lXMLLINT_OPTS_ARR+=("--noent" "--recover" "--nonet")
+
   local lVERSION_XML_ARR=()
   local lVERSION_XML_FILE=""
 
@@ -29,7 +32,6 @@ S08_submodule_sinamics_version_xml_parser() {
   local lAPP_LIC="NA"
   local lAPP_NAME="NA"
   local lAPP_VERS="NA"
-  local lAPP_ARCH="NA"
   local lAPP_MAINT="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
@@ -57,7 +59,7 @@ S08_submodule_sinamics_version_xml_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lVERSION_XML_ARR[@]}${NC} Sinamics VERSIONS.XML files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lVERSION_XML_FILE in "${lVERSION_XML_ARR[@]}" ; do
+    for lVERSION_XML_FILE in "${lVERSION_XML_ARR[@]}"; do
       lR_FILE=$(file -b "${lVERSION_XML_FILE}")
       if [[ ! "${lR_FILE}" == *"XML"* ]]; then
         # print_output "[!] NOT Testing ${lVERSION_XML_FILE} - ${lR_FILE}"
@@ -73,22 +75,25 @@ S08_submodule_sinamics_version_xml_parser() {
       fi
       lXML_CHECKED_ARR+=( "${lXML_MD5}" )
 
-      lXML_CHECK=$(xpath -e versions/Component/FirmwareBasis/ComponentContainer/ "${lVERSION_XML_FILE}" 2>/dev/null | grep -c "<Component category=")
+      if ! validate_xml "${lVERSION_XML_FILE}"; then
+        continue
+      fi
+
+      lXML_CHECK=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ComponentContainer "${lVERSION_XML_FILE}" 2>/dev/null | grep -c "<Component category=")
       # print_output "[*] Identified ${lXML_CHECK} XML nodes" "no_log"
       [[ "${lXML_CHECK}" -lt 1 ]] && continue
 
       for lCNT in $(seq "${lXML_CHECK}"); do
         # print_output "[*] Testing XML node: ${lCNT}" "no_log"
-        # xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" || true
-        # xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"]/IntVersion "${lVERSION_XML_FILE}" 2>/dev/null || true
-
-        # xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component[24] {} \; 2>/dev/null | grep "\<Component\ category=\"" | cut -d '"' -f2
-        lAPP_NAME=$(xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" | cut -d '"' -f2 || true)
+        lAPP_NAME=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" | cut -d '"' -f2 || true)
         lAPP_NAME=${lAPP_NAME/pkgname\ =\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
-        lAPP_VERS=$(xpath -e versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"]/IntVersion "${lVERSION_XML_FILE}" 2>/dev/null | cut -d '>' -f2 | cut -d '<' -f1 || true)
+        lAPP_VERS=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"]/IntVersion//text\(\) "${lVERSION_XML_FILE}" 2>/dev/null || true)
+        if [[ -z "${lAPP_VERS}" ]]; then
+          lAPP_VERS=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"]/ExtVersion//text\(\) "${lVERSION_XML_FILE}" 2>/dev/null || true)
+        fi
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
         [[ -z "${lAPP_VERS}" ]] && continue
@@ -104,11 +109,11 @@ S08_submodule_sinamics_version_xml_parser() {
         if [[ -z "${lOS_IDENTIFIED}" ]]; then
           lOS_IDENTIFIED="Sinamics"
         fi
-        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "apk" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
+        lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "sinamics" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${ARCH:-NA}")
 
         local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        # add deb path information to our properties array:
+        # add path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
         lPROP_ARRAY_INIT_ARR+=( "source_path:${lVERSION_XML_FILE}" )
         lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
@@ -129,7 +134,7 @@ S08_submodule_sinamics_version_xml_parser() {
         build_sbom_json_component_arr "${lPACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_LIC:-NA}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
         write_log "[*] Siemens Sinamics VERSIONS.XML details: ${ORANGE}${lVERSION_XML_FILE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-        write_csv_log "${lPACKAGING_SYSTEM}" "${lVERSION_XML_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
+        write_csv_log "${lPACKAGING_SYSTEM}" "${lVERSION_XML_FILE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done
     done

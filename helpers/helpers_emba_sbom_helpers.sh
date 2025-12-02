@@ -416,3 +416,12 @@ get_confidence_value() {
   fi
 }
 
+validate_xml() {
+  local lXML_FILE="${1:-}"
+  # Check for XXE/DTD in XML before using xpath
+  if grep -q -E '<!DOCTYPE|<!ENTITY' "${lXML_FILE}"; then
+    print_output "[!] XML (${lXML_FILE}) with DOCTYPE detected; skipping to prevent XXE"
+    return 1
+  fi
+  return 0
+}
