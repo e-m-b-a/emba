@@ -116,7 +116,9 @@ S06_distribution_identification()
           # Afterwards we need to check the VERSIONS.XML for the rest of the needed data
           if [[ "${lIDENTIFIER}" == *"siemens:sinamics_"* ]]; then
             # <ExtVersionString>6.4 HF4</ExtVersionString>
-            lSINAMICS_VERSION=$(xpath -e versions/Component/FirmwareBasis/ExtVersionString//text\(\) "${lFILE}" 2>/dev/null)
+            local lXMLLINT_OPTS_ARR=()
+            lXMLLINT_OPTS_ARR+=("--noent" "--recover" "--nonet")
+            lSINAMICS_VERSION=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ExtVersionString//text\(\) "${lFILE}" 2>/dev/null)
             if [[ -n "${lSINAMICS_VERSION}" ]]; then
               lIDENTIFIER="${lIDENTIFIER,,}:${lSINAMICS_VERSION/\ /:}"
               lCSV_RULE=":${lIDENTIFIER}"
