@@ -1016,7 +1016,7 @@ distribution_detector() {
   local lLINUX_DISTRI_IDENTIFID=""
 
   for lLINUX_DISTRI_IDENTIFID in "${LINUX_DISTRIS_ARR[@]}"; do
-    print_output "[+] Linux distribution detected: ${ORANGE}${lLINUX_DISTRI_IDENTIFID}${NC}"
+    print_output "[+] Operating system detected: ${ORANGE}${lLINUX_DISTRI_IDENTIFID}${NC}"
     write_link "s06"
   done
 }

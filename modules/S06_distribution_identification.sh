@@ -62,8 +62,10 @@ S06_distribution_identification()
       mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         local lLOG_DEST_PATH=""
+        local lSINAMICS_VERSION=""
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
+          lR_FILE=$(file -b "${lFILE}")
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
           # do not use safe_echo for lSED_COMMAND
           lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
@@ -104,11 +106,32 @@ S06_distribution_identification()
             print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
             copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
-            write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
             lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
             lOS_IDENTIFIED=$(distri_check)
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
             write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
+            write_csv_log "${lFILE}" "Linux" "${lIDENTIFIER}" "${lCSV_RULE}"
+          fi
+
+          # For Siemens Sinamics devices we only get the name from the initial identification
+          # Afterwards we need to check the VERSIONS.XML for the rest of the needed data
+          if [[ "${lIDENTIFIER}" == *"siemens:sinamics_"* ]]; then
+            if [[ ! "${lR_FILE}" == *"XML"* ]]; then
+              # if it is not a valid sinamics VERSION.XML we pass
+              continue
+            fi
+            if ! validate_xml "${lFILE}"; then
+              # if it is not a valid sinamics VERSION.XML we pass
+              continue
+            fi
+            # <ExtVersionString>6.4 HF4</ExtVersionString>
+            local lXMLLINT_OPTS_ARR=()
+            lXMLLINT_OPTS_ARR+=("--noent" "--recover" "--nonet")
+            lSINAMICS_VERSION=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ExtVersionString//text\(\) "${lFILE}" 2>/dev/null)
+            if [[ -n "${lSINAMICS_VERSION}" ]]; then
+              lIDENTIFIER="${lIDENTIFIER,,}:${lSINAMICS_VERSION/\ /:}"
+              lCSV_RULE=":${lIDENTIFIER}"
+            fi
           fi
 
           # check if not zero and not only spaces
@@ -118,6 +141,11 @@ S06_distribution_identification()
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
               lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
               write_csv_log "${lFILE}" "dlink" "${lIDENTIFIER}" "${lCSV_RULE}"
+            elif [[ -n "${lSINAMICS_VERSION}" ]]; then
+              lOS_IDENTIFIED="Siemens_Sinamics"
+              print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Siemens Sinamics detection"
+              copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
+              write_csv_log "${lFILE}" "Sinamics" "${lIDENTIFIER}" "${lCSV_RULE}"
             else
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} with Linux distribution detection"
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
