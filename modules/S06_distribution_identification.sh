@@ -78,13 +78,13 @@ S06_distribution_identification()
           # print_output "identified before: ${lOUT1}"
           lOUT1=$(echo "${lOUT1}" | sort -u | tr '\n' ' ')
           lOUT1="${lOUT1//\"}"
-          # print_output "identified mod: ${lOUT1}"
+          print_output "identified mod: ${lOUT1}"
           if [[ -n "${lSED_COMMAND}" ]]; then
             lIDENTIFIER=$(echo "${lOUT1}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
           else
             lIDENTIFIER=$(echo "${lOUT1}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
           fi
-          # print_output "[*] lIDENTIFIER: ${lIDENTIFIER}"
+          print_output "[*] lIDENTIFIER: ${lIDENTIFIER}"
           lFILENAME=$(basename "${lFILE,,}")
 
           if [[ $(basename "${lFILE}") == "image_sign" || $(basename "${lFILE}") == "fw_sign" ]]; then
