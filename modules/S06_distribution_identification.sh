@@ -65,6 +65,7 @@ S06_distribution_identification()
         local lSINAMICS_VERSION=""
         # print_output "lFILE: ${lFILE}"
         if [[ -f "${lFILE}" ]]; then
+          lR_FILE=$(file -b "${lFILE}")
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
           # do not use safe_echo for lSED_COMMAND
           lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
@@ -115,6 +116,14 @@ S06_distribution_identification()
           # For Siemens Sinamics devices we only get the name from the initial identification
           # Afterwards we need to check the VERSIONS.XML for the rest of the needed data
           if [[ "${lIDENTIFIER}" == *"siemens:sinamics_"* ]]; then
+            if [[ ! "${lR_FILE}" == *"XML"* ]]; then
+              # if it is not a valid sinamics VERSION.XML we pass
+              continue
+            fi
+            if ! validate_xml "${lFILE}"; then
+              # if it is not a valid sinamics VERSION.XML we pass
+              continue
+            fi
             # <ExtVersionString>6.4 HF4</ExtVersionString>
             local lXMLLINT_OPTS_ARR=()
             lXMLLINT_OPTS_ARR+=("--noent" "--recover" "--nonet")

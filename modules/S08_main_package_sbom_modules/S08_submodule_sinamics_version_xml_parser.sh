@@ -86,7 +86,6 @@ S08_submodule_sinamics_version_xml_parser() {
       for lCNT in $(seq "${lXML_CHECK}"); do
         # print_output "[*] Testing XML node: ${lCNT}" "no_log"
         lAPP_NAME=$(xmllint "${lXMLLINT_OPTS_ARR[@]}" --xpath versions/Component/FirmwareBasis/ComponentContainer/Component["${lCNT}"] "${lVERSION_XML_FILE}" 2>/dev/null | grep "\<Component\ category=\"" | cut -d '"' -f2 || true)
-        lAPP_NAME=${lAPP_NAME/pkgname\ =\ }
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
