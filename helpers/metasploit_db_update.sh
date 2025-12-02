@@ -44,7 +44,8 @@ if ! [[ -d "${MSF_MOD_PATH}" ]]; then
 fi
 
 if [[ -f "${MSF_DB_PATH}" ]]; then
-  echo -e "${GREEN}[*] Metasploit exploit database has ${ORANGE}$(wc -l "${MSF_DB_PATH}" | awk '{print $1}')${GREEN} exploit entries (before update).${NC}"
+  MSF_EXPLOIT_ENTRIES_INIT=$(wc -l < "${MSF_DB_PATH}")
+  echo -e "${GREEN}[*] Metasploit exploit database has ${ORANGE}${MSF_EXPLOIT_ENTRIES_INIT}${GREEN} exploit entries (before update).${NC}"
 fi
 
 # echo "[*] Updating the Metasploit framework package"
@@ -56,6 +57,11 @@ echo "[*] Building the Metasploit exploit database"
 find "${MSF_MOD_PATH}" -type f -iname "*.rb" -exec grep -a -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" \
   | sed "s@${MSF_MOD_PATH}@@"| sort > "${MSF_DB_PATH}"
 
-if [[ -f "${MSF_DB_PATH}" ]]; then
-  echo -e "${GREEN}[*] Metasploit exploit database now has ${ORANGE}$(wc -l "${MSF_DB_PATH}" | awk '{print $1}')${GREEN} exploit entries (after update).${NC}"
+# Validate that the output file was created and is not empty
+if [[ ! -f "${MSF_DB_PATH}" ]] || [[ ! -s "${MSF_DB_PATH}" ]]; then
+  echo -e "${ORANGE}[!] Warning: No CVEs found or database creation failed${NC}"
+  exit 1
 fi
+
+MSF_EXPLOIT_ENTRIES=$(wc -l < "${MSF_DB_PATH}")
+echo -e "${GREEN}[*] Metasploit exploit database now has ${ORANGE}${MSF_EXPLOIT_ENTRIES}${GREEN} exploit entries (after update).${NC}"

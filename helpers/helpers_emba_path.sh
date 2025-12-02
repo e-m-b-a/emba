@@ -89,19 +89,19 @@ path_attr() {
 
 permission_clean() {
   if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
-    echo -e "$(find "${1}" -xdev -maxdepth 0 -printf "%M")"
+    echo -e "$(find "${1:-}" -xdev -maxdepth 0 -printf "%M")"
   fi
 }
 
 owner_clean() {
   if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
-    echo -e "$(find "${1}" -xdev -maxdepth 0 -printf "%U")"
+    echo -e "$(find "${1:-}" -xdev -maxdepth 0 -printf "%U")"
   fi
 }
 
 group_clean() {
   if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
-    echo -e "$(find "${1}" -xdev -maxdepth 0 -printf "%G")"
+    echo -e "$(find "${1:-}" -xdev -maxdepth 0 -printf "%G")"
   fi
 }
 

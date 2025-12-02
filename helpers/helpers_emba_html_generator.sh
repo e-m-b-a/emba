@@ -85,9 +85,9 @@ add_link_tags() {
 
   # [REF] anchor
   if ( grep -a -q -E '\[REF\]' "${lLINK_FILE}" ) ; then
-    readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "${lLINK_FILE}" | cut -d':' -f1 )
+    readarray -t lREF_LINKS_L_NUMBER_ARR < <(grep -a -n -E '\[REF\].*' "${lLINK_FILE}" | cut -d':' -f1 )
     # print_output "[*] REF link found in ${lLINK_FILE}" "no_log"
-    for lREF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
+    for lREF_LINK_NUMBER in "${lREF_LINKS_L_NUMBER_ARR[@]}" ; do
       DEPTH="."
       local lREF_LINK=""
       local lHTML_LINK=""
@@ -420,11 +420,11 @@ add_link_tags() {
           lLOV_LINE_BEFORE="$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}" || true)"
           # lHTML_LINK="$(echo "${lLOV_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${lBACK_LINK}" | cut -d"." -f1)/$(basename "${lLOV_LINK%."${LOV_LINK##*.}"}").html@g" || true)"
           lHTML_LINK="$(echo "${LOCAL_OVERLAY_LINK}" | sed -e "s@LINK@${lLOV_LINK}@g" || true)"
-          echo "lHTML_LINK: ${lHTML_LINK}"
-          echo "lLOV_LINE_BEFORE: ${lLOV_LINE_BEFORE}"
-          echo "lLINE_NUMBER_INFO_PREV: ${lLINE_NUMBER_INFO_PREV}"
+          # echo "lHTML_LINK: ${lHTML_LINK}"
+          # echo "lLOV_LINE_BEFORE: ${lLOV_LINE_BEFORE}"
+          # echo "lLINE_NUMBER_INFO_PREV: ${lLINE_NUMBER_INFO_PREV}"
           lLINK_COMMAND_ARR+=( "${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
-          echo "LINK_COMMAND_ARR: ${lLINK_COMMAND_ARR[*]}"
+          # echo "LINK_COMMAND_ARR: ${lLINK_COMMAND_ARR[*]}"
         fi
       done
     fi

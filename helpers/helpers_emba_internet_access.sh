@@ -104,7 +104,7 @@ kernel_downloader() {
     fi
 
     # we check if the sources archive is already available and is a valid tgz file:
-    if ! [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]] || ! gunzip -t "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION}.tar.gz" > /dev/null; then
+    if ! [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]] || ! gunzip -t "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION}.tar.gz" >/dev/null 2>&1; then
       print_output "[*] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC}"
 
       if ! [[ -d "${TMP_DIR}" ]]; then

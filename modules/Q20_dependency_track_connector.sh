@@ -96,7 +96,8 @@ dep_track_upload_sbom() {
       lPROJ_UUID=$(jq -r .[].uuid "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" || true)
       # should be something like 830e6820-751a-4656-8274-08227c17cf62
       if [[ "${lPROJ_UUID}" =~ [0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+ ]]; then
-        write_link "http://${DEPENDENCY_TRACK_HOST_IP}/projects/${lPROJ_UUID}"
+        # Usually dependency track API is listening on port 8081 and the web server is listening on port 8080:
+        write_link "http://${DEPENDENCY_TRACK_HOST_IP/:*}:8080/projects/${lPROJ_UUID}"
         print_output "[*] Found dependency track project UUID ${lPROJ_UUID}:"
         jq -r . "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" | tee -a "${LOG_FILE}"
       fi

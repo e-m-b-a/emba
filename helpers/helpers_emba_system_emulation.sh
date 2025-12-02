@@ -159,7 +159,7 @@ write_script_exec() {
   local lEXECUTE="${3:-0}"
   local lPID=""
 
-  if [[ "${lEXECUTE}" -ne 0 ]];then
+  if [[ "${lEXECUTE}" -ne 0 ]]; then
     eval "${lCOMMAND}" || true &
     lPID="$!"
     disown "${lPID}" 2> /dev/null || true
