@@ -420,11 +420,11 @@ add_link_tags() {
           lLOV_LINE_BEFORE="$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}" || true)"
           # lHTML_LINK="$(echo "${lLOV_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${lBACK_LINK}" | cut -d"." -f1)/$(basename "${lLOV_LINK%."${LOV_LINK##*.}"}").html@g" || true)"
           lHTML_LINK="$(echo "${LOCAL_OVERLAY_LINK}" | sed -e "s@LINK@${lLOV_LINK}@g" || true)"
-          # echo "lHTML_LINK: ${lHTML_LINK}"
-          # echo "lLOV_LINE_BEFORE: ${lLOV_LINE_BEFORE}"
-          # echo "lLINE_NUMBER_INFO_PREV: ${lLINE_NUMBER_INFO_PREV}"
+          echo "lHTML_LINK: ${lHTML_LINK}"
+          echo "lLOV_LINE_BEFORE: ${lLOV_LINE_BEFORE}"
+          echo "lLINE_NUMBER_INFO_PREV: ${lLINE_NUMBER_INFO_PREV}"
           lLINK_COMMAND_ARR+=( "${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
-          # echo "LINK_COMMAND_ARR: ${lLINK_COMMAND_ARR[*]}"
+          echo "LINK_COMMAND_ARR: ${lLINK_COMMAND_ARR[*]}"
         fi
       done
     fi
