@@ -1051,6 +1051,7 @@ main() {
   # we need to change the permissions of the LOG_DIR to the orig. user from the host
   [[ "${IN_DOCKER}" -eq 1 ]] && restore_permissions
   cleaner 0
+
   exit 0
 }
 
