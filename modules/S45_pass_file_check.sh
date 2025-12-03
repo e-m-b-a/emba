@@ -63,7 +63,7 @@ S45_pass_file_check()
 
           local lROOT_ACCOUNTS=""
           # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-          lROOT_ACCOUNTS=$(grep -v -E "^#" "${lLINE}" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2> /dev/null || true)
+          lROOT_ACCOUNTS=$(grep -v -E "^#" "${lLINE}" 2>/dev/null | awk -F: '$3 == 0 { print $1}' 2> /dev/null || true)
 
           local lL_BREAK=0
           if [[ "$(echo "${lROOT_ACCOUNTS}" | wc -w)" -gt 0 ]] ; then
@@ -83,7 +83,7 @@ S45_pass_file_check()
             fi
             lL_BREAK=1
           fi
-          if ! [[ ${lL_BREAK} -eq 0 ]] ; then
+          if [[ ${lL_BREAK} -ne 0 ]] ; then
             print_ln
           fi
         fi

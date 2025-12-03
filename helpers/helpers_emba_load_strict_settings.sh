@@ -22,12 +22,14 @@ load_strict_mode_settings() {
   set -u          # Exit and trigger the ERR trap when accessing an unset variable
   set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
   set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+
   if [[ "${DEBUG_SCRIPT}" -eq 1 ]]; then
     # set DEBUG to 1 in the main emba script - be warned this produces a lot of output!
     # https://wiki.bash-hackers.org/scripting/debuggingtips#making_xtrace_more_useful
     export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
     set -x
   fi
+
   shopt -s extdebug # Enable extended debugging
   # nosemgrep
   IFS=$'\n\t'     # Set the "internal field separator"
@@ -45,7 +47,7 @@ enable_strict_mode() {
     # shellcheck disable=SC1091
     source "${INVOCATION_PATH}"/installer/wickStrictModeFail.sh
     load_strict_mode_settings
-    # just in case the error is very early we have not log directory
+    # just in case the error is very early we have no log directory
     if [[ -d "${LOG_DIR:-}" ]]; then
       trap 'wickStrictModeFail $? | tee -a "${ERROR_LOG}"' ERR  # The ERR trap is triggered when a script catches an error
     else
@@ -67,15 +69,15 @@ disable_strict_mode() {
     # WARNING: this should only be a temporary solution. The goal is to make modules
     # STRICT_MODE compatible
 
-    unset -f wickStrictModeFail
-    set +e          # Exit immediately if a command exits with a non-zero status
-    set +u          # Exit and trigger the ERR trap when accessing an unset variable
-    set +o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
-    set +E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
-    shopt -u extdebug # Enable extended debugging
+    unset -f wickStrictModeFail 2>/dev/null || true
+    set +e            # Do not exit immediately if a command exits with a non-zero status
+    set +u            # Do not exit and trigger the ERR trap when accessing an unset variable
+    set +o pipefail   # The return value of a pipeline is the value of the last command, regardless of errors
+    set +E            # The ERR trap is NOT inherited by shell functions, command substitutions and commands in subshells
+    shopt -u extdebug # Disable extended debugging
     # unset IFS
     # nosemgrep
-    IFS=$'\n\t'     # Restore the default "internal field separator"
+    IFS=$'\n\t'       # Restore the default "internal field separator"
     trap - ERR
     set +x
 

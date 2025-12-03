@@ -85,9 +85,9 @@ add_link_tags() {
 
   # [REF] anchor
   if ( grep -a -q -E '\[REF\]' "${lLINK_FILE}" ) ; then
-    readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "${lLINK_FILE}" | cut -d':' -f1 )
+    readarray -t lREF_LINKS_L_NUMBER_ARR < <(grep -a -n -E '\[REF\].*' "${lLINK_FILE}" | cut -d':' -f1 )
     # print_output "[*] REF link found in ${lLINK_FILE}" "no_log"
-    for lREF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
+    for lREF_LINK_NUMBER in "${lREF_LINKS_L_NUMBER_ARR[@]}" ; do
       DEPTH="."
       local lREF_LINK=""
       local lHTML_LINK=""

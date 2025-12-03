@@ -90,7 +90,7 @@ print_ln "no_log"
 if [[ "${UNKNOWN_VARS_CNT_ALL}" -gt 0 ]]; then
   print_output "[-] Found ${ORANGE}${UNKNOWN_VARS_CNT_ALL}${NC} indirect global variables in all modules" "no_log"
   print_output "[*] Fix these issues before pushing to repo" "no_log"
-  exit "${UNKNOWN_VARS_CNT_ALL}"
+  exit 1
 else
   print_output "[+] No indirect global variables usage detected ..." "no_log"
   exit 0
