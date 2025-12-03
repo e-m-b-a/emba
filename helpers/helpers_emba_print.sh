@@ -920,7 +920,7 @@ info_printer() {
   print_output "$(indent "[${GREEN}✓${NC}] Enjoyed the results")" "${lLOG_DETAILS}"
   print_output "$(indent "[${ORANGE}-${NC}] Spread the word about security testing with EMBA ${ORANGE}https://github.com/e-m-b-a/emba${NC}")" "${lLOG_DETAILS}"
   print_output "$(indent "[${ORANGE}-${NC}] Reviewed some EMBA code and opened some issues")" "${lLOG_DETAILS}"
-  print_output "$(indent "[${ORANGE}-${NC}] Found some EMBA bugs, fixed it and opened a pull request")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${ORANGE}-${NC}] Found some EMBA bugs, fixed them and opened a pull request")" "${lLOG_DETAILS}"
   print_output "$(indent "[${ORANGE}-${NC}] Sponsored the EMBA project - ${ORANGE}https://github.com/sponsors/e-m-b-a${NC}")" "${lLOG_DETAILS}"
   print_bar "${lLOG_DETAILS}"
 }
