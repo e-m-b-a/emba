@@ -829,6 +829,7 @@ main() {
         [[ -d "${LOG_DIR}" ]] && rm -rf "${LOG_DIR}"
         print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
       fi
+      info_printer "no_log"
       exit 0
     else
       print_output "[-] $(print_date) - Test ended on ""$(print_date)"" and EMBA failed in docker mode!" "main"
@@ -1051,6 +1052,7 @@ main() {
   # we need to change the permissions of the LOG_DIR to the orig. user from the host
   [[ "${IN_DOCKER}" -eq 1 ]] && restore_permissions
   cleaner 0
+  info_printer "no_log"
 
   exit 0
 }

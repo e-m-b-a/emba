@@ -1,0 +1,13 @@
+
+EMBA version 2.0.0 - A brave new world of firmware analysis
+
+Your perfect SBOM day looks like the following:
+ - Installed EMBA
+ - Setup the dependency track connection details
+ - Started EMBA
+ - Improved the SBOM workflow and get best SBOM with EMBA
+ - Enjoyed the SBOM in your dependency track instance
+ - Spread the word about SBOM generation with EMBA https://github.com/e-m-b-a/emba
+ - Reviewed some EMBA code and opened some issues
+ - Found some EMBA bugs, fixed them and opened a pull request
+ - Sponsored the EMBA project - https://github.com/sponsors/e-m-b-a

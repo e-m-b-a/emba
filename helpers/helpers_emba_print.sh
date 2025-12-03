@@ -909,6 +909,22 @@ banner_printer() {
   fi
 }
 
+info_printer() {
+  local lLOG_DETAILS="${1:-no_log}"
+
+  print_bar "${lLOG_DETAILS}"
+  print_output "${BOLD}Current state of your personal todo list:${NC}" "${lLOG_DETAILS}"
+  print_output "$(indent "[${GREEN}✓${NC}] Installed EMBA")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${GREEN}✓${NC}] Started EMBA")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${GREEN}✓${NC}] Improved the pentesting workflow and results with EMBA")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${GREEN}✓${NC}] Enjoyed the results")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${ORANGE}-${NC}] Spread the word about security testing with EMBA ${ORANGE}https://github.com/e-m-b-a/emba${NC}")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${ORANGE}-${NC}] Reviewed some EMBA code and opened some issues")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${ORANGE}-${NC}] Found some EMBA bugs, fixed it and opened a pull request")" "${lLOG_DETAILS}"
+  print_output "$(indent "[${ORANGE}-${NC}] Sponsored the EMBA project - ${ORANGE}https://github.com/sponsors/e-m-b-a${NC}")" "${lLOG_DETAILS}"
+  print_bar "${lLOG_DETAILS}"
+}
+
 # write notification is the central notification area
 # if you want to print a notification via the notification system
 # call this function with the message as parameter
