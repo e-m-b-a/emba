@@ -328,10 +328,10 @@ create_emulation_filesystem() {
       break
     fi
     print_output "[*] Info: Initial identification for Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC} failed ... trying again"
-    losetup || tee -a "${LOG_FILE}"
+    losetup | tee -a "${LOG_FILE}"
     losetup -D
     sleep 5
-    losetup || tee -a "${LOG_FILE}"
+    losetup | tee -a "${LOG_FILE}"
   done
 
   print_output "[*] Qemu Image device: ${ORANGE}${DEVICE}${NC}"
