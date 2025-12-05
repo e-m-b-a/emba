@@ -183,26 +183,27 @@ deeper_extractor_helper() {
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
     MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
-    deeper_extractor_threader "${lFILE_TMP}" &
+    deeper_extractor_threader "${lFILE_TMP}" "${lFILE_MD5/\ *}" &
     lBIN_PID="$!"
     lWAIT_PIDS_P60_init+=( "${lBIN_PID}" )
     max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_P60_init
   done
   wait_for_pid "${lWAIT_PIDS_P60_init[@]}"
 
-  cat "${LOG_PATH_MODULE}/tmp_out_"* >> "${LOG_FILE}"
+  cat "${LOG_PATH_MODULE}/tmp_out_"* >> "${LOG_FILE}" 2>/dev/null || true
 }
 
 deeper_extractor_threader() {
   local lFILE_TMP="${1:-}"
+  local lFILE_MD5="${2:-}"
 
   local lFILE_DETAILS=""
   lFILE_DETAILS=$(file -b "${lFILE_TMP}")
   if [[ "${lFILE_DETAILS}" == *"text"* ]]; then
     return
   fi
-  lFILE_MD5="$(md5sum "${lFILE_TMP}" | awk '{print $1}')"
-  # to bring all the extractors to log to something we have under control,
+
+  # to bring all the extractors to log to something we can work with,
   # we just rewrite the LOG_FILE variable in the threader now:
   export LOG_FILE="${LOG_PATH_MODULE}/tmp_out_${lFILE_MD5}"
 
