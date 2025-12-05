@@ -138,7 +138,7 @@ deep_extractor() {
 
   # if we run into the deep extraction mode we always do at least one extraction round:
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 0 ]]; then
-    print_output "[*] Deep extraction - 1st round"
+    print_output "[*] Deep extraction - ${ORANGE}1st${NC} round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     deeper_extractor_helper
@@ -146,7 +146,7 @@ deep_extractor() {
   fi
 
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 1 ]]; then
-    print_output "[*] Deep extraction - 2nd round"
+    print_output "[*] Deep extraction - ${ORANGE}2nd${NC} round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     deeper_extractor_helper
@@ -154,7 +154,7 @@ deep_extractor() {
   fi
 
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 2 ]]; then
-    print_output "[*] Deep extraction - 3rd round"
+    print_output "[*] Deep extraction - ${ORANGE}3rd${NC} round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     deeper_extractor_helper
@@ -162,11 +162,10 @@ deep_extractor() {
   fi
 
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 && "${DEEP_EXT_DEPTH:-4}" -gt 3 ]]; then
-    print_output "[*] Deep extraction - 4th round"
+    print_output "[*] Deep extraction - ${ORANGE}4th${NC} round"
     print_output "[*] Walking through all files and try to extract what ever possible with unblob mode"
     print_output "[*] WARNING: This is the last extraction round that is executed."
 
-    # if we are already that far we do a final matryoshka extraction mode
     deeper_extractor_helper
     detect_root_dir_helper "${FIRMWARE_PATH_CP}"
   fi
@@ -179,6 +178,7 @@ deeper_extractor_helper() {
   local lBIN_PID=""
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
+  print_output "[*] Deep extraction starting ..."
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
