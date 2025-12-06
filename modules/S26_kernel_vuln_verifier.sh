@@ -789,5 +789,5 @@ get_kernel_version_csv_data_s24() {
 
   # currently we only support one kernel version
   # if we detect multiple kernel versions we only process the first one after sorting
-  mapfile -t K_VERSIONS_ARR < <(cut -d\; -f2 "${lS24_CSV_LOG}" | grep -v "NA" | sort -u)
+  mapfile -t K_VERSIONS_ARR < <(cut -d\; -f2 "${lS24_CSV_LOG}" | tail -n +2 | grep -v "NA" | sort -u)
 }
