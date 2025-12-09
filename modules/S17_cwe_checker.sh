@@ -29,7 +29,7 @@ S17_cwe_checker()
     module_log_init "${FUNCNAME[0]}"
     module_title "Check binaries for vulnerabilities with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"
-    local lCWE_CNT_=0
+    local lCWE_CNT=0
     local lTESTED_BINS=0
 
     if [[ "${FULL_TEST}" -ne 1 ]]; then
@@ -41,15 +41,15 @@ S17_cwe_checker()
     cwe_check
 
     if [[ -f "${TMP_DIR}"/CWE_CNT.tmp ]]; then
-      lCWE_CNT_=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
+      lCWE_CNT=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
       lTESTED_BINS=$(grep -c "cwe-checker found.*different security issues in" "${LOG_FILE}" || true)
     fi
 
-    final_cwe_log "${lCWE_CNT_}" "${lTESTED_BINS}"
+    final_cwe_log "${lCWE_CNT}" "${lTESTED_BINS}"
 
     write_log ""
-    write_log "[*] Statistics:${lCWE_CNT_}:${lTESTED_BINS}"
-    module_end_log "${FUNCNAME[0]}" "${lCWE_CNT_}"
+    write_log "[*] Statistics:${lCWE_CNT}:${lTESTED_BINS}"
+    module_end_log "${FUNCNAME[0]}" "${lCWE_CNT}"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
@@ -137,8 +137,14 @@ cwe_checker_threaded() {
   local lNAME=""
   lNAME=$(basename "${lBINARY}")
 
+  # we rewrite the LOG_FILE variable to just log into some temporary file during testing
+  # afterwards we rewrite the LOG_FILE at once
   local lOLD_LOG_FILE="${LOG_FILE}"
-  local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${lNAME}"".txt"
+  local LOG_FILE="${LOG_PATH_MODULE}/cwe_check_${lNAME}.txt"
+  local lRAND_LOG_ID=${RANDOM}
+  local lCWE_CHECKER_JSON_LOG_FILE="${LOG_PATH_MODULE}/cwe_${lNAME}_${lRAND_LOG_ID}.json"
+  # lCWE_CHECKER_TXT_LOG_FILE is the log file from each binary
+  local lCWE_CHECKER_TXT_LOG_FILE="${LOG_PATH_MODULE}/cwe_${lNAME}_${lRAND_LOG_ID}.log"
   lBINARY=$(readlink -f "${lBINARY}")
 
   if [[ $(grep -F "$(escape_echo "${lBINARY}")" "${P99_CSV_LOG}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
@@ -148,45 +154,51 @@ cwe_checker_threaded() {
   fi
 
   ulimit -Sv "${lMEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log "${lCWE_CHECKER_OPTS_ARR[@]}" || true
+  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${lCWE_CHECKER_JSON_LOG_FILE}" "${lCWE_CHECKER_OPTS_ARR[@]}" || true
   ulimit -Sv unlimited
-  print_output "[*] Tested ${ORANGE}""$(print_path "${lBINARY}")""${NC}" "no_log"
+  print_output "[*] Tested ${ORANGE}$(print_path "${lBINARY}")${NC}" "no_log"
 
-  if [[ -s "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log ]]; then
-    jq -r '.[] | "\(.name) - \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | sort -u || true
-    # get the total number of vulnerabilities in hte binary
-    lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | wc -l || true)
-    mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | cut -d\) -f1 | tr -d '(' | sort -u || true)
+  if [[ -s "${lCWE_CHECKER_JSON_LOG_FILE}" ]]; then
+    log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
+    sub_module_title "CWE-Checker results for ${lNAME}" "${lCWE_CHECKER_TXT_LOG_FILE}"
+    # The following is just for getting some nice output to the cli interface:
+    jq -r '.[] | "\(.name) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | sort -u || true
+
+    # get the total number of vulnerabilities in the binary
+    lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | wc -l || true)
+    mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
     # this is the logging after every tested file
     if [[ ${#lCWE_OUT[@]} -ne 0 ]] ; then
       print_ln
+
+      jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["' >> "${lCWE_CHECKER_TXT_LOG_FILE}" || true
 
       # check for known linux files
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
         # if we have the base linux config file we are checking it:
         if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           # shellcheck disable=SC2153
-          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN}):${NC}" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
         else
-          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${RED}common linux file: no${GREEN}):${NC}" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${RED}common linux file: no${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
         fi
       else
-        print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:${NC}" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+        print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
       fi
 
       for lCWE_LINE in "${lCWE_OUT[@]}"; do
         lCWE="$(echo "${lCWE_LINE}" | awk '{print $1}')"
         lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"
-        lCWE_CNT="$(grep -c "${lCWE}" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log 2>/dev/null || true)"
+        lCWE_CNT="$(grep -c "${lCWE}" "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null || true)"
         # get a list of all affected addresses:
-        lADDRESSES="$(jq -cr '.[]? | select(.name=="'"${lCWE}"'") | .addresses' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | tr -d '\n' | sed 's/\]\[/,/g')"
+        lADDRESSES="$(jq -cr '.[]? | select(.name=="'"${lCWE}"'") | .addresses' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d '\n' | sed 's/\]\[/,/g')"
         echo "${lCWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
-        print_output "$(indent "$(orange "${lCWE}""${GREEN}"" - ""${lCWE_DESC}"" - ""${ORANGE}""${lCWE_CNT}"" times.")")"
+        print_output "$(indent "$(orange "${lCWE}${GREEN} - ${lCWE_DESC} - ${ORANGE}${lCWE_CNT} times.")")"
         write_csv_log "${lNAME}" "${lBINARY}" "${lCWE_TOTAL_CNT}" "${lCWE}" "${lCWE_CNT}" "${lADDRESSES}" "${lCWE_DESC}"
       done
     else
-      print_output "[-] Nothing found in ""${ORANGE}""${lNAME}""${NC}" "no_log"
-      rm "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+      print_output "[-] Nothing found in ${ORANGE}${lNAME}${NC}" "no_log"
+      rm -f "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null
     fi
   fi
 
@@ -208,19 +220,19 @@ final_cwe_log() {
   local lCWE_LOGS_ARR=()
 
   if [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mapfile -t lCWE_LOGS_ARR < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.log")
+    mapfile -t lCWE_LOGS_ARR < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.json")
     if [[ "${#lCWE_LOGS_ARR[@]}" -gt 0 ]]; then
-      mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+      mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
       if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]] ; then
         sub_module_title "Results - CWE-checker binary analysis"
-        print_output "[+] cwe-checker found a total of ""${ORANGE}""${lTOTAL_CWE_CNT}""${GREEN}"" of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
+        print_output "[+] cwe-checker found a total of ${ORANGE}${lTOTAL_CWE_CNT}${GREEN} of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
         for lCWE_LINE in "${lCWE_OUT_ARR[@]}"; do
           lCWE_ID="$(echo "${lCWE_LINE}" | awk '{print $1}')"
           lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"
           # do not change this to grep -c!
           # shellcheck disable=SC2126
-          lCWE_CNT="$(grep "${lCWE_ID}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
-          print_output "$(indent "$(orange "${lCWE_ID}""${GREEN}"" - ""${lCWE_DESC}"" - ""${ORANGE}""${lCWE_CNT}"" times.")")"
+          lCWE_CNT="$(grep "${lCWE_ID}" "${LOG_PATH_MODULE}"/cwe_*.json 2>/dev/null | wc -l || true)"
+          print_output "$(indent "$(orange "${lCWE_ID}${GREEN} - ${lCWE_DESC} - ${ORANGE}${lCWE_CNT} times.")")"
         done
         print_bar
       fi
