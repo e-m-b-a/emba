@@ -161,7 +161,9 @@ cwe_checker_threaded() {
   if [[ -s "${lCWE_CHECKER_JSON_LOG_FILE}" ]]; then
     log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     sub_module_title "CWE-Checker results for ${lNAME}" "${lCWE_CHECKER_TXT_LOG_FILE}"
+    # The following is just for getting some nice output to the cli interface:
     jq -r '.[] | "\(.name) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | sort -u || true
+
     # get the total number of vulnerabilities in the binary
     lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | wc -l || true)
     mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
