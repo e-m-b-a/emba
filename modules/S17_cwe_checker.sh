@@ -162,7 +162,7 @@ cwe_checker_threaded() {
     log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     sub_module_title "CWE-Checker results for ${lNAME}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     jq -r '.[] | "\(.name) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | sort -u || true
-    # get the total number of vulnerabilities from the binary
+    # get the total number of vulnerabilities in the binary
     lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | wc -l || true)
     mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
     # this is the logging after every tested file
@@ -196,7 +196,7 @@ cwe_checker_threaded() {
       done
     else
       print_output "[-] Nothing found in ${ORANGE}${lNAME}${NC}" "no_log"
-      rm "${lCWE_CHECKER_JSON_LOG_FILE}"
+      rm -f "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null
     fi
   fi
 
@@ -218,9 +218,9 @@ final_cwe_log() {
   local lCWE_LOGS_ARR=()
 
   if [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mapfile -t lCWE_LOGS_ARR < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.log")
+    mapfile -t lCWE_LOGS_ARR < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.json")
     if [[ "${#lCWE_LOGS_ARR[@]}" -gt 0 ]]; then
-      mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+      mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
       if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]] ; then
         sub_module_title "Results - CWE-checker binary analysis"
         print_output "[+] cwe-checker found a total of ${ORANGE}${lTOTAL_CWE_CNT}${GREEN} of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
@@ -229,7 +229,7 @@ final_cwe_log() {
           lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"
           # do not change this to grep -c!
           # shellcheck disable=SC2126
-          lCWE_CNT="$(grep "${lCWE_ID}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
+          lCWE_CNT="$(grep "${lCWE_ID}" "${LOG_PATH_MODULE}"/cwe_*.json 2>/dev/null | wc -l || true)"
           print_output "$(indent "$(orange "${lCWE_ID}${GREEN} - ${lCWE_DESC} - ${ORANGE}${lCWE_CNT} times.")")"
         done
         print_bar
