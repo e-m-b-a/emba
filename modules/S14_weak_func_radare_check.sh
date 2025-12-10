@@ -63,7 +63,7 @@ S14_weak_func_radare_check()
       lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
-      if [[ "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${lBIN_NAME}".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
+      if [[ -n "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${lBIN_NAME}".txt -print -quit)" ]]; then
         continue
       fi
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
@@ -602,7 +602,7 @@ radare_print_top10_statistics() {
 
   sub_module_title "Top 10 legacy C functions - Radare2 disasm mode"
 
-  if [[ "$(find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_[0-9]*_*-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ -n "$(find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_[0-9]*_*-*.txt" -print -quit)" ]]; then
     for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
       local lSEARCH_TERM=""
       local lF_COUNTER=0

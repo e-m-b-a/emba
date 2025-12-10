@@ -42,22 +42,26 @@ P14_ext_mounter() {
 ext_extractor() {
   local lEXT_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
-  local lTMP_EXT_MOUNT="${TMP_DIR}""/ext_mount_${RANDOM}"
+  local lTMP_EXT_MOUNT="$(mktemp -d "${TMP_DIR}/ext_mount_XXXXXX")"
   local lFILES_EXT_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
 
   if ! [[ -f "${lEXT_PATH_}" ]]; then
-    print_output "[-] No file for decryption provided"
+    print_output "[-] No EXT filesystem for extraction provided"
     return
   fi
 
   sub_module_title "EXT filesystem extractor"
 
-  mkdir -p "${lTMP_EXT_MOUNT}" || true
   print_output "[*] Trying to mount ${ORANGE}${lEXT_PATH_}${NC} to ${ORANGE}${lTMP_EXT_MOUNT}${NC} directory"
-  mount -o ro "${lEXT_PATH_}" "${lTMP_EXT_MOUNT}"
+  mount -o ro "${lEXT_PATH_}" "${lTMP_EXT_MOUNT}" || { print_output "[-] EXT filesystem mount failed"; return; }
   if mount | grep -q ext_mount; then
+    if [[ -n "$(find "${lTMP_EXT_MOUNT}" -mindepth 1 -print -quit)" ]]; then
+      print_output "[*] No mounted files found in ${ORANGE}${lTMP_EXT_MOUNT}${NC} -> return now"
+      return
+    fi
+
     print_output "[*] Copying ${ORANGE}${lTMP_EXT_MOUNT}${NC} to firmware tmp directory (${lEXTRACTION_DIR_})"
     mkdir -p "${lEXTRACTION_DIR_}"
     cp -pri "${lTMP_EXT_MOUNT}"/* "${lEXTRACTION_DIR_}"
@@ -80,7 +84,7 @@ ext_extractor() {
 
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
     write_csv_log "EXT filesystem extractor" "${lEXT_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_EXT_ARR[@]}" "NA"
-    umount "${lTMP_EXT_MOUNT}" || true
   fi
+  umount "${lTMP_EXT_MOUNT}" || true
   rm -r "${lTMP_EXT_MOUNT}"
 }

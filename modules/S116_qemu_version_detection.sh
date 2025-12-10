@@ -51,7 +51,7 @@ S116_qemu_version_detection() {
 
     local lLOG_PATH_S115="${LOG_DIR}"/s115_usermode_emulator.txt
     if [[ -f "${lLOG_PATH_S115}" && -d "${LOG_DIR}/s115_usermode_emulator" ]]; then
-      if [[ $(find "${LOG_DIR}/s115_usermode_emulator" -name "qemu_tmp*" | wc -l) -eq 0 ]]; then
+      if [[ -z "$(find "${LOG_DIR}/s115_usermode_emulator" -name "qemu_tmp*" -print -quit)" ]]; then
         print_output "[-] No emulation logs available ... return"
         module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
         return

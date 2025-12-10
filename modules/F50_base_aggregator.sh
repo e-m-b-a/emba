@@ -642,7 +642,7 @@ binary_fct_output() {
       fi
     done
   fi
-  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" || true)
+  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local lFCT_LINK=""
     if [[ "${lBINS_SEMGREP_CNT}" -gt 0 ]]; then

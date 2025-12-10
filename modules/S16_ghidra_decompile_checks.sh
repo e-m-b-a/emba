@@ -109,7 +109,7 @@ S16_ghidra_decompile_checks()
   # cleanup - remove the rest without issues now
   rm -r /tmp/haruspex_* 2>/dev/null || true
 
-  if [[ "$(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
+  if [[ -n "$(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "semgrep_*.csv" -print -quit)" ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
     # shellcheck disable=SC2126
     lVULN_COUNTER=$(wc -l "${LOG_PATH_MODULE}"/semgrep_*.csv | tail -n1 | awk '{print $1}' || echo 0)

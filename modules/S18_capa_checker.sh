@@ -75,7 +75,7 @@ S18_capa_checker() {
     local lBINS_AVAILABLE=0
     lBINS_AVAILABLE=$(grep -c "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" || true)
     print_ln
-    if [[ "$(find "${LOG_PATH_MODULE}" -name "capa_*.log" | wc -l)" -gt 0 ]]; then
+    if [[ -n "$(find "${LOG_PATH_MODULE}" -name "capa_*.log" -print -quit)" ]]; then
       lCAPA_RESULTS=$(grep -c "Capa results for " "${LOG_FILE}" || echo 0)
     fi
     print_output "[*] Found ${ORANGE}${lCAPA_RESULTS}${NC} capa results in ${ORANGE}${lBINS_AVAILABLE:-0}${NC} binaries"
