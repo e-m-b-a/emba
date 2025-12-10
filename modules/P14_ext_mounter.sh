@@ -42,7 +42,8 @@ P14_ext_mounter() {
 ext_extractor() {
   local lEXT_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
-  local lTMP_EXT_MOUNT="$(mktemp -d "${TMP_DIR}/ext_mount_XXXXXX")"
+  local lTMP_EXT_MOUNT=""
+  lTMP_EXT_MOUNT="$(mktemp -d "${TMP_DIR}/ext_mount_XXXXXX")"
   local lFILES_EXT_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
