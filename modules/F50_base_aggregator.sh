@@ -633,10 +633,16 @@ binary_fct_output() {
   fi
 
   # cwe-checker and semgrep results per binary
-  if [[ -f "${LOG_DIR}"/s17_cwe_checker/cwe_"${BINARY}".log ]]; then
-    lBINS_CWE_CHCK_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}/s17_cwe_checker/cwe_${BINARY}.log" || true)
+  mapfile -t lS17_BIN_ARR < <(find "${S17_LOG_DIR}" -name "cwe_${BINARY}_[0-9]*.json")
+  if [[ "${#lS17_BIN_ARR[@]}" -gt 0 ]]; then
+    local lS17_BINARY=""
+    for lS17_BINARY in "${lS17_BIN_ARR[@]}"; do
+      if [[ -f "${lS17_BINARY}" ]]; then
+        ((lBINS_CWE_CHCK_CNT+=$(grep -Ec "CWE[0-9]+" "${lS17_BINARY}" || echo 0)))
+      fi
+    done
   fi
-  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
+  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" || true)
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local lFCT_LINK=""
     if [[ "${lBINS_SEMGREP_CNT}" -gt 0 ]]; then
@@ -1147,11 +1153,11 @@ cwe_logging() {
   local lCWE_ENTRY=""
   local lCWE=""
   local lCWE_DESC=""
-  local lBINS_CWE_CHCK_CNT=""
+  local lBINS_CWE_CHCK_CNT=0
 
   if [[ -d "${LOG_DIR}"/"${lLOG_DIR_MOD}" ]]; then
     # mapfile -t lCWE_OUT_ARR < <( cat "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "lCWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
-    mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+    mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
 
     if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
@@ -1161,7 +1167,7 @@ cwe_logging() {
         lCWE_DESC="$(echo "${lCWE_ENTRY}" | cut -d\  -f2-)"
         # do not change this to grep -c!
         # shellcheck disable=SC2126
-        lBINS_CWE_CHCK_CNT="$(grep "${lCWE}" "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.log 2>/dev/null | wc -l || true)"
+        lBINS_CWE_CHCK_CNT="$(grep "${lCWE}" "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json 2>/dev/null | wc -l || true)"
         print_output "$(indent "$(orange "${lCWE}""${GREEN}"" - ""${lCWE_DESC}"" - ""${ORANGE}""${lBINS_CWE_CHCK_CNT}"" times.")")"
       done
       print_ln

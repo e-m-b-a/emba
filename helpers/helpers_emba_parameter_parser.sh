@@ -181,6 +181,13 @@ emba_parameter_parsing() {
         ;;
       V)
         print_output "[+] EMBA version: ${ORANGE}${EMBA_VERSION}${NC}" "no_log"
+        local lLOCAL_HASH=""
+        if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
+          if [[ -f .git/refs/heads/master ]]; then 
+            lLOCAL_HASH="$(head .git/refs/heads/master)"
+            print_output "[+] EMBA git hash: ${ORANGE}${lLOCAL_HASH}${NC}" "no_log"
+          fi
+        fi
         exit 0
         ;;
       W)

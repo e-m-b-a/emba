@@ -16,7 +16,7 @@ def help_me
     ./msfconsole -r ./helpers/l35_msf_check.rc 127.0.0.1 123,1337,101 mipsle
   |
 
-  help = help.gsub(/^\t/, '')
+  help = help.gsub(/^\s+/, '')
   print_line(help)
 end
 
@@ -33,7 +33,7 @@ def wait_until_jobs_done
   end
 end
 
-def select_payload(exploit,arch)
+def select_payload(exploit, arch)
   linux   = "linux/#{arch}/shell_bind_tcp"
   php     = 'php/meterpreter/bind_tcp'
   multi   = 'java/meterpreter/bind_tcp'
@@ -146,6 +146,7 @@ def exploit_checker(host, ports, architecture)
       end
 
       begin
+        # max lport 40862:
         lport_setting = rand(4000..40_862).to_s
         mod.datastore['LPORT'] = lport_setting
         if get_payload.to_s =~ /reverse/
