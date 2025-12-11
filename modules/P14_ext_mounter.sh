@@ -87,5 +87,5 @@ ext_extractor() {
     write_csv_log "EXT filesystem extractor" "${lEXT_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_EXT_ARR[@]}" "NA"
   fi
   umount "${lTMP_EXT_MOUNT}" || true
-  rm -r "${lTMP_EXT_MOUNT}"
+  [[ -d "${lTMP_EXT_MOUNT}" ]] && rm -rf "${lTMP_EXT_MOUNT}"
 }
