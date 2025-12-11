@@ -188,7 +188,7 @@ radare_decomp_print_top10_statistics() {
 
   sub_module_title "Top 10 legacy C functions - Radare2 decompilation mode"
 
-  if [[ "$(find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ -n "$(find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_*_*-*.txt" -print -quit)" ]]; then
     for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
       local lSEARCH_TERM=""
       local lF_COUNTER=0

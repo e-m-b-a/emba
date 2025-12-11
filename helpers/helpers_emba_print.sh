@@ -869,7 +869,7 @@ module_end_log() {
   [[ "${HTML}" -eq 1 ]] && run_web_reporter_mod_name "${lMODULE_MAIN_NAME}"
   if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "${LOG_PATH_MODULE}" ]]; then
-      if [[ "$(find "${LOG_PATH_MODULE}" -type f | wc -l)" -eq 0 ]]; then
+      if [[ -z "$(find "${LOG_PATH_MODULE}" -type f -print -quit)" ]]; then
         rm -r "${LOG_PATH_MODULE}"
       fi
     fi

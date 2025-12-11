@@ -432,7 +432,7 @@ fw_bin_detector() {
   fi
   if [[ "${lCHECK_FILE_NAME}" =~ .*\.ri ]] && [[ "${lFILE_BIN_OUT}" == *"data"* ]]; then
     # ri files are usually used by zyxel
-    if [[ $(find "${LOG_DIR}"/firmware -name "$(basename -s .ri "${lCHECK_FILE}")".bin | wc -l) -gt 0 ]]; then
+    if [[ -n $(find "${LOG_DIR}"/firmware -name "$(basename -s .ri "${lCHECK_FILE}")".bin -print -quit) ]]; then
       # if we find a bin file with the same name then it is a Zyxel firmware image
       print_output "[+] Identified ZyXel encrpyted ZIP firmware - using ZyXel extraction module"
       export ZYXEL_ZIP=1

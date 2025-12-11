@@ -54,27 +54,27 @@ Q02_openai_question() {
 
 # looks through the modules and finds chatgpt questions inside the csv
 ask_chatgpt() {
-  local lGPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files"
-  local lGPT_PRIO_=3
+  local lGPT_FILE_DIR="${LOG_PATH_MODULE}/gpt_files"
+  local lGPT_PRIO=3
   # default vars
-  local lGPT_QUESTION_=""
-  local lCHATGPT_CODE_=""
-  local lGPT_RESPONSE_=""
-  local lGPT_RESPONSE_CLEANED_=""
-  local lGPT_TOKENS_=0
-  local lHTTP_CODE_=200
-  local lORIGIN_MODULE_=""
-  local lGPT_SERVER_ERROR_CNT_=0
+  local lGPT_QUESTION=""
+  local lCHATGPT_CODE=""
+  local lGPT_RESPONSE=""
+  local lGPT_RESPONSE_CLEANED=""
+  local lGPT_TOKENS=0
+  local lHTTP_CODE=200
+  local lORIGIN_MODULE=""
+  local lGPT_SERVER_ERROR_CNT=0
   local lELE_INDEX=0
-  local lGPT_ANCHOR_=""
-  local lGPT_INPUT_FILE_=""
+  local lGPT_ANCHOR=""
+  local lGPT_INPUT_FILE=""
   local lGPT_INPUT_FILE_mod=""
-  local lGPT_OUTPUT_FILE_=""
-  local lSCRIPT_PATH_TMP_=""
+  local lGPT_OUTPUT_FILE=""
+  local lSCRIPT_PATH_TMP=""
 
   print_output "[*] Checking scripts with ChatGPT that have priority ${ORANGE}${MINIMUM_GPT_PRIO}${NC} or lower" "no_log"
-  if ! [[ -d "${lGPT_FILE_DIR_}" ]]; then
-    mkdir "${lGPT_FILE_DIR_}"
+  if ! [[ -d "${lGPT_FILE_DIR}" ]]; then
+    mkdir "${lGPT_FILE_DIR}"
   fi
 
   # generating Array for GPT requests - sorting according the prio in field 3
@@ -83,91 +83,91 @@ ask_chatgpt() {
 
   for (( lELE_INDEX=0; lELE_INDEX<"${#Q02_OPENAI_QUESTIONS[@]}"; lELE_INDEX++ )); do
     local lELEM="${Q02_OPENAI_QUESTIONS["${lELE_INDEX}"]}"
-    lSCRIPT_PATH_TMP_="$(echo "${lELEM}" | cut -d\; -f1)"
+    lSCRIPT_PATH_TMP="$(echo "${lELEM}" | cut -d\; -f1)"
 
     # as we always start with the highest rated entry, we need to check if this entry was already tested:
-    if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${lSCRIPT_PATH_TMP_} ]]; then
-      # print_output "[*] GPT - Already tested ${lSCRIPT_PATH_TMP_}" "no_log"
+    if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${lSCRIPT_PATH_TMP} ]]; then
+      # print_output "[*] GPT - Already tested ${lSCRIPT_PATH_TMP}" "no_log"
       # lets test the next entry
       continue
     fi
 
-    lGPT_ANCHOR_="$(echo "${lELEM}" | cut -d\; -f2)"
-    lGPT_PRIO_="$(echo "${lELEM}" | cut -d\; -f3)"
-    # lGPT_PRIO_="${lGPT_PRIO_//GPT-Prio-/}"
-    lGPT_QUESTION_="$(echo "${lELEM}" | cut -d\; -f4)"
-    lGPT_OUTPUT_FILE_="$(echo "${lELEM}" | cut -d\; -f5)"
-    lGPT_TOKENS_="$(echo "${lELEM}" | cut -d\; -f6)"
-    lGPT_TOKENS_="${lGPT_TOKENS_//cost\=/}"
-    lGPT_RESPONSE_="$(echo "${lELEM}" | cut -d\; -f7)"
-    lGPT_INPUT_FILE_="$(basename "${lSCRIPT_PATH_TMP_}")"
-    lGPT_INPUT_FILE_mod="${lGPT_INPUT_FILE_//\./}"
+    lGPT_ANCHOR="$(echo "${lELEM}" | cut -d\; -f2)"
+    lGPT_PRIO="$(echo "${lELEM}" | cut -d\; -f3)"
+    # lGPT_PRIO="${lGPT_PRIO//GPT-Prio-/}"
+    lGPT_QUESTION="$(echo "${lELEM}" | cut -d\; -f4)"
+    lGPT_OUTPUT_FILE="$(echo "${lELEM}" | cut -d\; -f5)"
+    lGPT_TOKENS="$(echo "${lELEM}" | cut -d\; -f6)"
+    lGPT_TOKENS="${lGPT_TOKENS//cost\=/}"
+    lGPT_RESPONSE="$(echo "${lELEM}" | cut -d\; -f7)"
+    lGPT_INPUT_FILE="$(basename "${lSCRIPT_PATH_TMP}")"
+    lGPT_INPUT_FILE_mod="${lGPT_INPUT_FILE//\./}"
 
     # in case we have nothing we are going to move on
-    [[ -z "${lSCRIPT_PATH_TMP_}" ]] && continue
+    [[ -z "${lSCRIPT_PATH_TMP}" ]] && continue
 
-    if [[ "${lSCRIPT_PATH_TMP_}" == *"s16_ghidra_decompile_checks"* ]]; then
+    if [[ "${lSCRIPT_PATH_TMP}" == *"s16_ghidra_decompile_checks"* ]]; then
       # our ghidra check stores the decompiled code in the log directory. We need to copy it to the gpt log directory for further processing
-      print_output "[*] Ghidra decompiled code found ${lSCRIPT_PATH_TMP_}" "no_log"
-      [[ -f "${lSCRIPT_PATH_TMP_}" ]] && cp "${lSCRIPT_PATH_TMP_}" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
+      print_output "[*] Ghidra decompiled code found ${lSCRIPT_PATH_TMP}" "no_log"
+      [[ -f "${lSCRIPT_PATH_TMP}" ]] && cp "${lSCRIPT_PATH_TMP}" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
     else
       # this is currently the usual case for scripts
-      print_output "[*] Identification of ${ORANGE}${lSCRIPT_PATH_TMP_} / ${lGPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
-      if [[ "${lSCRIPT_PATH_TMP_}" == ".""${LOG_DIR}"* ]]; then
+      print_output "[*] Identification of ${ORANGE}${lSCRIPT_PATH_TMP} / ${lGPT_INPUT_FILE}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
+      if [[ "${lSCRIPT_PATH_TMP}" == ".""${LOG_DIR}"* ]]; then
         print_output "[*] Warning: System path is not stripped with the root directory - we try to fix it now" "no_log"
         # remove the '.'
-        lSCRIPT_PATH_TMP_="${lSCRIPT_PATH_TMP_:1}"
+        lSCRIPT_PATH_TMP="${lSCRIPT_PATH_TMP:1}"
         # remove the LOG_DIR
         # shellcheck disable=SC2001
-        lSCRIPT_PATH_TMP_="$(echo "${lSCRIPT_PATH_TMP_}" | sed 's#'"${LOG_DIR}"'##')"
-        print_output "[*] Stripped path ${lSCRIPT_PATH_TMP_}" "no_log"
+        lSCRIPT_PATH_TMP="$(echo "${lSCRIPT_PATH_TMP}" | sed 's#'"${LOG_DIR}"'##')"
+        print_output "[*] Stripped path ${lSCRIPT_PATH_TMP}" "no_log"
       fi
       # dirty fix - Todo: use array in future
-      lSCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${lSCRIPT_PATH_TMP_}" | head -1)"
+      lSCRIPT_PATH_TMP="$(find "${LOG_DIR}/firmware" -wholename "*${lSCRIPT_PATH_TMP}" | head -1)"
 
       # in case we have nothing we are going to move on
-      ! [[ -f "${lSCRIPT_PATH_TMP_}" ]] && continue
-      [[ -f "${lSCRIPT_PATH_TMP_}" ]] && cp "${lSCRIPT_PATH_TMP_}" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
+      ! [[ -f "${lSCRIPT_PATH_TMP}" ]] && continue
+      [[ -f "${lSCRIPT_PATH_TMP}" ]] && cp "${lSCRIPT_PATH_TMP}" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
     fi
 
-    print_output "[*] AI-Assisted analysis of script ${ORANGE}${lSCRIPT_PATH_TMP_}${NC} with question ${ORANGE}${lGPT_QUESTION_}${NC}" "no_log"
-    print_output "[*] Current priority for testing is ${lGPT_PRIO_}" "no_log"
+    print_output "[*] AI-Assisted analysis of script ${ORANGE}${lSCRIPT_PATH_TMP}${NC} with question ${ORANGE}${lGPT_QUESTION}${NC}" "no_log"
+    print_output "[*] Current priority for testing is ${lGPT_PRIO}" "no_log"
 
-    if [[ -z ${lGPT_RESPONSE_} ]] && [[ ${lGPT_PRIO_} -ge ${MINIMUM_GPT_PRIO} ]] && [[ "${lSCRIPT_PATH_TMP_}" != '' ]]; then
-      if [[ -f "${lSCRIPT_PATH_TMP_}" ]]; then
+    if [[ -z ${lGPT_RESPONSE} ]] && [[ ${lGPT_PRIO} -ge ${MINIMUM_GPT_PRIO} ]] && [[ "${lSCRIPT_PATH_TMP}" != '' ]]; then
+      if [[ -f "${lSCRIPT_PATH_TMP}" ]]; then
         # add navbar-item for file
-        sub_module_title "AI analysis for ${lGPT_INPUT_FILE_}"
+        sub_module_title "AI analysis for ${lGPT_INPUT_FILE}"
 
-        # print_output "[*] AI-Assisted analysis for ${ORANGE}${lGPT_INPUT_FILE_}${NC}" "" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
-        print_output "[*] AI-Assisted analysis for ${lGPT_INPUT_FILE_mod}" "" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
-        print_output "$(indent "$(orange "$(print_path "${lSCRIPT_PATH_TMP_}")")")"
-        head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json" || print_error "[-] Tmp file create error for ${lSCRIPT_PATH_TMP_}"
+        # print_output "[*] AI-Assisted analysis for ${ORANGE}${lGPT_INPUT_FILE}${NC}" "" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
+        print_output "[*] AI-Assisted analysis for ${lGPT_INPUT_FILE_mod}" "" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
+        print_output "$(indent "$(orange "$(print_path "${lSCRIPT_PATH_TMP}")")")"
+        head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json" || print_error "[-] Tmp file create error for ${lSCRIPT_PATH_TMP}"
         if [[ ! -f "${TMP_DIR}/chat.json" ]]; then
-          print_output "[-] Temp file ${TMP_DIR}/chat.json for further analysis of ${lSCRIPT_PATH_TMP_} was not created ... some Error occured"
+          print_output "[-] Temp file ${TMP_DIR}/chat.json for further analysis of ${lSCRIPT_PATH_TMP} was not created ... some Error occured"
           return
         fi
 
-        lCHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${lSCRIPT_PATH_TMP_}" | tr -d '[:space:]' | sed 's/\[ASK_GPT\].*//')
-        if [[ "${#lCHATGPT_CODE_}" -gt 4561 ]]; then
+        lCHATGPT_CODE=$(sed 's/\\//g;s/"/\\\"/g' "${lSCRIPT_PATH_TMP}" | tr -d '[:space:]' | sed 's/\[ASK_GPT\].*//')
+        if [[ "${#lCHATGPT_CODE}" -gt 4561 ]]; then
           print_output "[*] GPT request is too big ... stripping it now" "no_log"
-          lCHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${lSCRIPT_PATH_TMP_}" | tr -d '[:space:]' | cut -c-4560 | sed 's/\[ASK_GPT\].*//')
+          lCHATGPT_CODE=$(sed 's/\\//g;s/"/\\\"/g' "${lSCRIPT_PATH_TMP}" | tr -d '[:space:]' | cut -c-4560 | sed 's/\[ASK_GPT\].*//')
         fi
-        strip_color_codes "$(printf '"%s %s"\n}]}' "${lGPT_QUESTION_}" "${lCHATGPT_CODE_}")" >> "${TMP_DIR}/chat.json"
+        strip_color_codes "$(printf '"%s %s"\n}]}' "${lGPT_QUESTION}" "${lCHATGPT_CODE}")" >> "${TMP_DIR}/chat.json"
 
         print_output "[*] Testing the following code with ChatGPT:" "no_log"
-        cat "${lSCRIPT_PATH_TMP_}"
+        cat "${lSCRIPT_PATH_TMP}"
         print_ln "no_log"
         print_output "[*] Adjusted the code under test to send it to ChatGPT:" "no_log"
         cat "${TMP_DIR}/chat.json"
         print_ln "no_log"
 
-        print_output "[*] The combined cost of the OpenAI request / the length is: ${ORANGE}${#lGPT_QUESTION_} + ${#lCHATGPT_CODE_}${NC}" "no_log"
+        print_output "[*] The combined cost of the OpenAI request / the length is: ${ORANGE}${#lGPT_QUESTION} + ${#lCHATGPT_CODE}${NC}" "no_log"
 
-        lHTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+        lHTTP_CODE=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
           -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" --write-out "%{http_code}" || true)
 
-        if [[ "${lHTTP_CODE_}" -ne 200 ]] ; then
+        if [[ "${lHTTP_CODE}" -ne 200 ]] ; then
           print_output "[-] Something went wrong with the ChatGPT requests"
           if [[ -f "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" ]]; then
             print_output "[-] ERROR response: $(cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json")"
@@ -178,8 +178,8 @@ ask_chatgpt() {
               sleep 20
               break
             elif jq '.error.type' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "server_error" ; then
-              ((lGPT_SERVER_ERROR_CNT_+=1))
-              if [[ "${lGPT_SERVER_ERROR_CNT_}" -ge 5 ]]; then
+              ((lGPT_SERVER_ERROR_CNT+=1))
+              if [[ "${lGPT_SERVER_ERROR_CNT}" -ge 5 ]]; then
                 # more than 5 failes we stop trying until the newxt round
                 print_output "[-] Stopping OpenAI requests since the Server seems to be overloaded"
                 CHATGPT_RESULT_CNT=-1
@@ -210,7 +210,7 @@ ask_chatgpt() {
               fi
             fi
 
-            cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" >> "${lGPT_FILE_DIR_}/openai_server_errors.log"
+            cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" >> "${lGPT_FILE_DIR}/openai_server_errors.log"
             readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
             # reset the array index to start again with the highest rated entry
             lELE_INDEX=0
@@ -224,45 +224,45 @@ ask_chatgpt() {
 
         if ! [[ -f "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" ]]; then
           # catches: (56) Recv failure: Connection reset by peer
-          print_output "[-] Something went wrong with the ChatGPT request for ${lGPT_INPUT_FILE_}"
+          print_output "[-] Something went wrong with the ChatGPT request for ${lGPT_INPUT_FILE}"
           break
         fi
 
-        lGPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json")")
-        lGPT_RESPONSE_CLEANED_="${lGPT_RESPONSE_[*]//\;/}" #remove ; from response
-        lGPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json")
+        lGPT_RESPONSE=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json")")
+        lGPT_RESPONSE_CLEANED="${lGPT_RESPONSE[*]//\;/}" #remove ; from response
+        lGPT_TOKENS=$(jq '.usage.total_tokens' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json")
 
-        if [[ ${lGPT_TOKENS_} -ne 0 ]]; then
-          GTP_CHECKED_ARR+=("${lSCRIPT_PATH_TMP_}")
+        if [[ ${lGPT_TOKENS} -ne 0 ]]; then
+          GTP_CHECKED_ARR+=("${lSCRIPT_PATH_TMP}")
           # write new into done csv
-          write_csv_gpt "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "cost=${lGPT_TOKENS_}" "'${lGPT_RESPONSE_CLEANED_//\'/}'"
+          write_csv_gpt "${lGPT_INPUT_FILE}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${lGPT_QUESTION}" "${lGPT_OUTPUT_FILE}" "cost=${lGPT_TOKENS}" "'${lGPT_RESPONSE_CLEANED//\'/}'"
 
           # we store the answers in dedicated files for further interlinking within the report
           if ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]]; then
             mkdir "${LOG_PATH_MODULE}"/gpt_answers || true
           fi
-          echo "${lGPT_RESPONSE_CLEANED_}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${lGPT_INPUT_FILE_mod}".log
+          echo "${lGPT_RESPONSE_CLEANED}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${lGPT_INPUT_FILE_mod}".log
 
           # print openai response
           print_ln
           # print_output "[*] ${ORANGE}AI-assisted analysis results via OpenAI ChatGPT:${NC}\\n"
-          echo -e "${lGPT_RESPONSE_[*]}" | tee -a "${LOG_FILE}"
+          echo -e "${lGPT_RESPONSE[*]}" | tee -a "${LOG_FILE}"
 
           # add proper module link
-          if [[ "${lGPT_OUTPUT_FILE_}" == *'/csv_logs/'* ]]; then
+          if [[ "${lGPT_OUTPUT_FILE}" == *'/csv_logs/'* ]]; then
             # if we have a csv_logs path we need to adjust the cut
-            lORIGIN_MODULE_="$(echo "${lGPT_OUTPUT_FILE_}" | cut -d / -f4 | cut -d_ -f1)"
-          elif [[ "${lGPT_OUTPUT_FILE_}" == '/logs/'* ]]; then
-            lORIGIN_MODULE_="$(echo "${lGPT_OUTPUT_FILE_}" | cut -d / -f3 | cut -d_ -f1)"
+            lORIGIN_MODULE="$(echo "${lGPT_OUTPUT_FILE}" | cut -d / -f4 | cut -d_ -f1)"
+          elif [[ "${lGPT_OUTPUT_FILE}" == '/logs/'* ]]; then
+            lORIGIN_MODULE="$(echo "${lGPT_OUTPUT_FILE}" | cut -d / -f3 | cut -d_ -f1)"
           else
-            lORIGIN_MODULE_="$(basename "$(dirname "${lGPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
+            lORIGIN_MODULE="$(basename "$(dirname "${lGPT_OUTPUT_FILE}")" | cut -d_ -f1)"
           fi
 
           print_ln
-          print_output "[+] Further results for ${ORANGE}${lGPT_INPUT_FILE_mod}${GREEN} available in module ${ORANGE}${lORIGIN_MODULE_}${NC}" "" "${lORIGIN_MODULE_}"
-          print_output "[+] Analysed source file ${ORANGE}${lGPT_INPUT_FILE_mod}${GREEN}" "" "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
+          print_output "[+] Further results for ${ORANGE}${lGPT_INPUT_FILE_mod}${GREEN} available in module ${ORANGE}${lORIGIN_MODULE}${NC}" "" "${lORIGIN_MODULE}"
+          print_output "[+] Analysed source file ${ORANGE}${lGPT_INPUT_FILE_mod}${GREEN}" "" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
           # print_output "[+] Analysed source script popup ${ORANGE}${lGPT_INPUT_FILE_mod}${GREEN} script"
-          # write_local_overlay_link "${lGPT_FILE_DIR_}/${lGPT_INPUT_FILE_mod}.log"
+          # write_local_overlay_link "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
           if [[ -f "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${lGPT_INPUT_FILE_mod}".log ]]; then
             print_output "[+] GPT answer file for ${ORANGE}${lGPT_INPUT_FILE_mod}${NC}" "" "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${lGPT_INPUT_FILE_mod}".log
           fi
@@ -271,7 +271,7 @@ ask_chatgpt() {
           ((CHATGPT_RESULT_CNT+=1))
         fi
       else
-        print_output "[-] Couldn't find ${ORANGE}$(print_path "${lSCRIPT_PATH_TMP_}")${NC}"
+        print_output "[-] Couldn't find ${ORANGE}$(print_path "${lSCRIPT_PATH_TMP}")${NC}"
       fi
     fi
 
@@ -293,8 +293,8 @@ ask_chatgpt() {
   if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
     local lGPT_ENTRY_LINE=""
     while read -r lGPT_ENTRY_LINE; do
-      lGPT_ANCHOR_="$(echo "${lGPT_ENTRY_LINE}" | cut -d ';' -f2)"
-      sed -i "/${lGPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
+      lGPT_ANCHOR="$(echo "${lGPT_ENTRY_LINE}" | cut -d ';' -f2)"
+      sed -i "/${lGPT_ANCHOR}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
     done < "${CSV_DIR}/q02_openai_question.csv"
   fi
 }
