@@ -5995,7 +5995,7 @@ grepit_module_general() {
 # Security issues can have many sources, often it is neglect of security topics, but it can also be malintent.
 # We're only trying to catch fools here. We're not looking for backdoors in DWARF in ELF binaries...
 grepit_module_backdoor() {
-  print_output "[*] Doing backdoor/malware/infected machine detection"
+  print_output "[*] Starting Grepit backdoor/malware/infected machine detection module" "no_log"
 
   grepit_search "Backdoor. Sounds suspicious, why would anyone ever use this word?" \
   'back-door' \
