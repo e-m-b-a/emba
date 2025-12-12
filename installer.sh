@@ -404,13 +404,14 @@ fi
 
 # if DOCKER_COMPOSE is not set we are in trouble
 if ! [[ -v DOCKER_COMPOSE[@] ]]; then
-  echo -e "\n${ORANGE}""${BOLD}""WARNING: No docker installation performed""${NC}"
+  echo -e "\n${ORANGE}${BOLD}WARNING: No docker installation performed${NC}"
   echo -e "${ORANGE}If you are running into installation issues please check your docker installation${NC}"
   echo -e "${ORANGE}and ensure the docker and docker compose command are available in your system path.${NC}"
   echo ""
-  if [[ "${FORCE}" -ne 1 ]]; then
-    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
-  fi
+  echo -e "\n${ORANGE}${BOLD}IMPORTANT:  IF you do not perform a working docker (including docker compose) installation${NC}"
+  echo -e "${ORANGE}${BOLD}              EMBA can't run on your machine!${NC}"
+  echo -e "\n${ORANGE}${BOLD}WARNING:    EMBA installation process will be stopped -> fix the environment and try again.${NC}"
+  exit 1
 fi
 
 # initial installation of the host environment:

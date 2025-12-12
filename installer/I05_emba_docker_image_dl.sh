@@ -22,7 +22,7 @@ I05_emba_docker_image_dl() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 0 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
     # print_tool_info "docker.io" 1 "docker" "docker-ce"
 
-    echo -e "\\n""${ORANGE}""${BOLD}""embeddedanalyzer/emba docker image""${NC}"
+    echo -e "\\n${ORANGE}${BOLD}embeddedanalyzer/emba docker image${NC}"
     echo -e "Description: EMBA docker images used for firmware analysis."
 
     if command -v docker > /dev/null; then
@@ -33,12 +33,21 @@ I05_emba_docker_image_dl() {
       else
         echo "Download-Size : ""$(("$(( "${f//$'\n'/+}" ))"/1048576))"" MB"
       fi
+    else
+      echo -e "\\n${ORANGE}${BOLD}WARNING: No docker command was found -> No working EMBA installation will be available.${NC}"
+      echo -e "\\n${ORANGE}${BOLD}WARNING: EMBA installation process will be stopped -> fix the environment and try again.${NC}"
+      exit 1
+    fi
+    if ! [[ -v DOCKER_COMPOSE[@] ]]; then
+      echo -e "\\n${ORANGE}${BOLD}WARNING: No docker compose command was found -> No working EMBA installation will be available.${NC}"
+      echo -e "\\n${ORANGE}${BOLD}WARNING: EMBA installation process will be stopped -> fix the environment and try again.${NC}"
+      exit 1
     fi
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""${MAGENTA}""${BOLD}""docker.io and the EMBA docker image (if not already on the system) will be downloaded and installed!""${NC}"
+      echo -e "\\n${MAGENTA}${BOLD}docker.io and the EMBA docker image (if not already on the system) will be downloaded and installed!${NC}"
       ANSWER=("y")
     fi
 
@@ -53,29 +62,29 @@ I05_emba_docker_image_dl() {
         fi
 
         if ! pgrep dockerd; then
-          echo -e "\\n""${RED}""${BOLD}""Docker daemon not running! Please check it manually and try again""${NC}"
+          echo -e "\\n${RED}${BOLD}Docker daemon not running! Please check it manually and try again${NC}"
           exit 1
         fi
         if command -v docker > /dev/null ; then
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          echo -e "${ORANGE}""Checking for EMBA docker image ...""${NC}"
-          echo -e "${ORANGE}""CONTAINER VARIABLE SET TO ""${CONTAINER}""${NC}"
+          echo -e "${ORANGE}Checking for EMBA docker image ...${NC}"
+          echo -e "${ORANGE}CONTAINER VARIABLE SET TO ${CONTAINER}${NC}"
 
           # First, check whether the local mirror exists with the correct base image and version
           if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "${CONTAINER}"; then
-            echo -e "${GREEN}""Found local image ${CONTAINER}, skipping download.""${NC}"
+            echo -e "${GREEN}Found local image ${CONTAINER}, skipping download.${NC}"
           else
-            echo -e "${ORANGE}""Local image not found, attempting to download.""${NC}"
+            echo -e "${ORANGE}Local image not found, attempting to download.${NC}"
             if ! docker pull "${CONTAINER}"; then
-              echo -e "${RED}""Failed to download ${CONTAINER}.""${NC}"
-              echo -e "${ORANGE}""Checking if we have any usable local images ...""${NC}"
+              echo -e "${RED}Failed to download ${CONTAINER}.${NC}"
+              echo -e "${ORANGE}Checking if we have any usable local images ...${NC}"
 
               # Check if there are any embeddedanalyzer/emba images
               if ! docker images | grep -q "embeddedanalyzer/emba"; then
-                echo -e "${RED}""No local EMBA images found. Installation may be incomplete.""${NC}"
+                echo -e "${RED}No local EMBA images found. Installation may be incomplete.${NC}"
                 exit 1
               else
-                echo -e "${GREEN}""Found alternative local EMBA image, will use that instead.""${NC}"
+                echo -e "${GREEN}Found alternative local EMBA image, will use that instead.${NC}"
                 # Use the latest local EMBA image
                 LOCAL_IMAGE=$(docker images embeddedanalyzer/emba --format "{{.Repository}}:{{.Tag}}" | head -1)
                 ORIGINAL_CONTAINER="${CONTAINER}"
@@ -83,13 +92,13 @@ I05_emba_docker_image_dl() {
 
                 # Check if the local image matches what's expected in docker-compose.yml
                 if [[ "${ORIGINAL_CONTAINER}" != "${CONTAINER}" ]]; then
-                  echo -e "${RED}""WARNING: Using local image ${CONTAINER} instead of ${ORIGINAL_CONTAINER}""${NC}"
-                  echo -e "${RED}""This might cause compatibility issues with your docker-compose configuration.""${NC}"
+                  echo -e "${RED}WARNING: Using local image ${CONTAINER} instead of ${ORIGINAL_CONTAINER}${NC}"
+                  echo -e "${RED}This might cause compatibility issues with your docker-compose configuration.${NC}"
                   read -p "Continue with this image anyway? (y/n): " -n1 -r CONTINUE_ANSWER
                   echo
                   if [[ "${CONTINUE_ANSWER,,}" != "y" ]]; then
-                    echo -e "${RED}""Installation aborted by user. Please pull the correct image with:""${NC}"
-                    echo -e "${ORANGE}""docker pull ${ORIGINAL_CONTAINER}""${NC}"
+                    echo -e "${RED}Installation aborted by user. Please pull the correct image with:${NC}"
+                    echo -e "${ORANGE}docker pull ${ORIGINAL_CONTAINER}${NC}"
                     exit 1
                   fi
                 fi
@@ -113,7 +122,7 @@ I05_emba_docker_image_dl() {
           "${DOCKER_COMPOSE[@]}" up --no-start
         else
           echo "Estimated download-Size: ~5500 MB"
-          echo -e "${ORANGE}""WARNING: docker command missing - no docker pull possible.""${NC}"
+          echo -e "${ORANGE}WARNING: docker command missing - no docker pull possible.${NC}"
         fi
       ;;
     esac
