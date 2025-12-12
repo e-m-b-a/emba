@@ -787,31 +787,31 @@ grepit_module_java() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'Zip(?:Archive)?Entry' \
   "2_java_ZipEntry.txt"
-    
+
   grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
   'TarArchiveEntry e = entries.nextElement();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'Tar(?:Archive)?Entry' \
   "2_java_TarEntry.txt"
-    
+
   grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
   'SevenZArchiveEntry entry = entries.nextElement();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'SevenZ(?:Archive)?Entry' \
   "2_java_SevenZEntry.txt"
-    
+
   grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
   'CpioEntry e = entries.nextElement();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'Cpio(?:Archive)?Entry' \
   "2_java_CpioEntry.txt"
-    
+
   grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
   'CabFileEntry e = entries.nextElement();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'CabFileEntry' \
   "2_java_CabFileEntry.txt"
-    
+
   grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
   'Example from https://github.com/junrar/junrar: FileHeader fileHeader = archive.nextFileHeader();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3855,7 +3855,7 @@ grepit_module_c_lang() {
   "wolfTPM2?_" \
   "2_c_wolftpm.txt"
   # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
-  
+
   # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
   grepit_search "Erase, either a function that erases something or an iterator invalidation rule https://kera.name/articles/2011/06/iterator-invalidation-rules-c0x/ which can lead to use-after-free, see also https://blog.trailofbits.com/2020/10/09/detecting-iterator-invalidation-with-codeql/ . Often it is used within a loop. The method erase() returns an iterator. If the return value is not used but further iteration happens, the code is likely vulnerable. The code is not vulnerable if the iterator is not used afterwards, for example when first, a find() is performed and then an erase and no further iteration happens. Invalidation does not matter then." \
   'erase(' \
@@ -4131,6 +4131,7 @@ grepit_module_crypto_creds() {
   '[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}' \
   "3_cryptocred_mysql_old_hashes.txt"
 
+  # nosemgrep
   grepit_search "Blowfish hash" \
   'pass="$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6"' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -5466,7 +5467,7 @@ grepit_module_general() {
   'fake' \
   "5_general_fake.txt" \
   "-i"
- 
+
   # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
   # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "URIs with authentication information specified as ://username:password@example.org" \
@@ -6100,14 +6101,14 @@ grepit_module_backdoor() {
   "extract\s{0,${WILDCARD_SHORT}}\(" \
   "5_backdoor_php_extract.txt" \
   "-i"
-    
+
   grepit_search "Assert can be used as backdoor, see http://rileykidd.com/2013/08/21/the-backdoor-you-didnt-grep/" \
   'assert(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "assert\s{0,${WILDCARD_SHORT}}\(" \
   "6_backdoor_php_assert.txt" \
   "-i"
-    
+
   grepit_search "Preg_replace can be used as backdoor, see http://labs.sucuri.net/?note=2012-05-21" \
   'preg_replace(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
