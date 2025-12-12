@@ -6065,7 +6065,7 @@ grepit_module_backdoor() {
 
   # ATTENTION: THIS EXAMPLE STRING HAS VARIOUS CRAZY UNICODE CHARACTERS!!!
   grepit_search "The example is '/*RLO | LRIif (isAdmin)PDI LRI begin admins only */', where RLO = 'U+202E, Right-to-Left Override, Force treating following text as right-to-left', LRI = 'U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text' and PDI ='U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI'. See https://trojansource.codes/trojan-source.pdf and https://github.com/nickboucher/trojan-source/blob/main/RegEx/pcre2.regex" \
-  '/*‮ | ⁦if (isAdmin)⁩ ⁦ begin admins only */' \
+  '/*‮ | ⁦if (isAdmin)⁩ ⁦ begin admins only */' \ # nosemgrep
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '(?(DEFINE)(?<pdi>([^\x{2067}\x{2066}\x{2068}]*)([^\x{2067}\x{2066}\x{2068}\x{2069}]*)((?-2)[\x{2067}\x{2066}\x{2068}](?-2)(?-1)*(?-2)[\x{2069}](?-2))*(?-3)[\x{2067}\x{2066}\x{2068}]+?(?-2)*)(?<pdf>([^\x{202B}\x{202A}\x{202E}\x{202D}]*)([^\x{202B}\x{202A}\x{202E}\x{202D}\x{202C}]*)((?-2)[\x{202B}\x{202A}\x{202E}\x{202D}](?-2)(?-1)*(?-2)[\x{202C}](?-2))*(?-3)[\x{202B}\x{202A}\x{202E}\x{202D}]+?(?-2)*)(?<unbal>(?&pdi)|(?&pdf))(?<string>(?:\x{27}(?&unbal)\x{27})|(?:"(?&unbal)"))(?<comment>(?:\/\*(?&unbal)\*\/)|(?:\/\/(?&unbal)$)|(?:#(?&unbal)$)))(?&string)|(?&comment)' \ # nosemgrep
   "3_backdoor_trojan_source_regex.txt" \
