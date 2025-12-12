@@ -3975,28 +3975,28 @@ grepit_module_crypto_creds() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'blowfish' \
   "3_cryptocred_ciphers_blowfish.txt" \
-	"-i"
+  "-i"
 
   grepit_search "ChaCha20 cipher. Security depends heavily on usage and what is secured." \
   'ChaCha20' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'ChaCha20' \
   "3_cryptocred_ciphers_chacha20.txt" \
-	"-i"
+  "-i"
 
   grepit_search "DESede cipher. Security depends heavily on usage and what is secured." \
   'DESede' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'DESede' \
   "2_cryptocred_ciphers_desede.txt" \
-	"-i"
+  "-i"
 
   grepit_search "DiffieHellman key exchange. Security depends heavily on usage and what is secured." \
   'DiffieHellman' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'DiffieHellman' \
   "3_cryptocred_ciphers_diffiehellman.txt" \
-	"-i"
+  "-i"
 
   grepit_search "AES cipher in CBC mode, e.g. in Java. Security depends heavily on usage and what is secured." \
   'Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");' \
@@ -4496,7 +4496,7 @@ grepit_module_crypto_creds() {
   "useSSL" \
   "3_cryptocred_ssl_usage_use-ssl_narrow.txt" \
   "-i"
-	
+
   grepit_search "SSL usage with useSSL" \
   'useSSL=' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -5996,103 +5996,104 @@ grepit_module_general() {
 # We're only trying to catch fools here. We're not looking for backdoors in DWARF in ELF binaries...
 grepit_module_backdoor() {
   print_output "[*] Doing backdoor/malware/infected machine detection"
-	
+
   grepit_search "Backdoor. Sounds suspicious, why would anyone ever use this word?" \
   'back-door' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "back.{0,${WILDCARD_SHORT}}door" \
   "3_backdoor_backdoor.txt" \
   "-i"
-  
+
   grepit_search "Backd00r. Sounds suspicious, why would anyone ever use this word?" \
   'back-d00r' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "back.{0,${WILDCARD_SHORT}}d00r" \
   "3_backdoor_backd00r.txt" \
   "-i"
-	
+
+  # nosemgrep
   grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://portswigger.net/research/hiding-payloads-in-java-source-code-strings ." \
   'var log4jpayload = "%24%7Bjndi:ldap://psres.net/\\u0022;Runtime.getRuntime().exec(\u0022open -a calculator\u0022);//%7D";' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\\u0022' \
   "3_backdoor_as_unicode_narrow_22_string_escape.txt" \
   "-i"
-	
+
   grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://portswigger.net/research/hiding-payloads-in-java-source-code-strings ." \
   'init(); /* This is just a comment \u002a\u002f untime.getRuntime().exec("say WTF"); \u002f\u002a' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\\u002a\\u002f' \
   "3_backdoor_as_unicode_narrow_2a2f_multiline_comment_escape.txt" \
   "-i"
-	
+
   grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://portswigger.net/research/hiding-payloads-in-java-source-code-strings ." \
   'System.out.println("\u0058\u0022\u0029\u003b\u0052\u0075\u006e\u0074\u0069\u006d\u0065\u002e\u0067\u0065\u0074\u0052\u0075\u006e\u0074\u0069\u006d\u0065\u0028\u0029\u002e\u0065\u0078\u0065\u0063\u0028\u0022\u0073\u0061\u0079\u0020\u0057\u0054\u0046\u0022\u0029\u003b\u0053\u0079\u0073\u0074\u0065\u006d\u002e\u006f\u0075\u0074\u002e\u0070\u0072\u0069\u006e\u0074\u006c\u006e\u0028\u0022\u0045\u006e\u0064\u0020\u0054\u0065\u0073\u0074");' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\\u00..\\u00..' \
   "5_backdoor_as_unicode_wide.txt" \
   "-i"
-  
+
   grepit_search "Viagra, infected machines are often used for spam and scam and illegal drug schemes" \
   'viagra' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'viagra' \
   "7_backdoor_viagra.txt" \
   "-i"
-  
+
   grepit_search "Pharmacy, infected machines are often used for spam and scam and illegal drug schemes" \
   'pharmacy' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'pharmacy' \
   "7_backdoor_pharmacy.txt" \
   "-i"
-  
+
   grepit_search "Drug, infected machines are often used for spam and scam and illegal drug schemes" \
   'drug' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'drug' \
   "7_backdoor_drug.txt" \
   "-i"
-	
-	#LRE, U+202A, Left-to-Right Embedding, Try treating following text as left-to-right.
-	#RLE, U+202B, Right-to-Left Embedding, Try treating following text as right-to-left.
-	#LRO, U+202D, Left-to-Right Override, Force treating following text as left-to-right.
-	#RLO, U+202E, Right-to-Left Override, Force treating following text as right-to-left.
-	#LRI, U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text.
-	#RLI, U+2067, Right-to-Left Isolate, Force treating following text as right-to-left without affecting adjacent text.
-	#FSI, U+2068, First Strong Isolate, Force treating following text in direction indicated by the next character.
-	#PDF, U+202C, Pop Directional Formatting, Terminate nearest LRE, RLE, LRO, or RLO.
-	#PDI, U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI.
-	
-	# ATTENTION: THIS EXAMPLE STRING HAS VARIOUS CRAZY UNICODE CHARACTERS!!!
+
+  # LRE, U+202A, Left-to-Right Embedding, Try treating following text as left-to-right.
+  # RLE, U+202B, Right-to-Left Embedding, Try treating following text as right-to-left.
+  # LRO, U+202D, Left-to-Right Override, Force treating following text as left-to-right.
+  # RLO, U+202E, Right-to-Left Override, Force treating following text as right-to-left.
+  # LRI, U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text.
+  # RLI, U+2067, Right-to-Left Isolate, Force treating following text as right-to-left without affecting adjacent text.
+  # FSI, U+2068, First Strong Isolate, Force treating following text in direction indicated by the next character.
+  # PDF, U+202C, Pop Directional Formatting, Terminate nearest LRE, RLE, LRO, or RLO.
+  # PDI, U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI.
+
+  # ATTENTION: THIS EXAMPLE STRING HAS VARIOUS CRAZY UNICODE CHARACTERS!!!
   grepit_search "The example is '/*RLO | LRIif (isAdmin)PDI LRI begin admins only */', where RLO = 'U+202E, Right-to-Left Override, Force treating following text as right-to-left', LRI = 'U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text' and PDI ='U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI'. See https://trojansource.codes/trojan-source.pdf and https://github.com/nickboucher/trojan-source/blob/main/RegEx/pcre2.regex" \
   '/*‮ | ⁦if (isAdmin)⁩ ⁦ begin admins only */' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '(?(DEFINE)(?<pdi>([^\x{2067}\x{2066}\x{2068}]*)([^\x{2067}\x{2066}\x{2068}\x{2069}]*)((?-2)[\x{2067}\x{2066}\x{2068}](?-2)(?-1)*(?-2)[\x{2069}](?-2))*(?-3)[\x{2067}\x{2066}\x{2068}]+?(?-2)*)(?<pdf>([^\x{202B}\x{202A}\x{202E}\x{202D}]*)([^\x{202B}\x{202A}\x{202E}\x{202D}\x{202C}]*)((?-2)[\x{202B}\x{202A}\x{202E}\x{202D}](?-2)(?-1)*(?-2)[\x{202C}](?-2))*(?-3)[\x{202B}\x{202A}\x{202E}\x{202D}]+?(?-2)*)(?<unbal>(?&pdi)|(?&pdf))(?<string>(?:\x{27}(?&unbal)\x{27})|(?:"(?&unbal)"))(?<comment>(?:\/\*(?&unbal)\*\/)|(?:\/\/(?&unbal)$)|(?:#(?&unbal)$)))(?&string)|(?&comment)' \
   "3_backdoor_trojan_source_regex.txt" \
   "-i"
-	
-	# ATTENTION: THIS EXAMPLE STRING HAS AN INVISIBLE ZWSP IN THE MIDDLE!!!
+
+  # ATTENTION: THIS EXAMPLE STRING HAS AN INVISIBLE ZWSP IN THE MIDDLE!!!
   grepit_search "The example is '/ZWSP*', where ZWSP='U+200B, Zero Width Space', it's an invisible character so you won't see it below, because in code it might be invisible but between // or /* it might deactivate a comment" \
   '/​*' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-	'\x{200B}' \
+  '\x{200B}' \
   "3_backdoor_zwsp.txt" \
   "-i"
-	
+
   grepit_search "Find non-latin alphabet character strings of at least length 3, can catch homoglyph attacks, backdoor comments" \
   'ศึกษา.ไทย    католик' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "[\p{Arabic}\p{Armenian}\p{Bengali}\p{Bopomofo}\p{Braille}\p{Buhid}\p{Canadian_Aboriginal}\p{Cherokee}\p{Cyrillic}\p{Devanagari}\p{Ethiopic}\p{Georgian}\p{Greek}\p{Gujarati}\p{Gurmukhi}\p{Han}\p{Hangul}\p{Hanunoo}\p{Hebrew}\p{Hiragana}\p{Inherited}\p{Kannada}\p{Katakana}\p{Khmer}\p{Lao}\p{Limbu}\p{Malayalam}\p{Mongolian}\p{Myanmar}\p{Ogham}\p{Oriya}\p{Runic}\p{Sinhala}\p{Syriac}\p{Tagalog}\p{Tagbanwa}\p{TaiLe}\p{Tamil}\p{Telugu}\p{Thaana}\p{Thai}\p{Tibetan}]{3}" \
   "6_backdoor_non-latin-characters_narrow.txt" \
   "-i"
-	
+
   grepit_search "Find non-latin alphabet character strings of at least length 1, can catch homoglyph attacks, backdoor comments" \
   'ศึกษา.ไทย    католик' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "[\p{Arabic}\p{Armenian}\p{Bengali}\p{Bopomofo}\p{Braille}\p{Buhid}\p{Canadian_Aboriginal}\p{Cherokee}\p{Cyrillic}\p{Devanagari}\p{Ethiopic}\p{Georgian}\p{Greek}\p{Gujarati}\p{Gurmukhi}\p{Han}\p{Hangul}\p{Hanunoo}\p{Hebrew}\p{Hiragana}\p{Inherited}\p{Kannada}\p{Katakana}\p{Khmer}\p{Lao}\p{Limbu}\p{Malayalam}\p{Mongolian}\p{Myanmar}\p{Ogham}\p{Oriya}\p{Runic}\p{Sinhala}\p{Syriac}\p{Tagalog}\p{Tagbanwa}\p{TaiLe}\p{Tamil}\p{Telugu}\p{Thaana}\p{Thai}\p{Tibetan}]{1}" \
   "8_backdoor_non-latin-characters_wide.txt" \
   "-i"
-	
+
   grepit_search "Extract can be dangerous and could be used as backdoor, see http://blog.sucuri.net/2014/02/php-backdoors-hidden-with-clever-use-of-extract-function.html#null" \
   'extract(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
