@@ -35,7 +35,6 @@
 # shellcheck disable=SC2016
 
 S99_grepit() {
-
   module_log_init "${FUNCNAME[0]}"
 
   if [[ "${QUICK_SCAN:-0}" -eq 1 ]]; then
@@ -202,6 +201,15 @@ grepit_module_java() {
   "9_java_strings.txt" \
   "-o" #Special case, we only want to show the strings themselves, therefore -o to output the match only
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "For some old Java web applications this prints a perfect URL tree of accessible URLs of the web application API." \
+  ' @Path("/blaBliBlaBlub")' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '@Path\("' \
+  "5_java_path.txt" \
+  "-h" #Special case, we only want to show the line without the file name
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
   grepit_search "All javax.crypto usage" \
   'import javax.crypto.bla;' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -218,23 +226,32 @@ grepit_module_java() {
   grepit_search "SecretKeySpec is used to initialize a new encryption key: instance of SecretKey, often passed in the first argument as a byte[], which is the actual key" \
   'new SecretKeySpec(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sSecretKeySpec\(' \
+  'SecretKeySpec\(' \
   "2_java_crypto_new-SecretKeySpec.txt" \
   "-i"
 
   grepit_search "PBEKeySpec(\" is used to initialize a new encryption key: instance of PBEKeySpec, often passed in the first argument as a byte[] like \"foobar\".getBytes(), which is the actual key. I leave this here for your amusement: https://github.com/wso2/wso2-synapse/blob/master/modules/securevault/src/main/java/org/apache/synapse/securevault/secret/handler/JBossEncryptionSecretCallbackHandler.java#L40 " \
   'new PBEKeySpec("foobar".getBytes());' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sPBEKeySpec\("' \
+  'PBEKeySpec\("' \
   "2_java_crypto_new-PBEKeySpec_str.txt" \
   "-i"
 
   grepit_search "PBEKeySpec( is used to initialize a new encryption key: instance of PBEKeySpec, often passed in the first argument as a byte[], which is the actual key" \
   'new PBEKeySpec(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sPBEKeySpec\(' \
+  'PBEKeySpec\(' \
   "4_java_crypto_new-PBEKeySpec.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "PKCS8EncodedKeySpec is used to initialize a new encryption key: instance of PKCS8EncodedKeySpec, often passed in the first argument as a byte[] like \"foobar\".getBytes(), which is the actual key. I leave this here for your amusement: https://github.com/wso2/wso2-synapse/blob/master/modules/securevault/src/main/java/org/apache/synapse/securevault/secret/handler/JBossEncryptionSecretCallbackHandler.java#L40 " \
+  'new PKCS8EncodedKeySpec("foobar".getBytes());' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'EncodedKeySpec\(' \
+  "2_java_crypto_EncodedKeySpec.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "GenerateKey is another form of making a new instance of SecretKey, depending on the use case randomly generates one on the fly. It's interesting to see where the key goes next, where it's stored or accidentially written to a log file." \
   '.generateKey()' \
@@ -242,22 +259,30 @@ grepit_module_java() {
   '\.generateKey\(' \
   "4_java_crypto_generateKey.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
   grepit_search "Occurences of KeyGenerator.getInstance(ALGORITHM) it's interesting to see where the key goes next, where it's stored or accidentially written to a log file. Make sure the cipher is secure." \
   'KeyGenerator.getInstance(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'KeyGenerator\.getInstance\(' \
-  "5_java_crypto_keygenerator-getinstance.txt"
+  "3_java_crypto_keygenerator-getinstance.txt"
 
   grepit_search "Occurences of Cipher.getInstance(ALGORITHM) it's interesting to see where the key goes next, where it's stored or accidentially written to a log file. Make sure the cipher is secure." \
   'Cipher.getInstance("RSA/NONE/NoPadding");' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'Cipher\.getInstance\(' \
-  "5_java_crypto_cipher_getInstance.txt"
+  "3_java_crypto_cipher_getInstance.txt"
+
+  grepit_search "Occurences of MessageDigest.getInstance(ALGORITHM) it's interesting to see where the key goes next, where it's stored or accidentially written to a log file. Make sure the cipher is secure." \
+  'MessageDigest.getInstance("RSA/NONE/NoPadding");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'MessageDigest\.getInstance\(' \
+  "3_java_crypto_messagedigest_getInstance.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "The Random class shouldn't be used for crypthography in Java, the SecureRandom should be used instead." \
   'Random random = new Random();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new Random\(' \
+  'Random\(' \
   "6_java_crypto_random.txt"
 
   grepit_search "The Math.random class shouldn't be used for crypthography in Java, the SecureRandom should be used instead." \
@@ -266,12 +291,35 @@ grepit_module_java() {
   'Math.random\(' \
   "6_java_math_random.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
   grepit_search "Message digest is used to generate hashes" \
   'messagedigest' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'messagedigest' \
-  "5_java_crypto_messagedigest.txt" \
+  "4_java_crypto_messagedigest.txt" \
   "-i"
+
+  grepit_search "MessageDigest used to compare hashes in a time-constant manner" \
+  'java.security.MessageDigest.isEqual(msd1.digest(),msd2.digest());' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "MessageDigest\.isEqual\(" \
+  "3_java_messagedigest_isequal.txt" \
+  "-i"
+
+  grepit_search "Hashes and passwords and such should be compared in a time-constant manner" \
+  'password.equals(config.password);' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "password\.equals(IgnoreCase)?\(" \
+  "2_java_password_equals.txt" \
+  "-i"
+
+  grepit_search "Hashes and passwords and such should be compared in a time-constant manner" \
+  'hash.equals(config.password);' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "hash\.equals(IgnoreCase)?\(" \
+  "2_java_hash_equals.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "KeyPairGenerator, well, to generate key pairs, see http://docs.oracle.com/javase/7/docs/api/java/security/KeyPairGenerator.html . It's interesting to see where the key goes next, where it's stored or accidentially written to a log file." \
   'KeyPairGenerator(' \
@@ -279,34 +327,60 @@ grepit_module_java() {
   'KeyPairGenerator\(' \
   "5_java_crypto_keypairgenerator.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "The parse method of the io.jsonwebtoken.JwtParser does not verify the cryptographic signature, see for example https://github.com/datahub-project/datahub/security/advisories/GHSA-r8gm-v65f-c973" \
+  'import io.jsonwebtoken.JwtParser;' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'io.jsonwebtoken.' \
+  "4_java_jsonwebtoken.txt"
+
+  grepit_search "A likely pattern to introduce SSRF vulnerabilities is a string format with the :// protocol, see also https://github.blog/2023-03-03-github-security-lab-audited-datahub-heres-what-they-found/#ssrf-xss-ghsl-2022-076" \
+  'return _ws.url(String.format("%s://%s:%s%s"' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'String.format\("%s://' \
+  "4_java_string_format_ssrf.txt"
+
+  grepit_search "A likely pattern to introduce JSON injection vulnerabilities is a string format which looks like it is creating JSON data, see also https://github.blog/2023-03-03-github-security-lab-audited-datahub-heres-what-they-found/#json-injection-ghsl-2022-080" \
+  'String json = String.format("{ \"%s\":\"%s\" }", USER_ID_FIELD, userId);' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'String.format\("\{' \
+  "4_java_string_format_json.txt"
+
+  grepit_search "Catch all exception is a no-go, see also https://github.blog/2023-03-03-github-security-lab-audited-datahub-heres-what-they-found/#login-fail-open-on-jaas-misconfiguration-ghsl-2022-081" \
+  '} catch (Exception e) {}' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'catch \(Exception e\) \{\}' \
+  "5_java_catch_all.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
   grepit_search "String comparisons have to be done with .equals() in Java, not with == (won't work). Attention: False positives often occur if you used a decompiler to get the Java code, additionally it's allowed in JavaScript." \
   '  toString(  )  ==' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "toString\(\s{0,${WILDCARD_SHORT}}}\)\s{0,${WILDCARD_SHORT}}}==" \
+  "toString\(\s{0,${WILDCARD_SHORT}}\)\s{0,${WILDCARD_SHORT}}==" \
   "9_java_string_comparison1.txt"
 
   grepit_search "String comparisons have to be done with .equals() in Java, not with == (won't work). Attention: False positives often occur if you used a decompiler to get the Java code, additionally it's allowed in JavaScript." \
   ' ==   toString() ' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "==\s{0,${WILDCARD_SHORT}}}toString\(\s{0,${WILDCARD_SHORT}}}\)" \
+  "==\s{0,${WILDCARD_SHORT}}toString\(\s{0,${WILDCARD_SHORT}}\)" \
   "9_java_string_comparison2.txt"
 
   grepit_search "String comparisons have to be done with .equals() in Java, not with == (won't work). Attention: False positives often occur if you used a decompiler to get the Java code, additionally it's allowed in JavaScript." \
   ' ==   "' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "==\s{0,${WILDCARD_SHORT}}}\"" \
+  "==\s{0,${WILDCARD_SHORT}}\"" \
   "9_java_string_comparison3.txt"
 
   grepit_search "Problem with equals and equalsIgnoreCase for checking user supplied passwords or Hashes or HMACs or XYZ is that it is not a time-consistent method, therefore allowing timing attacks." \
-  '.equals(hash_from_request)' \
+  '.equals(foo_hash_from_request)' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "equals\(.{0,${WILDCARD_SHORT}}}[Hh][Aa][Ss][Hh]" \
+  "equals\(.{0,${WILDCARD_SHORT}}[Hh][Aa][Ss][Hh]" \
   "2_java_string_comparison_equals_hash.txt"
 
   grepit_search "Problem with equals and equalsIgnoreCase for checking user supplied passwords or Hashes or HMACs or XYZ is that it is not a time-consistent method, therefore allowing timing attacks." \
   '.equalsIgnoreCase(hash_from_request' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "equalsIgnoreCase\(.{0,${WILDCARD_SHORT}}}[Hh][Aa][Ss][Hh]" \
+  "equalsIgnoreCase\(.{0,${WILDCARD_SHORT}}[Hh][Aa][Ss][Hh]" \
   "2_java_string_comparison_equalsIgnoreCase_hash.txt"
 
   grepit_search "String comparisons: Filters and conditional decisions on user input should better be done with .equalsIgnoreCase() in Java in most cases, so that the clause doesn't miss something (e.g. think about string comparison in filters) or long switch case. Another problem with equals and equalsIgnoreCase for checking user supplied passwords or Hashes or HMACs or XYZ is that it is not a time-consistent method, therefore allowing timing attacks. Then there is also the question of different systems handling/doing Unicode Normalization (see for example https://gosecure.github.io/unicode-pentester-cheatsheet/ and https://www.gosecure.net/blog/2020/08/04/unicode-for-security-professionals/) or not: B\xC3\xBCcher and B\x75\xcc\x88cher is both UTF-8, but one is the character for a real Unicode u-Umlaut while the other is u[COMBINING DIAERESIS]. If the backend normalizes it could be that identifiers clash." \
@@ -321,16 +395,36 @@ grepit_module_java() {
   'equalsIgnoreCase\(' \
   "6_java_string_comparison_equalsIgnoreCase.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Executing native SQL query with Entity Manager could lead to SQL injection https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html" \
+  'this.entityManager.createQuery(this.foo).getResultList()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.createQuery\(" \
+  "3_java_sql_createQuery.txt"
+
+  grepit_search "Executing native SQL query with Entity Manager could lead to SQL injection https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html" \
+  'this.entityManager.createStoredProcedureQuery(this.foo).getResultList()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.createStoredProcedureQuery\(" \
+  "3_java_sql_createStoredProcedureQuery(.txt"
+
+  grepit_search "Executing native SQL query with Entity Manager could lead to SQL injection https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html" \
+  'this.entityManager.createNativeQuery(this.foo).getResultList()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.createNativeQuery\(" \
+  "2_java_sql_createNativeQuery.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
   grepit_search "The syntax for SQL executions start with execute and this should as well catch generic execute calls." \
   'executeBlaBla(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "execute.{0,${WILDCARD_SHORT}}}\(" \
+  "execute.{0,${WILDCARD_SHORT}}\(" \
   "6_java_sql_execute.txt"
 
   grepit_search "If a developer catches SQL exceptions, this could mean that she tries to hide SQL injections or similar." \
   'SQLSyntaxErrorException' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "SQL.{0,${WILDCARD_SHORT}}}Exception" \
+  "SQL.{0,${WILDCARD_SHORT}}Exception" \
   "6_java_sql_exception.txt"
 
   grepit_search "SQL syntax" \
@@ -344,6 +438,14 @@ grepit_module_java() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "prepareStatement\(" \
   "6_java_sql_prepareStatement.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "SQL prepared statements, can go wrong if String.format a WHERE clause... as happened here (for graphql though): https://github.blog/2023-03-03-github-security-lab-audited-datahub-heres-what-they-found/#neo4js-cypher-injection-ghsl-2022-087" \
+  'whereClause = String.format(" WHERE %s", sourceTypes.stream().map(type -> "src:" + type).collect(Collectors.joining(" OR ")));' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  " WHERE %s" \
+  "6_java_sql_string_format_where.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "Method to set HTTP headers in Java" \
   '.setHeader(' \
@@ -363,11 +465,13 @@ grepit_module_java() {
   "\.sendRedirect\(" \
   "5_java_http_sendRedirect.txt"
 
-  grepit_search "Java add HTTP header" \
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Java add HTTP header, can lead to business logic errors such as https://github.blog/2023-03-03-github-security-lab-audited-datahub-heres-what-they-found/#system-account-impersonation-ghsl-2022-079" \
   '.addHeader(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "\.addHeader\(" \
   "5_java_http_addHeader.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "Java add Access-Control-Allow-Origin HTTP header, if set to * then authentication should not be done with authentication sharing mechanisms such as cookies in browsers" \
   '.addHeader("Access-Control-Allow-Origin", "*")' \
@@ -426,19 +530,19 @@ grepit_module_java() {
   grepit_search "Java generic parameter fetching" \
   '.getParameterBlabla(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "\.getParameter.{0,${WILDCARD_SHORT}}}\(" \
+  "\.getParameter.{0,${WILDCARD_SHORT}}\(" \
   "7_java_http_getParameter.txt"
 
   grepit_search "Potential tainted input in string format." \
   'String.format("bla-%s"+taintedInput, variable);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "String\.format\(\s{0,${WILDCARD_SHORT}}}\"[^\"]{1,${WILDCARD_LONG}}\"\s{0,${WILDCARD_SHORT}}}\+" \
+  "String\.format\(\s{0,${WILDCARD_SHORT}}\"[^\"]{1,${WILDCARD_LONG}}\"\s{0,${WILDCARD_SHORT}}\+" \
   "4_java_format_string1.txt"
 
   grepit_search "Potential tainted input in string format." \
   'String.format(variable)' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "String\.format\(\s{0,${WILDCARD_SHORT}}}[^\"]" \
+  "String\.format\(\s{0,${WILDCARD_SHORT}}[^\"]" \
   "5_java_format_string2.txt"
 
   grepit_search "Java ProcessBuilder" \
@@ -507,63 +611,63 @@ grepit_module_java() {
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String password' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}password" \
+  "string .{0,${WILDCARD_SHORT}}password" \
   "7_java_confidential_data_in_strings_password.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String secret' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}secret" \
+  "string .{0,${WILDCARD_SHORT}}secret" \
   "7_java_confidential_data_in_strings_secret.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String key' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}key" \
+  "string .{0,${WILDCARD_SHORT}}key" \
   "7_java_confidential_data_in_strings_key.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String cvv' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}cvv" \
+  "string .{0,${WILDCARD_SHORT}}cvv" \
   "7_java_confidential_data_in_strings_cvv.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String user' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}user" \
+  "string .{0,${WILDCARD_SHORT}}user" \
   "7_java_confidential_data_in_strings_user.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String passcode' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}passcode" \
+  "string .{0,${WILDCARD_SHORT}}passcode" \
   "7_java_confidential_data_in_strings_passcode.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String passphrase' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}passphrase" \
+  "string .{0,${WILDCARD_SHORT}}passphrase" \
   "7_java_confidential_data_in_strings_passphrase.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String pin' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}pin" \
+  "string .{0,${WILDCARD_SHORT}}pin" \
   "7_java_confidential_data_in_strings_pin.txt" \
   "-i"
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String creditcard_number' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string .{0,${WILDCARD_SHORT}}}credit" \
+  "string .{0,${WILDCARD_SHORT}}credit" \
   "7_java_confidential_data_in_strings_credit.txt" \
   "-i"
 
@@ -573,18 +677,25 @@ grepit_module_java() {
   'SSLSocketFactory' \
   "6_java_SSLSocketFactory.txt"
 
-  grepit_search "Apache's NoopHostnameVerifier makes TLS verification ignore the hostname, which is obviously very bad and allow MITM" \
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Apache's NoopHostnameVerifier makes TLS verification ignore the hostname, which is obviously bad and allow MITM" \
   'import org.apache.http.conn.ssl.NoopHostnameVerifier' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'NoopHostnameVerifier' \
-  "3_java_NoopHostnameVerifier.txt"
+  "2_java_NoopHostnameVerifier.txt"
 
-  grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://plus.google.com/111673599544007386234/posts/ZeXvRCRZ3LF ." \
-  '\u0041\u0042' \
+  grepit_search "OkHttpClient can be configured to make TLS verification ignore the hostname, which is obviously bad and allows MITM" \
+  'OkHttpClient.Builder().sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) certs[0]).hostnameVerifier((hostname, session) -> true).build();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '\\u00..\\u00..' \
-  "9_java_backdoor_as_unicode.txt" \
-  "-i"
+  '\.sslSocketFactory\(' \
+  "3_java_okhttpclient_sslsocketfactory.txt"
+
+  grepit_search "OkHttpClient can be configured to make TLS verification ignore the hostname, which is obviously bad and allows MITM" \
+  'OkHttpClient.Builder().sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) certs[0]).hostnameVerifier((hostname, session) -> true).build();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.hostnameVerifier\(' \
+  "3_java_okhttpclient_hostnameverifier.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "CheckValidity method of X509Certificate in Java is a very confusing naming for developers new to SSL/TLS and has been used as the *only* check to see if a certificate is valid or not in the past. This method *only* checks the date-validity, see http://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#checkValidity%28%29 : 'Checks that the certificate is currently valid. It is if the current date and time are within the validity period given in the certificate.'" \
   'paramArrayOfX509Certificate[0].checkValidity(); return;' \
@@ -625,7 +736,7 @@ grepit_module_java() {
   grepit_search "A search for Process p = r.exec()" \
   'Process p = r.exec(args1);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "Process.{0,${WILDCARD_SHORT}}}\.exec\(" \
+  "Process.{0,${WILDCARD_SHORT}}\.exec\(" \
   "6_java_runtime_exec_2.txt"
 
   grepit_search "The function openProcess is included in apache commons and does a getRuntime().exec" \
@@ -645,7 +756,16 @@ grepit_module_java() {
   '@JsonProperty("version")' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '@JsonProperty\(' \
-  "4_java_jsonproperty_annotation.txt"
+  "3_java_jsonproperty_annotation.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  grepit_search 'Setting values in Java objects from HTTP/JSON requests directly can be very dangerous. This is usually a flexjson binding, see https://flexjson.sourceforge.net/ . These properties might be secret inputs the server accepts, but are unlinked in the client side JavaScript code. For example imagine such an annotation on the username attribute of a User Java class. This would allow to fake the username by sending a username attribute in the JSON payload. Also check for arbitrary deserialisation, see https://www.synacktiv.com/en/publications/how-to-exploit-liferay-cve-2020-7961-quick-journey-to-poc.html .' \
+  '   @JSON' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '@JSON' \
+  "3_java_json_annotation.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search 'Validation in Java can be done via certain @constraint' \
@@ -661,53 +781,97 @@ grepit_module_java() {
   '@SuppressLint' \
   "6_java_suppresslint.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
+  'ZipEntry e = entries.nextElement();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'Zip(?:Archive)?Entry' \
+  "2_java_ZipEntry.txt"
+
+  grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
+  'TarArchiveEntry e = entries.nextElement();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'Tar(?:Archive)?Entry' \
+  "2_java_TarEntry.txt"
+
+  grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
+  'SevenZArchiveEntry entry = entries.nextElement();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'SevenZ(?:Archive)?Entry' \
+  "2_java_SevenZEntry.txt"
+
+  grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
+  'CpioEntry e = entries.nextElement();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'Cpio(?:Archive)?Entry' \
+  "2_java_CpioEntry.txt"
+
+  grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
+  'CabFileEntry e = entries.nextElement();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'CabFileEntry' \
+  "2_java_CabFileEntry.txt"
+
+  grepit_search 'Handling archive entries manually in Java is dangerous and can lead to path traversal and other vulnerabilities, see https://github.com/snyk/zip-slip-vulnerability, https://github.com/jwilk/traversal-archives https://www.pentagrid.ch/en/blog/archive-pwn-tool-release/ etc.' \
+  'Example from https://github.com/junrar/junrar: FileHeader fileHeader = archive.nextFileHeader();' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.nextFileHeader\(' \
+  "3_java_nextFileHeader.txt"
+
   grepit_search 'Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
   'new ObjectOutputStream(abc);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new ObjectOutputStream' \
-  "5_java_serialization-objectOutputStream.txt"
+  'ObjectOutputStream' \
+  "4_java_serialization-objectOutputStream.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
   'abc.writeObject(def);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\.writeObject\(' \
-  "5_java_serialization-writeObject.txt"
+  "4_java_serialization-writeObject.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
   'abc.readObject(def);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\.readObject\(' \
-  "7_java_serialization-readObject.txt"
+  "4_java_serialization-readObject.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
   ' @SerializedName("variableName")' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '@SerializedName\(' \
-  "5_java_serialization-SerializedName.txt"
+  "4_java_serialization-SerializedName.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, readResolve is a one of the Java APIs' \
   '.readResolve(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\.readResolve\(' \
-  "5_java_serialization-readResolve.txt"
+  "4_java_serialization-readResolve.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, readExternal is a one of the Java APIs' \
   '.readExternal(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\.readExternal\(' \
-  "5_java_serialization-readExternal.txt"
+  "4_java_serialization-readExternal.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, readUnshared is a one of the Java APIs' \
   '.readUnshared(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\.readUnshared\(' \
-  "5_java_serialization-readUnshared.txt"
+  "4_java_serialization-readUnshared.txt"
 
-  grepit_search 'Deserialization is something that can result in remote command execution, XStream is a one of the Java APIs' \
+  grepit_search 'Deserialization is something that can result in remote command execution, XStream is one of the Java APIs' \
   'XStream(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'XStream' \
-  "5_java_serialization-XStream.txt"
+  "4_java_serialization-XStream.txt"
+
+  grepit_search 'Deserialization is something that can result in remote command execution, and this example has such a catchy name and happened in the wild that it might very well happen again: https://github.blog/2023-03-03-github-security-lab-audited-datahub-heres-what-they-found/#deserialization-of-untrusted-data-ghsl-2022-086' \
+  'return serializationHelper.unserializeFromBase64(sValue.substring(PREFIX_SB64.length()));' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'unserializeFromBase64' \
+  "3_java_unserializeFromBase64.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search 'Java serialized data? Usually Java serialized data in base64 format starts with rO0 or non-base64 with hex ACED0005. Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
   'rO0ABXNyABpodWRzb24ucmVtb3RpbmcuQ2FwYWJpbGl0eQAAAAAAAAABAgABSgAEbWFza3hwAAAAAAAAAJP4=' \
@@ -770,10 +934,10 @@ grepit_module_java() {
   '\.invoke\(' \
   "5_java_invoke.txt"
 
-  grepit_search 'New cookie should automatically be followed by c.setSecure(true); to make sure the secure flag ist set, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=java' \
+  grepit_search 'New cookie should automatically be followed by c.setSecure(true); to make sure the secure flag ist set (also httpOnly, SameSite, etc.), see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=java' \
   'Cookie c = new Cookie(a, b);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sCookie\(' \
+  'Cookie\(' \
   "5_java_new_cookie.txt"
 
   grepit_search 'Servlet methods that throw exceptions might reveal sensitive information, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=java' \
@@ -836,6 +1000,26 @@ grepit_module_java() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "\.setSigningKey\(" \
   "3_java_jwt_setSigningKey.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "JWT in com.auth0.jwt.JWT Java set the secret. JWT shouldn't be used with a secret, but with public/private keys." \
+  'Verification verifier = JWT.require(Algorithm.HMAC256(getJwtSignatureSecret()));' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "JWT\.require\(" \
+  "2_java_jwt_require.txt"
+
+  grepit_search "Iterating through X509 certificates can be dangerous, e.g. when validating. You could get multiple chain of certificates. E.g. when validating client certificates, Java TLS only checks the first entry. See https://github.blog/security/vulnerability-research/mtls-when-certificate-authentication-is-done-wrong/" \
+  'for (X509Certificate cert : certificates) {' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "X509Certificate " \
+  "3_java_x509certificate.txt"
+
+  grepit_search "Iterating through X509 certificates can be dangerous, e.g. when validating. You could get multiple chain of certificates. E.g. when validating client certificates, Java TLS only checks the first entry. See https://github.blog/security/vulnerability-research/mtls-when-certificate-authentication-is-done-wrong/" \
+  '.map(certificate -> certificate.getSubjectDN().getName())' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.getSubjectDN\(" \
+  "3_java_getSubjectDN.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 }
 
 grepit_module_jsp() {
@@ -862,21 +1046,21 @@ grepit_module_jsp() {
   grepit_search "Can introduce XSS" \
   'escape=false' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "escape\s{0,${WILDCARD_SHORT}}}=\s{0,${WILDCARD_SHORT}}}'?\"?\s{0,${WILDCARD_SHORT}}}false" \
+  "escape\s{0,${WILDCARD_SHORT}}=\s{0,${WILDCARD_SHORT}}'?\"?\s{0,${WILDCARD_SHORT}}false" \
   "2_java_jsp_xss_escape.txt" \
   "-i"
 
   grepit_search "Can introduce XSS" \
   'escapeXml=false' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "escapeXml\s{0,${WILDCARD_SHORT}}}=\s{0,${WILDCARD_SHORT}}}'?\"?\s{0,${WILDCARD_SHORT}}}false" \
+  "escapeXml\s{0,${WILDCARD_SHORT}}=\s{0,${WILDCARD_SHORT}}'?\"?\s{0,${WILDCARD_SHORT}}false" \
   "2_java_jsp_xss_escapexml.txt" \
   "-i"
 
   grepit_search "Can introduce XSS when simply writing a bean property to HTML without escaping. Attention: there are now client-side JavaScript libraries using the same tags for templates!" \
   '<%=bean.getName()%>' \
   'Attention: there are now client-side JavaScript libraries using the same tags for templates!' \
-  "<%=\s{0,${WILDCARD_SHORT}}}[A-Za-z0-9_]{1,${WILDCARD_LONG}}.get[A-Za-z0-9_]{1,${WILDCARD_LONG}}\(" \
+  "<%=\s{0,${WILDCARD_SHORT}}[A-Za-z0-9_]{1,${WILDCARD_LONG}}.get[A-Za-z0-9_]{1,${WILDCARD_LONG}}\(" \
   "1_java_jsp_property_to_html_xss.txt" \
   "-i"
 
@@ -900,6 +1084,36 @@ grepit_module_jsp() {
   "<s:file\s" \
   "4_java_jsp_file_upload.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti . VelocityEngine is one of them in Java." \
+  "VelocityEngine velocityEngine = new VelocityEngine();" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "VelocityEngine" \
+  "4_java_ssti_VelocityEngine.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti . VelocityEngine is one of them in Java." \
+  "Template t = velocityEngine.getTemplate(\"template.vm\");" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.getTemplate\(" \
+  "3_java_ssti_VelocityEngine_getTemplate.txt" \
+  "-i"
+
+  grepit_search "Never String format a template for a template engine with user supplied input. Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "templateString = String.format(templateString, param);" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "String\.format\(.{0,${WILDCARD_SHORT}}template" \
+  "2_java_ssti_string_format_template.txt" \
+  "-i"
+
+  grepit_search "New template, Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "Template template = new Template();" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "Template\(" \
+  "3_java_ssti_new_template.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 }
 
 grepit_module_java_spring() {
@@ -926,11 +1140,27 @@ grepit_module_java_spring() {
   "2_java_spring_stripEncodeUnsafeHTML.txt" \
   "-i"
 
-  grepit_search "RequestMapping method of the Spring Surf Framework to see how request URLs are mapped to classes." \
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  grepit_search "Mapping methods of the Spring Framework to see how request URLs are mapped to classes." \
   '@RequestMapping(method=RequestMethod.GET, value={"/user","/user/{id}"})' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '@RequestMapping\(' \
+  '@(((Request|Get|Post|Put|Delete|Patch)Mapping)|FeignClient)\(' \
   "5_java_spring_requestMapping.txt"
+
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  grepit_search "ResponseBody methods of the Spring Framework tells what is passed as a JSON body." \
+  '@ResponseBody' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '@ResponseBody' \
+  "5_java_spring_responseBody.txt"
+
+  grepit_search "AddViewController function of Spring" \
+  'registry.addViewController("/new").setViewName("home");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.addViewController\(' \
+  "5_java_spring_addViewController.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "ServletMapping XML of the Spring Surf Framework to see how request URLs are mapped to classes." \
   '<servlet-mapping><servlet-name>spring</servlet-name><url-pattern>*.html</url-pattern><url-pattern>/gallery/*</url-pattern><url-pattern>/galleryupload/*</url-pattern>' \
@@ -964,10 +1194,54 @@ grepit_module_java_spring() {
 
   # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Check for Spring View Manipulation https://github.com/veracode-research/spring-view-manipulation/" \
-  '@GetMapping("/safe/redirect")' \
+  '@Controller' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '@GetMapping\(' \
+  '@Controller' \
   "2_java_spring_view_manipulation.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Check for Spring anyRequest that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.anyRequest\(' \
+  "3_java_spring_anyRequest.txt"
+
+  grepit_search "Check for Spring anyRequest that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.authorize(Http)?Requests\(' \
+  "3_java_spring_authorizeHttpRequests.txt"
+
+  grepit_search "Check for Spring SecurityFilterChain that checks for authorisation for example, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  'public SecurityFilterChain web(HttpSecurity http) throws Exception {' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'SecurityFilterChain' \
+  "3_java_spring_SecurityFilterChain.txt"
+
+  grepit_search "Check for Spring requestMatchers that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.requestMatchers("/resource/**").hasAuthority("USER")' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.requestMatchers\(' \
+  "3_java_spring_requestMatchers.txt"
+
+  grepit_search "Check for Spring RegexRequestMatcher that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.requestMatchers("/resource/**").hasAuthority("USER")' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.requestMatchers\(' \
+  "3_java_spring_RegexRequestMatcher.txt"
+
+  grepit_search "Check for Spring AuthorizationDecision that checks HTTP requests for authorization, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.requestMatchers("/test/**").access((authentication, context) -> new AuthorizationDecision(webSecurity.check(authentication.get(), context.getRequest())))' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AuthorizationDecision' \
+  "3_java_spring_AuthorizationDecision.txt"
+
+  grepit_search "Check for Spring securityMatcher that checks HTTP requests for security, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  'http.securityMatcher("/api/**").authorizeHttpRequests(authorize -> authorize' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'securityMatcher' \
+  "3_java_spring_securityMatcher.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 }
 
 grepit_module_java_struts() {
@@ -976,7 +1250,7 @@ grepit_module_java_struts() {
   grepit_search "Action mappings for struts where the validation is disabled" \
   'validate  =  "false' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "validate\s{0,${WILDCARD_SHORT}}}=\s{0,${WILDCARD_SHORT}}}'?\"?false" \
+  "validate\s{0,${WILDCARD_SHORT}}=\s{0,${WILDCARD_SHORT}}'?\"?false" \
   "3_java_struts_deactivated_validation.txt" \
   "-i"
 
@@ -1031,6 +1305,12 @@ grepit_module_flex_flash() {
 grepit_module_dot_net() {
   print_output "[*] Starting Grepit .NET module" "no_log"
 
+  grepit_search ".NET SqlCommand which is used to do SQL queries, check for SQL injection" \
+  'new SqlCommand(query, conn)' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "SqlCommand" \
+  "2_dotnet_sqlcommand.txt"
+
   grepit_search ".NET View state enable" \
   'EnableViewState' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -1071,7 +1351,13 @@ grepit_module_dot_net() {
   'new TripleDESCryptoServiceProvider();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "TripleDESCryptoServiceProvider" \
-  "4_dotnet_TripleDESCryptoServiceProvider.txt"
+  "2_dotnet_TripleDESCryptoServiceProvider.txt"
+
+  grepit_search "TripleDES., see https://stackoverflow.com/questions/45521363/encrypt-in-net-core-with-tripledes" \
+  'System.Security.Cryptography.TripleDES.Create()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "TripleDES" \
+  "3_dotnet_TripleDES.txt"
 
   grepit_search "unchecked allows to disable exceptions for integer overflows, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=cs" \
   'int d = unchecked(list.Sum()); or also as a block unchecked { int e = list.Sum(); }' \
@@ -1172,8 +1458,14 @@ grepit_module_dot_net() {
   grepit_search "SQL injection found in a web application the wild: Using string.Format instead of SqlParameter leading to non-prepared SQL statement which is later executed" \
   'string.Format("SELECT * FROM [a].[b] ab ORDER BY {0} {1} OFFSET {2} ROWS FETCH NEXT {3} ROWS ONLY;", new object[4]{(object) x, (object) y, (object) z, (object) u});' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "string\.Format\(.{0,${WILDCARD_SHORT}}}SELECT.{0,${WILDCARD_LONG}}FROM" \
-  "1_dotnet_stringformat_sqli.txt" \
+  "string\.Format\(.{0,${WILDCARD_SHORT}}SELECT.{0,${WILDCARD_LONG}}FROM" \
+  "1_dotnet_stringformat_sqli.txt"
+
+  grepit_search "Variatons of SQL injection found in a web application the wild: Using string format instead of SqlParameter leading to non-prepared SQL statement which is later executed" \
+  'string.Format("SELECT * FROM [a].[b] ab ORDER BY {0} {1} OFFSET {2} ROWS FETCH NEXT {3} ROWS ONLY;", new object[4]{(object) x, (object) y, (object) z, (object) u});' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "format.{0,${WILDCARD_SHORT}}SELECT.{0,${WILDCARD_LONG}}FROM" \
+  "3_dotnet_stringformat_sqli2.txt" \
   "-i"
 
   grepit_search "SuppressUnmanagedCodeSecurityAttribute, see https://msdn.microsoft.com/en-us/library/ms182311(v=vs.80).aspx" \
@@ -1246,7 +1538,7 @@ grepit_module_php() {
   grepit_search "Dangerous PHP function: passthru" \
   'passthru(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "passthru\s{0,${WILDCARD_SHORT}}}\(" \
+  "passthru\s{0,${WILDCARD_SHORT}}\(" \
   "2_php_passthru.txt" \
   "-i"
 
@@ -1260,14 +1552,14 @@ grepit_module_php() {
   grepit_search "Dangerous PHP function: fopen" \
   'fopen(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "fopen\s{0,${WILDCARD_SHORT}}}\(" \
+  "fopen\s{0,${WILDCARD_SHORT}}\(" \
   "3_php_fopen.txt" \
   "-i"
 
   grepit_search "Dangerous PHP function: file_get_contents" \
   'file_get_contents (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "file_get_contents\s{0,${WILDCARD_SHORT}}}\(" \
+  "file_get_contents\s{0,${WILDCARD_SHORT}}\(" \
   "4_php_file_get_contents.txt" \
   "-i"
 
@@ -1281,42 +1573,42 @@ grepit_module_php() {
   grepit_search "Dangerous PHP function: mkdir" \
   'mkdir (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "mkdir\s{0,${WILDCARD_SHORT}}}\(" \
+  "mkdir\s{0,${WILDCARD_SHORT}}\(" \
   "6_php_mkdir.txt" \
   "-i"
 
   grepit_search "Dangerous PHP function: chmod" \
   'chmod (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "chmod\s{0,${WILDCARD_SHORT}}}\(" \
+  "chmod\s{0,${WILDCARD_SHORT}}\(" \
   "6_php_chmod.txt" \
   "-i"
 
   grepit_search "Dangerous PHP function: chown" \
   'chown (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "chown\s{0,${WILDCARD_SHORT}}}\(" \
+  "chown\s{0,${WILDCARD_SHORT}}\(" \
   "6_php_chown.txt" \
   "-i"
 
   grepit_search "Dangerous PHP function: file" \
   'file (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "file\s{0,${WILDCARD_SHORT}}}\(" \
+  "file\s{0,${WILDCARD_SHORT}}\(" \
   "8_php_file.txt" \
   "-i"
 
   grepit_search "Dangerous PHP function: link" \
   'link (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "link\s{0,${WILDCARD_SHORT}}}\(" \
+  "link\s{0,${WILDCARD_SHORT}}\(" \
   "5_php_link.txt" \
   "-i"
 
   grepit_search "Dangerous PHP function: rmdir" \
   'rmdir (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "rmdir\s{0,${WILDCARD_SHORT}}}\(" \
+  "rmdir\s{0,${WILDCARD_SHORT}}\(" \
   "6_php_rmdir.txt" \
   "-i"
 
@@ -1344,35 +1636,35 @@ grepit_module_php() {
   grepit_search "fsockopen is not checking server certificates if used with a ssl:// URL. See https://crypto.stanford.edu/~dabo/pubs/abstracts/ssl-client-bugs.html" \
   'fsockopen (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "fsockopen\s{0,${WILDCARD_SHORT}}}\(" \
+  "fsockopen\s{0,${WILDCARD_SHORT}}\(" \
   "1_php_fsockopen.txt" \
   "-i"
 
   grepit_search "You can make a lot of things wrong with include" \
   'include (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "include\s{0,${WILDCARD_SHORT}}}\(" \
+  "include\s{0,${WILDCARD_SHORT}}\(" \
   "5_php_include.txt" \
   "-i"
 
   grepit_search "You can make a lot of things wrong with include_once" \
   'include_once (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "include_once\s{0,${WILDCARD_SHORT}}}\(" \
+  "include_once\s{0,${WILDCARD_SHORT}}\(" \
   "5_php_include_once.txt" \
   "-i"
 
   grepit_search "You can make a lot of things wrong with require" \
   'require (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "require\s{0,${WILDCARD_SHORT}}}\(" \
+  "require\s{0,${WILDCARD_SHORT}}\(" \
   "5_php_require.txt" \
   "-i"
 
   grepit_search "You can make a lot of things wrong with require_once" \
   'require_once (' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "require_once\s{0,${WILDCARD_SHORT}}}\(" \
+  "require_once\s{0,${WILDCARD_SHORT}}\(" \
   "5_php_require_once.txt" \
   "-i"
 
@@ -1449,65 +1741,64 @@ grepit_module_php() {
   grepit_search "Databases in PHP: pg_query" \
   'pg_query(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "pg_query\s{0,${WILDCARD_SHORT}}}\(" \
+  "pg_query\s{0,${WILDCARD_SHORT}}\(" \
   "4_php_sql_pg_query.txt" \
   "-i"
 
   grepit_search "Databases in PHP: mysqli_" \
   'mysqli_method(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "mysqli_.{1,${WILDCARD_SHORT}}}\(" \
+  "mysqli_.{1,${WILDCARD_SHORT}}\(" \
   "4_php_sql_mysqli.txt" \
   "-i"
 
   grepit_search "Databases in PHP: mysql_" \
   'mysql_method(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "mysql_.{1,${WILDCARD_SHORT}}}\(" \
+  "mysql_.{1,${WILDCARD_SHORT}}\(" \
   "4_php_sql_mysql.txt" \
   "-i"
 
   grepit_search "Databases in PHP: mssql_" \
   'mssql_method(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "mssql_.{1,${WILDCARD_SHORT}}}\(" \
+  "mssql_.{1,${WILDCARD_SHORT}}\(" \
   "4_php_sql_mssql.txt" \
   "-i"
 
   grepit_search "Databases in PHP: odbc_exec" \
   'odbc_exec(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "odbc_exec\s{0,${WILDCARD_SHORT}}}\(" \
+  "odbc_exec\s{0,${WILDCARD_SHORT}}\(" \
   "4_php_sql_odbc_exec.txt" \
   "-i"
 
   grepit_search "PHP rand(): This is not a secure random." \
   'rand(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "rand\s{0,${WILDCARD_SHORT}}}\(" \
+  "rand\s{0,${WILDCARD_SHORT}}\(" \
   "6_php_rand.txt" \
   "-i"
 
-  grepit_search "Extract can be dangerous and could be used as backdoor, see http://blog.sucuri.net/2014/02/php-backdoors-hidden-with-clever-use-of-extract-function.html#null" \
-  'extract(' \
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "The big problem with == is that in PHP (and some other languages), this comparison is not type safe. What you should always use is ===. For example a hash value that starts with 0E could be interpreted as an integer if you don't take care. There were real world bugs exploiting this issue already, think login form and comparing the hashed user password, what happens if you type in 0 as the password and brute force different usernames until a user has a hash which starts with 0E? Then there is also the question of different systems handling/doing Unicode Normalization (see for example https://gosecure.github.io/unicode-pentester-cheatsheet/ and https://www.gosecure.net/blog/2020/08/04/unicode-for-security-professionals/) or not: B\xC3\xBCcher and B\x75\xcc\x88cher is both UTF-8, but one is the character for a real Unicode u-Umlaut while the other is u[COMBINING DIAERESIS]. If the backend normalizes it could be that identifiers clash." \
+  'password_hash == PBKDF2(password_from_login_http_request)' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "extract\s{0,${WILDCARD_SHORT}}}\(" \
-  "5_php_extract.txt" \
-  "-i"
+  "hash ==[^=]" \
+  "2_php_type_unsafe_comparison_hash.txt"
 
-  grepit_search "Assert can be used as backdoor, see http://rileykidd.com/2013/08/21/the-backdoor-you-didnt-grep/" \
-  'assert(' \
+  grepit_search "The big problem with == is that in PHP (and some other languages), this comparison is not type safe. What you should always use is ===. For example a hash value that starts with 0E could be interpreted as an integer if you don't take care. There were real world bugs exploiting this issue already, think login form and comparing the hashed user password, what happens if you type in 0 as the password and brute force different usernames until a user has a hash which starts with 0E? Then there is also the question of different systems handling/doing Unicode Normalization (see for example https://gosecure.github.io/unicode-pentester-cheatsheet/ and https://www.gosecure.net/blog/2020/08/04/unicode-for-security-professionals/) or not: B\xC3\xBCcher and B\x75\xcc\x88cher is both UTF-8, but one is the character for a real Unicode u-Umlaut while the other is u[COMBINING DIAERESIS]. If the backend normalizes it could be that identifiers clash." \
+  'PBKDF2(password_from_login_http_request) == hash' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "assert\s{0,${WILDCARD_SHORT}}}\(" \
-  "6_php_assert.txt" \
-  "-i"
+  "[^=]== hash" \
+  "2_php_type_unsafe_comparison_hash_back.txt"
 
-  grepit_search "Preg_replace can be used as backdoor, see http://labs.sucuri.net/?note=2012-05-21" \
-  'preg_replace(' \
+  grepit_search "The big problem with == is that in PHP (and some other languages), this comparison is not type safe. What you should always use is ===. For example a hash value that starts with 0E could be interpreted as an integer if you don't take care. There were real world bugs exploiting this issue already, think login form and comparing the hashed user password, what happens if you type in 0 as the password and brute force different usernames until a user has a hash which starts with 0E? Then there is also the question of different systems handling/doing Unicode Normalization (see for example https://gosecure.github.io/unicode-pentester-cheatsheet/ and https://www.gosecure.net/blog/2020/08/04/unicode-for-security-professionals/) or not: B\xC3\xBCcher and B\x75\xcc\x88cher is both UTF-8, but one is the character for a real Unicode u-Umlaut while the other is u[COMBINING DIAERESIS]. If the backend normalizes it could be that identifiers clash." \
+  'PBKDF2(password_from_login_http_request) == password_hash' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "preg_replace\s{0,${WILDCARD_SHORT}}}\(" \
-  "6_php_preg_replace.txt" \
-  "-i"
+  "[^=]== pass" \
+  "2_php_type_unsafe_comparison_pass_back.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "The big problem with == is that in PHP (and some other languages), this comparison is not type safe. What you should always use is ===. For example a hash value that starts with 0E could be interpreted as an integer if you don't take care. There were real world bugs exploiting this issue already, think login form and comparing the hashed user password, what happens if you type in 0 as the password and brute force different usernames until a user has a hash which starts with 0E? Then there is also the question of different systems handling/doing Unicode Normalization (see for example https://gosecure.github.io/unicode-pentester-cheatsheet/ and https://www.gosecure.net/blog/2020/08/04/unicode-for-security-professionals/) or not: B\xC3\xBCcher and B\x75\xcc\x88cher is both UTF-8, but one is the character for a real Unicode u-Umlaut while the other is u[COMBINING DIAERESIS]. If the backend normalizes it could be that identifiers clash." \
   'hashvalue_from_db == PBKDF2(password_from_login_http_request)' \
@@ -1518,34 +1809,34 @@ grepit_module_php() {
   grepit_search "hash_hmac with user input. It throws a warning when the second parameter is an array instead of an exception, which is sometimes an issue as you can input arrays by using param[]=value." \
   'hash_hmac("sha256", $_POST["salt"], $secret);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "hash_hmac\s{0,${WILDCARD_SHORT}}}\(.{0,${WILDCARD_LONG}}\\\$_" \
+  "hash_hmac\s{0,${WILDCARD_SHORT}}\(.{0,${WILDCARD_LONG}}\\\$_" \
   "2_hmac_with_user_input.txt"
 
   grepit_search "Execute on shell in PHP" \
   'shell_exec(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "shell_exec\s{0,${WILDCARD_SHORT}}}\(" \
+  "shell_exec\s{0,${WILDCARD_SHORT}}\(" \
   "3_php_shell_exec.txt" \
   "-i"
 
   grepit_search "hash_equals is time-constant hash comparison. This is probably important code." \
   'return hash_equals($hash, self::signMessage($message, $key));' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "hash_equals\s{0,${WILDCARD_SHORT}}}\(" \
+  "hash_equals\s{0,${WILDCARD_SHORT}}\(" \
   "3_php_hash_equals.txt" \
   "-i"
 
   grepit_search "unserialize to unserialize objects in PHP https://www.php.net/manual/en/function.unserialize.php" \
   '$vault = unserialize($data, ["allowed_classes" => Vault::class]);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "unserialize\s{0,${WILDCARD_SHORT}}}\(" \
+  "unserialize\s{0,${WILDCARD_SHORT}}\(" \
   "3_php_unserialize.txt" \
   "-i"
 
   grepit_search "session_id function in PHP is used to get or set the session ID https://www.php.net/manual/en/function.session-id.php" \
   '$s = session_id();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "session_id\s{0,${WILDCARD_SHORT}}}\(" \
+  "session_id\s{0,${WILDCARD_SHORT}}\(" \
   "3_php_session_id.txt" \
   "-i"
 }
@@ -1626,6 +1917,44 @@ grepit_module_html() {
 grepit_module_js() {
   print_output "[*] Starting Grepit JavaScript module" "no_log"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Object.assign might create Prototype poisioning vulnerabilities (exploited by sending __proto__ attributes) on the Node.js server if the input is user controlled." \
+  'Object.assign' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'Object.assign' \
+  "2_js_object_assign.txt"
+
+  grepit_search "CloneDeep might create Prototype poisioning vulnerabilities (exploited by sending __proto__ attributes) on the Node.js server if the input is user controlled." \
+   '.cloneDeep(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.cloneDeep\(' \
+  "2_js_cloneDeep.txt"
+
+  grepit_search "cloneDeepWith might create Prototype poisioning vulnerabilities (exploited by sending __proto__ attributes) on the Node.js server if the input is user controlled." \
+  '.cloneDeepWith(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.cloneDeepWith\(' \
+  "2_js_cloneDeepWith.txt"
+
+  grepit_search "set might create Prototype poisioning vulnerabilities (exploited by sending __proto__ attributes) on the Node.js server if the input is user controlled." \
+  '.set(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.set\(' \
+  "5_js_set.txt"
+
+  grepit_search "zipObjectDeep might create Prototype poisioning vulnerabilities (exploited by sending __proto__ attributes) on the Node.js server if the input is user controlled." \
+  '.zipObjectDeep(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.zipObjectDeep\(' \
+  "2_js_zipObjectDeep.txt"
+
+  grepit_search "defaultsDeep might create Prototype poisioning vulnerabilities (exploited by sending __proto__ attributes) on the Node.js server if the input is user controlled." \
+  '.defaultsDeep(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.defaultsDeep\(' \
+  "2_js_defaultsDeep.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+
   grepit_search "Location hash: DOM-based XSS source/sink." \
   'location.hash' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -1689,7 +2018,7 @@ grepit_module_js() {
   grepit_search "InnerHTML: DOM-based XSS source/sink." \
   '.innerHTML =' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "\.innerHTML\s{0,${WILDCARD_SHORT}}}=" \
+  "\.innerHTML\s{0,${WILDCARD_SHORT}}=" \
   "5_js_dom_xss_innerHTML.txt"
 
   grepit_search "DangerouslySetInnerHTML: DOM-based XSS sink for React.js basically. Simply what's innerHTML is called dangerouslySetInnerHTML in React." \
@@ -1709,7 +2038,7 @@ grepit_module_js() {
   grepit_search "OuterHTML: DOM-based XSS source/sink." \
   '.outerHTML =' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "\.outerHTML\s{0,${WILDCARD_SHORT}}}=" \
+  "\.outerHTML\s{0,${WILDCARD_SHORT}}=" \
   "5_js_dom_xss_outerHTML.txt"
 
   grepit_search "Console should not be logged to in production" \
@@ -1727,7 +2056,7 @@ grepit_module_js() {
   grepit_search "The constructor for functions can be used as a replacement for eval, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=js" \
   'f = new Function("name", "return 123 + name"); ' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "new\sFunction.{0,${WILDCARD_SHORT}}}" \
+  "new\sFunction.{0,${WILDCARD_SHORT}}" \
   "4_js_new_function_eval.txt"
 
   grepit_search "Sensitive information in localStorage is not encrypted, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=js" \
@@ -1745,7 +2074,7 @@ grepit_module_js() {
   grepit_search "Dynamic creation of script tag, where is it loading JavaScript from?" \
   'elem = createElement("script");' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "createElement.{0,${WILDCARD_SHORT}}}script" \
+  "createElement.{0,${WILDCARD_SHORT}}script" \
   "4_js_createElement_script.txt"
 
   grepit_search "RFC 4627 includes a parser regex example http://www.ietf.org/rfc/rfc4627.txt and it is insecure as explained in the 'the tangled web' book, as it allows incrementing and decrementing of certain variables." \
@@ -1769,7 +2098,7 @@ grepit_module_js() {
   grepit_search "Frame communication in browsers with postMessage and the corresponding addEventListener." \
   'addEventListener("message", a_function, false);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "addEventListener.{0,${WILDCARD_SHORT}}}message" \
+  "addEventListener.{0,${WILDCARD_SHORT}}message" \
   "4_js_addEventListener_message.txt"
 
   grepit_search "AllowScriptAccess allows or disallows ExternalInterface.call from an Applet to JavaScript." \
@@ -1830,8 +2159,17 @@ grepit_module_js() {
   grepit_search "A *lot* of security settings (enabling nodes, XSS to RCE, CSP, etc.) are set by giving them to the BrowserWindow constructor, see https://www.electronjs.org/docs/tutorial/security#1-only-load-secure-content . Also catch obfuscated examples such as o = new k.BrowserWindow(t);" \
   'const mainWindow = new BrowserWindow({webPreferences: {preload: path.join(app.getAppPath(), "preload.js")}}); o = new k.BrowserWindow(t);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "new .{0,${WILDCARD_SHORT}}}BrowserWindow\(" \
+  "new .{0,${WILDCARD_SHORT}}BrowserWindow\(" \
   "2_js_electron_BrowserWindow.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  # NodeJS actually
+  grepit_search "When writing NodeJS applications with MySQL it is important to make sure the prepared queries are type-safe as in https://flatt.tech/research/posts/finding-an-unseen-sql-injection-by-bypassing-escape-functions-in-mysqljs-mysql/" \
+  'var mysql = require("mysql");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "require\([\"']mysql" \
+  "2_js_require_mysql.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 }
 
 grepit_module_modsecurity() {
@@ -1915,42 +2253,42 @@ grepit_module_mobile_device() {
   grepit_search "Root detection." \
   'root detection' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "root.{0,${WILDCARD_SHORT}}}detection" \
+  "root.{0,${WILDCARD_SHORT}}detection" \
   "4_mobile_root_detection_root-detection.txt" \
   "-i"
 
   grepit_search "Root detection." \
   'RootedDevice' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "root.{0,${WILDCARD_SHORT}}}Device" \
+  "root.{0,${WILDCARD_SHORT}}Device" \
   "4_mobile_root_detection_root-device.txt" \
   "-i"
 
   grepit_search "Root detection." \
   'isRooted' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "is.{0,${WILDCARD_SHORT}}}rooted" \
+  "is.{0,${WILDCARD_SHORT}}rooted" \
   "3_mobile_root_detection_isRooted.txt" \
   "-i"
 
   grepit_search "Root detection." \
   'detect root' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "detect.{0,${WILDCARD_SHORT}}}root" \
+  "detect.{0,${WILDCARD_SHORT}}root" \
   "3_mobile_root_detection_detectRoot.txt" \
   "-i"
 
   grepit_search "Jailbreak." \
   'jail_break' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "jail.{0,${WILDCARD_SHORT}}}break" \
+  "jail.{0,${WILDCARD_SHORT}}break" \
   "3_mobile_jailbreak.txt" \
   "-i"
 
   grepit_search "Firebaseio.com links. Depending on how the firebaseio.com database was secured, it might be accessible by opening https://example.firebaseio.com/.json or similar, see https://medium.com/@fs0c131y/how-i-found-the-database-of-the-donald-daters-app-af88b06e39ad" \
   'https://abc-xyz-123.firebaseio.com/' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "https?://.{0,${WILDCARD_SHORT}}}.firebaseio.com" \
+  "https?://.{0,${WILDCARD_SHORT}}.firebaseio.com" \
   "4_mobile_firebaseio_com.txt" \
   "-i"
 }
@@ -2114,7 +2452,7 @@ grepit_module_android() {
   grepit_search "Registering receivers and sending broadcasts can be dangerous when exported (which is the case here). See http://resources.infosecinstitute.com/android-hacking-security-part-3-exploiting-broadcast-receivers/" \
   'android:exported=true' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "android:exported.{0,${WILDCARD_SHORT}}}true" \
+  "android:exported.{0,${WILDCARD_SHORT}}true" \
   "4_android_intents_intent-filter_exported.txt" \
   "-i"
 
@@ -2149,6 +2487,14 @@ grepit_module_android() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\.getData\(' \
   "5_android_intents_getData.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Android get data from an intent" \
+  '.getStringExtra(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.getStringExtra\(' \
+  "4_android_intents_getStringExtra.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
   grepit_search "Java URI parsing. Often used in Android for an intent, where it is important to specify the receiving package with setPackage as well, so that no other app could receive the intent." \
   'Uri u = Uri.parse(scheme+"://somepath");' \
@@ -2262,7 +2608,7 @@ grepit_module_android() {
   '/system/xbin/which' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "/system" \
-  "4_android_system_path.txt"
+  "5_android_system_path.txt"
 
   grepit_search "Often used in root-detection mechanisms." \
   'Superuser.apk' \
@@ -2966,6 +3312,14 @@ grepit_module_python() {
   "input\s{0,${WILDCARD_SHORT}}\(" \
   "4_python_input_function.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Eval mostly means evaluating commands, but safe_eval ist especially burned for Python projects trying to do a safe_eval, which is usually not safe..." \
+  'safe_eval (' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "safe_eval\s{0,${WILDCARD_SHORT}}\(" \
+  "2_python_safe_eval.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   grepit_search "Assert statements are not compiled into the optimized byte code, therefore can not be used for security purposes, see https://access.redhat.com/blogs/766093/posts/2592591" \
   'assert variable and other' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3006,7 +3360,7 @@ grepit_module_python() {
   '2.2 * 3.0 == 3.3 * 2.2' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "\s{1,${WILDCARD_SHORT}}==\s{1,${WILDCARD_SHORT}}" \
-  "4_python_float_equality_general.txt"
+  "6_python_float_equality_general.txt"
 
   grepit_search "Double underscore variable visibility can be tricky, see https://access.redhat.com/blogs/766093/posts/2592591" \
   'self.__private' \
@@ -3097,6 +3451,43 @@ grepit_module_python() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "extra-index-url" \
   "2_python_extra_index_url.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "flask.render_template_string(source, **context)" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.render_template_string\(" \
+  "2_python_ssti_render_template_string.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "template = Template(\"{{ clever_function() }}\")" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "Template\(.{0,${WILDCARD_LONG}}\{\{" \
+  "2_python_ssti_template_narrow.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "template = Template(\"{{ clever_function() }}\")" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "Template\(" \
+  "4_python_ssti_template_wide.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "template.render(\"{{foobar}}\")" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.render\(.{0,${WILDCARD_LONG}}\{\{" \
+  "2_python_ssti_render_narrow.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
+  "template.render(**fields)" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\.render\(" \
+  "4_python_ssti_render_wide.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 }
 
 grepit_module_ruby() {
@@ -3190,27 +3581,51 @@ grepit_module_ruby() {
   "3_ruby_validates_format_of.txt"
 }
 
-grepit_module_azure() {
-  print_output "[*] Starting Grepit Azure Cloud module" "no_log"
+grepit_module_microsoft() {
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  print_output "[*] Starting Grepit Microsoft (Windows APIs/Powershell/Azure Cloud etc.) module" "no_log"
 
   grepit_search "Azure has an Azure Resource Manager PowerShell cmdlet to store credentials in a JSON file. TokenCache is one of the keywords." \
   'TokenCache' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "TokenCache" \
-  "3_azure_TokenCache.txt"
+  "3_microsoft_TokenCache.txt"
 
   grepit_search "Azure has an Azure Resource Manager PowerShell cmdlet to store credentials in a JSON file. PublishSettingsFileUrl is one of the keywords." \
   'PublishSettingsFileUrl' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "PublishSettingsFileUrl" \
-  "3_azure_PublishSettingsFileUrl.txt"
+  "3_microsoft_PublishSettingsFileUrl.txt"
 
   grepit_search "Azure has an Azure Resource Manager PowerShell cmdlet to store credentials in a JSON file. ManagementPortalUrl is one of the keywords." \
   'ManagementPortalUrl' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "ManagementPortalUrl" \
-  "3_azure_ManagementPortalUrl.txt"
+  "3_microsoft_ManagementPortalUrl.txt"
+
+  grepit_search "X509Certificate2 is a class that can be used to open a p12 cert/private key file and pass the password to the constructor, see https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.-ctor?view=net-8.0" \
+  'X509Certificate2(filename, password, foo)' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "X509Certificate2\(" \
+  "2_microsoft_X509Certificate2.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 }
+
+# Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+grepit_module_go_lang() {
+  grepit_search "os.DirFS creates a file system for a specific directory, make sure that it's fine if that entire direcotry is served as a directory listing if you expose it via HTTP. Let's assume we have /one/two, code like e.GET(\"/two/*\", echo.WrapHandler(http.FileServer(http.FS(os.DirFS(\"/one\"))))) will expose the entire /one directory. GET /two/foo.txt will server /one/two/foo.txt, but GET /two/%2e%2e/ will do a directory listing of /one/. " \
+  'e.GET("/public/*", echo.WrapHandler(http.FileServer(http.FS(os.DirFS("/var/www/webroot/static-files")))))' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "http\.FS\(os.DirFS\(" \
+  "2_go_http_fileserver_fs.txt"
+
+  grepit_search "os.DirFS creates a file system for a specific directory, make sure that it's fine if that entire direcotry is served as a directory listing if you expose it via HTTP. Let's assume we have /one/two, code like e.GET(\"/two/*\", echo.WrapHandler(http.FileServer(http.FS(os.DirFS(\"/one\"))))) will expose the entire /one directory. GET /two/foo.txt will server /one/two/foo.txt, but GET /two/%2e%2e/ will do a directory listing of /one/. " \
+  'http.FileServer(http.FS(os.DirFS("/var/www/webroot/static-files"))))' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "http\.FS\(" \
+  "3_go_http_fs.txt"
+}
+# End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
 grepit_module_c_lang() {
   print_output "[*] Starting Grepit C language module" "no_log"
@@ -3226,6 +3641,14 @@ grepit_module_c_lang() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'realloc\(' \
   "5_c_realloc.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "alloca function should not be used as the memory returned might not be usable properly." \
+  'alloca(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'alloca\(' \
+  "2_c_alloca.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
   grepit_search "Buffer overflows and format string vulnerable methods: memcpy" \
   'memcpy(' \
@@ -3257,11 +3680,37 @@ grepit_module_c_lang() {
   'strcpy\(' \
   "2_c_insecure_c_functions_strcpy.txt"
 
-  grepit_search "Buffer overflows and format string vulnerable methods: strcpy --> strlcpy" \
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Buffer overflows and format string vulnerable methods: strcpy --> strlcpy and family such as stpncpy" \
   'strncpy(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'strncpy\(' \
+  'st[rp][nl]cpy\(' \
   "5_c_insecure_c_functions_strncpy.txt"
+
+  grepit_search "Buffer overflows and format string vulnerable methods: wcscat" \
+  'wcscat(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'wcscat\(' \
+  "2_c_insecure_c_functions_wcscat.txt"
+
+  grepit_search "Buffer overflows and format string vulnerable methods: wcscpy, wcpcpy" \
+  'wcscpy(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'wc[sp]cpy\(' \
+  "2_c_insecure_c_functions_wcscpy.txt"
+
+  grepit_search "Buffer overflows and format string vulnerable methods: printf --> snprintf" \
+  ' printf(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '[^snf]printf\(' \
+  "3_c_insecure_c_functions_printf.txt"
+
+  grepit_search "Buffer overflows and format string vulnerable methods: printk" \
+  ' printk(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'printk\(' \
+  "3_c_insecure_c_functions_printk.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
   grepit_search "Buffer overflows and format string vulnerable methods: sprintf --> snprintf, vsprintf --> vsnprintf" \
   'sprintf(' \
@@ -3299,17 +3748,121 @@ grepit_module_c_lang() {
   'scanf\(' \
   "2_c_insecure_c_functions_scanf.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Buffer overflows and format string vulnerable methods: warn() and warnx() family such as vwarnx()." \
+  'warn(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'warnx?c?\(' \
+  "6_c_insecure_c_functions_warnx.txt"
+
+  grepit_search "Buffer overflows and format string vulnerable methods: syslog() family such as vsyslog()." \
+  'syslog(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'syslog\(' \
+  "4_c_insecure_c_functions_syslog.txt"
+
+  grepit_search "Buffer overflows and format string vulnerable methods: err() family such as verrx()." \
+  'verrx(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'errx?c?\(' \
+  "4_c_insecure_c_functions_err.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+
   grepit_search "Buffer overflows and format string vulnerable methods: gets --> fgets" \
   'gets(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'gets\(' \
   "5_c_insecure_c_functions_gets.txt"
 
-  grepit_search "Random is not a secure random number generator" \
+  grepit_search "Random is not a secure random number generator and this is often not a secure random number generator (e.g. Collection.random() isn't in Kotlin)" \
   'random(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'random\(' \
   "5_c_random.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "setuid calls. " \
+  'setuid()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "sete?uid" \
+  "3_c_setuid.txt"
+
+  grepit_search "setgid calls. " \
+  'setgid()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "sete?gid" \
+  "3_c_setgid.txt"
+
+  grepit_search "access calls check a resource, but there might be time of check time of use (TOCTOU) issues" \
+  'access()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "access\(" \
+  "3_c_access.txt"
+
+  grepit_search "stat and lstat calls check a resource, but there might be time of check time of use (TOCTOU) issues" \
+  'stat()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "stat\(" \
+  "3_c_stat.txt"
+
+  grepit_search "atoi, atol, atof have undefined behavior when the conversion resulted in an error. Use the strtol etc. functions instead" \
+  'atoi()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "ato[ifl]\(" \
+  "3_c_atoi_atof_atol.txt"
+
+  grepit_search "mktemp, tmpnam, tmpnam temporary files often create permission or time of check time of use (TOCTOU) issues" \
+  'mktemp()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "mktemp\(" \
+  "3_c_mktemp.txt"
+
+  grepit_search "mktemp, tmpnam, tempnam temporary files often create permission or time of check time of use (TOCTOU) issues" \
+  'tmpnam()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "te?mpnam\(" \
+  "3_c_tmpnam.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "ctime, ctime_r, asctime and asctime_r are in banned.h" \
+  'asctime_r()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "ctime_?r?\(" \
+  "3_c_ctime.txt"
+
+  grepit_search "localtime is in banned.h" \
+  'localtime()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "localtime\(" \
+  "3_c_localtime.txt"
+
+  grepit_search "gmtime is in banned.h" \
+  'gmtime()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "gmtime\(" \
+  "3_c_gmtime.txt"
+
+  grepit_search "strtok and strtok_r are in banned.h" \
+  'strtok()' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "strtok_?r?\(" \
+  "3_c_strtok.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
+  grepit_search "wolfTPM2 in an embedded device is used to do TPM interactions. For example wolfTPM2_CreateAndLoadKey is a function called to load the TPM key Check if the password is hard-coded." \
+  'wolfTPM2_' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "wolfTPM2?_" \
+  "2_c_wolftpm.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Erase, either a function that erases something or an iterator invalidation rule https://kera.name/articles/2011/06/iterator-invalidation-rules-c0x/ which can lead to use-after-free, see also https://blog.trailofbits.com/2020/10/09/detecting-iterator-invalidation-with-codeql/ . Often it is used within a loop. The method erase() returns an iterator. If the return value is not used but further iteration happens, the code is likely vulnerable. The code is not vulnerable if the iterator is not used afterwards, for example when first, a find() is performed and then an erase and no further iteration happens. Invalidation does not matter then." \
+  'erase(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "erase\(" \
+  "3_c_erase.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 }
 
 grepit_module_malware() {
@@ -3354,6 +3907,29 @@ grepit_module_crypto_creds() {
   "4_cryptocred_crypt_call.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "RSA cipher. Security depends heavily on usage and what is secured." \
+  'RSA' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'RSA' \
+  "5_cryptocred_ciphers_RSA.txt" \
+  "-i"
+
+  grepit_search "RSA cipher in practice the most common exponent e is 65537. Security depends heavily on usage and what is secured. https://www.johndcook.com/blog/2018/12/12/rsa-exponent/" \
+  '65537' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '65537' \
+  "4_cryptocred_ciphers_65537.txt" \
+  "-i"
+
+  grepit_search "RSA cipher in practice the most common exponent e is 65537, in base64 this is AQAB. Security depends heavily on usage and what is secured. https://www.johndcook.com/blog/2018/12/12/rsa-exponent/" \
+  'AQAB' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AQAB' \
+  "4_cryptocred_ciphers_aqab.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   grepit_search "Rot32 is really really bad obfuscation and has nothing to do with crypto." \
   'ROT32' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3381,11 +3957,85 @@ grepit_module_crypto_creds() {
   "4_cryptocred_ciphers_crc32.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "PBE cipher, e.g. in Java. Security depends heavily on usage and what is secured." \
+  'PBEWithHmacSHA512AndAES_256' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'PBEWith' \
+  "3_cryptocred_ciphers_pbewith.txt"
+
+  grepit_search "AES cipher in ECB mode, e.g. in Java. Security depends heavily on usage and what is secured." \
+  'Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AES/ECB' \
+  "3_cryptocred_ciphers_aes_ecb.txt"
+
+  grepit_search "Blowfish cipher. Security depends heavily on usage and what is secured." \
+  'Blowfish' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'blowfish' \
+  "3_cryptocred_ciphers_blowfish.txt" \
+  "-i"
+
+  grepit_search "ChaCha20 cipher. Security depends heavily on usage and what is secured." \
+  'ChaCha20' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'ChaCha20' \
+  "3_cryptocred_ciphers_chacha20.txt" \
+  "-i"
+
+  grepit_search "DESede cipher. Security depends heavily on usage and what is secured." \
+  'DESede' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'DESede' \
+  "2_cryptocred_ciphers_desede.txt" \
+  "-i"
+
+  grepit_search "DiffieHellman key exchange. Security depends heavily on usage and what is secured." \
+  'DiffieHellman' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'DiffieHellman' \
+  "3_cryptocred_ciphers_diffiehellman.txt" \
+  "-i"
+
+  grepit_search "AES cipher in CBC mode, e.g. in Java. Security depends heavily on usage and what is secured." \
+  'Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AES/CBC' \
+  "2_cryptocred_ciphers_aes_cbc.txt"
+
+  grepit_search "AES cipher in ECB mode, e.g. in Java. Security depends heavily on usage and what is secured." \
+  'Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AES/ECB' \
+  "2_cryptocred_ciphers_aes_ebc.txt"
+
+  grepit_search "DES cipher in CBC mode, e.g. in Java. Security depends heavily on usage and what is secured." \
+  'Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'DES/CBC' \
+  "1_cryptocred_ciphers_des_cbc.txt"
+
+  grepit_search "DES cipher in ECB mode, e.g. in Java. Security depends heavily on usage and what is secured." \
+  'Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'DES/ECB' \
+  "1_cryptocred_ciphers_des_ecb.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
   grepit_search "DES cipher. Security depends heavily on usage and what is secured." \
   'DES' \
   'DESCRIPTION TRADES' \
   'DES' \
   "7_cryptocred_ciphers_des.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "DSA - Digital Signature Algorithm. Security depends heavily on usage and what is secured." \
+  'DSA' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'DSA' \
+  "7_cryptocred_ciphers_dsa.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "MD2. Security depends heavily on usage and what is secured." \
   'MD2' \
@@ -3397,7 +4047,15 @@ grepit_module_crypto_creds() {
   'MD5' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'MD5' \
-  "5_cryptocred_ciphers_md5.txt"
+  "5_cryptocred_ciphers_md5_wide.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/c35da61ba8965f2b7295a26abfe8b3b2f5e1d761
+  grepit_search "MD5. Security depends heavily on usage and what is secured." \
+  '_MD5_' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '[^a-zA-Z0-9]MD5[^a-zA-Z0-9]' \
+  "3_cryptocred_ciphers_md5_narrow.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/c35da61ba8965f2b7295a26abfe8b3b2f5e1d761
 
   grepit_search "SHA1. Security depends heavily on usage and what is secured." \
   'SHA1' \
@@ -3460,6 +4118,44 @@ grepit_module_crypto_creds() {
   "6_cryptocred_hash.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/c35da61ba8965f2b7295a26abfe8b3b2f5e1d761
+  grepit_search "16 bytes in Hex. Could be MD5 hash." \
+  'pass="0800fc577294c34e0b28ad2839435945"' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '[^a-zA-Z0-9]([a-fA-F0-9]{32})[^a-zA-Z0-9]' \
+  "3_cryptocred_16_bytes_hex.txt"
+
+  grepit_search "MySQL old style hash" \
+  'pass="6f8c114b58f2ce9e"' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}' \
+  "3_cryptocred_mysql_old_hashes.txt"
+
+  grepit_search "Blowfish hash" \
+  'pass="$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6"' \ # nosemgrep
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\$2a\$0[0-9]\$[a-zA-Z0-9.]{0,100}' \
+  "2_cryptocred_blowfish_hashes.txt"
+
+  grepit_search "2y crypt scheme ID for a variant of bcrypt/blowfish" \
+  'pass="$2y$10$zUGqDlav79krrlQVwDeYNOkG3BjmeGhDGD3OfHFI1L3OOL4CRRMsW"' \ # nosemgrep
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\$2y\$[0-9]{2}\$[a-zA-Z0-9.]{0,100}' \
+  "2_cryptocred_crypt_bcrypt_blowfish_hashes.txt"
+
+  grepit_search "All kind of hashes like Wordpress-MD5, Drupal 7, Unix-MD5" \
+  'pass="$P$Bp.ZDNMM98mGNxCtHSkc1DqdRPXeoR."' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\$[PHS16]\$[A-Za-z0-9.]{20}' \
+  "3_cryptocred_various_hashes.txt"
+
+  grepit_search "All kind of hashes like md5-apr1" \
+  'pass="$apr1$Bp.ZDNMM98mGNxCtHSkc1DqdRPXeoR."' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\$apr1\$[A-Za-z0-9.]{20}' \
+  "3_cryptocred_various_hashes_apr1.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/c35da61ba8965f2b7295a26abfe8b3b2f5e1d761
+
   grepit_search 'Find *nix passwd or shadow files.' \
   '_xcsbuildagent:*:239:239:Xcode Server Build Agent:/var/empty:/usr/bin/false' \
   '/Users/eh2pasz/workspace/ios/CCB/CCB/Classes/CBSaver.h:23:46: note: passing argument to parameter "name" here^M+ (NSString *)loadStringWithName:(NSString *)name; 1b:ee:24:46:0c:17:' \
@@ -3473,6 +4169,15 @@ grepit_module_crypto_creds() {
   "encrypt.{0,${WILDCARD_SHORT}}key" \
   "2_cryptocred_encryption_key.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  search "Signing key and variants of it" \
+  'sign the key' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "sign.{0,${WILDCARD_SHORT}}key" \
+  "2_cryptocred_sign_key.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "Sources of entropy: /dev/random and /dev/urandom" \
   '/dev/urandom' \
@@ -3509,7 +4214,7 @@ grepit_module_crypto_creds() {
   'private key' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "PRIVATE.{0,${WILDCARD_SHORT}}KEY" \
-  "5_cryptocred_certificates_and_keys_wide_private-key.txt" \
+  "4_cryptocred_certificates_and_keys_wide_private-key.txt" \
   "-i"
 
   grepit_search "Wide search for certificate and keys specifics of base64 encoded format" \
@@ -3558,6 +4263,22 @@ grepit_module_crypto_creds() {
   "4_cryptocred_password.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Password and variants of it" \
+  'password: hakunamatatawhatawoderfulphrase' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'password:' \
+  "2_cryptocred_password_colon_narrow.txt" \
+  "-i"
+
+  grepit_search "Password and variants of it" \
+  'password=hakunamatatawhatawoderfulphrase' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'password=' \
+  "2_cryptocred_password_equals_narrow.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
   grepit_search "Password verification methods, interesting to see if timing " \
   'verifyPassword' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3596,6 +4317,28 @@ grepit_module_crypto_creds() {
   'Pwd' \
   "5_cryptocred_pwd_capitalcase.txt"
 
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "PassPhrase and similar for encryption keys and passwords" \
+  'PassPhrase = "Bl1ck";' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'PassPhrase =' \
+  "2_cryptocred_passphrase.txt"
+
+  grepit_search "PassPhrase and similar for encryption keys and passwords" \
+  'PassPhrase = "Bl1ck";' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'PassPhrase' \
+  "4_cryptocred_passphrase_generic.txt" \
+  "-i"
+
+  grepit_search "We've seen too many hard-coded encryption keys, often in the form [...]somethingKey = new byte[...] so this is a generic search that will match .NET and Java stuff" \
+  'private static readonly byte[] loginCookieKey = new byte[8] { 78, 1, 37, 44, 7, 2, 52, 48 };' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "key.{0,${WILDCARD_SHORT}}=.{0,${WILDCARD_SHORT}}new byte" \
+  "2_cryptocred_key_new_byte.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+
   grepit_search "The Windows cmd.exe of adding a new user with a password written directly into the cmd.exe. Often found in bad-practice Windows batch scripts or log files." \
   'net user ALongUserNameExampleHere ALongPaSSwOrdExampleHere /add' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3620,6 +4363,14 @@ grepit_module_crypto_creds() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "useradd " \
   "2_cryptocred_useradd.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Adding a new user in Dockerfiles for Wildfly. Wildfly has a add-user.sh." \
+  'add-user.sh -u username -p password' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "add-user.sh" \
+  "2_cryptocred_adduser_sh.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "Insecure registry file specifying that anonymous upload via FTP is possible." \
   '"AllowAnonymous"=dword:00000001 and "AllowAnonymousUpload"=dword:00000001' \
@@ -3735,8 +4486,24 @@ grepit_module_crypto_creds() {
   'use ssl' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "use.{0,${WILDCARD_SHORT}}SSL" \
-  "4_cryptocred_ssl_usage_use-ssl.txt" \
+  "4_cryptocred_ssl_usage_use-ssl-wide.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "SSL usage with useSSL" \
+  'useSSL=' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "useSSL" \
+  "3_cryptocred_ssl_usage_use-ssl_narrow.txt" \
+  "-i"
+
+  grepit_search "SSL usage with useSSL" \
+  'useSSL=' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "useSSL=" \
+  "2_cryptocred_ssl_usage_use-ssl_very_narrow.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "TLS usage with require TLS" \
   'require TLS' \
@@ -3798,6 +4565,14 @@ grepit_module_crypto_creds() {
   "openssl enc" \
   "2_cryptocred_openssl_enc.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "AES init context invocation that requires passing the AES key" \
+  'AES_init_ctx' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "AES_init_ctx" \
+  "2_cryptocred_AES_init_ctx.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
   grepit_search "OpenSSL command line parameter pkcs12 for storing keys" \
   'openssl pkcs12' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3839,6 +4614,14 @@ grepit_module_crypto_creds() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "openssl s_server" \
   "3_cryptocred_openssl_s_server.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "x509 certificates" \
+  'x509' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "x509" \
+  "2_cryptocred_x509.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 }
 
 grepit_module_api_keys() {
@@ -4221,6 +5004,14 @@ grepit_module_api_keys() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "kubeconfig-[^\:]{0,${WILDCARD_LONG}}:." \
   "2_apikeys_kubeconfig.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Microsoft Azure management API keys HTTP header name that has to be used: https://learn.microsoft.com/en-us/azure/api-management/api-management-subscriptions" \
+  'Ocp-Apim-Subscription-Key: 9182478923593252353435' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "Ocp-Apim-Subscription-Key" \
+  "2_apikeys_ocp_apim_subscription_key.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 }
 
 grepit_module_asm_native() {
@@ -4237,6 +5028,14 @@ grepit_module_asm_native() {
 
 grepit_module_general() {
   print_output "[*] Starting Grepit General module" "no_log"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/c35da61ba8965f2b7295a26abfe8b3b2f5e1d761
+  grepit_search "Extract URLs." \
+  'https://foo.bar/blabla' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "https?://[a-z0-9.:-]{4,${WILDCARD_SHORT}}/" \
+  "2_general_urls.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/c35da61ba8965f2b7295a26abfe8b3b2f5e1d761
 
   grepit_search "A generic templating pattern that is used in HTML generation of Java (JSP), Ruby and client-side JavaScript libraries." \
   'In Java <%=bean.getName()%> or in ruby <%= parameter[:value] %>' \
@@ -4429,12 +5228,35 @@ grepit_module_general() {
   "5_general_popen_wide.txt" \
   "-i"
 
-  grepit_search "spawn: Command execution?" \
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "exec.Command: Command execution? See also BatBadBut problem at https://flatt.tech/research/posts/batbadbut-you-cant-securely-execute-commands-on-windows/" \
+  'cmd := exec.Command("test.exe", "arg1", "arg2")' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "exec.Command" \
+  "3_general_execCommand.txt" \
+  "-i"
+
+  grepit_search "CreatePocessW: Command execution? See also BatBadBut problem at https://flatt.tech/research/posts/batbadbut-you-cant-securely-execute-commands-on-windows/" \
+  'CreateProcessW(nullptr, arguments, nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi);' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "CreateProcessW" \
+  "3_general_CreateProcessW.txt" \
+  "-i"
+
+  grepit_search "CreatePocess: Command execution? See also BatBadBut problem at https://flatt.tech/research/posts/batbadbut-you-cant-securely-execute-commands-on-windows/" \
+  'CreateProcessW(nullptr, arguments, nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi);' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "CreateProcess" \
+  "4_general_CreateProcess.txt" \
+  "-i"
+
+  grepit_search "spawn: Command execution? See also BatBadBut problem at https://flatt.tech/research/posts/batbadbut-you-cant-securely-execute-commands-on-windows/" \
   'spawn(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "spawn\s{0,${WILDCARD_SHORT}}\(" \
   "4_general_spawn_narrow.txt" \
   "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
 
   grepit_search "spawn: Command execution?" \
   'spawn' \
@@ -4463,6 +5285,22 @@ grepit_module_general() {
   "chmod" \
   "5_general_chmod.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Ansible credentials?" \
+  'ansible_user' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "ansible_" \
+  "4_general_ansible_credentials.txt" \
+  "-i"
+
+  grepit_search "Ansible lineinfile or replace command replaces via regexp certain values in Ansible. If it replaces a password, the 'no_log: true' is important to be set to make sure the password is not going into the ansible log." \
+  'replace: "{{something_password}}"' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "replace: .{0,${WILDCARD_SHORT}}pass" \
+  "3_general_ansible_replace.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
   grepit_search "Session timeouts should be reasonable short for things like sessions for web logins but can also lead to denial of service conditions in other cases." \
   'session-timeout' \
@@ -4554,6 +5392,32 @@ grepit_module_general() {
   'TODO' \
   "5_general_todo_uppercase.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "FIXME, unfinished and insecure things?" \
+  'FIXME:' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'FIXME' \
+  "5_general_fixme_uppercase.txt"
+
+  grepit_search "LATER, unfinished and insecure things?" \
+  'LATER:' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'LATER' \
+  "5_general_later_uppercase.txt"
+
+  grepit_search "BUG, unfinished, buggy and insecure things?" \
+  'BUG:' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'BUG' \
+  "5_general_bug_uppercase.txt"
+
+  grepit_search "XXX, unfinished, buggy and insecure things?" \
+  'XXX:' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'XXX' \
+  "5_general_xxx_uppercase.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+
   grepit_search "Workarounds, maybe they work around security?" \
   'workaround: ' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4596,20 +5460,6 @@ grepit_module_general() {
   "5_general_bypass.txt" \
   "-i"
 
-  grepit_search "Backdoor. Sounds suspicious, why would anyone ever use this word?" \
-  'back-door' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "back.{0,${WILDCARD_SHORT}}door" \
-  "3_general_backdoor.txt" \
-  "-i"
-
-  grepit_search "Backd00r. Sounds suspicious, why would anyone ever use this word?" \
-  'back-d00r' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "back.{0,${WILDCARD_SHORT}}d00r" \
-  "5_general_backd00r.txt" \
-  "-i"
-
   grepit_search "Fake. Sounds suspicious." \
   'fake:' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4617,11 +5467,12 @@ grepit_module_general() {
   "5_general_fake.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
   # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "URIs with authentication information specified as ://username:password@example.org" \
   'http://username:password@example.com' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "://[^ :/]{1,${WILDCARD_SHORT}}:[^ :/]{1,${WILDCARD_SHORT}}@" \
+  "://[^ @:/]{1,${WILDCARD_SHORT}}:[^ @:/]{1,${WILDCARD_SHORT}}@" \
   "1_general_uris_auth_info_narrow.txt" \
   "-i"
 
@@ -4629,9 +5480,10 @@ grepit_module_general() {
   grepit_search "URIs with authentication information specified as username:password@example.org" \
   'username:password@example.com' \
   'android:duration="@integer/animator_heartbeat_scaling_duration" or addObject:NSLocalizedString(@' \
-  "[^ \:/]{1,${WILDCARD_SHORT}}:[^ \:/]{1,${WILDCARD_SHORT}}@" \
+  "[^ @\:/]{1,${WILDCARD_SHORT}}:[^ @\:/]{1,${WILDCARD_SHORT}}@" \
   "2_general_uris_auth_info_wide.txt" \
   "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
   grepit_search "All HTTPS URIs" \
   'https://example.com' \
@@ -4682,6 +5534,61 @@ grepit_module_general() {
   "3_general_jdbc_uri.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "jdbc URIs when settings trustServerCertificate=true the TLS certificate is not checked, see for example https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver16" \
+  'jdbc:sqlserver://localhost:1433;user=SA;password=pass;encrypt=true;trustServerCertificate=true' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'trustServerCertificate=true' \
+  "1_general_jdbc_trustServerCertificate_true.txt" \
+  "-i"
+
+  grepit_search "jdbc URIs when settings hostNameInCertificate to a wildcard, the TLS certificate is only checked for that wildcard which can be a little permissive, see for example https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver16" \
+  'jdbc:sqlserver://localhost:1433;user=SA;password=pass;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'hostNameInCertificate=\*' \
+  "1_general_jdbc_hostNameInCertificate_wildcard.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
+  # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection" \
+  "<div bar:foo=\"@{'/0example?yes=\${someparam}'}\"></div>" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "<.{0,${WILDCARD_LONG}}\\{[^\\}]{0,${WILDCARD_LONG}}\\{[^\\}]{0,${WILDCARD_LONG}}\\}" \
+  "3_general_ssti_double_narrow.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection" \
+  "<div bar:foo=\"@{{someparam}}\"></div>" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "<.{0,${WILDCARD_LONG}}\\{\\{.{0,${WILDCARD_LONG}}\\}\\}" \
+  "4_general_ssti_html_double_braces_wide.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection" \
+  "<div bar:foo=\"@{'/foo/bar/__\${someparam}__'}\"></div>" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "@\\{.{0,${WILDCARD_LONG}}__\\\$\\{.{0,${WILDCARD_LONG}}\\}__.{0,${WILDCARD_LONG}}\\}" \
+  "2_general_ssti_html_double_braces_dollar_narrow.txt" \
+  "-i"
+
+  grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection" \
+  "{{someparam}}" \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "\\{\\{.{0,${WILDCARD_LONG}}\\}\\}" \
+  "5_general_ssti_double_braces_wide.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
+
+  # Start - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+  grepit_search "Variatons of SQL injection found in a web application the wild: Using string format instead of SqlParameter leading to non-prepared SQL statement which is later executed" \
+  '"SELECT * FROM [a].[b] ab ORDER BY %s"' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "SELECT.{0,${WILDCARD_LONG}}FROM.{0,${WILDCARD_LONG}}%s" \
+  "1_generic_sqli_stringformat.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
+
   grepit_search "Generic database connection string for SQL server. See https://www.connectionstrings.com/sql-server/ for different connection strings." \
   'Server=myServerAddress;Database=myDataBase;Trusted_Connection=True;' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4699,7 +5606,7 @@ grepit_module_general() {
   grepit_search "Generic database connection string for various databases. See https://www.connectionstrings.com/sql-server/ for different connection strings." \
   'Data Source=myServerAddress;Initial Catalog=myDataBase;Integrated Security=SSPI;User ID=myDomain\myUsername;Password=myPassword;' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  ";Password=" \
+  "Password=" \
   "1_general_con_str_sql_password.txt" \
   "-i"
 
@@ -4946,6 +5853,15 @@ grepit_module_general() {
   "5_general_base64_content.txt"
   # case sensitive, the regex is insensitive anyway
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Base64 encoded data (that is more than 6 bytes long and starts with something else). This regex won't detect a base64 encoded value over several lines and won't detect one that does not end with an equal sign..." \
+  'YWJj YScqKyo6LV/Dpw==' \
+  '/target/ //JQLite - the following ones shouldnt be an issue anymore as we require more than 6 bytes: done echo else gen/ ////' \
+  '[^A-Za-z0-9+/](?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})' \
+  "4_general_base64_content_start_no_alphabet.txt"
+  # case sensitive, the regex is insensitive anyway
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   # As the following regex had way too many false positives (thousands of english words match), we require the base64 to include
   # at least one equal sign at the end. The old regex was:
   # '(?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})'
@@ -4955,6 +5871,15 @@ grepit_module_general() {
   '(?:[A-Za-z0-9_-]{4}){2,}(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=)' \
   "5_general_base64_urlsafe.txt"
   # case sensitive, the regex is insensitive anyway
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Base64 URL-safe encoded data (that is more than 6 bytes long and starts with something else). To get from URL-safe base64 to regular base64 you need .replace('-','+').replace('_','/'). This regex won't detect a base64 encoded value over several lines and won't detect one that does not end with an equal sign..." \
+  'YWJj YScqKyo6LV_Dpw==' \
+  '/target/ //JQLite - the following ones shouldnt be an issue anymore as we require more than 6 bytes: done echo else gen/ ////' \
+  '[^A-Za-z0-9_-](?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})' \
+  "4_general_base64_urlsafe_no_alphabet.txt"
+  # case sensitive, the regex is insensitive anyway
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "Base64 as a word used" \
   'Base64' \
@@ -5002,21 +5927,21 @@ grepit_module_general() {
   'Stupid!' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'stupid' \
-  "4_general_swear_stupid.txt" \
+  "5_general_swear_stupid.txt" \
   "-i"
 
   grepit_search "Fuck: Swear words are often used when things don't work as intended by the developer. X-)" \
   'Fuck!' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'fuck' \
-  "4_general_swear_fuck.txt" \
+  "5_general_swear_fuck.txt" \
   "-i"
 
   grepit_search "Shit and bullshit: Swear words are often used when things don't work as intended by the developer." \
   'Shit!' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'shit' \
-  "4_general_swear_shit.txt" \
+  "5_general_swear_shit.txt" \
   "-i"
 
   grepit_search "Crap: Swear words are often used when things don't work as intended by the developer." \
@@ -5065,4 +5990,143 @@ grepit_module_general() {
   "sleep" \
   "7_general_sleep_generic.txt" \
   "-i"
+}
+
+# Security issues can have many sources, often it is neglect of security topics, but it can also be malintent.
+# We're only trying to catch fools here. We're not looking for backdoors in DWARF in ELF binaries...
+grepit_module_backdoor() {
+  print_output "[*] Starting Grepit backdoor/malware/infected machine detection module" "no_log"
+
+  grepit_search "Backdoor. Sounds suspicious, why would anyone ever use this word?" \
+  'back-door' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "back.{0,${WILDCARD_SHORT}}door" \
+  "3_backdoor_backdoor.txt" \
+  "-i"
+
+  grepit_search "Backd00r. Sounds suspicious, why would anyone ever use this word?" \
+  'back-d00r' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "back.{0,${WILDCARD_SHORT}}d00r" \
+  "3_backdoor_backd00r.txt" \
+  "-i"
+
+  grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://portswigger.net/research/hiding-payloads-in-java-source-code-strings ." \
+  'var log4jpayload = "%24%7Bjndi:ldap://psres.net/\\u0022;Runtime.getRuntime().exec(\u0022open -a calculator\u0022);//%7D";' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\\u0022' \
+  "3_backdoor_as_unicode_narrow_22_string_escape.txt" \
+  "-i"
+
+  grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://portswigger.net/research/hiding-payloads-in-java-source-code-strings ." \
+  'init(); /* This is just a comment \u002a\u002f untime.getRuntime().exec("say WTF"); \u002f\u002a' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\\u002a\\u002f' \
+  "3_backdoor_as_unicode_narrow_2a2f_multiline_comment_escape.txt" \
+  "-i"
+
+  grepit_search "It's very easy to construct a backdoor in Java with Unicode \u characters, even within multi line comments, see http://pastebin.com/iGQhuUGd and https://portswigger.net/research/hiding-payloads-in-java-source-code-strings ." \
+  'System.out.println("\u0058\u0022\u0029\u003b\u0052\u0075\u006e\u0074\u0069\u006d\u0065\u002e\u0067\u0065\u0074\u0052\u0075\u006e\u0074\u0069\u006d\u0065\u0028\u0029\u002e\u0065\u0078\u0065\u0063\u0028\u0022\u0073\u0061\u0079\u0020\u0057\u0054\u0046\u0022\u0029\u003b\u0053\u0079\u0073\u0074\u0065\u006d\u002e\u006f\u0075\u0074\u002e\u0070\u0072\u0069\u006e\u0074\u006c\u006e\u0028\u0022\u0045\u006e\u0064\u0020\u0054\u0065\u0073\u0074");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\\u00..\\u00..' \
+  "5_backdoor_as_unicode_wide.txt" \
+  "-i"
+
+  grepit_search "Viagra, infected machines are often used for spam and scam and illegal drug schemes" \
+  'viagra' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'viagra' \
+  "7_backdoor_viagra.txt" \
+  "-i"
+
+  grepit_search "Pharmacy, infected machines are often used for spam and scam and illegal drug schemes" \
+  'pharmacy' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'pharmacy' \
+  "7_backdoor_pharmacy.txt" \
+  "-i"
+
+  grepit_search "Drug, infected machines are often used for spam and scam and illegal drug schemes" \
+  'drug' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'drug' \
+  "7_backdoor_drug.txt" \
+  "-i"
+
+  # LRE, U+202A, Left-to-Right Embedding, Try treating following text as left-to-right.
+  # RLE, U+202B, Right-to-Left Embedding, Try treating following text as right-to-left.
+  # LRO, U+202D, Left-to-Right Override, Force treating following text as left-to-right.
+  # RLO, U+202E, Right-to-Left Override, Force treating following text as right-to-left.
+  # LRI, U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text.
+  # RLI, U+2067, Right-to-Left Isolate, Force treating following text as right-to-left without affecting adjacent text.
+  # FSI, U+2068, First Strong Isolate, Force treating following text in direction indicated by the next character.
+  # PDF, U+202C, Pop Directional Formatting, Terminate nearest LRE, RLE, LRO, or RLO.
+  # PDI, U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI.
+
+  # ATTENTION: THIS EXAMPLE STRING HAS VARIOUS CRAZY UNICODE CHARACTERS!!!
+  grepit_search "The example is '/*RLO | LRIif (isAdmin)PDI LRI begin admins only */', where RLO = 'U+202E, Right-to-Left Override, Force treating following text as right-to-left', LRI = 'U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text' and PDI ='U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI'. See https://trojansource.codes/trojan-source.pdf and https://github.com/nickboucher/trojan-source/blob/main/RegEx/pcre2.regex" \
+  '/*‮ | ⁦if (isAdmin)⁩ ⁦ begin admins only */' \ # nosemgrep
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '(?(DEFINE)(?<pdi>([^\x{2067}\x{2066}\x{2068}]*)([^\x{2067}\x{2066}\x{2068}\x{2069}]*)((?-2)[\x{2067}\x{2066}\x{2068}](?-2)(?-1)*(?-2)[\x{2069}](?-2))*(?-3)[\x{2067}\x{2066}\x{2068}]+?(?-2)*)(?<pdf>([^\x{202B}\x{202A}\x{202E}\x{202D}]*)([^\x{202B}\x{202A}\x{202E}\x{202D}\x{202C}]*)((?-2)[\x{202B}\x{202A}\x{202E}\x{202D}](?-2)(?-1)*(?-2)[\x{202C}](?-2))*(?-3)[\x{202B}\x{202A}\x{202E}\x{202D}]+?(?-2)*)(?<unbal>(?&pdi)|(?&pdf))(?<string>(?:\x{27}(?&unbal)\x{27})|(?:"(?&unbal)"))(?<comment>(?:\/\*(?&unbal)\*\/)|(?:\/\/(?&unbal)$)|(?:#(?&unbal)$)))(?&string)|(?&comment)' \ # nosemgrep
+  "3_backdoor_trojan_source_regex.txt" \
+  "-i"
+
+  # ATTENTION: THIS EXAMPLE STRING HAS AN INVISIBLE ZWSP IN THE MIDDLE!!!
+  grepit_search "The example is '/ZWSP*', where ZWSP='U+200B, Zero Width Space', it's an invisible character so you won't see it below, because in code it might be invisible but between // or /* it might deactivate a comment" \
+  '/​*' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\x{200B}' \
+  "3_backdoor_zwsp.txt" \
+  "-i"
+
+  grepit_search "Find non-latin alphabet character strings of at least length 3, can catch homoglyph attacks, backdoor comments" \
+  'ศึกษา.ไทย    католик' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "[\p{Arabic}\p{Armenian}\p{Bengali}\p{Bopomofo}\p{Braille}\p{Buhid}\p{Canadian_Aboriginal}\p{Cherokee}\p{Cyrillic}\p{Devanagari}\p{Ethiopic}\p{Georgian}\p{Greek}\p{Gujarati}\p{Gurmukhi}\p{Han}\p{Hangul}\p{Hanunoo}\p{Hebrew}\p{Hiragana}\p{Inherited}\p{Kannada}\p{Katakana}\p{Khmer}\p{Lao}\p{Limbu}\p{Malayalam}\p{Mongolian}\p{Myanmar}\p{Ogham}\p{Oriya}\p{Runic}\p{Sinhala}\p{Syriac}\p{Tagalog}\p{Tagbanwa}\p{TaiLe}\p{Tamil}\p{Telugu}\p{Thaana}\p{Thai}\p{Tibetan}]{3}" \
+  "6_backdoor_non-latin-characters_narrow.txt" \
+  "-i"
+
+  grepit_search "Find non-latin alphabet character strings of at least length 1, can catch homoglyph attacks, backdoor comments" \
+  'ศึกษา.ไทย    католик' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "[\p{Arabic}\p{Armenian}\p{Bengali}\p{Bopomofo}\p{Braille}\p{Buhid}\p{Canadian_Aboriginal}\p{Cherokee}\p{Cyrillic}\p{Devanagari}\p{Ethiopic}\p{Georgian}\p{Greek}\p{Gujarati}\p{Gurmukhi}\p{Han}\p{Hangul}\p{Hanunoo}\p{Hebrew}\p{Hiragana}\p{Inherited}\p{Kannada}\p{Katakana}\p{Khmer}\p{Lao}\p{Limbu}\p{Malayalam}\p{Mongolian}\p{Myanmar}\p{Ogham}\p{Oriya}\p{Runic}\p{Sinhala}\p{Syriac}\p{Tagalog}\p{Tagbanwa}\p{TaiLe}\p{Tamil}\p{Telugu}\p{Thaana}\p{Thai}\p{Tibetan}]{1}" \
+  "8_backdoor_non-latin-characters_wide.txt" \
+  "-i"
+
+  grepit_search "Extract can be dangerous and could be used as backdoor, see http://blog.sucuri.net/2014/02/php-backdoors-hidden-with-clever-use-of-extract-function.html#null" \
+  'extract(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "extract\s{0,${WILDCARD_SHORT}}\(" \
+  "5_backdoor_php_extract.txt" \
+  "-i"
+
+  grepit_search "Assert can be used as backdoor, see http://rileykidd.com/2013/08/21/the-backdoor-you-didnt-grep/" \
+  'assert(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "assert\s{0,${WILDCARD_SHORT}}\(" \
+  "6_backdoor_php_assert.txt" \
+  "-i"
+
+  grepit_search "Preg_replace can be used as backdoor, see http://labs.sucuri.net/?note=2012-05-21" \
+  'preg_replace(' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "preg_replace\s{0,${WILDCARD_SHORT}}\(" \
+  "6_backdoor_php_preg_replace.txt" \
+  "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Using curl to fetch or submit from/to internet resources is one of the way to implement a backdoor" \
+  'curl --help' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "curl " \
+  "5_backdoor_curl.txt" \
+  "-i"
+
+  grepit_search "Using wget to fetch or submit from/to internet resources is one of the way to implement a backdoor" \
+  'wget --help' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "wget " \
+  "5_backdoor_wget.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 }
