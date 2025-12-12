@@ -203,7 +203,7 @@ grepit_module_java() {
 
   # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
   grepit_search "For some old Java web applications this prints a perfect URL tree of accessible URLs of the web application API." \
-  ' @Path("blaBliBlaBlub")' \
+  ' @Path("/blaBliBlaBlub")' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '@Path\("' \
   "5_java_path.txt" \
@@ -226,23 +226,32 @@ grepit_module_java() {
   grepit_search "SecretKeySpec is used to initialize a new encryption key: instance of SecretKey, often passed in the first argument as a byte[], which is the actual key" \
   'new SecretKeySpec(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sSecretKeySpec\(' \
+  'SecretKeySpec\(' \
   "2_java_crypto_new-SecretKeySpec.txt" \
   "-i"
 
   grepit_search "PBEKeySpec(\" is used to initialize a new encryption key: instance of PBEKeySpec, often passed in the first argument as a byte[] like \"foobar\".getBytes(), which is the actual key. I leave this here for your amusement: https://github.com/wso2/wso2-synapse/blob/master/modules/securevault/src/main/java/org/apache/synapse/securevault/secret/handler/JBossEncryptionSecretCallbackHandler.java#L40 " \
   'new PBEKeySpec("foobar".getBytes());' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sPBEKeySpec\("' \
+  'PBEKeySpec\("' \
   "2_java_crypto_new-PBEKeySpec_str.txt" \
   "-i"
 
   grepit_search "PBEKeySpec( is used to initialize a new encryption key: instance of PBEKeySpec, often passed in the first argument as a byte[], which is the actual key" \
   'new PBEKeySpec(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sPBEKeySpec\(' \
+  'PBEKeySpec\(' \
   "4_java_crypto_new-PBEKeySpec.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "PKCS8EncodedKeySpec is used to initialize a new encryption key: instance of PKCS8EncodedKeySpec, often passed in the first argument as a byte[] like \"foobar\".getBytes(), which is the actual key. I leave this here for your amusement: https://github.com/wso2/wso2-synapse/blob/master/modules/securevault/src/main/java/org/apache/synapse/securevault/secret/handler/JBossEncryptionSecretCallbackHandler.java#L40 " \
+  'new PKCS8EncodedKeySpec("foobar".getBytes());' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'EncodedKeySpec\(' \
+  "2_java_crypto_EncodedKeySpec.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "GenerateKey is another form of making a new instance of SecretKey, depending on the use case randomly generates one on the fly. It's interesting to see where the key goes next, where it's stored or accidentially written to a log file." \
   '.generateKey()' \
@@ -273,7 +282,7 @@ grepit_module_java() {
   grepit_search "The Random class shouldn't be used for crypthography in Java, the SecureRandom should be used instead." \
   'Random random = new Random();' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new Random\(' \
+  'Random\(' \
   "6_java_crypto_random.txt"
 
   grepit_search "The Math.random class shouldn't be used for crypthography in Java, the SecureRandom should be used instead." \
@@ -363,7 +372,7 @@ grepit_module_java() {
   "9_java_string_comparison3.txt"
 
   grepit_search "Problem with equals and equalsIgnoreCase for checking user supplied passwords or Hashes or HMACs or XYZ is that it is not a time-consistent method, therefore allowing timing attacks." \
-  '.equals(hash_from_request)' \
+  '.equals(foo_hash_from_request)' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "equals\(.{0,${WILDCARD_SHORT}}[Hh][Aa][Ss][Hh]" \
   "2_java_string_comparison_equals_hash.txt"
@@ -812,7 +821,7 @@ grepit_module_java() {
   grepit_search 'Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
   'new ObjectOutputStream(abc);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new ObjectOutputStream' \
+  'ObjectOutputStream' \
   "4_java_serialization-objectOutputStream.txt"
 
   grepit_search 'Deserialization is something that can result in remote command execution, there are various exploits for such things, see http://foxglovesecurity.com/2015/11/06/what-do-weblogic-websphere-jboss-jenkins-opennms-and-your-application-have-in-common-this-vulnerability/ and https://github.com/mbechler/marshalsec for example' \
@@ -925,10 +934,10 @@ grepit_module_java() {
   '\.invoke\(' \
   "5_java_invoke.txt"
 
-  grepit_search 'New cookie should automatically be followed by c.setSecure(true); to make sure the secure flag ist set, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=java' \
+  grepit_search 'New cookie should automatically be followed by c.setSecure(true); to make sure the secure flag ist set (also httpOnly, SameSite, etc.), see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=java' \
   'Cookie c = new Cookie(a, b);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'new\sCookie\(' \
+  'Cookie\(' \
   "5_java_new_cookie.txt"
 
   grepit_search 'Servlet methods that throw exceptions might reveal sensitive information, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=java' \
@@ -1101,7 +1110,7 @@ grepit_module_jsp() {
   grepit_search "New template, Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection and https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti" \
   "Template template = new Template();" \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "new Template\(" \
+  "Template\(" \
   "3_java_ssti_new_template.txt" \
   "-i"
   # End - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
@@ -1131,11 +1140,27 @@ grepit_module_java_spring() {
   "2_java_spring_stripEncodeUnsafeHTML.txt" \
   "-i"
 
-  grepit_search "RequestMapping method of the Spring Surf Framework to see how request URLs are mapped to classes." \
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  grepit_search "Mapping methods of the Spring Framework to see how request URLs are mapped to classes." \
   '@RequestMapping(method=RequestMethod.GET, value={"/user","/user/{id}"})' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '@RequestMapping\(' \
+  '@(((Request|Get|Post|Put|Delete|Patch)Mapping)|FeignClient)\(' \
   "5_java_spring_requestMapping.txt"
+
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  grepit_search "ResponseBody methods of the Spring Framework tells what is passed as a JSON body." \
+  '@ResponseBody' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '@ResponseBody' \
+  "5_java_spring_responseBody.txt"
+
+  grepit_search "AddViewController function of Spring" \
+  'registry.addViewController("/new").setViewName("home");' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.addViewController\(' \
+  "5_java_spring_addViewController.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "ServletMapping XML of the Spring Surf Framework to see how request URLs are mapped to classes." \
   '<servlet-mapping><servlet-name>spring</servlet-name><url-pattern>*.html</url-pattern><url-pattern>/gallery/*</url-pattern><url-pattern>/galleryupload/*</url-pattern>' \
@@ -1169,10 +1194,54 @@ grepit_module_java_spring() {
 
   # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Check for Spring View Manipulation https://github.com/veracode-research/spring-view-manipulation/" \
-  '@GetMapping("/safe/redirect")' \
+  '@Controller' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '@GetMapping\(' \
+  '@Controller' \
   "2_java_spring_view_manipulation.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Check for Spring anyRequest that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.anyRequest\(' \
+  "3_java_spring_anyRequest.txt"
+
+  grepit_search "Check for Spring anyRequest that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.authorize(Http)?Requests\(' \
+  "3_java_spring_authorizeHttpRequests.txt"
+
+  grepit_search "Check for Spring SecurityFilterChain that checks for authorisation for example, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  'public SecurityFilterChain web(HttpSecurity http) throws Exception {' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'SecurityFilterChain' \
+  "3_java_spring_SecurityFilterChain.txt"
+
+  grepit_search "Check for Spring requestMatchers that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.requestMatchers("/resource/**").hasAuthority("USER")' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.requestMatchers\(' \
+  "3_java_spring_requestMatchers.txt"
+
+  grepit_search "Check for Spring RegexRequestMatcher that checks any request for certain criteria, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.requestMatchers("/resource/**").hasAuthority("USER")' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '\.requestMatchers\(' \
+  "3_java_spring_RegexRequestMatcher.txt"
+
+  grepit_search "Check for Spring AuthorizationDecision that checks HTTP requests for authorization, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  '.requestMatchers("/test/**").access((authentication, context) -> new AuthorizationDecision(webSecurity.check(authentication.get(), context.getRequest())))' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AuthorizationDecision' \
+  "3_java_spring_AuthorizationDecision.txt"
+
+  grepit_search "Check for Spring securityMatcher that checks HTTP requests for security, see https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" \
+  'http.securityMatcher("/api/**").authorizeHttpRequests(authorize -> authorize' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'securityMatcher' \
+  "3_java_spring_securityMatcher.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 }
 
 grepit_module_java_struts() {
@@ -1239,7 +1308,7 @@ grepit_module_dot_net() {
   grepit_search ".NET SqlCommand which is used to do SQL queries, check for SQL injection" \
   'new SqlCommand(query, conn)' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "new\sSqlCommand" \
+  "SqlCommand" \
   "2_dotnet_sqlcommand.txt"
 
   grepit_search ".NET View state enable" \
@@ -3243,6 +3312,14 @@ grepit_module_python() {
   "input\s{0,${WILDCARD_SHORT}}\(" \
   "4_python_input_function.txt"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Eval mostly means evaluating commands, but safe_eval ist especially burned for Python projects trying to do a safe_eval, which is usually not safe..." \
+  'safe_eval (' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "safe_eval\s{0,${WILDCARD_SHORT}}\(" \
+  "2_python_safe_eval.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   grepit_search "Assert statements are not compiled into the optimized byte code, therefore can not be used for security purposes, see https://access.redhat.com/blogs/766093/posts/2592591" \
   'assert variable and other' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3697,7 +3774,7 @@ grepit_module_c_lang() {
   'gets\(' \
   "5_c_insecure_c_functions_gets.txt"
 
-  grepit_search "Random is not a secure random number generator" \
+  grepit_search "Random is not a secure random number generator and this is often not a secure random number generator (e.g. Collection.random() isn't in Kotlin)" \
   'random(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'random\(' \
@@ -3830,6 +3907,29 @@ grepit_module_crypto_creds() {
   "4_cryptocred_crypt_call.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "RSA cipher. Security depends heavily on usage and what is secured." \
+  'RSA' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'RSA' \
+  "5_cryptocred_ciphers_RSA.txt" \
+  "-i"
+
+  grepit_search "RSA cipher in practice the most common exponent e is 65537. Security depends heavily on usage and what is secured. https://www.johndcook.com/blog/2018/12/12/rsa-exponent/" \
+  '65537' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  '65537' \
+  "4_cryptocred_ciphers_65537.txt" \
+  "-i"
+
+  grepit_search "RSA cipher in practice the most common exponent e is 65537, in base64 this is AQAB. Security depends heavily on usage and what is secured. https://www.johndcook.com/blog/2018/12/12/rsa-exponent/" \
+  'AQAB' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'AQAB' \
+  "4_cryptocred_ciphers_aqab.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   grepit_search "Rot32 is really really bad obfuscation and has nothing to do with crypto." \
   'ROT32' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -3908,7 +4008,7 @@ grepit_module_crypto_creds() {
   'Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'AES/ECB' \
-  "2_cryptocred_ciphers_aes_cbc.txt"
+  "2_cryptocred_ciphers_aes_ebc.txt"
 
   grepit_search "DES cipher in CBC mode, e.g. in Java. Security depends heavily on usage and what is secured." \
   'Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");' \
@@ -4024,6 +4124,15 @@ grepit_module_crypto_creds() {
   "2_cryptocred_encryption_key.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  search "Signing key and variants of it" \
+  'sign the key' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "sign.{0,${WILDCARD_SHORT}}key" \
+  "2_cryptocred_sign_key.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   grepit_search "Sources of entropy: /dev/random and /dev/urandom" \
   '/dev/urandom' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4059,7 +4168,7 @@ grepit_module_crypto_creds() {
   'private key' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "PRIVATE.{0,${WILDCARD_SHORT}}KEY" \
-  "5_cryptocred_certificates_and_keys_wide_private-key.txt" \
+  "4_cryptocred_certificates_and_keys_wide_private-key.txt" \
   "-i"
 
   grepit_search "Wide search for certificate and keys specifics of base64 encoded format" \
@@ -4849,6 +4958,14 @@ grepit_module_api_keys() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "kubeconfig-[^\:]{0,${WILDCARD_LONG}}:." \
   "2_apikeys_kubeconfig.txt"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Microsoft Azure management API keys HTTP header name that has to be used: https://learn.microsoft.com/en-us/azure/api-management/api-management-subscriptions" \
+  'Ocp-Apim-Subscription-Key: 9182478923593252353435' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "Ocp-Apim-Subscription-Key" \
+  "2_apikeys_ocp_apim_subscription_key.txt"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 }
 
 grepit_module_asm_native() {
@@ -5363,6 +5480,22 @@ grepit_module_general() {
   "3_general_jdbc_uri.txt" \
   "-i"
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "jdbc URIs when settings trustServerCertificate=true the TLS certificate is not checked, see for example https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver16" \
+  'jdbc:sqlserver://localhost:1433;user=SA;password=pass;encrypt=true;trustServerCertificate=true' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'trustServerCertificate=true' \
+  "1_general_jdbc_trustServerCertificate_true.txt" \
+  "-i"
+
+  grepit_search "jdbc URIs when settings hostNameInCertificate to a wildcard, the TLS certificate is only checked for that wildcard which can be a little permissive, see for example https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver16" \
+  'jdbc:sqlserver://localhost:1433;user=SA;password=pass;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  'hostNameInCertificate=\*' \
+  "1_general_jdbc_hostNameInCertificate_wildcard.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   # Start - https://github.com/floyd-fuh/crass/commit/031c8dea008d22b95dd6f61a72fce177abd5a5fb
   grepit_search "Server-Side Template Injection (SSTI) is a possibility at many places https://portswigger.net/web-security/server-side-template-injection" \
   "<div bar:foo=\"@{'/0example?yes=\${someparam}'}\"></div>" \
@@ -5398,7 +5531,7 @@ grepit_module_general() {
   '"SELECT * FROM [a].[b] ab ORDER BY %s"' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "SELECT.{0,${WILDCARD_LONG}}FROM.{0,${WILDCARD_LONG}}%s" \
-  "3_generic_sqli_stringformat.txt" \
+  "1_generic_sqli_stringformat.txt" \
   "-i"
   # End - https://github.com/floyd-fuh/crass/commit/ce5b3464c2e12afc0e11ede57b6fdbce7a995c6f
 
@@ -5666,6 +5799,15 @@ grepit_module_general() {
   "5_general_base64_content.txt"
   # case sensitive, the regex is insensitive anyway
 
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Base64 encoded data (that is more than 6 bytes long and starts with something else). This regex won't detect a base64 encoded value over several lines and won't detect one that does not end with an equal sign..." \
+  'YWJj YScqKyo6LV/Dpw==' \
+  '/target/ //JQLite - the following ones shouldnt be an issue anymore as we require more than 6 bytes: done echo else gen/ ////' \
+  '[^A-Za-z0-9+/](?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})' \
+  "4_general_base64_content_start_no_alphabet.txt"
+  # case sensitive, the regex is insensitive anyway
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+
   # As the following regex had way too many false positives (thousands of english words match), we require the base64 to include
   # at least one equal sign at the end. The old regex was:
   # '(?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})'
@@ -5675,6 +5817,15 @@ grepit_module_general() {
   '(?:[A-Za-z0-9_-]{4}){2,}(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=)' \
   "5_general_base64_urlsafe.txt"
   # case sensitive, the regex is insensitive anyway
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Base64 URL-safe encoded data (that is more than 6 bytes long and starts with something else). To get from URL-safe base64 to regular base64 you need .replace('-','+').replace('_','/'). This regex won't detect a base64 encoded value over several lines and won't detect one that does not end with an equal sign..." \
+  'YWJj YScqKyo6LV_Dpw==' \
+  '/target/ //JQLite - the following ones shouldnt be an issue anymore as we require more than 6 bytes: done echo else gen/ ////' \
+  '[^A-Za-z0-9_-](?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})' \
+  "4_general_base64_urlsafe_no_alphabet.txt"
+  # case sensitive, the regex is insensitive anyway
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 
   grepit_search "Base64 as a word used" \
   'Base64' \
@@ -5908,4 +6059,20 @@ grepit_module_backdoor() {
   "preg_replace\s{0,${WILDCARD_SHORT}}\(" \
   "6_backdoor_php_preg_replace.txt" \
   "-i"
+
+  # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
+  grepit_search "Using curl to fetch or submit from/to internet resources is one of the way to implement a backdoor" \
+  'curl --help' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "curl " \
+  "5_backdoor_curl.txt" \
+  "-i"
+
+  grepit_search "Using wget to fetch or submit from/to internet resources is one of the way to implement a backdoor" \
+  'wget --help' \
+  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  "wget " \
+  "5_backdoor_wget.txt" \
+  "-i"
+  # End - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
 }
