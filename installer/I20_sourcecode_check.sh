@@ -33,7 +33,7 @@ I20_sourcecode_check() {
     # pydantic update needed for semgrep
     print_pip_info "pydantic"
     print_pip_info "semgrep"
-    print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
+    print_git_info "semgrep-rules (2024 archive by opengrep)" "opengrep/opengrep-rules" "Standard library for Semgrep rules"
     print_git_info "0xdea C/C++ semgrep-rules" "EMBA-support-repos/semgrep-rules-0xdea" "C/C++ Semgrep rules by 0xdea"
     print_git_info "zarn" "EMBA-support-repos/zarn" "Zarn static perl analyzer"
     # cpanminus is needed for zarn:
@@ -58,7 +58,8 @@ I20_sourcecode_check() {
         pip_install "pydantic" "-U"
         pip_install "semgrep"
         if ! [[ -d external/semgrep-rules ]]; then
-          git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
+          # migrated to the 2024 rules without licensing issues
+          git clone https://github.com/opengrep/opengrep-rules.git external/semgrep-rules
         fi
         if ! [[ -d external/semgrep-rules-0xdea ]]; then
           git clone https://github.com/EMBA-support-repos/semgrep-rules-0xdea.git external/semgrep-rules-0xdea

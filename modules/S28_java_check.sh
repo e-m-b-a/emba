@@ -95,7 +95,7 @@ s28_java_semgrep() {
 
   local lJ_ANALYSE_DIR="${LOG_PATH_MODULE}/java_semgrep/"
   [[ ! -d "${lJ_ANALYSE_DIR}" ]] && mkdir -p "${lJ_ANALYSE_DIR}"
-  lJNAME="$(basename "${lJAVA_BIN_DIR}")" 2> /dev/null)
+  lJNAME="$(basename "${lJAVA_BIN_DIR}" 2> /dev/null)"
   local lJ_ANALYSE_RESULTS="${lJ_ANALYSE_DIR}/semgrep_${lJNAME}.json"
 
   semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules/java "${lJAVA_BIN_DIR}" > "${lJ_ANALYSE_RESULTS}" || true
