@@ -144,7 +144,7 @@ grepit_search() {
   fi
 
   # we skip rules with 6 to 9 rating
-  if [[ "${ENABLE_LEAST_LIKELY}" -eq 0 ]] && [[ "${lOUTFILE}" =~ [6-9]_* ]]; then
+  if [[ "${ENABLE_LEAST_LIKELY}" -eq 0 ]] && [[ "${lOUTFILE}" =~ [6-9]_.* ]]; then
     print_output "[-] Skipping searching for ${lOUTFILE} with regex ${lSEARCH_REGEX}. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
   else
     write_log "[*] Searching (args for grep: ${ORANGE}${lARGS_FOR_GREP_ARR[*]}${NC}) for ${ORANGE}${lSEARCH_REGEX}${NC}." "${LOG_PATH_MODULE}/${lOUTFILE}"
