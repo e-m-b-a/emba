@@ -87,7 +87,7 @@ IF17_cve_bin_tool() {
           if python3 ./cve_bin_tool/cli.py --update now -n json-mirror /dev/null; then
             break
           fi
-          echo "[-] cve bin tool update files for ${i} times"
+          echo "[-] cve bin tool update failed for ${i} times"
           ((i+=1))
           [[ "${i}" -eq 10 ]] && exit 1
         done

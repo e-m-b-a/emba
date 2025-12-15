@@ -61,7 +61,8 @@ S28_java_check()
 
   sub_module_title "Java security analysis"
   local lJAVA_BIN_DIR=""
-  for lJAVA_BIN_DIR in "${LOG_PATH_MODULE}/java_decompile/"*; do
+  mapfile -t lSEMGREP_SOURCES_ARR < <(find "${LOG_PATH_MODULE}/java_decompile/" -mindepth 1 -maxdepth 1 -type d)
+  for lJAVA_BIN_DIR in "${lSEMGREP_SOURCES_ARR[@]}"; do
     s28_java_semgrep "${lJAVA_BIN_DIR}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S28+=( "${lTMP_PID}" )
@@ -74,11 +75,15 @@ S28_java_check()
   local lSEMGREP_RESULT=""
   mapfile -t lSEMGREP_RESULTS_ARR < <(find "${LOG_PATH_MODULE}/java_semgrep/" -name "semgrep_*.json")
   for lSEMGREP_RESULT in "${lSEMGREP_RESULTS_ARR[@]}"; do
-    print_output "[*] Semgrep security scanning results for $(basename "${lSEMGREP_RESULT}")" "" "${lSEMGREP_RESULT}"
+    if [[ "$(jq -r '.results[] | length' "${lSEMGREP_RESULT}")" -gt 0 ]]; then
+      print_output "[*] Semgrep security scanning results for $(basename "${lSEMGREP_RESULT}")" "" "${lSEMGREP_RESULT}"
+      # todo: count vulns to lJAVA_VULNS
+    fi
   done
 
   local lJAVA_DECOMPILED=0
-  lJAVA_DECOMPILED=$(wc -l < "${TMP_DIR}/s28_jdecompiled.tmp")
+  lJAVA_DECOMPILED=$(find "${LOG_PATH_MODULE}/java_decompile/" -type f | wc -l)
+
   write_log ""
   write_log "[*] Statistics:${#lJAVA_BINS_ARR[@]}:${lJAVA_DECOMPILED}:${lJAVA_VULNS}"
   module_end_log "${FUNCNAME[0]}" "${lJAVA_DECOMPILED}"
@@ -93,7 +98,7 @@ s28_java_semgrep() {
   local lJ_ANALYSE_RESULTS="${lJ_ANALYSE_DIR}/semgrep_${lJNAME}_${RANDOM}.json"
 
   semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules/java "${lJAVA_BIN_DIR}" > "${lJ_ANALYSE_RESULTS}" || true
-  if [[ -f "${lJ_ANALYSE_RESULTS}" ]] && [[ "$(jq -r '.results[]' "${lJ_ANALYSE_RESULTS}")" -eq 0 ]]; then
+  if [[ -f "${lJ_ANALYSE_RESULTS}" ]] && [[ "$(jq -r '.results[] | length' "${lJ_ANALYSE_RESULTS}")" -eq 0 ]]; then
     rm "${lJ_ANALYSE_RESULTS}" || true
   fi
 }
@@ -108,8 +113,5 @@ s28_java_decompile() {
   [[ ! -d "${lJ_DECOMPILE_DIR}" ]] && mkdir -p "${lJ_DECOMPILE_DIR}"
 
   java -jar "${JAVA_DECOMPILER}" --silent "${lJAVA_BINARY}" "${lJ_DECOMPILE_DIR}" || true
-  local lJRET="$?"
-  # -> decompile ok/not ok
-  [[ "${lJRET}" -eq 0 ]] && echo "${lJRET}" >> "${TMP_DIR}/s28_jdecompiled.tmp"
 }
 
