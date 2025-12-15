@@ -127,7 +127,7 @@ grepit_reporter() {
   fi
 }
 
-grepit_search() {
+grepit_search() { # nosemgrep
   local lLINES_OF_OUTPUT=0
   local lGREP_COMMAND="grep"
   local lLOG_DETAILS=1

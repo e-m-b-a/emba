@@ -75,7 +75,7 @@ S28_java_check()
   local lSEMGREP_RESULT=""
   mapfile -t lSEMGREP_RESULTS_ARR < <(find "${LOG_PATH_MODULE}/java_semgrep/" -name "semgrep_*.json")
   for lSEMGREP_RESULT in "${lSEMGREP_RESULTS_ARR[@]}"; do
-    if [[ "$(jq -r '.results[] | length' "${lSEMGREP_RESULT}")" -gt 0 ]]; then
+    if grep -q "\"results\":" "${lSEMGREP_RESULT}"; then
       print_output "[+] Semgrep security scanning results for $(basename "${lSEMGREP_RESULT}")" "" "${lSEMGREP_RESULT}"
       # todo: count vulns to lJAVA_VULNS
     fi
@@ -99,7 +99,7 @@ s28_java_semgrep() {
   local lJ_ANALYSE_RESULTS="${lJ_ANALYSE_DIR}/semgrep_${lJNAME}.json"
 
   semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules/java "${lJAVA_BIN_DIR}" > "${lJ_ANALYSE_RESULTS}" || true
-  if [[ -f "${lJ_ANALYSE_RESULTS}" ]] && [[ "$(jq -r '.results[] | length' "${lJ_ANALYSE_RESULTS}")" -eq 0 ]]; then
+  if [[ -f "${lJ_ANALYSE_RESULTS}" ]] && [[ "$(grep -c "\"results\":" "${lJ_ANALYSE_RESULTS}")" -eq 0 ]]; then
     rm "${lJ_ANALYSE_RESULTS}" || true
   fi
 }
