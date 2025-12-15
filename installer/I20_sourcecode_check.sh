@@ -40,6 +40,7 @@ I20_sourcecode_check() {
     print_tool_info "cpanminus" 1
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
+    print_file_info "vineflower-1.11.2.jar" "Java decompiler" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -83,6 +84,9 @@ I20_sourcecode_check() {
         php composer.phar global require psecio/iniscan --no-interaction || true
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component iniscan" && exit 1 )
         cp -r "${HOME}""/.config/composer/vendor/" "./external/iniscan/"
+
+        # vineflower Java decompiler
+        download_file "vineflower-1.11.2.jar" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"
       ;;
     esac
   fi

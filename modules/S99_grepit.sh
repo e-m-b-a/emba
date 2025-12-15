@@ -143,7 +143,8 @@ grepit_search() {
     local lARGS_FOR_GREP_ARR=()
   fi
 
-  if [[ "${ENABLE_LEAST_LIKELY}" -eq 0 ]] && [[ "${lOUTFILE}" == 9_* ]]; then
+  # we skip rules with 6 to 9 rating
+  if [[ "${ENABLE_LEAST_LIKELY}" -eq 0 ]] && [[ "${lOUTFILE}" =~ [6-9]_* ]]; then
     print_output "[-] Skipping searching for ${lOUTFILE} with regex ${lSEARCH_REGEX}. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
   else
     write_log "[*] Searching (args for grep: ${ORANGE}${lARGS_FOR_GREP_ARR[*]}${NC}) for ${ORANGE}${lSEARCH_REGEX}${NC}." "${LOG_PATH_MODULE}/${lOUTFILE}"
@@ -4132,13 +4133,13 @@ grepit_module_crypto_creds() {
   "3_cryptocred_mysql_old_hashes.txt"
 
   grepit_search "Blowfish hash" \
-  'pass="$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6"' \ # nosemgrep
+  'pass="$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6"' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\$2a\$0[0-9]\$[a-zA-Z0-9.]{0,100}' \
   "2_cryptocred_blowfish_hashes.txt"
 
   grepit_search "2y crypt scheme ID for a variant of bcrypt/blowfish" \
-  'pass="$2y$10$zUGqDlav79krrlQVwDeYNOkG3BjmeGhDGD3OfHFI1L3OOL4CRRMsW"' \ # nosemgrep
+  'pass="$2y$10$zUGqDlav79krrlQVwDeYNOkG3BjmeGhDGD3OfHFI1L3OOL4CRRMsW"' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '\$2y\$[0-9]{2}\$[a-zA-Z0-9.]{0,100}' \
   "2_cryptocred_crypt_bcrypt_blowfish_hashes.txt"
@@ -4171,7 +4172,7 @@ grepit_module_crypto_creds() {
   "-i"
 
   # Start - https://github.com/floyd-fuh/crass/commit/cb197d0393a5d9235465ba9b388696611ae32730
-  search "Signing key and variants of it" \
+  grepit_search "Signing key and variants of it" \
   'sign the key' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "sign.{0,${WILDCARD_SHORT}}key" \
@@ -6065,9 +6066,9 @@ grepit_module_backdoor() {
 
   # ATTENTION: THIS EXAMPLE STRING HAS VARIOUS CRAZY UNICODE CHARACTERS!!!
   grepit_search "The example is '/*RLO | LRIif (isAdmin)PDI LRI begin admins only */', where RLO = 'U+202E, Right-to-Left Override, Force treating following text as right-to-left', LRI = 'U+2066, Left-to-Right Isolate, Force treating following text as left-to-right without affecting adjacent text' and PDI ='U+2069, Pop Directional Isolate, Terminate nearest LRI or RLI'. See https://trojansource.codes/trojan-source.pdf and https://github.com/nickboucher/trojan-source/blob/main/RegEx/pcre2.regex" \
-  '/*‮ | ⁦if (isAdmin)⁩ ⁦ begin admins only */' \ # nosemgrep
+  '/*‮ | ⁦if (isAdmin)⁩ ⁦ begin admins only */' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '(?(DEFINE)(?<pdi>([^\x{2067}\x{2066}\x{2068}]*)([^\x{2067}\x{2066}\x{2068}\x{2069}]*)((?-2)[\x{2067}\x{2066}\x{2068}](?-2)(?-1)*(?-2)[\x{2069}](?-2))*(?-3)[\x{2067}\x{2066}\x{2068}]+?(?-2)*)(?<pdf>([^\x{202B}\x{202A}\x{202E}\x{202D}]*)([^\x{202B}\x{202A}\x{202E}\x{202D}\x{202C}]*)((?-2)[\x{202B}\x{202A}\x{202E}\x{202D}](?-2)(?-1)*(?-2)[\x{202C}](?-2))*(?-3)[\x{202B}\x{202A}\x{202E}\x{202D}]+?(?-2)*)(?<unbal>(?&pdi)|(?&pdf))(?<string>(?:\x{27}(?&unbal)\x{27})|(?:"(?&unbal)"))(?<comment>(?:\/\*(?&unbal)\*\/)|(?:\/\/(?&unbal)$)|(?:#(?&unbal)$)))(?&string)|(?&comment)' \ # nosemgrep
+  '(?(DEFINE)(?<pdi>([^\x{2067}\x{2066}\x{2068}]*)([^\x{2067}\x{2066}\x{2068}\x{2069}]*)((?-2)[\x{2067}\x{2066}\x{2068}](?-2)(?-1)*(?-2)[\x{2069}](?-2))*(?-3)[\x{2067}\x{2066}\x{2068}]+?(?-2)*)(?<pdf>([^\x{202B}\x{202A}\x{202E}\x{202D}]*)([^\x{202B}\x{202A}\x{202E}\x{202D}\x{202C}]*)((?-2)[\x{202B}\x{202A}\x{202E}\x{202D}](?-2)(?-1)*(?-2)[\x{202C}](?-2))*(?-3)[\x{202B}\x{202A}\x{202E}\x{202D}]+?(?-2)*)(?<unbal>(?&pdi)|(?&pdf))(?<string>(?:\x{27}(?&unbal)\x{27})|(?:"(?&unbal)"))(?<comment>(?:\/\*(?&unbal)\*\/)|(?:\/\/(?&unbal)$)|(?:#(?&unbal)$)))(?&string)|(?&comment)' \
   "3_backdoor_trojan_source_regex.txt" \
   "-i"
 
