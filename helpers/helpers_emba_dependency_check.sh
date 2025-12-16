@@ -522,7 +522,7 @@ dependency_check()
   check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
 
   if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
-    check_dep_file "NVD CVE database in JSON format" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+    check_dep_file "NVD CVE database in JSON format" "${EXT_DIR}/nvd-json-data-feeds/README.md"
   fi
 
   print_output "    SQLite CVE database update in config directory - \\c" "no_log"

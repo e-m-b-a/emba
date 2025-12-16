@@ -18,7 +18,6 @@
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 L22_upnp_hnap_checks() {
-
   export UPNP_UP=0
   export HNAP_UP=0
   export JNAP_UP=0
@@ -28,7 +27,7 @@ L22_upnp_hnap_checks() {
     module_title "Live UPnP/HNAP tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ ${IN_DOCKER} -eq 0 ]] ; then
+    if [[ ${IN_DOCKER} -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
@@ -234,7 +233,6 @@ check_basic_hnap_jnap() {
         JNAP_UP=1
         print_output "[+] JNAP service successfully identified"
       fi
-
     done
   fi
 
