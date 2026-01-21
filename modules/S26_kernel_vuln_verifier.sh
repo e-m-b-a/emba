@@ -289,20 +289,23 @@ S26_kernel_vuln_verifier()
 
     if [[ "${#lVERIFIED_KERNEL_VERS_ARR[@]}" -gt 0 ]]; then
       for lVERIFIED_KVERS in "${lVERIFIED_KERNEL_VERS_ARR[@]}"; do
-        mapfile -t lVERIFIED_KERNEL_VERS_ARR < <(grep -h "^${lVERIFIED_KVERS}" "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | cut -d ';' -f3,6,7 | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
-        lTMP_CVE_ENTRY=""
+        local lVERIFIED_KERNEL_VERS_ARR_PER_VERSION=()
+        mapfile -t lVERIFIED_KERNEL_VERS_ARR_PER_VERSION < <(grep -h "^${lVERIFIED_KVERS}" "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | cut -d ';' -f3,6,7 | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
+
+        local lTMP_CVE_ENTRY=""
+        local lFULL_ENTRY_LINE=""
         # get the CVEs part of vuln_summary.txt
         lFULL_ENTRY_LINE=$(grep -E "${lVERIFIED_KVERS}.*:\s+CVEs:\ [0-9]+\s+:" "${LOG_PATH_MODULE}/vuln_summary.txt" || true)
         lTMP_CVE_ENTRY=$(echo "${lFULL_ENTRY_LINE}" | grep -o -E ":\s+CVEs:\ [0-9]+\s+:" || true)
         # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
-        lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_KERNEL_VERS_ARR[@]}"')/')
+        lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_KERNEL_VERS_ARR_PER_VERSION[@]}"')/')
         # ensure we have the right length -> :  CVEs: 1234 (123)  :
         lTMP_CVE_ENTRY=$(printf '%s%*s' "${lTMP_CVE_ENTRY%:}" "$((22-"${#lTMP_CVE_ENTRY}"))" ":")
 
         # final replacement in file:
         echo "${lFULL_ENTRY_LINE}" | sed -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' >> "${LOG_PATH_MODULE}/vuln_summary_new.txt"
 
-        for lVERIFIED_BB_CVE in "${lVERIFIED_KERNEL_VERS_ARR[@]}"; do
+        for lVERIFIED_BB_CVE in "${lVERIFIED_KERNEL_VERS_ARR_PER_VERSION[@]}"; do
           # print_output "[*] Replacing ${lVERIFIED_BB_CVE} in ${LOG_PATH_MODULE}/cve_sum/*_finished.txt" "no_log"
           local lV_ENTRY="(V)"
           # ensure we have the correct length
