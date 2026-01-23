@@ -391,7 +391,7 @@ cve_bin_tool_threader() {
       # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
       # ensure we skip duplicates:
       local lCVE_IDENTIFIER=""
-      lCVE_IDENTIFIER=$(echo "${lCVE_LINE}" | cut -d ',' -f4)
+      lCVE_IDENTIFIER=$(cut -d ',' -f4 <<<"${lCVE_LINE}")
       if printf '%s\0' "${lCVE_DONE_ARR[@]}" | grep -Fxqz -- "${lCVE_IDENTIFIER}"; then
         continue
       fi

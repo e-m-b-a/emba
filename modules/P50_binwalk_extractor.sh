@@ -130,19 +130,18 @@ remove_uprintable_paths() {
 
   local lFIRMWARE_UNPRINT_FILES_ARR=()
   local lFW_FILE=""
+  local lNEW_FILE=""
 
   mapfile -t lFIRMWARE_UNPRINT_FILES_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -name '*[^[:print:]]*')
   if [[ "${#lFIRMWARE_UNPRINT_FILES_ARR[@]}" -gt 0 ]]; then
-    shopt -s extglob
     print_output "[*] Unprintable characters detected in extracted files -> cleanup started"
     for lFW_FILE in "${lFIRMWARE_UNPRINT_FILES_ARR[@]}"; do
       print_output "[*] Cleanup of ${lFW_FILE} with unprintable characters"
       # print_output "[*] Moving ${lFW_FILE} to ${lFW_FILE//[![:print:]]/_}"
       # mv "${lFW_FILE}" "${lFW_FILE//[![:print:]]/_}" || true
-      lNEW_FILE=$(echo "${lFW_FILE}" | iconv -f UTF-8 -t ASCII//TRANSLIT)
+      lNEW_FILE=$(iconv -f UTF-8 -t ASCII//TRANSLIT <<<"${lFW_FILE}")
       print_output "[*] Moving ${lFW_FILE} to ${lNEW_FILE}"
       mv "${lFW_FILE}" "${lNEW_FILE}" || print_output "[-] Cleanup of file ${lFW_FILE} not possible"
     done
-    shopt -u extglob
   fi
 }
