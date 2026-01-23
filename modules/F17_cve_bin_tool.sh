@@ -386,8 +386,16 @@ cve_bin_tool_threader() {
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
     print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
+    local lCVE_DONE_ARR=()
     while read -r lCVE_LINE; do
       # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
+      # ensure we skip duplicates:
+      local lCVE_IDENTIFIER=""
+      lCVE_IDENTIFIER=$(echo "${lCVE_LINE}" | cut -d ',' -f4)
+      if printf '%s\0' "${lCVE_DONE_ARR[@]}" | grep -Fxqz -- "${lCVE_IDENTIFIER}"; then
+        continue
+      fi
+      lCVE_DONE_ARR+=("${lCVE_IDENTIFIER}")
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"

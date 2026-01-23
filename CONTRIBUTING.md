@@ -84,6 +84,8 @@ It also sketches the typical integration process of patches.
 
 - To make an array unique we prefer using the printf method instead of the eval method: `mapfile -t ARRAY < <(printf "%s\n" "${ARRAY[@]}" | sort -u)`
 
+- To check an array for a dedicated value we prefer the printf method: `printf '%s\0' "${lCVE_DONE_ARR[@]}" | grep -Fxqz -- "${lCVE_IDENTIFIER}"`
+
 - Ensure you are only working with printable characters (avoid using tr): `lVARIABLE=${lVARIABLE//[![:print:]]/}`
 
 - Code tests: Use shellcheck and semgrep to test your code
