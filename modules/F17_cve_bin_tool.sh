@@ -422,8 +422,8 @@ cve_bin_tool_threader() {
   local lCVE_COUNTER_VERSION=0
   local lCVE_COUNTER_VERIFIED=0
   if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" ]]; then
-    lEXPLOIT_COUNTER_VERSION=$(grep -c "Exploit (" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true)
-    lCVE_COUNTER_VERSION=$(grep -c -E "CVE-[0-9]+-[0-9]+" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true)
+    lEXPLOIT_COUNTER_VERSION=$(sort -u "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" | grep -c "Exploit (" || true)
+    lCVE_COUNTER_VERSION=$(sort -u "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" | grep -c -E "CVE-[0-9]+-[0-9]+" || true)
     lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION}"
   fi
 
