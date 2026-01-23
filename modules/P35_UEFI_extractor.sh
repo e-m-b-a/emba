@@ -147,6 +147,10 @@ uefi_firmware_parser() {
   sub_module_title "UEFI firmware-parser analysis"
   local lFIRMWARE_PATH_="${1:-}"
   local lFW_NAME_=""
+  if [[ ! -f "${lFIRMWARE_PATH_}" ]]; then
+    print_output "[-] UEFI firmware analysis for file ${lFIRMWARE_PATH_} not possible"
+    return
+  fi
   lFW_NAME_="$(basename "${lFIRMWARE_PATH_}")"
 
   uefi-firmware-parser -b "${lFIRMWARE_PATH_}" > "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${lFW_NAME_}".txt

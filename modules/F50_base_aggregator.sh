@@ -984,13 +984,12 @@ get_data() {
   if [[ -d "${F17_LOG_DIR}" ]]; then
     F17_VERSIONS_IDENTIFIED=$(wc -l 2>/dev/null < "${F17_LOG_DIR}/vuln_summary.txt" || true)
     CRITICAL_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
-    CVE_COUNTER=$((CVE_COUNTER+CRITICAL_CVE_COUNTER))
     HIGH_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)
-    CVE_COUNTER=$((CVE_COUNTER+HIGH_CVE_COUNTER))
     MEDIUM_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,MEDIUM" || true)
-    CVE_COUNTER=$((CVE_COUNTER+MEDIUM_CVE_COUNTER))
     LOW_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,LOW" || true)
-    CVE_COUNTER=$((CVE_COUNTER+LOW_CVE_COUNTER))
+  fi
+  if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
+    CVE_COUNTER=$(jq -r '.vulnerabilities[]? | .id //empty' "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" | wc -l || echo 0)
   fi
   if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
     KNOWN_EXPLOITED_COUNTER=$(wc -l 2>/dev/null < "${F17_LOG_DIR}"/KEV.txt)
