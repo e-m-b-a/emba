@@ -351,6 +351,12 @@ cve_bin_tool_threader() {
         continue
       fi
       write_log "${lPROD},${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
+      # the vendor cpe entries are very inconsistent and the generated vendors are often not matching
+      # this results in the following entry to search for product name only
+      if [[ "${lVENDOR}" != "NOTDEFINED" ]]; then
+        write_log "${lPROD},NOTDEFINED,${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
+      fi
+
     done
   done
   if ! [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
