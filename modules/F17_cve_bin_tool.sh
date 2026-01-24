@@ -386,7 +386,6 @@ cve_bin_tool_threader() {
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
     print_output "[*] Identification of possible Exploits, EPSS and further details ..." "no_log"
-    local lCVE_DONE_ARR=()
     while read -r lCVE_LINE; do
       # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
