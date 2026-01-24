@@ -389,19 +389,11 @@ cve_bin_tool_threader() {
     local lCVE_DONE_ARR=()
     while read -r lCVE_LINE; do
       # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
-      # ensure we skip duplicates:
-      local lCVE_IDENTIFIER=""
-      lCVE_IDENTIFIER=$(cut -d ',' -f4 <<<"${lCVE_LINE}")
-      if printf '%s\0' "${lCVE_DONE_ARR[@]}" | grep -Fxqz -- "${lCVE_IDENTIFIER}"; then
-        continue
-      fi
-      lCVE_DONE_ARR+=("${lCVE_IDENTIFIER}")
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_F17_ARR_2+=( "${lTMP_PID}" )
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
-    done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv")
+    done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" | sort -u -t, -k4,4)
   fi
   wait_for_pid "${lWAIT_PIDS_F17_ARR_2[@]}"
 
