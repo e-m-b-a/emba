@@ -989,7 +989,7 @@ get_data() {
     LOW_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,LOW" || true)
   fi
   if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
-    CVE_COUNTER=$(jq -r '.vulnerabilities[]? | .id //empty' "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" | wc -l || echo 0)
+    CVE_COUNTER=$(jq -r '.vulnerabilities[]? | .id //empty' "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" | sort -u | wc -l || echo 0)
   fi
   if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
     KNOWN_EXPLOITED_COUNTER=$(wc -l 2>/dev/null < "${F17_LOG_DIR}"/KEV.txt)

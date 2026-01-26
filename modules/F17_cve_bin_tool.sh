@@ -351,6 +351,12 @@ cve_bin_tool_threader() {
         continue
       fi
       write_log "${lPROD},${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
+      # the vendor cpe entries are very inconsistent and the generated vendors are often not matching
+      # this results in the following entry to search for product name only
+      if [[ "${lVENDOR}" != "NOTDEFINED" ]]; then
+        write_log "${lPROD},NOTDEFINED,${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
+      fi
+
     done
   done
   if ! [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
@@ -384,10 +390,9 @@ cve_bin_tool_threader() {
       # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_F17_ARR_2+=( "${lTMP_PID}" )
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
-    done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv")
+    done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" | sort -u -t, -k4,4)
   fi
   wait_for_pid "${lWAIT_PIDS_F17_ARR_2[@]}"
 
@@ -408,8 +413,8 @@ cve_bin_tool_threader() {
   local lCVE_COUNTER_VERSION=0
   local lCVE_COUNTER_VERIFIED=0
   if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" ]]; then
-    lEXPLOIT_COUNTER_VERSION=$(grep -c "Exploit (" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true)
-    lCVE_COUNTER_VERSION=$(grep -c -E "CVE-[0-9]+-[0-9]+" "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true)
+    lEXPLOIT_COUNTER_VERSION=$(sort -u "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" | grep -c "Exploit (" || true)
+    lCVE_COUNTER_VERSION=$(sort -u "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" | grep -c -E "CVE-[0-9]+-[0-9]+" || true)
     lCVE_COUNTER_VERIFIED="${lCVE_COUNTER_VERSION}"
   fi
 
