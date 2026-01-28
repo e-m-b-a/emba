@@ -33,6 +33,7 @@ I20_sourcecode_check() {
     # pydantic update needed for semgrep
     print_pip_info "pydantic"
     print_pip_info "semgrep"
+    print_pip_info "opengrep"
     print_git_info "semgrep-rules (2024 archive by opengrep)" "opengrep/opengrep-rules" "Standard library for Semgrep rules"
     print_git_info "0xdea C/C++ semgrep-rules" "EMBA-support-repos/semgrep-rules-0xdea" "C/C++ Semgrep rules by 0xdea"
     print_git_info "zarn" "EMBA-support-repos/zarn" "Zarn static perl analyzer"
