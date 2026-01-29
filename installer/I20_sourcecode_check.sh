@@ -42,6 +42,7 @@ I20_sourcecode_check() {
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
     print_file_info "vineflower-1.11.2.jar" "Java decompiler" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"
+    print_file_info "opengrep" "Semgrep alternative" "https://github.com/opengrep/opengrep/releases/download/v1.15.1/opengrep_manylinux_x86" "external/opengrep"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -58,6 +59,10 @@ I20_sourcecode_check() {
 
         pip_install "pydantic" "-U"
         pip_install "semgrep"
+
+        echo "Installing Opengrep now"
+        download_file "opengrep" "https://github.com/opengrep/opengrep/releases/download/v1.15.1/opengrep_manylinux_x86" "external/opengrep"
+
         if ! [[ -d external/semgrep-rules ]]; then
           # migrated to the 2024 rules without licensing issues
           git clone https://github.com/opengrep/opengrep-rules.git external/semgrep-rules
