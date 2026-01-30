@@ -341,7 +341,10 @@ write_json_module_log_entry() {
     print_output "[-] WARNING: JSON directory ${ORANGE}${JSON_DIR}${NC} not found"
     return
   fi
-  local lJSON_LOG="${LOG_PATH_MODULE}""/""JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
+  local lJSON_LOG="${LOG_PATH_MODULE}/JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
+  while [[ -f "${lJSON_LOG}" ]]; do
+    lJSON_LOG="${LOG_PATH_MODULE}/JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
+  done
 
   jo -p "${lJSON_ITEMS_ARR[@]}" >> "${lJSON_LOG}" || true
 }
@@ -354,7 +357,7 @@ write_json_module_log() {
     return
   fi
 
-  local lJSON_LOG="${JSON_DIR}""/""${LOG_FILE_NAME/\.txt/\.tmp}"
+  local lJSON_LOG="${JSON_DIR}/${LOG_FILE_NAME/\.txt/\.tmp}"
   local lCOMP_FILE_ID=0
 
   echo -n "[" > "${lJSON_LOG}"
@@ -365,6 +368,7 @@ write_json_module_log() {
         cat "${lCOMP_FILE}" >> "${lJSON_LOG}"
       else
         print_error "[-] WARNING: JSON entry ${lCOMP_FILE} failed to validate with json_pp"
+        cat "${lCOMP_FILE}" >> "${LOG_DIR}/emba_error.log"
         continue
       fi
     else

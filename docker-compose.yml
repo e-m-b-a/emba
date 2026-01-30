@@ -12,11 +12,13 @@ services:
     # /root/.local is needed for cwe_checker
     tmpfs:
       # exec on /tmp is needed for capa -> Todo: find better solution
+      # exec on /root/.cache/opengrep is needed for opengrep
       - /tmp:exec
       - /root/.config/
       - /root/.local/share/composer/
       - /root/.local/share/cwe_checker/
         # - /root/.local/share
+      - /root/.cache/opengrep:exec
       - /root/.cache/
       - /root/.semgrep/
       - /root/.ghidra/
