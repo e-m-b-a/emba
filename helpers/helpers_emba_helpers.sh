@@ -222,6 +222,9 @@ cleaner() {
   fi
 
 
+  if [[ -f "${LOG_DIR}"/print_running_modules.pid ]]; then
+    rm "${LOG_DIR}"/print_running_modules.pid > /dev/null || true
+  fi
   if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
     if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
       rm "${LOG_DIR}"/emba_error.log > /dev/null || true
