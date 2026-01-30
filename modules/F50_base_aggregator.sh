@@ -633,14 +633,16 @@ binary_fct_output() {
   fi
 
   # cwe-checker and semgrep results per binary
-  mapfile -t lS17_BIN_ARR < <(find "${S17_LOG_DIR}" -name "cwe_${BINARY}_[0-9]*.json")
-  if [[ "${#lS17_BIN_ARR[@]}" -gt 0 ]]; then
-    local lS17_BINARY=""
-    for lS17_BINARY in "${lS17_BIN_ARR[@]}"; do
-      if [[ -f "${lS17_BINARY}" ]]; then
-        ((lBINS_CWE_CHCK_CNT+=$(grep -Ec "CWE[0-9]+" "${lS17_BINARY}" || echo 0)))
-      fi
-    done
+  if [[ -d "${S17_LOG_DIR}" ]]; then
+    mapfile -t lS17_BIN_ARR < <(find "${S17_LOG_DIR}" -name "cwe_${BINARY}_[0-9]*.json")
+    if [[ "${#lS17_BIN_ARR[@]}" -gt 0 ]]; then
+      local lS17_BINARY=""
+      for lS17_BINARY in "${lS17_BIN_ARR[@]}"; do
+        if [[ -f "${lS17_BINARY}" ]]; then
+          ((lBINS_CWE_CHCK_CNT+=$(grep -Ec "CWE[0-9]+" "${lS17_BINARY}" || echo 0)))
+        fi
+      done
+    fi
   fi
   lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
   if [[ -f "${BASE_LINUX_FILES}" ]]; then

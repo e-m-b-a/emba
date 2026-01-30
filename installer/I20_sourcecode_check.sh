@@ -61,6 +61,7 @@ I20_sourcecode_check() {
 
         echo "Installing Opengrep now"
         download_file "opengrep" "https://github.com/opengrep/opengrep/releases/download/v1.15.1/opengrep_manylinux_x86" "external/opengrep"
+        chmod +x "external/opengrep"
 
         if ! [[ -d external/semgrep-rules ]]; then
           # migrated to the 2024 rules without licensing issues
