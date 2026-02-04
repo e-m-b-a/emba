@@ -211,18 +211,24 @@ service_online_check() {
     return 1
   fi
 
-  mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -h -E "[0-9]+/open/tcp" "${lARCHIVE_PATH}/"*"_nmap_"*".gnmap" | cut -d '/' -f1 | sort -u || true)
+  # if we are called without a network service we extract our services and use them
+  # otherwise we are only checking for the service provided by the caller
+  if [[ "${lNW_SERVICE}" == "NA" ]]; then
+    mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -h -E "[0-9]+/open/tcp" "${lARCHIVE_PATH}/"*"_nmap_"*".gnmap" | cut -d '/' -f1 | sort -u || true)
+  else
+    lNMAP_SERV_TCP_ARR+=("${lNW_SERVICE}")
+  fi
   if [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]]; then
     # we try this for lMAX_CNT times:
     while [[ "${lCNT}" -lt "${lMAX_CNT}" ]]; do
       # running through our extracted services and check if one of them is available via netcat
       for lSERVICE in "${lNMAP_SERV_TCP_ARR[@]}"; do
-        if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}" >/dev/null; then
-          [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
-          # we exit for our relevant service is reachable
-          # or we have no service that is relevant. This means we can
-          # return as soon as some service is up and running
-          if [[ "${lNW_SERVICE}" == "NA" ]] || [[ "${lSERVICE}" == "${lNW_SERVICE}" ]]; then
+        if [[ "${lNW_SERVICE}" == "NA" ]] || [[ "${lSERVICE}" == "${lNW_SERVICE}" ]]; then
+          if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}" >/dev/null; then
+            [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
+            # we exit for our relevant service is reachable
+            # or we have no service that is relevant. This means we can
+            # return as soon as some service is up and running
             return 0
           fi
         fi
