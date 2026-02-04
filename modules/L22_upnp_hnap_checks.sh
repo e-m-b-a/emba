@@ -161,7 +161,6 @@ check_basic_hnap_jnap() {
 
       local lHNAP_URLs_ARR=("HNAP" "HNAP1")
       for lHNAP_URL in "${lHNAP_URLs_ARR[@]}"; do
-        echo "[*] Testing ${lURL} / ${lHNAP_URL} / ${lPORT}"
         # HNAP
         if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
           if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
