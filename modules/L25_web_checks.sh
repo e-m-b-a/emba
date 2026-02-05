@@ -267,7 +267,7 @@ testssl_check() {
 
 check_curl_ret() {
   local lIP_="${1:-}"
-  local lPORT_="${2:-}"
+  local lPORT="${2:-}"
   local lCURL_RET="${3:-}"
 
   local lCURL_RET_CODE=""
@@ -275,16 +275,16 @@ check_curl_ret() {
 
   lCURL_RET_CODE="$(echo "${lCURL_RET}" | cut -d: -f1 || true)"
   lCURL_RET_SIZE="$(echo "${lCURL_RET}" | cut -d: -f2 || true)"
-  # print_output "[*] lCURL_RET: $lCURL_RET / ${HTTP_RAND_REF_SIZE} / Port: ${lPORT_}" "no_log"
+  # print_output "[*] lCURL_RET: $lCURL_RET / ${HTTP_RAND_REF_SIZE} / Port: ${lPORT}" "no_log"
 
   if [[ "${lCURL_RET_CODE}" -eq 200 ]]; then
     if [[ "${HTTP_RAND_REF_SIZE}" == "NA" ]] || [[ "${lCURL_RET_SIZE}" != "${HTTP_RAND_REF_SIZE}" ]]; then
-      echo "${lCURL_RET_CODE} OK:${lCURL_RET_SIZE}" >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" 2>/dev/null || true
+      echo "${lCURL_RET_CODE} OK:${lCURL_RET_SIZE}" >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT}.log" 2>/dev/null || true
     fi
   elif [[ "${lCURL_RET_CODE}" == "401" ]] && [[ "${lCURL_RET_SIZE}" != "${HTTP_RAND_REF_SIZE}" ]]; then
-    echo "${lCURL_RET_CODE} Unauth:${lCURL_RET_SIZE}" >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" 2>/dev/null || true
+    echo "${lCURL_RET_CODE} Unauth:${lCURL_RET_SIZE}" >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT}.log" 2>/dev/null || true
   else
-    echo "${lCURL_RET_CODE}:${lCURL_RET_SIZE}" >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" 2>/dev/null || true
+    echo "${lCURL_RET_CODE}:${lCURL_RET_SIZE}" >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT}.log" 2>/dev/null || true
   fi
 }
 
@@ -329,7 +329,7 @@ web_access_crawler() {
     lPROTO="http"
   fi
 
-  sub_module_title "Starting web server crawling for ${ORANGE}${lIP_}:${lPORT}${NC}"
+  sub_module_title "Starting web server crawling for ${ORANGE}${lIP_}:${lPORT_}${NC}"
   print_ln
 
   disable_strict_mode "${STRICT_MODE}" 0
@@ -429,7 +429,7 @@ web_access_crawler() {
         lCRAWLED_ARR+=( "${lWEB_DIR_L3}/${lWEB_FILE}" )
       fi
 
-      if ! system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
+      if ! system_online_check "${lIP_ADDRESS_}" "${lPORT_}"; then
         if ! restart_emulation "${lIP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing web crawling"
           enable_strict_mode "${STRICT_MODE}" 0
@@ -472,8 +472,8 @@ web_access_crawler() {
   done
 
   if [[ -f "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" ]]; then
-    grep -A1 Testing "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" | grep -i -B1 "200 OK:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*${lIP_}:${lPORT}//" | sort -u >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" || true
-    grep -A1 Testing "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" | grep -i -B1 "401 Unauth:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*${lIP_}:${lPORT}//" | sort -u >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-401Unauth.log" || true
+    grep -A1 Testing "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" | grep -i -B1 "200 OK:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*${lIP_}:${lPORT_}//" | sort -u >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" || true
+    grep -A1 Testing "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" | grep -i -B1 "401 Unauth:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*${lIP_}:${lPORT_}//" | sort -u >> "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-401Unauth.log" || true
     lCRAWL_RESP_200=$(wc -l < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log")
     lCRAWL_RESP_401=$(wc -l < "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-401Unauth.log")
 
@@ -526,9 +526,9 @@ web_access_crawler() {
 
     # todo: Python, further PHP analysis
 
-    print_output "[*] Finished web server crawling for ${ORANGE}${lIP_}:${lPORT}${NC}." "" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
+    print_output "[*] Finished web server crawling for ${ORANGE}${lIP_}:${lPORT_}${NC}." "" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
   else
-    print_output "[*] Finished web server crawling for ${ORANGE}${lIP_}:${lPORT}${NC}."
+    print_output "[*] Finished web server crawling for ${ORANGE}${lIP_}:${lPORT_}${NC}."
   fi
   print_bar ""
 }
