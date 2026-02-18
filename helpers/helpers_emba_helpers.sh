@@ -92,7 +92,7 @@ max_pids_protection() {
 }
 
 check_emba_ended() {
-  if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+  if grep -q "Test ended" "${LOG_DIR}/${MAIN_LOG_FILE}"; then
     # EMBA is already finished
     return 0
   fi

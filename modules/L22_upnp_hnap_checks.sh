@@ -79,7 +79,7 @@ check_basic_upnp() {
     if [[ "${lSERVICE}" == *"upnp"* && "${lTCP_UDP}" == *"tcp"* ]]; then
       print_output "[*] Testing UPnP reachability for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}" "no_log"
       if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
-        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
           print_output "[-] System not responding - Not performing further UPnP checks"
           return
         fi
@@ -101,7 +101,7 @@ check_basic_upnp() {
       [[ "${lUPNP_CNT}" -gt 5 ]] && break
 
       if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
-        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
           print_output "[-] System not responding - Not performing further UPnP checks"
           return
         fi
@@ -163,7 +163,7 @@ check_basic_hnap_jnap() {
       for lHNAP_URL in "${lHNAP_URLs_ARR[@]}"; do
         # HNAP
         if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
-          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+          if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
             print_output "[-] System not responding - Not performing further HNAP checks"
             return
           fi
@@ -174,7 +174,7 @@ check_basic_hnap_jnap() {
         local lHNAP_TIME_OUT_CNT=1
         while grep -q "Operation timed out" "${lDISCOVERY_LOG}"; do
           if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
-            if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+            if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
               print_output "[-] System not responding - Not performing further HNAP checks"
               return
             fi
@@ -192,7 +192,7 @@ check_basic_hnap_jnap() {
       local lJNAP_ACTION="X-JNAP-Action: http://cisco.com/jnap/core/GetDeviceInfo"
 
       if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
-        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
+        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
           print_output "[-] System not responding - Not performing further HNAP checks"
           return
         fi
@@ -219,7 +219,10 @@ check_basic_hnap_jnap() {
 
       if [[ $(grep -h "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-* 2>/dev/null | grep -c -v "${lJNAP_ACTION}" | awk '{sum += $1 } END { print sum }') -gt 0 ]]; then
         print_ln
-        tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/jnap-discovery-check-*
+        local lFILE=""
+        for lFILE in "${LOG_PATH_MODULE}"/jnap-discovery-check-*; do
+          tee -a "${LOG_FILE}" < "${lFILE}"
+        done
         print_ln
 
         JNAP_UP=$(grep -h "/jnap/" "${LOG_PATH_MODULE}"/jnap-discovery-check-* 2>/dev/null | grep -c -v "${lJNAP_ACTION}" | awk '{sum += $1 } END { print sum }' || echo 0)

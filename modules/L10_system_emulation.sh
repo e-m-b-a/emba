@@ -57,7 +57,7 @@ L10_system_emulation() {
     local lR_PATH_CNT=1
     local lIP_ADDRESS=""
     export R_PATH=""
-    export MIN_TCP_SERV=2
+    export MIN_TCP_SERV=3
     ### export IP_ADDRESS_=""
 
     # if we have a supported arch we move on with out emulation attempt
