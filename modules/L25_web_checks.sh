@@ -378,12 +378,12 @@ web_access_crawler() {
 
   local lHOME_=""
   lHOME_=$(pwd)
+
+  local lREQUEST_URL="${lPROTO}://${lIP_}:${lPORT_}"
   for lR_PATH in "${ROOT_PATH[@]}" ; do
     # we need files and links (for cgi files)
     cd "${lR_PATH}" || exit 1
     mapfile -t lFILE_ARR_EXT < <(find "." -type f -o -type l || true)
-
-    local lREQUEST_URL="${lPROTO}://${lIP_}:${lPORT_}"
 
     for lWEB_PATH in "${lFILE_ARR_EXT[@]}"; do
       print_dot
@@ -466,8 +466,8 @@ web_access_crawler() {
         mapfile -t lPOSSIBLE_FILES_ARR < <(strings "${lFILE_QEMU_START}" | grep -o -E '[-_a-zA-Z0-9]+\.[a-zA-Z0-9]{3}$' | sort -u || true)
         # crawl all the files:
         for lFILE_QEMU_TEST in "${lPOSSIBLE_FILES_ARR[@]}"; do
-          print_output "[*] Testing ${ORANGE}${lPROTO}://${lIP_}:${lPORT_}/${lFILE_QEMU_TEST}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
-          lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}""://""${lIP_}":"${lPORT_}""/""${lFILE_QEMU_TEST}" -o /dev/null -w '%{http_code}:%{size_download}' || true)"
+          print_output "[*] Testing ${ORANGE}${lREQUEST_URL}/${lFILE_QEMU_TEST}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
+          lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lFILE_QEMU_TEST}" -o /dev/null -w '%{http_code}:%{size_download}' || true)"
           check_curl_ret "${lIP_}" "${lPORT_}" "${lCURL_RET}"
         done
       done
