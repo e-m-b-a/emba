@@ -4,6 +4,12 @@
 In this document we list all known projects around EMBA and EMBArk. Feel free to open issues or a pull request to list your project also in here.
 
 
+## EMBA-MCP
+
+Model Context Protocol (MCP) server for EMBA firmware analysis. EMBA-MCP exposes EMBA firmware analysis results as structured tools via MCP, allowing LLMs (Claude, ChatGPT, etc.) to query, reason, and correlate firmware security findings programmatically. It parses, normalizes, and reasons over EMBA output.
+
+[Repository](https://github.com/0xbuz3R/EMBA-MCP)
+
 ## UTSA Software Capstone Design Project - Spring 2025
 
 P51 Mustang binwalk extractor is a module for EMBA (Embedded Malware Binary Analyzer) to improve the speed and scalability of firmware analysis by performing a depth-first traversal of the file system, using GPU acceleration, and parallelization of file operations.

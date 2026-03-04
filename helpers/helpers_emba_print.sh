@@ -138,6 +138,13 @@ print_error() {
   safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${ERROR_LOG}"
 }
 
+# usage:
+# print_output "asdf" -> logs to screena and to default LOG_FILE
+# print_output "asdf" "main" -> logs to screen and to main log
+# print_output "asdf" "no_log" -> just logs to screen
+# print_output "asdf" "other_log_file" -> logs to screen and to other log file
+# print_output "asdf" "" "link" -> logs to LOG_FILE and includes a link (REF)
+# print_output "asdf" "other_log_file" "" 0 -> does not log to default LOG_FILE. Logs to screen and to other_log_file
 print_output() {
   local lOUTPUT="${1:-\n}"
   local lLOG_SETTING="${2:-}"
@@ -146,6 +153,8 @@ print_output() {
   fi
   # add a link as third argument to add a link marker for web report
   local lREF_LINK="${3:-}"
+  # log into default log LOG_FILE
+  local lDEF_LOG="${4:-1}"
   local lTYPE_CHECK=""
   lTYPE_CHECK="$( echo "${lOUTPUT}" | cut -c1-3 )"
 
@@ -157,29 +166,39 @@ print_output() {
       safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
     elif [[ "${lLOG_SETTING}" != "no_log" ]] ; then
       if [[ -z "${lREF_LINK:-}" ]] ; then
-        safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${LOG_FILE}"
+        if [[ "${lDEF_LOG}" -eq 1 ]]; then
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${LOG_FILE}"
+        fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
           safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${lLOG_FILE_MOD}"
         fi
       else
-        safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        if [[ "${lDEF_LOG}" -eq 1 ]]; then
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
           safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
   else
-    safe_echo "${lOUTPUT}"
+    if [[ "${lDEF_LOG}" -eq 1 ]]; then
+      safe_echo "${lOUTPUT}"
+    fi
     if [[ "${lLOG_SETTING}" == "main" ]] ; then
       safe_echo "$(format_log "${lOUTPUT}")" "${MAIN_LOG}"
     elif [[ "${lLOG_SETTING}" != "no_log" ]] ; then
       if [[ -z "${lREF_LINK}" ]] ; then
-        safe_echo "$(format_log "${lOUTPUT}")" "${LOG_FILE:-}"
+        if [[ "${lDEF_LOG}" -eq 1 ]]; then
+          safe_echo "$(format_log "${lOUTPUT}")" "${LOG_FILE:-}"
+        fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
           safe_echo "$(format_log "${lOUTPUT}")" "${lLOG_FILE_MOD}"
         fi
       else
-        safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        if [[ "${lDEF_LOG}" -eq 1 ]]; then
+          safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+        fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
           safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi

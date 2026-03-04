@@ -51,7 +51,7 @@ wait_for_pid() {
       # print_output "[*] wait pid protection - running pid: $lPID"
       print_dot
       # if S115 is running we have to kill old qemu processes
-      if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 && -n "${QRUNTIME}" ]]; then
+      if [[ -f "${LOG_DIR}/${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}/${MAIN_LOG_FILE}") -gt 0 && -v QRUNTIME ]]; then
         killall -9 --quiet --older-than "${QRUNTIME}" -r .*qemu-.*-sta.* || true
       fi
     done
@@ -115,13 +115,13 @@ cleaner() {
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${QUEST_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] $(print_date) - Stopping Quest Container ..." "no_log"
-      docker kill "${QUEST_CONTAINER}" 2>/dev/null
+      docker kill "${QUEST_CONTAINER}" 2>/dev/null || true
     fi
   fi
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${MAIN_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] $(print_date) - Stopping EMBA main Container ..." "no_log"
-      docker kill "${MAIN_CONTAINER}" 2>/dev/null
+      docker kill "${MAIN_CONTAINER}" 2>/dev/null || true
     fi
   fi
   # stop inotifywait on host
