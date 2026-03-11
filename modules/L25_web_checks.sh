@@ -456,6 +456,7 @@ web_access_crawler() {
     done
     cd "${lHOME_}" || exit 1
   done
+  cd "${lHOME_}" || exit 1
   enable_strict_mode "${STRICT_MODE}" 0
 
   # extract started processes from all our qemu logs:
