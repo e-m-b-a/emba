@@ -38,6 +38,11 @@ I20_sourcecode_check() {
     print_git_info "zarn" "EMBA-support-repos/zarn" "Zarn static perl analyzer"
     # cpanminus is needed for zarn:
     print_tool_info "cpanminus" 1
+    print_tool_info "libppi-perl" 1
+    print_tool_info "libyaml-tiny-perl" 1
+    print_tool_info "libfile-find-rule-perl" 1
+    print_tool_info "libfile-find-rule-perl-perl" 1
+    print_tool_info "libgetopt-long-descriptive-perl" 1
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
     print_file_info "vineflower-1.11.2.jar" "Java decompiler" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"

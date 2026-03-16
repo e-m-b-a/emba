@@ -85,6 +85,7 @@ I13_disasm() {
             fi
           else
             echo -e "${ORANGE}""objdump installation failed - check it manually""${NC}"
+            exit 1
           fi
         else
           echo -e "${GREEN}""objdump already installed - no further action performed.""${NC}"

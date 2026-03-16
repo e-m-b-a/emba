@@ -165,6 +165,8 @@ set_defaults() {
   # usually we test firmware that is already out in the field
   # if this changes this option can be adjusted in the scanning profile
   export SBOM_LIFECYCLE_PHASE="operations"
+  # binary dependency map - enable via scanning profile
+  export EMBA_MAP_GENERATOR=0
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used

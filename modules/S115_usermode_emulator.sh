@@ -103,12 +103,16 @@ S115_usermode_emulator() {
         local lBIN_MD5_=""
         lBIN_MD5_=$(md5sum "${R_PATH}"/"${lBINARY}" | cut -d\  -f1)
 
-        # if we have already some SBOM json we check if we have already create some entry with version for this binary
-        # to do this, we remove unhandled_file entries
-        if [[ -d "${SBOM_LOG_PATH}" ]]; then
-          if grep -lr '"alg":"MD5","content":"'"${lBIN_MD5_}" "${SBOM_LOG_PATH}"/* | grep -qv "unhandled_file"; then
-            print_output "[*] Already found SBOM results for ${lBINARY} ... skip emulation tests"
-            continue
+        # the EMBA map generator uses the output of the user-mode emulation strace runs
+        # to ensure we generate the output we need to disable the speed improvements
+        if [[ "${EMBA_MAP_GENERATOR:-0}" -ne 1 ]]; then
+          # if we have already some SBOM json we check if we have already create some entry with version for this binary
+          # to do this, we remove unhandled_file entries
+          if [[ -d "${SBOM_LOG_PATH}" ]]; then
+            if grep -lr '"alg":"MD5","content":"'"${lBIN_MD5_}" "${SBOM_LOG_PATH}"/* | grep -qv "unhandled_file"; then
+              print_output "[*] Already found SBOM results for ${lBINARY} ... skip emulation tests"
+              continue
+            fi
           fi
         fi
         if [[ ! " ${lMD5_DONE_INT_ARR[*]} " =~ ${lBIN_MD5_} ]]; then
