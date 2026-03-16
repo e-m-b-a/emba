@@ -139,7 +139,7 @@ print_error() {
 }
 
 # usage:
-# print_output "asdf" -> logs to screena and to default LOG_FILE
+# print_output "asdf" -> logs to screen and to default LOG_FILE
 # print_output "asdf" "main" -> logs to screen and to main log
 # print_output "asdf" "no_log" -> just logs to screen
 # print_output "asdf" "other_log_file" -> logs to screen and to other log file
