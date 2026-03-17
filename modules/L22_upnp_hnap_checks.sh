@@ -111,15 +111,15 @@ check_basic_upnp() {
   done
 
   if [[ -f "${LOG_PATH_MODULE}"/upnp-discovery-check.txt ]]; then
-    UPNP_UP=$(grep "desc\|IGD" "${LOG_PATH_MODULE}"/upnp-discovery-check.txt | grep -v -c "No IGD" || echo 0)
-    if [[ ${UPNP_UP} -gt 0 ]]; then
+    UPNP_UP=$(grep "desc\|IGD" "${LOG_PATH_MODULE}"/upnp-discovery-check.txt | grep -v -c "No IGD" || true)
+    if [[ ${UPNP_UP:-0} -gt 0 ]]; then
       print_ln
       tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/upnp-discovery-check.txt
       print_ln
     fi
   fi
 
-  if [[ "${UPNP_UP}" -gt 0 ]]; then
+  if [[ "${UPNP_UP:-0}" -gt 0 ]]; then
     UPNP_UP=1
     print_output "[+] UPnP service successfully identified"
   fi
