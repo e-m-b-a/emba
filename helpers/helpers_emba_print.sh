@@ -360,9 +360,9 @@ write_json_module_log_entry() {
     print_output "[-] WARNING: JSON directory ${ORANGE}${JSON_DIR}${NC} not found"
     return
   fi
-  local lJSON_LOG="${LOG_PATH_MODULE}/JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
+  local lJSON_LOG="${LOG_PATH_MODULE}/JSON_tmp_${RANDOM}${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
   while [[ -f "${lJSON_LOG}" ]]; do
-    lJSON_LOG="${LOG_PATH_MODULE}/JSON_tmp_${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
+    lJSON_LOG="${LOG_PATH_MODULE}/JSON_tmp_${RANDOM}${RANDOM}_${LOG_FILE_NAME/\.txt/\.json}"
   done
 
   jo -p "${lJSON_ITEMS_ARR[@]}" >> "${lJSON_LOG}" || true

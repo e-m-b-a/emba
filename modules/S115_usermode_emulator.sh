@@ -451,7 +451,7 @@ run_init_test() {
     write_log "CPU_CONFIG_det\;${lCPU_CONFIG}" "${lLOG_FILE_INIT}"
     write_log "[*] Fallback to most found CPU configuration" "${lLOG_FILE_INIT}"
   fi
-  sed -i 's/.REF.*//' "${lLOG_FILE_INIT}"
+  sed -i 's/.REF.*//' "${lLOG_FILE_INIT}" || print_error "[-] S115 error in sed command to replace REF"
   write_log "\\n-----------------------------------------------------------------\\n" "${lLOG_FILE_INIT}"
 }
 
@@ -625,7 +625,7 @@ emulate_strace_run() {
 
   if [[ -f "${lLOG_FILE_STRACER}" ]]; then
     # remove the REF entries for printing the log file to the screen
-    sed -i 's/.REF.*//' "${lLOG_FILE_STRACER}"
+    sed -i 's/.REF.*//' "${lLOG_FILE_STRACER}" || print_error "[-] S115 - sed command for removing REF entries failed"
     # print it to the screen - we already have the output in the right log file
     cat "${lLOG_FILE_STRACER}" || true
     write_log "\\n-----------------------------------------------------------------\\n" "${lLOG_FILE_STRACER}"
