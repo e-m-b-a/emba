@@ -165,8 +165,11 @@ set_defaults() {
   # usually we test firmware that is already out in the field
   # if this changes this option can be adjusted in the scanning profile
   export SBOM_LIFECYCLE_PHASE="operations"
+
   # binary dependency map - enable via scanning profile
   export EMBA_MAP_GENERATOR=0
+  export MAX_MAP_FILES=2000     # maximum files to analyse and generate dependency map
+  export MAX_MAP_JOBS=""        # maximum jobs used for map generation - no entry means the default from the module
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
@@ -256,6 +259,8 @@ set_log_paths() {
   export S108_CSV_LOG="${CSV_DIR}/s108_stacs_password_search.csv"
   export S109_LOG="${LOG_DIR}/s109_jtr_local_pw_cracking.txt"
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
+  export S115_LOG="${CSV_DIR}/s115_usermode_emulator.txt"
+  export S115_LOG_DIR="${S115_LOG/\.txt/\/}"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
   export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"

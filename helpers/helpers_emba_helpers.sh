@@ -363,8 +363,12 @@ module_wait() {
 store_kill_pids() {
   local lPID="${1:-}"
   ! [[ -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
-  [[ "${IN_DOCKER}" -eq 0 ]] && echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS.log
-  [[ "${IN_DOCKER}" -eq 1 ]] && echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
+  if [[ "${IN_DOCKER}" -eq 0 ]]; then
+    echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS.log || true
+  fi
+  if [[ "${IN_DOCKER}" -eq 1 ]]; then
+    echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log || true
+  fi
   return 0
 }
 
