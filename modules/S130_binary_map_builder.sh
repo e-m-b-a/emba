@@ -443,7 +443,7 @@ write_entry_with_marker_check() {
         lNEW_ENTRY="${lCURRENT_ENTRY//\|${lCURRENT_SOURCES}\"/\|${lUPDATED_SOURCES}\"}"
         # print_output "[*] lNEW_ENTRY: ${lNEW_ENTRY}" "no_log"
         # awk -v s="$lCURRENT_ENTRY" -v r="$lNEW_ENTRY" 's != "" { while ( (i = index($0, s)) > 0 ) { $0 = substr($0, 1, i-1) r substr($0, i + length(s)) } } 1' "${lDOT_FILE_tmp_FILE}"
-        awk -v s="$lCURRENT_ENTRY" -v r="$lNEW_ENTRY" '
+        awk -v s="${lCURRENT_ENTRY}" -v r="${lNEW_ENTRY}" '
           BEGIN {
               l = length(s)
           }
