@@ -13,7 +13,6 @@
 #
 # Author(s): Michael Messner, Google Gemini AI
 
-
 S130_binary_map_builder() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary dependency map builder"
@@ -73,12 +72,12 @@ load_default_environment() {
   if ! [[ -d "${S115_LOG_DIR}" ]]; then
     print_ln ""
     print_output "[-] No s115 qemu check possible - missing s115 EMBA log directory"
-    DETECTION_MECHANISMS_ARR=( "${DETECTION_MECHANISMS_ARR[@]/QEMU-USER}" )
+    DETECTION_MECHANISMS_ARR=("${DETECTION_MECHANISMS_ARR[@]/QEMU-USER/}")
   fi
 
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     print_output "[-] No system emualtion checks possible - missing L10 EMBA log directory (future extension)"
-    DETECTION_MECHANISMS_ARR=( "${DETECTION_MECHANISMS_ARR[@]/QEMU-SYS}" )
+    DETECTION_MECHANISMS_ARR=("${DETECTION_MECHANISMS_ARR[@]/QEMU-SYS/}")
   fi
 
   local lDET_MECHANISM=""
@@ -111,7 +110,7 @@ load_default_environment() {
   export JS_LIB="${HELP_DIR}/svg-pan-zoom.min.js"
   export LOGO_FILE="${HELP_DIR}/emba.svg"
 
-  export COLOR_BIN="#1a3a5f"     # Deep Blue for Executables
+  export COLOR_BIN="#1a3a5f" # Deep Blue for Executables
   export COLOR_LNK="#D5AAAA"
 
   export DEPENDENCY_MAP_LOG="${LOG_PATH_MODULE}/dependency_map_details.log"
@@ -156,20 +155,35 @@ system_emulator_init_runner() {
   fi
 
   print_output "[*] Adjusting emulation runner script ..."
-  cp -r "${lEMU_PATH}" "${LOG_PATH_MODULE}/emulation_engine" || { print_error "[-] S130 - Adjusting emulation runner script failed"; return; }
-  sed -i 's/firmadyne.syscall=[0-9]*/firmadyne.syscall=32/' "${LOG_PATH_MODULE}"/emulation_engine/run.sh || { print_error "[-] S130 - Adjusting emulation runner script failed"; return; }
-  sed -i 's#file:./qemu.serial.log#file:./qemu.map.log#' "${LOG_PATH_MODULE}"/emulation_engine/run.sh || { print_error "[-] S130 - Adjusting emulation runner script failed"; return; }
+  cp -r "${lEMU_PATH}" "${LOG_PATH_MODULE}/emulation_engine" || {
+    print_error "[-] S130 - Adjusting emulation runner script failed"
+    return
+  }
+  sed -i 's/firmadyne.syscall=[0-9]*/firmadyne.syscall=32/' "${LOG_PATH_MODULE}"/emulation_engine/run.sh || {
+    print_error "[-] S130 - Adjusting emulation runner script failed"
+    return
+  }
+  sed -i 's#file:./qemu.serial.log#file:./qemu.map.log#' "${LOG_PATH_MODULE}"/emulation_engine/run.sh || {
+    print_error "[-] S130 - Adjusting emulation runner script failed"
+    return
+  }
 
   print_output "[*] Starting emulation engine ... running for 360 seconds"
   local lHOME_DIR=""
   lHOME_DIR=$(pwd)
-  cd "${LOG_PATH_MODULE}"/emulation_engine || { print_error "[-] S130 - Emulation run failed"; return; }
+  cd "${LOG_PATH_MODULE}"/emulation_engine || {
+    print_error "[-] S130 - Emulation run failed"
+    return
+  }
   timeout 360 ./run.sh
-  cd "${lHOME_DIR}" || { print_error "[-] S130 - Emulation run failed"; return; }
-  grep -a ANALYZE "${LOG_PATH_MODULE}"/emulation_engine/qemu.map.log | sed -e 's/.*PID: //' | awk '{print $2,$3}' | sort -u | sed 's/^(//' | sed 's/)]: / -> /' >> "${LOG_PATH_MODULE}"/system_emulation_results.log
+  cd "${lHOME_DIR}" || {
+    print_error "[-] S130 - Emulation run failed"
+    return
+  }
+  grep -a ANALYZE "${LOG_PATH_MODULE}"/emulation_engine/qemu.map.log | sed -e 's/.*PID: //' | awk '{print $2,$3}' | sort -u | sed 's/^(//' | sed 's/)]: / -> /' >>"${LOG_PATH_MODULE}"/system_emulation_results.log
   # we should have something like "UPDATELEASES.sh -> /usr/sbin/phpsh"
   print_ln ""
-  print_output "[+] Identified $(wc -l 2>/dev/null < "${LOG_PATH_MODULE}"/system_emulation_results.log) calls via system emulation"
+  print_output "[+] Identified $(wc -l 2>/dev/null <"${LOG_PATH_MODULE}"/system_emulation_results.log) calls via system emulation"
   print_ln ""
 }
 
@@ -221,17 +235,17 @@ get_capabilities() {
   elif [[ "${lARCH_INFO}" =~ "RISC-V" ]]; then
     # RISC-V: ecall, Register a7 (x17)
     lRAW_DISASM=$("${OBJDUMP}" -d "${lELF_FILE}" 2>/dev/null | grep -B 3 "ecall" | grep -oE "li\s+a7,[0-9]+" || true)
-    [[ "${lRAW_DISASM}" =~ (221|220) ]] && lCAPABILITIES+="EXEC "     # execve=221, clone=220
-    [[ "${lRAW_DISASM}" =~ (198|203) ]] && lCAPABILITIES+="NET "      # socket=198, connect=203
-    [[ "${lRAW_DISASM}" =~ (56|63|64) ]] && lCAPABILITIES+="FILE "    # openat=56, read=63, write=64
+    [[ "${lRAW_DISASM}" =~ (221|220) ]] && lCAPABILITIES+="EXEC "  # execve=221, clone=220
+    [[ "${lRAW_DISASM}" =~ (198|203) ]] && lCAPABILITIES+="NET "   # socket=198, connect=203
+    [[ "${lRAW_DISASM}" =~ (56|63|64) ]] && lCAPABILITIES+="FILE " # openat=56, read=63, write=64
 
   # PowerPC
   elif [[ "${lARCH_INFO}" =~ "PowerPC" ]]; then
     # PPC: sc, Register r0
     lRAW_DISASM=$("${OBJDUMP}" -d "${lELF_FILE}" 2>/dev/null | grep -B 3 "sc" | grep -oE "li\s+r0,[0-9]+" || true)
-    [[ "${lRAW_DISASM}" =~ (11|2) ]] && lCAPABILITIES+="EXEC "        # execve=11, fork=2
-    [[ "${lRAW_DISASM}" =~ (102|359) ]] && lCAPABILITIES+="NET "      # socketcall=102, socket=359
-    [[ "${lRAW_DISASM}" =~ (5|3|4) ]] && lCAPABILITIES+="FILE "       # open=5, read=3, write=4
+    [[ "${lRAW_DISASM}" =~ (11|2) ]] && lCAPABILITIES+="EXEC "   # execve=11, fork=2
+    [[ "${lRAW_DISASM}" =~ (102|359) ]] && lCAPABILITIES+="NET " # socketcall=102, socket=359
+    [[ "${lRAW_DISASM}" =~ (5|3|4) ]] && lCAPABILITIES+="FILE "  # open=5, read=3, write=4
 
   # Nios II
   elif [[ "${lARCH_INFO}" =~ "Altera Nios II" || "${lARCH_INFO}" =~ "Nios II" ]]; then
@@ -319,7 +333,7 @@ get_arch() {
   else
     # e.g. HTML document, ASCII text, with CRLF line terminators
     # -> we need the part in front of the ','
-    lARCH=${lFILE_OUTPUT/,*}
+    lARCH=${lFILE_OUTPUT/,*/}
   fi
   echo "${lARCH//\"/\\\"}"
 }
@@ -392,7 +406,7 @@ search_parse_log_helper() {
         write_entry_with_marker_check "${lURL}" "${lSAFE_DEP_NAME}" "${lMARKER}" "${lCOLOR}" "${lDOT_FILE_tmp_FILE}"
       else
         print_output "[*] ${lMARKER}: Creating new dependency ${ORANGE}${lSAFE_DEP_NAME}${NC} for ${ORANGE}${lSAFE_NAME}${NC}" "${DEPENDENCY_MAP_LOG}" "" 0
-        echo "  \"${lSAFE_NAME}\" -> \"${lSAFE_DEP_NAME}\";" >> "${lDOT_FILE_tmp_FILE}"
+        echo "  \"${lSAFE_NAME}\" -> \"${lSAFE_DEP_NAME}\";" >>"${lDOT_FILE_tmp_FILE}"
       fi
     done
   fi
@@ -411,7 +425,7 @@ write_entry_with_marker_check() {
   local lCURRENT_SOURCES=""
   if ! [[ -f "${lDOT_FILE_tmp_FILE}" ]]; then
     touch "${lDOT_FILE_tmp_FILE}"
-    echo "  \"${lSAFE_NAME}\" [shape=box, fillcolor=\"${lCOLOR}\", fontcolor=\"white\", URL=\"${lURL}|${lMARKER}\"];" >> "${lDOT_FILE_tmp_FILE}"
+    echo "  \"${lSAFE_NAME}\" [shape=box, fillcolor=\"${lCOLOR}\", fontcolor=\"white\", URL=\"${lURL}|${lMARKER}\"];" >>"${lDOT_FILE_tmp_FILE}"
     return
   fi
   mapfile -t lCURRENT_ENTRY_ARR < <(grep "  \"${lSAFE_NAME}\" \[shape=.*, fillcolor=\".*\", URL=\".*" "${lDOT_FILE_tmp_FILE}" || true)
@@ -420,7 +434,7 @@ write_entry_with_marker_check() {
       lCURRENT_SOURCES=$(echo "${lCURRENT_ENTRY}" | grep -o "URL=.*" | cut -d '|' -f6 | cut -d '"' -f1 || true)
       # print_output "[*] lCURRENT_ENTRY: ${lCURRENT_ENTRY}" "no_log"
       # print_output "[*] lCURRENT_SOURCES: ${lCURRENT_SOURCES}" "no_log"
-      local lUPDATED_SOURCES="${lCURRENT_SOURCES//NA}"
+      local lUPDATED_SOURCES="${lCURRENT_SOURCES//NA/}"
       if [[ "${lCURRENT_SOURCES}" != *"${lMARKER}"* ]]; then
         local lUPDATED_SOURCES+=" ${lMARKER}"
         # print_output "[*] lUPDATED_SOURCES: ${lUPDATED_SOURCES}" "no_log"
@@ -441,7 +455,7 @@ write_entry_with_marker_check() {
                   $0 = substr($0, i + l)
               }
               print out $0
-          }' "${lDOT_FILE_tmp_FILE}" > "${lDOT_FILE_tmp_FILE}.tmp" && mv "${lDOT_FILE_tmp_FILE}.tmp" "${lDOT_FILE_tmp_FILE}"
+          }' "${lDOT_FILE_tmp_FILE}" >"${lDOT_FILE_tmp_FILE}.tmp" && mv "${lDOT_FILE_tmp_FILE}.tmp" "${lDOT_FILE_tmp_FILE}"
       fi
     done
   fi
@@ -520,31 +534,31 @@ get_file_color() {
   local lFILE_BIN_DATA="${1:-}"
 
   if [[ "${lFILE_BIN_DATA}" == *"perl"* ]]; then
-    lCOLOR="#b4a7d6"  # some purple style
+    lCOLOR="#b4a7d6" # some purple style
   elif [[ "${lFILE_BIN_DATA}" == *"lua"* ]]; then
-    lCOLOR="#d5a6bd"  # some light pink style
+    lCOLOR="#d5a6bd" # some light pink style
   elif [[ "${lFILE_BIN_DATA}" == *"PHP"* ]]; then
-    lCOLOR="#f6b26b"  # some light orange style
+    lCOLOR="#f6b26b" # some light orange style
   elif [[ "${lFILE_BIN_DATA}" == *"Python"* ]]; then
-    lCOLOR="#e69138"  # some orange style
+    lCOLOR="#e69138" # some orange style
   elif [[ "${lFILE_BIN_DATA}" == *"shell script"* ]]; then
-    lCOLOR="#93c47d"  # light green
+    lCOLOR="#93c47d" # light green
   elif [[ "${lFILE_BIN_DATA}" == *"shared object"* ]]; then
-    lCOLOR="#3d85c6"  # light dark blue
+    lCOLOR="#3d85c6" # light dark blue
   elif [[ "${lFILE_BIN_DATA}" == *"ELF"* ]]; then
-    lCOLOR="#1a3a5f"  # dark blue
+    lCOLOR="#1a3a5f" # dark blue
   elif [[ "${lFILE_BIN_DATA}" == *"Squashfs filesystem"* ]]; then
-    lCOLOR="#b45f06"  # dark orange
+    lCOLOR="#b45f06" # dark orange
   elif [[ "${lFILE_BIN_DATA}" == *"HTML document"* ]]; then
-    lCOLOR="#c27ba0"  # light pink
+    lCOLOR="#c27ba0" # light pink
   elif [[ "${lFILE_BIN_DATA}" == *"JavaScript"* ]]; then
-    lCOLOR="#d5a6bd"  # light pink
+    lCOLOR="#d5a6bd" # light pink
   elif [[ "${lFILE_BIN_DATA}" == *"ASCII text"* ]]; then
-    lCOLOR="#ffd966"  # orange
+    lCOLOR="#ffd966" # orange
   elif [[ "${lFILE_BIN_DATA}" == *"data"* ]]; then
-    lCOLOR="#8fce00"  # green
+    lCOLOR="#8fce00" # green
   else
-    lCOLOR="#f9cb9c"  # very light orange
+    lCOLOR="#f9cb9c" # very light orange
   fi
   echo "${lCOLOR}"
 }
@@ -629,27 +643,27 @@ build_dot() {
 
   # preparation step - prepare and run the system emulation
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "QEMU-SYS"; then
-    if [[ $(wc -l 2>/dev/null < "${LOG_PATH_MODULE}"/system_emulation_results.log) -lt 100 ]]; then
+    if [[ $(wc -l 2>/dev/null <"${LOG_PATH_MODULE}"/system_emulation_results.log) -lt 100 ]]; then
       system_emulator_init_runner
     fi
   fi
 
   # generate the header in our final dot file:
   # { cmd1; cmd2; } >> file
-  { 
-  echo "digraph EMBA_Map {"
-  echo "  rankdir=LR;"
-  echo "  concentrate=true;"
-  echo "  splines=ortho;"
-  echo "  nodesep=0.2;"
-  echo "  ranksep=2.0;"
-  echo "  node [fontsize=10, fontname=\"Arial\", style=filled];"
-  } >> "${DOT_FILE}"
+  {
+    echo "digraph EMBA_Map {"
+    echo "  rankdir=LR;"
+    echo "  concentrate=true;"
+    echo "  splines=ortho;"
+    echo "  nodesep=0.2;"
+    echo "  ranksep=2.0;"
+    echo "  node [fontsize=10, fontname=\"Arial\", style=filled];"
+  } >>"${DOT_FILE}"
 
   local lFILE_CNT=0
   local lFILE_TO_CHECK=""
   for lFILE_TO_CHECK in "${ALL_EXEC_FILES_ARR[@]}"; do
-    lFILE_CNT=$((lFILE_CNT+1))
+    lFILE_CNT=$((lFILE_CNT + 1))
     if [[ "${lFILE_CNT}" -gt "${MAX_MAP_FILES}" ]]; then
       break
     fi
@@ -661,7 +675,7 @@ build_dot() {
     print_output "[*] Testing file ${ORANGE}${lFILE_CNT} / ${#ALL_EXEC_FILES_ARR[@]}${NC} - ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
 
     main_processing_thread_helper "${lFILE_TO_CHECK}" &
-    while (( $(jobs -r | wc -l) >= MAX_MAP_JOBS )); do
+    while (($(jobs -r | wc -l) >= MAX_MAP_JOBS)); do
       wait -n
     done
   done
@@ -672,7 +686,7 @@ build_dot() {
   mapfile -t lFS_LINKS_ARR < <(find "${FIRMWARE_PATH}" -type l)
 
   for lLINK_TO_CHECK in "${lFS_LINKS_ARR[@]}"; do
-    print_output "[*] Testing link ${ORANGE}${lFILE_CNT} / $(( ${#ALL_EXEC_FILES_ARR[@]}+${#lFS_LINKS_ARR[@]} ))${NC} - ${lLINK_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
+    print_output "[*] Testing link ${ORANGE}${lFILE_CNT} / $((${#ALL_EXEC_FILES_ARR[@]} + ${#lFS_LINKS_ARR[@]}))${NC} - ${lLINK_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
     lLNK_TARGET=$(readlink "${lLINK_TO_CHECK}" 2>/dev/null || echo "${lLINK_TO_CHECK}")
     # if the link targets something like ../../asdf -> we check for asdf
     while [[ "${lLNK_TARGET}" == "../"* ]]; do
@@ -696,13 +710,13 @@ build_dot() {
       lLNK_TARGET_NAME=$(basename "${LNK_TARGET_FILE}")
       lURL="NA|LNK to ${lLNK_TARGET_NAME}|NA|${lLINK_TO_CHECK}|NA"
       lMARKER="lnk_detection"
-      echo "  \"${lDEPNAME}\" [shape=ellipse, fillcolor=\"${COLOR_LNK}\", fontcolor=\"white\", URL=\"${lURL}|${lMARKER}\"];" >> "${lDOT_FILE_tmp_FILE}"
-      echo "  \"${lDEPNAME}\" -> \"${lLNK_TARGET_NAME}\";" >> "${lDOT_FILE_tmp_FILE}"
+      echo "  \"${lDEPNAME}\" [shape=ellipse, fillcolor=\"${COLOR_LNK}\", fontcolor=\"white\", URL=\"${lURL}|${lMARKER}\"];" >>"${lDOT_FILE_tmp_FILE}"
+      echo "  \"${lDEPNAME}\" -> \"${lLNK_TARGET_NAME}\";" >>"${lDOT_FILE_tmp_FILE}"
     done
     if [[ "${lFILE_CNT}" -gt "${MAX_MAP_FILES}" ]]; then
       break
     fi
-    lFILE_CNT=$((lFILE_CNT+1))
+    lFILE_CNT=$((lFILE_CNT + 1))
   done
 
   # wait for all jobs finished
@@ -714,10 +728,10 @@ build_dot() {
   mapfile -t lDOT_FILE_tmp_ALL_FILES < <(find "${DOT_FILE_tmp_dir}" -type f)
   for lDOT_FILE_tmp in "${lDOT_FILE_tmp_ALL_FILES[@]}"; do
     print_output "[*] Processing dot file ${lDOT_FILE_tmp}" "${DEPENDENCY_MAP_LOG}" "" 0
-    cat "${lDOT_FILE_tmp}" >> "${DOT_FILE}"
+    cat "${lDOT_FILE_tmp}" >>"${DOT_FILE}"
   done
 
-  echo "}" >> "${DOT_FILE}"
+  echo "}" >>"${DOT_FILE}"
 }
 
 build_svg() {
@@ -750,20 +764,20 @@ build_html() {
   sub_module_title "Interactive HTML dependency map"
 
   if [[ -f "${SVG_FILE}" ]]; then
-    sed -e "/%%SVG_FILE_CONTENT%%/{r ${SVG_FILE}" -e "d}" "${BASE_HTML_TEMPLATE}" > "${HTML_FILE}"
+    sed -e "/%%SVG_FILE_CONTENT%%/{r ${SVG_FILE}" -e "d}" "${BASE_HTML_TEMPLATE}" >"${HTML_FILE}"
     sed -i "s/%%COLOR_BIN%%/${COLOR_BIN}/" "${HTML_FILE}"
     sed -i "s#%%EMBA_LOGO%%#$(basename "${LOGO_FILE}")#" "${HTML_FILE}"
     sed -i "s#%%JS_LIB%%#$(basename "${JS_LIB}")#" "${HTML_FILE}"
   fi
   if [[ -f "${SVG_FILE//\.svg/_dot.svg}" ]]; then
-    sed -e "/%%SVG_FILE_CONTENT%%/{r ${SVG_FILE//\.svg/_dot.svg}" -e "d}" "${BASE_HTML_TEMPLATE}" > "${HTML_FILE//-map.html/-dot_map.html}"
+    sed -e "/%%SVG_FILE_CONTENT%%/{r ${SVG_FILE//\.svg/_dot.svg}" -e "d}" "${BASE_HTML_TEMPLATE}" >"${HTML_FILE//-map.html/-dot_map.html}"
     sed -i "s/%%COLOR_BIN%%/${COLOR_BIN}/" "${HTML_FILE//-map.html/-dot_map.html}"
     sed -i "s#%%EMBA_LOGO%%#$(basename "${LOGO_FILE}")#" "${HTML_FILE//-map.html/-dot_map.html}"
     sed -i "s#%%JS_LIB%%#$(basename "${JS_LIB}")#" "${HTML_FILE//-map.html/-dot_map.html}"
   fi
 
   if [[ -f "${HTML_FILE}" && -f "${SVG_FILE}" ]]; then
-    print_output "[+] EMBA dependency neato map generated: ${ORANGE}${HTML_FILE}"${NC}
+    print_output "[+] EMBA dependency neato map generated: ${ORANGE}${HTML_FILE}${NC}"
     write_link "${HTML_FILE}"
   fi
   if [[ -f "${HTML_FILE//-map.html/-dot_map.html}" && -f "${SVG_FILE//\.svg/_dot.svg}" ]]; then
@@ -771,4 +785,3 @@ build_html() {
     write_link "${HTML_FILE//-map.html/-dot_map.html}"
   fi
 }
-
