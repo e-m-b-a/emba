@@ -106,7 +106,7 @@ load_default_environment() {
   export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 
   # External assets - downloaded once for offline capability.
-  export JS_LIB="${HELP_DIR}/svg-pan-zoom.min.js"
+  export JS_LIB="${EXT_DIR}/svg-pan-zoom.min.js"
   export LOGO_FILE="${HELP_DIR}/emba.svg"
 
   export COLOR_BIN="#1a3a5f" # Deep Blue for Executables

@@ -755,7 +755,7 @@ check_disk_space_emu() {
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/stracer_}"
-    if pgrep -f "${lEMULATOR}.*${lKILL_PROC_NAME}" | grep -v "pgrep\|grep\|pkill"; then
+    if pgrep -f "${lEMULATOR}.*${lKILL_PROC_NAME}" 2>/dev/null; then
       print_output "[*] Qemu processes are wasting disk space ... we try to kill process ${lKILL_PROC_NAME} now" "no_log"
       pkill -9 -f "${lEMULATOR}.*${lKILL_PROC_NAME}.*" >/dev/null || true
     fi
