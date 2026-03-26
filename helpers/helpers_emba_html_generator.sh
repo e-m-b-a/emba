@@ -95,7 +95,7 @@ add_link_tags() {
       lREF_LINK="$(sed "${lREF_LINK_NUMBER}""q;d" "${lLINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       local lURL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "${lREF_LINK}" | cut -d"#" -f1)" ]] ; then
-        if [[  ( ("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c") ) ]] ; then
+        if [[  ( ("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv") ) || ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c") ) ]] ; then
           local lREF_ANCHOR=""
           if [[ ( ("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) ) ]] ; then
             lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
@@ -116,12 +116,16 @@ add_link_tags() {
             lLINE_NUMBER_INFO_PREV=$(( lLINE_NUMBER_INFO_PREV - 1 ))
           done
           lLINK_COMMAND_ARR+=( "${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
-        elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -5}" == ".spdx" ]]; then
+        elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -5}" == ".spdx" || "${lREF_LINK: -5}" == ".html" ]]; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
           local lRES_PATH=""
           lRES_PATH="${ABS_HTML_PATH}""/""$(echo "${lBACK_LINK}" | cut -d"." -f1 )""/res"
           if [[ ! -d "${lRES_PATH}" ]] ; then mkdir -p "${lRES_PATH}" > /dev/null || true ; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
+          if [[ "${lREF_LINK}" == *"EMBA-dependency"* ]]; then
+            cp "${EXT_DIR}/svg-pan-zoom.min.js" "${lRES_PATH}" || true
+            cp "${HELP_DIR}/emba.svg" "${lRES_PATH}" || true
+          fi
 
           lLINE_NUMBER_INFO_PREV="$(( lREF_LINK_NUMBER - 1 ))"
           lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1 )/res/$(basename "${lREF_LINK}")@g" || true)"
@@ -134,7 +138,7 @@ add_link_tags() {
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
           lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1 )/res/$(basename "${lREF_LINK}")@g" || true)""Download Qemu emulation archive.""${LINK_END}"
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "${lREF_LINK}").*@${lHTML_LINK}${P_END}@" "${lLINK_FILE}"
-        elif [[ "${lREF_LINK: -4}" == ".png" ]] ; then
+        elif [[ "${lREF_LINK: -4}" == ".png" || "${lREF_LINK: -4}" == ".svg" ]] ; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
           cp "${lREF_LINK}" "${ABS_HTML_PATH}${STYLE_PATH}""/""$(basename "${lREF_LINK}")" || true
 

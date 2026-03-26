@@ -170,7 +170,7 @@ S13_weak_func_check()
     fi
 
     local lBINS_CNT=0
-    lBINS_CNT=$(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep -c ";ELF")
+    lBINS_CNT=$(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep -c ";ELF" || true)
     write_log ""
     write_log "[*] Statistics:${lSTRCPY_CNT}:${lBINS_CNT}"
     write_log ""
@@ -525,7 +525,7 @@ function_check_ARM32() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -f "${FUNC_LOG:-}"
       continue
     fi
   done

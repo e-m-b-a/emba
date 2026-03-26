@@ -167,15 +167,17 @@ S118_busybox_verifier()
     fi
 
     print_output "[*] Create CVE vulnerabilities array for BusyBox version ${ORANGE}:${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}${NC} ..." "no_log"
-    mapfile -t lALL_BB_VULNS_ARR < <(tail -n+2 "${CVE_DETAILS_PATH}")
+    mapfile -t lALL_BB_VULNS_ARR < <(tail -n+2 "${CVE_DETAILS_PATH}" | cut -d ',' -f2- | sort -u)
 
     if [[ "${#lALL_BB_VULNS_ARR[@]}" -eq 0 ]] || [[ "${#BB_VERIFIED_APPLETS[@]}" -eq 0 ]]; then
       print_output "[-] No BusyBox vulnerability or applets found for ${ORANGE}:${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}${NC}"
       continue
     fi
+    mapfile -t BB_VERIFIED_APPLETS < <(printf "%s\n" "${BB_VERIFIED_APPLETS[@]}" | sort -u)
 
     print_ln
     sub_module_title "BusyBox - Vulnerability verification - :${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}"
+    mapfile -t lALL_BB_VULNS_ARR < <(printf "%s\n" "${lALL_BB_VULNS_ARR[@]}" | sort -u)
     print_output "[+] Extracted ${ORANGE}${#lALL_BB_VULNS_ARR[@]}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.txt/_nice.txt}"
     print_ln
 
@@ -244,7 +246,7 @@ busybox_vuln_testing_threader() {
 
   # print_output "[*] VULN: ${lVULN}"
   local lCVE=""
-  lCVE=$(echo "${lVULN}" | cut -d, -f4)
+  lCVE=$(echo "${lVULN}" | cut -d, -f3)
   local lLOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${lCVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then

@@ -32,7 +32,7 @@ set_defaults() {
   export MAX_EXT_CHECK_BINS=20
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
-  export DEEP_EXTRACTOR="unblob"  # binwalk/unblob
+  export DEEP_EXTRACTOR="binwalk"  # binwalk/unblob
   export DEEP_EXT_DEPTH=4
   export FIRMWARE=0
   export FORCE=0
@@ -167,7 +167,7 @@ set_defaults() {
   export SBOM_LIFECYCLE_PHASE="operations"
 
   # binary dependency map - enable via scanning profile
-  export EMBA_MAP_GENERATOR=0
+  export EMBA_MAP_GENERATOR=1
   export MAX_MAP_FILES=2000     # maximum files to analyse and generate dependency map
   export MAX_MAP_JOBS=""        # maximum jobs used for map generation - no entry means the default from the module
 
@@ -259,7 +259,7 @@ set_log_paths() {
   export S108_CSV_LOG="${CSV_DIR}/s108_stacs_password_search.csv"
   export S109_LOG="${LOG_DIR}/s109_jtr_local_pw_cracking.txt"
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
-  export S115_LOG="${CSV_DIR}/s115_usermode_emulator.txt"
+  export S115_LOG="${LOG_DIR}/s115_usermode_emulator.txt"
   export S115_LOG_DIR="${S115_LOG/\.txt/\/}"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"

@@ -457,8 +457,8 @@ function_entry_space_check() {
   # function_name(){
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA function space definition check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
 
-  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/* || true)
-  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/* || true)
+  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/*.sh || true)
+  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/*.sh || true)
 
   if [[ "${#FCT_SPACE_MODULES_ARR[@]}" -gt 0 ]] || [[ "${#FCT_SPACE_HLP_ARR[@]}" -gt 0 ]]; then
     echo -e "Found problem with spaces in function definition${NC}\\n"
