@@ -68,12 +68,12 @@ S09_firmware_base_version_check() {
   if [[ " ${MODULES_EXPORTED[*]} " == *S08* ]]; then
     print_output "[*] Checking for common package manager environments to optimize static version detection"
     # Debian:
-    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/debian_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u >"${LOG_PATH_MODULE}"/debian_known_files.txt || true
     # the extracted packages are used to further limit the static tests
-    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/debian_known_packages.txt || true
+    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/debian_known_packages.txt || true
     # OpenWRT
-    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
-    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u > "${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
@@ -81,19 +81,19 @@ S09_firmware_base_version_check() {
     # rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}"
 
     if [[ -f "${LOG_PATH_MODULE}"/debian_known_files.txt ]]; then
-      cat "${LOG_PATH_MODULE}"/debian_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+      cat "${LOG_PATH_MODULE}"/debian_known_files.txt >>"${LOG_PATH_MODULE}"/pkg_known_files.txt
     fi
     if [[ -f "${LOG_PATH_MODULE}"/openwrt_known_files.txt ]]; then
-      cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+      cat "${LOG_PATH_MODULE}"/openwrt_known_files.txt >>"${LOG_PATH_MODULE}"/pkg_known_files.txt
     fi
     if [[ -f "${LOG_PATH_MODULE}"/rpm_known_files.txt ]]; then
-      cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >> "${LOG_PATH_MODULE}"/pkg_known_files.txt
+      cat "${LOG_PATH_MODULE}"/rpm_known_files.txt >>"${LOG_PATH_MODULE}"/pkg_known_files.txt
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/pkg_known_files.txt ]]; then
       # sed -i '/\[/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
       sed -i '/\/\.$/d' "${LOG_PATH_MODULE}"/pkg_known_files.txt || true
-      mapfile -t lFILE_ARR_PKG < "${LOG_PATH_MODULE}"/pkg_known_files.txt
+      mapfile -t lFILE_ARR_PKG <"${LOG_PATH_MODULE}"/pkg_known_files.txt
     fi
 
     if [[ "${#lFILE_ARR_PKG[@]}" -gt 10 ]]; then
@@ -101,24 +101,24 @@ S09_firmware_base_version_check() {
       local lPKG_FILE=""
       for lPKG_FILE in "${lFILE_ARR_PKG[@]}"; do
         lPKG_FILE=$(printf "%q\n" "${lPKG_FILE}")
-        (grep -F "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >> "${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true)&
+        (grep -F "${lPKG_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 >>"${LOG_PATH_MODULE}"/known_system_pkg_files.txt || true) &
       done
 
       print_output "[*] Waiting for finishing the build process of known_system_pkg_files" "no_log"
       # shellcheck disable=SC2046
       wait $(jobs -p) # nosemgrep
 
-      sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt > "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
-      cut -d ';' -f2 "${P99_CSV_LOG}" | sort -u > "${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
+      sort -u "${LOG_PATH_MODULE}"/known_system_pkg_files.txt >"${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt || true
+      cut -d ';' -f2 "${P99_CSV_LOG}" | sort -u >"${LOG_PATH_MODULE}"/firmware_binaries_sorted.txt || true
 
       # we have now all our filesystem bins in "${P99_CSV_LOG}"
       # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
       # now we just need to do a diff on them and we should have only the non matching files
-      comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt > "${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
-      mapfile -t lFILE_ARR_TMP < "${LOG_PATH_MODULE}"/known_system_files_diffed.txt
+      comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt >"${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
+      mapfile -t lFILE_ARR_TMP <"${LOG_PATH_MODULE}"/known_system_files_diffed.txt
 
       local lINIT_FILES_CNT=0
-      lINIT_FILES_CNT="$(wc -l < "${P99_CSV_LOG}")"
+      lINIT_FILES_CNT="$(wc -l <"${P99_CSV_LOG}")"
       if [[ "${#lFILE_ARR_TMP[@]}" -lt "${lINIT_FILES_CNT}" ]]; then
         print_output "[*] Identified ${ORANGE}${lINIT_FILES_CNT}${NC} files before package manager matching" "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt"
         print_output "[*] EMBA is further analyzing ${ORANGE}${#lFILE_ARR_TMP[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/known_system_files_diffed.txt"
@@ -133,7 +133,7 @@ S09_firmware_base_version_check() {
             continue
           fi
           # print_output "$(indent "$(orange "${lFILE}")")"
-          FILE_ARR+=( "${lFILE}" )
+          FILE_ARR+=("${lFILE}")
         done
         print_output "[*] EMBA is testing ${ORANGE}${#FILE_ARR[@]}${NC} files which are not handled by the package manager" "${LOG_PATH_MODULE}/final_bins.txt"
       else
@@ -158,14 +158,14 @@ S09_firmware_base_version_check() {
     fi
     generate_strings "${lBIN}" &
     local lTMP_PID="$!"
-    WAIT_PIDS_S09_1+=( "${lTMP_PID}" )
-    max_pids_protection $(( MAX_MOD_THREADS*2 )) WAIT_PIDS_S09_1
+    WAIT_PIDS_S09_1+=("${lTMP_PID}")
+    max_pids_protection $((MAX_MOD_THREADS * 2)) WAIT_PIDS_S09_1
   done
 
   print_output "[*] Waiting for strings generator" "no_log"
   wait_for_pid "${WAIT_PIDS_S09_1[@]}"
   print_output "[*] Proceeding with version detection for ${ORANGE}${#FILE_ARR[@]}${NC} binary files"
-  echo "S09_strings_generated" > "${TMP_DIR}/S09_strings_generated.tmp"
+  echo "S09_strings_generated" >"${TMP_DIR}/S09_strings_generated.tmp"
   print_ln
 
   lOS_IDENTIFIED=$(distri_check)
@@ -173,7 +173,7 @@ S09_firmware_base_version_check() {
   for lVERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
     S09_identifier_threadings "${lVERSION_JSON_CFG}" "${lOS_IDENTIFIED}" &
     local lTMP_PID="$!"
-    WAIT_PIDS_S09_main+=( "${lTMP_PID}" )
+    WAIT_PIDS_S09_main+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" WAIT_PIDS_S09_main
     print_dot
   done
@@ -297,7 +297,7 @@ S09_identifier_threadings() {
       # as the STRICT_BINS array could also include other files we have to check for ELF files now
       # This information is already stored in P99_CSV_LOG and in our lBINARY_ENTRY details
       lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
-      if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]] ; then
+      if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]]; then
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
         MD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
         lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
@@ -365,7 +365,7 @@ S09_identifier_threadings() {
       # in RTOS mode we also test the original firmware file
 
       lMD5_SUM=$(md5sum "${FIRMWARE_PATH_BAK}")
-      lMD5_SUM="${lMD5_SUM/\ *}"
+      lMD5_SUM="${lMD5_SUM/\ */}"
       lAPP_NAME="$(basename "${FIRMWARE_PATH_BAK}")"
       local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lAPP_NAME}".txt
       # generate strings output if not already available:
@@ -403,7 +403,7 @@ S09_identifier_threadings() {
       # print_output "[*] Calling with ${lVERSION_IDENTIFIER}" "no_log"
       bin_string_checker "${lVERSION_IDENTIFIER}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR" "lPARSING_MODE_ARR" &
       local lTMP_PID="$!"
-      WAIT_PIDS_S09+=( "${lTMP_PID}" )
+      WAIT_PIDS_S09+=("${lTMP_PID}")
       # echo "WAIT_PIDS_S09: ${#WAIT_PIDS_S09[@]} / max: ${MAX_MOD_THREADS})"
       max_pids_protection "${MAX_MOD_THREADS}" WAIT_PIDS_S09
     done
@@ -446,7 +446,7 @@ version_parsing_logging() {
 
   for lCSV_REGEX in "${lrCSV_REGEX_ARR_ref[@]}"; do
     lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${lCSV_REGEX}")
-    lCSV_RULE="${lCSV_RULE//\ }"
+    lCSV_RULE="${lCSV_RULE//\ /}"
 
     lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
     # lAPP_NAME is the name from the json configuration
@@ -486,23 +486,23 @@ version_parsing_logging() {
     # add source file path information to our properties array:
     local lPROP_ARRAY_INIT_ARR=()
     if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lBINARY_PATH}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE_DETAILS}" )
+      lPROP_ARRAY_INIT_ARR+=("source_path:${lBINARY_PATH}")
+      lPROP_ARRAY_INIT_ARR+=("source_arch:${lBIN_ARCH}")
+      lPROP_ARRAY_INIT_ARR+=("source_details:${lBIN_FILE_DETAILS}")
     fi
-    lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lVERSION_IDENTIFIED}" )
+    lPROP_ARRAY_INIT_ARR+=("identifer_detected:${lVERSION_IDENTIFIED}")
 
     # minimal identifier is deprecated and will be replaced in the future
-    lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
+    lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lCSV_RULE}")
 
     # lets store the vendor names and product names for later vulnerability identification
     for lPNAME in "${lrPRODUCT_NAME_ARR_ref[@]}"; do
-      lPROP_ARRAY_INIT_ARR+=( "product_name:${lPNAME}" )
+      lPROP_ARRAY_INIT_ARR+=("product_name:${lPNAME}")
     done
     for lVENDOR in "${lrVENDOR_NAME_ARR_ref[@]}"; do
-      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lVENDOR}" )
+      lPROP_ARRAY_INIT_ARR+=("vendor_name:${lVENDOR}")
     done
-    lPROP_ARRAY_INIT_ARR+=( "confidence:$(get_confidence_string "${CONFIDENCE_LEVEL:-0}")" )
+    lPROP_ARRAY_INIT_ARR+=("confidence:$(get_confidence_string "${CONFIDENCE_LEVEL:-0}")")
 
     # build the dependencies based on linker details
     if [[ "${lBIN_FILE_DETAILS:-NA}" == *"dynamically linked"* ]]; then
@@ -511,7 +511,7 @@ version_parsing_logging() {
       # now we can create the dependencies based on ldd
       mapfile -t lBIN_DEPS_ARR < <(ldd "${lBINARY_PATH}" 2>&1 | grep -v "not a dynamic executable" | awk '{print $1}' || true)
       for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
-        lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+        lPROP_ARRAY_INIT_ARR+=("dependency:${lBIN_DEPENDENCY}")
       done
     fi
 
@@ -549,7 +549,7 @@ build_final_bins_threader() {
   fi
 
   if [[ "${lBIN_FILE}" != *"text"* && "${lBIN_FILE}" != *"compressed"* && "${lBIN_FILE}" != *"archive"* && "${lBIN_FILE}" != *"empty"* && "${lBIN_FILE}" != *"Git pack"* ]]; then
-    echo "${lFILE}" >> "${LOG_PATH_MODULE}"/final_bins.txt
+    echo "${lFILE}" >>"${LOG_PATH_MODULE}"/final_bins.txt
   fi
 
   if [[ "${SBOM_UNTRACKED_FILES}" -lt 1 ]]; then
@@ -579,18 +579,18 @@ build_final_bins_threader() {
   local lPROP_ARRAY_INIT_ARR=()
   lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
   lBIN_ARCH=${lBIN_ARCH#\ }
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lFILE}")
   if [[ -n "${lBIN_ARCH}" ]]; then
-    lPROP_ARRAY_INIT_ARR+=( "source_arch:${lBIN_ARCH}" )
+    lPROP_ARRAY_INIT_ARR+=("source_arch:${lBIN_ARCH}")
   fi
-  lPROP_ARRAY_INIT_ARR+=( "source_details:${lBIN_FILE}" )
+  lPROP_ARRAY_INIT_ARR+=("source_details:${lBIN_FILE}")
 
   # build the dependencies based on linker details
   if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
     # now we can create the dependencies based on ldd
     mapfile -t lBIN_DEPS_ARR < <(ldd "${lFILE}" 2>&1 | grep -v "not a dynamic executable" | awk '{print $1}' || true)
     for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
-      lPROP_ARRAY_INIT_ARR+=( "dependency:${lBIN_DEPENDENCY}" )
+      lPROP_ARRAY_INIT_ARR+=("dependency:${lBIN_DEPENDENCY}")
     done
   fi
 
@@ -614,7 +614,7 @@ check_pkg_files_filesystem() {
   # if our file from the filesystem is in the package managers array we do not need to test it here
   if grep -E -q "${lPKG_FILE}$" "${lFS_FILES}"; then
     # print_output "[+] Adding ${ORANGE}${lFILE}${GREEN} to testing array ..." "no_log"
-    grep -E "${lPKG_FILE}$" "${lFS_FILES}" >> "${LOG_PATH_MODULE}"/known_system_files.txt
+    grep -E "${lPKG_FILE}$" "${lFS_FILES}" >>"${LOG_PATH_MODULE}"/known_system_files.txt
   fi
 }
 
@@ -638,7 +638,7 @@ build_generic_purl() {
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
-  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED/-*}/${lBIN_NAME}"
+  lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED/-*/}/${lBIN_NAME}"
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
 
   if [[ -n "${lBIN_VERS}" ]]; then
@@ -716,7 +716,7 @@ generate_strings() {
   if [[ "${SBOM_UNTRACKED_FILES:-0}" -gt 0 ]]; then
     build_final_bins_threader "${lBINARY_PATH}" "${lBIN_FILE}" &
     local lTMP_PID="$!"
-    WAIT_PIDS_S09_ARR_tmp+=( "${lTMP_PID}" )
+    WAIT_PIDS_S09_ARR_tmp+=("${lTMP_PID}")
   fi
 
   if [[ "${lBIN_FILE}" == "empty" || "${lBIN_FILE}" == *"text"* || "${lBIN_FILE}" == *" archive "* || "${lBIN_FILE}" == *" compressed "* || "${lBIN_FILE}" == *" image data"* || "${lBIN_FILE}" == *"Git pack"* ]]; then
@@ -728,7 +728,7 @@ generate_strings() {
   lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
     # print_output "[*] Generating strings for ${lBINARY_PATH} ..."
-    strings "${lBINARY_PATH}" | uniq > "${lSTRINGS_OUTPUT}" || true
+    strings "${lBINARY_PATH}" | uniq >"${lSTRINGS_OUTPUT}" || true
   fi
 }
 
@@ -815,23 +815,23 @@ bin_string_checker() {
     local CONFIDENCE_LEVEL=3
 
     # print_output "[*] Testing ${lBINARY_PATH}" "no_log"
-    for (( j=0; j<${#lVERSION_IDENTIFIERS_ARR[@]}; j++ )); do
+    for ((j = 0; j < ${#lVERSION_IDENTIFIERS_ARR[@]}; j++)); do
       local lVERSION_IDENTIFIER="${lVERSION_IDENTIFIERS_ARR["${j}"]}"
       # print_output "[*] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
       local lVERSION_IDENTIFIED=""
       [[ -z "${lVERSION_IDENTIFIER}" ]] && continue
       # this is a workaround to handle the new multi_grep
       if [[ "${lVERSION_IDENTIFIER: -1}" == '"' ]]; then
-        lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"}"
+        lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"/}"
         lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
       fi
       if [[ ${RTOS} -eq 0 ]]; then
-        if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]] ; then
+        if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]]; then
           # print_output "[!] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-            if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
+            if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j + 1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
               print_output "[+] Found sub identifier ${ORANGE}${lVERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
               continue
@@ -854,7 +854,7 @@ bin_string_checker() {
           lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-            if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
+            if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j + 1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
               print_output "[+] Found sub identifier ${ORANGE}${lVERSION_IDENTIFIER}${GREEN} in file ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
               continue
@@ -874,7 +874,7 @@ bin_string_checker() {
         lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
 
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
-          if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
+          if [[ "${#lVERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j + 1))" -lt "${#lVERSION_IDENTIFIERS_ARR[@]}" ]]; then
             # we found the first identifier and now we need to check the other identifiers also
             print_output "[+] Found sub identifier ${ORANGE}${lVERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${lBINARY_PATH}${GREEN}" "no_log"
             continue
@@ -892,4 +892,3 @@ bin_string_checker() {
     done
   done
 }
-

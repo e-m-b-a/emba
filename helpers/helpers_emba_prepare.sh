@@ -25,15 +25,15 @@
 #                 firmware root path via $FIRMWARE_PATH
 
 log_folder() {
-  if [[ ${ONLY_DEP} -eq 0 ]] && [[ -d "${LOG_DIR}" ]] ; then
+  if [[ ${ONLY_DEP} -eq 0 ]] && [[ -d "${LOG_DIR}" ]]; then
     # If RESCAN_SBOM is enabled, skip log directory deletion prompt and reuse existing directory
     if [[ "${RESCAN_SBOM}" -eq 1 ]]; then
       print_output "[*] Rescanning SBOM using existing log directory ${ORANGE}${LOG_DIR}${NC}" "no_log"
       return
     fi
     export RESTART=0          # indicator for testing unfinished tests again
-    local lNOT_FINISHED=0      # identify unfinished firmware tests
-    local lPOSSIBLE_RESTART=0  # used for testing the checksums of the firmware with stored checksum
+    local lNOT_FINISHED=0     # identify unfinished firmware tests
+    local lPOSSIBLE_RESTART=0 # used for testing the checksums of the firmware with stored checksum
     local lUSER_ANSWER="n"
     local lD_LOG_FILES_ARR=()
     local lD_LOG_FILE=""
@@ -73,7 +73,7 @@ log_folder() {
       fi
     elif [[ -f "${P02_LOG_DIR}"/firmware_hashes.log ]] && [[ -d "${FIRMWARE_PATH}" ]]; then
       print_output "[*] Found firmware directory and hashes file -> checking against the provided firmware directory (${FIRMWARE_PATH}) if a restart would be possible" "no_log"
-      find "${FIRMWARE_PATH}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' > "${P02_LOG_DIR}/firmware_hashes_restarter.log" || true
+      find "${FIRMWARE_PATH}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' >"${P02_LOG_DIR}/firmware_hashes_restarter.log" || true
       # we just diff the file checksums to have a quick idea if we can restart the scan or not
       if diff -q "${P02_LOG_DIR}/firmware_hashes.log" "${P02_LOG_DIR}/firmware_hashes_restarter.log"; then
         lPOSSIBLE_RESTART=1
@@ -84,72 +84,71 @@ log_folder() {
       print_output "[*] If you answer with ${ORANGE}n${NC}o, EMBA tries to process the unfinished test${NC}" "no_log"
     fi
 
-    if [[ ${OVERWRITE_LOG} -eq 1 ]] ; then
+    if [[ ${OVERWRITE_LOG} -eq 1 ]]; then
       lUSER_ANSWER="y"
     else
       read -p "(Y/n)  " -r lUSER_ANSWER
     fi
     case ${lUSER_ANSWER:0:1} in
-        y|Y|"" )
-          if mount | grep "${LOG_DIR}" | grep -e "proc\|sys\|run" > /dev/null; then
-            print_ln "no_log"
-            print_output "[!] We found unmounted areas from a former emulation process in your log directory ${LOG_DIR}." "no_log"
-            print_output "[!] You should unmount this stuff manually:\\n" "no_log"
-            print_output "$(indent "$(mount | grep "${LOG_DIR}")")" "no_log"
-            echo -e "\\n${RED}Terminate EMBA${NC}\\n"
-            exit 1
-          elif mount | grep "${LOG_DIR}" > /dev/null; then
-            print_ln "no_log"
-            print_output "[!] We found unmounted areas in your log directory ${LOG_DIR}." "no_log"
-            print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
-            print_output "$(indent "$(mount | grep "${LOG_DIR}")")" "no_log"
-          else
-            rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
-            echo -e "\\n${GREEN}Successfully deleted: ${ORANGE}${LOG_DIR}${NC}\\n"
-          fi
-        ;;
-        n|N )
-          if [[ "${lNOT_FINISHED}" -eq 1 ]] && [[ -f "${LOG_DIR}"/backup_vars.log ]] && [[ "${lPOSSIBLE_RESTART}" -eq 1 ]]; then
-            print_output "[*] EMBA tries to process the unfinished test" "no_log"
-            if ! [[ -d "${TMP_DIR}" ]]; then
-              mkdir "${TMP_DIR}"
-            fi
-            touch "${TMP_DIR}"/restart_emba
-          else
-            echo -e "\\n${RED}Terminate EMBA${NC}\\n"
-            exit 1
-          fi
-        ;;
-        * )
-          echo -e "\\n${RED}Terminate EMBA${NC}\\n"
-          exit 1
-        ;;
+    y | Y | "")
+      if mount | grep "${LOG_DIR}" | grep -e "proc\|sys\|run" >/dev/null; then
+        print_ln "no_log"
+        print_output "[!] We found unmounted areas from a former emulation process in your log directory ${LOG_DIR}." "no_log"
+        print_output "[!] You should unmount this stuff manually:\\n" "no_log"
+        print_output "$(indent "$(mount | grep "${LOG_DIR}")")" "no_log"
+        echo -e "\\n${RED}Terminate EMBA${NC}\\n"
+        exit 1
+      elif mount | grep "${LOG_DIR}" >/dev/null; then
+        print_ln "no_log"
+        print_output "[!] We found unmounted areas in your log directory ${LOG_DIR}." "no_log"
+        print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
+        print_output "$(indent "$(mount | grep "${LOG_DIR}")")" "no_log"
+      else
+        rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
+        echo -e "\\n${GREEN}Successfully deleted: ${ORANGE}${LOG_DIR}${NC}\\n"
+      fi
+      ;;
+    n | N)
+      if [[ "${lNOT_FINISHED}" -eq 1 ]] && [[ -f "${LOG_DIR}"/backup_vars.log ]] && [[ "${lPOSSIBLE_RESTART}" -eq 1 ]]; then
+        print_output "[*] EMBA tries to process the unfinished test" "no_log"
+        if ! [[ -d "${TMP_DIR}" ]]; then
+          mkdir "${TMP_DIR}"
+        fi
+        touch "${TMP_DIR}"/restart_emba
+      else
+        echo -e "\\n${RED}Terminate EMBA${NC}\\n"
+        exit 1
+      fi
+      ;;
+    *)
+      echo -e "\\n${RED}Terminate EMBA${NC}\\n"
+      exit 1
+      ;;
     esac
   fi
 
-  readarray -t lD_LOG_FILES_ARR < <( find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100 )
-  if [[ ${USE_DOCKER} -eq 1 && ${#lD_LOG_FILES_ARR[@]} -gt 0 ]] ; then
+  readarray -t lD_LOG_FILES_ARR < <(find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100)
+  if [[ ${USE_DOCKER} -eq 1 && ${#lD_LOG_FILES_ARR[@]} -gt 0 ]]; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
-    for lD_LOG_FILE in "${lD_LOG_FILES_ARR[@]}" ; do
+    for lD_LOG_FILE in "${lD_LOG_FILES_ARR[@]}"; do
       echo -e "        ""$(orange "${lD_LOG_FILE}")"
     done
     echo -e "\\n${ORANGE}Continue to run EMBA and ignore this warning?${NC}\\n"
     read -p "(Y/n)  " -r lUSER_ANSWER
     case ${lUSER_ANSWER:0:1} in
-        y|Y|"" )
-          print_ln "no_log"
-        ;;
-        * )
-          echo -e "\\n${RED}Terminate EMBA${NC}\\n"
-          exit 1
-        ;;
+    y | Y | "")
+      print_ln "no_log"
+      ;;
+    *)
+      echo -e "\\n${RED}Terminate EMBA${NC}\\n"
+      exit 1
+      ;;
     esac
   fi
 }
 
-set_exclude()
-{
+set_exclude() {
   export EXCLUDE_PATHS=""
   export EXCLUDE=()
 
@@ -163,7 +162,7 @@ set_exclude()
   # exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   EXCLUDE_PATHS="$(set_excluded_path)"
   export EXCL_FIND=()
-  IFS=" " read -r -a EXCL_FIND <<< "$( echo -e "$(get_excluded_find "${EXCLUDE_PATHS}")" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
+  IFS=" " read -r -a EXCL_FIND <<<"$(echo -e "$(get_excluded_find "${EXCLUDE_PATHS}")" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
   print_excluded
 }
 
@@ -178,7 +177,7 @@ binary_architecture_threader() {
   local lD_ARCH_GUESSED="NA"
   local lMD5SUM=""
   lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
-  lMD5SUM="${lMD5SUM/\ *}"
+  lMD5SUM="${lMD5SUM/\ */}"
   if [[ "${lBINARY}" == *".raw" ]]; then
     return
   fi
@@ -189,7 +188,7 @@ binary_architecture_threader() {
   if [[ -f "${P99_CSV_LOG}" ]] && grep -q "${lMD5SUM}" "${P99_CSV_LOG}" 2>/dev/null; then
     return
   fi
-  echo "${lMD5SUM}" >> "${TMP_DIR}/p99_md5sum_done.tmp"
+  echo "${lMD5SUM}" >>"${TMP_DIR}/p99_md5sum_done.tmp"
 
   print_dot
 
@@ -220,7 +219,7 @@ binary_architecture_threader() {
     lD_DATA="${lD_DATA/*Data:/}"
     lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
 
-    lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
+    lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null | grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
@@ -234,7 +233,7 @@ architecture_check() {
     return
   fi
 
-  if [[ ${ARCH_CHECK} -eq 1 ]] ; then
+  if [[ ${ARCH_CHECK} -eq 1 ]]; then
     print_output "[*] Architecture auto detection and backend data population for ${ORANGE}${#ALL_FILES_ARR[@]}${NC} files (could take some time)\\n"
     # lARCH_MIPS_CNT -> 32 bit MIPS
     local lARCH_MIPS_CNT=0
@@ -290,134 +289,134 @@ architecture_check() {
     lD_END_BE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "MSB" || true)
     lD_END_LE_CNT=$(cut -d ';' -f8 "${P99_CSV_LOG}" | grep -c "LSB" || true)
 
-    if [[ $((lARCH_MIPS_CNT+lARCH_ARM_CNT+lARCH_X64_CNT+lARCH_X86_CNT+lARCH_PPC_CNT+lARCH_NIOS2_CNT+lARCH_MIPS64R2_CNT+lARCH_MIPS64_III_CNT+lARCH_MIPS64_N32_CNT+lARCH_ARM64_CNT+lARCH_MIPS64v1_CNT+lARCH_RISCV_CNT+lARCH_PPC64_CNT+lARCH_QCOM_DSP6_CNT+lARCH_TRICORE_CNT)) -gt 0 ]] ; then
+    if [[ $((lARCH_MIPS_CNT + lARCH_ARM_CNT + lARCH_X64_CNT + lARCH_X86_CNT + lARCH_PPC_CNT + lARCH_NIOS2_CNT + lARCH_MIPS64R2_CNT + lARCH_MIPS64_III_CNT + lARCH_MIPS64_N32_CNT + lARCH_ARM64_CNT + lARCH_MIPS64v1_CNT + lARCH_RISCV_CNT + lARCH_PPC64_CNT + lARCH_QCOM_DSP6_CNT + lARCH_TRICORE_CNT)) -gt 0 ]]; then
       print_output "$(indent "$(orange "Architecture Count")")"
-      if [[ ${lARCH_MIPS_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""${lARCH_MIPS_CNT}")")" ; fi
-      if [[ ${lARCH_MIPS64R2_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64r2     ""${lARCH_MIPS64R2_CNT}")")" ; fi
-      if [[ ${lARCH_MIPS64_III_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 III     ""${lARCH_MIPS64_III_CNT}")")" ; fi
-      if [[ ${lARCH_MIPS64_N32_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 N32     ""${lARCH_MIPS64_N32_CNT}")")" ; fi
-      if [[ ${lARCH_MIPS64v1_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64v1      ""${lARCH_MIPS64v1_CNT}")")" ; fi
-      if [[ ${lARCH_ARM_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""${lARCH_ARM_CNT}")")" ; fi
-      if [[ ${lARCH_ARM64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "ARM64         ""${lARCH_ARM64_CNT}")")" ; fi
-      if [[ ${lARCH_X64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""${lARCH_X64_CNT}")")" ; fi
-      if [[ ${lARCH_X86_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""${lARCH_X86_CNT}")")" ; fi
-      if [[ ${lARCH_PPC_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""${lARCH_PPC_CNT}")")" ; fi
-      if [[ ${lARCH_PPC64_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "PPC64         ""${lARCH_PPC64_CNT}")")" ; fi
-      if [[ ${lARCH_NIOS2_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""${lARCH_NIOS2_CNT}")")" ; fi
-      if [[ ${lARCH_RISCV_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "RISC-V        ""${lARCH_RISCV_CNT}")")" ; fi
-      if [[ ${lARCH_QCOM_DSP6_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Qualcom DSP6  ""${lARCH_QCOM_DSP6_CNT}")")" ; fi
-      if [[ ${lARCH_TRICORE_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Tricore       ""${lARCH_TRICORE_CNT}")")" ; fi
+      if [[ ${lARCH_MIPS_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "MIPS          ""${lARCH_MIPS_CNT}")")"; fi
+      if [[ ${lARCH_MIPS64R2_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "MIPS64r2     ""${lARCH_MIPS64R2_CNT}")")"; fi
+      if [[ ${lARCH_MIPS64_III_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "MIPS64 III     ""${lARCH_MIPS64_III_CNT}")")"; fi
+      if [[ ${lARCH_MIPS64_N32_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "MIPS64 N32     ""${lARCH_MIPS64_N32_CNT}")")"; fi
+      if [[ ${lARCH_MIPS64v1_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "MIPS64v1      ""${lARCH_MIPS64v1_CNT}")")"; fi
+      if [[ ${lARCH_ARM_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "ARM           ""${lARCH_ARM_CNT}")")"; fi
+      if [[ ${lARCH_ARM64_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "ARM64         ""${lARCH_ARM64_CNT}")")"; fi
+      if [[ ${lARCH_X64_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "x64           ""${lARCH_X64_CNT}")")"; fi
+      if [[ ${lARCH_X86_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "x86           ""${lARCH_X86_CNT}")")"; fi
+      if [[ ${lARCH_PPC_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "PPC           ""${lARCH_PPC_CNT}")")"; fi
+      if [[ ${lARCH_PPC64_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "PPC64         ""${lARCH_PPC64_CNT}")")"; fi
+      if [[ ${lARCH_NIOS2_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "NIOS II       ""${lARCH_NIOS2_CNT}")")"; fi
+      if [[ ${lARCH_RISCV_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "RISC-V        ""${lARCH_RISCV_CNT}")")"; fi
+      if [[ ${lARCH_QCOM_DSP6_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "Qualcom DSP6  ""${lARCH_QCOM_DSP6_CNT}")")"; fi
+      if [[ ${lARCH_TRICORE_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "Tricore       ""${lARCH_TRICORE_CNT}")")"; fi
 
-      if [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC_CNT} ]] && \
-        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && \
-        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
-        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && \
+      if [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC_CNT} ]] &&
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] &&
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_ARM64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_RISCV_CNT} ]] &&
+        [[ ${lARCH_MIPS_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_MIPS_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] &&
         [[ ${lARCH_MIPS_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS"
-      elif [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X86_CNT} ]] && \
-        [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
-        [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_ARM_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_X86_CNT} ]] &&
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] &&
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_ARM_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_ARM_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_ARM_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="ARM"
-      elif [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X86_CNT} ]] && \
-        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
-        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_ARM_CNT} ]] && \
-        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_X86_CNT} ]] &&
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] &&
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_ARM_CNT} ]] &&
+        [[ ${lARCH_ARM64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_ARM64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_ARM64_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="ARM64"
-      elif [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_X86_CNT} ]] && \
-        [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
-        [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_X64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_X86_CNT} ]] &&
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] &&
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_X64_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_X64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_X64_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="x64"
-      elif [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM_CNT} ]] && \
-        [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
-        [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_X86_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_X64_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM_CNT} ]] &&
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] &&
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_X86_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_X86_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_X86_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="x86"
-      elif [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_PPC_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
-        [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_PPC_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_NIOS2_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] &&
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_PPC_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_PPC_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_PPC_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="PPC"
-      elif [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && \
-        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] &&
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_NIOS2_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="NIOS2"
-      elif [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_III_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64R2_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64R2"
-      elif [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64_III_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64_3"
-      elif [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64_N32_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64N32"
-      elif [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_RISCV_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_MIPS64v1_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="MIPS64v1"
-      elif [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC64_CNT} ]] && \
+      elif [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_PPC64_CNT} ]] &&
         [[ ${lARCH_RISCV_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_RISCV_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="RISCV"
-      elif [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+      elif [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_RISCV_CNT} ]] &&
         [[ ${lARCH_PPC64_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]] && [[ ${lARCH_PPC64_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="PPC64"
-      elif [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+      elif [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_RISCV_CNT} ]] &&
         [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_QCOM_DSP6_CNT} -gt ${lARCH_TRICORE_CNT} ]]; then
         D_ARCH="QCOM_DSP6"
-      elif [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_X64_CNT} ]] && \
-        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_NIOS2_CNT} ]] && \
-        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM64_CNT} ]] && \
-        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_RISCV_CNT} ]] && \
+      elif [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_X64_CNT} ]] &&
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_X86_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_PPC_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_NIOS2_CNT} ]] &&
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64R2_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_ARM64_CNT} ]] &&
+        [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64_N32_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_MIPS64v1_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_RISCV_CNT} ]] &&
         [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_PPC64_CNT} ]] && [[ ${lARCH_TRICORE_CNT} -gt ${lARCH_QCOM_DSP6_CNT} ]]; then
         D_ARCH="TRICORE"
       else
         D_ARCH="unknown"
       fi
 
-      if [[ $((lD_END_BE_CNT+lD_END_LE_CNT)) -gt 0 ]] ; then
+      if [[ $((lD_END_BE_CNT + lD_END_LE_CNT)) -gt 0 ]]; then
         print_ln
         print_output "$(indent "$(orange "Endianness  Count")")"
-        if [[ ${lD_END_BE_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""${lD_END_BE_CNT}")")" ; fi
-        if [[ ${lD_END_LE_CNT} -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""${lD_END_LE_CNT}")")" ; fi
+        if [[ ${lD_END_BE_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "Big endian          ""${lD_END_BE_CNT}")")"; fi
+        if [[ ${lD_END_LE_CNT} -gt 0 ]]; then print_output "$(indent "$(orange "Little endian          ""${lD_END_LE_CNT}")")"; fi
       fi
-      if [[ $((ARM_SF+ARM_HF)) -gt 0 ]] ; then
+      if [[ $((ARM_SF + ARM_HF)) -gt 0 ]]; then
         print_ln
         print_output "$(indent "$(orange "ARM Hardware/Software floating Count")")"
-        if [[ ${ARM_SF} -gt 0 ]] ; then print_output "$(indent "$(orange "Software floating          ""${ARM_SF}")")" ; fi
-        if [[ ${ARM_HF} -gt 0 ]] ; then print_output "$(indent "$(orange "Hardware floating          ""${ARM_HF}")")" ; fi
+        if [[ ${ARM_SF} -gt 0 ]]; then print_output "$(indent "$(orange "Software floating          ""${ARM_SF}")")"; fi
+        if [[ ${ARM_HF} -gt 0 ]]; then print_output "$(indent "$(orange "Hardware floating          ""${ARM_HF}")")"; fi
       fi
 
-      if [[ ${lD_END_LE_CNT} -gt ${lD_END_BE_CNT} ]] ; then
+      if [[ ${lD_END_LE_CNT} -gt ${lD_END_BE_CNT} ]]; then
         D_END="EL"
-      elif [[ ${lD_END_BE_CNT} -gt ${lD_END_LE_CNT} ]] ; then
+      elif [[ ${lD_END_BE_CNT} -gt ${lD_END_LE_CNT} ]]; then
         D_END="EB"
       else
         D_END="NA"
@@ -425,15 +424,15 @@ architecture_check() {
 
       print_ln
 
-      if [[ $((lD_END_BE_CNT+lD_END_LE_CNT)) -gt 0 ]] ; then
+      if [[ $((lD_END_BE_CNT + lD_END_LE_CNT)) -gt 0 ]]; then
         print_output "$(indent "Detected architecture and endianness of the firmware: ""${ORANGE}""${D_ARCH}"" / ""${D_END}""${NC}")""\\n"
         export D_END
       else
         print_output "$(indent "Detected architecture of the firmware: ""${ORANGE}""${D_ARCH}""${NC}")""\\n"
       fi
 
-      if [[ -n "${ARCH:-}" ]] ; then
-        if [[ "${ARCH}" != "${D_ARCH}" ]] ; then
+      if [[ -n "${ARCH:-}" ]]; then
+        if [[ "${ARCH}" != "${D_ARCH}" ]]; then
           print_output "[!] Your set architecture (""${ARCH}"") is different from the automatically detected one. The set architecture will be used."
         fi
       else
@@ -447,7 +446,7 @@ architecture_check() {
       ARCH="${EFI_ARCH}"
     else
       print_output "$(indent "$(red "Based on binary identification no architecture was detected.")")"
-      if [[ -n "${ARCH}" ]] ; then
+      if [[ -n "${ARCH}" ]]; then
         print_output "[*] Manually enforced architecture (""${ARCH}"") will be used."
       fi
     fi
@@ -456,7 +455,7 @@ architecture_check() {
 
   else
     print_output "[*] Architecture auto detection disabled\\n"
-    if [[ -n "${ARCH}" ]] ; then
+    if [[ -n "${ARCH}" ]]; then
       print_output "[*] Manually enforced architecture (""${ARCH}"") will be used."
     else
       print_output "[!] Since no architecture could be detected, you should set one."
@@ -479,7 +478,7 @@ prepare_all_file_arrays() {
     # local lFILE_ARR_RTOS=()
     # readarray -t lFILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f)
     # ALL_FILES_ARR+=( "${lFILE_ARR_RTOS[@]}" )
-    ALL_FILES_ARR+=( "${lFIRMWARE_PATH}" )
+    ALL_FILES_ARR+=("${lFIRMWARE_PATH}")
   fi
 }
 
@@ -491,13 +490,13 @@ prepare_file_arr() {
   export FILE_ARR=()
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
-  readarray -t FILE_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}"| grep -v "\.raw$" || true)
+  readarray -t FILE_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$" || true)
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
     # FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
-    FILE_ARR+=( "${lFIRMWARE_PATH}" )
+    FILE_ARR+=("${lFIRMWARE_PATH}")
   fi
   print_output "[*] Found ${ORANGE}${#FILE_ARR[@]}${NC} unique files."
 
@@ -532,8 +531,8 @@ prepare_binary_arr() {
       if [[ -f "${lBINARY}" ]]; then
         lBIN_MD5=$(md5sum "${lBINARY}" | cut -d\  -f1)
         if [[ ! " ${lMD5_DONE_INT_ARR[*]} " =~ ${lBIN_MD5} ]]; then
-          BINARIES+=( "${lBINARY}" )
-          lMD5_DONE_INT_ARR+=( "${lBIN_MD5}" )
+          BINARIES+=("${lBINARY}")
+          lMD5_DONE_INT_ARR+=("${lBIN_MD5}")
         fi
       fi
     done
@@ -565,8 +564,7 @@ prepare_file_arr_limited() {
 
 }
 
-set_etc_paths()
-{
+set_etc_paths() {
   # For the case if ./etc isn't in root of provided firmware or is renamed like e.g. ./etc-ro:
   # search etc paths
   # set them in ETC_PATHS variable
@@ -586,12 +584,12 @@ check_firmware() {
   if [[ "${RTOS}" -eq 1 ]]; then
     # Check if firmware got normal linux directory structure and warn if not
     # as we already have done some root directory detection we are going to use it now
-    local lLINUX_PATHS_ARR=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
+    local lLINUX_PATHS_ARR=("bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var")
     if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
       for lR_PATH in "${ROOT_PATH[@]}"; do
         for lL_PATH in "${lLINUX_PATHS_ARR[@]}"; do
-          if [[ -d "${lR_PATH}"/"${lL_PATH}" ]] ; then
-            ((lDIR_COUNT+=1))
+          if [[ -d "${lR_PATH}"/"${lL_PATH}" ]]; then
+            ((lDIR_COUNT += 1))
           fi
         done
       done
@@ -599,8 +597,8 @@ check_firmware() {
       # this is needed for directories we are testing
       # in such a case the pre-checking modules are not executed and no RPATH is available
       for lL_PATH in "${lLINUX_PATHS_ARR[@]}"; do
-        if [[ -d "${FIRMWARE_PATH}"/"${lL_PATH}" ]] ; then
-          ((lDIR_COUNT+=1))
+        if [[ -d "${FIRMWARE_PATH}"/"${lL_PATH}" ]]; then
+          ((lDIR_COUNT += 1))
         fi
       done
     fi
@@ -651,7 +649,7 @@ detect_root_dir_helper() {
           # common false positive:
           if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
             [[ "${lR_PATH}" =~ \/lib\/$ ]] && continue
-            ROOT_PATH+=( "${lR_PATH}" )
+            ROOT_PATH+=("${lR_PATH}")
             lMECHANISM="binary interpreter"
           fi
         done
@@ -662,7 +660,7 @@ detect_root_dir_helper() {
     mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/busybox" | cut -d ';' -f2 | sed -E 's/\/.?bin\/busybox.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
-        ROOT_PATH+=( "${lR_PATH}" )
+        ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="busybox"
         elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "busybox"; then
@@ -674,7 +672,7 @@ detect_root_dir_helper() {
     mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/bash" | cut -d ';' -f2 | sed -E 's/\/.?bin\/bash.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
-        ROOT_PATH+=( "${lR_PATH}" )
+        ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="shell"
         elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
@@ -686,7 +684,7 @@ detect_root_dir_helper() {
     mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/sh;" | cut -d ';' -f2 | sed -E 's/\/.?bin\/sh.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
-        ROOT_PATH+=( "${lR_PATH}" )
+        ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="shell"
         elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
@@ -706,7 +704,7 @@ detect_root_dir_helper() {
     fi
     lR_PATH=$(echo "${lR_PATH}" | awk '{print $2}')
     if [[ -d "${lR_PATH}" ]]; then
-      ROOT_PATH+=( "${lR_PATH}" )
+      ROOT_PATH+=("${lR_PATH}")
       if [[ -z "${lMECHANISM}" ]]; then
         lMECHANISM="dir names"
       elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
@@ -717,13 +715,13 @@ detect_root_dir_helper() {
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     export RTOS=1
-    ROOT_PATH+=( "${lSEARCH_PATH}" )
+    ROOT_PATH+=("${lSEARCH_PATH}")
     lMECHANISM="last resort"
   else
     export RTOS=0
   fi
 
-  eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+  eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}"; do echo "\"${i}\""; done | sort -u))"
   if [[ -v ROOT_PATH[@] && "${RTOS}" -eq 0 ]]; then
     print_output "[*] Found ${ORANGE}${#ROOT_PATH[@]}${NC} different root directories:"
     write_link "s05#file_dirs"
@@ -742,7 +740,7 @@ detect_root_dir_helper() {
 check_init_size() {
   local lSIZE=""
 
-  lSIZE=$(du -b --max-depth=0 "${FIRMWARE_PATH}"| awk '{print $1}' || true)
+  lSIZE=$(du -b --max-depth=0 "${FIRMWARE_PATH}" | awk '{print $1}' || true)
   if [[ ${lSIZE} -gt 400000000 ]]; then
     print_ln "no_log"
     print_output "[!] WARNING: Your firmware is very big!" "no_log"
@@ -750,4 +748,3 @@ check_init_size() {
     print_ln "no_log"
   fi
 }
-

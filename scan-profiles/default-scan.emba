@@ -45,7 +45,7 @@ export SILENT=1
 export GPT_OPTION=0
 
 # enable EMBA binary map dependency generator - future extension
-EMBA_MAP_GENERATOR=0
+EMBA_MAP_GENERATOR=1
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

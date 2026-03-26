@@ -170,7 +170,7 @@ output_details() {
     write_csv_log "directories" "${DETECTED_DIR}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     lDATA_GENERATED=1
   fi
-  lENTROPY_PIC_PATH=$(find "${LOG_DIR}" -xdev -maxdepth 1 -type f -iname "*_entropy.png" 2> /dev/null)
+  lENTROPY_PIC_PATH=$(find "${LOG_DIR}" -xdev -maxdepth 1 -type f -iname "*_entropy.png" 2>/dev/null)
   if [[ -n "${ENTROPY}" ]]; then
     print_output "[+] Entropy analysis of binary firmware is: ""${ORANGE}""${ENTROPY}"
     write_link "p02"
@@ -430,10 +430,10 @@ output_binaries() {
     lBINS_CHECKED_CNT=$(grep -c "RELRO.*NX.*RPATH" "${S12_CSV_LOG}" || true)
     if [[ "${lBINS_CHECKED_CNT}" -gt 0 ]]; then
       # we have to remove the first line of the original output:
-      (( lBINS_CHECKED_CNT-- ))
+      ((lBINS_CHECKED_CNT--))
     fi
   elif [[ -f "${S13_LOG}" ]]; then
-      lBINS_CHECKED_CNT=$(grep -a "\[\*\]\ Statistics:" "${S13_LOG}" | cut -d: -f3 || true)
+    lBINS_CHECKED_CNT=$(grep -a "\[\*\]\ Statistics:" "${S13_LOG}" | cut -d: -f3 || true)
   fi
 
   if [[ "${lBIN_CANARY_CNT:-0}" -gt 0 || "${lBINS_RELRO_CNT:-0}" -gt 0 || "${lBIN_NX_CNT:-0}" -gt 0 || "${lBINS_PIE_CNT:-0}" -gt 0 || "${lBIN_STRIPPED_CNT:-0}" -gt 0 ]]; then
@@ -441,7 +441,7 @@ output_binaries() {
   fi
 
   if [[ "${lBIN_CANARY_CNT:-0}" -gt 0 ]]; then
-    lCANARY_PER=$(bc -l <<< "${lBIN_CANARY_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
+    lCANARY_PER=$(bc -l <<<"${lBIN_CANARY_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
     lCANARY_PER=$(/bin/printf "%.0f" "${lCANARY_PER}" 2>/dev/null || true)
     print_output "[+] Found ""${ORANGE}""${lBIN_CANARY_CNT}"" (""${lCANARY_PER}""%)""${GREEN}"" binaries without enabled stack canaries in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
     write_link "s12"
@@ -450,7 +450,7 @@ output_binaries() {
     lDATA_GENERATED=1
   fi
   if [[ "${lBINS_RELRO_CNT:-0}" -gt 0 ]]; then
-    lRELRO_PER=$(bc -l <<< "${lBINS_RELRO_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
+    lRELRO_PER=$(bc -l <<<"${lBINS_RELRO_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
     lRELRO_PER=$(/bin/printf "%.0f" "${lRELRO_PER}" 2>/dev/null || true)
     print_output "[+] Found ""${ORANGE}""${lBINS_RELRO_CNT}"" (""${lRELRO_PER}""%)""${GREEN}"" binaries without enabled RELRO in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
     write_link "s12"
@@ -459,7 +459,7 @@ output_binaries() {
     lDATA_GENERATED=1
   fi
   if [[ "${lBIN_NX_CNT:-0}" -gt 0 ]]; then
-    lNX_PER=$(bc -l <<< "${lBIN_NX_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
+    lNX_PER=$(bc -l <<<"${lBIN_NX_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
     lNX_PER=$(/bin/printf "%.0f" "${lNX_PER}" 2>/dev/null || true)
     print_output "[+] Found ""${ORANGE}""${lBIN_NX_CNT}"" (""${lNX_PER}""%)""${GREEN}"" binaries without enabled NX in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
     write_link "s12"
@@ -468,7 +468,7 @@ output_binaries() {
     lDATA_GENERATED=1
   fi
   if [[ "${lBINS_PIE_CNT:-0}" -gt 0 ]]; then
-    lPIE_PER=$(bc -l <<< "${lBINS_PIE_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
+    lPIE_PER=$(bc -l <<<"${lBINS_PIE_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
     lPIE_PER=$(/bin/printf "%.0f" "${lPIE_PER}" 2>/dev/null || true)
     print_output "[+] Found ""${ORANGE}""${lBINS_PIE_CNT}"" (""${lPIE_PER}""%)""${GREEN}"" binaries without enabled PIE in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
     write_link "s12"
@@ -477,7 +477,7 @@ output_binaries() {
     lDATA_GENERATED=1
   fi
   if [[ "${lBIN_STRIPPED_CNT:-0}" -gt 0 ]]; then
-    lSTRIPPED_PER=$(bc -l <<< "${lBIN_STRIPPED_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
+    lSTRIPPED_PER=$(bc -l <<<"${lBIN_STRIPPED_CNT}/(${lBINS_CHECKED_CNT}/100)" 2>/dev/null)
     lSTRIPPED_PER=$(/bin/printf "%.0f" "${lSTRIPPED_PER}" 2>/dev/null || true)
     print_output "[+] Found ""${ORANGE}""${lBIN_STRIPPED_CNT}"" (""${lSTRIPPED_PER}""%)""${GREEN}"" stripped binaries without symbols in ${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN} binaries."
     write_link "s12"
@@ -512,7 +512,7 @@ output_binaries() {
 
   local lDATA_GENERATED=0
 
-  if [[ "${STRCPY_CNT:-0}" -gt 0 ]] && [[ -d "${LOG_DIR}""/s13_weak_func_check/" || -d "${LOG_DIR}""/s14_weak_func_radare_check/" ]] ; then
+  if [[ "${STRCPY_CNT:-0}" -gt 0 ]] && [[ -d "${LOG_DIR}""/s13_weak_func_check/" || -d "${LOG_DIR}""/s14_weak_func_radare_check/" ]]; then
 
     # color codes for printf
     local RED_=""
@@ -533,8 +533,8 @@ output_binaries() {
       NC_="$(tput sgr0)"
     fi
 
-    readarray -t lRESULTS_STRCPY_ARR < <( find "${LOG_DIR}"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null || true)
-    readarray -t lRESULTS_SYSTEM_ARR < <( find "${LOG_DIR}"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null || true)
+    readarray -t lRESULTS_STRCPY_ARR < <(find "${LOG_DIR}"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2>/dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2>/dev/null || true)
+    readarray -t lRESULTS_SYSTEM_ARR < <(find "${LOG_DIR}"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2>/dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2>/dev/null || true)
 
     # strcpy:
     if [[ "${#lRESULTS_STRCPY_ARR[@]}" -gt 0 ]] && [[ $(echo "${lRESULTS_STRCPY_ARR[0]}" | awk '{print $1}') -gt 0 ]]; then
@@ -547,7 +547,7 @@ output_binaries() {
       fi
       lDATA_GENERATED=1
       printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-8.8s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "lBIN_CANARY_CNT" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
-      for lDETAIL_STRCPY in "${lRESULTS_STRCPY_ARR[@]}" ; do
+      for lDETAIL_STRCPY in "${lRESULTS_STRCPY_ARR[@]}"; do
         binary_fct_output "${lDETAIL_STRCPY}"
         write_csv_log "strcpy_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
       done
@@ -565,7 +565,7 @@ output_binaries() {
       fi
       lDATA_GENERATED=1
       printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-8.8s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "lBIN_CANARY_CNT" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
-      for lDETAIL_SYSTEM in "${lRESULTS_SYSTEM_ARR[@]}" ; do
+      for lDETAIL_SYSTEM in "${lRESULTS_SYSTEM_ARR[@]}"; do
         binary_fct_output "${lDETAIL_SYSTEM}"
         write_csv_log "system_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
       done
@@ -639,12 +639,12 @@ binary_fct_output() {
       local lS17_BINARY=""
       for lS17_BINARY in "${lS17_BIN_ARR[@]}"; do
         if [[ -f "${lS17_BINARY}" ]]; then
-          ((lBINS_CWE_CHCK_CNT+=$(grep -Ec "CWE[0-9]+" "${lS17_BINARY}" || echo 0)))
+          ((lBINS_CWE_CHCK_CNT += $(grep -Ec "CWE[0-9]+" "${lS17_BINARY}" || echo 0)))
         fi
       done
     fi
   fi
-  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null < "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
+  lBINS_SEMGREP_CNT=$(wc -l 2>/dev/null <"${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}_"[0-9]*".csv" || true)
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local lFCT_LINK=""
     if [[ "${lBINS_SEMGREP_CNT}" -gt 0 ]]; then
@@ -659,7 +659,7 @@ binary_fct_output() {
     if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
       printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: yes | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
     else
-      printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: no  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}"| tee -a "${LOG_FILE}"
+      printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: no  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
     fi
     write_link "${lFCT_LINK}"
   else
@@ -684,7 +684,7 @@ output_cve_exploits() {
         lBIN_VERS="$(echo "${OVERVIEW_LINE}" | cut -d: -f3 | tr -d '[:blank:]')"
         print_output "${OVERVIEW_LINE}"
         write_link "f17#cve_${lBINARY}_${lBIN_VERS}"
-      done < "${F17_LOG_DIR}/vuln_summary.txt"
+      done <"${F17_LOG_DIR}/vuln_summary.txt"
       print_ln
     fi
 
@@ -707,7 +707,7 @@ output_cve_exploits() {
       lDATA_GENERATED=1
     fi
     if [[ "${CVE_COUNTER:-0}" -gt 0 ]]; then
-      echo -e "\n" >> "${LOG_FILE}"
+      echo -e "\n" >>"${LOG_FILE}"
       print_output "[+] Identified ${ORANGE}${CVE_COUNTER}${GREEN} CVE entries."
       write_link "f17#collectcveandexploitdetails"
       print_output "$(indent "$(green "Identified ${RED}${BOLD}${CRITICAL_CVE_COUNTER}${NC}${GREEN} Critical rated CVE entries / Exploits: ${ORANGE}${EXPLOIT_CRITICAL_COUNT:-NA}${NC}")")"
@@ -744,7 +744,7 @@ output_cve_exploits() {
         write_csv_log "verified_exploited" "${MSF_VERIFIED}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       fi
       # we report only software components with exploits to csv:
-      grep "Found version details" "${F17_LOG_DIR}/vuln_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "${F50_CSV_LOG}" || true
+      grep "Found version details" "${F17_LOG_DIR}/vuln_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' | sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >>"${F50_CSV_LOG}" || true
       lDATA_GENERATED=1
     fi
   fi
@@ -869,7 +869,7 @@ get_data() {
     mapfile -t LINUX_DISTRIS_ARR < <(grep "Version information found" "${S06_LOG}" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u || true)
   fi
   if ! [[ "${FILE_ARR_COUNT-0}" -gt 0 ]]; then
-    FILE_ARR_COUNT=$(wc -l < "${P99_CSV_LOG}"|| true)
+    FILE_ARR_COUNT=$(wc -l <"${P99_CSV_LOG}" || true)
     DETECTED_DIR=$(find "${FIRMWARE_PATH_CP}" -type d 2>/dev/null | wc -l || true)
   fi
   if [[ -f "${S13_LOG}" ]]; then
@@ -881,7 +881,7 @@ get_data() {
   if [[ -f "${S14_LOG}" ]]; then
     STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "${S14_LOG}" | cut -d: -f2 || true)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "${S14_LOG}" | cut -d: -f2 || true)
-    STRCPY_CNT=$((STRCPY_CNT_14+STRCPY_CNT_13))
+    STRCPY_CNT=$((STRCPY_CNT_14 + STRCPY_CNT_13))
   else
     STRCPY_CNT="${STRCPY_CNT_13}"
   fi
@@ -972,7 +972,7 @@ get_data() {
     TCP=$(grep -c "TCP ok;" "${L10_SYS_EMU_RESULTS}" || true)
     IP_ADDR_CNT=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | grep -E -c "IP\ address:\ [0-9]+" || true)
     # we make something like this: "bridge-default-normal"
-    L10_EMULATION_MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f10 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
+    L10_EMULATION_MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f10 | sed 's/Network mode: //g' | tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "${L20_LOG}" ]]; then
     # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "${L15_LOG}" | cut -d: -f2 || true)
@@ -985,7 +985,7 @@ get_data() {
     MSF_VERIFIED=$(grep -v -c "Source" "${L35_CSV_LOG}" || true)
   fi
   if [[ -d "${F17_LOG_DIR}" ]]; then
-    F17_VERSIONS_IDENTIFIED=$(wc -l 2>/dev/null < "${F17_LOG_DIR}/vuln_summary.txt" || true)
+    F17_VERSIONS_IDENTIFIED=$(wc -l 2>/dev/null <"${F17_LOG_DIR}/vuln_summary.txt" || true)
     CRITICAL_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,CRITICAL" || true)
     HIGH_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,HIGH" || true)
     MEDIUM_CVE_COUNTER=$(cut -d ',' -f4,5 "${F17_LOG_DIR}"/*.csv 2>/dev/null | sort -u | grep -c "CVE-.*,MEDIUM" || true)
@@ -995,7 +995,7 @@ get_data() {
     CVE_COUNTER=$(jq -r '.vulnerabilities[]? | .id //empty' "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" | sort -u | wc -l || echo 0)
   fi
   if [[ -f "${F17_LOG_DIR}"/KEV.txt ]]; then
-    KNOWN_EXPLOITED_COUNTER=$(wc -l 2>/dev/null < "${F17_LOG_DIR}"/KEV.txt)
+    KNOWN_EXPLOITED_COUNTER=$(wc -l 2>/dev/null <"${F17_LOG_DIR}"/KEV.txt)
   fi
   if [[ -d "${F17_LOG_DIR}/cve_sum" ]]; then
     # nosemgrep
@@ -1159,9 +1159,9 @@ cwe_logging() {
 
   if [[ -d "${LOG_DIR}"/"${lLOG_DIR_MOD}" ]]; then
     # mapfile -t lCWE_OUT_ARR < <( cat "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "lCWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
-    mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+    mapfile -t lCWE_OUT_ARR < <(jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json | cut -d\) -f1 | tr -d '(' | sort -u || true)
 
-    if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]] ; then
+    if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]]; then
       print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
       write_link "s17"
       for lCWE_ENTRY in "${lCWE_OUT_ARR[@]}"; do

@@ -16,7 +16,6 @@
 # Description:  Collects information from s-phase and builds tags that can be used for further tools
 #               like dependency track or EMBArk
 
-
 F14_tag_builder() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final Tag builder"
@@ -40,8 +39,8 @@ F14_tag_builder() {
 
   # scripting languages
   if [[ -f "${S22_LOG}" ]]; then
-    if [[ $(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f2 || true) -gt 0 ]] || \
-       [[ $(grep -a "\[\*\]\ Statistics1:" "${S22_LOG}" | cut -d: -f2 || true) -gt 0 ]]; then
+    if [[ $(grep -a "\[\*\]\ Statistics:" "${S22_LOG}" | cut -d: -f2 || true) -gt 0 ]] ||
+      [[ $(grep -a "\[\*\]\ Statistics1:" "${S22_LOG}" | cut -d: -f2 || true) -gt 0 ]]; then
       lTAGs_ARR+=("PHP")
     fi
   fi
@@ -92,7 +91,7 @@ F14_tag_builder() {
 
   mapfile -t lTAGs_ARR < <(printf "%s\n" "${lTAGs_ARR[@]}" | sort -u)
 
-  jo -p "tags=$(jo -a "${lTAGs_ARR[@]}")" > "${LOG_PATH_MODULE}"/tags.json
+  jo -p "tags=$(jo -a "${lTAGs_ARR[@]}")" >"${LOG_PATH_MODULE}"/tags.json
   if [[ -f "${LOG_PATH_MODULE}"/tags.json ]]; then
     print_output "[*] Generated tags:" "" "${LOG_PATH_MODULE}"/tags.json
     for lTAG in "${lTAGs_ARR[@]}"; do

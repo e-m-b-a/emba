@@ -16,23 +16,22 @@
 
 # Description: Sets default values for EMBA
 
-
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=1
   export EMBA_VERSION="2.0.0"
 
-  export CLEANED=0              # used for the final cleaner function for not running it multiple times
+  export CLEANED=0 # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
   export DEBUG_SCRIPT=0
   export UPDATE=0
   export ARCH_CHECK=1
-  export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
+  export RTOS=1 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export BINARY_EXTENDED=0
   export MAX_EXT_CHECK_BINS=20
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
-  export DEEP_EXTRACTOR="unblob"  # binwalk/unblob
+  export DEEP_EXTRACTOR="unblob" # binwalk/unblob
   export DEEP_EXT_DEPTH=4
   export FIRMWARE=0
   export FORCE=0
@@ -54,51 +53,51 @@ set_defaults() {
   export EXCLUDE=()
   export SELECT_MODULES=()
   export MODULES_EXPORTED=()
-  export MD5_DONE_DEEP=()       # for tracking the extracted files in deep extractor
+  export MD5_DONE_DEEP=() # for tracking the extracted files in deep extractor
   export ROOT_PATH=()
   export FILE_ARR=()
   export MAX_MODS=0
   export MAX_MOD_THREADS=0
-  export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
-  export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
-  export ONLY_DEP=0             # test only dependency
-  export RESCAN_SBOM=0          # rescan existing log directory with F17 module only
+  export RESTART=0     # if we find an unfinished EMBA scan we try to only process not finished modules
+  export FINAL_FW_RM=0 # remove the firmware working copy after testing (do not waste too much disk space)
+  export ONLY_DEP=0    # test only dependency
+  export RESCAN_SBOM=0 # rescan existing log directory with F17 module only
   export PHP_CHECK=1
-  export PRE_CHECK=0            # test and extract binary files with binwalk
-                                # afterwards do a default EMBA scan
-  export SKIP_PRE_CHECKERS=0    # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
+  export PRE_CHECK=0 # test and extract binary files with binwalk
+  # afterwards do a default EMBA scan
+  export SKIP_PRE_CHECKERS=0 # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
   export PYTHON_CHECK=1
   # enable L10_DEBUG_MODE in scan profile or default config for further debugging capabilities:
   # * create_emulation_archive for all attempts
   # * do not stop after 2 detected network services
   export L10_DEBUG_MODE=0
-  export FULL_EMULATION=0       # full system emulation - set it via command line parameter -Q
-  export QEMULATION=0           # user-mode emulation - set it via command line parameter -E
+  export FULL_EMULATION=0 # full system emulation - set it via command line parameter -Q
+  export QEMULATION=0     # user-mode emulation - set it via command line parameter -E
   # some processes are running long and logging a lot
   # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
   export QEMU_KILL_SIZE="10M"
   export L10_KERNEL_V_LONG="4.14.336"
   export L10_BB_VER="1.36.1"
-  export MAX_SYSTEM_RESTART_CNT=20  # how often we try to restart the system if it is not available anymore
-  export MAX_PING_RETRY_CNT=100     # how long are we trying to reach the restarted system
-  export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
-                                # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
-                                # binary which results in long runtimes
+  export MAX_SYSTEM_RESTART_CNT=20 # how often we try to restart the system if it is not available anymore
+  export MAX_PING_RETRY_CNT=100    # how long are we trying to reach the restarted system
+  export FULL_TEST=0               # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
+  # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
+  # binary which results in long runtimes
   # to get rid of all the running stuff we are going to kill it after RUNTIME
   export QRUNTIME="20s"
 
   export SHELLCHECK=1
 
-  export GPT_OPTION=0           # 0 -> off 1-> unpaid plan 2 -> no rate-limit
+  export GPT_OPTION=0 # 0 -> off 1-> unpaid plan 2 -> no rate-limit
   export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
-  export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
+  export MINIMUM_GPT_PRIO=1 # everything above this value gets checked
 
-  export SHORT_PATH=0           # short paths in cli output
-  export THREADED=1             # 0 -> single thread
-                                # 1 -> multi threaded
-  export YARA=0                 # default: disable yara tests
-  export OVERWRITE_LOG=0        # automatically overwrite log directory, if necessary
-  export MAX_EXT_SPACE=110000   # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
+  export SHORT_PATH=0 # short paths in cli output
+  export THREADED=1   # 0 -> single thread
+  # 1 -> multi threaded
+  export YARA=0               # default: disable yara tests
+  export OVERWRITE_LOG=0      # automatically overwrite log directory, if necessary
+  export MAX_EXT_SPACE=110000 # ensure we do not stop on extraction. If you are running into disk space issues you can adjust this variable
   export LOG_DIR="${INVOCATION_PATH}""/logs"
   export BASIC_DATA_LOG_DIR="${LOG_DIR}/basic_data"
   # export ERROR_LOG="${LOG_DIR}/emba_error.log"  # This variable is reserved for logging errors. It is currently disabled but can be enabled for debugging purposes in the future.
@@ -125,27 +124,27 @@ set_defaults() {
   if [[ -f "${CONFIG_DIR}/trickest_cve-db.txt" ]]; then
     export TRICKEST_DB_PATH="${CONFIG_DIR}/trickest_cve-db.txt"
   fi
-  export GTFO_CFG="${CONFIG_DIR}/gtfobins_urls.cfg"         # gtfo urls
+  export GTFO_CFG="${CONFIG_DIR}/gtfobins_urls.cfg" # gtfo urls
   export SILENT=0
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
-  export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
+  export DISABLE_NOTIFICATIONS=1 # disable notifications and further desktop experience
   if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
-    export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+    export DISABLE_NOTIFICATIONS=0 # disable notifications and further desktop experience
   fi
-  export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
+  export NOTIFICATION_ID=0 # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "${HELP_DIR}"/emba.svg)
-  export WSL=0    # wsl environment detected
-  export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
-  export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
-  export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
+  export WSL=0                                           # wsl environment detected
+  export UNBLOB=1                                        # additional extraction with unblob - https://github.com/onekey-sec/unblob
+  export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt # include the blacklisted CVE values to this file
+  export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt # include the whitelisted CVE values to this file
   export NVD_DIR="${EXT_DIR}"/nvd-json-data-feeds
   export EPSS_DATA_PATH="${EXT_DIR}"/EPSS-data/EPSS_CVE_data
 
   export MODULE_BLACKLIST=()
   if [[ -f "${CONFIG_DIR}"/module_blacklist.txt ]]; then
-    readarray -t MODULE_BLACKLIST < "${CONFIG_DIR}"/module_blacklist.txt
+    readarray -t MODULE_BLACKLIST <"${CONFIG_DIR}"/module_blacklist.txt
   fi
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
@@ -154,7 +153,7 @@ set_defaults() {
   export UEFI_VERIFIED=0
   export MAIN_CONTAINER=""
   export QUEST_CONTAINER=""
-  export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
+  export DISABLE_DOTS=0 # set to 1 to disable dotting for showing EMBA is alive
   export CPE_VERSION="2.3"
 
   # we limit the maximal file log of our SBOM -> change this in the scanning profile
@@ -165,35 +164,38 @@ set_defaults() {
   # usually we test firmware that is already out in the field
   # if this changes this option can be adjusted in the scanning profile
   export SBOM_LIFECYCLE_PHASE="operations"
+
   # binary dependency map - enable via scanning profile
-  export EMBA_MAP_GENERATOR=0
+  export EMBA_MAP_GENERATOR=1
+  export MAX_MAP_FILES=1500 # maximum files to analyse and generate dependency map
+  export MAX_MAP_JOBS=""    # maximum jobs used for map generation - no entry means the default from the module
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
   # usually this should be done via a scan-profile
   export S08_MODULES_ARR=()
-  S08_MODULES_ARR+=( "S08_submodule_debian_pkg_mgmt_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_deb_package_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_openwrt_pkg_mgmt_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_openwrt_ipk_package_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_rpm_pkg_mgmt_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_rpm_package_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_bsd_package_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_python_pip_package_mgmt_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_python_requirements_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_python_poetry_lock_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_java_archives_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_ruby_gem_archive_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_alpine_apk_package_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_windows_exifparser" )
-  S08_MODULES_ARR+=( "S08_submodule_rust_cargo_lock_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_node_js_package_lock_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_c_conanfile_txt_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_perl_cpan_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_php_composer_lock" )
-  S08_MODULES_ARR+=( "S08_submodule_python_pipfile_lock" )
-  S08_MODULES_ARR+=( "S08_submodule_apk_pkg_mgmt_parser" )
-  S08_MODULES_ARR+=( "S08_submodule_sinamics_version_xml_parser" )
+  S08_MODULES_ARR+=("S08_submodule_debian_pkg_mgmt_parser")
+  S08_MODULES_ARR+=("S08_submodule_deb_package_parser")
+  S08_MODULES_ARR+=("S08_submodule_openwrt_pkg_mgmt_parser")
+  S08_MODULES_ARR+=("S08_submodule_openwrt_ipk_package_parser")
+  S08_MODULES_ARR+=("S08_submodule_rpm_pkg_mgmt_parser")
+  S08_MODULES_ARR+=("S08_submodule_rpm_package_parser")
+  S08_MODULES_ARR+=("S08_submodule_bsd_package_parser")
+  S08_MODULES_ARR+=("S08_submodule_python_pip_package_mgmt_parser")
+  S08_MODULES_ARR+=("S08_submodule_python_requirements_parser")
+  S08_MODULES_ARR+=("S08_submodule_python_poetry_lock_parser")
+  S08_MODULES_ARR+=("S08_submodule_java_archives_parser")
+  S08_MODULES_ARR+=("S08_submodule_ruby_gem_archive_parser")
+  S08_MODULES_ARR+=("S08_submodule_alpine_apk_package_parser")
+  S08_MODULES_ARR+=("S08_submodule_windows_exifparser")
+  S08_MODULES_ARR+=("S08_submodule_rust_cargo_lock_parser")
+  S08_MODULES_ARR+=("S08_submodule_node_js_package_lock_parser")
+  S08_MODULES_ARR+=("S08_submodule_c_conanfile_txt_parser")
+  S08_MODULES_ARR+=("S08_submodule_perl_cpan_parser")
+  S08_MODULES_ARR+=("S08_submodule_php_composer_lock")
+  S08_MODULES_ARR+=("S08_submodule_python_pipfile_lock")
+  S08_MODULES_ARR+=("S08_submodule_apk_pkg_mgmt_parser")
+  S08_MODULES_ARR+=("S08_submodule_sinamics_version_xml_parser")
 }
 
 set_log_paths() {
@@ -256,6 +258,8 @@ set_log_paths() {
   export S108_CSV_LOG="${CSV_DIR}/s108_stacs_password_search.csv"
   export S109_LOG="${LOG_DIR}/s109_jtr_local_pw_cracking.txt"
   export S110_LOG="${LOG_DIR}/s110_yara_check.txt"
+  export S115_LOG="${LOG_DIR}/s115_usermode_emulator.txt"
+  export S115_LOG_DIR="${S115_LOG/\.txt/\/}"
   export S116_CSV_LOG="${CSV_DIR}/s116_qemu_version_detection.csv"
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
   export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"

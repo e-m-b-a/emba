@@ -28,7 +28,7 @@ S02_UEFI_FwHunt() {
   local lNEG_LOG=0
   local lWAIT_PIDS_S02_ARR=()
   # shellcheck disable=SC2153
-  local lMAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
+  local lMAX_MOD_THREADS=$((MAX_MOD_THREADS / 2))
   local lEXTRACTED_FILE=""
 
   if [[ "${UEFI_VERIFIED}" -eq 1 ]] || { [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; }; then
@@ -42,7 +42,7 @@ S02_UEFI_FwHunt() {
           fwhunter "${lEXTRACTED_FILE}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S02_ARR+=( "${lTMP_PID}" )
+          lWAIT_PIDS_S02_ARR+=("${lTMP_PID}")
           max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S02_ARR
         else
           fwhunter "${lEXTRACTED_FILE}"
@@ -63,7 +63,7 @@ S02_UEFI_FwHunt() {
 fwhunter() {
   local lFWHUNTER_CHECK_FILE="${1:-}"
   local lFWHUNTER_CHECK_FILE_NAME=""
-  local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"*80/100 ))
+  local lMEM_LIMIT=$(("${TOTAL_MEMORY}" * 80 / 100))
 
   lFWHUNTER_CHECK_FILE_NAME=$(basename "${lFWHUNTER_CHECK_FILE}")
   while [[ -f "${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt" ]]; do
@@ -77,7 +77,7 @@ fwhunter() {
   ulimit -Sv unlimited
 
   # delete empty log files
-  if [[ $(wc -l < "${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt") -eq 1 ]]; then
+  if [[ $(wc -l <"${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt") -eq 1 ]]; then
     rm "${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt" || true
   fi
 }
@@ -99,7 +99,7 @@ fwhunter_logging() {
   local lFWHUNTER_BINARY_MATCH=""
   local lFWHUNTER_BINARLY_IDs_ARR=()
 
-  mapfile -t FWHUNTER_RESULTS_ARR < <(find "${LOG_PATH_MODULE}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" "%" || true')
+  mapfile -t FWHUNTER_RESULTS_ARR < <(find "${LOG_PATH_MODULE}" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'grep -H "Scanner result.*FwHunt rule has been triggered" "%" || true')
   if ! [[ "${#FWHUNTER_RESULTS_ARR[@]}" -gt 0 ]]; then
     return
   fi

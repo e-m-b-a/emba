@@ -35,7 +35,7 @@ P55_unblob_extractor() {
   fi
 
   # If we have found a linux filesystem we do not need an unblob extraction
-  if [[ ${RTOS} -eq 0 ]] ; then
+  if [[ ${RTOS} -eq 0 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -94,10 +94,10 @@ P55_unblob_extractor() {
       print_output "[*] Extracted ${ORANGE}${#lFILES_UNBLOB_ARR[@]}${NC} files."
       print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UNBLOB_ARR[@]}${NC} files ... could take some time" "no_log"
 
-      for lBINARY in "${lFILES_UNBLOB_ARR[@]}" ; do
+      for lBINARY in "${lFILES_UNBLOB_ARR[@]}"; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
       done
 
       lLINUX_PATH_COUNTER_UNBLOB=$(linux_basic_identification "${lOUTPUT_DIR_UNBLOB}" "${FUNCNAME[0]}")
@@ -133,10 +133,10 @@ P55_unblob_extractor() {
       print_output "[*] Extracted ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
       print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files ... could take some time" "no_log"
 
-      for lBINARY in "${lFILES_BINWALK_ARR[@]}" ; do
+      for lBINARY in "${lFILES_BINWALK_ARR[@]}"; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
       done
 
       lLINUX_PATH_COUNTER_BINWALK=$(linux_basic_identification "${lOUTPUT_DIR_BINWALK}" "${FUNCNAME[0]}")
@@ -182,12 +182,11 @@ unblobber() {
   if [[ "${lVERBOSE}" -eq 1 ]]; then
     # Warning: the safe_logging is very slow.
     # TODO: We need to check on this!
-    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -v -k --log "${lUNBLOB_LOG}" -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
-      |& safe_logging "${LOG_FILE}" 0 || true
+    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -v -k --log "${lUNBLOB_LOG}" -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" |&
+      safe_logging "${LOG_FILE}" 0 || true
   else
     local COLUMNS=""
-    COLUMNS=100 timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${lUNBLOB_LOG}" -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
-      |& safe_logging "${LOG_FILE}" 0 || true
+    COLUMNS=100 timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${lUNBLOB_LOG}" -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" |&
+      safe_logging "${LOG_FILE}" 0 || true
   fi
 }
-

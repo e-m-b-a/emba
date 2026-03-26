@@ -64,7 +64,7 @@ get_fw_dir_details() {
   # we create a log file with all file hashes of the firmware directory
   # this is needed to check the firmware directory on a possible restart against this
   # file and decide if we can restart a firmware analysis process or not
-  find "${lFIRMWARE_PATH_DIR}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' > "${LOG_PATH_MODULE}/firmware_hashes.log" || true
+  find "${lFIRMWARE_PATH_DIR}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' >"${LOG_PATH_MODULE}/firmware_hashes.log" || true
 }
 
 get_fw_file_details() {
@@ -87,7 +87,7 @@ print_fw_file_details() {
 
   print_output "$(indent "$(file "${lFIRMWARE_PATH_BIN}")")"
   print_ln
-  hexdump -C "${lFIRMWARE_PATH_BIN}"| head | tee -a "${LOG_FILE}" || true
+  hexdump -C "${lFIRMWARE_PATH_BIN}" | head | tee -a "${LOG_FILE}" || true
   print_ln
   print_output "[*] SHA512 checksum: ${ORANGE}${SHA512_CHECKSUM}${NC}"
   print_ln
@@ -104,7 +104,7 @@ generate_pixde() {
     print_output "[*] Visualized firmware file (first 2000 bytes):"
     print_ln "no_log"
     "${EXT_DIR}"/pixde -r-0x2000 "${lFIRMWARE_PATH_BIN}" | tee -a "${LOG_DIR}"/p02_pixd.txt
-    python3 "${EXT_DIR}"/pixd_png.py -i "${LOG_DIR}"/p02_pixd.txt -o "${lPIXD_PNG_PATH}" -p 10 > /dev/null
+    python3 "${EXT_DIR}"/pixd_png.py -i "${LOG_DIR}"/p02_pixd.txt -o "${lPIXD_PNG_PATH}" -p 10 >/dev/null
     write_link "${lPIXD_PNG_PATH}"
     print_ln "no_log"
   fi
@@ -170,7 +170,7 @@ fw_bin_detector() {
 
   set_p02_default_exports
 
-  strings "${lCHECK_FILE}" > "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" &
+  strings "${lCHECK_FILE}" >"${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" &
   local lTMP_PID="$!"
   lFILE_BIN_OUT=$(file "${lCHECK_FILE}")
   lHEX_FIRST_LINE=$(hexdump -C "${lCHECK_FILE}" | head -1 || true)
@@ -179,9 +179,9 @@ fw_bin_detector() {
   lBMC_CHECK=$(grep -c "libipmi.so" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
   if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     lDJI_PRAK_ENC_CHECK=$(grep -c "PRAK\|RREK\|IAEK\|PUEK" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
-    lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:"|| true)
+    lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:" || true)
     # we are running binwalk on the file to analyze the output afterwards:
-    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" > "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true
+    "${BINWALK_BIN[@]}" "${lCHECK_FILE}" >"${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true
     if [[ -f "${LOG_PATH_MODULE}"/p02_binwalk_output.txt ]]; then
       lQNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
     else
@@ -191,7 +191,7 @@ fw_bin_detector() {
     # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
     # further checks will follow in P35
     lUEFI_CHECK=$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true)
-    lUEFI_CHECK=$(( "${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)" ))
+    lUEFI_CHECK=$(("${lUEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)"))
   fi
 
   if [[ -f "${KERNEL_CONFIG}" ]] && [[ "${KERNEL}" -eq 1 ]]; then
@@ -201,7 +201,7 @@ fw_bin_detector() {
       write_csv_log "kernel config" "yes" "NA"
       export SKIP_PRE_CHECKERS=1
       # for the kernel configuration only test we only need module s25
-      export SELECT_MODULES=( "S25" )
+      export SELECT_MODULES=("S25")
       return
     fi
   fi
@@ -232,9 +232,9 @@ fw_bin_detector() {
     export AVM_DETECTED=1
     write_csv_log "AVM firmware detected" "yes" "NA"
   fi
-  if [[ "${lFILE_BIN_OUT}" == *"gzip compressed data"* || "${lFILE_BIN_OUT}" == *"Zip archive data"* || \
-    "${lFILE_BIN_OUT}" == *"POSIX tar archive"* || "${lFILE_BIN_OUT}" == *"ISO 9660 CD-ROM filesystem data"* || \
-    "${lFILE_BIN_OUT}" == *"7-zip archive data"* || "${lFILE_BIN_OUT}" == *"XZ compressed data"* || \
+  if [[ "${lFILE_BIN_OUT}" == *"gzip compressed data"* || "${lFILE_BIN_OUT}" == *"Zip archive data"* ||
+    "${lFILE_BIN_OUT}" == *"POSIX tar archive"* || "${lFILE_BIN_OUT}" == *"ISO 9660 CD-ROM filesystem data"* ||
+    "${lFILE_BIN_OUT}" == *"7-zip archive data"* || "${lFILE_BIN_OUT}" == *"XZ compressed data"* ||
     "${lFILE_BIN_OUT}" == *"bzip2 compressed data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "${AVM_DETECTED}" -ne 1 ]]; then

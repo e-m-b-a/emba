@@ -32,7 +32,7 @@ I199_default_tools_github() {
     print_pip_info "pillow"
     print_git_info "jchroot" "EMBA-support-repos/jchroot" "jchroot - a chroot with more isolation"
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""These applications (if not already on the system) will be downloaded!""${NC}"
@@ -40,41 +40,41 @@ I199_default_tools_github() {
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
-        download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
-        download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
-        download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
-        download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
-        download_file "progpilot" "https://github.com/designsecurity/progpilot/releases/download/v1.0.2/progpilot_v1.0.2.phar" "external/progpilot"
-        download_file "EnGenius decryptor" "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
+    y | Y)
+      download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
+      download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
+      download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
+      download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
+      download_file "progpilot" "https://github.com/designsecurity/progpilot/releases/download/v1.0.2/progpilot_v1.0.2.phar" "external/progpilot"
+      download_file "EnGenius decryptor" "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
 
-        # pixd installation
-        pip_install "pillow"
-        echo -e "\\n""${ORANGE}""${BOLD}""Downloading of pixd""${NC}"
-        git clone https://github.com/EMBA-support-repos/pixd_image.git ./external/pixd/
-        cd ./external/pixd/ || ( echo "Could not install EMBA component pixd" && exit 1 )
-        make
-        mv pixd ../pixde
-        mv pixd_png.py ../pixd_png.py
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component pixd" && exit 1 )
-        rm -r ./external/pixd/
-        # pixd installation finished
+      # pixd installation
+      pip_install "pillow"
+      echo -e "\\n""${ORANGE}""${BOLD}""Downloading of pixd""${NC}"
+      git clone https://github.com/EMBA-support-repos/pixd_image.git ./external/pixd/
+      cd ./external/pixd/ || (echo "Could not install EMBA component pixd" && exit 1)
+      make
+      mv pixd ../pixde
+      mv pixd_png.py ../pixd_png.py
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component pixd" && exit 1)
+      rm -r ./external/pixd/
+      # pixd installation finished
 
-        # jchroot
-        echo -e "\\n""${ORANGE}""${BOLD}""Download and install jchroot""${NC}"
-        if [[ -d "external/jchroot" ]]; then
-          rm -r external/jchroot
-        fi
-        git clone https://github.com/EMBA-support-repos/jchroot.git external/jchroot
-        cd ./external/jchroot/ || ( echo "Could not install EMBA component jchroot" && exit 1 )
-        make
-        if [[ -e ./jchroot ]] && [[ -e "/usr/sbin/jchroot" ]]; then
-          rm /usr/sbin/jchroot
-        fi
-        if [[ -e ./jchroot ]]; then
-          cp -r jchroot /usr/sbin/
-        fi
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component jchroot" && exit 1 )
+      # jchroot
+      echo -e "\\n""${ORANGE}""${BOLD}""Download and install jchroot""${NC}"
+      if [[ -d "external/jchroot" ]]; then
+        rm -r external/jchroot
+      fi
+      git clone https://github.com/EMBA-support-repos/jchroot.git external/jchroot
+      cd ./external/jchroot/ || (echo "Could not install EMBA component jchroot" && exit 1)
+      make
+      if [[ -e ./jchroot ]] && [[ -e "/usr/sbin/jchroot" ]]; then
+        rm /usr/sbin/jchroot
+      fi
+      if [[ -e ./jchroot ]]; then
+        cp -r jchroot /usr/sbin/
+      fi
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component jchroot" && exit 1)
       ;;
     esac
   fi

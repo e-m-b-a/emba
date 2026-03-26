@@ -16,8 +16,7 @@
 
 # Description:  Scans system for typical config files, e.g. *.cfg or fstab and analyzes fstab for user details.
 
-S65_config_file_check()
-{
+S65_config_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search/scan config files"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -35,17 +34,17 @@ S65_config_file_check()
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
-scan_config()
-{
+scan_config() {
   sub_module_title "Search for config file"
   local lCONFIG_FILE=""
 
   readarray -t CONF_FILES_ARR < <(config_find "${CONFIG_DIR}""/config_files.cfg")
 
-  if [[ "${CONF_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#CONF_FILES_ARR[@]} -gt 0 ]] ; then
+  if [[ "${CONF_FILES_ARR[0]-}" == "C_N_F" ]]; then
+    print_output "[!] Config not found"
+  elif [[ ${#CONF_FILES_ARR[@]} -gt 0 ]]; then
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
-    for lCONFIG_FILE in "${CONF_FILES_ARR[@]}" ; do
+    for lCONFIG_FILE in "${CONF_FILES_ARR[@]}"; do
       print_output "$(indent "$(orange "$(print_path "${lCONFIG_FILE}")")")"
     done
   else
@@ -60,12 +59,12 @@ check_fstab() {
 
   mapfile -t lFSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
-  if [[ ${#lFSTAB_ARR[@]} -gt 0 ]] ; then
-    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "username" "%"' 2>/dev/null || true)")
-    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0|xargs -r -0 -P 16 -I % sh -c 'grep "password" "%"' 2>/dev/null || true)")
+  if [[ ${#lFSTAB_ARR[@]} -gt 0 ]]; then
+    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0 | xargs -r -0 -P 16 -I % sh -c 'grep "username" "%"' 2>/dev/null || true)")
+    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0 | xargs -r -0 -P 16 -I % sh -c 'grep "password" "%"' 2>/dev/null || true)")
   fi
 
-  if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
+  if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]]; then
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
     for lFSTAB_FILE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "${lFSTAB_FILE}")")"
@@ -75,7 +74,7 @@ check_fstab() {
     print_output "[-] No fstab files with user details found"
   fi
 
-  if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]] ; then
+  if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]]; then
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
     for lFSTAB_FILE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "${lFSTAB_FILE}")")"

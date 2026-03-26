@@ -34,16 +34,16 @@ S08_submodule_perl_cpan_parser() {
 
   mapfile -t lPERL_CPAN_FILES_ARR < <(grep "cpanfile" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lPERL_CPAN_FILES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lPERL_CPAN_FILES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lPERL_CPAN_FILES_ARR[@]}${NC} perl CPAN package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPACKAGE_FILE in "${lPERL_CPAN_FILES_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lPERL_CPAN_FILES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lPERL_CPAN_FILES_ARR[@]}${NC} perl CPAN package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPACKAGE_FILE in "${lPERL_CPAN_FILES_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lPERL_CPAN_FILES_ARR[@]}"; do
 
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
@@ -51,18 +51,18 @@ S08_submodule_perl_cpan_parser() {
         print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if grep -q "requires" "${lPACKAGE_FILE}"; then
         mapfile -t lPERL_CPAN_PACKAGES_ARR < <(grep "requires " "${lPACKAGE_FILE}")
         write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         write_log "[*] Found perl CPAN package details in ${ORANGE}${lPACKAGE_FILE}${NC}:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-        for lPACKAGE_VERSION in "${lPERL_CPAN_PACKAGES_ARR[@]}" ; do
+        for lPACKAGE_VERSION in "${lPERL_CPAN_PACKAGES_ARR[@]}"; do
           perl_cpanfiles_analysis_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPACKAGE_FILE}" "${lPACKAGE_VERSION}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+          lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
           max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
           lPOS_RES=1
         done
@@ -110,25 +110,25 @@ perl_cpanfiles_analysis_threader() {
   local lPURL_IDENTIFIER="NA"
 
   lPACKAGE=$(safe_echo "${lPACKAGE_VERSION}" | awk '{print $2}')
-  lPACKAGE=${lPACKAGE//\ }
-  lPACKAGE=${lPACKAGE//\'}
-  lPACKAGE=${lPACKAGE//\"}
-  lPACKAGE=${lPACKAGE//,}
+  lPACKAGE=${lPACKAGE//\ /}
+  lPACKAGE=${lPACKAGE//\'/}
+  lPACKAGE=${lPACKAGE//\"/}
+  lPACKAGE=${lPACKAGE//,/}
   [[ -z "${lPACKAGE}" ]] && return
 
   if [[ "${lPACKAGE_VERSION}" =~ .*requires.*\ \=\>\ .* ]]; then
-    lVERSION=${lPACKAGE_VERSION/*=>}
-    lVERSION=${lVERSION/\;*}
+    lVERSION=${lPACKAGE_VERSION/*=>/}
+    lVERSION=${lVERSION/\;*/}
   elif [[ "${lPACKAGE_VERSION}" =~ .*requires.*,.* ]]; then
     lVERSION=${lPACKAGE_VERSION#*,}
-    lVERSION=${lVERSION/\;*}
+    lVERSION=${lVERSION/\;*/}
   else
     print_error "[-] Parsing error for cpanfile ${lPACKAGE_FILE} - entry ${lPACKAGE_VERSION}"
     return
   fi
-  lVERSION=${lVERSION//\ }
-  lVERSION=${lVERSION//\'}
-  lVERSION=${lVERSION//\"}
+  lVERSION=${lVERSION//\ /}
+  lVERSION=${lVERSION//\'/}
+  lVERSION=${lVERSION//\"/}
   # we have seen entries with invalid "0" entries in the version -> drop these results here
   if [[ "${lVERSION}" == "0" ]]; then
     return
@@ -147,9 +147,9 @@ perl_cpanfiles_analysis_threader() {
 
   # add source file path information to our properties array:
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lPACKAGE_FILE}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

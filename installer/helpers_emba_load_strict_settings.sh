@@ -30,7 +30,6 @@ load_strict_mode_settings() {
   fi
   shopt -s extdebug # Enable extended debugging
   # nosemgrep
-  IFS=$'\n\t'     # Set the "internal field separator"
-  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+  IFS=$'\n\t'                      # Set the "internal field separator"
+  trap 'wickStrictModeFail $?' ERR # The ERR trap is triggered when a script catches an error
 }
-

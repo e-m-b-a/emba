@@ -21,7 +21,7 @@ L35_metasploit_check() {
 
   local lMODULE_END=0
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
-    if ! command -v msfconsole > /dev/null; then
+    if ! command -v msfconsole >/dev/null; then
       print_output "[-] Metasploit not available - Not performing Metasploit checks"
       return
     fi
@@ -34,7 +34,7 @@ L35_metasploit_check() {
     module_title "Metasploit exploit checks of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ ${IN_DOCKER} -eq 0 ]] ; then
+    if [[ ${IN_DOCKER} -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
@@ -93,7 +93,7 @@ check_live_metasploit() {
   # lARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${lD_END}" | tr '[:upper:]' '[:lower:]')"
   lARCH_END="${ARCH,,}""${lD_END,,}"
 
-  timeout --signal SIGINT -k 60 60m msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${lPORTS}" "${lARCH_END}"| tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true
+  timeout --signal SIGINT -k 60 60m msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${lPORTS}" "${lARCH_END}" | tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true
 
   if [[ -f "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt ]] && [[ $(grep -a -i -c "Vulnerability identified for module" "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt) -gt 0 ]]; then
     write_csv_log "Source" "Module" "CVE" "ARCH_END" "IP_ADDRESS" "PORTS"

@@ -36,10 +36,10 @@ S08_submodule_python_requirements_parser() {
 
   mapfile -t lPY_REQUIREMENTS_ARR < <(grep "requirements.*\.txt" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}" ; do
+    for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPY_REQ_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -47,7 +47,7 @@ S08_submodule_python_requirements_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}" ; do
+    for lPY_REQ_FILE in "${lPY_REQUIREMENTS_ARR[@]}"; do
       lR_FILE=$(file "${lPY_REQ_FILE}")
       if [[ ! "${lR_FILE}" == *"ASCII text"* ]]; then
         continue
@@ -59,7 +59,7 @@ S08_submodule_python_requirements_parser() {
         print_output "[*] ${ORANGE}${lPY_REQ_FILE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       # read entry line by line
       while read -r lRES_ENTRY; do
@@ -72,11 +72,11 @@ S08_submodule_python_requirements_parser() {
         python_requirements_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPY_REQ_FILE}" "${lRES_ENTRY}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+        lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
 
         lPOS_RES=1
-      done < "${lPY_REQ_FILE}"
+      done <"${lPY_REQ_FILE}"
     done
     wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"
 
@@ -118,19 +118,19 @@ python_requirements_threader() {
   local lCPE_IDENTIFIER="NA"
 
   if [[ "${lRES_ENTRY}" == *"=="* ]]; then
-    lAPP_NAME=${lRES_ENTRY/==*}
-    lAPP_VERS=${lRES_ENTRY/*==}
+    lAPP_NAME=${lRES_ENTRY/==*/}
+    lAPP_VERS=${lRES_ENTRY/*==/}
   elif [[ "${lRES_ENTRY}" == *">="* ]]; then
-    lAPP_NAME=${lRES_ENTRY/>=*}
-    lAPP_VERS=${lRES_ENTRY/*>=}
+    lAPP_NAME=${lRES_ENTRY/>=*/}
+    lAPP_VERS=${lRES_ENTRY/*>=/}
     lAPP_VERS='>='"${lAPP_VERS}"
   elif [[ "${lRES_ENTRY}" == *"<"* ]]; then
-    lAPP_NAME=${lRES_ENTRY/<*}
-    lAPP_VERS=${lRES_ENTRY/*<}
+    lAPP_NAME=${lRES_ENTRY/<*/}
+    lAPP_VERS=${lRES_ENTRY/*</}
     lAPP_VERS='<'"${lAPP_VERS}"
   elif [[ "${lRES_ENTRY}" == *"~="* ]]; then
-    lAPP_NAME=${lRES_ENTRY/~=*}
-    lAPP_VERS=${lRES_ENTRY/*~=}
+    lAPP_NAME=${lRES_ENTRY/~=*/}
+    lAPP_VERS=${lRES_ENTRY/*~=/}
     lAPP_VERS='~='"${lAPP_VERS}"
   else
     lAPP_NAME=${lRES_ENTRY}
@@ -155,22 +155,22 @@ python_requirements_threader() {
 
   local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
-        # with internet we can query further details
-        # └─$ curl -sH "accept: application/json" https://pypi.org/pypi/"${lAPP_NAME}"/json | jq '.info.author, .info.classifiers'
-        # "Chris P"
-        # [
-        #   "Development Status :: 5 - Production/Stable",
-        #   "License :: OSI Approved :: MIT License",
+  # with internet we can query further details
+  # └─$ curl -sH "accept: application/json" https://pypi.org/pypi/"${lAPP_NAME}"/json | jq '.info.author, .info.classifiers'
+  # "Chris P"
+  # [
+  #   "Development Status :: 5 - Production/Stable",
+  #   "License :: OSI Approved :: MIT License",
 
   # add the python requirement path information to our properties array:
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPY_REQ_FILE}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lPY_REQ_FILE}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

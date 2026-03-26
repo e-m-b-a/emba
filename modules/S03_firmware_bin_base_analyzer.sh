@@ -30,13 +30,13 @@ S03_firmware_bin_base_analyzer() {
   local lNEG_LOG=0
   local lWAIT_PIDS_S03_ARR=()
 
-  if [[ -d "${FIRMWARE_PATH_CP}" ]] ; then
+  if [[ -d "${FIRMWARE_PATH_CP}" ]]; then
     export OUTPUT_DIR="${FIRMWARE_PATH_CP}"
     if [[ ${THREADED} -eq 1 ]]; then
       os_identification &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S03_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S03_ARR+=("${lTMP_PID}")
     else
       os_identification
     fi
@@ -47,7 +47,7 @@ S03_firmware_bin_base_analyzer() {
     export PRE_ARCH_Y_ARR=()
     export PRE_ARCH_A_ARR=()
     export PRE_ARCH_CPU_REC=""
-    if [[ ${RTOS} -eq 1 ]] ; then
+    if [[ ${RTOS} -eq 1 ]]; then
       print_output "[*] INFO: S03 Architecture detection mechanism is currently not available"
 
       # if [[ ${THREADED} -eq 1 ]]; then
@@ -66,7 +66,7 @@ S03_firmware_bin_base_analyzer() {
   [[ -f "${TMP_DIR}"/s03_arch.tmp ]] && binary_architecture_reporter
 
   if [[ -f "${TMP_DIR}"/s03.tmp ]]; then
-    [[ "$(wc -l < "${TMP_DIR}"/s03.tmp)" -gt 0 ]] && lNEG_LOG=1
+    [[ "$(wc -l <"${TMP_DIR}"/s03.tmp)" -gt 0 ]] && lNEG_LOG=1
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -87,18 +87,18 @@ os_identification() {
   declare -A OS_COUNTER=()
   local lWAIT_PIDS_S03_1_ARR=()
 
-  if [[ ${#ROOT_PATH[@]} -gt 1 || ${LINUX_PATH_COUNTER} -gt 2 ]] ; then
-    safe_echo "${#ROOT_PATH[@]}" >> "${TMP_DIR}"/s03.tmp
-    safe_echo "${LINUX_PATH_COUNTER}" >> "${TMP_DIR}"/s03.tmp
+  if [[ ${#ROOT_PATH[@]} -gt 1 || ${LINUX_PATH_COUNTER} -gt 2 ]]; then
+    safe_echo "${#ROOT_PATH[@]}" >>"${TMP_DIR}"/s03.tmp
+    safe_echo "${LINUX_PATH_COUNTER}" >>"${TMP_DIR}"/s03.tmp
   fi
 
   print_ln
   print_output "$(indent "$(orange "Operating system detection:")")"
 
-  strings "${FIRMWARE_PATH}" 2>/dev/null > "${LOG_PATH_MODULE}/strings_firmware.txt" || true &
-  lWAIT_PIDS_S03_1_ARR+=( "${!}" )
-  find "${OUTPUT_DIR}" -xdev -type f -print0|xargs -0 -P 16 -I % sh -c 'strings "%" | uniq >> '"${LOG_PATH_MODULE}/all_strings_firmware.txt"' 2> /dev/null' || true &
-  lWAIT_PIDS_S03_1_ARR+=( "${!}" )
+  strings "${FIRMWARE_PATH}" 2>/dev/null >"${LOG_PATH_MODULE}/strings_firmware.txt" || true &
+  lWAIT_PIDS_S03_1_ARR+=("${!}")
+  find "${OUTPUT_DIR}" -xdev -type f -print0 | xargs -0 -P 16 -I % sh -c 'strings "%" | uniq >> '"${LOG_PATH_MODULE}/all_strings_firmware.txt"' 2> /dev/null' || true &
+  lWAIT_PIDS_S03_1_ARR+=("${!}")
   wait_for_pid "${lWAIT_PIDS_S03_1_ARR[@]}"
 
   local lWAIT_PIDS_S03_1_ARR=()
@@ -108,7 +108,7 @@ os_identification() {
       os_detection_thread_per_os "${lOS}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S03_1_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S03_1_ARR+=("${lTMP_PID}")
     else
       os_detection_thread_per_os "${lOS}"
     fi
@@ -137,59 +137,59 @@ os_detection_thread_per_os() {
 
   OS_COUNTER[${lOS}]=0
   if [[ -f "${LOG_PATH_MODULE}/strings_firmware.txt" ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/strings_firmware.txt" || true)" ))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}" + "$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/strings_firmware.txt" || true)"))
   fi
   if [[ -f "${LOG_PATH_MODULE}/all_strings_firmware.txt" ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/all_strings_firmware.txt" 2>/dev/null || true)"))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}" + "$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/all_strings_firmware.txt" 2>/dev/null || true)"))
   fi
   if [[ -f "${LOG_DIR}"/p60_firmware_bin_extractor.txt ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_DIR}"/p60_firmware_bin_extractor.txt 2>/dev/null || true)" ))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}" + "$(grep -a -i -c "${lOS}" "${LOG_DIR}"/p60_firmware_bin_extractor.txt 2>/dev/null || true)"))
   fi
   if [[ -f "${LOG_PATH_MODULE}/strings_firmware.txt" ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/strings_firmware.txt" 2>/dev/null || true)" ))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}" + "$(grep -a -i -c "${lOS}" "${LOG_PATH_MODULE}/strings_firmware.txt" 2>/dev/null || true)"))
   fi
 
   if [[ ${lOS} == "VxWorks\|Wind" ]]; then
     OS_COUNTER_VxWorks="${OS_COUNTER[${lOS}]}"
   fi
   if [[ ${lOS} == *"CPU "* || ${lOS} == "ADONIS" || ${lOS} == "CP443" ]] && [[ -f "${LOG_PATH_MODULE}/strings_firmware.txt" ]]; then
-    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}"+"$(grep -a -i -c "Original Siemens Equipment" "${LOG_PATH_MODULE}/strings_firmware.txt" || true)" ))
+    OS_COUNTER[${lOS}]=$(("${OS_COUNTER[${lOS}]}" + "$(grep -a -i -c "Original Siemens Equipment" "${LOG_PATH_MODULE}/strings_firmware.txt" || true)"))
   fi
 
-  if [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]] ; then
+  if [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]]; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected (root filesystem)${NC}\n" "${lOS} detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "verified" "${#ROOT_PATH[@]}"
     lDETECTED=1
-  elif [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 && ${LINUX_PATH_COUNTER} -gt 2 ]] ; then
+  elif [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 && ${LINUX_PATH_COUNTER} -gt 2 ]]; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected (root filesystem)${NC}\n" "${lOS} detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "verified" "${#ROOT_PATH[@]}"
     lDETECTED=1
-  elif [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 ]] ; then
+  elif [[ ${lOS} == "Linux" && ${OS_COUNTER[${lOS}]} -gt 5 ]]; then
     printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "${lOS} detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "not verified" "${#ROOT_PATH[@]}"
     lDETECTED=1
   fi
 
-  if [[ ${lOS} == "SIPROTEC" && ${OS_COUNTER[${lOS}]} -gt 100 && ${OS_COUNTER_VxWorks} -gt 20 ]] ; then
+  if [[ ${lOS} == "SIPROTEC" && ${OS_COUNTER[${lOS}]} -gt 100 && ${OS_COUNTER_VxWorks} -gt 20 ]]; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified SIPROTEC system detected${NC}\n" "${lOS} detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "verified" "NA"
     lDETECTED=1
-  elif [[ ${lOS} == "SIPROTEC" && ${OS_COUNTER[${lOS}]} -gt 10 ]] ; then
+  elif [[ ${lOS} == "SIPROTEC" && ${OS_COUNTER[${lOS}]} -gt 10 ]]; then
     printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "SIPROTEC detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "not verified" "NA"
     lDETECTED=1
   fi
-  if [[ ${lOS} == "CP443" && ${OS_COUNTER[${lOS}]} -gt 100 && ${OS_COUNTER_VxWorks} -gt 20 ]] ; then
+  if [[ ${lOS} == "CP443" && ${OS_COUNTER[${lOS}]} -gt 100 && ${OS_COUNTER_VxWorks} -gt 20 ]]; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified S7-CP443 system detected${NC}\n" "${lOS} detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "verified" "NA"
     lDETECTED=1
-  elif [[ ${lOS} == "CP443" && ${OS_COUNTER[${lOS}]} -gt 10 ]] ; then
+  elif [[ ${lOS} == "CP443" && ${OS_COUNTER[${lOS}]} -gt 10 ]]; then
     printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "S7-CP443 detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
     write_csv_log "${lOS}" "${OS_COUNTER[${lOS}]}" "not verified" "NA"
     lDETECTED=1
   fi
 
-  if [[ ${OS_COUNTER[${lOS}]} -gt 5 ]] ; then
+  if [[ ${OS_COUNTER[${lOS}]} -gt 5 ]]; then
     if [[ ${lOS} == "VxWorks\|Wind" ]]; then
       lOS_="VxWorks"
       printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "${lOS_} detected" "${OS_COUNTER[${lOS}]}" | tee -a "${LOG_FILE}"
@@ -205,7 +205,7 @@ os_detection_thread_per_os() {
     fi
   fi
 
-  [[ "${OS_COUNTER[${lOS}]}" -gt 0 ]] && safe_echo "${OS_COUNTER[${lOS}]}" >> "${TMP_DIR}"/s03.tmp
+  [[ "${OS_COUNTER[${lOS}]}" -gt 0 ]] && safe_echo "${OS_COUNTER[${lOS}]}" >>"${TMP_DIR}"/s03.tmp
 }
 
 binary_architecture_detection() {
@@ -220,25 +220,25 @@ binary_architecture_detection() {
   print_output "[*] Architecture detection running on ""${lFILE_TO_CHECK}"
 
   # as Thumb is usually false positive we remove it from the results
-  mapfile -t PRE_ARCH_Y_ARR < <(binwalk -Y "${lFILE_TO_CHECK}" | grep "valid\ instructions" | grep -v "Thumb" | \
+  mapfile -t PRE_ARCH_Y_ARR < <(binwalk -Y "${lFILE_TO_CHECK}" | grep "valid\ instructions" | grep -v "Thumb" |
     awk '{print $3}' | sort -u || true)
-  mapfile -t PRE_ARCH_A_ARR < <(binwalk -A "${lFILE_TO_CHECK}" | grep "\ instructions," | awk '{print $3}' | \
+  mapfile -t PRE_ARCH_A_ARR < <(binwalk -A "${lFILE_TO_CHECK}" | grep "\ instructions," | awk '{print $3}' |
     uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
 
   if [[ -f "${HOME}"/.config/binwalk/modules/cpu_rec.py ]]; then
     # entropy=0.9xxx is typically encrypted or compressed -> we just remove these entries:
-    PRE_ARCH_CPU_REC=$(binwalk -% "${lFILE_TO_CHECK}"  | grep -v "DESCRIPTION\|None\|-----------" | grep -v "entropy=0.9" \
-      | awk '{print $3}' | grep -v -e "^$" | sort | uniq -c | head -1 | awk '{print $2}' || true)
+    PRE_ARCH_CPU_REC=$(binwalk -% "${lFILE_TO_CHECK}" | grep -v "DESCRIPTION\|None\|-----------" | grep -v "entropy=0.9" |
+      awk '{print $3}' | grep -v -e "^$" | sort | uniq -c | head -1 | awk '{print $2}' || true)
   fi
 
   for lPRE_ARCH_ in "${PRE_ARCH_Y_ARR[@]}"; do
-    echo "binwalk -Y;${lPRE_ARCH_}" >> "${TMP_DIR}"/s03_arch.tmp
+    echo "binwalk -Y;${lPRE_ARCH_}" >>"${TMP_DIR}"/s03_arch.tmp
   done
   for lPRE_ARCH_ in "${PRE_ARCH_A_ARR[@]}"; do
-    echo "binwalk -A;${lPRE_ARCH_}" >> "${TMP_DIR}"/s03_arch.tmp
+    echo "binwalk -A;${lPRE_ARCH_}" >>"${TMP_DIR}"/s03_arch.tmp
   done
   if [[ -n "${PRE_ARCH_CPU_REC}" ]]; then
-    echo "cpu_rec;${PRE_ARCH_CPU_REC}" >> "${TMP_DIR}"/s03_arch.tmp
+    echo "cpu_rec;${PRE_ARCH_CPU_REC}" >>"${TMP_DIR}"/s03_arch.tmp
   fi
 }
 
@@ -252,6 +252,6 @@ binary_architecture_reporter() {
     lPRE_ARCH_=$(echo "${lPRE_ARCH_}" | cut -d\; -f2)
     print_ln
     print_output "[+] Possible architecture details found (${ORANGE}${lSOURCE}${GREEN}): ${ORANGE}${lPRE_ARCH_}${NC}"
-    echo "${lPRE_ARCH_}" >> "${TMP_DIR}"/s03.tmp
-  done < "${TMP_DIR}"/s03_arch.tmp
+    echo "${lPRE_ARCH_}" >>"${TMP_DIR}"/s03.tmp
+  done <"${TMP_DIR}"/s03_arch.tmp
 }

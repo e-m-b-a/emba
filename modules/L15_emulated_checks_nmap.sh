@@ -70,12 +70,12 @@ check_live_nmap_basic() {
   if [[ "${#lNMAP_RESULT_FILES_ARR[@]}" -gt 0 ]]; then
     for lNMAP_RESULTF in "${lNMAP_RESULT_FILES_ARR[@]}"; do
       print_output "[*] Found Nmap results ${ORANGE}$(basename "${lNMAP_RESULTF}")${NC}:"
-      tee -a "${LOG_FILE}" < "${lNMAP_RESULTF}"
+      tee -a "${LOG_FILE}" <"${lNMAP_RESULTF}"
       print_ln
     done
   else
     # if no Nmap results are found we initiate a scan
-    if ! system_online_check "${lIP_ADDRESS}" ; then
+    if ! system_online_check "${lIP_ADDRESS}"; then
       if ! restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
         print_output "[-] System not responding - Not performing Nmap checks"
         return
@@ -86,7 +86,7 @@ check_live_nmap_basic() {
   print_ln
 
   # extract only the service details from gnmap output file:
-  mapfile -t lNMAP_SERVICES_ARR < <(grep -h -a "open" "${LOG_PATH_MODULE}"/*.gnmap | cut -d: -f3- | sed s/'\t'/'\n\t'/g | sed s/'\/, '/'\n\t\t'/g | sed s/'Ports: '/'Ports:\n\t\t'/g | grep -v "/closed/\|filtered/" | grep -v "Host: \|Ports:\|Ignored State:\|OS: \|Seq Index: \|Status: \|IP ID Seq: \|^# " | sed 's/^[[:blank:]].*\/\///' | sed 's/\/$//g'| sort -u || true)
+  mapfile -t lNMAP_SERVICES_ARR < <(grep -h -a "open" "${LOG_PATH_MODULE}"/*.gnmap | cut -d: -f3- | sed s/'\t'/'\n\t'/g | sed s/'\/, '/'\n\t\t'/g | sed s/'Ports: '/'Ports:\n\t\t'/g | grep -v "/closed/\|filtered/" | grep -v "Host: \|Ports:\|Ignored State:\|OS: \|Seq Index: \|Status: \|IP ID Seq: \|^# " | sed 's/^[[:blank:]].*\/\///' | sed 's/\/$//g' | sort -u || true)
   mapfile -t NMAP_PORTS_SERVICES_ARR < <(grep -h -a "open" "${LOG_PATH_MODULE}"/*.nmap | awk '{print $1,$3}' | grep "[0-9]" | sort -u || true)
   # extract cpe information like the following:
   # Service Info: OS: Linux; Device: WAP; CPE: cpe:/h:dlink:dir-300:2.14, cpe:/o:linux:linux_kernel, cpe:/h:d-link:dir-300
@@ -105,7 +105,7 @@ check_live_nmap_basic() {
           continue
         fi
         lNMAP_CPE=${lNMAP_CPE/ /}
-        lNMAP_CPE=${lNMAP_CPE//cpe:\/}
+        lNMAP_CPE=${lNMAP_CPE//cpe:\//}
         # remove h/o/b from start -> we need to start with :
         lNMAP_CPE=${lNMAP_CPE#[hob]}
         # just to ensure there is some kind of version information in our entry
@@ -141,7 +141,7 @@ check_live_nmap_basic() {
             lS09_L15_MATCH=$(echo "${lS09_L15_MATCH}" | cut -d ';' -f4)
             if ! grep -q ";${lS09_L15_MATCH};" "${L15_CSV_LOG}" 2>/dev/null; then
               print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${lS09_L15_MATCH}${NC}"
-              echo "${lS09_L15_MATCH}" >> "${L15_CSV_LOG}"
+              echo "${lS09_L15_MATCH}" >>"${L15_CSV_LOG}"
             fi
           done
         fi
@@ -154,7 +154,7 @@ check_live_nmap_basic() {
             lS116_L15_MATCH=$(echo "${lS116_L15_MATCH}" | cut -d ';' -f4)
             if ! grep -q ";${lS116_L15_MATCH};" "${L15_CSV_LOG}" 2>/dev/null; then
               print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${lS116_L15_MATCH}${NC}"
-              echo "${lS116_L15_MATCH}" >> "${L15_CSV_LOG}"
+              echo "${lS116_L15_MATCH}" >>"${L15_CSV_LOG}"
             fi
           done
         fi
@@ -171,7 +171,7 @@ check_live_nmap_basic() {
       fi
       l15_version_detector "${lSERVICE}" "${lTYPE}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_L15_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_L15_ARR+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_L15_ARR
     done
     wait_for_pid "${lWAIT_PIDS_L15_ARR[@]}"
@@ -201,7 +201,7 @@ l15_version_detector() {
     l15_version_detector_threader "${lVERSION_JSON_CFG}" "${lSERVICE}" "${lTYPE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
-    WAIT_PIDS_L15_ARR_02+=( "${lTMP_PID}" )
+    WAIT_PIDS_L15_ARR_02+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_L15_ARR_02
   done
   wait_for_pid "${lWAIT_PIDS_L15_ARR_02[@]}"

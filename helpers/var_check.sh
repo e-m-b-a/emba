@@ -45,7 +45,7 @@ for MODULE in "${SCRIPTS_TO_TEST[@]}"; do
   mapfile -t UNKNOWN_VARS_ARR_ARR1 < <(grep -o -E "declare -A( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | awk '{print $3}' | cut -d '=' -f1 | grep -v "mapfile\|local\|export\|for\|if" | sort -u)
   mapfile -t UNKNOWN_VARS_ARR_ARR2 < <(grep -o -E "readarray -t( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | awk '{print $3}' | cut -d '=' -f1 | grep -v "mapfile\|declare\|local\|export\|for\|if" | sort -u)
 
-  UNKNOWN_VARS_ARR=( "${UNKNOWN_LOOP_VARS[@]}" "${UNKNOWN_ARR_ADD[@]}" "${UNKNOWN_VARS_ARR_VAR[@]}" "${UNKNOWN_VARS_ARR_ARR[@]}" "${UNKNOWN_VARS_ARR_ARR1[@]}" "${UNKNOWN_VARS_ARR_ARR2[@]}" )
+  UNKNOWN_VARS_ARR=("${UNKNOWN_LOOP_VARS[@]}" "${UNKNOWN_ARR_ADD[@]}" "${UNKNOWN_VARS_ARR_VAR[@]}" "${UNKNOWN_VARS_ARR_ARR[@]}" "${UNKNOWN_VARS_ARR_ARR1[@]}" "${UNKNOWN_VARS_ARR_ARR2[@]}")
   mapfile -t UNKNOWN_VARS_ARR < <(printf "%s\n" "${UNKNOWN_VARS_ARR[@]}" | sort -u)
 
   if [[ "${#LOCALS_ARR[@]}" -gt 0 ]]; then
@@ -73,8 +73,8 @@ for MODULE in "${SCRIPTS_TO_TEST[@]}"; do
       fi
       if [[ "${EXPORTS_ARR[*]}" != *"${UNKNOWN_VAR}"* ]] && [[ "${LOCALS_ARR[*]}" != *"${UNKNOWN_VAR}"* ]]; then
         print_output "$(indent "$(red "[-] indirect exported var: ${ORANGE}${UNKNOWN_VAR}${NC}")")" "no_log"
-        UNKNOWN_VARS_ARR_CNT=$((UNKNOWN_VARS_ARR_CNT+1))
-        UNKNOWN_VARS_CNT_ALL=$((UNKNOWN_VARS_CNT_ALL+1))
+        UNKNOWN_VARS_ARR_CNT=$((UNKNOWN_VARS_ARR_CNT + 1))
+        UNKNOWN_VARS_CNT_ALL=$((UNKNOWN_VARS_CNT_ALL + 1))
       fi
     done
     if [[ "${UNKNOWN_VARS_ARR_CNT}" -gt 0 ]]; then
@@ -95,4 +95,3 @@ else
   print_output "[+] No indirect global variables usage detected ..." "no_log"
   exit 0
 fi
-

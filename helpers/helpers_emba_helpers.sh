@@ -72,7 +72,7 @@ max_pids_protection() {
       # print_output "[*] max pid protection: ${#lrWAIT_PIDS_ARR[@]}"
       if [[ -e /proc/"${lPID}" ]]; then
         if ! grep -q "State:.*zombie.*" "/proc/${lPID}/status" 2>/dev/null; then
-          lTEMP_PIDS_ARR+=( "${lPID}" )
+          lTEMP_PIDS_ARR+=("${lPID}")
         fi
       fi
     done
@@ -125,7 +125,7 @@ cleaner() {
     fi
   fi
   # stop inotifywait on host
-  if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &> /dev/null 2>&1; then
+  if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &>/dev/null 2>&1; then
     print_output "[*] $(print_date) - Stopping inotify ..." "no_log"
     pkill -f "inotifywait.*${LOG_DIR}.*" >/dev/null || true
   fi
@@ -140,7 +140,7 @@ cleaner() {
     if [[ $(grep -i -c S115 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; then
 
       print_output "[*] $(print_date) - Terminating qemu processes - check it with ps" "no_log"
-      killall -9 --quiet -r .*qemu-.*-sta.* > /dev/null || true
+      killall -9 --quiet -r .*qemu-.*-sta.* >/dev/null || true
       print_output "[*] $(print_date) - Cleaning the emulation environment\\n" "no_log"
       find "${FIRMWARE_PATH_CP}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
       find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
@@ -164,7 +164,7 @@ cleaner() {
 
     if [[ $(grep -i -c S120 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; then
       print_output "[*] $(print_date) - Terminating cwe-checker processes - check it with ps" "no_log"
-      killall -9 --quiet -r .*cwe_checker.* > /dev/null || true
+      killall -9 --quiet -r .*cwe_checker.* >/dev/null || true
     fi
 
     # If SYS_ONLINE is 1 and some qemu system process is running, the live system tester (system mode emulator)
@@ -180,15 +180,15 @@ cleaner() {
   [[ "${IN_DOCKER}" -eq 1 ]] && restore_permissions
 
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
-    pkill -f "tail.*-f ${LOG_DIR}/emba.log" > /dev/null || true
+    pkill -f "tail.*-f ${LOG_DIR}/emba.log" >/dev/null || true
     remove_status_bar
   fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -v K_DOWN_PID ]]; then
-    if ps -p "${K_DOWN_PID}" > /dev/null; then
+    if ps -p "${K_DOWN_PID}" >/dev/null; then
       # kernel downloader is running in a thread on the host and needs to be stopped now
       print_output "[*] $(print_date) - Stopping kernel downloader thread with PID ${K_DOWN_PID}" "no_log"
-      kill "${K_DOWN_PID}" > /dev/null || true
+      kill "${K_DOWN_PID}" >/dev/null || true
     fi
   fi
 
@@ -207,27 +207,26 @@ cleaner() {
     while read -r KILL_PID; do
       if [[ -e /proc/"${KILL_PID}" ]]; then
         print_output "[*] $(print_date) - Stopping EMBA process with PID ${KILL_PID}" "no_log"
-        kill -9 "${KILL_PID}" > /dev/null || true
+        kill -9 "${KILL_PID}" >/dev/null || true
       fi
-    done < "${TMP_DIR}"/EXIT_KILL_PIDS.log
+    done <"${TMP_DIR}"/EXIT_KILL_PIDS.log
   fi
 
   if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log ]]; then
     while read -r KILL_PID; do
       if [[ -e /proc/"${KILL_PID}" ]]; then
         print_output "[*] $(print_date) - Stopping EMBA process with PID ${KILL_PID} in docker" "no_log"
-        kill -9 "${KILL_PID}" > /dev/null || true
+        kill -9 "${KILL_PID}" >/dev/null || true
       fi
-    done < "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
+    done <"${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
   fi
 
-
   if [[ -f "${LOG_DIR}"/print_running_modules.pid ]]; then
-    rm "${LOG_DIR}"/print_running_modules.pid > /dev/null || true
+    rm "${LOG_DIR}"/print_running_modules.pid >/dev/null || true
   fi
   if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
     if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
-      rm "${LOG_DIR}"/emba_error.log > /dev/null || true
+      rm "${LOG_DIR}"/emba_error.log >/dev/null || true
     fi
   fi
 
@@ -257,26 +256,26 @@ emba_updater() {
 
   if [[ -d "${EXT_DIR}"/EPSS-data ]]; then
     print_output "[*] EMBA update - EPSS database update" "no_log"
-    cd "${EXT_DIR}"/EPSS-data || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
+    cd "${EXT_DIR}"/EPSS-data || (print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1)
     if [[ -d ./.git ]]; then
       timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update EPSS database" "no_log"
     fi
-    cd "${lHOME_DIR}" || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
+    cd "${lHOME_DIR}" || (print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1)
   else
     print_output "[-] WARNING: Can't update EPSS database" "no_log"
   fi
 
   if [[ -d "${NVD_DIR}" ]]; then
     print_output "[*] EMBA update - CVE database update" "no_log"
-    cd "${NVD_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
+    cd "${NVD_DIR}" || (print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1)
     if [[ -d ./.git ]]; then
       timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update CVE database" "no_log"
     fi
-    cd "${lHOME_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
+    cd "${lHOME_DIR}" || (print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1)
   else
     print_output "[-] WARNING: Can't update CVE database" "no_log"
   fi
@@ -292,7 +291,7 @@ emba_updater() {
 # this means the EMBA module was loaded
 function_exists() {
   local lFCT_TO_CHECK="${1:-}"
-  declare -f -F "${lFCT_TO_CHECK}" > /dev/null
+  declare -f -F "${lFCT_TO_CHECK}" >/dev/null
   return $?
 }
 
@@ -328,7 +327,7 @@ backup_var() {
   local lVAR_VALUE="${2:-}"
   local lBACKUP_FILE="${LOG_DIR}""/backup_vars.log"
 
-  echo "export ${lVAR_NAME}=\"${lVAR_VALUE}\"" >> "${lBACKUP_FILE}"
+  echo "export ${lVAR_NAME}=\"${lVAR_VALUE}\"" >>"${lBACKUP_FILE}"
 }
 
 module_wait() {
@@ -352,7 +351,7 @@ module_wait() {
     if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
       if grep -q "${lMODULE_TO_WAIT}" "${LOG_DIR}"/emba_error.log; then
         print_output "[-] $(print_date) - WARNING: Module to wait for is probably crashed and will never end. Check the EMBA error log ${LOG_DIR}/emba_error.log" "main"
-        cat "${LOG_DIR}"/emba_error.log >> "${MAIN_LOG}"
+        cat "${LOG_DIR}"/emba_error.log >>"${MAIN_LOG}"
         return
       fi
     fi
@@ -363,8 +362,12 @@ module_wait() {
 store_kill_pids() {
   local lPID="${1:-}"
   ! [[ -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
-  [[ "${IN_DOCKER}" -eq 0 ]] && echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS.log
-  [[ "${IN_DOCKER}" -eq 1 ]] && echo "${lPID}" >> "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
+  if [[ "${IN_DOCKER}" -eq 0 ]]; then
+    echo "${lPID}" >>"${TMP_DIR}"/EXIT_KILL_PIDS.log || true
+  fi
+  if [[ "${IN_DOCKER}" -eq 1 ]]; then
+    echo "${lPID}" >>"${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log || true
+  fi
   return 0
 }
 
@@ -416,7 +419,7 @@ safe_logging() {
   ## Force UTF-8 charset
   while read -r lINPUT_; do
     if [[ "${lALT_OUT_}" -eq 1 ]]; then
-      echo "${lINPUT_}" | iconv -c --to-code=UTF-8 >> "${lLOG_FILE_}"
+      echo "${lINPUT_}" | iconv -c --to-code=UTF-8 >>"${lLOG_FILE_}"
     else
       echo "${lINPUT_}" | iconv -c --to-code=UTF-8 | tee -a "${lLOG_FILE_}"
     fi

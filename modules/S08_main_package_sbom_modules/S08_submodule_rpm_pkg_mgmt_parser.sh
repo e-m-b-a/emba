@@ -40,15 +40,15 @@ S08_submodule_rpm_pkg_mgmt_parser() {
   local lPKG_MD5=""
 
   # this handles the Berkley database
-  mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(grep "rpm/Packages;" "${P99_CSV_LOG}" | cut -d ';'  -f2 || true)
+  mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(grep "rpm/Packages;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   # this handles the sqlite database
-  mapfile -t lRPM_PACKAGE_DBS_SQLITE_ARR < <(grep "rpm/rpmdb.sqlite;" "${P99_CSV_LOG}" | cut -d ';'  -f2 || true)
-  lRPM_PACKAGE_DBS_ARR=( "${lRPM_PACKAGE_DBS_BRK_ARR[@]}" "${lRPM_PACKAGE_DBS_SQLITE_ARR[@]}" )
+  mapfile -t lRPM_PACKAGE_DBS_SQLITE_ARR < <(grep "rpm/rpmdb.sqlite;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  lRPM_PACKAGE_DBS_ARR=("${lRPM_PACKAGE_DBS_BRK_ARR[@]}" "${lRPM_PACKAGE_DBS_SQLITE_ARR[@]}")
 
-  if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -56,14 +56,14 @@ S08_submodule_rpm_pkg_mgmt_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lRPM_PACKAGE_DBS_ARR[@]}${NC} RPM package management directories." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lRPM_PACKAGE_DBS_ARR[@]}"; do
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
         print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       lSHA256_CHECKSUM="$(sha256sum "${lPACKAGE_FILE}" | awk '{print $1}')"
@@ -72,11 +72,11 @@ S08_submodule_rpm_pkg_mgmt_parser() {
       lRPM_DIR="$(dirname "${lPACKAGE_FILE}" || true)"
       # not sure this works on an offline system - we need further tests on this:
       mapfile -t lRPM_PACKAGES_ARR < <(rpm -qa --dbpath "${lRPM_DIR}" || print_error "[-] Failed to identify RPM packages in ${lRPM_DIR}")
-      for lPACKAGE_AND_VERSION in "${lRPM_PACKAGES_ARR[@]}" ; do
+      for lPACKAGE_AND_VERSION in "${lRPM_PACKAGES_ARR[@]}"; do
         rpm_pkg_mgmt_analysis_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPACKAGE_FILE}" "${lPACKAGE_AND_VERSION}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+        lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
         lPOS_RES=1
       done
@@ -125,11 +125,11 @@ rpm_pkg_mgmt_analysis_threader() {
   # print_output "[*] Testing RPM directory ${lRPM_DIR} with PACKAGE_AND_VERSION: ${lPACKAGE_AND_VERSION}" "no_log"
 
   lAPP_VERS=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Version" || true)
-  lAPP_VERS="${lAPP_VERS/*:\ }"
+  lAPP_VERS="${lAPP_VERS/*:\ /}"
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
 
   lAPP_NAME=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Name" || true)
-  lAPP_NAME="${lAPP_NAME/*:\ }"
+  lAPP_NAME="${lAPP_NAME/*:\ /}"
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
 
   if [[ -z "${lAPP_NAME}" ]]; then
@@ -137,11 +137,11 @@ rpm_pkg_mgmt_analysis_threader() {
   fi
 
   lAPP_LIC=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^License" || true)
-  lAPP_LIC="${lAPP_LIC/*:\ }"
+  lAPP_LIC="${lAPP_LIC/*:\ /}"
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
   lAPP_ARCH=$(rpm -qi --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" | grep "^Architecture" || true)
-  lAPP_ARCH="${lAPP_ARCH/*:\ }"
+  lAPP_ARCH="${lAPP_ARCH/*:\ /}"
   lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
 
   mapfile -t lAPP_DEPS_ARR < <(rpm -qR --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
@@ -160,24 +160,24 @@ rpm_pkg_mgmt_analysis_threader() {
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lPACKAGE_FILE}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
 
   if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
     for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
-      lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+      lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
     done
   fi
 
   # add package files to properties
-  if [[ "${#lAPP_FILES_ARR[@]}" -gt 0  ]]; then
+  if [[ "${#lAPP_FILES_ARR[@]}" -gt 0 ]]; then
     for lAPP_FILE_ID in "${!lAPP_FILES_ARR[@]}"; do
       lAPP_FILE="${lAPP_FILES_ARR["${lAPP_FILE_ID}"]}"
-      lPROP_ARRAY_INIT_ARR+=( "path:${lAPP_FILE#\.}" )
+      lPROP_ARRAY_INIT_ARR+=("path:${lAPP_FILE#\.}")
       # we limit the logging of the package files to 500 files per package
       if [[ "${lAPP_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-        lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+        lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
         break
       fi
     done

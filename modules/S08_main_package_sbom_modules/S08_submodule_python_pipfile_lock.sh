@@ -44,10 +44,10 @@ S08_submodule_python_pipfile_lock() {
 
   mapfile -t lPIPFILE_LCK_ARCHIVES_ARR < <(grep -i "/Pipfile.*\.lock;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lPIPFILE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lPIPFILE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lPIPFILE_LCK_ARCHIVES_ARR[@]}${NC} Python pipfile.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPIPFILE_LCK_ARCHIVE in "${lPIPFILE_LCK_ARCHIVES_ARR[@]}" ; do
+    for lPIPFILE_LCK_ARCHIVE in "${lPIPFILE_LCK_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPIPFILE_LCK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -62,7 +62,7 @@ S08_submodule_python_pipfile_lock() {
         print_output "[*] ${ORANGE}${lPIPFILE_LCK_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       lR_FILE=$(file "${lPIPFILE_LCK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"JSON text"* ]]; then
@@ -76,7 +76,7 @@ S08_submodule_python_pipfile_lock() {
         python_pipfile_lock_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPIPFILE_LCK_ARCHIVE}" "${lPIP_LOCK_ENTRY}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+        lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
         lPOS_RES=1
       done
@@ -113,8 +113,8 @@ python_pipfile_lock_threader() {
 
   # our entry looks like
   # Entry: urllib3,{"hashes":["sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df","sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d"],"markers":"python_version >= '3.9'","version":"==2.3.0"}
-  lAPP_NAME="${lPIPFILE_LCK_ENTRY/,*}"
-  lAPP_VERS=$(jq -r .version <<< "${lPIPFILE_LCK_ENTRY#*,}")
+  lAPP_NAME="${lPIPFILE_LCK_ENTRY/,*/}"
+  lAPP_VERS=$(jq -r .version <<<"${lPIPFILE_LCK_ENTRY#*,}")
 
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   # version outcome from compose is mostly ==1.2.3 -> 1.2.3
@@ -134,11 +134,11 @@ python_pipfile_lock_threader() {
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIPFILE_LCK_ARCHIVE}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lPIPFILE_LCK_ARCHIVE}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -155,4 +155,3 @@ python_pipfile_lock_threader() {
   write_log "[*] Python pipfile.lock archive details: ${ORANGE}${lPIPFILE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lPIPFILE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC:-NA}"
 }
-

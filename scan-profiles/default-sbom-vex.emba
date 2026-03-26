@@ -48,6 +48,9 @@ export SELECT_MODULES+=( "F17" "F50" )
 # VEX metrics (check for KEV, Exploits, EPSS)
 export VEX_METRICS=1
 
+# disable EMBA binary map dependency generator
+EMBA_MAP_GENERATOR=0
+
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0
 export SILENT=1

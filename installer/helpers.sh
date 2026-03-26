@@ -16,8 +16,7 @@
 
 # Description:  Helpers for EMBA installation
 
-print_help()
-{
+print_help() {
   echo -e "\\n""${CYAN}""USAGE""${NC}"
   echo -e "${CYAN}""-d""${NC}""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "${CYAN}""-D""${NC}""         Only used via docker-compose for building EMBA docker container"
@@ -32,8 +31,7 @@ print_help()
   echo
 }
 
-module_title()
-{
+module_title() {
   local MODULE_TITLE
   MODULE_TITLE="${1:-}"
   local MODULE_TITLE_FORMAT
@@ -48,7 +46,7 @@ module_title()
 # c = if given: check if this application is on the system instead of a
 # d = if given: use this as the package name on RHEL systems
 
-print_tool_info(){
+print_tool_info() {
   echo -e "\\n""${ORANGE}""${BOLD}""${1:-}""${NC}"
 
   local lPKG_NAME="$1"
@@ -61,16 +59,16 @@ print_tool_info(){
   local lIS_INSTALLED=0
 
   if [[ "${RHEL_OS}" -eq 1 ]]; then
-    lTOOL_INFO="$(dnf info "${lPKG_NAME}" 2> /dev/null)"
+    lTOOL_INFO="$(dnf info "${lPKG_NAME}" 2>/dev/null)"
   else
-    lTOOL_INFO="$(apt show "${lPKG_NAME}" 2> /dev/null)"
+    lTOOL_INFO="$(apt show "${lPKG_NAME}" 2>/dev/null)"
   fi
 
-  if [[ -n "${lTOOL_INFO}" ]] ; then
+  if [[ -n "${lTOOL_INFO}" ]]; then
     local lDESC=""
-        lDESC="$(echo "${lTOOL_INFO}" | grep -E "^Description[[:space:]]*:" | head -n 1 || true)"
+    lDESC="$(echo "${lTOOL_INFO}" | grep -E "^Description[[:space:]]*:" | head -n 1 || true)"
     if [[ -n "${lDESC}" ]]; then
-        echo -e "${lDESC}"
+      echo -e "${lDESC}"
     fi
 
     local lSIZE=""
@@ -84,24 +82,24 @@ print_tool_info(){
     fi
 
     local lCOMMAND_=""
-    if [[ -n ${3+x} ]] ; then
+    if [[ -n ${3+x} ]]; then
       lCOMMAND_="${3:-}"
     else
       lCOMMAND_="${lPKG_NAME}"
     fi
 
-    if ( command -v "${lCOMMAND_}" > /dev/null); then
+    if (command -v "${lCOMMAND_}" >/dev/null); then
       lIS_INSTALLED=1
     elif [[ "${RHEL_OS}" -eq 1 ]]; then
-      if rpm -q "${lPKG_NAME}" &> /dev/null; then lIS_INSTALLED=1; fi
+      if rpm -q "${lPKG_NAME}" &>/dev/null; then lIS_INSTALLED=1; fi
     else
-      if ( dpkg -s "${lPKG_NAME}" 2> /dev/null | grep -q "Status: install ok installed" ); then lIS_INSTALLED=1; fi
+      if (dpkg -s "${lPKG_NAME}" 2>/dev/null | grep -q "Status: install ok installed"); then lIS_INSTALLED=1; fi
     fi
 
     if [[ "${lIS_INSTALLED}" -eq 1 ]]; then
       local lUPDATE_AVAILABLE=0
       if [[ "${RHEL_OS}" -eq 1 ]]; then
-        dnf check-update "${lPKG_NAME}" &> /dev/null
+        dnf check-update "${lPKG_NAME}" &>/dev/null
         [[ $? -eq 100 ]] && lUPDATE_AVAILABLE=1
       else
         local lUPDATE=0
@@ -137,16 +135,16 @@ print_git_info() {
   local GIT_SIZE=0
 
   echo -e "\\n""${ORANGE}""${BOLD}""${GIT_NAME}""${NC}"
-  if [[ -n "${GIT_DESC}" ]] ; then
+  if [[ -n "${GIT_DESC}" ]]; then
     echo -e "Description: ""${GIT_DESC}"
   fi
 
-  if command -v jq >/dev/null ; then
-    GIT_SIZE=$(curl https://api.github.com/repos/"${GIT_URL}" 2> /dev/null | jq -r '.size' || true)
+  if command -v jq >/dev/null; then
+    GIT_SIZE=$(curl https://api.github.com/repos/"${GIT_URL}" 2>/dev/null | jq -r '.size' || true)
 
     if [[ -n "${GIT_SIZE+0}" ]] && [[ "${GIT_SIZE}" =~ [0-9]+ ]]; then
-      if (( GIT_SIZE > 1024 )) ; then
-        echo -e "Download-Size: ""$(( GIT_SIZE / 1024 ))"" MB"
+      if ((GIT_SIZE > 1024)); then
+        echo -e "Download-Size: ""$((GIT_SIZE / 1024))"" MB"
       else
         echo -e "Download-Size: ""${GIT_SIZE}"" KB"
       fi
@@ -161,16 +159,16 @@ print_git_info() {
 print_pip_info() {
   local PIP_NAME="${1:-}"
   local INSTALLED=0
-  if [[ -n "${2+x}" ]] ; then
+  if [[ -n "${2+x}" ]]; then
     local PACKAGE_VERSION="${2:-}"
   fi
   echo -e "\\n""${ORANGE}""${BOLD}""${PIP_NAME}""${NC}"
   mapfile -t PIP_INFOS < <(pip3 show "${PIP_NAME}" 2>/dev/null || true)
   # in the error message of pip install we can find all available versions
-  if [[ -n "${PACKAGE_VERSION+x}" ]] ; then
+  if [[ -n "${PACKAGE_VERSION+x}" ]]; then
     PVERSION=$(pip3 install "${PIP_NAME}==" 2>&1 | grep -o "${PACKAGE_VERSION}" || true)
   else
-  #  PVERSION=$(pip3 install "${PIP_NAME}" 2>&1 | grep -v "Requirement already satisfied")
+    #  PVERSION=$(pip3 install "${PIP_NAME}" 2>&1 | grep -v "Requirement already satisfied")
     PVERSION="NA"
   fi
   for INFO in "${PIP_INFOS[@]}"; do
@@ -231,12 +229,11 @@ pip_install() {
 # d = path on system
 # e = if given: check this path or application is on the system instead of d
 
-print_file_info()
-{
+print_file_info() {
   local CONTENT_LENGTH=""
   local FILE_SIZE=0
   echo -e "\\n""${ORANGE}""${BOLD}""${1:-}""${NC}"
-  if [[ -n "${2:-}" ]] ; then
+  if [[ -n "${2:-}" ]]; then
     echo -e "Description: ""${2:-}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
@@ -248,17 +245,17 @@ print_file_info()
     FILE_SIZE=$(("$(sed -ne '/.ontent-.ength/{s/.*: //;p}' ./.wget.log | sed '$!d')"))
   fi
 
-  if (( FILE_SIZE > 1048576 )) ; then
-    echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
-  elif (( FILE_SIZE > 1024 )) ; then
-    echo -e "Download-Size: ""$(( FILE_SIZE / 1024 ))"" KB"
+  if ((FILE_SIZE > 1048576)); then
+    echo -e "Download-Size: ""$((FILE_SIZE / 1048576))"" MB"
+  elif ((FILE_SIZE > 1024)); then
+    echo -e "Download-Size: ""$((FILE_SIZE / 1024))"" KB"
   else
     echo -e "Download-Size: ""${FILE_SIZE}"" B"
   fi
 
-  if ! [[ -f "${4:-}" ]] ; then
-    if [[ -n "${5+x}" ]] ; then
-      if [[ -f "${5:-}" ]] || ( command -v "${5:-}" > /dev/null) || ( dpkg -s "${5:-}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+  if ! [[ -f "${4:-}" ]]; then
+    if [[ -n "${5+x}" ]]; then
+      if [[ -f "${5:-}" ]] || (command -v "${5:-}" >/dev/null) || (dpkg -s "${5:-}" 2>/dev/null | grep -q "Status: install ok installed"); then
         echo -e "${GREEN}""${1:-}"" is already installed - no further action performed.""${NC}"
       else
         echo -e "${ORANGE}""${1:-}"" will be downloaded.""${NC}"
@@ -282,12 +279,11 @@ print_file_info()
 # c = path on system
 # WARNING: you need to do a print_file_info first!
 
-download_file()
-{
-  for D_FILE in "${DOWNLOAD_FILE_LIST[@]}" ; do
-    if [[ "${D_FILE}" == "${1:-}" ]] ; then
+download_file() {
+  for D_FILE in "${DOWNLOAD_FILE_LIST[@]}"; do
+    if [[ "${D_FILE}" == "${1:-}" ]]; then
       echo -e "\\n""${ORANGE}""${BOLD}""Downloading ""${1:-}""${NC}"
-      if ! [[ -f "${3:-}" ]] ; then
+      if ! [[ -f "${3:-}" ]]; then
         wget --no-check-certificate --output-file=./.wget.log "${2:-}" -O "${3:-}"
         if [[ -f "./.wget.log" ]]; then
           cat ./.wget.log
@@ -297,7 +293,7 @@ download_file()
       fi
     fi
   done
-  if [[ -f "${3:-}" ]] && ! [[ -x "${3:-}" ]] ; then
+  if [[ -f "${3:-}" ]] && ! [[ -x "${3:-}" ]]; then
     chmod +x "${3:-}"
   fi
   if [[ -f "./.wget.log" ]]; then

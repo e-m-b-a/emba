@@ -58,4 +58,3 @@ binwalker_matryoshka() {
   timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${BINWALK_BIN[@]}" -v -e -c -M -d "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${LOG_FILE}" || print_error "[-] WARNING: Binwalk returned with error state for ${lFIRMWARE_PATH}"
   print_ln
 }
-

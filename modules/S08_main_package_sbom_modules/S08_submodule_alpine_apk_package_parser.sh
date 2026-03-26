@@ -48,10 +48,10 @@ S08_submodule_alpine_apk_package_parser() {
   # mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.apk" -type f)
   mapfile -t lAPK_ARCHIVES_ARR < <(grep "\.apk;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}" ; do
+    for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lAPK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -59,7 +59,7 @@ S08_submodule_alpine_apk_package_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lAPK_ARCHIVES_ARR[@]}${NC} Alpine apk archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}" ; do
+    for lAPK_ARCHIVE in "${lAPK_ARCHIVES_ARR[@]}"; do
       lR_FILE=$(file "${lAPK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"gzip compressed data"* ]]; then
         continue
@@ -71,7 +71,7 @@ S08_submodule_alpine_apk_package_parser() {
         print_output "[*] ${ORANGE}${lAPK_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if ! [[ -d "${TMP_DIR}"/apk ]]; then
         mkdir "${TMP_DIR}"/apk || true
@@ -83,16 +83,16 @@ S08_submodule_alpine_apk_package_parser() {
       fi
 
       lAPP_NAME=$(grep '^pkgname = ' "${TMP_DIR}"/apk/.PKGINFO || true)
-      lAPP_NAME=${lAPP_NAME/pkgname\ =\ }
+      lAPP_NAME=${lAPP_NAME/pkgname\ =\ /}
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       [[ -z "${lAPP_NAME}" ]] && continue
 
       lAPP_LIC=$(grep '^license = ' "${TMP_DIR}"/apk/.PKGINFO || true)
-      lAPP_LIC=${lAPP_LIC/license\ =\ }
+      lAPP_LIC=${lAPP_LIC/license\ =\ /}
       lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
       lAPP_VERS=$(grep '^pkgver = ' "${TMP_DIR}"/apk/.PKGINFO || true)
-      lAPP_VERS=${lAPP_VERS/pkgver\ =\ }
+      lAPP_VERS=${lAPP_VERS/pkgver\ =\ /}
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
@@ -112,21 +112,21 @@ S08_submodule_alpine_apk_package_parser() {
 
       # add deb path information to our properties array:
       local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lAPK_ARCHIVE}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      lPROP_ARRAY_INIT_ARR+=("source_path:${lAPK_ARCHIVE}")
+      lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+      lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+      lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+      lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
       mapfile -t lAPK_FILES_ARR < <(find "${TMP_DIR}"/apk)
       # add package files to properties
       if [[ "${#lAPK_FILES_ARR[@]}" -gt 0 ]]; then
         for lAPK_FILE_ID in "${!lAPK_FILES_ARR[@]}"; do
           lAPK_FILE="${lAPK_FILES_ARR["${lAPK_FILE_ID}"]}"
-          lPROP_ARRAY_INIT_ARR+=( "path:${lAPK_FILE#*apk}" )
+          lPROP_ARRAY_INIT_ARR+=("path:${lAPK_FILE#*apk}")
           # we limit the logging of the package files to 500 files per package
           if [[ "${lAPK_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-            lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+            lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
             break
           fi
         done
@@ -165,4 +165,3 @@ S08_submodule_alpine_apk_package_parser() {
     print_output "[*] No Alpine APK archives SBOM results available"
   fi
 }
-

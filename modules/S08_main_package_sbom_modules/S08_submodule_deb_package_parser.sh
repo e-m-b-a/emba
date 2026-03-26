@@ -44,10 +44,10 @@ S08_submodule_deb_package_parser() {
   # mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
   mapfile -t lDEB_ARCHIVES_ARR < <(grep "\.deb;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}" ; do
+    for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lDEB_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -55,11 +55,11 @@ S08_submodule_deb_package_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lDEB_ARCHIVES_ARR[@]}${NC} Debian deb files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}" ; do
+    for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}"; do
       deb_package_parser_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lDEB_ARCHIVE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
       lPOS_RES=1
     done
@@ -119,7 +119,7 @@ deb_package_parser_threader() {
     print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
     return
   fi
-  lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+  lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
   local lDEB_LOG_PATH="${TMP_DIR}/deb_package_${lPKG_MD5}"
   if ! [[ -d "${lDEB_LOG_PATH}" ]]; then
@@ -128,10 +128,10 @@ deb_package_parser_threader() {
   ar x "${lDEB_ARCHIVE}" --output "${lDEB_LOG_PATH}" || print_error "[-] Extraction error for debian archive ${lDEB_ARCHIVE}"
 
   if [[ -f "${lDEB_LOG_PATH}/control.tar.zst" ]]; then
-    zstd -d < "${lDEB_LOG_PATH}/control.tar.zst" | xz > "${lDEB_LOG_PATH}/control.tar.xz" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
+    zstd -d <"${lDEB_LOG_PATH}/control.tar.zst" | xz >"${lDEB_LOG_PATH}/control.tar.xz" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
   fi
   if [[ -f "${lDEB_LOG_PATH}/data.tar.zst" ]]; then
-    zstd -d < "${lDEB_LOG_PATH}/data.tar.zst" | xz > "${lDEB_LOG_PATH}/data.tar.xz" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
+    zstd -d <"${lDEB_LOG_PATH}/data.tar.zst" | xz >"${lDEB_LOG_PATH}/data.tar.xz" || print_error "[-] Can't process ${lDEB_ARCHIVE}"
   fi
 
   if [[ -f "${lDEB_LOG_PATH}/control.tar.xz" ]]; then
@@ -147,28 +147,28 @@ deb_package_parser_threader() {
   fi
 
   lAPP_NAME=$(grep "Package: " "${lDEB_LOG_PATH}/control" || true)
-  lAPP_NAME=${lAPP_NAME/*:\ }
+  lAPP_NAME=${lAPP_NAME/*:\ /}
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_ARCH=$(grep "Architecture: " "${lDEB_LOG_PATH}/control" || true)
-  lAPP_ARCH=${lAPP_ARCH/*:\ }
+  lAPP_ARCH=${lAPP_ARCH/*:\ /}
   lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
 
   lAPP_MAINT=$(grep "Maintainer: " "${lDEB_LOG_PATH}/control" || true)
-  lAPP_MAINT=${lAPP_MAINT/*:\ }
+  lAPP_MAINT=${lAPP_MAINT/*:\ /}
   lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
 
   lAPP_DESC=$(grep "Description: " "${lDEB_LOG_PATH}/control" || true)
-  lAPP_DESC=${lAPP_DESC/*:\ }
+  lAPP_DESC=${lAPP_DESC/*:\ /}
   lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
   lAPP_LIC=$(grep "License: " "${lDEB_LOG_PATH}/control" || true)
-  lAPP_LIC=${lAPP_LIC/*:\ }
+  lAPP_LIC=${lAPP_LIC/*:\ /}
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
   lAPP_VERS=$(grep "Version: " "${lDEB_LOG_PATH}/control" || true)
-  lAPP_VERS=${lAPP_VERS/*:\ }
+  lAPP_VERS=${lAPP_VERS/*:\ /}
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
@@ -189,17 +189,17 @@ deb_package_parser_threader() {
 
   # add deb path information to our properties array:
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lDEB_ARCHIVE}" )
-  lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lDEB_ARCHIVE}")
+  lPROP_ARRAY_INIT_ARR+=("source_arch:${lAPP_ARCH}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   # Add dependencies to properties
   for lDEB_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
     lAPP_DEP="${lAPP_DEPS_ARR["${lDEB_DEP_ID}"]}"
-    lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+    lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
   done
 
   # add package files to properties
@@ -207,10 +207,10 @@ deb_package_parser_threader() {
     mapfile -t lDEB_FILES_ARR < <(tar -tvf "${lDEB_LOG_PATH}/data.tar.xz" | awk '{print $6}')
     for lDEB_FILE_ID in "${!lDEB_FILES_ARR[@]}"; do
       lDEB_FILE="${lDEB_FILES_ARR["${lDEB_FILE_ID}"]}"
-      lPROP_ARRAY_INIT_ARR+=( "path:${lDEB_FILE#\.}" )
+      lPROP_ARRAY_INIT_ARR+=("path:${lDEB_FILE#\.}")
       # we limit the logging of the package files to 500 files per package
       if [[ "${lDEB_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-        lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+        lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
         break
       fi
     done

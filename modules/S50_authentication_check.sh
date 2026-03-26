@@ -30,31 +30,31 @@ S50_authentication_check() {
   # disabled internal module threading as the output is not readable anymore
   if [[ "${THREADED}" -eq 9 ]]; then
     user_zero &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     search_shadow &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     non_unique_acc &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     non_unique_group_id &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     non_unique_group_name &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     query_user_acc &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     query_nis_plus_auth_supp &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     check_sudoers &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     check_owner_perm_sudo_config &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     search_pam_testing_libs &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     scan_pam_conf &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     search_pam_configs &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
     search_pam_files &
-    lWAIT_PIDS_S50_ARR+=( "$!" )
+    lWAIT_PIDS_S50_ARR+=("$!")
   else
     user_zero
     search_shadow
@@ -92,9 +92,9 @@ search_shadow() {
   local lHASH=""
   local lCHECK=0
 
-  mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*"  -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ASCII text" | cut -d: -f1' || true)
+  mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*" -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ASCII text" | cut -d: -f1' || true)
   for lSHADOW_FILE in "${lSHADOW_FILE_PATHS_ARR[@]}"; do
-    if [[ -f "${lSHADOW_FILE}" ]] ; then
+    if [[ -f "${lSHADOW_FILE}" ]]; then
       mapfile -t lHASHES_ARR < <(grep -E '\$[1-6][ay]?\$' "${lSHADOW_FILE}" || true)
       for lHASH in "${lHASHES_ARR[@]}"; do
         local lHTYPE="unknown"
@@ -111,19 +111,19 @@ search_shadow() {
         fi
         if [[ "${lHTYPE}" == "unknown" ]]; then
           print_output "[+] Found shadow file ""${ORANGE}$(print_path "${lSHADOW_FILE}")${GREEN} with possible hash ${ORANGE}${lHASH}${NC}"
-          ((lAUTH_ISSUES+=1))
+          ((lAUTH_ISSUES += 1))
           continue
         fi
         print_output "[+] Found shadow file ""${ORANGE}$(print_path "${lSHADOW_FILE}")${GREEN} with possible hash ${ORANGE}${lHASH}${GREEN} of hashtype: ${ORANGE}${lHTYPE}${NC}"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       done
       lCHECK=1
     fi
   done
-  if [[ ${lCHECK} -eq 0 ]] ; then
+  if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] shadow file not available"
   fi
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 user_zero() {
@@ -137,21 +137,21 @@ user_zero() {
   mapfile -t lPASSWD_FILE_PATHS_ARR < <(mod_path "/ETC_PATHS/passwd")
 
   for lPASSWD_FILE in "${lPASSWD_FILE_PATHS_ARR[@]}"; do
-    if [[ -f "${lPASSWD_FILE}" ]] ; then
+    if [[ -f "${lPASSWD_FILE}" ]]; then
       lCHECK=1
       local lFIND=""
       lFIND=$(grep ':0:' "${lPASSWD_FILE}" | grep -v '^#|^root:|^(\+:\*)?:0:0:::' | cut -d ":" -f1,3 | grep ':0' || true)
-      if [[ -n "${lFIND}" ]] ; then
+      if [[ -n "${lFIND}" ]]; then
         print_output "[+] Found administrator account/s with UID 0 in ""$(print_path "${lPASSWD_FILE}")"
         print_output "$(indent "$(orange "Administrator account: ${lFIND}")")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       else
         print_output "[-] Found no administrator account (root) with UID 0"
       fi
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/passwd not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 non_unique_acc() {
@@ -166,21 +166,21 @@ non_unique_acc() {
   mapfile -t lPASSWD_FILE_PATHS_ARR < <(mod_path "/ETC_PATHS/passwd")
 
   for lPASSWD_FILE in "${lPASSWD_FILE_PATHS_ARR[@]}"; do
-    if [[ -f "${lPASSWD_FILE}" ]] ; then
+    if [[ -f "${lPASSWD_FILE}" ]]; then
       lCHECK=1
       local lFIND=""
       lFIND=$(grep -v '^#' "${lPASSWD_FILE}" | cut -d ':' -f3 | sort | uniq -d || true)
-      if [[ "${lFIND}" = "" ]] ; then
+      if [[ "${lFIND}" = "" ]]; then
         print_output "[-] All accounts found in ""$(print_path "${lPASSWD_FILE}")"" are unique"
       else
         print_output "[+] Non-unique accounts found in ""$(print_path "${lPASSWD_FILE}")"
         print_output "$(indent "$(orange "${lFIND}")")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/passwd not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 non_unique_group_id() {
@@ -195,21 +195,21 @@ non_unique_group_id() {
   mapfile -t lGROUP_PATHS_ARR < <(mod_path "/ETC_PATHS/group")
 
   for lGROUP_PATH in "${lGROUP_PATHS_ARR[@]}"; do
-    if [[ -f "${lGROUP_PATH}" ]] ; then
+    if [[ -f "${lGROUP_PATH}" ]]; then
       lCHECK=1
       local lFIND=""
       lFIND=$(grep -v '^#' "${lGROUP_PATH}" | grep -v '^$' | awk -F: '{ print $3 }' | sort | uniq -d || true)
-      if [[ "${lFIND}" = "" ]] ; then
+      if [[ "${lFIND}" = "" ]]; then
         print_output "[-] All group ID's found in ""$(print_path "${lGROUP_PATH}")"" are unique"
       else
         print_output "[+] Found the same group ID multiple times"
         print_output "$(indent "$(orange "Non-unique group id: ""${lFIND}")")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/group not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 non_unique_group_name() {
@@ -223,21 +223,21 @@ non_unique_group_name() {
   mapfile -t lGROUP_PATHS_ARR < <(mod_path "/ETC_PATHS/group")
 
   for lGROUP_PATH in "${lGROUP_PATHS_ARR[@]}"; do
-    if [[ -f "${lGROUP_PATH}" ]] ; then
+    if [[ -f "${lGROUP_PATH}" ]]; then
       lCHECK=1
       local lFIND=""
       lFIND=$(grep -v '^#' "${lGROUP_PATH}" | grep -v '^$' | awk -F: '{ print $1 }' | sort | uniq -d || true)
-      if [[ "${lFIND}" = "" ]] ; then
+      if [[ "${lFIND}" = "" ]]; then
         print_output "[-] All group names found in ""$(print_path "${lGROUP_PATH}")"" are unique"
       else
         print_output "[+] Found the same group name multiple times"
         print_output "$(indent "$(orange "Non-unique group name: ""${lFIND}")")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/group not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 query_user_acc() {
@@ -252,14 +252,14 @@ query_user_acc() {
   mapfile -t lPASSWD_FILE_PATHS_ARR < <(mod_path "/ETC_PATHS/passwd")
 
   for lPASSWD_FILE in "${lPASSWD_FILE_PATHS_ARR[@]}"; do
-    if [[ -f "${lPASSWD_FILE}" ]] ; then
+    if [[ -f "${lPASSWD_FILE}" ]]; then
       lCHECK=1
       local lUID_MIN=""
       local lLOGIN_DEFS_PATH_ARR=()
       local lLOGIN_DEF=""
       mapfile -t lLOGIN_DEFS_PATH_ARR < <(mod_path "/ETC_PATHS/login.defs")
       for lLOGIN_DEF in "${lLOGIN_DEFS_PATH_ARR[@]}"; do
-        if [[ -f "${lLOGIN_DEF}" ]] ; then
+        if [[ -f "${lLOGIN_DEF}" ]]; then
           lUID_MIN=$(grep "^UID_MIN" "${lLOGIN_DEF}" | awk '{print $2}')
           print_output "[*] Found minimal user id specified: ""${lUID_MIN}"
         fi
@@ -268,7 +268,7 @@ query_user_acc() {
       print_output "[*] Linux real users output (ID = 0, or ""${lUID_MIN}""+, but not 65534):"
       lFIND=$(awk -v lUID_MIN="${lUID_MIN}" -F: '($3 >= lUID_MIN && $3 != 65534) || ($3 == 0) { print $1","$3 }' "${lPASSWD_FILE}")
 
-      if [[ "${lFIND}" = "" ]] ; then
+      if [[ "${lFIND}" = "" ]]; then
         print_output "[-] No users found/unknown result"
       else
         print_output "[+] Query system user"
@@ -277,7 +277,7 @@ query_user_acc() {
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/passwd not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 query_nis_plus_auth_supp() {
@@ -292,12 +292,12 @@ query_nis_plus_auth_supp() {
   mapfile -t lNSS_PATH_L_ARR < <(mod_path "/ETC_PATHS/nsswitch.conf")
 
   for lNSS_PATH in "${lNSS_PATH_L_ARR[@]}"; do
-    if [[ -f "${lNSS_PATH}" ]] ; then
+    if [[ -f "${lNSS_PATH}" ]]; then
       lCHECK=1
       print_output "[+] ""$(print_path "${lNSS_PATH}")"" exist"
       local lFIND=""
       lFIND="$(grep "^passwd" "${lNSS_PATH}" | grep "compat|nis" | grep -v "nisplus" || true)"
-      if [[ -z "${lFIND}" ]] ; then
+      if [[ -z "${lFIND}" ]]; then
         print_output "[-] NIS/NIS+ authentication not enabled"
       else
         local lFIND2=""
@@ -306,14 +306,14 @@ query_nis_plus_auth_supp() {
         local lFIND5=""
         lFIND2=$(grep "^passwd_compat" "${lNSS_PATH}" | grep "nis" | grep -v "nisplus" || true)
         lFIND3=$(grep "^passwd" "${lNSS_PATH}" | grep "nis" | grep -v "nisplus" || true)
-        if [[ -n "${lFIND2}" ]] || [[ -n "${lFIND3}" ]] ; then
+        if [[ -n "${lFIND2}" ]] || [[ -n "${lFIND3}" ]]; then
           print_output "[+] Result: NIS authentication enabled"
         else
           print_output "[+] Result: NIS authentication not enabled"
         fi
         lFIND4=$(grep "^passwd_compat" "${lNSS_PATH}" | grep "nisplus" || true)
         lFIND5=$(grep "^passwd" "${lNSS_PATH}" | grep "nisplus" || true)
-        if [[ -n "${lFIND4}" ]] || [[ -n "${lFIND5}" ]] ; then
+        if [[ -n "${lFIND4}" ]] || [[ -n "${lFIND5}" ]]; then
           print_output "[+] Result: NIS+ authentication enabled"
         else
           print_output "[+] Result: NIS+ authentication not enabled"
@@ -322,7 +322,7 @@ query_nis_plus_auth_supp() {
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/nsswitch.conf not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 check_sudoers() {
@@ -345,7 +345,7 @@ check_sudoers() {
           readarray lSUDOERS_ISSUES_ARR < <("${EXT_DIR}"/sudo-parser.pl -f "${lSUDOERS_FILE}" -r "${lR_PATH}" | grep -E "^E:\ " || true)
           for lS_ISSUE in "${lSUDOERS_ISSUES_ARR[@]}"; do
             print_output "[+] ${lS_ISSUE}"
-            ((lAUTH_ISSUES+=1))
+            ((lAUTH_ISSUES += 1))
           done
         fi
       done
@@ -353,7 +353,7 @@ check_sudoers() {
       print_output "[-] No sudoers files found in ${lR_PATH}"
     fi
   done
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 check_owner_perm_sudo_config() {
@@ -365,7 +365,7 @@ check_owner_perm_sudo_config() {
   if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for lFILE in "${SUDOERS_FILES_ARR[@]}"; do
       local lSUDOERS_D="${lFILE}"".d"
-      if [[ -d "${lSUDOERS_D}" ]] ; then
+      if [[ -d "${lSUDOERS_D}" ]]; then
         print_output "[*] Checking drop-in directory (""$(print_path "${lSUDOERS_D}")"")"
         local lFIND=""
         local lFIND2=""
@@ -380,20 +380,20 @@ check_owner_perm_sudo_config() {
         case "${lFIND}" in
         drwx[r-][w-][x-]---)
           print_output "[-] ""$(print_path "${lSUDOERS_D}")"" permissions OK"
-          if [[ "${lFIND2}" = "0:0" ]] ; then
+          if [[ "${lFIND2}" = "0:0" ]]; then
             print_output "[-] ""$(print_path "${lSUDOERS_D}")"" ownership OK"
           else
             print_output "[+] ""$(print_path "${lSUDOERS_D}")"" ownership unsafe"
-            ((lAUTH_ISSUES+=1))
+            ((lAUTH_ISSUES += 1))
           fi
           ;;
         *)
           print_output "[+] ""$(print_path "${lSUDOERS_D}")"" permissions possibly unsafe"
-          if [[ "${lFIND2}" = "0:0" ]] ; then
+          if [[ "${lFIND2}" = "0:0" ]]; then
             print_output "[-] ""$(print_path "${lSUDOERS_D}")"" ownership OK"
           else
             print_output "[+] ""$(print_path "${lSUDOERS_D}")"" ownership unsafe"
-            ((lAUTH_ISSUES+=1))
+            ((lAUTH_ISSUES += 1))
           fi
           ;;
         esac
@@ -407,20 +407,20 @@ check_owner_perm_sudo_config() {
       case "${lFIND3}" in
       rwx[r-][w-][x-]---)
         print_output "[-] ""$(print_path "${lFILE}")"" permissions OK"
-        if [[ "${lFIND4}" = "0:0" ]] ; then
+        if [[ "${lFIND4}" = "0:0" ]]; then
           print_output "[-] ""$(print_path "${lFILE}")"" ownership OK"
         else
           print_output "[+] ""$(print_path "${lFILE}")"" ownership unsafe"
-          ((lAUTH_ISSUES+=1))
+          ((lAUTH_ISSUES += 1))
         fi
         ;;
       *)
         print_output "[+] ""$(print_path "${lFILE}")"" permissions possibly unsafe"
-        if [[ "${lFIND4}" = "0:0" ]] ; then
+        if [[ "${lFIND4}" = "0:0" ]]; then
           print_output "[-] ""$(print_path "${lFILE}")"" ownership OK"
         else
           print_output "[+] ""$(print_path "${lFILE}")"" ownership unsafe"
-          ((lAUTH_ISSUES+=1))
+          ((lAUTH_ISSUES += 1))
         fi
         ;;
       esac
@@ -428,7 +428,7 @@ check_owner_perm_sudo_config() {
   else
     print_output "[-] No sudoers files found - no check possible"
   fi
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 search_pam_testing_libs() {
@@ -446,71 +446,71 @@ search_pam_testing_libs() {
 
   mapfile -t lFILE_PATH_ARR < <(mod_path_array "$(config_list "${CONFIG_DIR}""/pam_files.cfg" "")")
 
-  if [[ "${lFILE_PATH_ARR[0]-}" == "C_N_F" ]] ; then
+  if [[ "${lFILE_PATH_ARR[0]-}" == "C_N_F" ]]; then
     print_output "[!] Config not found"
-  elif ! [[ "${#lFILE_PATH_ARR[@]}" -eq 0 ]] ; then
+  elif ! [[ "${#lFILE_PATH_ARR[@]}" -eq 0 ]]; then
     local lFOUND=0
 
     for lPATH_F in "${lFILE_PATH_ARR[@]}"; do
       local lFULL_PATH="${FIRMWARE_PATH}""/""${lPATH_F}"
 
-      if [[ -f "${lFULL_PATH}""/pam_cracklib.so" ]] ; then
+      if [[ -f "${lFULL_PATH}""/pam_cracklib.so" ]]; then
         lFOUND_CRACKLIB=1
         lFOUND=1
         print_output "[+] Found pam_cracklib.so (crack library PAM) in ""$(print_path "${lFULL_PATH}")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
 
-      if [[ -f "${lFULL_PATH}""/pam_passwdqc.so" ]] ; then
+      if [[ -f "${lFULL_PATH}""/pam_passwdqc.so" ]]; then
         lFOUND_PASSWDQC=1
         lFOUND=1
         print_output "[+] Found pam_passwdqc.so (passwd quality control PAM) in ""$(print_path "${lFULL_PATH}")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
 
-      if [[ -f "${lFULL_PATH}""/pam_pwquality.so" ]] ; then
+      if [[ -f "${lFULL_PATH}""/pam_pwquality.so" ]]; then
         lFOUND_PWQUALITY=1
         lFOUND=1
         print_output "[+] Found pam_pwquality.so (password quality control PAM) in ""$(print_path "${lFULL_PATH}")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
     done
 
     # Cracklib
-    if [[ ${lFOUND_CRACKLIB} -eq 1 ]] ; then
+    if [[ ${lFOUND_CRACKLIB} -eq 1 ]]; then
       print_output "[+] pam_cracklib.so found"
-      ((lAUTH_ISSUES+=1))
+      ((lAUTH_ISSUES += 1))
     else
       print_output "[-] pam_cracklib.so not found"
     fi
 
     # Password quality control
-    if [[ ${lFOUND_PASSWDQC} -eq 1 ]] ; then
+    if [[ ${lFOUND_PASSWDQC} -eq 1 ]]; then
       print_output "[+] pam_passwdqc.so found"
-      ((lAUTH_ISSUES+=1))
+      ((lAUTH_ISSUES += 1))
     else
       print_output "[-] pam_passwdqc.so not found"
     fi
 
     # pwquality module
-    if [[ ${lFOUND_PWQUALITY} -eq 1 ]] ; then
+    if [[ ${lFOUND_PWQUALITY} -eq 1 ]]; then
       print_output "[+] pam_pwquality.so found"
-      ((lAUTH_ISSUES+=1))
+      ((lAUTH_ISSUES += 1))
     else
       print_output "[-] pam_pwquality.so not found"
     fi
 
-    if [[ ${lFOUND} -eq 0 ]] ; then
+    if [[ ${lFOUND} -eq 0 ]]; then
       print_output "[-] No PAM modules for password strength testing found"
     else
       print_output "[-] Found at least one PAM module for password strength testing"
-      ((lAUTH_ISSUES+=1))
+      ((lAUTH_ISSUES += 1))
     fi
 
   else
     print_output "[-] No pam files found"
   fi
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 scan_pam_conf() {
@@ -523,23 +523,23 @@ scan_pam_conf() {
 
   mapfile -t lPAM_PATH_L_ARR < <(mod_path "/ETC_PATHS/pam.conf")
   for lPAM_PATH in "${lPAM_PATH_L_ARR[@]}"; do
-    if [[ -f "${lPAM_PATH}" ]] ; then
+    if [[ -f "${lPAM_PATH}" ]]; then
       lCHECK=1
       print_output "[+] ""$(print_path "${lPAM_PATH}")"" exist"
       local lFIND=""
       lFIND=$(grep -v "^#" "${lPAM_PATH}" | grep -v "^$" | sed 's/[[:space:]]/ /g' | sed 's/  / /g' | sed 's/ /:space:/g' || true)
-      if [[ -z "${lFIND}" ]] ; then
+      if [[ -z "${lFIND}" ]]; then
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
         print_output "[+] Found one or more configuration lines"
         local lLINE=${lFIND//[[:space:]]/}
         print_output "$(indent "$(orange "${lLINE}")")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/pam.conf not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 search_pam_configs() {
@@ -554,7 +554,7 @@ search_pam_configs() {
 
   mapfile -t lPAM_PATH_L_ARR < <(mod_path "/ETC_PATHS/pam.d")
   for lPAM_PATH in "${lPAM_PATH_L_ARR[@]}"; do
-    if [[ -d "${lPAM_PATH}" ]] ; then
+    if [[ -d "${lPAM_PATH}" ]]; then
       lCHECK=1
       print_output "[+] ""$(print_path "${lPAM_PATH}")"" exist"
       local lFIND=""
@@ -567,12 +567,12 @@ search_pam_configs() {
       lAUTH_FILES_ARR=("${lPAM_PATH}""/common-auth" "${lPAM_PATH}""/system-auth")
       for lFILE in "${lAUTH_FILES_ARR[@]}"; do
         print_output "[*] Check if LDAP support in PAM files"
-        if [[ -f "${lFILE}" ]] ; then
-          ((lAUTH_ISSUES+=1))
+        if [[ -f "${lFILE}" ]]; then
+          ((lAUTH_ISSUES += 1))
           print_output "[+] ""$(print_path "${lFILE}")"" exist"
           local lFIND2=""
           lFIND2=$(grep "^auth.*ldap" "${lFILE}" || true)
-          if [[ -n "${lFIND2}" ]] ; then
+          if [[ -n "${lFIND2}" ]]; then
             print_output "[+] LDAP module present"
             print_output "$(indent "$(orange "${lFIND2}")")"
           else
@@ -585,7 +585,7 @@ search_pam_configs() {
     fi
   done
   [[ ${lCHECK} -eq 0 ]] && print_output "[-] /etc/pam.d not available"
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }
 
 search_pam_files() {
@@ -598,16 +598,17 @@ search_pam_files() {
   local lFIND_FILE=""
   readarray -t lPAM_FILES_ARR < <(config_find "${CONFIG_DIR}""/pam_files.cfg")
 
-  if [[ "${lPAM_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#lPAM_FILES_ARR[@]} -ne 0 ]] ; then
+  if [[ "${lPAM_FILES_ARR[0]-}" == "C_N_F" ]]; then
+    print_output "[!] Config not found"
+  elif [[ ${#lPAM_FILES_ARR[@]} -ne 0 ]]; then
     print_output "[*] Found ""${ORANGE}${#lPAM_FILES_ARR[@]}${NC}"" possible interesting areas for PAM:"
-    for lPAM_FILE in "${lPAM_FILES_ARR[@]}" ; do
-      if [[ -f "${lPAM_FILE}" ]] ; then
+    for lPAM_FILE in "${lPAM_FILES_ARR[@]}"; do
+      if [[ -f "${lPAM_FILE}" ]]; then
         lCHECK=1
         print_output "$(indent "$(orange "$(print_path "${lPAM_FILE}")")")"
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
-      if [[ -d "${lPAM_FILE}" ]] && [[ ! -L "${lPAM_FILE}" ]] ; then
+      if [[ -d "${lPAM_FILE}" ]] && [[ ! -L "${lPAM_FILE}" ]]; then
         print_output "$(indent "$(print_path "${lPAM_FILE}")")"
         local lFIND=""
         mapfile -t lFIND < <(find "${lPAM_FILE}" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
@@ -615,12 +616,12 @@ search_pam_files() {
           lCHECK=1
           print_output "$(indent "$(orange "${lFIND_FILE}")")"
         done
-        ((lAUTH_ISSUES+=1))
+        ((lAUTH_ISSUES += 1))
       fi
     done
     [[ ${lCHECK} -eq 0 ]] && print_output "[-] Nothing interesting found"
   else
     print_output "[-] Nothing found"
   fi
-  echo "${lAUTH_ISSUES}" >> "${TMP_DIR}"/S50_AUTH_ISSUES.tmp
+  echo "${lAUTH_ISSUES}" >>"${TMP_DIR}"/S50_AUTH_ISSUES.tmp
 }

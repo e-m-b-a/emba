@@ -35,7 +35,7 @@ if [[ "${STRICT_MODE}" -eq 1 ]]; then
   # shellcheck source=./helpers/helpers_emba_load_strict_settings.sh
   source "${HELP_DIR}"/helpers_emba_load_strict_settings.sh
   load_strict_mode_settings
-  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+  trap 'wickStrictModeFail $?' ERR # The ERR trap is triggered when a script catches an error
 fi
 
 if [[ "$*" == *"--fast"* ]]; then
@@ -115,7 +115,7 @@ import_module() {
   mapfile -t MODULES < <(find "${MOD_DIR}" -iname "*.sh" 2>/dev/null)
   if [[ -d "${MOD_DIR_LOCAL}" ]]; then
     mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -iname "*.sh" 2>/dev/null)
-    MODULES=( "${MODULES[@]}" "${MODULES_LOCAL[@]}")
+    MODULES=("${MODULES[@]}" "${MODULES_LOCAL[@]}")
   fi
   for LINE in "${MODULES[@]}"; do
     if (file "${LINE}" | grep -q "shell script"); then
@@ -157,7 +157,7 @@ dockerchecker() {
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
-      MODULES_TO_CHECK_ARR_DOCKER+=( "${DOCKER_COMP}" )
+      MODULES_TO_CHECK_ARR_DOCKER+=("${DOCKER_COMP}")
     fi
   done
 }
@@ -258,7 +258,7 @@ check() {
   for SOURCE in "${JSON_SOURCES[@]}"; do
     [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Check ${ORANGE}json validity${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    if (json_pp < "${SOURCE}" &> /dev/null); then
+    if (json_pp <"${SOURCE}" &>/dev/null); then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
@@ -373,8 +373,8 @@ summary() {
 # check that all tools are installed
 check_tools() {
   TOOLS=("semgrep" "shellcheck" "json_pp")
-  for TOOL in "${TOOLS[@]}";do
-    if ! command -v "${TOOL}" > /dev/null ; then
+  for TOOL in "${TOOLS[@]}"; do
+    if ! command -v "${TOOL}" >/dev/null; then
       echo -e "\\n""${RED}""${TOOL} is not installed correctly""${NC}""\\n"
       exit 1
     fi
@@ -392,7 +392,7 @@ check_tools() {
   fi
 }
 
-list_linter_exceptions(){
+list_linter_exceptions() {
   # lists all linter exceptions for a given toolname inside a directory
   # $1 tool name
   # $2 directory
@@ -404,27 +404,27 @@ list_linter_exceptions(){
   local SEARCH_TYPE_=""
   echo -e "\\n""${GREEN}""Checking for ${TOOL_NAME_} exceptions inside ${DIR_}:""${NC}""\\n"
   case "${TOOL_NAME_}" in
-    shellcheck)
-      SEARCH_PAR_="shellcheck disable"
-      SEARCH_TYPE_="sh"
-      ;;
-    semgrep)
-      SEARCH_PAR_="nosemgrep"
-      SEARCH_TYPE_="sh"
-      ;;
+  shellcheck)
+    SEARCH_PAR_="shellcheck disable"
+    SEARCH_TYPE_="sh"
+    ;;
+  semgrep)
+    SEARCH_PAR_="nosemgrep"
+    SEARCH_TYPE_="sh"
+    ;;
   esac
   mapfile -t EXCEPTION_SCRIPTS < <(find "${DIR_}" -type d -path "${EXCLUDE_}" -prune -false -o -iname "*.${SEARCH_TYPE_}" -exec grep -H "${SEARCH_PAR_}" {} \;)
   if [[ "${#EXCEPTION_SCRIPTS[@]}" -gt 0 ]]; then
     for EXCEPTION_ in "${EXCEPTION_SCRIPTS[@]}"; do
       echo -e "${GREEN}Found exception in ${ORANGE}${EXCEPTION_%%:*}:${EXCEPTION_##*:}${NC}"
-      EXCEPTIONS_TO_CHECK_ARR+=( "${EXCEPTION_%%:*}" )
+      EXCEPTIONS_TO_CHECK_ARR+=("${EXCEPTION_%%:*}")
     done
   else
     echo -e "\\n""${GREEN}""=> Found no exceptions for ${TOOL_NAME_}""${NC}""\\n"
   fi
 }
 
-copy_right_check(){
+copy_right_check() {
   # checks all Copyright occurences for supplied end-year
   # $1 copyright holder
   # $2 end-year
@@ -439,7 +439,7 @@ copy_right_check(){
   if [[ "${#COPYRIGHT_LINE_[@]}" -gt 0 ]]; then
     for LINE_ in "${COPYRIGHT_LINE_[@]}"; do
       if [[ "${LINE_##*:}" == *"${OWNER_}" && "${LINE_##*:}" != *"${YEAR_}"* ]]; then
-        MODULES_TO_CHECK_ARR_COPYRIGHT+=( "${LINE_%%:*}" )
+        MODULES_TO_CHECK_ARR_COPYRIGHT+=("${LINE_%%:*}")
         echo -e "Found problem with Copyright for ${GREEN}${OWNER_}${NC} in ${LINE_%%:*}: ${ORANGE}${LINE_##*:}""${NC}""\\n"
         echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
       fi
@@ -457,8 +457,8 @@ function_entry_space_check() {
   # function_name(){
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA function space definition check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
 
-  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/* || true)
-  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/* || true)
+  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/*.sh || true)
+  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/*.sh || true)
 
   if [[ "${#FCT_SPACE_MODULES_ARR[@]}" -gt 0 ]] || [[ "${#FCT_SPACE_HLP_ARR[@]}" -gt 0 ]]; then
     echo -e "Found problem with spaces in function definition${NC}\\n"
@@ -479,7 +479,7 @@ var_checker() {
   "${HELP_DIR}"/var_check.sh "${MODE}"
   RET_ISSUES="$?"
 
-  CNT_VAR_CHECKER_ISSUES=$((CNT_VAR_CHECKER_ISSUES+RET_ISSUES))
+  CNT_VAR_CHECKER_ISSUES=$((CNT_VAR_CHECKER_ISSUES + RET_ISSUES))
 
   if [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
     echo -e "Found ${ORANGE}${CNT_VAR_CHECKER_ISSUES}${NC} variable scope issues in EMBA ${MODE} scripts${NC}\\n"
@@ -507,11 +507,11 @@ fi
 
 summary
 
-if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]] || \
+if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] ||
+  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] ||
+  [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] ||
+  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] ||
+  [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]] ||
   [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_JSON[@]}" -gt 0 ]]; then
   exit 1
 fi

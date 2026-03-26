@@ -16,7 +16,7 @@
 # Description:  Zenity based EMBA launcher with basic wizard functionality
 #               start with ./launcher from the EMBA installation directory
 
-if ! command -v zenity >/dev/null ; then
+if ! command -v zenity >/dev/null; then
   echo "[-] WARNING: zenity package not installed"
   echo "[*] Install it with sudo apt-get install zenity"
   exit 1
@@ -36,7 +36,6 @@ if [[ -n "$1" ]]; then
 else
   EMBA_PROFILE="default-scan.emba"
 fi
-
 
 # shellcheck source=./helpers/helpers_emba_print.sh
 source ./helpers/helpers_emba_print.sh
@@ -97,7 +96,7 @@ if zenity --question --icon="${ICON_PATH}" --title="EMBA firmware analysis" --te
   EMBA_RET=$?
   if [[ "${EMBA_RET}" -eq 0 ]]; then
     if zenity --progress --text="EMBA run was successful. Open the web report?" --percentage=100 2>/dev/null; then
-      if command -v firefox >/dev/null ; then
+      if command -v firefox >/dev/null; then
         firefox "${EMBA_LOG_DIR}/html-report/index.html" &
       else
         print_output "[-] firefox not available ... install it and launch the web report" "no_log"

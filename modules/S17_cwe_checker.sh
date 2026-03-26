@@ -23,9 +23,8 @@
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=0
 
-S17_cwe_checker()
-{
-  if [[ ${BINARY_EXTENDED} -eq 1 ]] ; then
+S17_cwe_checker() {
+  if [[ ${BINARY_EXTENDED} -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Check binaries for vulnerabilities with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -64,7 +63,7 @@ cwe_check() {
   local lBINS_CHECKED_ARR=()
 
   local lBINARIES_ARR=()
-  if [[ "$(wc -l 2>/dev/null < "${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null < "${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null < "${S15_CSV_LOG}")" -gt 1 ]]; then
+  if [[ "$(wc -l 2>/dev/null <"${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
@@ -98,7 +97,7 @@ cwe_check() {
       # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
       continue
     fi
-    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    lBINS_CHECKED_ARR+=("${lBIN_MD5}")
 
     # while s09 is running we throttle this module:
     local lMAX_MOD_THREADS=$(("$(nproc || echo 1)" / 3))
@@ -107,7 +106,7 @@ cwe_check() {
     fi
     cwe_checker_threaded "${lBIN_TO_CHECK}" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_S17+=( "${lTMP_PID}" )
+    lWAIT_PIDS_S17+=("${lTMP_PID}")
     max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S17
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
@@ -130,7 +129,7 @@ cwe_checker_threaded() {
   local lCWE_CNT=""
   local lADDRESSES=""
   local lCWE_TOTAL_CNT=0
-  local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
+  local lMEM_LIMIT=$(("${TOTAL_MEMORY}" / 2))
   local lCWE_CHECKER_BARE_METAL_CFG=""
   local lCWE_CHECKER_OPTS_ARR=()
 
@@ -166,12 +165,12 @@ cwe_checker_threaded() {
 
     # get the total number of vulnerabilities in the binary
     lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | wc -l || true)
-    mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
+    mapfile -t lCWE_OUT < <(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
     # this is the logging after every tested file
-    if [[ ${#lCWE_OUT[@]} -ne 0 ]] ; then
+    if [[ ${#lCWE_OUT[@]} -ne 0 ]]; then
       print_ln
 
-      jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["' >> "${lCWE_CHECKER_TXT_LOG_FILE}" || true
+      jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["' >>"${lCWE_CHECKER_TXT_LOG_FILE}" || true
 
       # check for known linux files
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
@@ -192,7 +191,7 @@ cwe_checker_threaded() {
         lCWE_CNT="$(grep -c "${lCWE}" "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null || true)"
         # get a list of all affected addresses:
         lADDRESSES="$(jq -cr '.[]? | select(.name=="'"${lCWE}"'") | .addresses' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d '\n' | sed 's/\]\[/,/g')"
-        echo "${lCWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
+        echo "${lCWE_CNT}" >>"${TMP_DIR}"/CWE_CNT.tmp
         print_output "$(indent "$(orange "${lCWE}${GREEN} - ${lCWE_DESC} - ${ORANGE}${lCWE_CNT} times.")")"
         write_csv_log "${lNAME}" "${lBINARY}" "${lCWE_TOTAL_CNT}" "${lCWE}" "${lCWE_CNT}" "${lADDRESSES}" "${lCWE_DESC}"
       done
@@ -203,8 +202,8 @@ cwe_checker_threaded() {
   fi
 
   if [[ -f "${LOG_FILE}" ]]; then
-    cat "${LOG_FILE}" >> "${lOLD_LOG_FILE}"
-    rm "${LOG_FILE}" 2> /dev/null
+    cat "${LOG_FILE}" >>"${lOLD_LOG_FILE}"
+    rm "${LOG_FILE}" 2>/dev/null
   fi
   LOG_FILE="${lOLD_LOG_FILE}"
 }
@@ -222,8 +221,8 @@ final_cwe_log() {
   if [[ -d "${LOG_PATH_MODULE}" ]]; then
     mapfile -t lCWE_LOGS_ARR < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.json")
     if [[ "${#lCWE_LOGS_ARR[@]}" -gt 0 ]]; then
-      mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
-      if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]] ; then
+      mapfile -t lCWE_OUT_ARR < <(jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.json | cut -d\) -f1 | tr -d '(' | sort -u || true)
+      if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]]; then
         sub_module_title "Results - CWE-checker binary analysis"
         print_output "[+] cwe-checker found a total of ${ORANGE}${lTOTAL_CWE_CNT}${GREEN} of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
         for lCWE_LINE in "${lCWE_OUT_ARR[@]}"; do
@@ -239,4 +238,3 @@ final_cwe_log() {
     fi
   fi
 }
-

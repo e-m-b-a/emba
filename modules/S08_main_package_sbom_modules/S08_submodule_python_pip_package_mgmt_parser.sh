@@ -47,10 +47,10 @@ S08_submodule_python_pip_package_mgmt_parser() {
   mapfile -t lPIP_PACKAGES_SITE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "site-packages" -type d)
   mapfile -t lPIP_PACKAGES_DIST_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "dist-packages" -type d)
 
-  if [[ "${#lPIP_PACKAGES_DIST_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lPIP_PACKAGES_DIST_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
+    for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPIP_DIST_DIR}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -58,29 +58,29 @@ S08_submodule_python_pip_package_mgmt_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lPIP_PACKAGES_DIST_ARR[@]}${NC} PIP dist-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}" ; do
+    for lPIP_DIST_DIR in "${lPIP_PACKAGES_DIST_ARR[@]}"; do
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "METADATA" -type f)
-      for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
+      for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}"; do
         lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=${lAPP_NAME/*:\ /}
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=${lAPP_VERS/*:\ /}
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_LIC=${lAPP_LIC/*:\ }
+        lAPP_LIC=${lAPP_LIC/*:\ /}
 
         lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=${lAPP_DESC/*:\ /}
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
         lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=${lAPP_MAINT/*:\ /}
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
@@ -103,11 +103,11 @@ S08_submodule_python_pip_package_mgmt_parser() {
         # Todo: in the future we should check for the package, package hashes and which files
         # are in the package
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lPIP_DIST_META_PACKAGE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+        lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -127,27 +127,27 @@ S08_submodule_python_pip_package_mgmt_parser() {
       done
 
       mapfile -t lPIP_DIST_INSTALLED_PACKAGES_ARR < <(find "${lPIP_DIST_DIR}" -name "PKG-INFO" -type f)
-      for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}" ; do
+      for lPIP_DIST_META_PACKAGE in "${lPIP_DIST_INSTALLED_PACKAGES_ARR[@]}"; do
         lAPP_NAME=$(grep "^Name: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=${lAPP_NAME/*:\ /}
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=${lAPP_VERS/*:\ /}
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lAPP_LIC=$(grep "^License: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_LIC=${lAPP_LIC/*:\ }
+        lAPP_LIC=${lAPP_LIC/*:\ /}
 
         lAPP_DESC=$(grep "^Summary: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=${lAPP_DESC/*:\ /}
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
         lAPP_MAINT=$(grep "^Author: " "${lPIP_DIST_META_PACKAGE}" || true)
-        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=${lAPP_MAINT/*:\ /}
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
@@ -168,11 +168,11 @@ S08_submodule_python_pip_package_mgmt_parser() {
         # Todo: in the future we should check for the package, package hashes and which files
         # are in the package
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_DIST_META_PACKAGE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lPIP_DIST_META_PACKAGE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+        lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -199,40 +199,40 @@ S08_submodule_python_pip_package_mgmt_parser() {
     write_log "[-] No PIP dist package files found!" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   fi
 
-  if [[ "${#lPIP_PACKAGES_SITE_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lPIP_PACKAGES_SITE_ARR[@]}" -gt 0 ]]; then
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Found ${ORANGE}${#lPIP_PACKAGES_SITE_ARR[@]}${NC} PIP site-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
+    for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPIP_SITE_DIR}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lPIP_PACKAGES_SITE_ARR[@]}${NC} PIP site-packages directories:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}" ; do
+    for lPIP_SITE_DIR in "${lPIP_PACKAGES_SITE_ARR[@]}"; do
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "METADATA" -type f)
-      for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
+      for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}"; do
         lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=${lAPP_NAME/*:\ /}
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=${lAPP_VERS/*:\ /}
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lAPP_LIC=$(grep "^License: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_LIC=${lAPP_LIC/*:\ }
+        lAPP_LIC=${lAPP_LIC/*:\ /}
 
         lAPP_DESC=$(grep "^Summary: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=${lAPP_DESC/*:\ /}
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
         lAPP_MAINT=$(grep "^Author: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=${lAPP_MAINT/*:\ /}
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
@@ -253,11 +253,11 @@ S08_submodule_python_pip_package_mgmt_parser() {
         # Todo: in the future we should check for the package, package hashes and which files
         # are in the package
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lPIP_SITE_META_PACKAGE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+        lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -277,27 +277,27 @@ S08_submodule_python_pip_package_mgmt_parser() {
       done
 
       mapfile -t lPIP_SITE_INSTALLED_PACKAGES_ARR < <(find "${lPIP_SITE_DIR}" -name "PKG-INFO" -type f)
-      for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}" ; do
+      for lPIP_SITE_META_PACKAGE in "${lPIP_SITE_INSTALLED_PACKAGES_ARR[@]}"; do
         lAPP_NAME=$(grep "^Name: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_NAME=${lAPP_NAME/*:\ }
+        lAPP_NAME=${lAPP_NAME/*:\ /}
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
         lAPP_VERS=$(grep "^Version: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_VERS=${lAPP_VERS/*:\ }
+        lAPP_VERS=${lAPP_VERS/*:\ /}
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lAPP_LIC=$(grep "^License: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_LIC=${lAPP_LIC/*:\ }
+        lAPP_LIC=${lAPP_LIC/*:\ /}
 
         lAPP_DESC=$(grep "^Summary: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_DESC=${lAPP_DESC/*:\ }
+        lAPP_DESC=${lAPP_DESC/*:\ /}
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
         lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
         lAPP_MAINT=$(grep "^Author: " "${lPIP_SITE_META_PACKAGE}" || true)
-        lAPP_MAINT=${lAPP_MAINT/*:\ }
+        lAPP_MAINT=${lAPP_MAINT/*:\ /}
         lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
         lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
@@ -318,11 +318,11 @@ S08_submodule_python_pip_package_mgmt_parser() {
         # Todo: in the future we should check for the package, package hashes and which files
         # are in the package
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lPIP_SITE_META_PACKAGE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lPIP_SITE_META_PACKAGE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+        lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

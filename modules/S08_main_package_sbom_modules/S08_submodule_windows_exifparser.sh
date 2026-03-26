@@ -16,7 +16,6 @@
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
 
-
 S08_submodule_windows_exifparser() {
   local lPACKAGING_SYSTEM="windows_exe"
   local lOS_IDENTIFIED="${1:-}"
@@ -34,10 +33,10 @@ S08_submodule_windows_exifparser() {
 
   mapfile -t lEXE_ARCHIVES_ARR < <(grep "PE32\|MSI" "${P99_CSV_LOG}" | grep -v "ASCII text\|Unicode text" | cut -d ';' -f2 || true)
 
-  if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
+    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lEXE_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -45,20 +44,20 @@ S08_submodule_windows_exifparser() {
     write_log "[*] Analyzing ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
+    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}"; do
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
         print_output "[*] ${ORANGE}${lEXE_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       windows_exifparser_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lEXE_ARCHIVE}" &
 
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
       lPOS_RES=1
     done
@@ -108,31 +107,31 @@ windows_exifparser_threader() {
   lPKG_MD5="$(md5sum "${lEXE_ARCHIVE}" | awk '{print $1}')"
   lEXIF_LOG="${LOG_PATH_MODULE}/windows_exe_exif_data_${lEXE_NAME}_${lPKG_MD5}.txt"
 
-  exiftool "${lEXE_ARCHIVE}" > "${lEXIF_LOG}" || true
+  exiftool "${lEXE_ARCHIVE}" >"${lEXIF_LOG}" || true
   if ! [[ -f "${lEXIF_LOG}" ]]; then
     return
   fi
 
   lAPP_NAME=$(grep "Product Name" "${lEXIF_LOG}" || true)
-  lAPP_NAME=${lAPP_NAME/*:\ }
+  lAPP_NAME=${lAPP_NAME/*:\ /}
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   lAPP_NAME=$(clean_package_versions "${lAPP_NAME}")
 
   if [[ -z "${lAPP_NAME}" ]]; then
     lAPP_NAME=$(grep "Internal Name" "${lEXIF_LOG}" || true)
-    lAPP_NAME=${lAPP_NAME/*:\ }
+    lAPP_NAME=${lAPP_NAME/*:\ /}
     lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   fi
 
   if [[ -z "${lAPP_NAME}" ]]; then
     lAPP_NAME=$(grep "File Name" "${lEXIF_LOG}" || true)
-    lAPP_NAME=${lAPP_NAME/*:\ }
+    lAPP_NAME=${lAPP_NAME/*:\ /}
     lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   fi
   [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_VENDOR=$(grep "Company Name" "${lEXIF_LOG}" || true)
-  lAPP_VENDOR=${lAPP_VENDOR/*:\ }
+  lAPP_VENDOR=${lAPP_VENDOR/*:\ /}
   lAPP_VENDOR=$(clean_package_details "${lAPP_VENDOR}")
   lAPP_VENDOR=$(clean_package_versions "${lAPP_VENDOR}")
 
@@ -141,7 +140,7 @@ windows_exifparser_threader() {
   fi
 
   lAPP_DESC=$(grep "File Description" "${lEXIF_LOG}" || true)
-  lAPP_DESC=${lAPP_DESC/*:\ }
+  lAPP_DESC=${lAPP_DESC/*:\ /}
   lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
   lAPP_LIC="NA"
@@ -151,7 +150,7 @@ windows_exifparser_threader() {
     # backup
     lAPP_VERS=$(grep "Product Version" "${lEXIF_LOG}" || true)
   fi
-  lAPP_VERS=${lAPP_VERS/*:\ }
+  lAPP_VERS=${lAPP_VERS/*:\ /}
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
   if [[ -z "${lAPP_VERS}" ]]; then
@@ -159,7 +158,7 @@ windows_exifparser_threader() {
   fi
 
   lAPP_ARCH=$(grep "Machine Type" "${lEXIF_LOG}" || true)
-  lAPP_ARCH=${lAPP_ARCH/*:\ }
+  lAPP_ARCH=${lAPP_ARCH/*:\ /}
   lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
 
   if [[ "${lAPP_ARCH}" == *"intel_386_or_later"* ]]; then
@@ -182,16 +181,16 @@ windows_exifparser_threader() {
 
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "exe" "${lAPP_NAME%.exe}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
 
-  local lSTRIPPED_VERSION="::${lAPP_NAME//\.exe}:${lAPP_VERS:-NA}"
+  local lSTRIPPED_VERSION="::${lAPP_NAME//\.exe/}:${lAPP_VERS:-NA}"
 
   # add EXE path information to our properties array:
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lEXE_ARCHIVE}" )
-  [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR%.exe}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME%.exe}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lEXE_ARCHIVE}")
+  [[ -n "${lAPP_ARCH}" ]] && lPROP_ARRAY_INIT_ARR+=("source_arch:${lAPP_ARCH}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR%.exe}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME%.exe}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -209,4 +208,3 @@ windows_exifparser_threader() {
   write_link "${lEXIF_LOG}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lEXE_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
 }
-

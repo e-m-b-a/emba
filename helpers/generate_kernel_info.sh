@@ -25,10 +25,13 @@ fi
 source ./helpers/helpers_emba_print.sh
 
 KERNEL_RELEASES_URL="https://mirrors.edge.kernel.org/pub/linux/kernel/"
-KERNEL_RELEASES_FILE=$(mktemp) || { print_output "[-] Failed to create temporary file" "no_log"; exit 1; }
+KERNEL_RELEASES_FILE=$(mktemp) || {
+  print_output "[-] Failed to create temporary file" "no_log"
+  exit 1
+}
 KERNEL_OUTPUT_CSV="./config/kernel_details.csv"
 
-if ! curl -sf "${KERNEL_RELEASES_URL}" > "${KERNEL_RELEASES_FILE}"; then
+if ! curl -sf "${KERNEL_RELEASES_URL}" >"${KERNEL_RELEASES_FILE}"; then
   print_output "[-] Error downloading ${KERNEL_RELEASES_FILE}" "no_log"
   exit 1
 fi
@@ -40,24 +43,24 @@ mapfile -t KERNEL_SUB_DIR_ARR < <(grep "a href=\"v[0-9]\." "${KERNEL_RELEASES_FI
 
 # extracting all sub directories and store the kernel version data and release date
 for KERNEL_SUB_DIR in "${KERNEL_SUB_DIR_ARR[@]}"; do
-  KERNEL_SUB_DIR=${KERNEL_SUB_DIR/<a href=\"}
-  KERNEL_SUB_DIR=${KERNEL_SUB_DIR/\">v*}
+  KERNEL_SUB_DIR=${KERNEL_SUB_DIR/<a href=\"/}
+  KERNEL_SUB_DIR=${KERNEL_SUB_DIR/\">v*/}
   print_output "[*] Testing kernel sub dir: ${ORANGE}${KERNEL_SUB_DIR}${NC}" "no_log"
-  curl -s "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >> "${KERNEL_RELEASES_FILE}"
+  curl -s "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >>"${KERNEL_RELEASES_FILE}"
 done
 
 # extract kernel versions and release dates:
 mapfile -t KERNEL_VER_ARR < <(grep "<a href=\"linux-[0-9].*.tar.gz" "${KERNEL_RELEASES_FILE}")
 
 for KERNEL_ENTRY in "${KERNEL_VER_ARR[@]}"; do
-  KERNEL_VER=${KERNEL_ENTRY/*\">}
-  KERNEL_VER=${KERNEL_VER/.tar.gz*}
+  KERNEL_VER=${KERNEL_ENTRY/*\">/}
+  KERNEL_VER=${KERNEL_VER/.tar.gz*/}
   # Validate that KERNEL_VER is not empty
   [[ -z "${KERNEL_VER}" ]] && continue
-  KERNEL_RELEASE=${KERNEL_ENTRY/*<\/a>}
+  KERNEL_RELEASE=${KERNEL_ENTRY/*<\/a>/}
   KERNEL_RELEASE=$(echo "${KERNEL_RELEASE}" | awk '{print $1}')
   print_output "[*] Kernel version: ${ORANGE}${KERNEL_VER}${NC} / release date: ${ORANGE}${KERNEL_RELEASE}${NC}" "no_log"
-  echo "${KERNEL_VER};${KERNEL_RELEASE}" >> "${KERNEL_OUTPUT_CSV}"
+  echo "${KERNEL_VER};${KERNEL_RELEASE}" >>"${KERNEL_OUTPUT_CSV}"
 done
 
 [[ -f "${KERNEL_RELEASES_FILE}" ]] && rm "${KERNEL_RELEASES_FILE}"

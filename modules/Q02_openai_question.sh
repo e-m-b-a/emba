@@ -34,7 +34,7 @@ Q02_openai_question() {
     done
 
     if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
-      while ! [[ -f  "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
+      while ! [[ -f "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
         sleep 3
       done
     fi
@@ -81,7 +81,7 @@ ask_chatgpt() {
   # this array gets regenerated on every round
   readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
 
-  for (( lELE_INDEX=0; lELE_INDEX<"${#Q02_OPENAI_QUESTIONS[@]}"; lELE_INDEX++ )); do
+  for ((lELE_INDEX = 0; lELE_INDEX < "${#Q02_OPENAI_QUESTIONS[@]}"; lELE_INDEX++)); do
     local lELEM="${Q02_OPENAI_QUESTIONS["${lELE_INDEX}"]}"
     lSCRIPT_PATH_TMP="$(echo "${lELEM}" | cut -d\; -f1)"
 
@@ -141,7 +141,7 @@ ask_chatgpt() {
         # print_output "[*] AI-Assisted analysis for ${ORANGE}${lGPT_INPUT_FILE}${NC}" "" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
         print_output "[*] AI-Assisted analysis for ${lGPT_INPUT_FILE_mod}" "" "${lGPT_FILE_DIR}/${lGPT_INPUT_FILE_mod}.log"
         print_output "$(indent "$(orange "$(print_path "${lSCRIPT_PATH_TMP}")")")"
-        head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json" || print_error "[-] Tmp file create error for ${lSCRIPT_PATH_TMP}"
+        head -n -2 "${CONFIG_DIR}/gpt_template.json" >"${TMP_DIR}/chat.json" || print_error "[-] Tmp file create error for ${lSCRIPT_PATH_TMP}"
         if [[ ! -f "${TMP_DIR}/chat.json" ]]; then
           print_output "[-] Temp file ${TMP_DIR}/chat.json for further analysis of ${lSCRIPT_PATH_TMP} was not created ... some Error occured"
           return
@@ -152,7 +152,7 @@ ask_chatgpt() {
           print_output "[*] GPT request is too big ... stripping it now" "no_log"
           lCHATGPT_CODE=$(sed 's/\\//g;s/"/\\\"/g' "${lSCRIPT_PATH_TMP}" | tr -d '[:space:]' | cut -c-4560 | sed 's/\[ASK_GPT\].*//')
         fi
-        strip_color_codes "$(printf '"%s %s"\n}]}' "${lGPT_QUESTION}" "${lCHATGPT_CODE}")" >> "${TMP_DIR}/chat.json"
+        strip_color_codes "$(printf '"%s %s"\n}]}' "${lGPT_QUESTION}" "${lCHATGPT_CODE}")" >>"${TMP_DIR}/chat.json"
 
         print_output "[*] Testing the following code with ChatGPT:" "no_log"
         cat "${lSCRIPT_PATH_TMP}"
@@ -167,18 +167,18 @@ ask_chatgpt() {
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
           -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" --write-out "%{http_code}" || true)
 
-        if [[ "${lHTTP_CODE}" -ne 200 ]] ; then
+        if [[ "${lHTTP_CODE}" -ne 200 ]]; then
           print_output "[-] Something went wrong with the ChatGPT requests"
           if [[ -f "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" ]]; then
             print_output "[-] ERROR response: $(cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json")"
 
-            if jq '.error.type' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "insufficient_quota" ; then
+            if jq '.error.type' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "insufficient_quota"; then
               print_output "[-] Stopping OpenAI requests since the API key has reached its quota limit"
               CHATGPT_RESULT_CNT=-1
               sleep 20
               break
-            elif jq '.error.type' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "server_error" ; then
-              ((lGPT_SERVER_ERROR_CNT+=1))
+            elif jq '.error.type' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "server_error"; then
+              ((lGPT_SERVER_ERROR_CNT += 1))
               if [[ "${lGPT_SERVER_ERROR_CNT}" -ge 5 ]]; then
                 # more than 5 failes we stop trying until the newxt round
                 print_output "[-] Stopping OpenAI requests since the Server seems to be overloaded"
@@ -186,17 +186,17 @@ ask_chatgpt() {
                 sleep 20
                 break
               fi
-            elif jq '.error.code' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "rate_limit_exceeded" ; then
+            elif jq '.error.code' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "rate_limit_exceeded"; then
               # rate limit handling - if we got a response like:
               # Please try again in 7m12s.
               # then we will wate ~10mins and try it afterwards again
               # in this time we need to check if the Testing phase is running or not
-              if jq '.error.message' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "Please try again in " ; then
+              if jq '.error.message' "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" | grep -q "Please try again in "; then
                 local lCNT=0
                 while [[ "${lCNT}" -lt 1000 ]]; do
-                  lCNT=$((lCNT+1))
-                  local lTEMP_VAR="$(( "${lCNT}" % 100 ))"
-                  (( "${lTEMP_VAR}" == 0 )) && print_output "[*] Rate limit handling ... sleep mode - ${lCNT}" "no_log"
+                  lCNT=$((lCNT + 1))
+                  local lTEMP_VAR="$(("${lCNT}" % 100))"
+                  (("${lTEMP_VAR}" == 0)) && print_output "[*] Rate limit handling ... sleep mode - ${lCNT}" "no_log"
                   if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
                     break 2
                   fi
@@ -210,7 +210,7 @@ ask_chatgpt() {
               fi
             fi
 
-            cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" >> "${lGPT_FILE_DIR}/openai_server_errors.log"
+            cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" >>"${lGPT_FILE_DIR}/openai_server_errors.log"
             readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
             # reset the array index to start again with the highest rated entry
             lELE_INDEX=0
@@ -241,7 +241,7 @@ ask_chatgpt() {
           if ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]]; then
             mkdir "${LOG_PATH_MODULE}"/gpt_answers || true
           fi
-          echo "${lGPT_RESPONSE_CLEANED}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${lGPT_INPUT_FILE_mod}".log
+          echo "${lGPT_RESPONSE_CLEANED}" >"${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${lGPT_INPUT_FILE_mod}".log
 
           # print openai response
           print_ln
@@ -268,7 +268,7 @@ ask_chatgpt() {
           fi
 
           print_ln
-          ((CHATGPT_RESULT_CNT+=1))
+          ((CHATGPT_RESULT_CNT += 1))
         fi
       else
         print_output "[-] Couldn't find ${ORANGE}$(print_path "${lSCRIPT_PATH_TMP}")${NC}"
@@ -295,6 +295,6 @@ ask_chatgpt() {
     while read -r lGPT_ENTRY_LINE; do
       lGPT_ANCHOR="$(echo "${lGPT_ENTRY_LINE}" | cut -d ';' -f2)"
       sed -i "/${lGPT_ANCHOR}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
-    done < "${CSV_DIR}/q02_openai_question.csv"
+    done <"${CSV_DIR}/q02_openai_question.csv"
   fi
 }

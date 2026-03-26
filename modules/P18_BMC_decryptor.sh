@@ -31,7 +31,7 @@ P18_BMC_decryptor() {
 
     bmc_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       lNEG_LOG=1
     fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -72,10 +72,10 @@ bmc_extractor() {
   print_output "[*] Extracted ${ORANGE}${#lFILES_BMC_ARR[@]}${NC} files from BMC encrypted firmware."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BMC_ARR[@]}${NC} files ... could take some time" "no_log"
 
-  for lBINARY in "${lFILES_BMC_ARR[@]}" ; do
+  for lBINARY in "${lFILES_BMC_ARR[@]}"; do
     binary_architecture_threader "${lBINARY}" "P18_BMC_decryptor" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

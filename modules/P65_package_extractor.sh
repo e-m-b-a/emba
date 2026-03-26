@@ -74,10 +74,10 @@ P65_package_extractor() {
 
     print_output "[*] Adjusting the backend from ${ORANGE}${FILES_PRE_PACKAGE}${NC} to ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} entries ... take a break" "no_log"
 
-    for lBINARY in "${lFILES_POST_PACKAGE_ARR[@]}" ; do
+    for lBINARY in "${lFILES_POST_PACKAGE_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
 
     local lLINUX_PATH_COUNTER_PCK=0
@@ -117,7 +117,7 @@ rpm_extractor() {
       done
     done
 
-    lFILES_AFTER_RPM=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    lFILES_AFTER_RPM=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l)
     print_ln "no_log"
     print_output "[*] Before deep extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after RPM extraction we have ${ORANGE}${lFILES_AFTER_RPM}${NC} files extracted."
   else
@@ -147,7 +147,7 @@ apk_extractor() {
       done
     done
 
-    lFILES_AFTER_APK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    lFILES_AFTER_APK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l)
     print_ln "no_log"
     print_output "[*] Before apk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_APK}${NC} files extracted."
   else
@@ -187,7 +187,7 @@ ipk_extractor() {
       done
     done
 
-    lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw" | wc -l )
+    lFILES_AFTER_IPK=$(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw" | wc -l)
     print_ln "no_log"
     print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_IPK}${NC} files extracted."
     if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
@@ -216,7 +216,7 @@ deb_extractor() {
         print_output "[*] Extracting ${lDEB} to ${lR_PATH}"
         if [[ "${THREADED}" -eq 1 ]]; then
           extract_deb_extractor_helper "${lDEB}" "${lR_PATH}" &
-          WAIT_PIDS_P20+=( "$!" )
+          WAIT_PIDS_P20+=("$!")
         else
           extract_deb_extractor_helper "${lDEB}" "${lR_PATH}"
         fi
@@ -225,7 +225,7 @@ deb_extractor() {
 
     [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
 
-    lFILES_AFTER_DEB=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
+    lFILES_AFTER_DEB=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l)
     print_ln "no_log"
     print_output "[*] Before deb extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_DEB}${NC} files extracted."
   else
@@ -242,4 +242,3 @@ extract_deb_extractor_helper() {
   print_output "[*] Extracting ${ORANGE}${lDEB_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
   dpkg-deb --extract "${lDEB}" "${lR_PATH}" || true
 }
-

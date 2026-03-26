@@ -30,7 +30,7 @@ P14_ext_mounter() {
 
     ext_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -56,7 +56,10 @@ ext_extractor() {
   sub_module_title "EXT filesystem extractor"
 
   print_output "[*] Trying to mount ${ORANGE}${lEXT_PATH_}${NC} to ${ORANGE}${lTMP_EXT_MOUNT}${NC} directory"
-  mount -o ro "${lEXT_PATH_}" "${lTMP_EXT_MOUNT}" || { print_output "[-] EXT filesystem mount failed"; return; }
+  mount -o ro "${lEXT_PATH_}" "${lTMP_EXT_MOUNT}" || {
+    print_output "[-] EXT filesystem mount failed"
+    return
+  }
   if mount | grep -q ext_mount; then
     if [[ -n "$(find "${lTMP_EXT_MOUNT}" -mindepth 1 -print -quit)" ]]; then
       print_output "[*] No mounted files found in ${ORANGE}${lTMP_EXT_MOUNT}${NC} -> return now"
@@ -76,10 +79,10 @@ ext_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files from the EXT filesystem."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_EXT_ARR[@]}" ; do
+    for lBINARY in "${lFILES_EXT_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "P14_ext_mounter" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
