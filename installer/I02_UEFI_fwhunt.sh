@@ -34,7 +34,7 @@ I02_UEFI_fwhunt() {
     print_git_info "BIOSUtilities" "EMBA-support-repos/BIOSUtilities" "Various BIOS Utilities for Modding/Research"
     print_git_info "BGScriptTool" "platomav/BGScriptTool" "The tool allows you to assemble and disassemble BIOS Guard script."
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""These applications (if not already on the system) will be downloaded!""${NC}"
@@ -42,54 +42,54 @@ I02_UEFI_fwhunt() {
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
+    y | Y)
 
-        pip_install "rzpipe"
-        pip_install "click"
-        pip_install "pyyaml"
-        pip_install "uefi_firmware"
+      pip_install "rzpipe"
+      pip_install "click"
+      pip_install "pyyaml"
+      pip_install "uefi_firmware"
 
-        # rizin:
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        echo -e "${ORANGE}""${BOLD}""Installing rizin""${NC}"
-        if [[ -d external/rizin ]]; then
-          rm -r external/rizin
-        fi
-        git clone https://github.com/rizinorg/rizin.git external/rizin
-        cd external/rizin || ( echo "Could not install EMBA component rizin" && exit 1 )
-        meson build
-        ninja -C build
-        ninja -C build install
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component rizin" && exit 1 )
+      # rizin:
+      apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+      echo -e "${ORANGE}""${BOLD}""Installing rizin""${NC}"
+      if [[ -d external/rizin ]]; then
+        rm -r external/rizin
+      fi
+      git clone https://github.com/rizinorg/rizin.git external/rizin
+      cd external/rizin || (echo "Could not install EMBA component rizin" && exit 1)
+      meson build
+      ninja -C build
+      ninja -C build install
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component rizin" && exit 1)
 
-        # BIOSUtilities
-        echo -e "${ORANGE}""${BOLD}""Installing BIOSUtilities""${NC}"
-        if [[ -d external/BIOSUtilities ]]; then
-          rm -r external/BIOSUtilities
-        fi
-        if [[ -d external/BGScriptTool ]]; then
-          rm -r external/BGScriptTool
-        fi
-        git clone https://github.com/EMBA-support-repos/BIOSUtilities.git external/BIOSUtilities
-        git clone https://github.com/platomav/BGScriptTool.git external/BGScriptTool
-        if [[ -f external/BGScriptTool/big_script_tool.py ]]; then
-          cp external/BGScriptTool/big_script_tool.py external/BIOSUtilities/
-        fi
+      # BIOSUtilities
+      echo -e "${ORANGE}""${BOLD}""Installing BIOSUtilities""${NC}"
+      if [[ -d external/BIOSUtilities ]]; then
+        rm -r external/BIOSUtilities
+      fi
+      if [[ -d external/BGScriptTool ]]; then
+        rm -r external/BGScriptTool
+      fi
+      git clone https://github.com/EMBA-support-repos/BIOSUtilities.git external/BIOSUtilities
+      git clone https://github.com/platomav/BGScriptTool.git external/BGScriptTool
+      if [[ -f external/BGScriptTool/big_script_tool.py ]]; then
+        cp external/BGScriptTool/big_script_tool.py external/BIOSUtilities/
+      fi
 
-        echo -e "${ORANGE}""${BOLD}""Installing FwHunt""${NC}"
-        if [[ -d external/fwhunt-scan ]]; then
-          rm -r external/fwhunt-scan
-        fi
-        git clone https://github.com/EMBA-support-repos/fwhunt-scan.git external/fwhunt-scan
-        cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
-        git clone https://github.com/EMBA-support-repos/FwHunt.git rules
-        echo "Installed $(find rules/ -iname "BRLY-*" | wc -l) fwhunt rules"
-        # ldconfig
-        # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
-        # python3 setup.py install
-        # ldconfig
-        pip_install "fwhunt-scan"
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
+      echo -e "${ORANGE}""${BOLD}""Installing FwHunt""${NC}"
+      if [[ -d external/fwhunt-scan ]]; then
+        rm -r external/fwhunt-scan
+      fi
+      git clone https://github.com/EMBA-support-repos/fwhunt-scan.git external/fwhunt-scan
+      cd external/fwhunt-scan || (echo "Could not install EMBA component fwhunt-scan" && exit 1)
+      git clone https://github.com/EMBA-support-repos/FwHunt.git rules
+      echo "Installed $(find rules/ -iname "BRLY-*" | wc -l) fwhunt rules"
+      # ldconfig
+      # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
+      # python3 setup.py install
+      # ldconfig
+      pip_install "fwhunt-scan"
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component fwhunt-scan" && exit 1)
       ;;
     esac
   fi

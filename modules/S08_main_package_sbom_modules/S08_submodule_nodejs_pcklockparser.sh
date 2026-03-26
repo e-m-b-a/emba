@@ -41,10 +41,10 @@ S08_submodule_node_js_package_lock_parser() {
 
   mapfile -t lNODE_LCK_ARCHIVES_ARR < <(grep "/package.*json;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lNODE_LCK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} Node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
+    for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lNODE_LCK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -52,32 +52,32 @@ S08_submodule_node_js_package_lock_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lNODE_LCK_ARCHIVES_ARR[@]}${NC} node.js npm lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}" ; do
+    for lNODE_LCK_ARCHIVE in "${lNODE_LCK_ARCHIVES_ARR[@]}"; do
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lNODE_LCK_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
         print_output "[*] ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       lR_FILE=$(file "${lNODE_LCK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"JSON text"* ]]; then
         continue
       fi
 
-      jq -r '"\(.name);\(.version);\(.license);\(.integrity);\(.dependencies)"' "${lNODE_LCK_ARCHIVE}" > "${TMP_DIR}/node.lock.tmp" || true
-      jq -r '.packages | keys[] as $k | "\($k);\(.[$k] | "\(.version);\(.license);\(.integrity);\(.dependencies)")"' "${lNODE_LCK_ARCHIVE}" >> "${TMP_DIR}/node.lock.tmp" || true
+      jq -r '"\(.name);\(.version);\(.license);\(.integrity);\(.dependencies)"' "${lNODE_LCK_ARCHIVE}" >"${TMP_DIR}/node.lock.tmp" || true
+      jq -r '.packages | keys[] as $k | "\($k);\(.[$k] | "\(.version);\(.license);\(.integrity);\(.dependencies)")"' "${lNODE_LCK_ARCHIVE}" >>"${TMP_DIR}/node.lock.tmp" || true
 
       # shellcheck disable=SC2034
       while IFS=";" read -r lAPP_NAME lAPP_VERS lAPP_LIC lAPP_CHECKSUM lAPP_DEPS; do
         node_js_package_lock_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lNODE_LCK_ARCHIVE}" "${lAPP_NAME}" "${lAPP_VERS:-NA}" "${lAPP_LIC:-NA}" "${lAPP_DEPS:-NA}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+        lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
         lPOS_RES=1
-      done < "${TMP_DIR}/node.lock.tmp"
+      done <"${TMP_DIR}/node.lock.tmp"
       wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"
       rm -f "${TMP_DIR}/node.lock.tmp"
     done
@@ -142,16 +142,16 @@ node_js_package_lock_threader() {
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lNODE_LCK_ARCHIVE}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lNODE_LCK_ARCHIVE}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   # Add dependencies to properties
   for lJS_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
     lAPP_DEP="${lAPP_DEPS_ARR["${lJS_DEP_ID}"]}"
-    lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+    lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
   done
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
@@ -169,4 +169,3 @@ node_js_package_lock_threader() {
   write_log "[*] Node.js npm lock archive details: ${ORANGE}${lNODE_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lNODE_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC:-NA}"
 }
-

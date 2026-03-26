@@ -22,7 +22,7 @@ I108_stacs_password_search() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
 
-    cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
+    cd "${HOME_PATH}" || (echo "Could not install EMBA component STACS" && exit 1)
 
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
 
@@ -35,47 +35,47 @@ I108_stacs_password_search() {
     print_git_info "stacs" "stacscan/stacs" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
     print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""STACS and the default rules (if not already on the system) will be downloaded!""${NC}"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in
-      y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+    y | Y)
+      apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        # if ! [[ -d external/stacs ]]; then
-        #   git clone https://github.com/stacscan/stacs.git external/stacs
-        # fi
+      # if ! [[ -d external/stacs ]]; then
+      #   git clone https://github.com/stacscan/stacs.git external/stacs
+      # fi
 
-        # cd ./external/stacs || ( echo "Could not install EMBA component STACS" && exit 1 )
+      # cd ./external/stacs || ( echo "Could not install EMBA component STACS" && exit 1 )
 
-        # deactivate python venv for stacs - this is needed to bypass the pydantic dependency clash with semgrep
-        # we install stacs in the system and semgrep into the virtual environment
-        deactivate destructive
-        pip_install "setuptools" "-U"
-        pip_install "stacs"
-        activate_pipenv "./external/emba_venv"
+      # deactivate python venv for stacs - this is needed to bypass the pydantic dependency clash with semgrep
+      # we install stacs in the system and semgrep into the virtual environment
+      deactivate destructive
+      pip_install "setuptools" "-U"
+      pip_install "stacs"
+      activate_pipenv "./external/emba_venv"
 
-        # python3 setup.py install
-        # cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
+      # python3 setup.py install
+      # cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
 
-        if ! [[ -d external/stacs-rules ]]; then
-          git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
-        fi
-        cd ./external/stacs-rules || ( echo "Could not install EMBA component STACS" && exit 1 )
-        find rules -name "*.yar" | sed 's/rules\///' \
-          | xargs -I{} bash -c "\
+      if ! [[ -d external/stacs-rules ]]; then
+        git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
+      fi
+      cd ./external/stacs-rules || (echo "Could not install EMBA component STACS" && exit 1)
+      find rules -name "*.yar" | sed 's/rules\///' |
+        xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component STACS" && exit 1)
 
-        if command -v stacs > /dev/null ; then
-          echo -e "${GREEN}""STACS installed successfully""${NC}"
-        else
-          echo -e "${ORANGE}""STACS installation failed - check it manually""${NC}"
-        fi
+      if command -v stacs >/dev/null; then
+        echo -e "${GREEN}""STACS installed successfully""${NC}"
+      else
+        echo -e "${ORANGE}""STACS installation failed - check it manually""${NC}"
+      fi
       ;;
     esac
   fi

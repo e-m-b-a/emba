@@ -17,7 +17,7 @@
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q20_dependency_track_connector() {
-  if [[ "${DEPENDENCY_TRACK_ENABLED}" -gt 0 ]] && [[ -n "${DEPENDENCY_TRACK_HOST_IP}" ]] && \
+  if [[ "${DEPENDENCY_TRACK_ENABLED}" -gt 0 ]] && [[ -n "${DEPENDENCY_TRACK_HOST_IP}" ]] &&
     [[ -n "${DEPENDENCY_TRACK_API_KEY}" ]]; then
 
     module_log_init "${FUNCNAME[0]}"
@@ -82,24 +82,24 @@ dep_track_upload_sbom() {
     -F "projectVersion=${FW_VERSION:-unknown}" \
     -F "projectTags=${lDEPENDENCY_TRACK_TAGS:-EMBA,firmware}" \
     -F "bom=@${EMBA_SBOM_JSON}" \
-    -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
+    -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_upload_response.txt" --write-out "%{http_code}" || true)
 
-  if [[ "${lHTTP_CODE}" -eq 200 ]] && grep -q token "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt" 2>/dev/null; then
+  if [[ "${lHTTP_CODE}" -eq 200 ]] && grep -q token "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_upload_response.txt" 2>/dev/null; then
     # with the following request we check for our UUID and build a link
     lHTTP_CODE=$(curl "http://${DEPENDENCY_TRACK_HOST_IP}/api/v1/project?name=${lFW_TESTED}&sortName=lastBomImport&sortOrder=desc&offset=0&limit=1" \
       -H 'Content-Type: multipart/form-data' \
       -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
-      -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" --write-out "%{http_code}" || true)
+      -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_details_response.txt" --write-out "%{http_code}" || true)
 
     print_output "[+] SBOM upload to Dependency Track environment was successful"
-    if [[ "${lHTTP_CODE}" -eq 200 ]] ; then
-      lPROJ_UUID=$(jq -r .[].uuid "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" || true)
+    if [[ "${lHTTP_CODE}" -eq 200 ]]; then
+      lPROJ_UUID=$(jq -r .[].uuid "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_details_response.txt" || true)
       # should be something like 830e6820-751a-4656-8274-08227c17cf62
       if [[ "${lPROJ_UUID}" =~ [0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+ ]]; then
         # Usually dependency track API is listening on port 8081 and the web server is listening on port 8080:
-        write_link "http://${DEPENDENCY_TRACK_HOST_IP/:*}:8080/projects/${lPROJ_UUID}"
+        write_link "http://${DEPENDENCY_TRACK_HOST_IP/:*/}:8080/projects/${lPROJ_UUID}"
         print_output "[*] Found dependency track project UUID ${lPROJ_UUID}:"
-        jq -r . "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_details_response.txt" | tee -a "${LOG_FILE}"
+        jq -r . "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_details_response.txt" | tee -a "${LOG_FILE}"
       fi
     fi
   else
@@ -107,4 +107,3 @@ dep_track_upload_sbom() {
   fi
   # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*}_sbom_upload_response.txt"
 }
-

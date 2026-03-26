@@ -82,10 +82,10 @@ P50_binwalk_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_BINWALK_ARR[@]}" ; do
+    for lBINARY in "${lFILES_BINWALK_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
 
     lLINUX_PATH_COUNTER_BINWALK=$(linux_basic_identification "${lOUTPUT_DIR_BINWALK}" "${FUNCNAME[0]}")

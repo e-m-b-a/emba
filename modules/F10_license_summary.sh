@@ -17,7 +17,6 @@
 #               the corresponding license (if available). The license details are maintained in the
 #               configuration files located here: config/bin_version_identifiers
 
-
 F10_license_summary() {
   module_log_init "${FUNCNAME[0]}"
   module_title "License inventory"
@@ -52,7 +51,7 @@ F10_license_summary() {
       lBINARY="${lBINARY%\'}"
 
       print_output "[+] Binary: ${ORANGE}$(basename "${lBINARY}")${GREEN} / Product: ${ORANGE}${lPRODUCT}${GREEN} / Version: ${ORANGE}${lVERSION}${GREEN} / License: ${ORANGE}${lLICENSE_ARR[*]}${NC}"
-      ((lCOUNT_LIC+=1))
+      ((lCOUNT_LIC += 1))
     done
   else
     print_output "[-] No SBOM details available"

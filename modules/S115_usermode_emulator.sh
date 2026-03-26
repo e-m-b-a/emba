@@ -30,15 +30,15 @@ S115_usermode_emulator() {
 
   if [[ "${QEMULATION}" -eq 1 && "${RTOS}" -eq 0 ]]; then
 
-    if [[ ${IN_DOCKER} -eq 0 ]] ; then
+    if [[ ${IN_DOCKER} -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
 
     export OPTS=()
-    if [[ "${ARCH}" != "MIPS64" ]] && command -v jchroot > /dev/null; then
+    if [[ "${ARCH}" != "MIPS64" ]] && command -v jchroot >/dev/null; then
       # we have seen issues on MIPS64 -> lets fall back to chroot
       setup_jchroot
-    elif command -v chroot > /dev/null; then
+    elif command -v chroot >/dev/null; then
       setup_chroot
     else
       print_output "[-] No chroot binary found ..."
@@ -63,7 +63,7 @@ S115_usermode_emulator() {
     get_local_ip
 
     # load blacklist of binaries that could cause troubles during emulation:
-    readarray -t lBIN_BLACKLIST_ARR < "${CONFIG_DIR}"/emulation_blacklist.cfg
+    readarray -t lBIN_BLACKLIST_ARR <"${CONFIG_DIR}"/emulation_blacklist.cfg
 
     # as we modify the firmware area, we copy it to the log directory and do the modifications in this area
     copy_firmware
@@ -74,9 +74,9 @@ S115_usermode_emulator() {
 
     kill_qemu_threader &
     export PID_killer="$!"
-    disown "${PID_killer}" 2> /dev/null || true
+    disown "${PID_killer}" 2>/dev/null || true
 
-    for R_PATH in "${ROOT_PATH[@]}" ; do
+    for R_PATH in "${ROOT_PATH[@]}"; do
       print_ln
       print_output "[*] Detected root path: ${ORANGE}${R_PATH}${NC}"
       if [[ -f "${HELP_DIR}"/fix_bins_lnk_emulation.sh ]] && [[ $(find "${R_PATH}" -type l | wc -l) -lt 10 ]]; then
@@ -86,12 +86,12 @@ S115_usermode_emulator() {
       # lMD5_DONE_INT_ARR is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
       local lMD5_DONE_INT_ARR=()
       local lBIN_CNT=0
-      ((ROOT_CNT=ROOT_CNT+1))
+      ((ROOT_CNT = ROOT_CNT + 1))
       print_output "[*] Running emulation processes in ${ORANGE}${R_PATH}${NC} root path (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
 
       local lDIR=""
       lDIR=$(pwd)
-      mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" -o -name "*.raw" \) -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${lDIR}" || exit)
+      mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" -o -name "*.raw" \) -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${lDIR}" || exit)
       # we re-create the lBIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in lMD5_DONE_INT_ARR (for all root dirs) we test every bin only once
       lBIN_EMU_ARR=()
@@ -116,8 +116,8 @@ S115_usermode_emulator() {
           fi
         fi
         if [[ ! " ${lMD5_DONE_INT_ARR[*]} " =~ ${lBIN_MD5_} ]]; then
-          lBIN_EMU_ARR+=( "${lBINARY}" )
-          lMD5_DONE_INT_ARR+=( "${lBIN_MD5_}" )
+          lBIN_EMU_ARR+=("${lBINARY}")
+          lMD5_DONE_INT_ARR+=("${lBIN_MD5_}")
         fi
       done
 
@@ -132,15 +132,15 @@ S115_usermode_emulator() {
       local lCPU_CNT=1
       lCPU_CNT="$(nproc || echo 1)"
 
-      for BIN_ in "${lBIN_EMU_ARR[@]}" ; do
-        ((lBIN_CNT=lBIN_CNT+1))
+      for BIN_ in "${lBIN_EMU_ARR[@]}"; do
+        ((lBIN_CNT = lBIN_CNT + 1))
         FULL_BIN_PATH="${R_PATH}"/"${BIN_}"
 
         local lBIN_EMU_NAME_=""
         lBIN_EMU_NAME_=$(basename "${FULL_BIN_PATH}")
 
         local lTHOLD=0
-        lTHOLD=$(( 25*"${ROOT_CNT}" ))
+        lTHOLD=$((25 * "${ROOT_CNT}"))
         # if we have already a log file with a lot of content we assume this binary was already emulated correct
         if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_DIR}"/s115_usermode_emulator/qemu_init_"${lBIN_EMU_NAME_}".txt 2>/dev/null | grep -c -v -E "\[\*\]\ " || true) -gt "${lTHOLD}" ]]; then
           print_output "[!] BIN ${lBIN_EMU_NAME_} was already emulated ... skipping"
@@ -153,10 +153,10 @@ S115_usermode_emulator() {
         else
           if [[ "${THREADED}" -eq 1 ]]; then
             # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
-            lMAX_THREADS_S115=$((5*"${lCPU_CNT:-1}"))
+            lMAX_THREADS_S115=$((5 * "${lCPU_CNT:-1}"))
             if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
               # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
-              lMAX_THREADS_S115=$((3*"${lCPU_CNT:-1}"))
+              lMAX_THREADS_S115=$((3 * "${lCPU_CNT:-1}"))
             fi
           fi
           if [[ "${BIN_}" != './qemu-'* ]]; then
@@ -195,14 +195,14 @@ S115_usermode_emulator() {
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB executable, Altera Nios II"* ]]; then
               # the latest qemu package from kali does not include the nios2 emulator anymore
               lEMULATOR="qemu-nios2-static"
-              if ! command -v "${lEMULATOR}" > /dev/null; then
+              if ! command -v "${lEMULATOR}" >/dev/null; then
                 print_output "[-] No working NIOS2 emulator found for ${BIN_}"
                 continue
               fi
             elif [[ "${lBIN_FILE}" == *"ELF 32-bit LSB shared object, Altera Nios II"* ]]; then
               # the latest qemu package from kali does not include the nios2 emulator anymore
               lEMULATOR="qemu-nios2-static"
-              if ! command -v "${lEMULATOR}" > /dev/null; then
+              if ! command -v "${lEMULATOR}" >/dev/null; then
                 print_output "[-] No working NIOS2 emulator found for ${BIN_}"
                 continue
               fi
@@ -223,7 +223,7 @@ S115_usermode_emulator() {
                 local lTMP_PID="$!"
                 store_kill_pids "${lTMP_PID}"
                 write_pid_log "${FUNCNAME[0]} - emulate_binary - ${BIN_} - ${lTMP_PID}"
-                lWAIT_PIDS_S115_ARR+=( "${lTMP_PID}" )
+                lWAIT_PIDS_S115_ARR+=("${lTMP_PID}")
                 max_pids_protection "${lMAX_THREADS_S115}" lWAIT_PIDS_S115_ARR
               else
                 emulate_binary "${lEMULATOR}" "${R_PATH}" "${BIN_}"
@@ -264,11 +264,11 @@ copy_firmware() {
   # we create a backup copy for user mode emulation only if we have enough disk space.
   # If there is not enough disk space we use the original firmware directory
   lFREE_SPACE="$(df --output=avail "${LOG_DIR}" | awk 'NR==2')"
-  lNEEDED_SPACE="$(( "$(du --max-depth=0 "${EMULATION_PATH_BASE}" | awk '{print $1}')" + 10000 ))"
+  lNEEDED_SPACE="$(("$(du --max-depth=0 "${EMULATION_PATH_BASE}" | awk '{print $1}')" + 10000))"
 
   if [[ "${lFREE_SPACE}" -gt "${lNEEDED_SPACE}" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
-    cp -pri "${EMULATION_PATH_BASE}" "${LOG_PATH_MODULE}"/firmware 2> /dev/null
+    cp -pri "${EMULATION_PATH_BASE}" "${LOG_PATH_MODULE}"/firmware 2>/dev/null
     EMULATION_PATH_BASE="${LOG_PATH_MODULE}"/firmware
     print_output "[*] Firmware backup for emulation created in ${ORANGE}${EMULATION_PATH_BASE}${NC}"
   else
@@ -281,7 +281,7 @@ copy_firmware() {
 setup_jchroot() {
   export CHROOT="jchroot"
   export OPTS=()
-  echo "${CHROOT}" > "${TMP_DIR}"/chroot_mode.tmp
+  echo "${CHROOT}" >"${TMP_DIR}"/chroot_mode.tmp
   # if [[ "${IN_DOCKER}" -eq 1 ]]; then
   #  # OPTS see https://github.com/vincentbernat/jchroot#security-note
   #  OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
@@ -292,7 +292,7 @@ setup_jchroot() {
 setup_chroot() {
   export OPTS=()
   export CHROOT="chroot"
-  echo "${CHROOT}" > "${TMP_DIR}"/chroot_mode.tmp
+  echo "${CHROOT}" >"${TMP_DIR}"/chroot_mode.tmp
   print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
 }
 
@@ -305,7 +305,7 @@ prepare_emulator() {
     sub_module_title "Preparation phase"
 
     print_output "[*] Preparing the environment for usermode emulation"
-    if ! command -v "${lEMULATOR}" > /dev/null ; then
+    if ! command -v "${lEMULATOR}" >/dev/null; then
       print_ln "no_log"
       print_output "[!] Is the qemu package installed?"
       print_output "$(indent "We can't find it!")"
@@ -315,37 +315,37 @@ prepare_emulator() {
       cp "$(command -v "${lEMULATOR}")" "${lR_PATH}" || (print_output "[-] Issues in copy emulator process for emulator ${lEMULATOR}" && return)
     fi
 
-    if ! [[ -d "${lR_PATH}""/proc" ]] ; then
-      mkdir "${lR_PATH}""/proc" 2> /dev/null || true
+    if ! [[ -d "${lR_PATH}""/proc" ]]; then
+      mkdir "${lR_PATH}""/proc" 2>/dev/null || true
     fi
 
-    if ! [[ -d "${lR_PATH}""/sys" ]] ; then
-      mkdir "${lR_PATH}""/sys" 2> /dev/null || true
+    if ! [[ -d "${lR_PATH}""/sys" ]]; then
+      mkdir "${lR_PATH}""/sys" 2>/dev/null || true
     fi
 
-    if ! [[ -d "${lR_PATH}""/run" ]] ; then
-      mkdir "${lR_PATH}""/run" 2> /dev/null || true
+    if ! [[ -d "${lR_PATH}""/run" ]]; then
+      mkdir "${lR_PATH}""/run" 2>/dev/null || true
     fi
 
-    if ! [[ -d "${lR_PATH}""/dev/" ]] ; then
-      mkdir "${lR_PATH}""/dev/" 2> /dev/null || true
+    if ! [[ -d "${lR_PATH}""/dev/" ]]; then
+      mkdir "${lR_PATH}""/dev/" 2>/dev/null || true
     fi
 
-    if ! mount | grep "${lR_PATH}"/proc > /dev/null ; then
-      mount proc "${lR_PATH}""/proc" -t proc 2> /dev/null || true
+    if ! mount | grep "${lR_PATH}"/proc >/dev/null; then
+      mount proc "${lR_PATH}""/proc" -t proc 2>/dev/null || true
     fi
-    if ! mount | grep "${lR_PATH}/run" > /dev/null ; then
-      mount -o bind /run "${lR_PATH}""/run" 2> /dev/null || true
+    if ! mount | grep "${lR_PATH}/run" >/dev/null; then
+      mount -o bind /run "${lR_PATH}""/run" 2>/dev/null || true
     fi
-    if ! mount | grep "${lR_PATH}/sys" > /dev/null ; then
-      mount -o bind /sys "${lR_PATH}""/sys" 2> /dev/null || true
+    if ! mount | grep "${lR_PATH}/sys" >/dev/null; then
+      mount -o bind /sys "${lR_PATH}""/sys" 2>/dev/null || true
     fi
 
     creating_dev_area "${lR_PATH}"
 
     print_ln
     print_output "[*] Currently mounted areas:"
-    print_output "$(indent "$(mount | grep "${lR_PATH}" 2> /dev/null || true)")""\\n"
+    print_output "$(indent "$(mount | grep "${lR_PATH}" 2>/dev/null || true)")""\\n"
 
     print_output "[*] Final fixes of the root filesytem in a chroot environment"
     cp "${HELP_DIR}"/fixImage_user_mode_emulation.sh "${lR_PATH}"
@@ -389,9 +389,9 @@ run_init_test() {
 
   # this is an initial jchroot check. If this fails we switch back to chroot via "setup_chroot"
   if [[ "${CHROOT}" == "jchroot" ]]; then
-    timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace "${BIN_}" >> "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
+    timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace "${BIN_}" >>"${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
     local lPID="$!"
-    disown "${lPID}" 2> /dev/null || true
+    disown "${lPID}" 2>/dev/null || true
     if [[ -f "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" ]] && grep -q "unable to create temporary directory for pivot root: Permission denied" "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt"; then
       print_output "[*] jchroot issues identified - ${ORANGE}switching to chroot${NC}" "no_log"
       setup_chroot
@@ -402,7 +402,7 @@ run_init_test() {
   fi
   run_init_qemu "${lCPU_CONFIG}" "${lBIN_EMU_NAME_}" "${lLOG_FILE_INIT}" "${lEMULATOR}"
 
-  if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2> /dev/null) -gt 0 || $(wc -l < "${LOG_PATH_MODULE}/qemu_initx_${lBIN_EMU_NAME_}.txt") -lt 6 ]]; then
+  if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>/dev/null) -gt 0 || $(wc -l <"${LOG_PATH_MODULE}/qemu_initx_${lBIN_EMU_NAME_}.txt") -lt 6 ]]; then
 
     write_log "[-] Emulation process of binary ${ORANGE}${lBIN_EMU_NAME_}${NC} with CPU configuration ${ORANGE}${lCPU_CONFIG}${NC} failed" "${lLOG_FILE_INIT}"
 
@@ -423,7 +423,7 @@ run_init_test() {
         lCPU_CONFIG="NONE"
       fi
 
-      if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2> /dev/null) -gt 0 || $(wc -l < "${LOG_PATH_MODULE}/qemu_initx_${lBIN_EMU_NAME_}.txt") -lt 6 ]]; then
+      if [[ ! -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>/dev/null) -gt 0 || $(wc -l <"${LOG_PATH_MODULE}/qemu_initx_${lBIN_EMU_NAME_}.txt") -lt 6 ]]; then
         write_log "[-] Emulation process of binary ${ORANGE}${lBIN_EMU_NAME_}${NC} with CPU configuration ${ORANGE}${lCPU_CONFIG}${NC} failed" "${lLOG_FILE_INIT}"
         continue
       fi
@@ -474,13 +474,13 @@ run_init_qemu() {
   local lPID=$!
   write_pid_log "${FUNCNAME[0]} - runner - ${BIN_} - ${lPID}"
   [[ "${STRICT_MODE}" -eq 1 ]] && set -e
-  disown "${lPID}" 2> /dev/null || true
+  disown "${lPID}" 2>/dev/null || true
 
   # wait a bit and then kill it
   sleep 1
-  kill -9 "${lPID}" 2> /dev/null || true
+  kill -9 "${lPID}" 2>/dev/null || true
   if [[ -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" ]]; then
-    cat "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" >> "${lLOG_FILE_INIT}" || true
+    cat "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" >>"${lLOG_FILE_INIT}" || true
   fi
 }
 
@@ -495,25 +495,25 @@ run_init_qemu_runner() {
     write_log "[*] Trying to emulate binary ${ORANGE}${BIN_}${NC} with cpu config ${ORANGE}NONE${NC}" "${lLOG_FILE_INIT}"
     write_log "" "${lLOG_FILE_INIT}"
     if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace "${BIN_}" >> "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace "${BIN_}" >>"${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     else
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" --strace "${BIN_}" >> "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" --strace "${BIN_}" >>"${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     fi
   else
     write_log "[*] Trying to emulate binary ${ORANGE}${BIN_}${NC} with cpu config ${ORANGE}${lCPU_CONFIG}${NC}" "${lLOG_FILE_INIT}"
     write_log "" "${lLOG_FILE_INIT}"
     if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace -cpu "${lCPU_CONFIG}" "${BIN_}" >> "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace -cpu "${lCPU_CONFIG}" "${BIN_}" >>"${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     else
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" --strace -cpu "${lCPU_CONFIG}" "${BIN_}" >> "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" --strace -cpu "${lCPU_CONFIG}" "${BIN_}" >>"${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" 2>&1 || true
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     fi
   fi
 }
@@ -545,23 +545,23 @@ emulate_strace_run() {
   [[ "${STRICT_MODE}" -eq 1 ]] && set +e
   if [[ -z "${lCPU_CONFIG}" || "${lCPU_CONFIG}" == *"NONE"* ]]; then
     if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace "${BIN_}" >> "${lLOG_FILE_STRACER}" 2>&1 &
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" --strace "${BIN_}" >>"${lLOG_FILE_STRACER}" 2>&1 &
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     else
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" --strace "${BIN_}" >> "${lLOG_FILE_STRACER}" 2>&1 &
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" --strace "${BIN_}" >>"${lLOG_FILE_STRACER}" 2>&1 &
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     fi
   else
     if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" --strace "${BIN_}" >> "${lLOG_FILE_STRACER}" 2>&1 &
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" --strace "${BIN_}" >>"${lLOG_FILE_STRACER}" 2>&1 &
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     else
-      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" --strace "${BIN_}" >> "${lLOG_FILE_STRACER}" 2>&1 &
+      timeout --preserve-status --signal SIGINT 2 "${CHROOT}" "${OPTS[@]}" "${R_PATH}" ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" --strace "${BIN_}" >>"${lLOG_FILE_STRACER}" 2>&1 &
       local lPID="$!"
-      disown "${lPID}" 2> /dev/null || true
+      disown "${lPID}" 2>/dev/null || true
     fi
   fi
   write_pid_log "${FUNCNAME[0]} - ${CHROOT} - ${BIN_} - ${lPID}"
@@ -569,7 +569,7 @@ emulate_strace_run() {
 
   # wait a second and then kill it
   sleep 1
-  kill -9 "${lPID}" 2> /dev/null || true
+  kill -9 "${lPID}" 2>/dev/null || true
 
   # extract missing files, exclude *.so files:
   write_log "" "${lLOG_FILE_STRACER}"
@@ -577,7 +577,7 @@ emulate_strace_run() {
 
   mapfile -t MISSING_AREAS_ARR < <(grep -a "open.*errno=2\ " "${lLOG_FILE_STRACER}" 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
   mapfile -t lMISSING_AREAS_TMP_ARR < <(grep -a "^qemu.*: Could not open" "${lLOG_FILE_STRACER}" | cut -d\' -f2 2>&1 | sort -u || true)
-  MISSING_AREAS_ARR+=("${lMISSING_AREAS_TMP_ARR[@]}" )
+  MISSING_AREAS_ARR+=("${lMISSING_AREAS_TMP_ARR[@]}")
 
   if [[ "${#MISSING_AREAS_ARR[@]}" -gt 0 ]]; then
     for MISSING_AREA in "${MISSING_AREAS_ARR[@]}"; do
@@ -598,22 +598,22 @@ emulate_strace_run() {
 
         if [[ ! -d "${R_PATH}""${lPATH_MISSING}" ]]; then
           write_log "[*] Creating directory ${ORANGE}${R_PATH}${lPATH_MISSING}${NC}" "${lLOG_FILE_STRACER}"
-          mkdir -p "${R_PATH}""${lPATH_MISSING}" 2> /dev/null || true
+          mkdir -p "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
           # continue
         fi
         if [[ -n "${lFILENAME_FOUND}" ]]; then
           write_log "[*] Copy file ${ORANGE}${lFILENAME_FOUND}${NC} to ${ORANGE}${R_PATH}${lPATH_MISSING}/${NC}" "${lLOG_FILE_STRACER}"
           local lOUTPUT=""
           lOUTPUT=$(file -b "${lFILENAME_FOUND}")
-          if [[ "${lOUTPUT}" != *"(named pipe)" ]];then
-            cp -L "${lFILENAME_FOUND}" "${R_PATH}""${lPATH_MISSING}" 2> /dev/null || true
+          if [[ "${lOUTPUT}" != *"(named pipe)" ]]; then
+            cp -L "${lFILENAME_FOUND}" "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
           fi
           continue
         else
-        #  # disabled this for now - have to rethink this feature
-        #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
-        #  write_log "[*] Creating empty file $ORANGE$R_PATH$lPATH_MISSING/$lFILENAME_MISSING$NC" "${lLOG_FILE_STRACER}"
-        #  touch "${R_PATH}""${lPATH_MISSING}"/"${lFILENAME_MISSING}" 2> /dev/null
+          #  # disabled this for now - have to rethink this feature
+          #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
+          #  write_log "[*] Creating empty file $ORANGE$R_PATH$lPATH_MISSING/$lFILENAME_MISSING$NC" "${lLOG_FILE_STRACER}"
+          #  touch "${R_PATH}""${lPATH_MISSING}"/"${lFILENAME_MISSING}" 2> /dev/null
           write_log "[*] Missing file ${ORANGE}${R_PATH}${lPATH_MISSING}/${lFILENAME_MISSING}${NC}" "${lLOG_FILE_STRACER}"
           continue
         fi
@@ -663,7 +663,7 @@ emulate_binary() {
   write_log "[*] Using root directory: ${ORANGE}${lR_PATH}${NC} (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})" "${lLOG_FILE_BIN}"
   write_log "[*] Using CPU config: ${ORANGE}${lCPU_CONFIG}${NC}" "${lLOG_FILE_BIN}"
   # write_log "[*] Root path used: $ORANGE$lR_PATH$NC" "${lLOG_FILE_BIN}"
-  write_log "[*] Emulating binary: ${ORANGE}${lBINARY_MIN_PATH/\.}${NC}" "${lLOG_FILE_BIN}"
+  write_log "[*] Emulating binary: ${ORANGE}${lBINARY_MIN_PATH/\./}${NC}" "${lLOG_FILE_BIN}"
   write_log "" "${lLOG_FILE_BIN}"
 
   # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
@@ -688,24 +688,24 @@ emulate_binary() {
     if [[ -z "${lCPU_CONFIG}" ]] || [[ "${lCPU_CONFIG}" == "NONE" ]]; then
       write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM}${NC}" "${lLOG_FILE_BIN}"
       if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>> "${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
-        disown "${lPID}" 2> /dev/null || true
+        disown "${lPID}" 2>/dev/null || true
       else
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>> "${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
-        disown "${lPID}" 2> /dev/null || true
+        disown "${lPID}" 2>/dev/null || true
       fi
     else
       write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM}${NC} and cpu configuration ${ORANGE}${lCPU_CONFIG}${NC}" "${lLOG_FILE_BIN}"
       if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>> "${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
-        disown "${lPID}" 2> /dev/null || true
+        disown "${lPID}" 2>/dev/null || true
       else
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>> "${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
-        disown "${lPID}" 2> /dev/null || true
+        disown "${lPID}" 2>/dev/null || true
       fi
     fi
     write_pid_log "${FUNCNAME[0]} - ${CHROOT} qemu final run - ${lBINARY_MIN_PATH} - ${lPID}"
@@ -750,11 +750,11 @@ check_disk_space_emu() {
   local lCRITICAL_FILES_ARR=()
   local lKILL_PROC_NAME=""
 
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename -s .txt % 2>/dev/null' || true)
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null | xargs -r -0 -P 16 -I % sh -c 'basename -s .txt % 2>/dev/null' || true)
   for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
-    lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_}"
-    lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_}"
-    lKILL_PROC_NAME="${lKILL_PROC_NAME/stracer_}"
+    lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_/}"
+    lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_/}"
+    lKILL_PROC_NAME="${lKILL_PROC_NAME/stracer_/}"
     if pgrep -f "${lEMULATOR}.*${lKILL_PROC_NAME}" | grep -v "pgrep\|grep\|pkill"; then
       print_output "[*] Qemu processes are wasting disk space ... we try to kill process ${lKILL_PROC_NAME} now" "no_log"
       pkill -9 -f "${lEMULATOR}.*${lKILL_PROC_NAME}.*" >/dev/null || true
@@ -769,7 +769,7 @@ running_jobs() {
   # if no emulation at all was possible the $lEMULATOR variable is not defined
   if [[ -n "${lEMULATOR}" ]]; then
     lCJOBS=$(pgrep -f -c -a "${lEMULATOR}" || true)
-    if [[ -n "${lCJOBS}" ]] ; then
+    if [[ -n "${lCJOBS}" ]]; then
       print_ln "no_log"
       print_output "[*] Currently running emulation jobs: ${ORANGE}${lCJOBS}${NC}" "no_log"
     else
@@ -790,7 +790,7 @@ kill_qemu_threader() {
 
 get_local_ip() {
   export IP_ETH0=""
-  IP_ETH0=$(ifconfig eth0 2>/dev/null|awk '/inet / {print $2}')
+  IP_ETH0=$(ifconfig eth0 2>/dev/null | awk '/inet / {print $2}')
 }
 
 recover_local_ip() {
@@ -840,7 +840,7 @@ s115_cleanup() {
   fi
 
   lCJOBS=$(pgrep -f qemu- || true)
-  if [[ -n "${lCJOBS}" ]] ; then
+  if [[ -n "${lCJOBS}" ]]; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n" "no_log"
     pkill -9 -f .*"${lEMULATOR}".* >/dev/null || true
   fi
@@ -868,17 +868,17 @@ s115_cleanup() {
   if [[ "${lILLEGAL_INSTRUCTIONS_CNT}" -gt 0 ]]; then
     print_output "[*] Found ${ORANGE}${lILLEGAL_INSTRUCTIONS_CNT}${NC}binaries not emulated - Illegal instructions" "no_log"
   fi
-  if [[ "${#lLOG_FILES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lLOG_FILES_ARR[@]}" -gt 0 ]]; then
     sub_module_title "Reporting phase"
-    for lLOG_FILE in "${lLOG_FILES_ARR[@]}" ; do
+    for lLOG_FILE in "${lLOG_FILES_ARR[@]}"; do
       local lLINES_OF_LOG=0
-      lLINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "${lLOG_FILE}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | \
-        grep -a -v "\[\*\] " | grep -a -v "Illegal instruction\|core dumped\|Invalid ELF image for this architecture" | \
+      lLINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "${lLOG_FILE}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" |
+        grep -a -v "\[\*\] " | grep -a -v "Illegal instruction\|core dumped\|Invalid ELF image for this architecture" |
         grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
       # print_output "[*] LOG_FILE: $lLOG_FILE - Lines: $lLINES_OF_LOG" "no_log"
       if ! [[ -s "${lLOG_FILE}" ]] || [[ "${lLINES_OF_LOG}" -eq 0 ]]; then
         # print_output "[*] Removing empty log file: $lLOG_FILE" "no_log"
-        rm "${lLOG_FILE}" 2> /dev/null || true
+        rm "${lLOG_FILE}" 2>/dev/null || true
         continue
       fi
       lBINARY_FROM_LOG=$(basename "${lLOG_FILE}")
@@ -902,155 +902,154 @@ creating_dev_area() {
 
   print_output "[*] Creating dev area for user mode emulation"
 
-  if ! [[ -e "${lR_PATH}""/dev/console" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/console" ]]; then
     print_output "[*] Creating /dev/console"
-    mknod -m 622 "${lR_PATH}""/dev/console" c 5 1 2> /dev/null || true
+    mknod -m 622 "${lR_PATH}""/dev/console" c 5 1 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/null" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/null" ]]; then
     print_output "[*] Creating /dev/null"
-    mknod -m 666 "${lR_PATH}""/dev/null" c 1 3 2> /dev/null || true
+    mknod -m 666 "${lR_PATH}""/dev/null" c 1 3 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/zero" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/zero" ]]; then
     print_output "[*] Creating /dev/zero"
-    mknod -m 666 "${lR_PATH}""/dev/zero" c 1 5 2> /dev/null || true
+    mknod -m 666 "${lR_PATH}""/dev/zero" c 1 5 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/ptmx" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/ptmx" ]]; then
     print_output "[*] Creating /dev/ptmx"
-    mknod -m 666 "${lR_PATH}""/dev/ptmx" c 5 2 2> /dev/null || true
+    mknod -m 666 "${lR_PATH}""/dev/ptmx" c 5 2 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/tty" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/tty" ]]; then
     print_output "[*] Creating /dev/tty"
-    mknod -m 666 "${lR_PATH}""/dev/tty" c 5 0 2> /dev/null || true
+    mknod -m 666 "${lR_PATH}""/dev/tty" c 5 0 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/random" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/random" ]]; then
     print_output "[*] Creating /dev/random"
-    mknod -m 444 "${lR_PATH}""/dev/random" c 1 8 2> /dev/null || true
+    mknod -m 444 "${lR_PATH}""/dev/random" c 1 8 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/urandom" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/urandom" ]]; then
     print_output "[*] Creating /dev/urandom"
-    mknod -m 444 "${lR_PATH}""/dev/urandom" c 1 9 2> /dev/null || true
+    mknod -m 444 "${lR_PATH}""/dev/urandom" c 1 9 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/mem" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/mem" ]]; then
     print_output "[*] Creating /dev/mem"
-    mknod -m 660 "${lR_PATH}"/dev/mem c 1 1 2> /dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/mem c 1 1 2>/dev/null || true
   fi
-  if ! [[ -e "${lR_PATH}""/dev/kmem" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/kmem" ]]; then
     print_output "[*] Creating /dev/kmem"
-    mknod -m 640 "${lR_PATH}"/dev/kmem c 1 2 2> /dev/null || true
+    mknod -m 640 "${lR_PATH}"/dev/kmem c 1 2 2>/dev/null || true
   fi
-  if ! [[ -e "${lR_PATH}""/dev/armem" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/armem" ]]; then
     print_output "[*] Creating /dev/armem"
-    mknod -m 666 "${lR_PATH}"/dev/armem c 1 13 2> /dev/null || true
+    mknod -m 666 "${lR_PATH}"/dev/armem c 1 13 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/tty0" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/tty0" ]]; then
     print_output "[*] Creating /dev/tty0"
-    mknod -m 622 "${lR_PATH}"/dev/tty0 c 4 0 2> /dev/null || true
+    mknod -m 622 "${lR_PATH}"/dev/tty0 c 4 0 2>/dev/null || true
   fi
-  if ! [[ -e "${lR_PATH}""/dev/ttyS0" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/ttyS0" ]]; then
     print_output "[*] Creating /dev/ttyS0 - ttyS3"
-    mknod -m 660 "${lR_PATH}"/dev/ttyS0 c 4 64 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/ttyS1 c 4 65 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/ttyS2 c 4 66 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/ttyS3 c 4 67 2> /dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/ttyS0 c 4 64 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/ttyS1 c 4 65 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/ttyS2 c 4 66 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/ttyS3 c 4 67 2>/dev/null || true
   fi
 
-  if ! [[ -e "${lR_PATH}""/dev/adsl0" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/adsl0" ]]; then
     print_output "[*] Creating /dev/adsl0"
-    mknod -m 644 "${lR_PATH}"/dev/adsl0 c 100 0 2> /dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/adsl0 c 100 0 2>/dev/null || true
   fi
-  if ! [[ -e "${lR_PATH}""/dev/ppp" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/ppp" ]]; then
     print_output "[*] Creating /dev/ppp"
-    mknod -m 644 "${lR_PATH}"/dev/ppp c 108 0 2> /dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/ppp c 108 0 2>/dev/null || true
   fi
-  if ! [[ -e "${lR_PATH}""/dev/hidraw0" ]] ; then
+  if ! [[ -e "${lR_PATH}""/dev/hidraw0" ]]; then
     print_output "[*] Creating /dev/hidraw0"
-    mknod -m 666 "${lR_PATH}"/dev/hidraw0 c 251 0 2> /dev/null || true
+    mknod -m 666 "${lR_PATH}"/dev/hidraw0 c 251 0 2>/dev/null || true
   fi
 
   if ! [[ -d "${lR_PATH}"/dev/mtd ]]; then
     print_output "[*] Creating and populating /dev/mtd"
-    mkdir -p "${lR_PATH}"/dev/mtd 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/0 c 90 0 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/1 c 90 2 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/2 c 90 4 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/3 c 90 6 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/4 c 90 8 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/5 c 90 10 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/6 c 90 12 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/7 c 90 14 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/8 c 90 16 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/9 c 90 18 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtd/10 c 90 20 2> /dev/null || true
+    mkdir -p "${lR_PATH}"/dev/mtd 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/0 c 90 0 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/1 c 90 2 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/2 c 90 4 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/3 c 90 6 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/4 c 90 8 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/5 c 90 10 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/6 c 90 12 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/7 c 90 14 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/8 c 90 16 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/9 c 90 18 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtd/10 c 90 20 2>/dev/null || true
   fi
 
-  mknod -m 644 "${lR_PATH}"/dev/mtd0 c 90 0 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr0 c 90 1 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd1 c 90 2 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr1 c 90 3 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd2 c 90 4 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr2 c 90 5 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd3 c 90 6 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr3 c 90 7 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd4 c 90 8 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr4 c 90 9 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd5 c 90 10 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr5 c 90 11 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd6 c 90 12 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr6 c 90 13 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd7 c 90 14 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr7 c 90 15 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd8 c 90 16 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr8 c 90 17 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd9 c 90 18 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr9 c 90 19 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtd10 c 90 20 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdr10 c 90 21 2> /dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd0 c 90 0 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr0 c 90 1 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd1 c 90 2 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr1 c 90 3 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd2 c 90 4 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr2 c 90 5 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd3 c 90 6 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr3 c 90 7 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd4 c 90 8 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr4 c 90 9 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd5 c 90 10 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr5 c 90 11 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd6 c 90 12 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr6 c 90 13 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd7 c 90 14 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr7 c 90 15 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd8 c 90 16 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr8 c 90 17 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd9 c 90 18 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr9 c 90 19 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtd10 c 90 20 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdr10 c 90 21 2>/dev/null || true
 
   if ! [[ -d "${lR_PATH}"/dev/mtdblock ]]; then
     print_output "[*] Creating and populating /dev/mtdblock"
-    mkdir -p "${lR_PATH}"/dev/mtdblock 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/0 b 31 0 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/1 b 31 1 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/2 b 31 2 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/3 b 31 3 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/4 b 31 4 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/5 b 31 5 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/6 b 31 6 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/7 b 31 7 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/8 b 31 8 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/9 b 31 9 2> /dev/null || true
-    mknod -m 644 "${lR_PATH}"/dev/mtdblock/10 b 31 10 2> /dev/null || true
+    mkdir -p "${lR_PATH}"/dev/mtdblock 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/0 b 31 0 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/1 b 31 1 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/2 b 31 2 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/3 b 31 3 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/4 b 31 4 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/5 b 31 5 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/6 b 31 6 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/7 b 31 7 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/8 b 31 8 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/9 b 31 9 2>/dev/null || true
+    mknod -m 644 "${lR_PATH}"/dev/mtdblock/10 b 31 10 2>/dev/null || true
   fi
 
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock0 b 31 0 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock1 b 31 1 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock2 b 31 2 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock3 b 31 3 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock4 b 31 4 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock5 b 31 5 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock6 b 31 6 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock7 b 31 7 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock8 b 31 8 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock9 b 31 9 2> /dev/null || true
-  mknod -m 644 "${lR_PATH}"/dev/mtdblock10 b 31 10 2> /dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock0 b 31 0 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock1 b 31 1 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock2 b 31 2 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock3 b 31 3 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock4 b 31 4 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock5 b 31 5 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock6 b 31 6 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock7 b 31 7 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock8 b 31 8 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock9 b 31 9 2>/dev/null || true
+  mknod -m 644 "${lR_PATH}"/dev/mtdblock10 b 31 10 2>/dev/null || true
 
   if ! [[ -d "${lR_PATH}"/dev/tts ]]; then
     print_output "[*] Creating and populating /dev/tts"
-    mkdir -p "${lR_PATH}"/dev/tts 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/tts/0 c 4 64 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/tts/1 c 4 65 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/tts/2 c 4 66 2> /dev/null || true
-    mknod -m 660 "${lR_PATH}"/dev/tts/3 c 4 67 2> /dev/null || true
+    mkdir -p "${lR_PATH}"/dev/tts 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/tts/0 c 4 64 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/tts/1 c 4 65 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/tts/2 c 4 66 2>/dev/null || true
+    mknod -m 660 "${lR_PATH}"/dev/tts/3 c 4 67 2>/dev/null || true
   fi
 
-  chown -v root:tty "${lR_PATH}""/dev/"{console,ptmx,tty} > /dev/null 2>&1 || true
+  chown -v root:tty "${lR_PATH}""/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
 }
-

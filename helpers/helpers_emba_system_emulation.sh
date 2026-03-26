@@ -24,7 +24,7 @@ restart_emulation() {
   local lRESTART_FORCE="${5:-0}"
 
   if [[ "${lRESTART_FORCE}" -eq 0 ]]; then
-    if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
+    if ping -c 1 "${lIP_ADDRESS}" &>/dev/null; then
       print_output "[+] System with ${ORANGE}${lIP_ADDRESS}${GREEN} responding again - probably it recovered automatically.${NC}" "no_log"
       return
     fi
@@ -39,13 +39,13 @@ restart_emulation() {
   print_output "[!] Warning: System with ${ORANGE}${lIP_ADDRESS}${MAGENTA} not responding." "no_log"
   print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
 
-  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
+  if [[ $(wc -l 2>/dev/null <"${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
     print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
     return 1
   fi
 
   write_log "[*] $(date) - system emulation restarting ..." "${TMP_DIR}/emulation_restarting.log"
-  if [[ "$(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log")" -gt 10 ]]; then
+  if [[ "$(wc -l 2>/dev/null <"${TMP_DIR}/emulation_restarting.log")" -gt 10 ]]; then
     print_output "[!] WARNING: Restarting system multiple times ..."
   fi
 
@@ -54,9 +54,15 @@ restart_emulation() {
 
   check_qemu_instance_l10
 
-  pushd "${ARCHIVE_PATH}" >/dev/null || { print_output "[-] Emulation archive path not found"; return 1; }
+  pushd "${ARCHIVE_PATH}" >/dev/null || {
+    print_output "[-] Emulation archive path not found"
+    return 1
+  }
   ./run.sh &
-  popd >/dev/null || { print_output "[-] EMBA path not available?"; return 1; }
+  popd >/dev/null || {
+    print_output "[-] EMBA path not available?"
+    return 1
+  }
 
   if [[ "${lSTATE_CHECK_MECHANISM}" == "PING" ]]; then
     if ping_check "${lIP_ADDRESS}" 1; then
@@ -162,13 +168,13 @@ write_script_exec() {
   if [[ "${lEXECUTE}" -ne 0 ]]; then
     eval "${lCOMMAND}" || true &
     lPID="$!"
-    disown "${lPID}" 2> /dev/null || true
+    disown "${lPID}" 2>/dev/null || true
   fi
 
-  if [[ "${lEXECUTE}" -ne 2 ]];then
+  if [[ "${lEXECUTE}" -ne 2 ]]; then
     if ! [[ -f "${lSCRIPT_WRITE}" ]]; then
       # just in case we have our script not already there we set it up now
-      echo "#!/bin/bash -p" > "${lSCRIPT_WRITE}"
+      echo "#!/bin/bash -p" >"${lSCRIPT_WRITE}"
     fi
 
     # for the final script we need to adjust the paths:
@@ -186,7 +192,7 @@ write_script_exec() {
       lCOMMAND="${lCOMMAND% ; pkill -9 -f tail.*-F.*}"
     fi
 
-    echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
+    echo "${lCOMMAND}" >>"${lSCRIPT_WRITE}"
   fi
 }
 
@@ -228,7 +234,7 @@ service_online_check() {
       done
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for responsive network services on ${ORANGE}${lIP_ADDRESS} - #${lCNT}/${lMAX_CNT}${NC}" "no_log"
       sleep 10
-      lCNT=$((lCNT+1))
+      lCNT=$((lCNT + 1))
     done
   else
     [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] No network services detected for recovery ..." "no_log"
@@ -243,7 +249,7 @@ system_online_check() {
 
   # STATE_CHECK_MECHANISM is exported by l10
 
-  if [[ $(wc -l 2>/dev/null < "${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
+  if [[ $(wc -l 2>/dev/null <"${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
     print_output "[!] WARNING: Maximal restart counter reached ... no further service checks and system restarts performed"
     return 1
   fi
@@ -274,10 +280,10 @@ hping_check() {
   local lRESTARTER=0
   local lMAX_PING_CNT=50
 
-  while ! [[ "$(hping3 -n -c 1 "${lIP_ADDRESS}" 2> /dev/null | grep -c "^len=")" -gt 0 ]]; do
+  while ! [[ "$(hping3 -n -c 1 "${lIP_ADDRESS}" 2>/dev/null | grep -c "^len=")" -gt 0 ]]; do
     lRESTARTER=1
     [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... hping mode" "no_log"
-    ((lCOUNTER+=1))
+    ((lCOUNTER += 1))
     if [[ "${lCOUNTER}" -gt "${lMAX_PING_CNT}" ]]; then
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
@@ -308,7 +314,7 @@ ping_check() {
   while ! ping -c 1 "${lIP_ADDRESS}"; do
     lRESTARTER=1
     [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... ping check #${lCOUNTER}/${MAX_PING_RETRY_CNT}" "no_log"
-    ((lCOUNTER+=1))
+    ((lCOUNTER += 1))
     if [[ "${lCOUNTER}" -gt "${MAX_PING_RETRY_CNT}" ]]; then
       [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
@@ -316,7 +322,7 @@ ping_check() {
     sleep 6
   done
 
-  if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
+  if ping -c 1 "${lIP_ADDRESS}" &>/dev/null; then
     [[ "${lPRINT_OUTPUT}" -eq 1 || "${lRESTARTER}" -eq 1 ]] && print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address ${ORANGE}${lIP_ADDRESS}${NC}" "no_log"
     [[ "${lRESTARTER}" -eq 1 ]] && sleep 60
     export SYS_ONLINE=1

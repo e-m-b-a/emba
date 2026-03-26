@@ -63,10 +63,10 @@ P35_UEFI_extractor() {
       print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image in Unblob mode."
       print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-      for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+      for lBINARY in "${lFILES_UEFI_ARR[@]}"; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -103,10 +103,10 @@ P35_UEFI_extractor() {
       print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image in Binwalk mode."
       print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-      for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+      for lBINARY in "${lFILES_UEFI_ARR[@]}"; do
         binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
         local lTMP_PID="$!"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -131,7 +131,7 @@ P35_UEFI_extractor() {
       fi
     fi
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       lNEG_LOG=1
     fi
@@ -153,7 +153,7 @@ uefi_firmware_parser() {
   fi
   lFW_NAME_="$(basename "${lFIRMWARE_PATH_}")"
 
-  uefi-firmware-parser -b "${lFIRMWARE_PATH_}" > "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${lFW_NAME_}".txt
+  uefi-firmware-parser -b "${lFIRMWARE_PATH_}" >"${LOG_PATH_MODULE}"/uefi-firmware-parser_"${lFW_NAME_}".txt
 
   if [[ -s "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${lFW_NAME_}".txt ]]; then
     print_ln
@@ -185,10 +185,10 @@ ami_extractor() {
 
   lFIRMWARE_NAME_="$(basename "${lFIRMWARE_PATH_}")"
 
-  echo -ne '\n' | python3 "${EXT_DIR}"/BIOSUtilities/biosutilities/ami_pfat_extract.py -o "${lEXTRACTION_DIR_}" "${lFIRMWARE_PATH_}" &> "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log || true
+  echo -ne '\n' | python3 "${EXT_DIR}"/BIOSUtilities/biosutilities/ami_pfat_extract.py -o "${lEXTRACTION_DIR_}" "${lFIRMWARE_PATH_}" &>"${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log || true
 
   if [[ -s "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log ]] && ! grep -q "Error: " "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log; then
-    tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log
+    tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/uefi_ami_"${lFIRMWARE_NAME_}".log
 
     print_ln
     print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR_}${NC}) as base directory:"
@@ -199,10 +199,10 @@ ami_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from the firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+    for lBINARY in "${lFILES_UEFI_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "P35_UEFI_extractor" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -245,7 +245,7 @@ uefi_extractor() {
     mkdir -p "${lEXTRACTION_DIR_}"
   fi
   cp "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}"
-  "${lUEFI_EXTRACT_BIN}" "${lEXTRACTION_DIR_}"/firmware all &> "${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log || print_error "[-] UEFI firmware extraction failed"
+  "${lUEFI_EXTRACT_BIN}" "${lEXTRACTION_DIR_}"/firmware all &>"${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log || print_error "[-] UEFI firmware extraction failed"
 
   lUEFI_EXTRACT_REPORT_FILE="${lEXTRACTION_DIR_}"/firmware.report.txt
   if [[ -f "${lUEFI_EXTRACT_REPORT_FILE}" ]]; then
@@ -261,7 +261,7 @@ uefi_extractor() {
   fi
 
   if [[ -f "${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log ]]; then
-    tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log
+    tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log
     if grep -q "parse: not a single Volume Top File is found, the image may be corrupted" "${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log; then
       print_output "[-] No results from UEFITool UEFI Extractor"
       return
@@ -282,10 +282,10 @@ uefi_extractor() {
   print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-  for lBINARY in "${lFILES_UEFI_ARR[@]}" ; do
+  for lBINARY in "${lFILES_UEFI_ARR[@]}"; do
     binary_architecture_threader "${lBINARY}" "P35_UEFI_extractor" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

@@ -76,14 +76,14 @@ F15_cyclonedx_sbom() {
     local lEMBA_URLS_ARR=("https://github.com/e-m-b-a/emba")
 
     local lTOOL_COMP_ARR=()
-    lTOOL_COMP_ARR+=( type="application" )
-    lTOOL_COMP_ARR+=( author="EMBA community" )
-    lTOOL_COMP_ARR+=( name="${lSBOM_TOOL}" )
+    lTOOL_COMP_ARR+=(type="application")
+    lTOOL_COMP_ARR+=(author="EMBA community")
+    lTOOL_COMP_ARR+=(name="${lSBOM_TOOL}")
     if [[ -f "${INVOCATION_PATH}"/.git/refs/heads/master ]]; then
       lSBOM_TOOL_VERS+="-$(cat "${INVOCATION_PATH}"/.git/refs/heads/master)"
     fi
-    lTOOL_COMP_ARR+=( version="${lSBOM_TOOL_VERS}" )
-    lTOOL_COMP_ARR+=( description="EMBA firmware analyzer - ${lEMBA_URLS_ARR[*]}" )
+    lTOOL_COMP_ARR+=(version="${lSBOM_TOOL_VERS}")
+    lTOOL_COMP_ARR+=(description="EMBA firmware analyzer - ${lEMBA_URLS_ARR[*]}")
 
     # the following removes the duplicate untracked files that are handled from an other SBOM entry
     if [[ -s "${SBOM_LOG_PATH}"/duplicates_to_delete.txt ]]; then
@@ -91,21 +91,21 @@ F15_cyclonedx_sbom() {
       print_output "[*] Deleting duplicates" "no_log"
       while read -r lDUP_DEL; do
         rm -f "${lDUP_DEL}" || true
-      done < "${SBOM_LOG_PATH}"/duplicates_to_delete.txt
+      done <"${SBOM_LOG_PATH}"/duplicates_to_delete.txt
     fi
 
     # Firmeware details for the SBOM
     local lFW_COMPONENT_DATA_ARR=()
-    lFW_COMPONENT_DATA_ARR+=( name="${lFW_PATH}" )
-    lFW_COMPONENT_DATA_ARR+=( type="${lFW_TYPE}" )
-    lFW_COMPONENT_DATA_ARR+=( bom-ref="$(uuidgen)" )
+    lFW_COMPONENT_DATA_ARR+=(name="${lFW_PATH}")
+    lFW_COMPONENT_DATA_ARR+=(type="${lFW_TYPE}")
+    lFW_COMPONENT_DATA_ARR+=(bom-ref="$(uuidgen)")
 
     # generate hashes for the firmware itself:
     if [[ -f "${FIRMWARE_PATH_BAK}" ]]; then
       build_sbom_json_hashes_arr "${FIRMWARE_PATH_BAK}" "NA" "NA"
     fi
 
-    [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
+    [[ -v HASHES_ARR ]] && lFW_COMPONENT_DATA_ARR+=("hashes=$(jo -a "${HASHES_ARR[@]}")")
 
     # build the component array for final sbom build:
     mapfile -t lCOMP_FILES_ARR < <(find "${SBOM_LOG_PATH}" -maxdepth 1 -type f -name "*.json" -not -name "unhandled_file_*" | sort -u)
@@ -116,7 +116,7 @@ F15_cyclonedx_sbom() {
 
     # as we can have so many components that everything goes b00m we need to build the
     # components json manually:
-    echo -n "[" > "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+    echo -n "[" >"${SBOM_LOG_PATH}/sbom_components_tmp.json"
     for lCOMP_FILE_ID in "${!lCOMP_FILES_ARR[@]}"; do
       lCOMP_FILE="${lCOMP_FILES_ARR["${lCOMP_FILE_ID}"]}"
 
@@ -126,13 +126,13 @@ F15_cyclonedx_sbom() {
       fi
 
       if [[ -s "${lCOMP_FILE}" ]]; then
-        if (json_pp < "${lCOMP_FILE}" &> /dev/null); then
+        if (json_pp <"${lCOMP_FILE}" &>/dev/null); then
           # before adding the new component we need to check that this is not our first entry (after the initial [) and for a ','
           # if it is not found we need to add it now
           if [[ "$(tail -c1 "${SBOM_LOG_PATH}/sbom_components_tmp.json")" != '[' ]] && [[ "$(tail -n1 "${SBOM_LOG_PATH}/sbom_components_tmp.json")" != ',' ]]; then
-             echo -n "," >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+            echo -n "," >>"${SBOM_LOG_PATH}/sbom_components_tmp.json"
           fi
-          cat "${lCOMP_FILE}" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
+          cat "${lCOMP_FILE}" >>"${SBOM_LOG_PATH}/sbom_components_tmp.json"
         else
           print_error "[-] WARNING: SBOM component ${lCOMP_FILE} failed to validate with json_pp"
           continue
@@ -142,8 +142,8 @@ F15_cyclonedx_sbom() {
         continue
       fi
     done
-    echo -n "]" >> "${SBOM_LOG_PATH}/sbom_components_tmp.json"
-    tr -d '\n' < "${SBOM_LOG_PATH}/sbom_components_tmp.json" > "${lSBOM_LOG_FILE}_components.json"
+    echo -n "]" >>"${SBOM_LOG_PATH}/sbom_components_tmp.json"
+    tr -d '\n' <"${SBOM_LOG_PATH}/sbom_components_tmp.json" >"${lSBOM_LOG_FILE}_components.json"
 
     if [[ -d "${SBOM_LOG_PATH}/SBOM_deps/" ]]; then
       # build the dependency array for final sbom build:
@@ -153,19 +153,19 @@ F15_cyclonedx_sbom() {
     if [[ "${#lDEP_FILES_ARR[@]}" -gt 0 ]]; then
       # as we could have so many components that everything goes b00m we need to build the
       # components json now manually:
-      echo -n "[" > "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+      echo -n "[" >"${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
       for lDEP_FILE_ID in "${!lDEP_FILES_ARR[@]}"; do
         lDEP_FILE="${lDEP_FILES_ARR["${lDEP_FILE_ID}"]}"
-        cat "${lDEP_FILE}" >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
-        if [[ $((lDEP_FILE_ID+1)) -lt "${#lDEP_FILES_ARR[@]}" ]]; then
-          echo -n "," >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+        cat "${lDEP_FILE}" >>"${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+        if [[ $((lDEP_FILE_ID + 1)) -lt "${#lDEP_FILES_ARR[@]}" ]]; then
+          echo -n "," >>"${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
         fi
       done
-      echo -n "]" >> "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
-      tr -d '\n' < "${SBOM_LOG_PATH}/sbom_dependencies_tmp.json" > "${lSBOM_LOG_FILE}_dependencies.json"
+      echo -n "]" >>"${SBOM_LOG_PATH}/sbom_dependencies_tmp.json"
+      tr -d '\n' <"${SBOM_LOG_PATH}/sbom_dependencies_tmp.json" >"${lSBOM_LOG_FILE}_dependencies.json"
     else
-      echo -n "[" > "${lSBOM_LOG_FILE}_dependencies.json"
-      echo -n "]" >> "${lSBOM_LOG_FILE}_dependencies.json"
+      echo -n "[" >"${lSBOM_LOG_FILE}_dependencies.json"
+      echo -n "]" >>"${lSBOM_LOG_FILE}_dependencies.json"
     fi
 
     # final sbom build:
@@ -188,7 +188,7 @@ F15_cyclonedx_sbom() {
       components=:"${lSBOM_LOG_FILE}_components.json" \
       dependencies=:"${lSBOM_LOG_FILE}_dependencies.json" \
       vulnerabilities="[]" \
-      > "${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
+      >"${lSBOM_LOG_FILE}.json" || print_error "[-] SBOM builder error!"
 
     # Replace placeholder '%SPACE%' with actual spaces in the generated JSON file to ensure proper formatting.
     sed -i 's/%SPACE%/\ /g' "${lSBOM_LOG_FILE}.json"
@@ -217,7 +217,7 @@ F15_cyclonedx_sbom() {
       print_ln
       print_output "[+] Cyclonedx SBOM in json format:" "" "${lSBOM_LOG_FILE}.json"
       print_ln
-      tee -a "${LOG_FILE}" < "${lSBOM_LOG_FILE}.json"
+      tee -a "${LOG_FILE}" <"${lSBOM_LOG_FILE}.json"
       print_ln
     else
       print_output "[-] No SBOM created!"

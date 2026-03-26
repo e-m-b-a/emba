@@ -30,7 +30,7 @@ P21_buffalo_decryptor() {
 
     buffalo_enc_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       lNEG_LOG=1
     fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -96,20 +96,20 @@ buffalo_enc_extractor() {
       print_ln
       print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
 
-      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE/\.bin}_binwalk_extracted"
+      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted"
 
-      print_output "[*] Checking ${lEXTRACTION_FILE/\.bin}_binwalk_extracted for files and directories"
-      if [[ -d "${lEXTRACTION_FILE/\.bin}_binwalk_extracted" ]]; then
-        mapfile -t lFILES_BUFFALO_ARR < <(find "${lEXTRACTION_FILE/\.bin}_binwalk_extracted" -type f ! -name "*.raw")
+      print_output "[*] Checking ${lEXTRACTION_FILE/\.bin/}_binwalk_extracted for files and directories"
+      if [[ -d "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" ]]; then
+        mapfile -t lFILES_BUFFALO_ARR < <(find "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" -type f ! -name "*.raw")
         print_ln
         print_output "[*] Extracted ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files from the firmware image."
         print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files ... could take some time" "no_log"
       fi
 
-      for lBINARY in "${lFILES_BUFFALO_ARR[@]}" ; do
+      for lBINARY in "${lFILES_BUFFALO_ARR[@]}"; do
         binary_architecture_threader "${lBINARY}" "P21_buffalo_decryptor" &
         local lTMP_PID="$!"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -126,4 +126,3 @@ buffalo_enc_extractor() {
     print_output "[-] Decryption of Buffalo firmware file failed"
   fi
 }
-

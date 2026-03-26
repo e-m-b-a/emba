@@ -16,8 +16,7 @@
 
 # Description: Identifies the main Linux distribution like Kali Linux, Debian, Fedora or OpenWRT
 
-S06_distribution_identification()
-{
+S06_distribution_identification() {
   module_log_init "${FUNCNAME[0]}"
   module_title "System identification"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -71,14 +70,14 @@ S06_distribution_identification()
           lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
           lFILE_QUOTED=$(escape_echo "${lFILE}")
           lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
-          lOUT1="${lOUT1//\'}"
+          lOUT1="${lOUT1//\'/}"
           # print_output "lCONFIG: ${lCONFIG}"
           # print_output "lPATTERN: ${lPATTERN}"
           # print_output "SED command: ${lSED_COMMAND}"
           # print_output "FILE: ${lFILE_QUOTED}"
           # print_output "identified before: ${lOUT1}"
           lOUT1=$(echo "${lOUT1}" | sort -u | tr '\n' ' ')
-          lOUT1="${lOUT1//\"}"
+          lOUT1="${lOUT1//\"/}"
           # print_output "identified mod: ${lOUT1}"
           if [[ -n "${lSED_COMMAND}" ]]; then
             lIDENTIFIER=$(echo "${lOUT1}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
@@ -135,7 +134,7 @@ S06_distribution_identification()
           fi
 
           # check if not zero and not only spaces
-          if [[ -n "${lIDENTIFIER// }" ]] && [[ "${lIDENTIFIER}" == *[0-9]* ]]; then
+          if [[ -n "${lIDENTIFIER// /}" ]] && [[ "${lIDENTIFIER}" == *[0-9]* ]]; then
             if [[ -n "${DLINK_FW_VER}" ]]; then
               print_output "[+] Version information found ${ORANGE}${lIDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${lFILE}")${GREEN} for D-Link device."
               copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
@@ -165,21 +164,21 @@ S06_distribution_identification()
             local lAPP_VERS=""
             lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
             # it could be that we have a version like 2.14b:* -> we remove the last field
-            lAPP_VERS="${lAPP_VERS/:\*}"
+            lAPP_VERS="${lAPP_VERS/:\*/}"
             # we use the already (p99) identified architecture for the distri
             local lAPP_ARCH="${ARCH:-NA}"
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lAPP_ARCH:-NA}")
 
             # add source file path information to our properties array:
             local lPROP_ARRAY_INIT_ARR=()
-            lPROP_ARRAY_INIT_ARR+=( "source_path:${lFILE}" )
+            lPROP_ARRAY_INIT_ARR+=("source_path:${lFILE}")
             if [[ "${lAPP_ARCH}" != "NA" ]]; then
-              lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
+              lPROP_ARRAY_INIT_ARR+=("source_arch:${lAPP_ARCH}")
             fi
-            lPROP_ARRAY_INIT_ARR+=( "identifer_detected:${lIDENTIFIER}" )
-            lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lCSV_RULE}" )
-            lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_MAINT}" )
-            lPROP_ARRAY_INIT_ARR+=( "confidence:medium" )
+            lPROP_ARRAY_INIT_ARR+=("identifer_detected:${lIDENTIFIER}")
+            lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lCSV_RULE}")
+            lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_MAINT}")
+            lPROP_ARRAY_INIT_ARR+=("confidence:medium")
 
             build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -199,7 +198,7 @@ S06_distribution_identification()
         fi
       done
     fi
-  done < "${CONFIG_DIR}"/distri_id.cfg
+  done <"${CONFIG_DIR}"/distri_id.cfg
 
   write_log ""
   module_end_log "${FUNCNAME[0]}" "${lOUTPUT}"
@@ -216,7 +215,7 @@ dlink_image_sign() {
   # mapfile -t lDLINK_BUILDVER_ARR < <(find "${FIRMWARE_PATH}" -xdev -path "*config/buildver")
   mapfile -t lDLINK_BUILDVER_ARR < <(grep "config/buildver;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   for lDLINK_BVER in "${lDLINK_BUILDVER_ARR[@]}"; do
-    DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "${lDLINK_BVER/;*}" || true)
+    DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "${lDLINK_BVER/;*/}" || true)
     if ! [[ "${DLINK_FW_VER}" =~ ^v.* ]]; then
       DLINK_FW_VER="v${DLINK_FW_VER}"
     fi
@@ -292,10 +291,10 @@ get_csv_rule_distri() {
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER// /:}"
 
   # ensure we have filled all the fields
-  lRES="${lVERSION_IDENTIFIER//[^:]}"
+  lRES="${lVERSION_IDENTIFIER//[^:]/}"
   while [[ "${#lRES}" -lt 3 ]]; do
     lVERSION_IDENTIFIER=":${lVERSION_IDENTIFIER}"
-    lRES="${lVERSION_IDENTIFIER//[^:]}"
+    lRES="${lVERSION_IDENTIFIER//[^:]/}"
   done
 
   lCSV_RULE="$(safe_echo "${lVERSION_IDENTIFIER}")"

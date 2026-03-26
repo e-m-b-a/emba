@@ -22,10 +22,10 @@ NC="\033[0m"
 # the other scripts to track the emulation state and ensure they are not running multiple times
 # this file gets removed between automated emulation states. Nevertheless, as we are overwriting
 # it from the preInit script here we should be also fine on manual runs via run.sh
-"${BUSYBOX}" echo "preInit started" > /tmp/EMBA_config_state
+"${BUSYBOX}" echo "preInit started" >/tmp/EMBA_config_state
 
 print_keepalive() {
-  while(true); do
+  while (true); do
     "${BUSYBOX}" echo -e "[*] $(get_date) - EMBA emulation system is live"
     "${BUSYBOX}" sleep 5
   done

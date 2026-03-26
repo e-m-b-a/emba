@@ -27,7 +27,7 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] $(get_date) - Starting initial services in emulated environment...${NC}"
-"${BUSYBOX}" echo "init service config started" >> /tmp/EMBA_config_state
+"${BUSYBOX}" echo "init service config started" >>/tmp/EMBA_config_state
 
 "${BUSYBOX}" cat /firmadyne/startup_service
 
@@ -42,23 +42,22 @@ if ("${EMBA_ETC}"); then
     SERVICE_NAME=$("${BUSYBOX}" basename "${SERVICE_NAME}")
 
     # normal service startups
-    if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}") ); then
+    if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}")); then
       "${BUSYBOX}" echo -e "\tSERVICE_NAME: ${SERVICE_NAME}"
       "${BUSYBOX}" echo -e "\tSERVICE: ${SERVICE}"
 
       "${BUSYBOX}" echo -e "${NC}[*] Starting initial service ${ORANGE}${SERVICE_NAME} - ${SERVICE}${NC} ..."
       # shellcheck disable=SC3060
-      "${BUSYBOX}" ls -l "${SERVICE/\ *}"
+      "${BUSYBOX}" ls -l "${SERVICE/\ */}"
       # BINARY variable could be something like: binary parameter parameter ...
-      ${SERVICE} &  # nosemgrep
+      ${SERVICE} & # nosemgrep
       "${BUSYBOX}" sleep 5
-      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}") ); then
+      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${SERVICE_NAME}")); then
         # shellcheck disable=SC2086
-        "${BUSYBOX}" sh ${SERVICE} &  # nosemgrep
+        "${BUSYBOX}" sh ${SERVICE} & # nosemgrep
       fi
     else
       "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${SERVICE_NAME}${NC} already started ..."
     fi
-  done < "/firmadyne/startup_service"
+  done <"/firmadyne/startup_service"
 fi
-

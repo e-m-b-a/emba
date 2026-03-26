@@ -18,13 +18,12 @@
 #               The generated source code is further analysed with semgrep and the rules provided by 0xdea
 #               (https://github.com/0xdea/semgrep-rules)
 
-S16_ghidra_decompile_checks()
-{
+S16_ghidra_decompile_checks() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check decompiled binary source code for vulnerabilities"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  if [[ ${BINARY_EXTENDED} -ne 1 ]] ; then
+  if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -50,7 +49,7 @@ S16_ghidra_decompile_checks()
   fi
 
   local lBINARIES_ARR=()
-  if [[ "$(wc -l 2>/dev/null < "${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null < "${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null < "${S15_CSV_LOG}")" -gt 1 ]]; then
+  if [[ "$(wc -l 2>/dev/null <"${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
@@ -59,7 +58,7 @@ S16_ghidra_decompile_checks()
   fi
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
-    lNAME=$(basename "${lBIN_TO_CHECK}" 2> /dev/null)
+    lNAME=$(basename "${lBIN_TO_CHECK}" 2>/dev/null)
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
@@ -90,11 +89,11 @@ S16_ghidra_decompile_checks()
       print_output "[*] Info: Temporary directory already exists for binary ${ORANGE}${lNAME}${NC} - skipping analysis" "no_log"
       continue
     fi
-    lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
+    lBINS_CHECKED_ARR+=("${lBIN_MD5}")
     ghidra_analyzer "${lBIN_TO_CHECK}" &
     lTMP_PID="$!"
-    lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
-    max_pids_protection "$(("${MAX_MOD_THREADS}"/3))" lWAIT_PIDS_S16_ARR
+    lWAIT_PIDS_S16_ARR+=("${lTMP_PID}")
+    max_pids_protection "$(("${MAX_MOD_THREADS}" / 3))" lWAIT_PIDS_S16_ARR
 
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
@@ -149,7 +148,7 @@ ghidra_analyzer() {
     return
   fi
 
-  lNAME=$(basename "${lBINARY}" 2> /dev/null)
+  lNAME=$(basename "${lBINARY}" 2>/dev/null)
 
   if [[ -d "/tmp/haruspex_${lNAME}" ]]; then
     print_output "[*] Info: Temporary directory already exists for binary ${ORANGE}${lNAME}${NC} - skipping analysis" "no_log"
@@ -210,12 +209,12 @@ ghidra_analyzer() {
     fi
   done
 
-  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea/rules /tmp/haruspex_"${lNAME}"/* >> "${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
+  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea/rules /tmp/haruspex_"${lNAME}"/* >>"${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
 
   # check if there are more details in our log (not only the header with the binary protections)
-  if [[ "$(wc -l < "${lSEMGREPLOG}")" -gt 0 ]]; then
-    jq  -rc '.results[] | "\(.path),\(.check_id),\(.end.line),\(.extra.message)"' "${lSEMGREPLOG}" >> "${lSEMGREPLOG_CSV}" || true
-    lS16_SEMGREP_ISSUES=$(wc -l < "${lSEMGREPLOG_CSV}" || true)
+  if [[ "$(wc -l <"${lSEMGREPLOG}")" -gt 0 ]]; then
+    jq -rc '.results[] | "\(.path),\(.check_id),\(.end.line),\(.extra.message)"' "${lSEMGREPLOG}" >>"${lSEMGREPLOG_CSV}" || true
+    lS16_SEMGREP_ISSUES=$(wc -l <"${lSEMGREPLOG_CSV}" || true)
 
     if [[ "${lS16_SEMGREP_ISSUES}" -gt 0 ]]; then
       # check for known linux files
@@ -233,7 +232,7 @@ ghidra_analyzer() {
 
       # highlight security findings in the main semgrep log:
       # sed -i -r "s/.*external\.semgrep-rules-0xdea.*/\x1b[32m&\x1b[0m/" "${lSEMGREPLOG}"
-      lGPT_PRIO_=$((lGPT_PRIO_+1))
+      lGPT_PRIO_=$((lGPT_PRIO_ + 1))
       # Todo: highlight the identified code areas in the decompiled code
     else
       print_output "[-] No C/C++ issues found for binary ${ORANGE}${lNAME}${NC}" "no_log"
@@ -257,14 +256,14 @@ ghidra_analyzer() {
       # we need to rewrite the logging functionality in here to provide threading
       s16_semgrep_logger "${lHARUSPEX_FILE}" "${lNAME}" "${lSEMGREPLOG}" "${lGPT_PRIO_}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_S16_1+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S16_1+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S16_1
     done
 
     wait_for_pid "${lWAIT_PIDS_S16_1[@]}"
     s16_finish_the_log "${lSEMGREPLOG}" "${lNAME}" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_S16_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_S16_ARR+=("${lTMP_PID}")
   fi
 }
 
@@ -277,7 +276,7 @@ s16_finish_the_log() {
 
   for lTMP_FILE in "${lSEMGREPLOG/\.json/}"_"${lNAME}"*.tmp; do
     if [[ -f "${lTMP_FILE}" ]]; then
-      cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_error "[-] Error in logfile processing - ${lTMP_FILE}"
+      cat "${lTMP_FILE}" >>"${lSEMGREPLOG_TXT}" || print_error "[-] Error in logfile processing - ${lTMP_FILE}"
       rm "${lTMP_FILE}" || true
     fi
   done
@@ -339,10 +338,10 @@ s16_semgrep_logger() {
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${lCODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
 
         # lBINARY;source function;semgrep rule;code line nr; code line
-        write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${lCODE_LINE/\;}" "${lMESSAGE/\;}"
+        write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${lCODE_LINE/\;/}" "${lMESSAGE/\;/}"
       fi
       write_log "\\n-----------------------------------------------------------------\\n" "${lSEMGREPLOG_TMP}"
-    done < "${lSEMGREPLOG_CSV}"
+    done <"${lSEMGREPLOG_CSV}"
   fi
 
   # GPT integration
@@ -350,13 +349,13 @@ s16_semgrep_logger() {
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     # if we have the base linux config file we are checking it:
     if ! grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-      lGPT_PRIO=$((lGPT_PRIO+1))
+      lGPT_PRIO=$((lGPT_PRIO + 1))
     fi
   fi
   write_csv_gpt_tmp "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${GPT_QUESTION}" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "" ""
   write_anchor_gpt "${lGPT_ANCHOR}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}"/"${lHARUSPEX_FILE_NAME}"
 
   if [[ -f "${lSEMGREPLOG_TMP}" ]]; then
-    cat "${lSEMGREPLOG_TMP}" >> "${lSEMGREPLOG_TXT}"
+    cat "${lSEMGREPLOG_TMP}" >>"${lSEMGREPLOG_TXT}"
   fi
 }

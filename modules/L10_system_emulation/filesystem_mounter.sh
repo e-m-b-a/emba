@@ -16,7 +16,6 @@
 
 # Description:  Mounter/unmounter for L10 generated filesystems
 
-
 ## Color definition
 export RED="\033[0;31m"
 export GREEN="\033[0;32m"
@@ -24,7 +23,7 @@ export ORANGE="\033[0;33m"
 export BLUE="\033[0;34m"
 export MAGENTA="\033[0;35m"
 export CYAN="\033[0;36m"
-export NC="\033[0m"  # no color
+export NC="\033[0m" # no color
 
 delete_device_entry() {
   local lIMAGE="${1:-}"
@@ -33,7 +32,7 @@ delete_device_entry() {
 
   lIMAGE_PATH="$(realpath "${lIMAGE}")"
   lIMAGE_PATH="${lIMAGE_PATH%\/*}"
-  lIMAGE_NAME="${lIMAGE/*\/}"
+  lIMAGE_NAME="${lIMAGE/*\//}"
 
   echo "[*] Deleting device mapper for ${lIMAGE_PATH}/${lIMAGE_NAME}"
 
@@ -68,10 +67,10 @@ add_partition_emulation() {
 
   while (losetup | grep -q "${1}"); do
     local lLOOP=""
-    ((lCNT+=1))
+    ((lCNT += 1))
     lLOOP=$(losetup -a | grep "${1}" | sort -u)
     # we try to get rid of the entry nicely
-    losetup -d "${lLOOP/:*}"
+    losetup -d "${lLOOP/:*/}"
     if losetup -a | grep -q "${1}"; then
       # and now we go the brutal way
       losetup -D
@@ -85,7 +84,7 @@ add_partition_emulation() {
 
   local lCNT=0
   while (! losetup -Pf "${1}"); do
-    ((lCNT+=1))
+    ((lCNT += 1))
     if [[ "${lCNT}" -gt 10 ]]; then
       break
     fi
@@ -94,7 +93,7 @@ add_partition_emulation() {
 
   while (! "${lFOUND}"); do
     sleep 1
-    ((lCNT+=1))
+    ((lCNT += 1))
     local lLOSETUP_OUT_ARR=()
     mapfile -t lLOSETUP_OUT_ARR < <(losetup | grep -v "BACK-FILE")
     for LINE in "${lLOSETUP_OUT_ARR[@]}"; do
@@ -123,7 +122,7 @@ add_partition_emulation() {
   local lCNT=0
   while (! find "${lDEV_PATH}" -ls | grep -q "disk"); do
     sleep 1
-    ((lCNT+=1))
+    ((lCNT += 1))
     if [[ "${lCNT}" -gt 100 ]]; then
       # get an exit if nothing happens
       break
@@ -137,7 +136,7 @@ image_mounter() {
 
   lIMAGE_PATH="$(realpath "${lIMAGE}")"
   lIMAGE_PATH="${lIMAGE_PATH%\/*}"
-  lIMAGE_NAME="${lIMAGE/*\/}"
+  lIMAGE_NAME="${lIMAGE/*\//}"
   lMNT_POINT="${lIMAGE_PATH}"/mounter
   [[ ! -d "${lMNT_POINT}" ]] && mkdir "${lMNT_POINT}"
 
@@ -166,7 +165,7 @@ image_unmounter() {
   lIMAGE="${1:-}"
   lIMAGE_PATH="$(realpath "${lIMAGE}")"
   lIMAGE_PATH="${lIMAGE_PATH%\/*}"
-  lIMAGE_NAME="${lIMAGE/*\/}"
+  lIMAGE_NAME="${lIMAGE/*\//}"
   lMNT_POINT="${lIMAGE_PATH}"/mounter
 
   if [[ ! -d "${lMNT_POINT}" ]]; then
@@ -199,7 +198,7 @@ if [[ "${IMAGE_DETAILS}" != *"DOS/MBR boot sector; partition"* ]]; then
   exit 1
 fi
 
-if ! [[ ${EUID} -eq 0 ]] ; then
+if ! [[ ${EUID} -eq 0 ]]; then
   echo -e "[-] Setting up the firmware mounter requires root privileges"
   exit 1
 fi
@@ -214,4 +213,3 @@ if [[ "${MOUNTER}" == "mount" ]]; then
 elif [[ "${MOUNTER}" == "umount" ]]; then
   image_unmounter "${IMAGE}"
 fi
-

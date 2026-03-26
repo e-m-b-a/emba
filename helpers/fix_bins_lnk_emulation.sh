@@ -36,7 +36,7 @@ chmod +x "${ROOT_DIR}"/busybox
 echo "[*] Identifying possible executable files"
 mapfile -t POSSIBLE_ELFS < <(find "${ROOT_DIR}" -type f ! -name "*.raw" -exec file {} \; | grep "ELF\|executable" | cut -d: -f1)
 mapfile -t POSSIBLE_SH < <(find "${ROOT_DIR}" -type f -name "*.sh")
-POSSIBLE_EXES_ARR=( "${POSSIBLE_ELFS[@]}" "${POSSIBLE_SH[@]}" )
+POSSIBLE_EXES_ARR=("${POSSIBLE_ELFS[@]}" "${POSSIBLE_SH[@]}")
 
 for POSSIBLE_EXE in "${POSSIBLE_EXES_ARR[@]}"; do
   [[ -x "${POSSIBLE_EXE}" ]] && continue
