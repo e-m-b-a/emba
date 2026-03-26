@@ -167,7 +167,7 @@ set_defaults() {
 
   # binary dependency map - enable via scanning profile
   export EMBA_MAP_GENERATOR=1
-  export MAX_MAP_FILES=2000 # maximum files to analyse and generate dependency map
+  export MAX_MAP_FILES=1500 # maximum files to analyse and generate dependency map
   export MAX_MAP_JOBS=""    # maximum jobs used for map generation - no entry means the default from the module
 
   # we can enable/disable the s08 submodules with the following array configuration

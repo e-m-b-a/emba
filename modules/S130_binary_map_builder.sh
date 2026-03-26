@@ -52,7 +52,6 @@ load_default_environment() {
   # Limit the number of processed files to 2000 for handling firmware images
   # For testing this should be limited to something lower
   [[ -z "${MAX_MAP_FILES}" ]] && export MAX_MAP_FILES=2000
-  MAX_MAP_FILES=500
 
   # hard-coded dependency blacklist - is fp prone and overwhelming output
   # add entries if you do not want to see them
