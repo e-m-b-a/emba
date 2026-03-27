@@ -161,7 +161,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
         </div>
 
         <div style="margin-top:20px; font-size:9px; color:#bbb; text-align:center; letter-spacing: 1px;">
-            EMBA INTERACTIVE AUDIT MAP
+            EMBA INTERACTIVE FIRMWARE MAP
         </div>
     </div>
 </div>
@@ -248,12 +248,6 @@ Author(s) and contributors from the EMBA project are listed here: https://github
     }
 
     /**
-     * Jumps the camera to the other end of a connection (edge).
-     * Automatically detects if it should jump forward or backward.
-     * If a node is focused, it jumps to the partner.
-     */
-
-    /**
      * Jumps to the other end of a connection.
      * Bi-directional: If at target, jumps back to source.
      */
@@ -268,7 +262,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
         var idTarget = pts[1];
         var finalTargetID = idTarget; // Standard: vorwärts
 
-        // Aktuellen Fokus bestimmen (sauber bereinigt)
+        // Aktuellen Fokus bestimmen
         var currentFocusNode = document.querySelector('.node.fokus-blink');
         if (currentFocusNode) {
             var currentID = currentFocusNode.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
@@ -327,7 +321,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
         document.getElementById('info-arch').textContent = data[1] || "N/A";
         document.getElementById('info-path').textContent = data[3] || "N/A";
 
-        // NEU: Marker-Feld füllen (Feld Index 5)
+        // Marker-Feld füllen (Feld Index 5)
         var markerVal = (data[5] && data[5] !== "NONE") ? data[5] : "-";
         document.getElementById('info-marker').textContent = markerVal;
 
@@ -348,15 +342,6 @@ Author(s) and contributors from the EMBA project are listed here: https://github
             capCon.appendChild(s);
         });
 
-/*
-        // Tracing Edges
-        var dc = 0, rc = 0;
-        document.querySelectorAll('.edge').forEach(e => {
-            var pts = e.querySelector('title').textContent.trim().replace(/"/g, '').split('->');
-            if (pts[0] === nodeTitle) { e.classList.add('tracer-active'); markPartner(pts[1], 'node-dependency'); dc++; }
-            if (pts[1] === nodeTitle) { e.classList.add('tracer-reverse'); markPartner(pts[0], 'node-reverse'); rc++; }
-        });
-*/
 
         // Tracing Edges
         var dc = 0, rc = 0;
