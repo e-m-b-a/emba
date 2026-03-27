@@ -39,6 +39,9 @@ export QEMULATION=0
 
 export SELECT_MODULES+=( "S06" "S08" "S24" "S25" "F15" )
 
+# disable EMBA binary map dependency generator
+EMBA_MAP_GENERATOR=0
+
 # we can enable/disable the s08 submodules with the following array configuration -> just comment the submodule
 # that should not be used
 export S08_MODULES_ARR=()

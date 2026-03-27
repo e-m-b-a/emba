@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -170,7 +170,7 @@ S13_weak_func_check()
     fi
 
     local lBINS_CNT=0
-    lBINS_CNT=$(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep -c ";ELF")
+    lBINS_CNT=$(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep -c ";ELF" || true)
     write_log ""
     write_log "[*] Statistics:${lSTRCPY_CNT}:${lBINS_CNT}"
     write_log ""
@@ -525,7 +525,7 @@ function_check_ARM32() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -f "${FUNC_LOG:-}"
       continue
     fi
   done
