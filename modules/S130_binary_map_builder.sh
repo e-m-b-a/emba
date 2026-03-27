@@ -137,8 +137,8 @@ setup_environment() {
 
 system_emulator_init_runner() {
   local lSYS_EMU_ENTRY=""
-  if [[ -f "${EMBA_LOG_DIR}"/emulator_online_results.log ]]; then
-    lSYS_EMU_ENTRY=$(grep "ICMP ok\|TCP ok" "${EMBA_LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 || true)
+  if [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
+    lSYS_EMU_ENTRY=$(grep "ICMP ok\|TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 || true)
   else
     print_output "[-] Identified NO system emulation details"
     return
@@ -147,7 +147,7 @@ system_emulator_init_runner() {
   print_output "  ->  ${lSYS_EMU_ENTRY}"
 
   lEMU_PATH=$(echo "${lSYS_EMU_ENTRY}" | cut -d ';' -f11)
-  lEMU_PATH=${EMBA_LOG_DIR}"/l10_system_emulation/${lEMU_PATH}"
+  lEMU_PATH=${LOG_DIR}"/l10_system_emulation/${lEMU_PATH}"
   if [[ ! -d "${lEMU_PATH}" ]]; then
     print_output "[-] No system emulation results available ... no checks performed"
     return

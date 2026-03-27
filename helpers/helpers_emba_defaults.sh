@@ -165,8 +165,8 @@ set_defaults() {
   # if this changes this option can be adjusted in the scanning profile
   export SBOM_LIFECYCLE_PHASE="operations"
 
-  # binary dependency map - enable by default, can be adjusted via scanning profile
-  export EMBA_MAP_GENERATOR=1
+  # binary dependency map - disabled by default, can be adjusted via scanning profile
+  export EMBA_MAP_GENERATOR=0
   export MAX_MAP_FILES=1500 # maximum files to analyse and generate dependency map
   export MAX_MAP_JOBS=""    # maximum jobs used for map generation - no entry means the default from the module
 
