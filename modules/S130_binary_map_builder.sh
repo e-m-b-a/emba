@@ -663,6 +663,8 @@ build_dot() {
   local lFILE_TO_CHECK=""
   for lFILE_TO_CHECK in "${ALL_EXEC_FILES_ARR[@]}"; do
     lFILE_CNT=$((lFILE_CNT + 1))
+    print_output "[*] Testing file ${ORANGE}${lFILE_CNT} / ${#ALL_EXEC_FILES_ARR[@]}${NC} - ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
+
     if [[ "${lFILE_CNT}" -gt "${MAX_MAP_FILES}" ]]; then
       break
     fi
@@ -671,7 +673,6 @@ build_dot() {
     [[ "${lFILE_TO_CHECK}" == *"/decompressed.bin" ]] && continue
     [[ "${lFILE_TO_CHECK}" == *".raw" ]] && continue
 
-    print_output "[*] Testing file ${ORANGE}${lFILE_CNT} / ${#ALL_EXEC_FILES_ARR[@]}${NC} - ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
 
     main_processing_thread_helper "${lFILE_TO_CHECK}" &
     while (($(jobs -r | wc -l) >= MAX_MAP_JOBS)); do
