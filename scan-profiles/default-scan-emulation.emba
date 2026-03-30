@@ -25,6 +25,9 @@ export SELECT_MODULES+=( "S05" "S21" "S22" "S23" "S24" "F14" "F50" )
 export DISABLE_STATUS_BAR=0
 export SILENT=1
 
+# disable EMBA binary map dependency generator
+EMBA_MAP_GENERATOR=0
+
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"

@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -77,7 +77,7 @@ P35_UEFI_extractor() {
         # lets check for UEFI firmware
         local lTMP_UEFI_FILES_ARR=()
         local lUEFI_FILE=""
-        mapfile -t lTMP_UEFI_FILES_ARR < <(grep "^${FUNCNAME[0]};" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep "${lEXTRACTION_DIR}" | sort -u)
+        mapfile -t lTMP_UEFI_FILES_ARR < <(grep "^${FUNCNAME[0]};" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep "${lEXTRACTION_DIR}" | sort -u || true)
         for lUEFI_FILE in "${lTMP_UEFI_FILES_ARR[@]}"; do
           uefi_firmware_parser "${lUEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
@@ -116,7 +116,7 @@ P35_UEFI_extractor() {
       if [[ -d "${lEXTRACTION_DIR}" && "${RTOS}" -eq 1 ]]; then
         local lTMP_UEFI_FILES_ARR=()
         local lUEFI_FILE=""
-        mapfile -t lTMP_UEFI_FILES_ARR < <(grep "^${FUNCNAME[0]};" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep "${lEXTRACTION_DIR}" | sort -u)
+        mapfile -t lTMP_UEFI_FILES_ARR < <(grep "^${FUNCNAME[0]};" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep "${lEXTRACTION_DIR}" | sort -u || true)
         for lUEFI_FILE in "${lTMP_UEFI_FILES_ARR[@]}"; do
           uefi_firmware_parser "${lUEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then

@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 # Copyright 2020-2023 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -750,16 +750,14 @@ check_disk_space_emu() {
   local lCRITICAL_FILES_ARR=()
   local lKILL_PROC_NAME=""
 
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}"/ -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename -s .txt % 2>/dev/null' || true)
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null |xargs -r -0 -P 16 -I % sh -c 'basename -s .txt % 2>/dev/null' || true)
   for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/stracer_}"
-    if pgrep -f "${lEMULATOR}.*${lKILL_PROC_NAME}" > /dev/null; then
-      print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"
-      print_output "[*] Killing process ${ORANGE}${lEMULATOR}.*${lKILL_PROC_NAME}.*${NC}" "no_log"
-      pkill -f "${lEMULATOR}.*${lKILL_PROC_NAME}.*" >/dev/null|| true
-      # rm "${LOG_DIR}"/qemu_emulator/*"${lKILLER}"*
+    if pgrep -f "${lEMULATOR}.*${lKILL_PROC_NAME}" 2>/dev/null; then
+      print_output "[*] Qemu processes are wasting disk space ... we try to kill process ${lKILL_PROC_NAME} now" "no_log"
+      pkill -9 -f "${lEMULATOR}.*${lKILL_PROC_NAME}.*" >/dev/null || true
     fi
   done
 }

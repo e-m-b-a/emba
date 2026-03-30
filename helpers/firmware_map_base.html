@@ -1,0 +1,542 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2026 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EMBA System Map - Interactive dependency analysis</title>
+    <script src="%%JS_LIB%%"></script>
+    <style>
+        /* BASE LAYOUT */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #eee; font-family: sans-serif; }
+        #wrapper { width: 100vw; height: 100vh; background: white; cursor: grab; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #wrapper svg { width: 100%; height: 100%; display: block; min-width: 500px; }
+
+        /* ISOLATION & SCREENSHOT STATES */
+        /* Normal isolation: dimmed background */
+        svg.is-isolating .node, svg.is-isolating .edge { opacity: 0.1; transition: opacity 0.3s ease; }
+        /* Keep selected paths and nodes fully opaque */
+        svg.is-isolating .node.fokus-blink, svg.is-isolating .node.node-dependency, svg.is-isolating .node.node-reverse,
+        svg.is-isolating .edge.tracer-active, svg.is-isolating .edge.tracer-reverse, svg.is-isolating .edge.edge-focus { opacity: 1 !important; }
+        /* High-contrast text during isolation */
+        svg.is-isolating .node.fokus-blink text, svg.is-isolating .node.node-dependency text, svg.is-isolating .node.node-reverse text { fill: #000000 !important; font-weight: bold; }
+        /* Screenshot mode: completely hide background elements */
+        svg.is-screenshotting .node:not(.fokus-blink):not(.node-dependency):not(.node-reverse),
+        svg.is-screenshotting .edge:not(.tracer-active):not(.tracer-reverse):not(.edge-focus) { display: none !important; }
+
+        /* COMPACT UI OVERLAYS */
+        /* Top Left: Search & Logo */
+        .ui-overlay { position: absolute; top: 15px; left: 15px; z-index: 1000; width: 156px; pointer-events: none; }
+        .ui-element { pointer-events: auto; }
+        .emba-logo { width: 100%; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.1)); margin-bottom: 6px; cursor: pointer; }
+        .search-panel { background: white; padding: 8px; border-radius: 4px; border-top: 3px solid %%COLOR_BIN%%; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; box-sizing: border-box; }
+        #result-list { list-style: none; padding: 0; margin-top: 5px; max-height: 140px; overflow-y: auto; }
+        #result-list li { padding: 4px 6px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 10px; line-height: 1.2; }
+        #result-list li:hover { background: #f0f7ff; }
+
+        /* Top Right: Info Panel */
+        .info-panel { position: absolute; top: 15px; right: 15px; z-index: 1000; background: white; width: 246px; padding: 14px; border-radius: 6px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); border: 1px solid #ccc; display: none; }
+        .info-header { font-size: 16px; font-weight: bold; border-bottom: 2px solid %%COLOR_BIN%%; margin-bottom: 10px; padding-bottom: 6px; word-break: break-all; line-height: 1.2; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; text-align: right; font-size: 12px; white-space: break-space; }
+        .info-row b { font-size: 11px; }
+        #info-path { font-size: 10px !important; max-width: 140px; word-break: break-all; text-align: right; color: #666; }
+
+        /* SECURITY & CAPABILITY STYLING */
+        .sec-badge { padding: 1px 5px; border-radius: 2px; font-size: 9px; font-weight: bold; color: white; text-transform: uppercase; }
+        .sec-on { background: #28a745; } .sec-off { background: #dc3545; } .sec-warn { background: #ff9800; }
+        .cap-tag { font-size: 9px; padding: 1px 4px; border-radius: 6px; font-weight: bold; display: inline-block; border: 1px solid transparent; margin-bottom: 2px; }
+        .cap-exec { background: #fff3e0; color: #e65100; border-color: #ffb74d; }
+        .cap-net  { background: #e8f5e9; color: #1b5e20; border-color: #81c784; }
+        .cap-file { background: #e3f2fd; color: #0d47a1; border-color: #64b5f6; }
+
+        /* Bottom Left: Zoom & Controls */
+        .zoom-panel { position: absolute; bottom: 15px; left: 15px; z-index: 1000; display: flex; flex-direction: column; gap: 4px; background: white; padding: 6px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid #ccc; }
+        .zoom-panel button { width: 28px; height: 28px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 3px; font-size: 14px; font-weight: bold; cursor: pointer; color: #333; transition: background 0.2s; }
+        .zoom-panel button:hover { background: #e9ecef; color: %%COLOR_BIN%%; }
+        .zoom-panel button.active { background: #dc3545; color: white; border-color: #a71d2a; }
+
+        /* Bottom Right: Legend */
+        .legend-panel { position: absolute; bottom: 15px; right: 15px; width: 180px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 6px; border: 1px solid #ccc; z-index: 900; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .legend-title { font-weight: bold; color: %%COLOR_BIN%%; border-bottom: 1px solid #eee; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .legend-content { font-size: 10px; line-height: 1.6; color: #444; display: flex; flex-direction: column; gap: 4px; }
+        .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; flex-shrink: 0; }
+
+        /* HELP OVERLAY */
+        .help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .help-content { background: white; width: 320px; padding: 20px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .help-section-title { font-size: 10px; font-weight: bold; color: %%COLOR_BIN%%; text-transform: uppercase; margin-top: 10px; margin-bottom: 4px; border-bottom: 1px solid #f0f0f0; }
+        .help-item { font-size: 11px; color: #444; padding: 3px 0; display: flex; justify-content: space-between; }
+        .help-item b { color: #000; font-weight: 600; }
+
+        /* ANIMATIONS & INTERACTION */
+        .node.fokus-blink polygon, .node.fokus-blink ellipse, .node.fokus-blink path { fill: #22b8cf !important; stroke: #15aabf !important; stroke-width: 4px !important; animation: pulse-animation 2s infinite; }
+        .node.node-dependency polygon, .node.node-dependency ellipse, .node.node-dependency path { fill: #a5d8ff !important; stroke: #339af0 !important; stroke-width: 3px !important; }
+        .node.node-reverse polygon, .node.node-reverse ellipse, .node.node-reverse path { fill: #b2f2bb !important; stroke: #51cf66 !important; stroke-width: 3px !important; }
+        .edge.tracer-active path { stroke: #339af0 !important; stroke-width: 5px !important; }
+        .edge.tracer-reverse path { stroke: #51cf66 !important; stroke-width: 5px !important; }
+        .edge.edge-focus path { stroke: #fd7e14 !important; stroke-width: 6px !important; }
+        @keyframes pulse-animation { 0% { stroke-width: 4px; } 50% { stroke-width: 8px; stroke-opacity: 0.5; } 100% { stroke-width: 4px; } }
+        svg .node, svg .edge { cursor: pointer; }
+        text { pointer-events: none; }
+        .close-btn { float: right; cursor: pointer; font-size: 18px; color: #999; margin-top: -12px; margin-right: -6px; }
+
+        /* Erleichtert das Klicken auf Kanten */
+        .edge {
+            pointer-events: visiblePainted;
+            cursor: crosshair;
+        }
+        /* Vergrößert die Interaktionszone der Pfade */
+        .edge path {
+            stroke-width: 2px;
+        }
+        .hist-btn {
+            width: 24px;
+            height: 20px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            pointer-events: auto !important; /* Wichtig für Klickbarkeit */
+        }
+
+        .hist-btn:hover {
+            background: #e9ecef;
+            color: %%COLOR_BIN%%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="ui-overlay">
+    <a href="https://github.com" target="_blank" class="ui-element">
+        <img src="%%EMBA_LOGO%%" class="emba-logo" alt="EMBA Logo">
+    </a>
+    <div class="search-panel ui-element">
+        <input type="text" id="search-input" placeholder="Search binary..." autocomplete="off">
+        <ul id="result-list"></ul>
+    </div>
+</div>
+
+<!-- HELP OVERLAY -->
+<div id="help-overlay" class="help-overlay" onclick="toggleHelp()">
+    <div class="help-content ui-element" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="toggleHelp()">×</span>
+        <div class="info-header" style="font-size: 16px; margin-bottom: 15px;">EMBA Quick Help</div>
+
+        <div class="help-grid">
+            <div class="help-section-title">Navigation</div>
+            <div class="help-item"><b>Mouse Wheel:</b> Zoom In / Out</div>
+            <div class="help-item"><b>Left Click + Drag:</b> Pan across Map</div>
+            <div class="help-item"><b>⟲ Button:</b> Reset Zoom & Center</div>
+
+            <div class="help-section-title">Analysis</div>
+            <div class="help-item"><b>Click Node:</b> Show Binary Details</div>
+            <div class="help-item"><b>Click Edge:</b> Show Dependency Info</div>
+            <!-- NEU: Dokumentation des Sprung-Features -->
+            <div class="help-item"><b>Double Click Edge:</b> Jump to Partner</div>
+            <div class="help-item"><b>[ESC] Key:</b> Clear All Highlights</div>
+
+            <div class="help-section-title">Visuals</div>
+            <div class="help-item"><b>[S] Key / 📷:</b> Screenshot Mode</div>
+            <div class="help-item" style="font-size: 9px; color: #888;">(Hides Background & UI for clean images)</div>
+        </div>
+
+        <div style="margin-top:20px; font-size:9px; color:#bbb; text-align:center; letter-spacing: 1px;">
+            EMBA INTERACTIVE FIRMWARE MAP
+        </div>
+    </div>
+</div>
+
+<div class="zoom-panel ui-element">
+    <button onclick="pz.zoomIn()" title="Zoom In">+</button>
+    <button onclick="pz.zoomOut()" title="Zoom Out">−</button>
+    <button onclick="pz.resetZoom(); pz.center();" title="Reset Zoom">⟲</button>
+    <button onclick="toggleHelp()" style="color: %%COLOR_BIN%%;" title="Help">?</button>
+    <button id="snap-btn" class="screenshot-btn" onclick="toggleScreenshotMode()" title="Screenshot Mode">📷</button>
+</div>
+
+<div id="info-panel" class="info-panel">
+    <!-- History & Close Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: -5px;">
+        <div id="history-controls" style="display: flex; gap: 5px; pointer-events: auto;">
+            <button onclick="historyBack()" id="hist-back" class="hist-btn" title="Go Back">◀</button>
+            <button onclick="historyForward()" id="hist-fwd" class="hist-btn" title="Go Forward">▶</button>
+            <span id="hist-status" style="font-size: 9px; color: #999; margin-left: 5px;"></span>
+        </div>
+        <span class="close-btn" onclick="resetMap()" style="margin-top: 0; position: relative;">×</span>
+    </div>
+
+    <div style="font-size:10px; color:%%COLOR_BIN%%; font-weight:bold; letter-spacing:1px; margin-bottom:5px;">ANALYSIS REPORT</div>
+    <div id="info-filename" class="info-header">-</div>
+    <div id="sec-container" style="display:flex; gap:5px; margin-bottom:15px; flex-wrap: wrap;"></div>
+    <div class="info-row"><b>Path:</b> <span id="info-path">-</span></div>
+    <div class="info-row"><b>Size:</b> <span id="info-size">-</span></div>
+    <div class="info-row"><b>Arch:</b> <span id="info-arch">-</span></div>
+    <div class="info-row"><b>Source:</b> <span id="info-marker">-</span></div>
+    <div style="margin-top:10px; font-weight:bold; font-size:12px; color:%%COLOR_BIN%%;">Capabilities:</div>
+    <div id="cap-container" style="display:flex; gap:5px; margin-top:5px; flex-wrap: wrap;"></div>
+    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+    <div class="info-row">Forward: <span id="count-dep" style="color:#339af0; font-weight:bold;">0</span></div>
+    <div class="info-row">Reverse: <span id="count-rev" style="color:#51cf66; font-weight:bold;">0</span></div>
+</div>
+
+<div class="legend-panel">
+    <div class="legend-title">🛡️ Security Hardening</div>
+    <div class="legend-sec-list">
+        <div><span class="sec-badge sec-on">NX</span> <small>No-Exec</small></div>
+        <div><span class="sec-badge sec-on">PIE</span> <small>ASLR</small></div>
+        <div><span class="sec-badge sec-on">CANARY</span> <small>Stack Prot.</small></div>
+        <div><span class="sec-badge sec-warn">STATIC</span> <small>Linked</small></div>
+    </div>
+    <div class="legend-title">🖱️ Interaction</div>
+    <div class="legend-content">
+        <div class="legend-item"><span class="dot" style="background:#339af0;"></span> Forward (Deps)</div>
+        <div class="legend-item"><span class="dot" style="background:#51cf66;"></span> Reverse (Users)</div>
+        <div class="legend-item"><span class="dot" style="background:#22b8cf;"></span> Selected Binary</div>
+    </div>
+</div>
+
+<div id="wrapper">
+%%SVG_FILE_CONTENT%%
+</div>
+
+<script>
+    var pz;
+
+    /**
+     * Resets all UI states and SVG highlights.
+     */
+    function resetMap() {
+        document.querySelectorAll('.fokus-blink, .tracer-active, .tracer-reverse, .node-reverse, .node-dependency, .edge-focus')
+            .forEach(el => el.classList.remove('fokus-blink', 'tracer-active', 'tracer-reverse', 'node-reverse', 'node-dependency', 'edge-focus'));
+        
+        document.querySelectorAll('.node text').forEach(txt => {
+            txt.style.fill = ""; txt.style.fontWeight = "normal";
+            var isBin = txt.parentNode.querySelector('polygon, path');
+            txt.style.fill = isBin ? "white" : "black";
+        });
+
+        var svg = document.querySelector('svg');
+        if (svg) { svg.classList.remove('is-isolating', 'is-screenshotting'); }
+
+        document.getElementById('info-panel').style.display = 'none';
+        document.getElementById('result-list').innerHTML = '';
+        document.querySelectorAll('.ui-overlay, .legend-panel, .zoom-panel').forEach(el => {
+            el.style.display = "block";
+            el.style.opacity = "1";
+        });
+        var snapBtn = document.getElementById('snap-btn'); if (snapBtn) snapBtn.classList.remove('active');
+    }
+
+    /**
+     * Jumps to the other end of a connection.
+     * Bi-directional: If at target, jumps back to source.
+     */
+    function jumpToPartner(edge) {
+        // Gleiche Bereinigung wie oben
+        var edgeTitle = edge.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
+        var pts = edgeTitle.split('->').map(p => p.trim());
+
+        if (pts.length !== 2) return;
+
+        var idSource = pts[0];
+        var idTarget = pts[1];
+        var finalTargetID = idTarget; // Standard: vorwärts
+
+        // Aktuellen Fokus bestimmen
+        var currentFocusNode = document.querySelector('.node.fokus-blink');
+        if (currentFocusNode) {
+            var currentID = currentFocusNode.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
+
+            // Wenn wir beim Ziel sind, springe zur Quelle
+            if (currentID === idTarget) {
+                finalTargetID = idSource;
+            }
+        }
+
+        // Ziel suchen und fokussieren
+        document.querySelectorAll('.node').forEach(n => {
+            var nodeTitle = n.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
+            if (nodeTitle === finalTargetID) {
+                focusNode(n);
+            }
+        });
+    }
+
+    /**
+     * Marks dependency partners in the graph.
+     */
+    function markPartner(ident, className) {
+        var cleanID = ident.replace(/"/g, '').trim();
+        document.querySelectorAll('.node').forEach(node => {
+            var title = node.querySelector('title');
+            if (title && title.textContent.trim().replace(/"/g, '') === cleanID) {
+                node.classList.add(className);
+                var text = node.querySelector('text');
+                if (text) text.style.fontWeight = "bold";
+            }
+        });
+    }
+
+    /**
+     * Focused view for a specific node (Binary).
+     */
+    function focusNode(node) {
+        var nodeTitle = node.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
+        addToHistory(nodeTitle);
+
+        resetMap();
+        document.querySelector('svg').classList.add('is-isolating');
+        node.classList.add('fokus-blink');
+
+        var nodeName = node.querySelector('text').textContent.trim();
+        var nodeTitle = node.querySelector('title').textContent.trim().replace(/"/g, '');
+        var link = node.querySelector('a');
+        
+        // Data format: Size|Arch|Security|Path|Capabilities|Source
+        var data = (link ? (link.getAttribute('xlink:href') || link.getAttribute('href')) : "-|-|-|-|-|-").split('|');
+        
+        // XSS Prevention: Use textContent
+        document.getElementById('info-filename').textContent = nodeName;
+        document.getElementById('info-size').textContent = data[0] || "N/A";
+        document.getElementById('info-arch').textContent = data[1] || "N/A";
+        document.getElementById('info-path').textContent = data[3] || "N/A";
+
+        // Marker-Feld füllen (Feld Index 5)
+        var markerVal = (data[5] && data[5] !== "NONE") ? data[5] : "-";
+        document.getElementById('info-marker').textContent = markerVal;
+
+        // Security Badges
+        var secCon = document.getElementById('sec-container'); secCon.innerHTML = '';
+        if(data[2]) data[2].trim().split(' ').forEach(f => {
+            if(!f) return;
+            var s = document.createElement('span'); s.textContent = f.replace('!', '');
+            s.className = 'sec-badge ' + (f === 'STATIC' ? 'sec-warn' : (f.startsWith('!') ? 'sec-off' : 'sec-on'));
+            secCon.appendChild(s);
+        });
+
+        // Capabilities
+        var capCon = document.getElementById('cap-container'); capCon.innerHTML = '';
+        if(data[4] && data[4] !== "NONE") data[4].trim().split(' ').forEach(c => {
+            var s = document.createElement('span'); s.textContent = c;
+            s.className = 'cap-tag cap-' + c.toLowerCase().trim();
+            capCon.appendChild(s);
+        });
+
+
+        // Tracing Edges
+        var dc = 0, rc = 0;
+        document.querySelectorAll('.edge').forEach(e => {
+            // WICHTIG: .replace(/[\n\r]/g, '') entfernt Zeilenumbrüche, die Graphviz oft einfügt
+            var edgeTitle = e.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
+            var pts = edgeTitle.split('->').map(p => p.trim());
+
+            if (pts[0] === nodeTitle) {
+                e.classList.add('tracer-active');
+                markPartner(pts[1], 'node-dependency');
+                dc++;
+            }
+            if (pts[1] === nodeTitle) {
+                e.classList.add('tracer-reverse');
+                markPartner(pts[0], 'node-reverse');
+                rc++;
+            }
+        });
+
+        // Bind Edge events (Single click for info, Double click to jump)
+        document.querySelectorAll('.edge').forEach(e => {
+            // Single click: Show connection info in the panel
+            e.onclick = function(ev) { 
+                ev.stopPropagation(); 
+                focusEdge(e); 
+            };
+            
+            // Double click: Jump to the connected node
+            // e.ondblclick = function(ev) {
+            //    ev.stopPropagation();
+            //    jumpToPartner(e);
+            // };
+
+            // Visual feedback: change cursor to pointer
+            e.style.cursor = "crosshair"; 
+        });
+
+
+        document.getElementById('count-dep').textContent = dc;
+        document.getElementById('count-rev').textContent = rc;
+        document.getElementById('info-panel').style.display = 'block';
+
+        // Camera Pan
+        var r = node.getBoundingClientRect(), w = document.getElementById('wrapper').getBoundingClientRect();
+        pz.panBy({x: (w.left + w.width/2) - (r.left + r.width/2), y: (w.top + w.height/2) - (r.top + r.height/2)});
+    }
+
+    /**
+     * Interaction for edges (Links).
+     */
+    function focusEdge(edge) {
+        resetMap();
+        document.querySelector('svg').classList.add('is-isolating');
+        edge.classList.add('edge-focus');
+        var pts = edge.querySelector('title').textContent.trim().replace(/"/g, '').split('->');
+        document.getElementById('info-filename').textContent = "Dependency Link";
+        document.getElementById('info-size').textContent = pts[0];
+        document.getElementById('info-arch').textContent = pts[1];
+        markPartner(pts[0], 'fokus-blink'); markPartner(pts[1], 'node-dependency');
+        document.getElementById('info-panel').style.display = 'block';
+        document.getElementById('lbl-marker').innerText = "";
+        document.getElementById('info-marker').textContent = "";
+    }
+
+    /**
+     * UI Mode Toggles.
+     */
+    function toggleScreenshotMode() {
+        var svg = document.querySelector('svg');
+        var btn = document.getElementById('snap-btn');
+        if (!svg.classList.contains('is-isolating')) { alert("Select binary first."); return; }
+        var active = svg.classList.toggle('is-screenshotting');
+        btn.classList.toggle('active', active);
+        document.querySelectorAll('.ui-overlay, .info-panel, .legend-panel, .zoom-panel').forEach(el => {
+            if (el.classList.contains('zoom-panel')) el.style.opacity = active ? "0.2" : "1";
+            else el.style.display = active ? "none" : (el.id === 'info-panel' ? 'block' : 'block');
+        });
+    }
+
+    function toggleHelp() {
+        var o = document.getElementById('help-overlay');
+        o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+        var nodeHistory = [];
+    var historyIndex = -1;
+    var isHistoryAction = false; // Verhindert Duplikate beim Navigieren
+
+    /**
+     * Fügt einen Knoten zur History hinzu.
+     */
+    function addToHistory(nodeID) {
+        if (isHistoryAction) return;
+        
+        // Falls wir in der Mitte der History waren und neu klicken, 
+        // löschen wir den "Forward"-Zweig
+        if (historyIndex < nodeHistory.length - 1) {
+            nodeHistory = nodeHistory.slice(0, historyIndex + 1);
+        }
+
+        // Nur hinzufügen, wenn es nicht der aktuelle Knoten ist
+        if (nodeHistory[historyIndex] !== nodeID) {
+            nodeHistory.push(nodeID);
+            if (nodeHistory.length > 10) nodeHistory.shift(); // Max 10 Einträge
+            historyIndex = nodeHistory.length - 1;
+        }
+        updateHistoryButtons();
+    }
+
+    function historyBack() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            jumpToHistoryEntry();
+        }
+    }
+
+    function historyForward() {
+        if (historyIndex < nodeHistory.length - 1) {
+            historyIndex++;
+            jumpToHistoryEntry();
+        }
+    }
+
+    function jumpToHistoryEntry() {
+        isHistoryAction = true;
+        var targetID = nodeHistory[historyIndex];
+        document.querySelectorAll('.node').forEach(n => {
+            var title = n.querySelector('title').textContent.replace(/[\n\r"]/g, '').trim();
+            if (title === targetID) focusNode(n);
+        });
+        isHistoryAction = false;
+        updateHistoryButtons();
+    }
+
+    function updateHistoryButtons() {
+        document.getElementById('hist-back').style.opacity = (historyIndex > 0) ? "1" : "0.3";
+        document.getElementById('hist-fwd').style.opacity = (historyIndex < nodeHistory.length - 1) ? "1" : "0.3";
+        document.getElementById('hist-status').textContent = (historyIndex + 1) + " / " + nodeHistory.length;
+    }
+
+
+    // EVENT INITIALIZATION
+    window.onload = function() {
+        var svg = document.querySelector('svg');
+        if (!svg) return;
+        pz = svgPanZoom(svg, { zoomEnabled: true, controlIconsEnabled: false, fit: true, center: true });
+
+        // Link/Node hijacking
+        document.querySelectorAll('svg a').forEach(a => a.onclick = (e) => e.preventDefault());
+        document.querySelectorAll('.node').forEach(n => n.onclick = (e) => { e.stopPropagation(); focusNode(n); });
+        // document.querySelectorAll('.edge').forEach(e => e.onclick = (ev) => { ev.stopPropagation(); focusEdge(e); });
+        
+        // Search
+        var sIn = document.getElementById('search-input'), rLi = document.getElementById('result-list');
+        sIn.oninput = function() {
+            rLi.innerHTML = ''; var term = this.value.toLowerCase();
+            if (term.length < 2) return;
+            document.querySelectorAll('.node').forEach(n => {
+                var txt = n.querySelector('text').textContent;
+                if (txt.toLowerCase().includes(term)) {
+                    var li = document.createElement('li'); li.textContent = txt;
+                    li.onclick = () => focusNode(n); rLi.appendChild(li);
+                }
+            });
+        };
+        sIn.addEventListener('keydown', e => { if (e.key === 'Enter') rLi.querySelector('li')?.click(); });
+
+        // Logo Help
+        var logo = document.querySelector('.emba-logo'); if (logo) logo.onclick = toggleHelp;
+
+        // Global Keys
+        window.onkeydown = function(e) {
+            if (e.target.tagName === 'INPUT') { if (e.key === 'Escape') { e.target.value = ''; resetMap(); } return; }
+            if (e.key === 'Escape') resetMap();
+            if (e.key.toLowerCase() === 's') toggleScreenshotMode();
+        };
+
+        // Alle Edges finden und Events sauber binden
+        document.querySelectorAll('.edge').forEach(e => {
+            // Einfacher Klick: Info-Panel
+            e.onclick = function(ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                focusEdge(e);
+            };
+        
+            // Doppelklick: Sprung-Logik
+            e.ondblclick = function(ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                jumpToPartner(e);
+            };
+        });
+    };
+</script>
+</body>
+</html>

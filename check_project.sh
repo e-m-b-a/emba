@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -457,8 +457,8 @@ function_entry_space_check() {
   # function_name(){
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA function space definition check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
 
-  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/* || true)
-  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/* || true)
+  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/*.sh || true)
+  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/*.sh || true)
 
   if [[ "${#FCT_SPACE_MODULES_ARR[@]}" -gt 0 ]] || [[ "${#FCT_SPACE_HLP_ARR[@]}" -gt 0 ]]; then
     echo -e "Found problem with spaces in function definition${NC}\\n"
@@ -500,7 +500,7 @@ if [[ "${FAST_EXECUTION:-0}" -ne 1 ]]; then
   var_checker helpers
   function_entry_space_check
   dockerchecker
-  copy_right_check "Siemens Energy AG" 2025 ./ ./external
+  copy_right_check "Siemens Energy AG" 2026 ./ ./external
   list_linter_exceptions shellcheck ./ ./external
   list_linter_exceptions semgrep ./ ./external
 fi

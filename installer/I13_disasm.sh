@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -42,6 +42,14 @@ I13_disasm() {
       print_tool_info "python-is-python3" 1
       print_tool_info "libzip-dev" 1
       print_tool_info "meson" 1
+
+      # dependency map js library
+      JS_LIB="svg-pan-zoom.min.js"
+      JS_URL="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.0/dist/${JS_LIB}"
+      print_file_info "svg-pan-zoom.min.js" "JS library for dependency map" "${JS_URL}" "external/${JS_LIB}"
+      print_tool_info "graphviz" 1
+      print_tool_info "python3-pygraphviz" 1
+
       # if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       #  print_tool_info "radare2" 1
       # else
@@ -59,6 +67,9 @@ I13_disasm() {
       y|Y )
         # apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+        # dependency map js library
+        download_file "svg-pan-zoom.min.js" "${JS_URL}" "external/${JS_LIB}"
 
         if ! [[ -f "external/capa" ]]; then
           download_file "Capa" "https://github.com/mandiant/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip" "external/capa-v${CAPA_VERSION}-linux.zip"

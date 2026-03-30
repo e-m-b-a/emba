@@ -33,6 +33,9 @@ export BINARY_EXTENDED=1
 
 export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" "S17_cwe_checker" "F20_vul_aggregator" )
 
+# enable EMBA binary map dependency generator
+EMBA_MAP_GENERATOR=1
+
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
