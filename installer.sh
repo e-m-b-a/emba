@@ -91,7 +91,8 @@ echo ""
 echo -e "==> ""${GREEN}""Imported ""${INSTALLER_COUNT}"" installer module files""${NC}"
 echo ""
 
-if [[ "$#" -lt 1 ]] || [[ "$#" -gt 2 ]]; then
+# expect the user to provide at least one argument
+if [[ "$#" -lt 1 ]] ; then
   echo -e "${RED}""${BOLD}""Invalid number of arguments""${NC}"
   echo -e "\n\n------------------------------------------------------------------"
   echo -e "If you are going to install EMBA in default mode you can use:"
@@ -159,6 +160,17 @@ while getopts CdDfFghlrsc: OPT ; do
       ;;
   esac
 done
+
+# make sure the argument combination passed results in a valid install operation
+if [[ ! ("${LIST_DEP}" -eq 1 || "${DOCKER_SETUP}" -eq 1 || "${FULL}" -eq 1 || "${REMOVE}" -eq 1 || "${IN_DOCKER}" -eq 1) ]] ; then
+  echo -e "${RED}""${BOLD}""Missing operation""${NC}"
+  echo -e "\n\n------------------------------------------------------------------"
+  echo -e "If you are going to install EMBA in default mode you can use:"
+  echo -e "${CYAN}""     sudo ./installer.sh -d""${NC}"
+  echo -e "------------------------------------------------------------------\n\n"
+  print_help
+  exit 1
+fi
 
 if ! [[ -v CONTAINER ]]; then
   if [[ -f docker-compose.yml ]]; then
