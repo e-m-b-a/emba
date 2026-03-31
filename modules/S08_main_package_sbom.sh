@@ -83,6 +83,7 @@ build_dependency_tree() {
     # to speed up the dep tree we are working threaded for every componentfile and write into dedicated json files
     # "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json which we can put together in f15
     create_comp_dep_tree_threader "${lSBOM_COMP}" &
+    local lTMP_PID="$!"
     lWAIT_PIDS_S08_DEP_ARR+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_DEP_ARR
   done
