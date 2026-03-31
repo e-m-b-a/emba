@@ -188,7 +188,7 @@ system_emulator_init_runner() {
     return
   }
 
-  if  [[ ${EUID} -eq 0 ]] ; then
+  if [[ ${EUID} -eq 0 ]]; then
     timeout 360 ./run.sh
   else
     timeout 360 sudo ./run.sh
@@ -692,7 +692,6 @@ build_dot() {
     # which files should not be handled
     [[ "${lFILE_TO_CHECK}" == *"/decompressed.bin" ]] && continue
     [[ "${lFILE_TO_CHECK}" == *".raw" ]] && continue
-
 
     main_processing_thread_helper "${lFILE_TO_CHECK}" &
     while (($(jobs -r | wc -l) >= MAX_MAP_JOBS)); do

@@ -33,7 +33,7 @@ set_defaults() {
   export DISABLE_DEEP=0
   export DEEP_EXTRACTOR="unblob" # binwalk/unblob
   export DEEP_EXT_DEPTH=4
-  export BINWALK_DISABLE=0  # we can disable the binwalk module P50 to enforce unblob is taking over
+  export BINWALK_DISABLE=0 # we can disable the binwalk module P50 to enforce unblob is taking over
   export FIRMWARE=0
   export FORCE=0
   export FORMAT_LOG=0
