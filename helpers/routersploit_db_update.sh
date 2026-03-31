@@ -31,7 +31,7 @@ ROUTERSPLOIT_MOD_PATH="${1:-}"
 ## Color definition
 GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
-NC="\033[0m"  # no color
+NC="\033[0m" # no color
 
 if ! [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   echo "[-] No EMBA config directory found! Please start this crawler from the EMBA directory"
@@ -45,17 +45,17 @@ fi
 
 if [[ -f "${ROUTERSPLOIT_CVE_PATH}" ]]; then
   CNT_TMP=$(wc -l "${ROUTERSPLOIT_CVE_PATH}")
-  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}${CNT_TMP/\ *}${GREEN} CVE matching exploit entries (before update).${NC}"
+  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}${CNT_TMP/\ */}${GREEN} CVE matching exploit entries (before update).${NC}"
 fi
 if [[ -f "${ROUTERSPLOIT_EDB_PATH}" ]]; then
   CNT_TMP=$(wc -l "${ROUTERSPLOIT_EDB_PATH}")
-  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}${CNT_TMP/\ *}${GREEN} EDB matching exploit entries (before update).${NC}"
+  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}${CNT_TMP/\ */}${GREEN} EDB matching exploit entries (before update).${NC}"
 fi
 
 echo "[*] Building the Routersploit exploit database"
 # search all ruby files in the routersploit directory and create a temporary file with the module path and CVE:
-find "${ROUTERSPLOIT_MOD_PATH}" -type f -iname "*.py" -exec grep -i -o -H -E "CVE-[0-9]{4}-[0-9]+" {} \; | sed 's/.*external\/routersploit//' | sed 's/cve-/CVE-/' | sort -u > "${ROUTERSPLOIT_CVE_PATH}"
-find "${ROUTERSPLOIT_MOD_PATH}" -type f -iname "*.py" -exec grep -i -o -H -E "exploit-db.com/exploits/[0-9]+" {} \; | sed 's/exploit-db\.com\/exploits\///' | sed 's/.*external\/routersploit//' | sort -u > "${ROUTERSPLOIT_EDB_PATH}"
+find "${ROUTERSPLOIT_MOD_PATH}" -type f -iname "*.py" -exec grep -i -o -H -E "CVE-[0-9]{4}-[0-9]+" {} \; | sed 's/.*external\/routersploit//' | sed 's/cve-/CVE-/' | sort -u >"${ROUTERSPLOIT_CVE_PATH}"
+find "${ROUTERSPLOIT_MOD_PATH}" -type f -iname "*.py" -exec grep -i -o -H -E "exploit-db.com/exploits/[0-9]+" {} \; | sed 's/exploit-db\.com\/exploits\///' | sed 's/.*external\/routersploit//' | sort -u >"${ROUTERSPLOIT_EDB_PATH}"
 
 if [[ -f "${ROUTERSPLOIT_CVE_PATH}" ]]; then
   echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l "${ROUTERSPLOIT_CVE_PATH}" | awk '{print $1}')${GREEN} CVE matching exploit entries (after update).${NC}"

@@ -32,7 +32,7 @@ P17_gpg_decompress() {
 
     gpg_decompress_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       lNEG_LOG=1
     fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -55,7 +55,7 @@ gpg_decompress_extractor() {
   sub_module_title "GPG compressed firmware extractor"
 
   gpg --list-packets "${lGPG_FILE_PATH_}" 2>/dev/null | tee -a "${LOG_FILE}"
-  gpg --decrypt "${lGPG_FILE_PATH_}" > "${lEXTRACTION_FILE_}" || true
+  gpg --decrypt "${lGPG_FILE_PATH_}" >"${lEXTRACTION_FILE_}" || true
 
   print_ln
   if [[ -f "${lEXTRACTION_FILE_}" ]]; then
@@ -70,10 +70,10 @@ gpg_decompress_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files from GPG compressed file."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_GPG_ARR[@]}" ; do
+    for lBINARY in "${lFILES_GPG_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "P17_gpg_decompress" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

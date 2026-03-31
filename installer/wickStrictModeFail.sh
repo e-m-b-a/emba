@@ -19,7 +19,7 @@ wickStrictModeFail() (
   echo -e "Location:  ${ORANGE}${BASH_SOURCE[1]:-unknown}${NC}, line ${ORANGE}${BASH_LINENO[0]:-unknown}${NC}"
 
   if [[ ${#PIPESTATUS[@]} -gt 1 ]]; then
-      echo "Pipe status: " "${PIPESTATUS[@]}"
+    echo "Pipe status: " "${PIPESTATUS[@]}"
   fi
 
   i=$#
@@ -34,11 +34,11 @@ wickStrictModeFail() (
   while [[ ${i} -lt ${#BASH_LINENO[@]} ]]; do
     argsList=()
 
-    if [[ ${#BASH_ARGC[@]} -gt ${i} ]] && [[ ${#BASH_ARGV[@]} -ge $(( nextArg + BASH_ARGC[i] )) ]]; then
-      for (( argsLeft = BASH_ARGC[i]; argsLeft; --argsLeft )); do
+    if [[ ${#BASH_ARGC[@]} -gt ${i} ]] && [[ ${#BASH_ARGV[@]} -ge $((nextArg + BASH_ARGC[i])) ]]; then
+      for ((argsLeft = BASH_ARGC[i]; argsLeft; --argsLeft)); do
         # Note: this reverses the order on purpose
         argsList[argsLeft]=${BASH_ARGV[nextArg]}
-        (( nextArg ++ ))
+        ((nextArg++))
       done
 
       if [[ ${#argsList[@]} -gt 0 ]]; then
@@ -54,8 +54,8 @@ wickStrictModeFail() (
       argsList=""
     fi
 
-    echo "    [${i}] ${FUNCNAME[i]:+${FUNCNAME[i]}"():" }${BASH_SOURCE[i]}, line ${BASH_LINENO[i - 1]} -> ${FUNCNAME[i]:-${BASH_SOURCE[i]##*/}}${argsList}"
-    (( i ++ ))
+    echo "    [${i}] ${FUNCNAME[i]:+${FUNCNAME[i]}"():" }${BASH_SOURCE[i]}, line ${BASH_LINENO[i-1]} -> ${FUNCNAME[i]:-${BASH_SOURCE[i]##*/}}${argsList}"
+    ((i++))
   done
   echo -e "\n${BLUE}${BOLD}Important: Consider filling out a bug report at https://github.com/e-m-b-a/emba/issues${NC}\n"
   echo -e "------------------------------------------------------------------------------------------------"

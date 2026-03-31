@@ -53,10 +53,10 @@ D05_firmware_diffing_extractor() {
   if [[ -d "${OUTPUT_DIR_UNBLOB1}" ]]; then
     lNEG_LOG=1
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB1}"
-    lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f | wc -l )
-    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type d | wc -l )
-    tree -Csh "${OUTPUT_DIR_UNBLOB1}" > "${LOG_PATH_MODULE}"/firmware_image1.txt
+    lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f | wc -l)
+    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l)
+    lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type d | wc -l)
+    tree -Csh "${OUTPUT_DIR_UNBLOB1}" >"${LOG_PATH_MODULE}"/firmware_image1.txt
 
     print_output "[*] ${ORANGE}Unblob${NC} results:"
     print_output "[*] Found ${ORANGE}${lFILES_EXT_UB}${NC} files (${ORANGE}${lUNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${lDIRS_EXT_UB}${NC} directories at all."
@@ -76,10 +76,10 @@ D05_firmware_diffing_extractor() {
   if [[ -d "${OUTPUT_DIR_UNBLOB2}" ]]; then
     lNEG_LOG=1
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB2}"
-    lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f | wc -l )
-    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type d | wc -l )
-    tree -Csh "${OUTPUT_DIR_UNBLOB2}" > "${LOG_PATH_MODULE}"/firmware_image2.txt
+    lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f | wc -l)
+    lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l)
+    lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type d | wc -l)
+    tree -Csh "${OUTPUT_DIR_UNBLOB2}" >"${LOG_PATH_MODULE}"/firmware_image2.txt
 
     print_output "[*] ${ORANGE}Unblob${NC} results:"
     print_output "[*] Found ${ORANGE}${lFILES_EXT_UB}${NC} files (${ORANGE}${lUNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${lDIRS_EXT_UB}${NC} directories at all."
@@ -100,4 +100,3 @@ D05_firmware_diffing_extractor() {
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
-

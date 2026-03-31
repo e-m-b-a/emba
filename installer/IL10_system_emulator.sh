@@ -21,7 +21,7 @@ IL10_system_emulator() {
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "${HOME_PATH}" || ( echo "Could not install EMBA component system emulator" && exit 1 )
+    cd "${HOME_PATH}" || (echo "Could not install EMBA component system emulator" && exit 1)
 
     UML_UTILITIES_URL="http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2.1_amd64.deb"
 
@@ -69,7 +69,7 @@ IL10_system_emulator() {
     print_file_info "strace.zip" "strace for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
     print_file_info "Linux-Kernel-v4.14.336.zip" "Linux Kernel v4.14.336 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""The system emulation dependencies (if not already on the system) will be downloaded and installed!""${NC}"
@@ -77,7 +77,7 @@ IL10_system_emulator() {
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
+    y | Y)
 
       mkdir -p external/EMBA_Live_bins
 
@@ -113,4 +113,3 @@ IL10_system_emulator() {
     esac
   fi
 }
-

@@ -18,8 +18,7 @@
 #               This module was inspired by the crass java checkers here:
 #               https://github.com/floyd-fuh/crass/blob/master/java-decompile.sh
 
-S28_java_check()
-{
+S28_java_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Decompiles Java files and performs security tests"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -41,19 +40,19 @@ S28_java_check()
     return
   fi
 
-  for lJAVA_BINARY in "${lJAVA_BINS_ARR[@]}" ; do
+  for lJAVA_BINARY in "${lJAVA_BINS_ARR[@]}"; do
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      lJNAME=$(basename "$(echo "${lJAVA_BINARY}" | cut -d';' -f2)" 2> /dev/null)
+      lJNAME=$(basename "$(echo "${lJAVA_BINARY}" | cut -d';' -f2)" 2>/dev/null)
       if grep -E -q "^${lJNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
-    ((lS28_JAVA_SCRIPTS+=1))
+    ((lS28_JAVA_SCRIPTS += 1))
     s28_java_decompile "$(echo "${lJAVA_BINARY}" | cut -d';' -f2)" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_S28+=( "${lTMP_PID}" )
+    lWAIT_PIDS_S28+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S28
   done
 
@@ -65,7 +64,7 @@ S28_java_check()
   for lJAVA_BIN_DIR in "${lSEMGREP_SOURCES_ARR[@]}"; do
     s28_java_semgrep "${lJAVA_BIN_DIR}" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_S28+=( "${lTMP_PID}" )
+    lWAIT_PIDS_S28+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S28
   done
 
@@ -95,10 +94,10 @@ s28_java_semgrep() {
 
   local lJ_ANALYSE_DIR="${LOG_PATH_MODULE}/java_semgrep/"
   [[ ! -d "${lJ_ANALYSE_DIR}" ]] && mkdir -p "${lJ_ANALYSE_DIR}"
-  lJNAME="$(basename "${lJAVA_BIN_DIR}" 2> /dev/null)"
+  lJNAME="$(basename "${lJAVA_BIN_DIR}" 2>/dev/null)"
   local lJ_ANALYSE_RESULTS="${lJ_ANALYSE_DIR}/semgrep_${lJNAME}.json"
 
-  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules/java "${lJAVA_BIN_DIR}" > "${lJ_ANALYSE_RESULTS}" || true
+  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules/java "${lJAVA_BIN_DIR}" >"${lJ_ANALYSE_RESULTS}" || true
   if [[ -f "${lJ_ANALYSE_RESULTS}" ]] && [[ "$(grep -c '\"results\":\[{\"' "${lJ_ANALYSE_RESULTS}")" -eq 0 ]]; then
     rm "${lJ_ANALYSE_RESULTS}" || true
   fi
@@ -108,11 +107,10 @@ s28_java_decompile() {
   local lJAVA_BINARY="${1:-}"
   local lJNAME=""
 
-  lJNAME=$(basename "${lJAVA_BINARY}" 2> /dev/null | sed -e 's/:/_/g')
+  lJNAME=$(basename "${lJAVA_BINARY}" 2>/dev/null | sed -e 's/:/_/g')
   print_output "[*] Decompiling Java binary ${ORANGE}${lJNAME}${NC}" "no_log"
   local lJ_DECOMPILE_DIR="${LOG_PATH_MODULE}/java_decompile/${lJNAME}_${RANDOM}"
   [[ ! -d "${lJ_DECOMPILE_DIR}" ]] && mkdir -p "${lJ_DECOMPILE_DIR}"
 
   java -jar "${JAVA_DECOMPILER}" --silent "${lJAVA_BINARY}" "${lJ_DECOMPILE_DIR}" || true
 }
-

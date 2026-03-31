@@ -28,7 +28,7 @@ P25_android_ota() {
 
     android_ota_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -65,10 +65,10 @@ android_ota_extractor() {
   print_output "[*] Extracted ${ORANGE}${#lFILES_OTA_ARR[@]}${NC} files from the firmware image."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_OTA_ARR[@]}${NC} files ... could take some time" "no_log"
 
-  for lBINARY in "${lFILES_OTA_ARR[@]}" ; do
+  for lBINARY in "${lFILES_OTA_ARR[@]}"; do
     binary_architecture_threader "${lBINARY}" "P25_android_ota" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

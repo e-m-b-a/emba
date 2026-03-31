@@ -87,7 +87,6 @@ Note: List all authors including contributors to this module
 
 END_OF_DOCS
 
-
 template_module() {
   # Initialize module and creates a log file "template_module_log.txt" and directory "template_module" (if needed) in your log folder
   # Required!
@@ -98,9 +97,9 @@ template_module() {
 
   # Global variables
 
-    # $FIRMWARE_PATH - absolute path to the root directory of the firmware (String)
-    # $FILE_ARR - all valid files of the provided firmware (Array)
-    # $BINARIES - all executable binaries of the provided firmware (Array)
+  # $FIRMWARE_PATH - absolute path to the root directory of the firmware (String)
+  # $FILE_ARR - all valid files of the provided firmware (Array)
+  # $BINARIES - all executable binaries of the provided firmware (Array)
 
   # Setup variables
 
@@ -223,15 +222,15 @@ path_handling() {
   # Insert "${EXCL_FIND[@]}" in your search-command to automatically remove excluded paths
   local lCHECK=0
   local lTEST_ARR=()
-  readarray -t lTEST_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t lTEST_ARR < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
   local lTEST_E=""
   for lTEST_E in "${lTEST_ARR[@]}"; do
-    if [[ -f "${lTEST_E}" ]] ; then
+    if [[ -f "${lTEST_E}" ]]; then
       lCHECK=1
       print_output "[+] Found ""$(print_path "${lTEST_E}")"
     fi
   done
-  if [[ ${lCHECK} -eq 0 ]] ; then
+  if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No modprobe.d directory found"
   fi
 
@@ -242,13 +241,13 @@ path_handling() {
   local lTEST_PATHS_ARR=()
   mapfile -t lTEST_PATHS_ARR < <(mod_path "/ETC_PATHS/xy.cfg")
 
-  for lTEST_E in "${lTEST_PATHS_ARR[@]}" ; do
-    if [[ -f "${lTEST_E}" ]] ; then
+  for lTEST_E in "${lTEST_PATHS_ARR[@]}"; do
+    if [[ -f "${lTEST_E}" ]]; then
       lCHECK=1
       print_output "[+] Found xy config: ""$(print_path "${lTEST_E}")"
     fi
   done
-  if [[ ${lCHECK} -eq 0 ]] ; then
+  if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No xy configuration file found"
   fi
 
@@ -256,11 +255,11 @@ path_handling() {
   local lTEST_PATHS_ARR=()
   mapfile -t lTEST_PATHS_ARR < <(mod_path_array "$(config_list "${CONFIG_DIR}""/test_files.cfg" "")")
 
-  if [[ "${lTEST_PATHS_ARR[0]}" == "C_N_F" ]] ; then
+  if [[ "${lTEST_PATHS_ARR[0]}" == "C_N_F" ]]; then
     print_output "[!] Config not found"
-  elif [[ "${#lTEST_PATHS_ARR[@]}" -ne 0 ]] ; then
+  elif [[ "${#lTEST_PATHS_ARR[@]}" -ne 0 ]]; then
     for lTEST_E in "${lTEST_PATHS_ARR[@]}"; do
-      if [[ -f "${lTEST_E}" ]] ; then
+      if [[ -f "${lTEST_E}" ]]; then
         print_output "[+] Found: ""$(print_path "${lTEST_E}")"
       fi
     done
@@ -304,14 +303,14 @@ load_from_config() {
   local lOUTPUT_LINES_ARR=()
   mapfile -t lOUTPUT_LINES_ARR < <(config_grep "${CONFIG_DIR}""/config_grep.cfg" "${FILE_PATH}")
 
-  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]] ; then
+  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]]; then
     print_output "[!] Config not found"
-  elif [[ "${#lOUTPUT_LINES_ARR[@]}" -ne 0 ]] ; then
+  elif [[ "${#lOUTPUT_LINES_ARR[@]}" -ne 0 ]]; then
     # count of results
     print_output "[+] Found ""${#lOUTPUT_LINES_ARR[@]}"" files:"
 
     for lOUTPUT in "${lOUTPUT_LINES_ARR[@]}"; do
-      if [[ -f "${lOUTPUT}" ]] ; then
+      if [[ -f "${lOUTPUT}" ]]; then
         print_output "$(print_path "${lOUTPUT}")"
       fi
     done
@@ -323,14 +322,14 @@ load_from_config() {
   local lOUTPUT_LINES_ARR=()
   mapfile -t lOUTPUT_LINES_ARR < <(config_list "${CONFIG_DIR}""/config_list.cfg")
 
-  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]] ; then
+  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]]; then
     print_output "[!] Config not found"
-  elif [[ "${#lOUTPUT_LINES_ARR[@]}" -ne 0 ]] ; then
+  elif [[ "${#lOUTPUT_LINES_ARR[@]}" -ne 0 ]]; then
     # count of results
     print_output "[+] Found ""${#lOUTPUT_LINES_ARR[@]}"" files:"
 
     for lOUTPUT in "${lOUTPUT_LINES_ARR[@]}"; do
-      if [[ -f "${lOUTPUT}" ]] ; then
+      if [[ -f "${lOUTPUT}" ]]; then
         print_output "$(print_path "${lOUTPUT}")"
       fi
     done
@@ -343,11 +342,12 @@ load_from_config() {
   local lLINE=""
   readarray -t lOUTPUT_LINES_ARR < <(printf '%s' "$(config_find "${CONFIG_DIR}""/config_find.cfg")")
 
-  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#lOUTPUT_LINES_ARR[@]} -ne 0 ]] ; then
+  if [[ "${lOUTPUT_LINES_ARR[0]}" == "C_N_F" ]]; then
+    print_output "[!] Config not found"
+  elif [[ ${#lOUTPUT_LINES_ARR[@]} -ne 0 ]]; then
     print_output "[+] Found ""${#lOUTPUT_LINES_ARR[@]}"" files:"
-    for lLINE in "${lOUTPUT_LINES_ARR[@]}" ; do
-      if [[ -f "${lLINE}" ]] ; then
+    for lLINE in "${lOUTPUT_LINES_ARR[@]}"; do
+      if [[ -f "${lLINE}" ]]; then
         print_output "$(indent "$(orange "$(print_path "${lLINE}")")")"
       fi
     done
@@ -355,4 +355,3 @@ load_from_config() {
     print_output "[-] No files found"
   fi
 }
-

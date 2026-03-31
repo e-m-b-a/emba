@@ -30,7 +30,7 @@ P15_ubi_extractor() {
 
     ubi_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi
@@ -70,7 +70,7 @@ ubi_extractor() {
   print_output "[*] Extracted ${ORANGE}${FILES_UBI_EXT}${NC} files from the firmware image via UBI extraction round 2."
 
   if [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f  -print0|xargs -r -0 -P 16 -I % sh -c 'file -b "%"' | grep "UBI image" || true)
+    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'file -b "%"' | grep "UBI image" || true)
 
     for lUBI_DATA in "${lUBI_1st_ROUND_ARR[@]}"; do
       lUBI_FILE=$(safe_echo "${lUBI_DATA}" | cut -d: -f1)
@@ -91,10 +91,10 @@ ubi_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_UBI_ARR[@]}${NC} files from the UBI firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UBI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_UBI_ARR[@]}" ; do
+    for lBINARY in "${lFILES_UBI_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "P15_ubi_extractor" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

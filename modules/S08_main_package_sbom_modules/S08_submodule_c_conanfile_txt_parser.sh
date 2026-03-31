@@ -45,10 +45,10 @@ S08_submodule_c_conanfile_txt_parser() {
 
   mapfile -t lCONAN_ARCHIVES_ARR < <(grep "conanfile.txt" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lCONAN_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lCONAN_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lCONAN_ARCHIVES_ARR[@]}${NC} C/C++ conanfile.txt package files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lCONAN_ARCHIVE in "${lCONAN_ARCHIVES_ARR[@]}" ; do
+    for lCONAN_ARCHIVE in "${lCONAN_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lCONAN_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -56,7 +56,7 @@ S08_submodule_c_conanfile_txt_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lCONAN_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lCONAN_ARCHIVE in "${lCONAN_ARCHIVES_ARR[@]}" ; do
+    for lCONAN_ARCHIVE in "${lCONAN_ARCHIVES_ARR[@]}"; do
       lC_FILE=$(file "${lCONAN_ARCHIVE}")
       if [[ ! "${lC_FILE}" == *"ASCII text"* ]]; then
         continue
@@ -67,7 +67,7 @@ S08_submodule_c_conanfile_txt_parser() {
         print_output "[*] ${ORANGE}${lCONAN_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
       # we start with the following file structure:
       # [requires]
       # zlib/1.2.11
@@ -100,7 +100,7 @@ S08_submodule_c_conanfile_txt_parser() {
         elif [[ "${lCONAN_ENTRY}" == *"[tool_requires]"* ]]; then
           continue
         fi
-        lAPP_NAME=${lCONAN_ENTRY/\/*}
+        lAPP_NAME=${lCONAN_ENTRY/\/*/}
         lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
         [[ -z "${lAPP_NAME}" ]] && continue
 
@@ -122,10 +122,10 @@ S08_submodule_c_conanfile_txt_parser() {
 
         # add deb path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lCONAN_ARCHIVE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lCONAN_ARCHIVE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

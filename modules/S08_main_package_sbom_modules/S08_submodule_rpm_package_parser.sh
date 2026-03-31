@@ -49,10 +49,10 @@ S08_submodule_rpm_package_parser() {
 
   mapfile -t lRPM_ARCHIVES_ARR < <(grep "\.rpm;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
+    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lRPM_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -60,7 +60,7 @@ S08_submodule_rpm_package_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}" ; do
+    for lRPM_ARCHIVE in "${lRPM_ARCHIVES_ARR[@]}"; do
       lR_FILE=$(file -b "${lRPM_ARCHIVE}")
       if [[ ! "${lR_FILE}" == "RPM "* ]]; then
         continue
@@ -72,7 +72,7 @@ S08_submodule_rpm_package_parser() {
         print_output "[*] ${ORANGE}${lRPM_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       lAPP_NAME=$(rpm -qipl "${lRPM_ARCHIVE}" 2>/dev/null | grep "^Name" || true)
       lAPP_NAME=${lAPP_NAME/*:\ /}
@@ -119,17 +119,17 @@ S08_submodule_rpm_package_parser() {
 
       # add rpm path information to our properties array:
       local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lRPM_ARCHIVE}" )
-      lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      lPROP_ARRAY_INIT_ARR+=("source_path:${lRPM_ARCHIVE}")
+      lPROP_ARRAY_INIT_ARR+=("source_arch:${lAPP_ARCH}")
+      lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+      lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+      lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+      lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
       # add dependencies to properties
       if [[ "${#lRPM_DEPS_ARR[@]}" -gt 0 ]]; then
         for lRPM_DEP in "${lRPM_DEP_ARR[@]}"; do
-          lPROP_ARRAY_INIT_ARR+=( "dependency:${lRPM_DEP}" )
+          lPROP_ARRAY_INIT_ARR+=("dependency:${lRPM_DEP}")
         done
       fi
 
@@ -137,10 +137,10 @@ S08_submodule_rpm_package_parser() {
       if [[ "${#lRPM_FILES_ARR[@]}" -gt 0 ]]; then
         for lRPM_FILE_ID in "${!lRPM_FILES_ARR[@]}"; do
           lRPM_FILE="${lRPM_FILES_ARR["${lRPM_FILE_ID}"]}"
-          lPROP_ARRAY_INIT_ARR+=( "path:${lRPM_FILE}" )
+          lPROP_ARRAY_INIT_ARR+=("path:${lRPM_FILE}")
           # we limit the logging of the package files to 500 files per package
           if [[ "${lRPM_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-            lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+            lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
             break
           fi
         done

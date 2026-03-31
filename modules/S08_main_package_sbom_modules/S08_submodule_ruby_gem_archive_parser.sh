@@ -46,10 +46,10 @@ S08_submodule_ruby_gem_archive_parser() {
 
   mapfile -t lGEM_ARCHIVES_ARR < <(grep "\.gem;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lGEM_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lGEM_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}" ; do
+    for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lGEM_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -57,7 +57,7 @@ S08_submodule_ruby_gem_archive_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lGEM_ARCHIVES_ARR[@]}${NC} Ruby gem archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}" ; do
+    for lGEM_ARCHIVE in "${lGEM_ARCHIVES_ARR[@]}"; do
       lR_FILE=$(file "${lGEM_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"POSIX tar archive"* ]]; then
         continue
@@ -69,7 +69,7 @@ S08_submodule_ruby_gem_archive_parser() {
         print_output "[*] ${ORANGE}${lGEM_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if ! [[ -d "${TMP_DIR}"/gems ]]; then
         mkdir "${TMP_DIR}"/gems || true
@@ -82,7 +82,7 @@ S08_submodule_ruby_gem_archive_parser() {
         write_log "[-] No metadata.gz extracted from ${lGEM_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
         continue
       fi
-      gunzip -k -c "${TMP_DIR}"/gems/metadata.gz > "${TMP_DIR}"/gems/metadata
+      gunzip -k -c "${TMP_DIR}"/gems/metadata.gz >"${TMP_DIR}"/gems/metadata
 
       if ! [[ -f "${TMP_DIR}"/gems/metadata ]]; then
         write_log "[-] No metadata extracted from ${lGEM_ARCHIVE}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -90,7 +90,7 @@ S08_submodule_ruby_gem_archive_parser() {
       fi
 
       lAPP_NAME=$(grep '^name: ' "${TMP_DIR}"/gems/metadata || true)
-      lAPP_NAME=${lAPP_NAME/name:\ }
+      lAPP_NAME=${lAPP_NAME/name:\ /}
       lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
       [[ -z "${lAPP_NAME}" ]] && continue
 
@@ -99,7 +99,7 @@ S08_submodule_ruby_gem_archive_parser() {
 
       # grep -A1 "^version: " metadata | grep "[0-9]\."
       lAPP_VERS=$(grep -A1 '^version' "${TMP_DIR}"/gems/metadata | grep "[0-9]" || true)
-      lAPP_VERS=${lAPP_VERS/*version:\ }
+      lAPP_VERS=${lAPP_VERS/*version:\ /}
       lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
       lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
@@ -118,21 +118,21 @@ S08_submodule_ruby_gem_archive_parser() {
 
       # add deb path information to our properties array:
       local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lGEM_ARCHIVE}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      lPROP_ARRAY_INIT_ARR+=("source_path:${lGEM_ARCHIVE}")
+      lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+      lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+      lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+      lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
       # add package files to properties
       if [[ -f "${TMP_DIR}/gems/data.tar.gz" ]]; then
         mapfile -t lGEM_FILES_ARR < <(tar -tvf "${TMP_DIR}/gems/data.tar.gz" | awk '{print $6}' || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed")
         for lGEM_FILE_ID in "${!lGEM_FILES_ARR[@]}"; do
           lGEM_FILE="${lGEM_FILES_ARR["${lGEM_FILE_ID}"]}"
-          lPROP_ARRAY_INIT_ARR+=( "path:${lGEM_FILE#\.}" )
+          lPROP_ARRAY_INIT_ARR+=("path:${lGEM_FILE#\.}")
           # we limit the logging of the package files to 500 files per package
           if [[ "${lGEM_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-            lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+            lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
             break
           fi
         done
@@ -171,4 +171,3 @@ S08_submodule_ruby_gem_archive_parser() {
     print_output "[*] No Ruby gemx package SBOM results available"
   fi
 }
-

@@ -77,7 +77,7 @@ S116_qemu_version_detection() {
         version_detection_thread "${lVERSION_JSON_CFG}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S116_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_S116_ARR+=("${lTMP_PID}")
       done
       print_ln "no_log"
 
@@ -187,4 +187,3 @@ version_detection_thread() {
     done
   fi
 }
-

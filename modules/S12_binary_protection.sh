@@ -19,8 +19,7 @@
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
 
-S12_binary_protection()
-{
+S12_binary_protection() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binary protection mechanisms"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -28,12 +27,12 @@ S12_binary_protection()
   local lNEG_LOG=0
   local lWAIT_PIDS_S12=()
 
-  if [[ -f "${EXT_DIR}"/checksec ]] ; then
+  if [[ -f "${EXT_DIR}"/checksec ]]; then
     local lCSV_LOG=""
     lCSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
     lCSV_LOG="${CSV_DIR}""/""${lCSV_LOG}"
 
-    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >> "${lCSV_LOG}"
+    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >>"${lCSV_LOG}"
     printf "\t%-13.13s  %-16.16s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
       "RELRO" "CANARY" "NX" "PIE" "RPATH" "RUNPATH" "SYMBOLS" "FORTIFY" "FILE" | tee -a "${TMP_DIR}"/s12.tmp
 
@@ -41,14 +40,14 @@ S12_binary_protection()
       binary_protection_threader "${lBINARY}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S12+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S12+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S12
     done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
     wait_for_pid "${lWAIT_PIDS_S12[@]}"
 
-    if [[ "$(wc -l < "${TMP_DIR}"/s12.tmp)" -gt 1 ]]; then
-      cat "${TMP_DIR}"/s12.tmp >> "${LOG_FILE}"
+    if [[ "$(wc -l <"${TMP_DIR}"/s12.tmp)" -gt 1 ]]; then
+      cat "${TMP_DIR}"/s12.tmp >>"${LOG_FILE}"
       lNEG_LOG=1
     fi
   else
@@ -81,7 +80,7 @@ binary_protection_threader() {
 
   # we usually use ; instead of , for csv ...
   lCSV_BIN_OUT=${lCSV_BIN_OUT//,/\;}
-  echo "${lCSV_BIN_OUT}" >> "${lCSV_LOG}"
+  echo "${lCSV_BIN_OUT}" >>"${lCSV_LOG}"
 
   # coloring the output from csv
   lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RELRO)/${RED_}&${NC_}/g")

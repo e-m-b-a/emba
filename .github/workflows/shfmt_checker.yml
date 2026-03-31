@@ -1,0 +1,27 @@
+name: Check Formatting with shfmt
+
+on:
+  push:
+    branches:
+      - '**'        # matches every branch
+  pull_request:
+    branches:
+      - '**'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  shfmt:
+    if: github.repository_owner == 'e-m-b-a'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup shfmt
+        uses: mfinelli/setup-shfmt@v3
+
+      - name: Run shfmt check
+        # -d: Diff anzeigen (zeigt Fehler im Log)
+        # -i 2: Prüft auf exakt 2 Leerzeichen Einrückung
+        run: shfmt -d -i 2 .

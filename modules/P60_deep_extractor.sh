@@ -41,7 +41,7 @@ P60_deep_extractor() {
   local lFILES_P99_BEFORE=0
   if [[ -f "${P99_CSV_LOG}" ]]; then
     lFILES_P99_BEFORE=$(wc -l "${P99_CSV_LOG}")
-    lFILES_P99_BEFORE="${lFILES_P99_BEFORE/\ *}"
+    lFILES_P99_BEFORE="${lFILES_P99_BEFORE/\ */}"
   fi
 
   check_disk_space
@@ -62,7 +62,7 @@ P60_deep_extractor() {
   local lFILES_P99=0
   if [[ -f "${P99_CSV_LOG}" ]]; then
     lFILES_P99=$(wc -l "${P99_CSV_LOG}")
-    lFILES_P99="${lFILES_P99/\ *}"
+    lFILES_P99="${lFILES_P99/\ */}"
   fi
 
   # we only do the P99 populating if we have done something with the deep extractor
@@ -74,10 +74,10 @@ P60_deep_extractor() {
 
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_EXT_ARR[@]}" ; do
+    for lBINARY in "${lFILES_EXT_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
 
     local lLINUX_PATH_COUNTER=0
@@ -94,7 +94,7 @@ P60_deep_extractor() {
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
     export FIRMWARE_PATH="${FIRMWARE_PATH_CP}"
 
-    if [[ "${#ROOT_PATH[@]}" -gt 0 ]] ; then
+    if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
       write_csv_log "FILES" "LINUX_PATH_COUNTER" "Root PATH detected"
       for lR_PATH in "${ROOT_PATH[@]}"; do
         write_csv_log "${#lFILES_EXT_ARR[@]}" "${lLINUX_PATH_COUNTER}" "${lR_PATH}"
@@ -123,10 +123,10 @@ deep_extractor() {
     fi
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DEEP_PRE_ARR[@]}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_DEEP_PRE_ARR[@]}" ; do
+    for lBINARY in "${lFILES_DEEP_PRE_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P60_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P60_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P60_ARR[@]}"
     detect_root_dir_helper "${LOG_DIR}/firmware"
@@ -181,16 +181,16 @@ deeper_extractor_helper() {
   print_output "[*] Deep extraction starting ..."
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
-    [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ *}"* ]] && continue
-    MD5_DONE_DEEP+=( "${lFILE_MD5/\ *}" )
-    deeper_extractor_threader "${lFILE_TMP}" "${lFILE_MD5/\ *}" &
+    [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ */}"* ]] && continue
+    MD5_DONE_DEEP+=("${lFILE_MD5/\ */}")
+    deeper_extractor_threader "${lFILE_TMP}" "${lFILE_MD5/\ */}" &
     lBIN_PID="$!"
-    lWAIT_PIDS_P60_init+=( "${lBIN_PID}" )
-    max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_P60_init
+    lWAIT_PIDS_P60_init+=("${lBIN_PID}")
+    max_pids_protection $((2 * "${MAX_MOD_THREADS}")) lWAIT_PIDS_P60_init
   done
   wait_for_pid "${lWAIT_PIDS_P60_init[@]}"
 
-  cat "${LOG_PATH_MODULE}/tmp_out_"* >> "${LOG_FILE}" 2>/dev/null || true
+  cat "${LOG_PATH_MODULE}/tmp_out_"* >>"${LOG_FILE}" 2>/dev/null || true
 }
 
 deeper_extractor_threader() {
@@ -259,4 +259,3 @@ deeper_extractor_threader() {
     fi
   fi
 }
-

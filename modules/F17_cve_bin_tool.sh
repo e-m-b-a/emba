@@ -34,7 +34,7 @@ F17_cve_bin_tool() {
   local lVEX_FILE_ID=0
   local lVEX_FILE=""
   local lNEG_LOG=0
-  local MAX_MOD_THREADS=$((MAX_MOD_THREADS*2))
+  local MAX_MOD_THREADS=$((MAX_MOD_THREADS * 2))
 
   mkdir "${LOG_PATH_MODULE}/json/" || true
   mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
@@ -61,13 +61,13 @@ F17_cve_bin_tool() {
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     sbom_preprocessing_threader "${lSBOM_ENTRY}" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_TEMP+=( "${lTMP_PID}" )
-    max_pids_protection $((2*"${MAX_MOD_THREADS}")) lWAIT_PIDS_TEMP
+    lWAIT_PIDS_TEMP+=("${lTMP_PID}")
+    max_pids_protection $((2 * "${MAX_MOD_THREADS}")) lWAIT_PIDS_TEMP
     local lNEG_LOG=1
   done
   wait_for_pid "${lWAIT_PIDS_TEMP[@]}"
 
-  cat "${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed."* > "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" || print_output "[-] Some pre-processing error occured"
+  cat "${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed."* >"${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp" || print_output "[-] Some pre-processing error occured"
 
   print_bar
 
@@ -84,7 +84,7 @@ F17_cve_bin_tool() {
   local lCNT=0
   while ! [[ -f "${TMP_DIR}/tmp_state_data.log" ]]; do
     print_output "[*] Waiting for CVE database ..." "no_log"
-    lCNT=$((lCNT+1))
+    lCNT=$((lCNT + 1))
     if [[ "${lCNT}" -gt 24 ]]; then
       print_output "[-] CVE database not prepared in time ... trying to proceed"
       break
@@ -101,25 +101,25 @@ F17_cve_bin_tool() {
     local lPRODUCT_VERSION=""
     local lPRODUCT_NAME=""
     # print_output "[*] lSBOM_ENTRY: ${lSBOM_ENTRY}"
-    lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
+    lPRODUCT_NAME=$(jq --raw-output '.name' <<<"${lSBOM_ENTRY}")
 
     # extract all our possible vendor names and product names:
-    mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<< "${lSBOM_ENTRY}")
+    mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<<"${lSBOM_ENTRY}")
     if [[ "${#lVENDOR_ARR[@]}" -eq 0 ]]; then
       lVENDOR_ARR+=("NOTDEFINED")
     fi
-    mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<< "${lSBOM_ENTRY}")
+    mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<<"${lSBOM_ENTRY}")
     if [[ "${#lPRODUCT_ARR[@]}" -eq 0 ]]; then
       lPRODUCT_ARR+=("${lPRODUCT_NAME}")
     fi
 
-    lPRODUCT_VERSION=$(jq --raw-output '.version' <<< "${lSBOM_ENTRY}")
+    lPRODUCT_VERSION=$(jq --raw-output '.version' <<<"${lSBOM_ENTRY}")
 
     # avoid duplicates
-    if (grep -q "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
+    if (grep -q "${lVENDOR_ARR[*]//\\n/};${lPRODUCT_ARR[*]//\\n/};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
       continue
     fi
-    echo "${lVENDOR_ARR[*]//\\n};${lPRODUCT_ARR[*]//\\n};${lPRODUCT_VERSION}" >> "${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
+    echo "${lVENDOR_ARR[*]//\\n/};${lPRODUCT_ARR[*]//\\n/};${lPRODUCT_VERSION}" >>"${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
 
     # BusyBox verification module handling - we already have all the data from s118. Now we just copy these details
     if [[ "${lPRODUCT_NAME}" == "busybox" ]] && [[ -s "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
@@ -130,14 +130,14 @@ F17_cve_bin_tool() {
       cp "${S118_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || true
       if [[ -f "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
         lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPRODUCT_NAME}.*:.*${lPRODUCT_VERSION}.*:" "${S118_LOG_DIR}"/vuln_summary.txt || true)
-        echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+        echo "${lBB_ENTRY_TO_COPY}" >>"${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
       local lBIN_LOG=""
       lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPRODUCT_NAME}_${lPRODUCT_VERSION}_finished.txt" | sort -u | head -1)
 
       # now, lets write the main f20 log file with the results of the current binary:
       if [[ -f "${lBIN_LOG}" ]]; then
-        tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+        tee -a "${LOG_FILE}" <"${lBIN_LOG}"
         continue
       else
         print_error "[-] S118 Busybox details missing ... continue in default mode"
@@ -150,14 +150,14 @@ F17_cve_bin_tool() {
       cp "${S36_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] lighttpd CVE log copy process failed"
       if [[ -f "${S36_LOG_DIR}/vuln_summary.txt" ]]; then
         lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPRODUCT_NAME}.*:.*${lPRODUCT_VERSION}.*:" "${S36_LOG_DIR}"/vuln_summary.txt || true)
-        echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+        echo "${lBB_ENTRY_TO_COPY}" >>"${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
       local lBIN_LOG=""
       lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPRODUCT_NAME}_${lPRODUCT_VERSION}_finished.txt" | sort -u | head -1)
 
       # now, lets write the main f20 log file with the results of the current binary:
       if [[ -f "${lBIN_LOG}" ]]; then
-        tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+        tee -a "${LOG_FILE}" <"${lBIN_LOG}"
         continue
       else
         print_error "[-] S36 lighttpd details missing ... continue in default mode"
@@ -171,29 +171,29 @@ F17_cve_bin_tool() {
       cp "${S26_LOG_DIR}/exploit/"* "${LOG_PATH_MODULE}/exploit/" 2>/dev/null || print_error "[-] Linux Kernel CVE log copy process failed"
       if [[ -f "${S26_LOG_DIR}/vuln_summary.txt" ]]; then
         lBB_ENTRY_TO_COPY=$(grep "Component details:.*${lPRODUCT_NAME}.*:.*${lPRODUCT_VERSION}.*:" "${S26_LOG_DIR}"/vuln_summary.txt || true)
-        echo "${lBB_ENTRY_TO_COPY}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+        echo "${lBB_ENTRY_TO_COPY}" >>"${LOG_PATH_MODULE}"/vuln_summary.txt
       fi
       local lBIN_LOG=""
       lBIN_LOG=$(find "${LOG_PATH_MODULE}"/cve_sum/ -name "*_${lPRODUCT_NAME}_${lPRODUCT_VERSION}_finished.txt" | sort -u | head -1)
 
       # now, lets write the main f20 log file with the results of the current binary:
       if [[ -f "${lBIN_LOG}" ]]; then
-        tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+        tee -a "${LOG_FILE}" <"${lBIN_LOG}"
         continue
       else
         print_error "[-] S26 Linux Kernel details missing ... continue in default mode"
       fi
     fi
 
-    lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}" || print_error "[-] BOM_REF failed to extract from ${lSBOM_ENTRY}")
-    lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}" || print_error "[-] ORIG_SOURCE failed to extract from ${lSBOM_ENTRY}")
+    lBOM_REF=$(jq --raw-output '."bom-ref"' <<<"${lSBOM_ENTRY}" || print_error "[-] BOM_REF failed to extract from ${lSBOM_ENTRY}")
+    lORIG_SOURCE=$(jq --raw-output '.group' <<<"${lSBOM_ENTRY}" || print_error "[-] ORIG_SOURCE failed to extract from ${lSBOM_ENTRY}")
 
     cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
-    lWAIT_PIDS_F17_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_F17_ARR+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR
-  done < "${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
+  done <"${LOG_PATH_MODULE}/sbom_entry_preprocessed.tmp"
 
   wait_for_pid "${lWAIT_PIDS_F17_ARR[@]}"
 
@@ -225,13 +225,13 @@ F17_cve_bin_tool() {
   print_output "[*] Building final VEX - Vulnerability Exploitability eXchange" "no_log"
   if [[ "${#lVEX_JSON_ENTRIES_ARR[@]}" -gt 0 ]]; then
     local lNEG_LOG=1
-    echo "\"vulnerabilities\": [" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+    echo "\"vulnerabilities\": [" >"${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
 
     for lVEX_FILE_ID in "${!lVEX_JSON_ENTRIES_ARR[@]}"; do
       lVEX_FILE="${lVEX_JSON_ENTRIES_ARR["${lVEX_FILE_ID}"]}"
       if [[ -s "${lVEX_FILE}" ]]; then
-        if (json_pp < "${lVEX_FILE}" &> /dev/null); then
-          cat "${lVEX_FILE}" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+        if (json_pp <"${lVEX_FILE}" &>/dev/null); then
+          cat "${lVEX_FILE}" >>"${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
         else
           print_output "[!] WARNING: SBOM component ${lVEX_FILE} failed to validate with json_pp"
           continue
@@ -240,20 +240,20 @@ F17_cve_bin_tool() {
         print_output "[!] WARNING: SBOM component ${lVEX_FILE} failed to decode"
         continue
       fi
-      if [[ $((lVEX_FILE_ID+1)) -lt "${#lVEX_JSON_ENTRIES_ARR[@]}" ]]; then
-        echo -n "," >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+      if [[ $((lVEX_FILE_ID + 1)) -lt "${#lVEX_JSON_ENTRIES_ARR[@]}" ]]; then
+        echo -n "," >>"${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
       fi
     done
 
-    echo -n "]" >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
-    tr -d '\n' < "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" > "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
+    echo -n "]" >>"${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+    tr -d '\n' <"${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" >"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
 
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" ]]; then
       sub_module_title "VEX - Vulnerability Exploitability eXchange"
       print_output "[+] VEX data in json format is available" "" "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json"
 
       # let's replace the vulnerability marker with our VEX:
-      sed -e '/\"vulnerabilities\": \[\]/{r '"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" -e 'd;}' "${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json" > "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" || print_error "[-] SBOM - VEX merge failed"
+      sed -e '/\"vulnerabilities\": \[\]/{r '"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" -e 'd;}' "${SBOM_LOG_PATH}/EMBA_cyclonedx_sbom.json" >"${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" || print_error "[-] SBOM - VEX merge failed"
 
       # now we ensure that we have a valid vex only json:
       # https://github.com/CycloneDX/bom-examples/blob/master/VEX/vex.json
@@ -263,7 +263,7 @@ F17_cve_bin_tool() {
       sed -i '1i {' "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
 
       # adjust the end of our json:
-      echo '}' >> "${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
+      echo '}' >>"${SBOM_LOG_PATH}/EMBA_sbom_vex_only.json" || print_error "[-] VEX only JSON preparation failed"
     fi
     if [[ -f "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json" ]]; then
       print_output "[+] CycloneDX SBOM with VEX data in JSON format is ready" "" "${SBOM_LOG_PATH}/EMBA_cyclonedx_vex_sbom.json"
@@ -283,14 +283,14 @@ sbom_preprocessing_threader() {
   local lPRODUCT_VERSION=""
   local lPRODUCT_NAME=""
 
-  lORIG_SOURCE=$(jq --raw-output '.group' <<< "${lSBOM_ENTRY}")
+  lORIG_SOURCE=$(jq --raw-output '.group' <<<"${lSBOM_ENTRY}")
 
   # if source is unhandled_file we can skip this entry completely
   if [[ "${lORIG_SOURCE}" == "unhandled_file" ]]; then
     return
   fi
 
-  lPRODUCT_VERSION=$(jq --raw-output '.version' <<< "${lSBOM_ENTRY}")
+  lPRODUCT_VERSION=$(jq --raw-output '.version' <<<"${lSBOM_ENTRY}")
 
   # ensure we have some version to test
   if [[ -z "${lPRODUCT_VERSION}" ]]; then
@@ -298,21 +298,21 @@ sbom_preprocessing_threader() {
   fi
 
   # lPRODUCT_NAME is only used for duplicate checking:
-  lPRODUCT_NAME=$(jq --raw-output '.name' <<< "${lSBOM_ENTRY}")
+  lPRODUCT_NAME=$(jq --raw-output '.name' <<<"${lSBOM_ENTRY}")
 
   # extract all our possible vendor names and product names:
-  mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<< "${lSBOM_ENTRY}")
+  mapfile -t lVENDOR_ARR < <(jq --raw-output '.properties[] | select(.name | test("vendor_name")) | .value' <<<"${lSBOM_ENTRY}")
   if [[ "${#lVENDOR_ARR[@]}" -eq 0 ]]; then
     lVENDOR_ARR+=("NOTDEFINED")
   fi
-  mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<< "${lSBOM_ENTRY}")
+  mapfile -t lPRODUCT_ARR < <(jq --raw-output '.properties[] | select(.name | test("product_name")) | .value' <<<"${lSBOM_ENTRY}")
   if [[ "${#lPRODUCT_ARR[@]}" -eq 0 ]]; then
     lPRODUCT_ARR+=("${lPRODUCT_NAME}")
   fi
 
-  lBOM_REF=$(jq --raw-output '."bom-ref"' <<< "${lSBOM_ENTRY}")
+  lBOM_REF=$(jq --raw-output '."bom-ref"' <<<"${lSBOM_ENTRY}")
   local lANCHOR=""
-  lANCHOR="${lPRODUCT_ARR[0]//\'}_${lPRODUCT_VERSION}"
+  lANCHOR="${lPRODUCT_ARR[0]//\'/}_${lPRODUCT_VERSION}"
   lANCHOR="cve_${lANCHOR:0:20}"
 
   # ensure this product/version combination is not already in our testing array:
@@ -320,7 +320,7 @@ sbom_preprocessing_threader() {
     return
   fi
 
-  echo "${lSBOM_ENTRY}" >> "${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed.${lBOM_REF}"
+  echo "${lSBOM_ENTRY}" >>"${LOG_PATH_MODULE}/tmp/sbom_entry_preprocessed.${lBOM_REF}"
   print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 }
 
@@ -379,9 +379,9 @@ cve_bin_tool_threader() {
 
   python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
 
-#  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
-#    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
-#  fi
+  #  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
+  #    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
+  #  fi
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
   if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" ]]; then
@@ -390,7 +390,7 @@ cve_bin_tool_threader() {
       # print_output "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}"
       tear_down_cve_threader "${lBOM_REF},${lORIG_SOURCE},${lCVE_LINE}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_F17_ARR_2+=( "${lTMP_PID}" )
+      lWAIT_PIDS_F17_ARR_2+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
     done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" | sort -u -t, -k4,4)
   fi
@@ -404,7 +404,7 @@ cve_bin_tool_threader() {
   write_log "" "${lBIN_LOG}"
 
   local lANCHOR=""
-  lANCHOR="${lPRODUCT_NAME//\'}_${lVERS}"
+  lANCHOR="${lPRODUCT_NAME//\'/}_${lVERS}"
   lANCHOR="cve_${lANCHOR:0:20}"
   write_log "[*] Vulnerability details for ${ORANGE}${lPRODUCT_NAME}${NC} / version ${ORANGE}${lVERS}${NC} / source ${ORANGE}${lORIG_SOURCE}${NC}:" "${lBIN_LOG}"
   write_anchor "${lANCHOR}" "${lBIN_LOG}"
@@ -443,23 +443,23 @@ cve_bin_tool_threader() {
   if [[ "${lEXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     write_log "" "${lBIN_LOG}"
     # write detailed log
-    cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" >> "${lBIN_LOG}"
+    cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" >>"${lBIN_LOG}"
     write_log "" "${lBIN_LOG}"
     write_log "[+] Identified ${RED}${BOLD}${lCVE_COUNTER_VERIFIED}${GREEN} CVEs and ${RED}${BOLD}${lEXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${lPRODUCT_NAME}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
 
     # write summary log:
-    printf "[${MAGENTA}+${NC}]${MAGENTA} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME}" "${lVERS}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    printf "[${MAGENTA}+${NC}]${MAGENTA} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME}" "${lVERS}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >>"${LOG_PATH_MODULE}"/vuln_summary.txt
   elif [[ "${lCVE_COUNTER_VERSION}" -gt 0 ]]; then
     write_log "" "${lBIN_LOG}"
-    cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" >> "${lBIN_LOG}"
+    cat "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" >>"${lBIN_LOG}"
     write_log "" "${lBIN_LOG}"
     write_log "[+] Identified ${ORANGE}${BOLD}${lCVE_COUNTER_VERIFIED}${GREEN} CVEs in ${ORANGE}${lPRODUCT_NAME}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
 
     # write summary log:
-    printf "[${ORANGE}+${NC}]${ORANGE} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME}" "${lVERS}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    printf "[${ORANGE}+${NC}]${ORANGE} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME}" "${lVERS}" "${lCVE_COUNTER_VERIFIED}" "${lEXPLOIT_COUNTER_VERSION}" "${lORIG_SOURCE}" >>"${LOG_PATH_MODULE}"/vuln_summary.txt
   else
     write_log "[+] Identified ${GREEN}${BOLD}${lCVE_COUNTER_VERIFIED:-0}${GREEN} CVEs in ${ORANGE}${lPRODUCT_NAME}${GREEN} with version ${ORANGE}${lVERS}${GREEN} (source ${ORANGE}${lORIG_SOURCE}${GREEN}).${NC}" "${lBIN_LOG}"
-    printf "[${GREEN}+${NC}]${GREEN} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME}" "${lVERS}" "${lCVE_COUNTER_VERIFIED:-0}" "${lEXPLOIT_COUNTER_VERSION:-0}" "${lORIG_SOURCE}" >> "${LOG_PATH_MODULE}"/vuln_summary.txt
+    printf "[${GREEN}+${NC}]${GREEN} Component details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-20.20s${NC}\n" "${lPRODUCT_NAME}" "${lVERS}" "${lCVE_COUNTER_VERIFIED:-0}" "${lEXPLOIT_COUNTER_VERSION:-0}" "${lORIG_SOURCE}" >>"${LOG_PATH_MODULE}"/vuln_summary.txt
   fi
   write_log "\\n-----------------------------------------------------------------\\n" "${lBIN_LOG}"
 
@@ -470,7 +470,7 @@ cve_bin_tool_threader() {
 
   # now, lets write the main f20 log file with the results of the current binary:
   if [[ -f "${lBIN_LOG}" ]]; then
-    tee -a "${LOG_FILE}" < "${lBIN_LOG}"
+    tee -a "${LOG_FILE}" <"${lBIN_LOG}"
   fi
 }
 
@@ -558,7 +558,7 @@ tear_down_cve_threader() {
     # we get "EPSS;percentage" back
     lFIRST_EPSS=$(get_epss_data "${lCVE_ID}")
     # local lFIRST_PERC="${lFIRST_EPSS/*\;}"
-    lFIRST_EPSS="${lFIRST_EPSS/\;*}"
+    lFIRST_EPSS="${lFIRST_EPSS/\;*/}"
 
     # check if the CVE is known as a knwon exploited vulnerability:
     if grep -q "^${lCVE_ID}," "${KNOWN_EXP_CSV}"; then
@@ -593,17 +593,17 @@ tear_down_cve_threader() {
         # check if the current CVE is a verified kernel CVE from s26 module
         if grep -q ";${lCVE_ID};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
           print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!" "no_log"
-          ((lKERNEL_VERIFIED_VULN+=1))
+          ((lKERNEL_VERIFIED_VULN += 1))
           lKERNEL_VERIFIED="yes"
         fi
         if grep -q ";${lCVE_ID};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
           print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!" "no_log"
-          ((lKERNEL_VERIFIED_VULN+=1))
+          ((lKERNEL_VERIFIED_VULN += 1))
           lKERNEL_VERIFIED="yes"
         fi
         if grep -q ";${lCVE_ID};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${lBIN_VERS}".csv; then
           print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${lCVE_ID}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!" "no_log"
-          ((lKERNEL_VERIFIED_VULN+=1))
+          ((lKERNEL_VERIFIED_VULN += 1))
           lKERNEL_VERIFIED="yes"
         fi
       fi
@@ -639,11 +639,11 @@ tear_down_cve_threader() {
         lEXPLOIT+=" / EDB ID:"
       fi
 
-      for lEXPLOIT_ID in "${lEXPLOIT_IDS_ARR[@]}" ; do
-        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:EDB:${lEXPLOIT_ID}" )
+      for lEXPLOIT_ID in "${lEXPLOIT_IDS_ARR[@]}"; do
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:EDB:${lEXPLOIT_ID}")
         lEXPLOIT+=" ${lEXPLOIT_ID}"
         write_log "[+] Exploit for ${lCVE_ID}:\\n" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
-        write_log "[+] EDB Exploit for ${lCVE_ID} identified"  "${LOG_PATH_MODULE}/exploit/EDB_${lEXPLOIT_ID}_notes.txt"
+        write_log "[+] EDB Exploit for ${lCVE_ID} identified" "${LOG_PATH_MODULE}/exploit/EDB_${lEXPLOIT_ID}_notes.txt"
         write_log "${lEXPLOIT_AVAIL_EDB_ARR[*]/\ /\\n}" "${LOG_PATH_MODULE}/exploit/edb_${lEXPLOIT_ID}_notes.txt"
         # write_log "${lLINE}" "${LOG_PATH_MODULE}""/exploit/""${lEXPLOIT_ID}"".txt"
         if [[ "${lEXPLOIT_AVAIL_EDB_ARR[*]}" =~ "Type: local" && "${lLOCAL:-0}" -eq 0 ]]; then
@@ -666,7 +666,7 @@ tear_down_cve_threader() {
       for lEXPLOIT_ENTRY in "${lEXPLOIT_AVAIL_EDB_ARR[@]}"; do
         if [[ "${lEXPLOIT_ENTRY}" =~ "File:" ]]; then
           lE_FILE=$(echo "${lEXPLOIT_ENTRY}" | awk '{print $2}')
-          if [[ -f "${lE_FILE}" ]] ; then
+          if [[ -f "${lE_FILE}" ]]; then
             cp "${lE_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${lE_FILE}")" || print_error "[-] Copy exploit error for ${lE_FILE}"
           fi
         fi
@@ -680,16 +680,16 @@ tear_down_cve_threader() {
         lEXPLOIT+=" / MSF:"
       fi
 
-      for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}" ; do
+      for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}"; do
         if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
           lEXPLOIT_PATH=$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
         else
           lEXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
         fi
         lEXPLOIT_NAME=$(basename -s .rb "${lEXPLOIT_PATH}")
-        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:MSF:${lEXPLOIT_NAME}" )
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:MSF:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
-        if [[ -f "${lEXPLOIT_PATH}" ]] ; then
+        if [[ -f "${lEXPLOIT_PATH}" ]]; then
           # for the web reporter we copy the original metasploit module into the EMBA log directory
           cp "${lEXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/msf_""${lEXPLOIT_NAME}".rb
           if grep -q "< Msf::Exploit::Remote" "${lEXPLOIT_PATH}"; then
@@ -719,9 +719,9 @@ tear_down_cve_threader() {
         lEXPLOIT+=" / Snyk:"
       fi
 
-      for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}" ; do
+      for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}"; do
         lEXPLOIT_NAME=$(echo "${lEXPLOIT_SNYK}" | cut -d\; -f2)
-        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:SNYK:${lEXPLOIT_NAME}" )
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:SNYK:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
         if [[ "${lTYPE}" != "NA" ]]; then
           lEXPLOIT+=" (${lTYPE})"
@@ -743,10 +743,10 @@ tear_down_cve_threader() {
         lEXPLOIT+=" / PSS:"
       fi
 
-      for lEXPLOIT_PS in "${lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]}" ; do
+      for lEXPLOIT_PS in "${lEXPLOIT_AVAIL_PACKETSTORM_ARR[@]}"; do
         # we use the html file as lEXPLOIT_NAME.
         lEXPLOIT_NAME=$(echo "${lEXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
-        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:PSS:${lEXPLOIT_NAME}" )
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:PSS:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
         lPS_TYPE=$(grep "^${lCVE_ID};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${lEXPLOIT_NAME}" | cut -d\; -f4 || true)
         if [[ "${lPS_TYPE}" == "remote" ]]; then
@@ -780,12 +780,12 @@ tear_down_cve_threader() {
       fi
       local lEXPLOIT_ROUTERSPLOIT_ARR=("${lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" "${lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}")
 
-      for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}" ; do
+      for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}"; do
         lEXPLOIT_PATH=$(echo "${lEXPLOIT_RS}" | cut -d: -f1)
         lEXPLOIT_NAME=$(basename -s .py "${lEXPLOIT_PATH}")
-        lVEX_EXPLOIT_PROP_ARRAY_ARR+=( "exploit:RS:${lEXPLOIT_NAME}" )
+        lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:RS:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
-        if [[ -f "${lEXPLOIT_PATH}" ]] ; then
+        if [[ -f "${lEXPLOIT_PATH}" ]]; then
           # for the web reporter we copy the original metasploit module into the EMBA log directory
           cp "${lEXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/routersploit_""${lEXPLOIT_NAME}".py
           if grep -q Port "${lEXPLOIT_PATH}"; then
@@ -820,46 +820,46 @@ tear_down_cve_threader() {
 
   # we do not deal with output formatting the usual way -> we use printf
   if [[ ! -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt" ]]; then
-    printf "${GREEN}\t%-20.20s:   %-12.12s:   %-20.20s:  %-10.10s : %-4.4s :   %-15.15s:   %s${NC}\n" "BIN NAME" "BIN VERS" "CVE ID" "CVSS VALUE" "EPSS" "SOURCE" "EXPLOIT" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+    printf "${GREEN}\t%-20.20s:   %-12.12s:   %-20.20s:  %-10.10s : %-4.4s :   %-15.15s:   %s${NC}\n" "BIN NAME" "BIN VERS" "CVE ID" "CVSS VALUE" "EPSS" "SOURCE" "EXPLOIT" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
   fi
   if [[ "${lCVSS_SEVERITY}" == "CRITICAL" ]]; then
-    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
+    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* ||
       "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
-      echo "${lCVSS_SEVERITY}" >> "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      echo "${lCVSS_SEVERITY}" >>"${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
     else
-      printf "${RED}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${RED}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   elif [[ "${lCVSS_SEVERITY}" == "HIGH" ]]; then
-    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
+    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* ||
       "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
-      echo "${lCVSS_SEVERITY}" >> "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      echo "${lCVSS_SEVERITY}" >>"${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
     else
-      printf "${RED}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${RED}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   elif [[ "${lCVSS_SEVERITY}" == "MEDIUM" ]]; then
-    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
+    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* ||
       "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
-      echo "${lCVSS_SEVERITY}" >> "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      echo "${lCVSS_SEVERITY}" >>"${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
     else
-      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   else
-    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* || \
+    if [[ "${lEXPLOIT}" == *MSF* || "${lEXPLOIT}" == *EDB\ ID* || "${lEXPLOIT}" == *linux-exploit-suggester* || "${lEXPLOIT}" == *Routersploit* ||
       "${lEXPLOIT}" == *PSS* || "${lEXPLOIT}" == *Snyk* || "${lKNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
-      echo "${lCVSS_SEVERITY}" >> "${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      echo "${lCVSS_SEVERITY}" >>"${TMP_DIR}"/SEVERITY_EXPLOITS.tmp
     else
-      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >> "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
+      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-20.20s:   %-10.10s:  %-3.3s :   %-15.15s:   %s${NC}\n" "${lBIN_NAME}" "${lBIN_VERS}" "${lCVE_ID}" "${lCVSS_SCORE_VERS}" "${lFIRST_EPSS}" "${lORIG_SOURCE}" "${lEXPLOIT}" >>"${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lBIN_NAME}_${lBIN_VERS}.txt"
     fi
   fi
 
   # generate the vulnerability details for the SBOM (VEX)
 
   # external/nvd-json-data-feeds/CVE-2022/CVE-2022-25xx/CVE-2022-2586.json
-  mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u | cut -d '-' -f2|| true)
+  mapfile -t lCWE < <(grep -o -E "CWE-[0-9]+" "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null | sort -u | cut -d '-' -f2 || true)
   lCVE_DESC=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
 
   local lVULN_BOM_REF=""
@@ -894,10 +894,10 @@ tear_down_cve_threader() {
     description="${lCVE_DESC}" \
     affects="$(jo -a "$(jo -n ref="${lBOM_REF}" versions="$(jo -a "$(jo -n -- -s component="${lPRODUCT_NAME}" -s version="${lVERS}")")")")" \
     properties="$(jo -a "${PROPERTIES_JSON_ARR[@]:-null}")" \
-    > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || print_error "[*] VEX entry failed for ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}"
+    >"${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || print_error "[*] VEX entry failed for ${lBIN_NAME};${lBIN_VERS};${lCVE_ID};${lEXPLOIT}"
 
   # make it nice:
-  jq . "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" > "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.json"
+  jq . "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" >"${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.json"
 
   # cleanup
   rm "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || true
@@ -954,4 +954,3 @@ backup_vex_file() {
     print_output "[*] Backed up ${lFILE_PATH} as $(basename "${lBASE_NAME}.previous.json")" "no_log"
   fi
 }
-

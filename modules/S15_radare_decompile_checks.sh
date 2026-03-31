@@ -21,8 +21,7 @@
 # do not prio s13 and s14 as the dependency check during runtime will fail!
 export THREAD_PRIO=0
 
-S15_radare_decompile_checks()
-{
+S15_radare_decompile_checks() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Create and analyze decompilation of binaries"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -31,7 +30,7 @@ S15_radare_decompile_checks()
   export COUNT_STRLEN=0
   local lWAIT_PIDS_S15_ARR=()
 
-  if [[ -n "${ARCH}" ]] ; then
+  if [[ -n "${ARCH}" ]]; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
     # This module waits for S12 - binary protections and s13
     # check emba.log for S12_binary_protection starting
@@ -47,25 +46,25 @@ S15_radare_decompile_checks()
     export FUNC_LOG=""
 
     lVULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
-    print_output "[*] Vulnerable functions: ""$( echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
+    print_output "[*] Vulnerable functions: ""$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')""\\n"
     # nosemgrep
     local IFS=" "
-    IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$( echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
+    IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')"
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
       lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
-      lBINARY="${lBINARY/;*}"
+      lBINARY="${lBINARY/;*/}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
-        lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
+        lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
 
         if [[ "${THREADED}" -eq 1 ]]; then
           radare_decompilation "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S15_ARR+=( "${lTMP_PID}" )
+          lWAIT_PIDS_S15_ARR+=("${lTMP_PID}")
         else
           radare_decompilation "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
         fi
@@ -98,7 +97,7 @@ radare_decompilation() {
   shift 1
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
-  lBIN_NAME=$(basename "${lBINARY}" 2> /dev/null)
+  lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
   local lSTRCPY_CNT=0
   export NETWORKING=""
 
@@ -106,8 +105,8 @@ radare_decompilation() {
     return
   fi
 
-  NETWORKING=$(readelf -W -a "${lBINARY}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
-  for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
+  NETWORKING=$(readelf -W -a "${lBINARY}" --use-dynamic 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
+  for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     export COUNT_FUNC=0
     FUNC_LOG="${LOG_PATH_MODULE}""/decompilation_vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
     radare_decomp_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
@@ -115,19 +114,19 @@ radare_decompilation() {
     # pdd is for decompilation - with @@ we are working through all the identified functions
     # We analyse only 150 functions per binary
     timeout --preserve-status --signal SIGINT 3600 r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >> "${FUNC_LOG}" || true
-#      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" 2> /dev/null >> "${FUNC_LOG}" || true
+      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >>"${FUNC_LOG}" || true
+    #      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" 2> /dev/null >> "${FUNC_LOG}" || true
 
-    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l < "${FUNC_LOG}") -gt 3 ]] ; then
+    if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l <"${FUNC_LOG}") -gt 3 ]]; then
       radare_decomp_color_output "${lFUNCTION}" "${FUNC_LOG}"
 
       # Todo: check this with other architectures
-      COUNT_FUNC="$(grep -c "${lFUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
+      COUNT_FUNC="$(grep -c "${lFUNCTION}" "${FUNC_LOG}" 2>/dev/null || true)"
       # we have already the header with the function name - remove it
-      COUNT_FUNC=$((COUNT_FUNC-1))
-      if [[ "${lFUNCTION}" == "strcpy" ]] ; then
-        COUNT_STRLEN=$(grep -c "strlen" "${FUNC_LOG}"  2> /dev/null || true)
-        lSTRCPY_CNT=$((lSTRCPY_CNT+COUNT_FUNC))
+      COUNT_FUNC=$((COUNT_FUNC - 1))
+      if [[ "${lFUNCTION}" == "strcpy" ]]; then
+        COUNT_STRLEN=$(grep -c "strlen" "${FUNC_LOG}" 2>/dev/null || true)
+        lSTRCPY_CNT=$((lSTRCPY_CNT + COUNT_FUNC))
       fi
 
       # from S14_weak_func_radare_check
@@ -140,7 +139,7 @@ radare_decompilation() {
       continue
     fi
   done
-  echo "${lSTRCPY_CNT}" >> "${TMP_DIR}"/S15_STRCPY_CNT.tmp
+  echo "${lSTRCPY_CNT}" >>"${TMP_DIR}"/S15_STRCPY_CNT.tmp
 }
 
 radare_decomp_log_bin_hardening() {
@@ -156,7 +155,7 @@ radare_decomp_log_bin_hardening() {
     # write_link "$LOG_DIR/s12_binary_protection.txt" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
     # get headline:
-    lHEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${S12_LOG}" | sed 's/FORTIFY.*//'| sort -u || true)
+    lHEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${S12_LOG}" | sed 's/FORTIFY.*//' | sort -u || true)
     write_log "  ${lHEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
     lBIN_PROT=$(grep '/'"${lBIN_NAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
@@ -165,16 +164,16 @@ radare_decomp_log_bin_hardening() {
   fi
 
   write_log "${NC}" "${lFUNC_LOG}"
-# not working - check this:
-#  if [[ -d "${LOG_DIR}"/s14_weak_func_radare_check/ ]] && [[ "$(find "${LOG_DIR}"/s14_weak_func_radare_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
-#    write_log "[*] Function $ORANGE$lFUNCTION$NC tear down of $ORANGE$lBIN_NAME$NC / Switch to Radare2 disasm$NC" "${lFUNC_LOG}"
-#    write_link "$(find "${LOG_DIR}"/s14_weak_func_radare_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt")" "${lFUNC_LOG}"
-#  elif [[ -d "${LOG_DIR}"/s13_weak_func_check/ ]] && [[ "$(find "${LOG_DIR}"/s13_weak_func_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
-#    write_log "[*] Function $ORANGE$lFUNCTION$NC tear down of $ORANGE$lBIN_NAME$NC / Switch to Objdump disasm$NC" "${lFUNC_LOG}"
-#    write_link "$(find "${LOG_DIR}"/s13_weak_func_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt")" "${lFUNC_LOG}"
-#  else
+  # not working - check this:
+  #  if [[ -d "${LOG_DIR}"/s14_weak_func_radare_check/ ]] && [[ "$(find "${LOG_DIR}"/s14_weak_func_radare_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
+  #    write_log "[*] Function $ORANGE$lFUNCTION$NC tear down of $ORANGE$lBIN_NAME$NC / Switch to Radare2 disasm$NC" "${lFUNC_LOG}"
+  #    write_link "$(find "${LOG_DIR}"/s14_weak_func_radare_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt")" "${lFUNC_LOG}"
+  #  elif [[ -d "${LOG_DIR}"/s13_weak_func_check/ ]] && [[ "$(find "${LOG_DIR}"/s13_weak_func_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
+  #    write_log "[*] Function $ORANGE$lFUNCTION$NC tear down of $ORANGE$lBIN_NAME$NC / Switch to Objdump disasm$NC" "${lFUNC_LOG}"
+  #    write_link "$(find "${LOG_DIR}"/s13_weak_func_check/ -name "vul_func_*""${lFUNCTION}""-""${lBIN_NAME}"".txt")" "${lFUNC_LOG}"
+  #  else
   write_log "[*] Function ${ORANGE}${lFUNCTION}${NC} tear down of ${ORANGE}${lBIN_NAME}${NC}" "${lFUNC_LOG}"
-#  fi
+  #  fi
   write_log "" "${lFUNC_LOG}"
 }
 
@@ -189,18 +188,18 @@ radare_decomp_print_top10_statistics() {
   sub_module_title "Top 10 legacy C functions - Radare2 decompilation mode"
 
   if [[ -n "$(find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_*_*-*.txt" -print -quit)" ]]; then
-    for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}" ; do
+    for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
       local lSEARCH_TERM=""
       local lF_COUNTER=0
-      readarray -t lRESULTS_ARR < <( find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_*_""${lFUNCTION}""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""${lFUNCTION}""-/  /" | sed "s/\.txt//" | grep -v "^0\ " 2> /dev/null || true)
+      readarray -t lRESULTS_ARR < <(find "${LOG_PATH_MODULE}" -xdev -iname "vul_func_*_""${lFUNCTION}""-*.txt" 2>/dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""${lFUNCTION}""-/  /" | sed "s/\.txt//" | grep -v "^0\ " 2>/dev/null || true)
 
       if [[ "${#lRESULTS_ARR[@]}" -gt 0 ]]; then
         print_ln
         print_output "[+] ""${lFUNCTION}"" - top 10 results:"
-        if [[ "${lFUNCTION}" == "strcpy" ]] ; then
+        if [[ "${lFUNCTION}" == "strcpy" ]]; then
           write_anchor "strcpysummary"
         fi
-        for lBINARY in "${lRESULTS_ARR[@]}" ; do
+        for lBINARY in "${lRESULTS_ARR[@]}"; do
           lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
@@ -225,7 +224,7 @@ radare_decomp_print_top10_statistics() {
               # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
               write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" "" ""
               # add ChatGPT link
-              printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
+              printf '%s\n\n' "" >>"${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
               write_anchor_gpt "${lGPT_ANCHOR_}" "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
             fi
           fi
@@ -245,8 +244,7 @@ radare_decomp_color_output() {
 }
 
 radare_decomp_output_function_details() {
-  write_s15_log()
-  {
+  write_s15_log() {
     local lOUTPUT="${1:-}"
     local lLINK="${2:-}"
     local lLOG_FILE="${3:-}"
@@ -255,8 +253,8 @@ radare_decomp_output_function_details() {
     print_output "${lOUTPUT}" "" "${lLINK}"
 
     if [[ -f "${lLOG_FILE}" ]]; then
-      cat "${lLOG_FILE}" >> "${lOLD_LOG_FILE}" || true
-      rm "${lLOG_FILE}" 2> /dev/null || true
+      cat "${lLOG_FILE}" >>"${lOLD_LOG_FILE}" || true
+      rm "${lLOG_FILE}" 2>/dev/null || true
     fi
     lLOG_FILE="${lOLD_LOG_FILE}"
   }
@@ -296,7 +294,7 @@ radare_decomp_output_function_details() {
   local lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${COUNT_FUNC}"_"${lFUNCTION}"-"${lBIN_NAME}".txt
 
   if [[ -f "${lLOG_FILE_LOC_OLD}" ]]; then
-    mv "${lLOG_FILE_LOC_OLD}" "${lLOG_FILE_LOC}" 2> /dev/null || true
+    mv "${lLOG_FILE_LOC_OLD}" "${lLOG_FILE_LOC}" 2>/dev/null || true
   fi
 
   if [[ "${NETWORKING}" -gt 1 ]]; then
@@ -307,11 +305,11 @@ radare_decomp_output_function_details() {
     local lNETWORKING_="${GREEN}networking: ${lNW_CSV}${NC}"
   fi
 
-  if [[ ${COUNT_FUNC} -gt 0 ]] ; then
+  if [[ ${COUNT_FUNC} -gt 0 ]]; then
     local lOUTPUT=""
-    if [[ "${lFUNCTION}" == "strcpy" ]] ; then
+    if [[ "${lFUNCTION}" == "strcpy" ]]; then
       lOUTPUT="[+] ""$(print_path "${lBINARY}")""${lCOMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${lFUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${lNETWORKING_}""${NC}"
-    elif [[ "${lFUNCTION}" == "mmap" ]] ; then
+    elif [[ "${lFUNCTION}" == "mmap" ]]; then
       local lCOUNT_MMAP_OK="NA"
       lOUTPUT="[+] ""$(print_path "${lBINARY}")""${lCOMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${lFUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""${lCOUNT_MMAP_OK}"" ""${NC}"
     else

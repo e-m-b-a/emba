@@ -24,7 +24,7 @@ resolve_link() {
 
 if ("${EMBA_BOOT}"); then
   if [ ! -e /bin/sh ]; then
-      "${BUSYBOX}" ln -s /firmadyne/busybox /bin/sh
+    "${BUSYBOX}" ln -s /firmadyne/busybox /bin/sh
   fi
   "${BUSYBOX}" ln -s /firmadyne/busybox /firmadyne/sh
 
@@ -54,11 +54,10 @@ if ("${EMBA_BOOT}"); then
   mkdir -p "$(resolve_link /var/wps)"
   mkdir -p "$(resolve_link /var/ppp)"
 
-  for FILE in $("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -perm -u+x -exec "${BUSYBOX}" strings {} \; | "${BUSYBOX}" egrep "^(/var|/etc|/tmp)(.+)\/([^\/]+)$")
-  do
+  for FILE in $("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -perm -u+x -exec "${BUSYBOX}" strings {} \; | "${BUSYBOX}" egrep "^(/var|/etc|/tmp)(.+)\/([^\/]+)$"); do
     DIR=$("${BUSYBOX}" dirname "${FILE}")
-    if (! "${BUSYBOX}" echo "${DIR}" | "${BUSYBOX}" egrep -q "(%s|%c|%d|/tmp/services)");then
-      "${BUSYBOX}" echo "${DIR}" >> /firmadyne/dir_log
+    if (! "${BUSYBOX}" echo "${DIR}" | "${BUSYBOX}" egrep -q "(%s|%c|%d|/tmp/services)"); then
+      "${BUSYBOX}" echo "${DIR}" >>/firmadyne/dir_log
       mkdir -p "$(resolve_link "${DIR}")"
     fi
   done
@@ -68,18 +67,18 @@ fi
 mkdir -p "$(resolve_link /etc)"
 if [ ! -s /etc/TZ ]; then
   mkdir -p "$(dirname "$(resolve_link /etc/TZ)")"
-  echo "EST5EDT" > "$(resolve_link /etc/TZ)"
+  echo "EST5EDT" >"$(resolve_link /etc/TZ)"
 fi
 
 if [ ! -s /etc/hosts ]; then
   mkdir -p "$(dirname "$(resolve_link /etc/hosts)")"
-  echo "127.0.0.1 localhost" > "$(resolve_link /etc/hosts)"
+  echo "127.0.0.1 localhost" >"$(resolve_link /etc/hosts)"
 fi
 
 if [ ! -s /etc/passwd ]; then
   mkdir -p "$(dirname "$(resolve_link /etc/passwd)")"
   # nosemgrep
-  echo "root::0:0:root:/root:/bin/sh" > "$(resolve_link /etc/passwd)"
+  echo "root::0:0:root:/root:/bin/sh" >"$(resolve_link /etc/passwd)"
 fi
 
 # for busybox older v1.3.0 we need an rcS entry
@@ -89,22 +88,22 @@ mkdir -p "$(resolve_link /etc/init.d)"
 
 # disabled for now
 if [ -s /etc/init.d/rcSX ]; then
-  echo '#!/firmadyne/sh' > /etc/init.d/rcS
-  echo 'BUSYBOX=/firmadyne/busybox' >> /etc/init.d/rcS
-  echo '${BUSYBOX} echo [*] Execute EMBA $0 script sleeping 10 secs ...' >> /etc/init.d/rcS
-  echo '${BUSYBOX} echo [*] Filesystem overview:' >> /etc/init.d/rcS
-  echo '${BUSYBOX} ls -l /' >> /etc/init.d/rcS
-  echo '${BUSYBOX} echo [*] EMBA helpers directory:' >> /etc/init.d/rcS
-  echo '${BUSYBOX} ls -l /firmadyne' >> /etc/init.d/rcS
-  echo '${BUSYBOX} sleep 10' >> /etc/init.d/rcS
-  echo '${BUSYBOX} echo "[*] Execute EMBA preInit.sh script starter .."' >> /etc/init.d/rcS
-  echo '/firmadyne/preInit.sh &' >> /etc/init.d/rcS
-  echo '${BUSYBOX} sleep 10' >> /etc/init.d/rcS
-  echo '${BUSYBOX} echo "[*] Execute EMBA network.sh script starter .."' >> /etc/init.d/rcS
-  echo '/firmadyne/network.sh &' >>  /etc/init.d/rcS
-  echo '${BUSYBOX} sleep 10' >> /etc/init.d/rcS
-  echo '${BUSYBOX} echo "[*] Execute EMBA run_service.sh script starter .."' >> /etc/init.d/rcS
-  echo '/firmadyne/run_service.sh &' >> /etc/init.d/rcS
+  echo '#!/firmadyne/sh' >/etc/init.d/rcS
+  echo 'BUSYBOX=/firmadyne/busybox' >>/etc/init.d/rcS
+  echo '${BUSYBOX} echo [*] Execute EMBA $0 script sleeping 10 secs ...' >>/etc/init.d/rcS
+  echo '${BUSYBOX} echo [*] Filesystem overview:' >>/etc/init.d/rcS
+  echo '${BUSYBOX} ls -l /' >>/etc/init.d/rcS
+  echo '${BUSYBOX} echo [*] EMBA helpers directory:' >>/etc/init.d/rcS
+  echo '${BUSYBOX} ls -l /firmadyne' >>/etc/init.d/rcS
+  echo '${BUSYBOX} sleep 10' >>/etc/init.d/rcS
+  echo '${BUSYBOX} echo "[*] Execute EMBA preInit.sh script starter .."' >>/etc/init.d/rcS
+  echo '/firmadyne/preInit.sh &' >>/etc/init.d/rcS
+  echo '${BUSYBOX} sleep 10' >>/etc/init.d/rcS
+  echo '${BUSYBOX} echo "[*] Execute EMBA network.sh script starter .."' >>/etc/init.d/rcS
+  echo '/firmadyne/network.sh &' >>/etc/init.d/rcS
+  echo '${BUSYBOX} sleep 10' >>/etc/init.d/rcS
+  echo '${BUSYBOX} echo "[*] Execute EMBA run_service.sh script starter .."' >>/etc/init.d/rcS
+  echo '/firmadyne/run_service.sh &' >>/etc/init.d/rcS
   chmod +x /etc/init.d/rcS
 fi
 
@@ -220,12 +219,12 @@ ls -l /dev/
 if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libcm.so) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
-    echo "Creating /dev/gpio/in!"
-    if ("${EMBA_BOOT}"); then
-      rm /dev/gpio 2>/dev/null
-    fi
-    mkdir -p /dev/gpio
-    echo -ne "\xff\xff\xff\xff" > /dev/gpio/in
+  echo "Creating /dev/gpio/in!"
+  if ("${EMBA_BOOT}"); then
+    rm /dev/gpio 2>/dev/null
+  fi
+  mkdir -p /dev/gpio
+  echo -ne "\xff\xff\xff\xff" >/dev/gpio/in
 else
   # just create an empty file
   rm -r /dev/gpio 2>/dev/null
@@ -237,8 +236,8 @@ if ("${EMBA_BOOT}"); then
   echo "Removing /sbin/reboot!"
   if [ -s /sbin/reboot ]; then
     rm -f /sbin/reboot
-    echo '#!/bin/sh' > /sbin/reboot
-    echo 'echo "[*] System tries to reboot - reboot not executed"' >> /sbin/reboot
+    echo '#!/bin/sh' >/sbin/reboot
+    echo 'echo "[*] System tries to reboot - reboot not executed"' >>/sbin/reboot
     chmod +x /sbin/reboot
   fi
 fi
@@ -248,31 +247,31 @@ rm -f /etc/scripts/sys_resetbutton
 # add some default nvram entries
 if "${BUSYBOX}" grep -sq "ipv6_6to4_lan_ip" /sbin/rc; then
   echo "Creating default ipv6_6to4_lan_ip!"
-  echo -n "2002:7f00:0001::" > /firmadyne/libnvram.override/ipv6_6to4_lan_ip
+  echo -n "2002:7f00:0001::" >/firmadyne/libnvram.override/ipv6_6to4_lan_ip
 fi
 
 if "${BUSYBOX}" grep -sq "time_zone_x" /lib/libacos_shared.so; then
   echo "Creating default time_zone_x!"
-  echo -n "0" > /firmadyne/libnvram.override/time_zone_x
+  echo -n "0" >/firmadyne/libnvram.override/time_zone_x
 fi
 
 if "${BUSYBOX}" grep -sq "rip_multicast" /usr/sbin/httpd; then
   echo "Creating default rip_multicast!"
-  echo -n "0" > /firmadyne/libnvram.override/rip_multicast
+  echo -n "0" >/firmadyne/libnvram.override/rip_multicast
 fi
 
 if "${BUSYBOX}" grep -sq "bs_trustedip_enable" /usr/sbin/httpd; then
   echo "Creating default bs_trustedip_enable!"
-  echo -n "0" > /firmadyne/libnvram.override/bs_trustedip_enable
+  echo -n "0" >/firmadyne/libnvram.override/bs_trustedip_enable
 fi
 
 if "${BUSYBOX}" grep -sq "filter_rule_tbl" /usr/sbin/httpd; then
   echo "Creating default filter_rule_tbl!"
-  echo -n "" > /firmadyne/libnvram.override/filter_rule_tbl
+  echo -n "" >/firmadyne/libnvram.override/filter_rule_tbl
 fi
 
 if "${BUSYBOX}" grep -sq "rip_enable" /sbin/acos_service; then
   echo "Creating default rip_enable!"
-  echo -n "0" > /firmadyne/libnvram.override/rip_enable
+  echo -n "0" >/firmadyne/libnvram.override/rip_enable
 fi
 "${BUSYBOX}" echo "[*] EMBA fixImage script finished ..."

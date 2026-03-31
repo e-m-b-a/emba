@@ -29,7 +29,7 @@ GREEN="\033[0;32m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "\n[*] Network configuration - ACTION: ${ORANGE}${ACTION}${NC}"
-"${BUSYBOX}" echo "network config started" >> /tmp/EMBA_config_state
+"${BUSYBOX}" echo "network config started" >>/tmp/EMBA_config_state
 
 if ("${EMBA_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
@@ -80,7 +80,7 @@ if ("${EMBA_NET}"); then
         "${BUSYBOX}" brctl show
         break
       fi
-      CNT=$((CNT+1))
+      CNT=$((CNT + 1))
     done
 
     "${BUSYBOX}" sleep 5
@@ -161,5 +161,5 @@ if ("${EMBA_NET}"); then
 
   "${BUSYBOX}" echo "[*] Current network configuration:"
   "${BUSYBOX}" ifconfig -a
-  "${BUSYBOX}" echo "network config finished" >> /tmp/EMBA_config_state
+  "${BUSYBOX}" echo "network config finished" >>/tmp/EMBA_config_state
 fi

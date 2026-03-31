@@ -35,23 +35,23 @@ S08_submodule_apk_pkg_mgmt_parser() {
 
   mapfile -t lAPK_MGMT_STATUS_ARR < <(grep "apk/db/installed" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
 
-  if [[ "${#lAPK_MGMT_STATUS_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lAPK_MGMT_STATUS_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lAPK_MGMT_STATUS_ARR[@]}${NC} APK package management databases:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPACKAGE_FILE in "${lAPK_MGMT_STATUS_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lAPK_MGMT_STATUS_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "[*] Analyzing ${ORANGE}${#lAPK_MGMT_STATUS_ARR[@]}${NC} APK package management databases:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPACKAGE_FILE in "${lAPK_MGMT_STATUS_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lAPK_MGMT_STATUS_ARR[@]}"; do
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
         print_output "[*] APK database ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if [[ ! -d "${LOG_PATH_MODULE}"/apk_tmp_db ]]; then
         mkdir "${LOG_PATH_MODULE}"/apk_tmp_db
@@ -66,7 +66,7 @@ S08_submodule_apk_pkg_mgmt_parser() {
         for lAPK_PACKAGE_FILE_TMP in "${lAPK_PACKAGE_FILES_ARR[@]}"; do
           apk_pkg_analysis_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lPACKAGE_FILE}" "${lAPK_PACKAGE_FILE_TMP}" &
           local lTMP_PID="$!"
-          lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+          lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
           max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
           lPOS_RES=1
         done
@@ -112,35 +112,35 @@ apk_pkg_analysis_threader() {
   local lAPP_DEPS_ARR=()
 
   lAPP_NAME=$(grep "^P:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_NAME=$(clean_package_details "${lAPP_NAME/P:}")
+  lAPP_NAME=$(clean_package_details "${lAPP_NAME/P:/}")
   [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_VERS=$(grep "^V:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_VERS=${lAPP_VERS/V:}
+  lAPP_VERS=${lAPP_VERS/V:/}
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}" || true)
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
   lAPP_MAINT=$(grep "^m:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_MAINT=${lAPP_MAINT/m:}
+  lAPP_MAINT=${lAPP_MAINT/m:/}
   lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
   lAPP_MAINT=$(clean_package_versions "${lAPP_MAINT}")
 
   lAPP_ARCH=$(grep "^A:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_ARCH=${lAPP_ARCH/A:}
+  lAPP_ARCH=${lAPP_ARCH/A:/}
   lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
   lAPP_ARCH=$(clean_package_versions "${lAPP_ARCH}")
 
   lAPP_DESC=$(grep "^T:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_DESC=${lAPP_DESC/T:}
+  lAPP_DESC=${lAPP_DESC/T:/}
   lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
   lAPP_DESC=$(clean_package_versions "${lAPP_DESC}")
 
   lAPP_LIC=$(grep "^L:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_LIC=${lAPP_LIC/L:}
+  lAPP_LIC=${lAPP_LIC/L:/}
 
   # currently not further used -> probably this can be used for externalReferences
   lAPP_URL=$(grep "^U:" "${lAPK_PACKAGE_FILE_TMP}" || true)
-  lAPP_URL=${lAPP_URL/U:}
+  lAPP_URL=${lAPP_URL/U:/}
 
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="alpine-based"
@@ -152,16 +152,16 @@ apk_pkg_analysis_threader() {
 
   # add source file path information to our properties array:
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lPACKAGE_FILE}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   mapfile -t lAPP_DEPS_ARR < <(grep "^D:" "${lAPK_PACKAGE_FILE_TMP}" | tr ' ' '\n' | sort -u || true)
   if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
     for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
-      lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP/D:}" )
+      lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP/D:/}")
     done
   fi
 
@@ -170,7 +170,7 @@ apk_pkg_analysis_threader() {
   lAPP_LIST_FILE=$(grep "^R:" "${lAPK_PACKAGE_FILE_TMP}" || true)
   # get the list file path
   if [[ -n "${lAPP_LIST_FILE}" ]]; then
-    lAPP_LIST_FILE=$(grep "apk/packages/${lAPP_LIST_FILE/R:};" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+    lAPP_LIST_FILE=$(grep "apk/packages/${lAPP_LIST_FILE/R:/};" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   fi
 
   # if we have the list file also we can add all the paths provided by the package
@@ -178,14 +178,14 @@ apk_pkg_analysis_threader() {
     local lPKG_LIST_ENTRY=""
     local lCNT=0
     while IFS= read -r lPKG_LIST_ENTRY; do
-      lCNT=$((lCNT+1))
-      lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+      lCNT=$((lCNT + 1))
+      lPROP_ARRAY_INIT_ARR+=("path:${lPKG_LIST_ENTRY}")
       # we limit the logging of the package files to 500 files per package
       if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-        lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+        lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
         break
       fi
-    done < "${lAPP_LIST_FILE}"
+    done <"${lAPP_LIST_FILE}"
   fi
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

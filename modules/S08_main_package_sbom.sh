@@ -48,7 +48,7 @@ S08_main_package_sbom() {
       print_output "[*] SBOM - starting ${lS08_MODULE}" "no_log"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_S08_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S08_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_S08_ARR[@]}"
   else
@@ -83,7 +83,8 @@ build_dependency_tree() {
     # to speed up the dep tree we are working threaded for every componentfile and write into dedicated json files
     # "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json which we can put together in f15
     create_comp_dep_tree_threader "${lSBOM_COMP}" &
-    lWAIT_PIDS_S08_DEP_ARR+=( "${lTMP_PID}" )
+    local lTMP_PID="$!"
+    lWAIT_PIDS_S08_DEP_ARR+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_DEP_ARR
   done
   wait_for_pid "${lWAIT_PIDS_S08_DEP_ARR[@]}"
@@ -138,9 +139,9 @@ create_comp_dep_tree_threader() {
   # now we check every dependency for the current component
   for lSBOM_COMP_DEP in "${lSBOM_COMP_DEPS_FILES_ARR[@]}"; do
     # lets extract the name of the dependency
-    lSBOM_COMP_DEP="${lSBOM_COMP_DEP//\'}"
-    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ *}"
-    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*}"
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP//\'/}"
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\ */}"
+    lSBOM_COMP_DEP="${lSBOM_COMP_DEP/\(*/}"
 
     # check all sbom component files from this group (e.g. debian_pkg_mgmt) for the dependency as name:
     mapfile -t lSBOM_DEP_SOURCE_FILES_ARR < <(grep -l "name\":\"${lSBOM_COMP_DEP}\"" "${SBOM_LOG_PATH}"/"${lSBOM_COMP_SOURCE}"_* || true)
@@ -165,10 +166,10 @@ create_comp_dep_tree_threader() {
   done
   write_log "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
 
-  cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >> "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
+  cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >>"${SBOM_LOG_PATH}/SBOM_dependencies.txt"
   rm "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
 
-  jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" >> "${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
+  jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" >>"${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
 }
 
 clean_package_details() {
@@ -176,10 +177,10 @@ clean_package_details() {
 
   lCLEAN_ME_UP=$(safe_echo "${lCLEAN_ME_UP}")
   lCLEAN_ME_UP="${lCLEAN_ME_UP//[![:print:]]/}"
-  lCLEAN_ME_UP="${lCLEAN_ME_UP/\"}"
+  lCLEAN_ME_UP="${lCLEAN_ME_UP/\"/}"
   # Turn on extended globbing
   shopt -s extglob
-  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\;\#\%\/\<\>\(\)\]])}
+  lCLEAN_ME_UP=${lCLEAN_ME_UP//+([\[\'\"\;\#\%\/\<\>\(\)\]])/}
   lCLEAN_ME_UP=${lCLEAN_ME_UP##+( )}
   lCLEAN_ME_UP=${lCLEAN_ME_UP%%+( )}
   lCLEAN_ME_UP=${lCLEAN_ME_UP//\ /_}

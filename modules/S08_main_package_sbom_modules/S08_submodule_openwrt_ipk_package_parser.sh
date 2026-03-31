@@ -52,10 +52,10 @@ S08_submodule_openwrt_ipk_package_parser() {
 
   mapfile -t lIPK_ARCHIVES_ARR < <(grep "\.ipk;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lIPK_ARCHIVES_ARR[@]}${NC} OpenWRT ipk files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lIPK_ARCHIVE in "${lIPK_ARCHIVES_ARR[@]}" ; do
+    for lIPK_ARCHIVE in "${lIPK_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lIPK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -63,11 +63,11 @@ S08_submodule_openwrt_ipk_package_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lIPK_ARCHIVES_ARR[@]}${NC} OpenWRT ipk files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lIPK_ARCHIVE in "${lIPK_ARCHIVES_ARR[@]}" ; do
+    for lIPK_ARCHIVE in "${lIPK_ARCHIVES_ARR[@]}"; do
       ipk_package_parser_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lIPK_ARCHIVE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
       lPOS_RES=1
     done
@@ -126,7 +126,7 @@ ipk_package_parser_threader() {
     print_output "[*] ${ORANGE}${lIPK_ARCHIVE}${NC} already analyzed" "no_log"
     return
   fi
-  lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+  lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
   local lIPK_LOG_PATH="${TMP_DIR}/ipk_package_${lPKG_MD5}"
   if ! [[ -d "${lIPK_LOG_PATH}" ]]; then
@@ -147,28 +147,28 @@ ipk_package_parser_threader() {
   fi
 
   lAPP_NAME=$(grep "Package: " "${lIPK_LOG_PATH}/control" || true)
-  lAPP_NAME=${lAPP_NAME/*:\ }
+  lAPP_NAME=${lAPP_NAME/*:\ /}
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_ARCH=$(grep "Architecture: " "${lIPK_LOG_PATH}/control" || true)
-  lAPP_ARCH=${lAPP_ARCH/*:\ }
+  lAPP_ARCH=${lAPP_ARCH/*:\ /}
   lAPP_ARCH=$(clean_package_details "${lAPP_ARCH}")
 
   lAPP_MAINT=$(grep "Maintainer: " "${lIPK_LOG_PATH}/control" || true)
-  lAPP_MAINT=${lAPP_MAINT/*:\ }
+  lAPP_MAINT=${lAPP_MAINT/*:\ /}
   lAPP_MAINT=$(clean_package_details "${lAPP_MAINT}")
 
   lAPP_DESC=$(grep "Description: " "${lIPK_LOG_PATH}/control" || true)
-  lAPP_DESC=${lAPP_DESC/*:\ }
+  lAPP_DESC=${lAPP_DESC/*:\ /}
   lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
   lAPP_LIC=$(grep "License: " "${lIPK_LOG_PATH}/control" || true)
-  lAPP_LIC=${lAPP_LIC/*:\ }
+  lAPP_LIC=${lAPP_LIC/*:\ /}
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
   lAPP_VERS=$(grep "Version: " "${lIPK_LOG_PATH}/control" || true)
-  lAPP_VERS=${lAPP_VERS/*:\ }
+  lAPP_VERS=${lAPP_VERS/*:\ /}
   lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
   lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
@@ -189,17 +189,17 @@ ipk_package_parser_threader() {
 
   # add deb path information to our properties array:
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lIPK_ARCHIVE}" )
-  lPROP_ARRAY_INIT_ARR+=( "source_arch:${lAPP_ARCH}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lIPK_ARCHIVE}")
+  lPROP_ARRAY_INIT_ARR+=("source_arch:${lAPP_ARCH}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   # Add dependencies to properties
   for lIPK_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
     lAPP_DEP="${lAPP_DEPS_ARR["${lIPK_DEP_ID}"]}"
-    lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+    lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
   done
 
   # add package files to properties
@@ -207,10 +207,10 @@ ipk_package_parser_threader() {
     mapfile -t lIPK_FILES_ARR < <(tar -tvf "${lIPK_LOG_PATH}/data.tar.xz" | awk '{print $6}')
     for lIPK_FILE_ID in "${!lIPK_FILES_ARR[@]}"; do
       lIPK_FILE="${lIPK_FILES_ARR["${lIPK_FILE_ID}"]}"
-      lPROP_ARRAY_INIT_ARR+=( "path:${lIPK_FILE#\.}" )
+      lPROP_ARRAY_INIT_ARR+=("path:${lIPK_FILE#\.}")
       # we limit the logging of the package files to 500 files per package
       if [[ "${lIPK_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-        lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+        lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
         break
       fi
     done

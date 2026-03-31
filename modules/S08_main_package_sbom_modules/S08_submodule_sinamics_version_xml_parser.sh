@@ -48,10 +48,10 @@ S08_submodule_sinamics_version_xml_parser() {
 
   mapfile -t lVERSION_XML_ARR < <(grep "VERSIONS\.XML;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lVERSION_XML_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lVERSION_XML_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lVERSION_XML_ARR[@]}${NC} Sinamics VERSIONS.XML files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lVERSION_XML_FILE in "${lVERSION_XML_ARR[@]}" ; do
+    for lVERSION_XML_FILE in "${lVERSION_XML_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lVERSION_XML_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -73,7 +73,7 @@ S08_submodule_sinamics_version_xml_parser() {
         print_output "[*] Sinamics ${ORANGE}${lVERSION_XML_FILE}${NC} already analyzed" "no_log"
         continue
       fi
-      lXML_CHECKED_ARR+=( "${lXML_MD5}" )
+      lXML_CHECKED_ARR+=("${lXML_MD5}")
 
       if ! validate_xml "${lVERSION_XML_FILE}"; then
         continue
@@ -114,11 +114,11 @@ S08_submodule_sinamics_version_xml_parser() {
 
         # add path information to our properties array:
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lVERSION_XML_FILE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lVERSION_XML_FILE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+        lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -147,4 +147,3 @@ S08_submodule_sinamics_version_xml_parser() {
     print_output "[*] No Siemens Sinamics VERSIONS.XML SBOM results available"
   fi
 }
-

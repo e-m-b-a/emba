@@ -15,7 +15,6 @@
 
 # Description: Multiple useful helpers used to access online resources
 
-
 # kernel downloader waits for s24 results. If we were able to identify a kernel version,
 # a kernel config or at least kernel symbols we can use these details to verify the
 # vulnerabilities which we identified based on the kernel version
@@ -60,7 +59,7 @@ kernel_downloader() {
 
   mapfile -t lK_VERSIONS_ARR < <(cut -d ';' -f2 "${S24_CSV_LOG}" | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
   print_output "[*] $(print_date) - Detected kernel details:"
-  mapfile -t lKERNEL_DETAILS_TMP_ARR < "${S24_CSV_LOG}"
+  mapfile -t lKERNEL_DETAILS_TMP_ARR <"${S24_CSV_LOG}"
   for lKERNEL_DETAILS_TMP_ENTRY in "${lKERNEL_DETAILS_TMP_ARR[@]}"; do
     local lKERNEL_DETAILS_TMP_FILE=""
     local lKERNEL_DETAILS_TMP_VERSION=""
@@ -117,16 +116,16 @@ kernel_downloader() {
       enable_strict_mode "${STRICT_MODE}" 0
 
       if [[ -f "${TMP_DIR}"/wget.log ]]; then
-        tee -a "${LOG_FILE}" < "${TMP_DIR}"/wget.log || true
+        tee -a "${LOG_FILE}" <"${TMP_DIR}"/wget.log || true
         rm "${TMP_DIR}"/wget.log
       fi
       # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
       # checks for the file "${TMP_DIR}"/linux_download_failed. If this file is available it stops waiting for the kernel
       # sources
-      if [[ ${lD_RETURN} -ne 0 ]] ; then
+      if [[ ${lD_RETURN} -ne 0 ]]; then
         print_output "[-] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC} failed"
 
-        echo "failed" > "${TMP_DIR}"/linux_download_failed
+        echo "failed" >"${TMP_DIR}"/linux_download_failed
         if [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]]; then
           rm "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz
         fi

@@ -32,8 +32,8 @@ load_strict_mode_settings() {
 
   shopt -s extdebug # Enable extended debugging
   # nosemgrep
-  IFS=$'\n\t'     # Set the "internal field separator"
-  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+  IFS=$'\n\t'                      # Set the "internal field separator"
+  trap 'wickStrictModeFail $?' ERR # The ERR trap is triggered when a script catches an error
 }
 
 enable_strict_mode() {
@@ -49,9 +49,9 @@ enable_strict_mode() {
     load_strict_mode_settings
     # just in case the error is very early we have no log directory
     if [[ -d "${LOG_DIR:-}" ]]; then
-      trap 'wickStrictModeFail $? | tee -a "${ERROR_LOG}"' ERR  # The ERR trap is triggered when a script catches an error
+      trap 'wickStrictModeFail $? | tee -a "${ERROR_LOG}"' ERR # The ERR trap is triggered when a script catches an error
     else
-      trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+      trap 'wickStrictModeFail $?' ERR # The ERR trap is triggered when a script catches an error
     fi
 
     if [[ "${lPRINTER}" -eq 1 ]]; then
@@ -77,7 +77,7 @@ disable_strict_mode() {
     shopt -u extdebug # Disable extended debugging
     # unset IFS
     # nosemgrep
-    IFS=$'\n\t'       # Restore the default "internal field separator"
+    IFS=$'\n\t' # Restore the default "internal field separator"
     trap - ERR
     set +x
 
@@ -86,4 +86,3 @@ disable_strict_mode() {
     fi
   fi
 }
-

@@ -29,7 +29,7 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] $(get_date) - Starting services in emulated environment...${NC}"
-"${BUSYBOX}" echo "run_service started" >> /tmp/EMBA_config_state
+"${BUSYBOX}" echo "run_service started" >>/tmp/EMBA_config_state
 "${BUSYBOX}" cat /firmadyne/service
 
 if ("${EMBA_ETC}"); then
@@ -106,7 +106,7 @@ if ("${EMBA_ETC}"); then
       fi
 
       # normal service startups
-      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
+      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}")); then
         "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
         "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
 
@@ -116,7 +116,7 @@ if ("${EMBA_ETC}"); then
         ${_BINARY} &
 
         "${BUSYBOX}" sleep 2
-        if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
+        if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}")); then
           # shellcheck disable=SC2086
           "${BUSYBOX}" sh ${_BINARY} &
         fi
@@ -135,7 +135,7 @@ if ("${EMBA_ETC}"); then
           iptables -L
           iptables flush 2>/dev/null || true
           iptables -F 2>/dev/null || true
-          iptables -P 2>/dev/null INPUT ACCEPT || true
+          iptables -P INPUT ACCEPT 2>/dev/null || true
         fi
       fi
 
@@ -153,7 +153,6 @@ if ("${EMBA_ETC}"); then
           /firmadyne/network.sh 1
         fi
       fi
-    done < "/firmadyne/service"
+    done <"/firmadyne/service"
   done
 fi
-

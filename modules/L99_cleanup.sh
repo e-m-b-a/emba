@@ -27,4 +27,3 @@ L99_cleanup() {
     module_end_log "${FUNCNAME[0]}" 0
   fi
 }
-

@@ -17,7 +17,6 @@
 # Description:  Checks files with yara for suspicious patterns.
 export THREAD_PRIO=0
 
-
 S110_yara_check() {
   module_log_init "${FUNCNAME[0]}"
 
@@ -35,19 +34,19 @@ S110_yara_check() {
   local lMATCH_FILE=""
   local lMATCH_FILE_NAME=""
   # shellcheck disable=SC2153
-  local lMAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
-  local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"*80/100 ))
+  local lMAX_MOD_THREADS=$((MAX_MOD_THREADS / 2))
+  local lMEM_LIMIT=$(("${TOTAL_MEMORY}" * 80 / 100))
   local lYARA_OUT_LINE=""
 
-  if [[ ${YARA} -eq 1 ]] ; then
+  if [[ ${YARA} -eq 1 ]]; then
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
     if [[ ! -f "${lDIR_COMB_YARA}" ]]; then
-      find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n'| sort -n > "${lDIR_COMB_YARA}"
+      find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n' | sort -n >"${lDIR_COMB_YARA}"
     fi
 
     ulimit -Sv "${lMEM_LIMIT}"
-    yara -p "${lMAX_MOD_THREADS}" -r -w -s -m -L -g "${lDIR_COMB_YARA}" "${LOG_DIR}"/firmware > "${LOG_PATH_MODULE}"/yara_complete_output.txt || true
+    yara -p "${lMAX_MOD_THREADS}" -r -w -s -m -L -g "${lDIR_COMB_YARA}" "${LOG_DIR}"/firmware >"${LOG_PATH_MODULE}"/yara_complete_output.txt || true
     ulimit -Sv unlimited
 
     while read -r lYARA_OUT_LINE; do
@@ -62,12 +61,12 @@ S110_yara_check() {
           print_output "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           write_log "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           write_log "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
-          echo "" >> "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
-          lCOUNTING=$((lCOUNTING+1))
+          echo "" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
+          lCOUNTING=$((lCOUNTING + 1))
         fi
       fi
-      [[ -v lMATCH_FILE_NAME ]] && echo "${lYARA_OUT_LINE}" >> "${LOG_PATH_MODULE}"/"${lMATCH_FILE_NAME}".txt
-    done < "${LOG_PATH_MODULE}"/yara_complete_output.txt
+      [[ -v lMATCH_FILE_NAME ]] && echo "${lYARA_OUT_LINE}" >>"${LOG_PATH_MODULE}"/"${lMATCH_FILE_NAME}".txt
+    done <"${LOG_PATH_MODULE}"/yara_complete_output.txt
 
     print_ln
     print_ln

@@ -37,10 +37,10 @@ S08_submodule_php_composer_lock() {
 
   mapfile -t lCOMPOSER_LCK_ARCHIVES_ARR < <(grep "/composer\.lock;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lCOMPOSER_LCK_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lCOMPOSER_LCK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lCOMPOSER_LCK_ARCHIVES_ARR[@]}${NC} PHP composer lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lCOMPOSER_LCK_ARCHIVE in "${lCOMPOSER_LCK_ARCHIVES_ARR[@]}" ; do
+    for lCOMPOSER_LCK_ARCHIVE in "${lCOMPOSER_LCK_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lCOMPOSER_LCK_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -48,14 +48,14 @@ S08_submodule_php_composer_lock() {
     write_log "[*] Analyzing ${ORANGE}${#lCOMPOSER_LCK_ARCHIVES_ARR[@]}${NC} PHP composer lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lCOMPOSER_LCK_ARCHIVE in "${lCOMPOSER_LCK_ARCHIVES_ARR[@]}" ; do
+    for lCOMPOSER_LCK_ARCHIVE in "${lCOMPOSER_LCK_ARCHIVES_ARR[@]}"; do
       # if we have found multiple status files but all are the same -> we do not need to test duplicates
       lPKG_MD5="$(md5sum "${lCOMPOSER_LCK_ARCHIVE}" | awk '{print $1}')"
       if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
         print_output "[*] ${ORANGE}${lCOMPOSER_LCK_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       lR_FILE=$(file "${lCOMPOSER_LCK_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"JSON text"* ]]; then
@@ -69,7 +69,7 @@ S08_submodule_php_composer_lock() {
         php_composer_lock_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lCOMPOSER_LCK_ARCHIVE}" "${lC_LOCK_ENTRY}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
-        lWAIT_PIDS_S08_ARR_LCK+=( "${lTMP_PID}" )
+        lWAIT_PIDS_S08_ARR_LCK+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S08_ARR_LCK
         lPOS_RES=1
       done
@@ -113,10 +113,10 @@ php_composer_lock_threader() {
   local lAPP_MAINT="NA"
   local lAPP_VENDOR="NA"
 
-  lAPP_NAME=$(jq -r .name <<< "${lCOMPOSER_LCK_ENTRY}")
-  lAPP_VERS=$(jq -r .version <<< "${lCOMPOSER_LCK_ENTRY}")
-  lAPP_DESC=$(jq -r .description <<< "${lCOMPOSER_LCK_ENTRY}")
-  lAPP_DEPS=$(jq -r .require <<< "${lCOMPOSER_LCK_ENTRY}")
+  lAPP_NAME=$(jq -r .name <<<"${lCOMPOSER_LCK_ENTRY}")
+  lAPP_VERS=$(jq -r .version <<<"${lCOMPOSER_LCK_ENTRY}")
+  lAPP_DESC=$(jq -r .description <<<"${lCOMPOSER_LCK_ENTRY}")
+  lAPP_DEPS=$(jq -r .require <<<"${lCOMPOSER_LCK_ENTRY}")
 
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   # version outcome from compose is mostly v1.2.3 -> 1.2.3
@@ -134,23 +134,23 @@ php_composer_lock_threader() {
 
   if [[ "${lAPP_DEPS}" != "null" ]]; then
     # extract the dependencies lAPP_DEPS from '{"ansi-styles":"^4.0.0","string-width":"^4.1.0","strip-ansi":"^6.0.0"}'
-    mapfile -t lAPP_DEPS_ARR < <(jq -r '. | to_entries[] | "\(.key)(\(.value))"' <<< "${lAPP_DEPS}" || true)
+    mapfile -t lAPP_DEPS_ARR < <(jq -r '. | to_entries[] | "\(.key)(\(.value))"' <<<"${lAPP_DEPS}" || true)
   fi
 
   # add the node lock path information to our properties array:
   # Todo: in the future we should check for the package, package hashes and which files
   # are in the package
   local lPROP_ARRAY_INIT_ARR=()
-  lPROP_ARRAY_INIT_ARR+=( "source_path:${lCOMPOSER_LCK_ARCHIVE}" )
-  lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-  lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-  lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-  lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+  lPROP_ARRAY_INIT_ARR+=("source_path:${lCOMPOSER_LCK_ARCHIVE}")
+  lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+  lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+  lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+  lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   # Add dependencies to properties
   for lPHP_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
     lAPP_DEP="${lAPP_DEPS_ARR["${lPHP_DEP_ID}"]}"
-    lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+    lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
   done
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
@@ -168,4 +168,3 @@ php_composer_lock_threader() {
   write_log "[*] PHP composer lock archive details: ${ORANGE}${lCOMPOSER_LCK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lCOMPOSER_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC:-NA}" "${lAPP_MAINT:-NA}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC:-NA}"
 }
-

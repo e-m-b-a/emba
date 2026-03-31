@@ -31,7 +31,7 @@ P19_bsd_ufs_mounter() {
 
     ufs_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -44,7 +44,10 @@ ufs_extractor() {
   local lUFS_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
   local lTMP_UFS_MOUNT=""
-  lTMP_UFS_MOUNT="$(mktemp -d "${TMP_DIR}/ufs_mount_XXXXXX")" || { print_output "[-] Failed to create temporary directory"; return; }
+  lTMP_UFS_MOUNT="$(mktemp -d "${TMP_DIR}/ufs_mount_XXXXXX")" || {
+    print_output "[-] Failed to create temporary directory"
+    return
+  }
   local lFILES_UFS_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
@@ -74,10 +77,10 @@ ufs_extractor() {
     mapfile -t lFILES_UFS_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
     print_output "[*] Extracted ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files from the firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files ... could take some time" "no_log"
-    for lBINARY in "${lFILES_UFS_ARR[@]}" ; do
+    for lBINARY in "${lFILES_UFS_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

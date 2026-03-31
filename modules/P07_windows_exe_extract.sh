@@ -115,7 +115,6 @@ Michael Messner
 
 END_OF_DOCS
 
-
 P07_windows_exe_extract() {
   local lNEG_LOG=0
 
@@ -128,7 +127,7 @@ P07_windows_exe_extract() {
 
     exe_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       lNEG_LOG=1
@@ -158,7 +157,7 @@ exe_extractor() {
   7z x -o"${lEXTRACTION_DIR}" "${lFIRMWARE_PATH}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log || print_error "[-] Windows exe extraction via 7zip failed"
 
   if [[ -s "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log ]]; then
-    cat "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log >> "${LOG_FILE}"
+    cat "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log >>"${LOG_FILE}"
 
     # Error handling. If we have errors on exe extraction we try binwalk
     if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
@@ -186,7 +185,7 @@ exe_extractor() {
   if [[ -d "${lEXTRACTION_DIR%\/}_binwalk" ]]; then
     local lFILES_EXE_ARR_2=()
     mapfile -t lFILES_EXE_ARR_2 < <(find "${lEXTRACTION_DIR%\/}_binwalk" -type f ! -name "*.raw")
-    lFILES_EXE_ARR=( "${lFILES_EXE_ARR[@]}" "${lFILES_EXE_ARR_2[@]}" )
+    lFILES_EXE_ARR=("${lFILES_EXE_ARR[@]}" "${lFILES_EXE_ARR_2[@]}")
   fi
 
   print_output "[*] Extracted ${ORANGE}${#lFILES_EXE_ARR[@]}${NC} files from the Windows executable."
@@ -194,7 +193,7 @@ exe_extractor() {
   for lBINARY in "${lFILES_EXE_ARR[@]}"; do
     binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

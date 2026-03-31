@@ -119,7 +119,6 @@ Michael Messner
 
 END_OF_DOCS
 
-
 S04_windows_basic_analysis() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Discover basic information of Windows executables"
@@ -131,24 +130,24 @@ S04_windows_basic_analysis() {
 
   mapfile -t lEXE_ARCHIVES_ARR < <(grep "PE32\|MSI" "${P99_CSV_LOG}" | sort -u || true)
 
-  if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
-    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}" ; do
+  if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]]; then
+    for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}"; do
       lEXE_ARCHIVE=$(echo "${lEXE_ARCHIVE}" | cut -d ';' -f2)
       lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
 
       sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"
       print_output "[*] Extract exifdata from ${ORANGE}${lEXE_NAME}${NC}" "no_log"
-      exiftool "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log" || print_error "[-] Something happened on exiftool analysis for ${lEXE_ARCHIVE}"
+      exiftool "${lEXE_ARCHIVE}" 2>/dev/null >>"${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log" || print_error "[-] Something happened on exiftool analysis for ${lEXE_ARCHIVE}"
 
       sub_module_title "PEdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
       print_output "[*] Extract pedata from ${ORANGE}${lEXE_NAME}${NC}" "no_log"
       write_log "" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
       write_log "[*] pescan for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
-      pescan -v "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" || print_error "[-] Something happened on pescan analysis for ${lEXE_ARCHIVE}"
+      pescan -v "${lEXE_ARCHIVE}" 2>/dev/null >>"${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" || print_error "[-] Something happened on pescan analysis for ${lEXE_ARCHIVE}"
 
       write_log "" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
       write_log "[*] readpe for ${ORANGE}${lEXE_NAME}${NC}" "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log"
-      readpe "${lEXE_ARCHIVE}" 2>/dev/null >> "${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" || print_error "[-] Something happened on pedata analysis for ${lEXE_ARCHIVE}"
+      readpe "${lEXE_ARCHIVE}" 2>/dev/null >>"${LOG_PATH_MODULE}/readpe_${lEXE_NAME}.log" || print_error "[-] Something happened on pedata analysis for ${lEXE_ARCHIVE}"
 
       if [[ -s "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log" ]]; then
         print_output "[*] Windows binary exifdata - $(orange "$(print_path "${lEXE_ARCHIVE}")")" "" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"
@@ -167,4 +166,3 @@ S04_windows_basic_analysis() {
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
-

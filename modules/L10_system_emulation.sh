@@ -87,7 +87,7 @@ L10_system_emulation() {
         print_output "[*] Recovered ARCHIVE_PATH: ${ORANGE}${ARCHIVE_PATH}${NC}"
 
         if [[ -v ARCHIVE_PATH ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
-          IMAGE_NAME="$(tr ' ' '\n' < "${ARCHIVE_PATH}"/run.sh | grep -o "file=.*" | cut -d '/' -f2)"
+          IMAGE_NAME="$(tr ' ' '\n' <"${ARCHIVE_PATH}"/run.sh | grep -o "file=.*" | cut -d '/' -f2)"
           print_output "[*] Identified IMAGE_NAME: ${ORANGE}${IMAGE_NAME}${NC}" "no_log"
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
           mapfile -t HOSTNETDEV_ARR < <(grep "ip link set.*up" "${ARCHIVE_PATH}"/run.sh | awk '{print $4}' | sort -u)
@@ -111,7 +111,7 @@ L10_system_emulation() {
       if [[ "${SYS_ONLINE}" -ne 1 ]] && [[ "${TCP}" != "ok" ]]; then
         # ROOT_PATH array is exported from the pre-checking phase
         # shellcheck disable=SC2153
-        for R_PATH in "${ROOT_PATH[@]}" ; do
+        for R_PATH in "${ROOT_PATH[@]}"; do
           print_output "[*] Testing root path (${ORANGE}${lR_PATH_CNT}${NC}/${ORANGE}${#ROOT_PATH[@]}${NC}): ${ORANGE}${R_PATH}${NC}"
           if grep -q "P55_unblob_extractor nothing reported" "${P55_LOG}" 2>/dev/null; then
             if ! grep -q "P60_deep_extractor nothing reported" "${P60_LOG}" 2>/dev/null; then
@@ -168,7 +168,7 @@ L10_system_emulation() {
           else
             print_output "[!] No supported architecture detected"
           fi
-          ((lR_PATH_CNT+=1))
+          ((lR_PATH_CNT += 1))
         done
         print_system_emulation_results
       fi
@@ -200,7 +200,7 @@ L10_system_emulation() {
       print_output "[*] Identified ARCHIVE_PATH: ${ORANGE}${ARCHIVE_PATH}${NC}" "no_log"
 
       if [[ -v ARCHIVE_PATH ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
-        IMAGE_NAME="$(tr ' ' '\n' < "${ARCHIVE_PATH}"/run.sh | grep -o "file=.*" | cut -d '/' -f2)"
+        IMAGE_NAME="$(tr ' ' '\n' <"${ARCHIVE_PATH}"/run.sh | grep -o "file=.*" | cut -d '/' -f2)"
         print_output "[*] Identified IMAGE_NAME: ${ORANGE}${IMAGE_NAME}${NC}" "no_log"
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis" "no_log"
         print_ln
@@ -253,7 +253,7 @@ print_system_emulation_results() {
       else
         print_output "[*] ${lEMU_RES}"
       fi
-    done < "${L10_SYS_EMU_RESULTS}"
+    done <"${L10_SYS_EMU_RESULTS}"
   fi
 }
 
@@ -319,7 +319,7 @@ create_emulation_filesystem() {
   local lCNT=0
   while [[ "${DEVICE:-NA}" == "NA" ]]; do
     DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
-    lCNT=$((lCNT+1))
+    lCNT=$((lCNT + 1))
     if [[ "${DEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
       print_output "[-] No Qemu Image device identified - return from ${FUNCNAME[0]}"
       return
@@ -340,10 +340,10 @@ create_emulation_filesystem() {
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext2 "${DEVICE}" || ( print_output "[-] Error in filesystem creation" && return )
+  mkfs.ext2 "${DEVICE}" || (print_output "[-] Error in filesystem creation" && return)
 
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
-  mount "${DEVICE}" "${MNT_POINT}" || ( print_output "[-] Error in mounting the filesystem" && return )
+  mount "${DEVICE}" "${MNT_POINT}" || (print_output "[-] Error in mounting the filesystem" && return)
 
   if mount | grep -q "${MNT_POINT}"; then
     print_output "[*] Copy extracted root filesystem to new QEMU image"
@@ -369,12 +369,12 @@ create_emulation_filesystem() {
       # kernelInit is getting the output of the init command line we get from s24
       if grep -q ";rdinit=" "${S24_CSV_LOG}"; then
         print_output "[*] Found ${ORANGE}rdinit${NC} entry for kernel - see ${ORANGE}${S24_LOG}${NC}:"
-        grep ";rdinit=/" "${S24_CSV_LOG}" | cut -d\; -f4 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
-        tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
+        grep ";rdinit=/" "${S24_CSV_LOG}" | cut -d\; -f4 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}' | sort -u | tee -a "${MNT_POINT}"/kernelInit
+        tee -a "${LOG_FILE}" <"${MNT_POINT}"/kernelInit
       elif grep -q ";init=" "${S24_CSV_LOG}"; then
         print_output "[*] Found ${ORANGE}init${NC} entry for kernel - see ${ORANGE}${S24_LOG}${NC}:"
-        grep ";init=/" "${S24_CSV_LOG}" | cut -d\; -f4 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
-        tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
+        grep ";init=/" "${S24_CSV_LOG}" | cut -d\; -f4 | sed -e 's/.*init=/init=/' | awk '{print $1}' | sort -u | tee -a "${MNT_POINT}"/kernelInit
+        tee -a "${LOG_FILE}" <"${MNT_POINT}"/kernelInit
       fi
     else
       print_output "[-] No results from S24 kernel module found"
@@ -414,7 +414,7 @@ create_emulation_filesystem() {
 
     if [[ -e "${MNT_POINT}/kernelInit" ]]; then
       print_output "[*] Backup ${MNT_POINT}/kernelInit:"
-      tee -a "${LOG_FILE}" < "${MNT_POINT}/kernelInit"
+      tee -a "${LOG_FILE}" <"${MNT_POINT}/kernelInit"
       rm "${MNT_POINT}/kernelInit"
     fi
 
@@ -425,7 +425,7 @@ create_emulation_filesystem() {
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
     # FirmAE/firmadyne recompiled binaries + addons
-    local lBINARIES_ARR=( "busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver" )
+    local lBINARIES_ARR=("busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver")
     local lBINARY_NAME=""
     local lBINARY_PATH=""
     local lTMP_EXEC_64_CNT=0
@@ -479,9 +479,9 @@ create_emulation_filesystem() {
         if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
           mkdir "${LOG_PATH_MODULE}"/nvram
         fi
-        lNVRAM_FILE="${lNVRAM_FILE/\.}"
+        lNVRAM_FILE="${lNVRAM_FILE/\./}"
         print_output "[*] Found possible NVRAM default file ${ORANGE}${lNVRAM_FILE}${NC} -> setup /firmadyne directory"
-        echo "${lNVRAM_FILE}" >> "${LOG_PATH_MODULE}"/nvram/nvram_files
+        echo "${lNVRAM_FILE}" >>"${LOG_PATH_MODULE}"/nvram/nvram_files
         cp ."${lNVRAM_FILE}" "${LOG_PATH_MODULE}"/nvram/
       fi
     done
@@ -533,16 +533,16 @@ main_emulation() {
       # if we are too deep (-gt 5) then we will skip this init entry
       # usually this looks the following
       # /bin/linuxrc
-      local lINIT_DEPTH="${lINIT_FILE//[^\/]}"
+      local lINIT_DEPTH="${lINIT_FILE//[^\/]/}"
       if [[ "${#lINIT_DEPTH}" -gt 5 ]]; then
         continue
       fi
       lINIT_FILES_ARR+=("${lINIT_FILE}")
       echo "${lINIT_FILE}" | tee -a "${LOG_FILE}"
-    done < "${LOG_PATH_MODULE}"/firmadyne_init
+    done <"${LOG_PATH_MODULE}"/firmadyne_init
   else
     print_output "[-] WARNING: init file not created! Processing backup dummy init"
-    lINIT_FILES_ARR+=( "/dummy_init" )
+    lINIT_FILES_ARR+=("/dummy_init")
   fi
 
   local lINDEX=1
@@ -569,7 +569,7 @@ main_emulation() {
       local lCNT=0
       while [[ "${lDEVICE:-NA}" == "NA" ]]; do
         lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
-        lCNT=$((lCNT+1))
+        lCNT=$((lCNT + 1))
         if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
           print_output "[-] No Qemu Image device identified - continue now with next init entry"
           continue 2
@@ -616,9 +616,9 @@ main_emulation() {
       print_output "[*] Add ${lINIT_FILE} entry to ${ORANGE}${lINIT_OUT}${NC}"
       # we always add the identified init entry to the EMBA preInit script
       if ! (grep -q "${lINIT_FILE}" "${lINIT_OUT}"); then
-        echo "${lINIT_FILE} &" >> "${lINIT_OUT}" || true
+        echo "${lINIT_FILE} &" >>"${lINIT_OUT}" || true
         # ensure we give the system some time to boot via the original init file
-        echo "/firmadyne/busybox sleep 60" >> "${lINIT_OUT}" || true
+        echo "/firmadyne/busybox sleep 60" >>"${lINIT_OUT}" || true
       fi
     fi
 
@@ -656,7 +656,7 @@ main_emulation() {
     fi
 
     local lFS_MOUNTS_ARR=()
-    lFS_MOUNTS_ARR=( "${lFS_MOUNTS_INIT_ARR[@]}" "${lFS_MOUNTS_FS_ARR[@]}" )
+    lFS_MOUNTS_ARR=("${lFS_MOUNTS_INIT_ARR[@]}" "${lFS_MOUNTS_FS_ARR[@]}")
     mapfile -t lFS_MOUNTS_ARR < <(printf "%s\n" "${lFS_MOUNTS_ARR[@]}" | sort -u)
 
     handle_fs_mounts "${lINIT_FILE}" "${lFS_MOUNTS_ARR[@]}"
@@ -670,61 +670,61 @@ main_emulation() {
     fi
 
     if [[ "${lINIT_OUT}" != *"preInit.sh" ]]; then
-      if ( grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
+      if (grep -q "/firmadyne/preInit.sh" "${lINIT_OUT}"); then
         print_output "[*] preInit.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
         sed -i '/\/firmadyne\/preInit\.sh\ &/d' "${lINIT_OUT}"
       fi
-      echo "/firmadyne/preInit.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
+      echo "/firmadyne/preInit.sh &" >>"${lINIT_OUT}" || print_error "[-] Some error occured while adding the preInit.sh entry to ${lINIT_OUT}"
     fi
 
-    if ( grep -q "/firmadyne/init_service.sh" "${lINIT_OUT}"); then
+    if (grep -q "/firmadyne/init_service.sh" "${lINIT_OUT}"); then
       print_output "[*] init_server.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
       sed -i '/\/firmadyne\/init_service\.sh\ &/d' "${lINIT_OUT}"
     fi
     if [[ -f "${MNT_POINT}/firmadyne/startup_service" ]]; then
       while read -r lSERVICE_NAME; do
         print_output "[*] Created init service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
-      done < "${MNT_POINT}/firmadyne/startup_service"
-      echo "/firmadyne/init_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the init_service entry to ${lINIT_OUT}"
+      done <"${MNT_POINT}/firmadyne/startup_service"
+      echo "/firmadyne/init_service.sh &" >>"${lINIT_OUT}" || print_error "[-] Some error occured while adding the init_service entry to ${lINIT_OUT}"
     fi
 
-    if ( grep -q "/firmadyne/network.sh" "${lINIT_OUT}"); then
+    if (grep -q "/firmadyne/network.sh" "${lINIT_OUT}"); then
       print_output "[*] network.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
       sed -i '/\/firmadyne\/network\.sh\ &/d' "${lINIT_OUT}"
     fi
 
     print_output "[*] Add network.sh entry to ${ORANGE}${lINIT_OUT}${NC}"
-    echo "" >> "${lINIT_OUT}" || true
-    echo "/firmadyne/network.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
+    echo "" >>"${lINIT_OUT}" || true
+    echo "/firmadyne/network.sh &" >>"${lINIT_OUT}" || print_error "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
 
-    if ( grep -q "/firmadyne/run_service.sh" "${lINIT_OUT}"); then
+    if (grep -q "/firmadyne/run_service.sh" "${lINIT_OUT}"); then
       print_output "[*] run_service.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC} -> removing now"
       sed -i '/\/firmadyne\/run_service\.sh\ &/d' "${lINIT_OUT}"
     fi
     if [[ -f "${MNT_POINT}/firmadyne/service" ]]; then
       while read -r lSERVICE_NAME; do
         print_output "[*] Created service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
-      done < "${MNT_POINT}/firmadyne/service"
-      echo "/firmadyne/run_service.sh &" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
+      done <"${MNT_POINT}/firmadyne/service"
+      echo "/firmadyne/run_service.sh &" >>"${lINIT_OUT}" || print_error "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
     fi
 
     # ensure we have not sleep entry and it is not the EMBA backup init script
-    if ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}"); then
+    if (grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}"); then
       print_output "[*] busybox sleep 36000 entry already available in init ${ORANGE}${lINIT_OUT}${NC}  -> removing now"
       sed -i '/\/firmadyne\/busybox\ sleep\ 36000/d' "${lINIT_OUT}"
     fi
-    if ! ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}") && ! (grep -q "Execute EMBA " "${lINIT_OUT}"); then
+    if ! (grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}") && ! (grep -q "Execute EMBA " "${lINIT_OUT}"); then
       # trendnet TEW-828DRU_1.0.7.2, etc...
-      echo "/firmadyne/busybox sleep 36000" >> "${lINIT_OUT}" || print_error "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
+      echo "/firmadyne/busybox sleep 36000" >>"${lINIT_OUT}" || print_error "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
     fi
 
     print_ln
     print_output "[*] EMBA init starter file: ${ORANGE}${lINIT_OUT}${NC}"
-    tee -a "${LOG_FILE}" < "${lINIT_OUT}" || true
+    tee -a "${LOG_FILE}" <"${lINIT_OUT}" || true
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
       print_ln
       print_output "[*] Firmware Init file details: ${ORANGE}${lINIT_FILE}${NC}"
-      tee -a "${LOG_FILE}" < "${MNT_POINT}""${lINIT_FILE}"
+      tee -a "${LOG_FILE}" <"${MNT_POINT}""${lINIT_FILE}"
     fi
 
     print_ln
@@ -757,14 +757,14 @@ main_emulation() {
     local lF_STARTUP=0
     if [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
       check_qemu_kernel_output "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${ARCHIVE_PATH:-NA}" "${IMAGE_NAME:-NA}" "${lNETWORK_MODE:-NA}" "${lETH_INT:-NA}" "${lVLAN_ID:-NA}" "${lINIT_FILE:-NA}" "${lNETWORK_DEVICE:-NA}" "${#PANICS[@]}" "${SYS_ONLINE:-0}" "${TCP:-NA}"
-      cat "${LOG_PATH_MODULE}"/qemu.initial.serial.log >> "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
+      cat "${LOG_PATH_MODULE}"/qemu.initial.serial.log >>"${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
       write_link "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}".log
 
       ###############################################################################################
       # if we were running into issues with the network identification we poke with rdinit vs init:
       # lets check if we have found a startup procedure (preInit script) from EMBA - if not we try it with the other init
       lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
-      lF_STARTUP=$(( "${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" ))
+      lF_STARTUP=$(("${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)"))
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
       return
@@ -796,13 +796,13 @@ main_emulation() {
         fi
         print_ln
 
-      elif [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "None" ]] || \
+      elif [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "None" ]] ||
         [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "default" ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
         print_output "[!] Possible init issue ... switching init from ${KINIT}"
         local lPORTS_1st=0
         local lCOUNTING_1st=0
         mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log
-        lCOUNTING_1st=$(wc -l < "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log)
+        lCOUNTING_1st=$(wc -l <"${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log)
         lPORTS_1st=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | sort -u | wc -l | awk '{print $1}' || true)
         switch_inits "${KINIT}"
 
@@ -818,8 +818,8 @@ main_emulation() {
           print_output "[*] qemu.initial.serial.log detected and checking for STARTUP and Service data"
           # now we need to check if something is better now or we should switch back to the original init
           lF_STARTUP=$(grep -a -c "EMBA preInit script starting" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)
-          lF_STARTUP=$(( "${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" ))
-          lCOUNTING_2nd=$(wc -l < "${LOG_PATH_MODULE}"/qemu.initial.serial.log)
+          lF_STARTUP=$(("${lF_STARTUP}" + "$(grep -a -c "Network configuration - ACTION" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)"))
+          lCOUNTING_2nd=$(wc -l <"${LOG_PATH_MODULE}"/qemu.initial.serial.log)
           lPORTS_2nd=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
           # IPS_INT_VLAN is always at least 1 for the default configuration
         else
@@ -827,7 +827,7 @@ main_emulation() {
         fi
 
         print_output "[*] lPORTS_1st: ${lPORTS_1st} / lPORTS_2nd: ${lPORTS_2nd} / lF_STARTUP: ${lF_STARTUP}"
-        if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
+        if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] ||
           [[ "${DETECTED_IP}" -eq 0 ]]; then
           if [[ "${#PANICS[@]}" -gt 0 ]]; then
             # on a Kernel panic we always switch back
@@ -874,7 +874,7 @@ main_emulation() {
       local lMAX_NET_CFG=15
       print_output "[*] Unsorted configuration"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
-        lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
+        lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
         lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
         lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
@@ -893,7 +893,7 @@ main_emulation() {
 
       print_output "[*] Sorted and unique configuration"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
-        lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
+        lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
         lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
         lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
@@ -905,10 +905,9 @@ main_emulation() {
         print_output "$(indent "$(orange "${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")")"
       done
 
-
       print_output "[*] Final configuration"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
-        lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
+        lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
         lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
         lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
@@ -917,11 +916,11 @@ main_emulation() {
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
           continue
         fi
-        lIPS_INT_VLAN_TMP+=( "${lNW_ENTRY_PRIO}"\;"${lIP_CFG}"\;"${lINTERFACE_CFG}"\;"${lNETWORK_INTERFACE_CFG}"\;"${lVLAN_CFG}"\;"${lCFG_CFG}" )
+        lIPS_INT_VLAN_TMP+=("${lNW_ENTRY_PRIO}"\;"${lIP_CFG}"\;"${lINTERFACE_CFG}"\;"${lNETWORK_INTERFACE_CFG}"\;"${lVLAN_CFG}"\;"${lCFG_CFG}")
         print_output "$(indent "$(orange "${lIP_CFG}"" - ""${lINTERFACE_CFG}"" - ""${lNETWORK_INTERFACE_CFG}"" - ""${lVLAN_CFG}"" - ""${lCFG_CFG}"" - ""${lNW_ENTRY_PRIO}")")"
         if [[ "${#lIPS_INT_VLAN_TMP[@]}" -ge "${lMAX_NET_CFG}" ]]; then
           print_output "[*] INFO: More then ${lMAX_NET_CFG} detected -> adding a default backup config and testing only ${lMAX_NET_CFG} most relevant configuration options"
-          lIPS_INT_VLAN_TMP+=( "1;192.168.0.1;br0;eth0;NONE;default" )
+          lIPS_INT_VLAN_TMP+=("1;192.168.0.1;br0;eth0;NONE;default")
           print_output "$(indent "$(orange "192.168.0.1 - br0 - eth0 - NONE - default - 1")")"
           break
         fi
@@ -955,7 +954,7 @@ main_emulation() {
 
     print_output "[*] Processing init file ${ORANGE}${lINIT_FILE}${NC} (${lINDEX}/${#lINIT_FILES_ARR[@]}) finished"
     print_bar ""
-    ((lINDEX+=1))
+    ((lINDEX += 1))
   done
 
   delete_device_entry "${IMAGE_NAME}" "${lDEVICE:-NA}" "${MNT_POINT}"
@@ -987,8 +986,8 @@ check_qemu_kernel_output() {
   local lQEMU_RUN_TIME_KERNEL=0
 
   lQEMU_RUN_TIME_KERNEL=$(grep -a -o -E "^\[[[:space:]]+[0-9]+\.[0-9]+.*\] EMBA" "${lQEMU_LOG_TO_CHECK}" | tail -1 || true)
-  lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//\.*}
-  lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//*\ }
+  lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//\.*/}
+  lQEMU_RUN_TIME_KERNEL=${lQEMU_RUN_TIME_KERNEL//*\ /}
 
   if [[ "${lQEMU_RUN_TIME_KERNEL}" -lt "${lKERNEL_MIN_RUNTIME}" ]]; then
     print_output "[-] WARNING: QEMU log (${lQEMU_LOG_TO_CHECK}) has less then ${lKERNEL_MIN_RUNTIME} seconds of kernel runtime entries. Probably something is going wrong with your emulation environment:"
@@ -1012,7 +1011,7 @@ emulation_with_config() {
 
   local lENTRY_PRIO=""
   local lVLAN_ID=""
-  lENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*}"
+  lENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
   IP_ADDRESS_=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
   lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
   lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
@@ -1028,7 +1027,7 @@ emulation_with_config() {
 
   print_keepalive "${LOG_PATH_MODULE}/qemu.final.serial.log" "${IMAGE_NAME}" &
   local lALIVE_PID="$!"
-  disown "${lALIVE_PID}" 2> /dev/null || true
+  disown "${lALIVE_PID}" 2>/dev/null || true
 
   # we kill this process from "check_online_stat"
   tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null | grep -a -v "klogd" || true
@@ -1130,7 +1129,7 @@ emulation_with_config() {
     # we use the output of ipconfig from the qemu logs for this check
     # first: generate an array with the possible ip addresses (remove already local addresses like 127.0.0.)
     mapfile -t lTEMP_RUN_IPs_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" \
-      "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log | \
+      "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${lIPS_INT_VLAN_CFG//\;/-}"-"${lINIT_FNAME}".log |
       grep -v "127.0.0." | grep -v "${IP_ADDRESS_}" | cut -d ':' -f2 | sort -u || true)
     for lTMP_IP in "${lTEMP_RUN_IPs_ARR[@]}"; do
       # check every detected ip address against our real system ip address
@@ -1145,7 +1144,7 @@ emulation_with_config() {
             if [[ "${lRESTARTED_EMULATION:-1}" -eq 0 ]]; then
               print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed and executed"
               lIPS_INT_VLAN_CFG="${lENTRY_PRIO}"\;"${lTMP_IP}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}"
-              IPS_INT_VLAN+=( "${lIPS_INT_VLAN_CFG}" )
+              IPS_INT_VLAN+=("${lIPS_INT_VLAN_CFG}")
               emulation_with_config "${lIPS_INT_VLAN_CFG}" 1
             else
               print_output "[!] Emulation re-run with IP ${ORANGE}${lTMP_IP}${MAGENTA} needed but ${ORANGE}not executed${NC}"
@@ -1254,7 +1253,7 @@ handle_fs_mounts() {
     find "${lFS_FIND}" -xdev -ls || true
 
     print_output "[*] Identify system areas in the to-mount area:"
-    local lLINUX_PATHS_ARR=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
+    local lLINUX_PATHS_ARR=("bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var")
     local lL_PATH=""
     local lN_PATH=""
     local lX_PATH=""
@@ -1265,7 +1264,7 @@ handle_fs_mounts() {
     for lL_PATH in "${lLINUX_PATHS_ARR[@]}"; do
       mapfile -t lNEWPATH_tmp_ARR < <(find "${lFS_FIND}" -path "*/${lL_PATH}" -type d | sed "s/\/${lL_PATH}\/*/\//g")
       mapfile -t lNEWPATH_test_ARR < <(find "${lFS_FIND}" -path "*/${lL_PATH}" -type d)
-      lNEWPATH_ARR+=( "${lNEWPATH_tmp_ARR[@]}" )
+      lNEWPATH_ARR+=("${lNEWPATH_tmp_ARR[@]}")
       if [[ -d "${MNT_POINT}"/"${lL_PATH}" ]]; then
         for lX_PATH in "${lNEWPATH_test_ARR[@]}"; do
           print_output "[*] Copy ${lX_PATH} to ${MNT_POINT}/${lL_PATH}/"
@@ -1305,7 +1304,7 @@ handle_fs_mounts() {
   print_output "[*] inferService.sh (chroot)"
   EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
   rm "${MNT_POINT}"/inferService.sh || true
-  rm "${MNT_POINT}"/bash-static|| true
+  rm "${MNT_POINT}"/bash-static || true
   rm "${MNT_POINT}"/busybox || true
 
   if [[ -f "${MNT_POINT}"/firmadyne/service ]]; then
@@ -1460,15 +1459,15 @@ identify_networking_emulation() {
   run_network_id_emulation "${lCONSOLE}" "${lCPU}" "${lKERNEL}" "${lQEMU_BIN}" "${lQEMU_MACHINE}" "${lQEMU_DISK}" "${lQEMU_PARAMS}" "${lQEMU_NETWORK}" "${lQEMU_ROOTFS}" "${lIMAGE_NAME}" "${lINIT_FILE}" "${lARCH_END}" &
 
   local lPID="$!"
-  disown "${lPID}" 2> /dev/null || true
+  disown "${lPID}" 2>/dev/null || true
 
   print_keepalive "${LOG_PATH_MODULE}/qemu.initial.serial.log" "${lIMAGE_NAME}" &
   local lALIVE_PID="$!"
-  disown "${lALIVE_PID}" 2> /dev/null || true
+  disown "${lALIVE_PID}" 2>/dev/null || true
 
   timeout --preserve-status --signal SIGINT 660 tail -F "${LOG_PATH_MODULE}/qemu.initial.serial.log" 2>/dev/null | grep -a -v "klogd" || true
   local lPID="$!"
-  disown "${lPID}" 2> /dev/null || true
+  disown "${lPID}" 2>/dev/null || true
 
   kill "${lALIVE_PID}" || true
   print_output "[*] Call to stop emulation process - Source ${FUNCNAME[0]}" "no_log"
@@ -1488,7 +1487,7 @@ print_keepalive() {
   # we give the whole system a few seconds until we start printing the keepalives
   # and also check for kernel panics
   sleep 10
-  while(true); do
+  while (true); do
     print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
     run_kpanic_identification_single "${lLOG_FILE}" "${lIMAGE_NAME}"
     sleep 5
@@ -1623,13 +1622,13 @@ get_networking_details_emulation() {
     local lMISSING_FILES_TMP=()
     local lMISSING_DIRS_TMP=()
     local lSERVICE_NAME=""
-    local lADJUST_PRIO=0  # adjust priority for detected network configuration
+    local lADJUST_PRIO=0 # adjust priority for detected network configuration
     local l_NW_ENTRY_PRIO=1
 
-    mapfile -t lINTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //' \
-     | sort -u | grep -v "device:lo ifa:0x0100007f" | grep -v -E " = -[0-9][0-9]" | sed 's/\[.*\]\ EMBA.*//' || true)
+    mapfile -t lINTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //' |
+      sort -u | grep -v "device:lo ifa:0x0100007f" | grep -v -E " = -[0-9][0-9]" | sed 's/\[.*\]\ EMBA.*//' || true)
     mapfile -t lBRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
-                #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
+    #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
     mapfile -t lVLAN_INFOS < <(grep -a "register_vlan_dev" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sort -u | grep -v -E " = -[0-9][0-9]" || true)
     # mapfile -t PANICS < <(grep -a "Kernel panic - " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u || true)
     # # ensure we only stop if we have a panic near the end - otherwise the system probably has rebooted and recovered
@@ -1641,11 +1640,11 @@ get_networking_details_emulation() {
 
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
     mapfile -t lMISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
-    MISSING_FILES+=( "${lMISSING_FILES_TMP[@]}" )
+    MISSING_FILES+=("${lMISSING_FILES_TMP[@]}")
     mapfile -t lMISSING_DIRS_TMP < <(grep -a -E "nonexistent directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | grep -a "^/" | sort -u || true)
-    MISSING_FILES+=( "${lMISSING_DIRS_TMP[@]}" )
+    MISSING_FILES+=("${lMISSING_DIRS_TMP[@]}")
 
-    lNVRAM_TMP=( "${lNVRAM_ARR[@]}" )
+    lNVRAM_TMP=("${lNVRAM_ARR[@]}")
 
     if [[ "${#lINTERFACE_CANDIDATES[@]}" -gt 0 || "${#lBRIDGE_INTERFACES[@]}" -gt 0 || "${#lVLAN_INFOS[@]}" -gt 0 || "${#lPORTS_ARR[@]}" -gt 0 || "${#lNVRAM_TMP[@]}" -gt 0 ]]; then
       print_output "[+] Booted system detected."
@@ -1655,8 +1654,8 @@ get_networking_details_emulation() {
     if [[ -v lNVRAM_TMP[@] ]]; then
       for lNVRAM_ENTRY in "${lNVRAM_TMP[@]}"; do
         if [[ "${lNVRAM_ENTRY}" =~ [[:print:]] ]]; then
-          if [[ ! " ${NVRAMS[*]} " =~  ${lNVRAM_ENTRY}  ]]; then
-            NVRAMS+=( "${lNVRAM_ENTRY}" )
+          if [[ ! " ${NVRAMS[*]} " =~ ${lNVRAM_ENTRY} ]]; then
+            NVRAMS+=("${lNVRAM_ENTRY}")
           fi
         fi
       done
@@ -1675,14 +1674,14 @@ get_networking_details_emulation() {
 
         if [[ "${lTCP_PORT}" =~ [0-9]+ ]]; then
           print_output "[*] Detected TCP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${lTCP_PORT}${NC}"
-          TCP_SERVICES_STARTUP+=( "${lTCP_PORT}" )
+          TCP_SERVICES_STARTUP+=("${lTCP_PORT}")
         fi
         if [[ "${lUDP_PORT}" =~ [0-9]+ ]]; then
           print_output "[*] Detected UDP service startup: ${ORANGE}${lSERVICE_NAME}${NC} / ${ORANGE}${lUDP_PORT}${NC}"
-          UDP_SERVICES_STARTUP+=( "${lUDP_PORT}" )
+          UDP_SERVICES_STARTUP+=("${lUDP_PORT}")
         fi
 
-        SERVICES_STARTUP+=( "${lSERVICE_NAME}" )
+        SERVICES_STARTUP+=("${lSERVICE_NAME}")
       done
     fi
 
@@ -1702,7 +1701,7 @@ get_networking_details_emulation() {
 
     for lINTERFACE_CAND in "${lINTERFACE_CANDIDATES[@]}"; do
       l_NW_ENTRY_PRIO=1
-      lADJUST_PRIO=0  # adjust priority for detected network configuration
+      lADJUST_PRIO=0 # adjust priority for detected network configuration
 
       lINTERFACE_CAND="${lINTERFACE_CAND//[![:print:]]/}"
       print_output "[*] Possible interface candidate detected: ${ORANGE}${lINTERFACE_CAND}${NC}"
@@ -1717,7 +1716,7 @@ get_networking_details_emulation() {
       local lIP=""
       local lCNT=0
       for _IPs in "${lIP_ADDRESS_HEX[@]}"; do
-        lCNT=$((lCNT+1))
+        lCNT=$((lCNT + 1))
         if [[ "${_IPs}" == "0x"* ]]; then
           # shellcheck disable=SC2004
           lIP="${lIP}.$((${_IPs}))"
@@ -1726,7 +1725,7 @@ get_networking_details_emulation() {
         [[ "${lCNT}" -ge 4 ]] && break
       done
 
-      lIP="${lIP/\.}"
+      lIP="${lIP/\./}"
 
       IP_ADDRESS_=""
       if [[ "${D_END,,}" == "eb" ]]; then
@@ -1738,12 +1737,12 @@ get_networking_details_emulation() {
       # we try to extract a backup IP address from the nvram log
       # afterwards we can use this ip if we have a bridge interface with "0.0.0.0"
       local lNVRAM_BACKUP_IP=""
-      lNVRAM_BACKUP_IP=$(grep -E -h "nvram_get_buf.*[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}"/qemu.initial.serial.log \
-        | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -v "0\.0\.0\.0\|127\.0\.\|255\." | sort -u | head -1 || true)
+      lNVRAM_BACKUP_IP=$(grep -E -h "nvram_get_buf.*[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}"/qemu.initial.serial.log |
+        grep -E -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -v "0\.0\.0\.0\|127\.0\.\|255\." | sort -u | head -1 || true)
 
       # handle IP addresses 0.0.0.0 somehow:
       if [[ "${IP_ADDRESS_}" == "0.0.0.0" ]]; then
-        lADJUST_PRIO=$((lADJUST_PRIO-2))
+        lADJUST_PRIO=$((lADJUST_PRIO - 2))
         # we use one of the idenfied IP addresses. If no IP address available we switch to default 192.168.0.1
         if [[ "${lNVRAM_BACKUP_IP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           IP_ADDRESS_="${lNVRAM_BACKUP_IP}"
@@ -1789,10 +1788,10 @@ get_networking_details_emulation() {
                   # Nevertheless, we also need to process non matching results where we have network entries without a matching
                   # bridge interface
                   print_output "[+] Processing matching bridge interface: ${ORANGE}${lBRIDGE_INT}${GREEN} / network device: ${ORANGE}${lNETWORK_DEVICE}${NC}"
-                  lADJUST_PRIO=$((lADJUST_PRIO+1))
+                  lADJUST_PRIO=$((lADJUST_PRIO + 1))
                 else
                   print_output "[*] Processing NON matching bridge interface: ${ORANGE}${lBRIDGE_INT}${NC} / network device: ${ORANGE}${lNETWORK_DEVICE}${NC}"
-                  lADJUST_PRIO=$((lADJUST_PRIO-1))
+                  lADJUST_PRIO=$((lADJUST_PRIO - 1))
                 fi
                 # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
                 # extract the eth1 from dev:eth1
@@ -1809,7 +1808,7 @@ get_networking_details_emulation() {
                 fi
                 if [[ -v lVLAN_HW_INFO_DEV[@] ]]; then
                   # lets store the current details before we do this VLAN iteration
-                  l_NW_ENTRY_PRIO=$((3+lADJUST_PRIO))
+                  l_NW_ENTRY_PRIO=$((3 + lADJUST_PRIO))
                   store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
                   # if we have found some entry "adding VLAN [0-9] to HW filter on device ethX" in our qemu logs
                   # we check all these entries now and generate additional configurations for further evaluation
@@ -1818,7 +1817,7 @@ get_networking_details_emulation() {
                     lETH_INT="${lETH_INT//[![:print:]]/}"
                     lVLAN_ID=$(grep -a -o -E "adding VLAN [0-9] to HW filter on device ${lETH_INT}" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $3}' | sort -u)
                     # initial entry with possible vlan information
-                    l_NW_ENTRY_PRIO=$((5+lADJUST_PRIO))
+                    l_NW_ENTRY_PRIO=$((5 + lADJUST_PRIO))
                     store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
 
                     # entry with vlan NONE (just in case as backup)
@@ -1828,7 +1827,7 @@ get_networking_details_emulation() {
                       # entry with vlan NONE and interface br0 - just as another fallback solution
                       local lNETWORK_DEVICE="br0"
                       print_output "[*] Fallback bridge interface - #1 ${ORANGE}${lNETWORK_DEVICE}${NC}"
-                      l_NW_ENTRY_PRIO=$((3+lADJUST_PRIO))
+                      l_NW_ENTRY_PRIO=$((3 + lADJUST_PRIO))
                       store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
                     fi
                   done
@@ -1840,19 +1839,19 @@ get_networking_details_emulation() {
                   # if we have a bridge device like br-lan we ensure we also have an entry with a usual br0 interface
                   local lNETWORK_DEVICE="br0"
                   print_output "[*] Fallback bridge interface - #2 ${ORANGE}${lNETWORK_DEVICE}${NC}"
-                  l_NW_ENTRY_PRIO=$((3+lADJUST_PRIO))
+                  l_NW_ENTRY_PRIO=$((3 + lADJUST_PRIO))
                   store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
                 fi
                 # if we have found that the br entry has for eg an ethX interface, we now check for the real br interface entry -> lNETWORK_DEVICE
                 lNETWORK_DEVICE="$(echo "${lBRIDGE_INT}" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2)"
                 lNETWORK_DEVICE="${lNETWORK_DEVICE//[![:print:]]/}"
-                l_NW_ENTRY_PRIO=$((4+lADJUST_PRIO))
+                l_NW_ENTRY_PRIO=$((4 + lADJUST_PRIO))
                 store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE:-br0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-0}" "${lNETWORK_MODE:-bridge}" "${l_NW_ENTRY_PRIO}"
               done
             else
               # set typical default values - this is just in case we have not found br_add_if entries:
               lVLAN_ID="NONE"
-              l_NW_ENTRY_PRIO=$((3+lADJUST_PRIO))
+              l_NW_ENTRY_PRIO=$((3 + lADJUST_PRIO))
               if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
                 lETH_INT="eth0"
                 store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
@@ -1867,35 +1866,35 @@ get_networking_details_emulation() {
             lNETWORK_MODE="normal"
             if echo "${lNETWORK_DEVICE}" | grep -q -E "[0-9]\.[0-9]"; then
               # now we know that there is a vlan number - extract the vlan number now:
-              l_NW_ENTRY_PRIO=$((4+lADJUST_PRIO))
+              l_NW_ENTRY_PRIO=$((4 + lADJUST_PRIO))
               lVLAN_ID="$(echo "${lNETWORK_DEVICE}" | cut -d. -f2 | grep -E "[0-9]+")"
               lVLAN_ID="${lVLAN_ID//[![:print:]]/}"
             elif [[ -v lVLAN_INFOS[@] ]]; then
-              lETH_INT="${lNETWORK_DEVICE/\.*}"
+              lETH_INT="${lNETWORK_DEVICE/\.*/}"
               iterate_vlans "${lETH_INT}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${IP_ADDRESS_}" "${lADJUST_PRIO}" "${lVLAN_INFOS[@]}"
             else
-              l_NW_ENTRY_PRIO=$((3+lADJUST_PRIO))
+              l_NW_ENTRY_PRIO=$((3 + lADJUST_PRIO))
               lVLAN_ID="NONE"
             fi
-            lNETWORK_DEVICE="${lNETWORK_DEVICE/\.*}"
-            lETH_INT="${lNETWORK_DEVICE/\.*}"
+            lNETWORK_DEVICE="${lNETWORK_DEVICE/\.*/}"
+            lETH_INT="${lNETWORK_DEVICE/\.*/}"
             store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
           else
             # could not happen - just for future extension
             print_output "[+] Possible other interface detected: ${ORANGE}${lNETWORK_DEVICE}${NC}"
             lVLAN_ID="NONE"
             lNETWORK_MODE="normal"
-            lNETWORK_DEVICE="${lNETWORK_DEVICE/\.*}"
+            lNETWORK_DEVICE="${lNETWORK_DEVICE/\.*/}"
             lETH_INT="${lNETWORK_DEVICE}"
             l_NW_ENTRY_PRIO=1
             store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
           fi
         fi
         # this is a default (fallback) entry with the correct ip address:
-        l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
+        l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
         store_interface_details "${IP_ADDRESS_}" "br0" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "default" "${l_NW_ENTRY_PRIO}"
         # this is a default (fallback) entry with the correct ip address:
-        l_NW_ENTRY_PRIO=$((1+lADJUST_PRIO))
+        l_NW_ENTRY_PRIO=$((1 + lADJUST_PRIO))
         store_interface_details "${IP_ADDRESS_}" "${lETH_INT:-eth0}" "${lETH_INT:-eth0}" "${lVLAN_ID:-NONE}" "interface" "${l_NW_ENTRY_PRIO}"
       fi
     done
@@ -1908,13 +1907,13 @@ get_networking_details_emulation() {
         # we need to further improve this mechanism to include VLAN detection, bridge vs interface vs normal ...
         local lIP_ADDR_BACKUP_ARR=()
         local lIP_ADDR_BACKUP=""
-        mapfile -t lIP_ADDR_BACKUP_ARR < <(grep -h "ip.*addr" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | grep -o -E "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" \
-          | grep -E -v "\.255$" | grep -v -E "\.0$" | grep -v -E "^127\." | grep -v "^255\." | sort -u || true)
+        mapfile -t lIP_ADDR_BACKUP_ARR < <(grep -h "ip.*addr" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | grep -o -E "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" |
+          grep -E -v "\.255$" | grep -v -E "\.0$" | grep -v -E "^127\." | grep -v "^255\." | sort -u || true)
         for lIP_ADDR_BACKUP in "${lIP_ADDR_BACKUP_ARR[@]}"; do
           # if we have bridge interfaces found and we have some eth0 entries in our qemu log we guess a shiny configuration
           if [[ -v lBRIDGE_INTERFACES[@] ]]; then
             if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
-              l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
+              l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
               store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "bridge" "${l_NW_ENTRY_PRIO}"
               store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "0" "bridge" "${l_NW_ENTRY_PRIO}"
             fi
@@ -1956,7 +1955,7 @@ get_networking_details_emulation() {
             iterate_vlans "${lETH_INT}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${IP_ADDRESS_}" "${lADJUST_PRIO}" "${lVLAN_INFOS[@]}"
           fi
         fi
-        l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
+        l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
         store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
       done
     fi
@@ -1973,7 +1972,7 @@ get_networking_details_emulation() {
       if [[ "${FW_VENDOR:-}" == "AVM" ]]; then
         # for AVM fritzboxen the default IP is set to the correct one:
         IP_ADDRESS_="192.168.178.1"
-        l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
+        l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
       fi
       lVLAN_ID="NONE"
       lETH_INT="eth0"
@@ -1993,7 +1992,7 @@ get_networking_details_emulation() {
       if [[ "${FW_VENDOR:-}" == "AVM" ]]; then
         # for AVM fritzboxen the default IP is set to the correct one:
         IP_ADDRESS_="192.168.178.1"
-        l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
+        l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
       fi
       lVLAN_ID="NONE"
       lETH_INT="eth0"
@@ -2023,7 +2022,7 @@ store_interface_details() {
 
   print_output "[+] Interface details detected: IP address: ${ORANGE}${lIP_ADDRESS}${GREEN} / bridge dev: ${ORANGE}${lNETWORK_DEVICE}${GREEN} / network device: ${ORANGE}${lETH_INT}${GREEN} / vlan id: ${ORANGE}${lVLAN_ID}${GREEN} / network mode: ${ORANGE}${lNETWORK_MODE}${GREEN} / priority: ${ORANGE}${lENTRY_PRIO}${NC}"
 
-  IPS_INT_VLAN+=( "${lENTRY_PRIO}"\;"${lIP_ADDRESS}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}" )
+  IPS_INT_VLAN+=("${lENTRY_PRIO}"\;"${lIP_ADDRESS}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}")
 }
 
 iterate_vlans() {
@@ -2053,11 +2052,11 @@ iterate_vlans() {
     print_output "[*] Interface details: ${ORANGE}${lETH_INT}${NC}"
     if [[ "${lVLAN_DEV}" == *"${lETH_INT}"* ]]; then
       print_output "[*] Possible matching VLAN details detected: ${ORANGE}${lVLAN_INFO}${NC}"
-      l_NW_ENTRY_PRIO=$((5+lADJUST_PRIO))
-      lVLAN_ID=$(echo "${lVLAN_INFO}" | sed "s/.*vlan_id://" | grep -E -o "[0-9]+" )
+      l_NW_ENTRY_PRIO=$((5 + lADJUST_PRIO))
+      lVLAN_ID=$(echo "${lVLAN_INFO}" | sed "s/.*vlan_id://" | grep -E -o "[0-9]+")
       lVLAN_ID="${lVLAN_ID//[![:print:]]/}"
     else
-      l_NW_ENTRY_PRIO=$((2+lADJUST_PRIO))
+      l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
       lVLAN_ID="NONE"
     fi
     store_interface_details "${lIP_ADDRESS}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
@@ -2076,7 +2075,7 @@ iterate_vlans() {
       for lETH_INT_ in "${lETH_INTS_ARR[@]}"; do
         # if we found multiple interfaces belonging to a vlan we need to store all of them:
         lETH_INT_="${lETH_INT_//[![:print:]]/}"
-        l_NW_ENTRY_PRIO=$((4+lADJUST_PRIO))
+        l_NW_ENTRY_PRIO=$((4 + lADJUST_PRIO))
         store_interface_details "${lIP_ADDRESS}" "${lNETWORK_DEVICE}" "${lETH_INT_}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
       done
     fi
@@ -2107,11 +2106,11 @@ setup_network_emulation() {
 
   # a br interface with a number ... eg br0, br1 ... but no br-lan interface
   if [[ "${lNETWORK_DEVICE}" == *"br"* ]] && [[ "${lNETWORK_DEVICE}" == *[0-9]* ]]; then
-    BR_NUM="${lNETWORK_DEVICE/br}"
+    BR_NUM="${lNETWORK_DEVICE/br/}"
     BR_NUM="${BR_NUM//[![:print:]]/}"
   fi
   if [[ "${lETH_INT}" =~ .*eth[0-9]+.* ]]; then
-    ETH_NUM="${lETH_INT/eth}"
+    ETH_NUM="${lETH_INT/eth/}"
     ETH_NUM="${ETH_NUM//[![:print:]]/}"
   fi
 
@@ -2184,7 +2183,7 @@ write_network_config_to_filesystem() {
   local lCNT=0
   while [[ "${lDEVICE:-NA}" == "NA" ]]; do
     lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${lIMAGE_NAME}")"
-    lCNT=$((lCNT+1))
+    lCNT=$((lCNT + 1))
     if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
       print_output "[-] No Qemu Image device identified - return from ${FUNCNAME[0]}"
       return
@@ -2253,7 +2252,7 @@ write_network_config_to_filesystem() {
 
 nvram_check() {
   local lIMAGE_NAME="${1:-}"
-  local lMAX_THREADS_NVRAM=$((4*"$(nproc || echo 1)"))
+  local lMAX_THREADS_NVRAM=$((4 * "$(nproc || echo 1)"))
   local lDEVICE=""
   local lWAIT_PIDS_AE=()
   local lCURRENT_DIR=""
@@ -2265,7 +2264,7 @@ nvram_check() {
   local lCNT=0
   while [[ "${lDEVICE:-NA}" == "NA" ]]; do
     lDEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${lIMAGE_NAME}")"
-    lCNT=$((lCNT+1))
+    lCNT=$((lCNT + 1))
     if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
       print_output "[-] No Qemu Image device identified - return from ${FUNCNAME[0]}"
       return
@@ -2292,8 +2291,8 @@ nvram_check() {
 
       # need to check for firmadyne string in path
       for lNVRAM_FILE in "${lNVRAM_FILE_LIST[@]}"; do
-        nvram_searcher_emulation "${lNVRAM_FILE/:*}" &
-        lWAIT_PIDS_AE+=( "$!" )
+        nvram_searcher_emulation "${lNVRAM_FILE/:*/}" &
+        lWAIT_PIDS_AE+=("$!")
         max_pids_protection "${lMAX_THREADS_NVRAM}" lWAIT_PIDS_AE
       done
       wait_for_pid "${lWAIT_PIDS_AE[@]}"
@@ -2301,17 +2300,17 @@ nvram_check() {
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final ]]; then
-      if [[ "$(wc -l < "${LOG_PATH_MODULE}"/nvram/nvram_files_final)" -gt 0 ]]; then
+      if [[ "$(wc -l <"${LOG_PATH_MODULE}"/nvram/nvram_files_final)" -gt 0 ]]; then
         # print_output "[*] Identified the following NVRAM files:"
         # tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/nvram/nvram_files_final
 
-        sort -u -r -h -k2 "${LOG_PATH_MODULE}"/nvram/nvram_files_final | sort -u -k1,1 | sort -r -h -k2 | head -10 > "${MNT_POINT}"/firmadyne/nvram_files || true
+        sort -u -r -h -k2 "${LOG_PATH_MODULE}"/nvram/nvram_files_final | sort -u -k1,1 | sort -r -h -k2 | head -10 >"${MNT_POINT}"/firmadyne/nvram_files || true
         # store a copy in the log dir
         cp "${MNT_POINT}"/firmadyne/nvram_files "${LOG_PATH_MODULE}"/nvram/nvram_files_final_ || true
 
         print_ln
         print_output "[*] Setting up ${ORANGE}nvram_files${NC} in target filesystem:"
-        tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/nvram/nvram_files_final_
+        tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/nvram/nvram_files_final_
       fi
     fi
   fi
@@ -2335,11 +2334,11 @@ nvram_searcher_emulation() {
     lMAX_VALUES="${#NVRAMS[@]}"
   fi
 
-  for (( j=0; j<"${lMAX_VALUES}"; j++ )); do
+  for ((j = 0; j < "${lMAX_VALUES}"; j++)); do
     lNVRAM_ENTRY="${NVRAMS[${j}]}"
     lNVRAM_KEY=""
     # check https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/inferDefault.py
-    echo "${lNVRAM_ENTRY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.tmp
+    echo "${lNVRAM_ENTRY}" >>"${LOG_PATH_MODULE}"/nvram/nvram_keys.tmp
     lNVRAM_KEY=$(echo "${lNVRAM_ENTRY}" | tr -s '[:blank:]')
     lNVRAM_KEY="${lNVRAM_KEY//[![:print:]]/}"
     if [[ "${lNVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#lNVRAM_KEY}" -gt 3 ]]; then
@@ -2348,13 +2347,13 @@ nvram_searcher_emulation() {
         # print_output "[*] Possible NVRAM access via key ${ORANGE}${lNVRAM_KEY}${NC} found in NVRAM file ${ORANGE}${lNVRAM_FILE}${NC}."
         lCOUNT=$((lCOUNT + 1))
       fi
-      echo "${lNVRAM_KEY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.log
+      echo "${lNVRAM_KEY}" >>"${LOG_PATH_MODULE}"/nvram/nvram_keys.log
     fi
   done
 
   if [[ "${lCOUNT}" -gt 5 ]]; then
-    print_output "[*] ${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text"
-    echo "${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
+    print_output "[*] ${lNVRAM_FILE/\./} ${lCOUNT} ASCII_text"
+    echo "${lNVRAM_FILE/\./} ${lCOUNT} ASCII_text" >>"${LOG_PATH_MODULE}"/nvram/nvram_files_final
   fi
 }
 
@@ -2535,7 +2534,7 @@ run_emulated_system() {
     # 6 Interfaces -> 0-5
     for lNET_ID in {0..5}; do
       print_output "[*] Network ID ${lNET_ID} connector / lNET_NUM: ${lNET_NUM}"
-      if [[ "${lNET_ID}" == "${lNET_NUM}" ]];then
+      if [[ "${lNET_ID}" == "${lNET_NUM}" ]]; then
         # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: ${ORANGE}${lNET_ID}${NC} to host"
         lQEMU_NETWORK+=" -device ${lQEMU_NET_DEVICE},netdev=net${lNET_ID}"
@@ -2611,7 +2610,7 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
-  date +%s > "${TMP_DIR}/emu_starter.log"
+  date +%s >"${TMP_DIR}/emu_starter.log"
   write_script_exec "timeout --preserve-status --signal SIGINT 2000 ${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
 }
 
@@ -2623,7 +2622,7 @@ get_emu_runtime() {
   if [[ -f "${TMP_DIR}/emu_starter.log" ]]; then
     lEMU_START_DATE=$(cat "${TMP_DIR}/emu_starter.log")
     lCURRENT_DATE="$(date +%s)"
-    lRUN_TIME=$((lCURRENT_DATE-lEMU_START_DATE))
+    lRUN_TIME=$((lCURRENT_DATE - lEMU_START_DATE))
   else
     lRUN_TIME="NA"
   fi
@@ -2660,7 +2659,7 @@ check_online_stat() {
   # if the system is reachable we go ahead
   while [[ "${lRUN_TIME}" -lt "${lMAX_RUN_TIME}" && "${lSYS_ONLINE}" -eq 0 ]]; do
     # lets use the default ping command first
-    if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
+    if ping -c 1 "${lIP_ADDRESS}" &>/dev/null; then
       print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
       ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
       print_ln
@@ -2674,12 +2673,12 @@ check_online_stat() {
     # we can use this address for further analysis
     if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
       local lIP_ADDRESS_TMP_ARR=()
-      mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" \
-        | grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
+      mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" |
+        grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
       for lIP_ADDRESS_TMP in "${lIP_ADDRESS_TMP_ARR[@]}"; do
         if [[ "${lIP_ADDRESS_TMP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           print_output "[*] Testing for changed IP address ${lIP_ADDRESS_TMP}" "no_log"
-          if ping -c 1 "${lIP_ADDRESS_TMP}" &> /dev/null; then
+          if ping -c 1 "${lIP_ADDRESS_TMP}" &>/dev/null; then
             print_output "[+] Host with changed ip address ${ORANGE}${lIP_ADDRESS_TMP}${GREEN} is reachable via ICMP."
             print_output "[*] Changing testing ip address to ${ORANGE}${lIP_ADDRESS_TMP}${NC}."
             ping -c 1 "${lIP_ADDRESS_TMP}" | tee -a "${LOG_FILE}" || true
@@ -2705,7 +2704,7 @@ check_online_stat() {
       hping3 -n -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
       print_ln
       if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
-        if ping -c 1 "${lIP_ADDRESS}" &> /dev/null; then
+        if ping -c 1 "${lIP_ADDRESS}" &>/dev/null; then
           print_output "[+] Host with ${ORANGE}${lIP_ADDRESS}${GREEN} is reachable via ICMP."
           ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
           print_ln
@@ -2717,7 +2716,7 @@ check_online_stat() {
       lSYS_ONLINE=1
     fi
 
-    lPING_CNT=$((lPING_CNT+1))
+    lPING_CNT=$((lPING_CNT + 1))
     if [[ "${lSYS_ONLINE}" -eq 0 ]]; then
       print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable for ${lPING_CNT} time(s) - runtime $(date -ud@"${lRUN_TIME}" +%H:%M:%S)." "no_log"
       lSYS_ONLINE=0
@@ -2745,12 +2744,12 @@ check_online_stat() {
       print_output "[-] Warning: System was already available but it does not respond to ping anymore."
       print_output "[-] Probably the IP address of the system has changed."
       local lIP_ADDRESS_TMP_ARR=()
-      mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" \
-        | grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
+      mapfile -t lIP_ADDRESS_TMP_ARR < <(grep -a -o -E "inet addr:[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${LOG_PATH_MODULE}/qemu.final.serial.log" |
+        grep -v "127.0.0." | grep -v "${lIP_ADDRESS}" | cut -d ':' -f2 | sort -u || true)
       for lIP_ADDRESS_TMP in "${lIP_ADDRESS_TMP_ARR[@]}"; do
         if [[ "${lIP_ADDRESS_TMP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           print_output "[*] Testing for changed IP address ${lIP_ADDRESS_TMP}"
-          if ping -c 1 "${lIP_ADDRESS_TMP}" &> /dev/null; then
+          if ping -c 1 "${lIP_ADDRESS_TMP}" &>/dev/null; then
             print_output "[*] System available via changed IP address ${lIP_ADDRESS_TMP}"
           fi
         fi
@@ -2764,7 +2763,7 @@ check_online_stat() {
     # lets also so a quick udp scan on common ports
     nmap -Pn -n -sUV -p 111,123,137,161,1434 --host-timeout 10m -oA "${ARCHIVE_PATH}/${lCNT}_$(basename "${lNMAP_LOG}")_udp" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}" || true
     if grep -q "open" "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
-      tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
+      tee -a "${LOG_FILE}" <"${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
     fi
 
     lMAX_NMAP_RETRIES=40
@@ -2780,7 +2779,7 @@ check_online_stat() {
         write_link "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
         print_ln
       fi
-      lCNT=$((lCNT+1))
+      lCNT=$((lCNT + 1))
       print_output "[*] Give the system another 60 seconds to ensure the boot process is finished - ${lCNT}/${lMAX_NMAP_RETRIES}.\n" "no_log"
       sleep 60
       # we store our Nmap logs in dedicated files (${lCNT}_nmap_log_file):
@@ -2790,7 +2789,7 @@ check_online_stat() {
       # ensure we have the last results also in our main Nmap log file:
       # cp "${ARCHIVE_PATH}"/"${lCNT}_${lNMAP_LOG}" "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
       if grep -q "/open\ " "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"; then
-        tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
+        tee -a "${LOG_FILE}" <"${ARCHIVE_PATH}/${lCNT}_${lNMAP_LOG}"
       fi
       # lMAX_NMAP_RETRIES is as backup to exit somehow from this loop
       [[ "${lCNT}" -ge "${lMAX_NMAP_RETRIES}" ]] && break
@@ -2810,8 +2809,8 @@ check_online_stat() {
     mapfile -t lNMAP_SERV_TCP_ARR < <(grep -o -E "[0-9]+/open/tcp" "${ARCHIVE_PATH}/${lNMAP_LOG}" | cut -d '/' -f1 | sort -u || true)
     mapfile -t lNMAP_SERV_UDP_ARR < <(grep -o -E "[0-9]+/open/udp" "${ARCHIVE_PATH}/${lNMAP_LOG}" | cut -d '/' -f1 | sort -u || true)
 
-    if [[ "${#SERVICES_STARTUP[@]}" -gt 0 ]] || [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] || \
-      [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] || [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]] || \
+    if [[ "${#SERVICES_STARTUP[@]}" -gt 0 ]] || [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] ||
+      [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]] || [[ "${#lNMAP_SERV_TCP_ARR[@]}" -gt 0 ]] ||
       [[ "${#lNMAP_SERV_UDP_ARR[@]}" -gt 0 ]]; then
       local lUDP_SERV_NETSTAT=""
       local lUDP_SERV_STARTUP=""
@@ -2866,8 +2865,8 @@ check_online_stat() {
       print_ln
 
       # work with this:
-      lUDP_SERV_ARR=( "${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" "${#lNMAP_SERV_UDP_ARR[@]}")
-      lTCP_SERV_ARR=( "${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" "${#lNMAP_SERV_TCP_ARR[@]}")
+      lUDP_SERV_ARR=("${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" "${#lNMAP_SERV_UDP_ARR[@]}")
+      lTCP_SERV_ARR=("${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" "${#lNMAP_SERV_TCP_ARR[@]}")
       # we add some default services that we always check in our final Nmap scan
       lTCP_SERV_ARR+=(21)
       lTCP_SERV_ARR+=(22)
@@ -2954,7 +2953,7 @@ create_emulation_archive() {
     local lCNT=0
     while [[ "${lDEVICE:-NA}" == "NA" ]]; do
       lDEVICE="$(add_partition_emulation "${lIMAGE}")"
-      lCNT=$((lCNT+1))
+      lCNT=$((lCNT + 1))
       if [[ "${lDEVICE:-NA}" == "NA" ]] && [[ "${lCNT}" -gt 10 ]]; then
         print_output "[-] No Qemu Image device identified - return now from ${FUNCNAME[0]}"
         return
@@ -2975,8 +2974,8 @@ create_emulation_archive() {
     mv "${LOG_PATH_MODULE}"/nmap_emba_"${lIPS_INT_VLAN_CFG_mod}"* "${lARCHIVE_PATH}" || print_error "[-] Error in Nmap results copy procedure"
   fi
 
-  echo "${lIPS_INT_VLAN_CFG_mod}" >> "${lARCHIVE_PATH}"/emulation_config.txt || true
-  cat "${L10_SYS_EMU_RESULTS}" >> "${lARCHIVE_PATH}"/emulation_config.txt || true
+  echo "${lIPS_INT_VLAN_CFG_mod}" >>"${lARCHIVE_PATH}"/emulation_config.txt || true
+  cat "${L10_SYS_EMU_RESULTS}" >>"${lARCHIVE_PATH}"/emulation_config.txt || true
 
   if [[ -v ARCHIVE_PATH ]] && [[ -f "${lARCHIVE_PATH}"/run.sh ]]; then
     chmod +x "${lARCHIVE_PATH}"/run.sh
@@ -3015,14 +3014,14 @@ get_binary() {
   # '${lBINARY_NAME/\.*}' -> strip the .so from libnvram.so and libnvram_ioctl.so
   if [[ "${lBINARY_NAME}" == *"busybox"* ]] && [[ -f "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     echo "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*/}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
-  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*/}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*/}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
+    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*/}/${lBINARY_NAME}.${lARCH_END}_musl_${lMUSL_VER}"
   elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     echo "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}"
   else
@@ -3039,10 +3038,10 @@ add_partition_emulation() {
 
   while (losetup | grep -q "${1}"); do
     local lLOOP=""
-    ((lCNT+=1))
+    ((lCNT += 1))
     lLOOP=$(losetup -a | grep "${1}" | sort -u)
     # we try to get rid of the entry nicely
-    losetup -d "${lLOOP/:*}"
+    losetup -d "${lLOOP/:*/}"
     if losetup -a | grep -q "${1}"; then
       # and now we go the brutal way
       losetup -D
@@ -3056,7 +3055,7 @@ add_partition_emulation() {
 
   local lCNT=0
   while (! losetup -Pf "${1}"); do
-    ((lCNT+=1))
+    ((lCNT += 1))
     if [[ "${lCNT}" -gt 10 ]]; then
       break
     fi
@@ -3066,7 +3065,7 @@ add_partition_emulation() {
   local lCNT=0
   while (! "${lFOUND}"); do
     sleep 1
-    ((lCNT+=1))
+    ((lCNT += 1))
     local lLOSETUP_OUT_ARR=()
     mapfile -t lLOSETUP_OUT_ARR < <(losetup | grep -v "BACK-FILE" || true)
     local lLINE=""
@@ -3097,7 +3096,7 @@ add_partition_emulation() {
     local lCNT=0
     while (! find "${lDEV_PATH}" -ls 2>/dev/null | grep -q "disk"); do
       sleep 1
-      ((lCNT+=1))
+      ((lCNT += 1))
       if [[ "${lCNT}" -gt 600 ]]; then
         # get an exit if nothing happens
         break
@@ -3141,13 +3140,13 @@ set_network_config() {
   local lNETWORK_DEVICE="${3:-br0}"
   local lETH_INT="${4:-eth0}"
 
-  echo "${lNETWORK_MODE}" > "${MNT_POINT}/firmadyne/network_type"
-  echo "${lNETWORK_DEVICE}" > "${MNT_POINT}/firmadyne/net_bridge"
-  echo "${lETH_INT}" > "${MNT_POINT}/firmadyne/net_interface"
+  echo "${lNETWORK_MODE}" >"${MNT_POINT}/firmadyne/network_type"
+  echo "${lNETWORK_DEVICE}" >"${MNT_POINT}/firmadyne/net_bridge"
+  echo "${lETH_INT}" >"${MNT_POINT}/firmadyne/net_interface"
   if [[ -z "${lIP_ADDRESS}" ]]; then
     lIP_ADDRESS="192.168.0.1"
   fi
-  echo "${lIP_ADDRESS}" > "${MNT_POINT}/firmadyne/ip_default"
+  echo "${lIP_ADDRESS}" >"${MNT_POINT}/firmadyne/ip_default"
 }
 
 write_results() {
@@ -3179,7 +3178,7 @@ write_results() {
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services cnt;available network services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
   fi
-  write_log "${lFIRMWARE_PATH_orig:-NA};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};${lSERVICES%,};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
+  write_log "${lFIRMWARE_PATH_orig:-NA};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};${lSERVICES%,};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*/});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
   print_bar ""
 }
 

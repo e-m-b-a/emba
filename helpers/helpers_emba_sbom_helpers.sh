@@ -57,10 +57,10 @@ build_sbom_json_properties_arr() {
     [[ "${lPROPERTIES_ELEMENT_1}" == "source_path" ]] && lINIT_ELEMENT="EMBA:sbom:source_location"
 
     local lPROPERTIES_ARRAY_TMP=()
-    lPROPERTIES_ARRAY_TMP+=("-s" "name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID+1)):${lPROPERTIES_ELEMENT_1}")
+    lPROPERTIES_ARRAY_TMP+=("-s" "name=${lINIT_ELEMENT}:$((lPROPERTIES_ELEMENT_ID + 1)):${lPROPERTIES_ELEMENT_1}")
     [[ "${lPROPERTIES_ELEMENT_2}" == "NA" ]] && continue
     lPROPERTIES_ARRAY_TMP+=("-s" "value=${lPROPERTIES_ELEMENT_2@Q}")
-    PROPERTIES_JSON_ARR+=( "$(jo -n -- "${lPROPERTIES_ARRAY_TMP[@]}")")
+    PROPERTIES_JSON_ARR+=("$(jo -n -- "${lPROPERTIES_ARRAY_TMP[@]}")")
   done
   # lPROPERTIES_PATH_JSON=$(jo -p -a "${lPROPERTIES_PATH_ARR_TMP[@]}")
 }
@@ -100,19 +100,19 @@ build_sbom_json_hashes_arr() {
       # temp array with only one set of hash values
       local lHASHES_ARRAY_INIT=("alg=MD5")
       lHASHES_ARRAY_INIT+=("content=${lMD5_CHECKSUM}")
-      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+      HASHES_ARR+=("$(jo "${lHASHES_ARRAY_INIT[@]}")")
     fi
 
     if [[ -n "${lSHA256_CHECKSUM}" ]]; then
       lHASHES_ARRAY_INIT=("alg=SHA-256")
       lHASHES_ARRAY_INIT+=("content=${lSHA256_CHECKSUM}")
-      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+      HASHES_ARR+=("$(jo "${lHASHES_ARRAY_INIT[@]}")")
     fi
 
     if [[ -n "${lSHA512_CHECKSUM}" ]]; then
       lHASHES_ARRAY_INIT=("alg=SHA-512")
       lHASHES_ARRAY_INIT+=("content=${lSHA512_CHECKSUM}")
-      HASHES_ARR+=( "$(jo "${lHASHES_ARRAY_INIT[@]}")" )
+      HASHES_ARR+=("$(jo "${lHASHES_ARRAY_INIT[@]}")")
     fi
   else
     print_output "[*] No real binary detected for ${lBINARY} - no checksums for the SBOM generated" "no_log"
@@ -154,7 +154,7 @@ build_sbom_json_hashes_arr() {
         # write_log "[*] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
         write_log "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
-        jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS+1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" > "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp"
+        jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS + 1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp"
         if ! [[ -f "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" ]]; then
           continue
         fi
@@ -163,7 +163,7 @@ build_sbom_json_hashes_arr() {
         # on the 2nd case we also add this different version to the properties
         if [[ "${lAPP_VERS}" != "${lDUP_CHECK_VERS}" ]]; then
           write_log "[*] Version difference detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
-          jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS+2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" > "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
+          jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS + 2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
           mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" 2>/dev/null || true
         fi
 
@@ -176,7 +176,7 @@ build_sbom_json_hashes_arr() {
             # if our current level is higher as the level from the json we need to adjust it now
             write_log "[*] Duplicate handling - Confidence level needs to be adjusted for ${lDUP_CHECK_FILE} -> from ${lCONFIDENCE_LEVEL_JSON:-NA} -> to $(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")" "${SBOM_LOG_PATH}"/duplicates.txt
             # very dirty :-D
-            jq . "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" | sed 's/"value": "'"${lCONFIDENCE_LEVEL_JSON:-NA}"'"/"value": "'"$(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"'"/' > "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" || true
+            jq . "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" | sed 's/"value": "'"${lCONFIDENCE_LEVEL_JSON:-NA}"'"/"value": "'"$(get_confidence_string "${lCONFIDENCE_LEVEL:-NA}")"'"/' >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" || true
             mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" 2>/dev/null || true
             # Todo: adjust json
           fi
@@ -193,7 +193,7 @@ build_sbom_json_hashes_arr() {
     for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
       print_output "[*] Duplicate unhandled_file sbom entry detected for ${lAPP_NAME} - ${lDUP_CHECK_FILE}" "no_log"
       if ! grep -q "${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates_to_delete.txt 2>/dev/null; then
-        echo "${lDUP_CHECK_FILE}" >> "${SBOM_LOG_PATH}"/duplicates_to_delete.txt
+        echo "${lDUP_CHECK_FILE}" >>"${SBOM_LOG_PATH}"/duplicates_to_delete.txt
       fi
     done
   fi
@@ -237,7 +237,7 @@ build_sbom_json_component_arr() {
   if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" || "${lAPP_LIC}" == "null" || "${lAPP_LIC}" == "unknown" ]]; then
     lAPP_LIC_ARR=()
   else
-    lAPP_LIC_ARR+=( "name=${lAPP_LIC}" )
+    lAPP_LIC_ARR+=("name=${lAPP_LIC}")
   fi
   if [[ -n "${lCPE_IDENTIFIER}" ]] && [[ "${lCPE_IDENTIFIER}" == "NA" ]]; then
     lCPE_IDENTIFIER=""
@@ -256,15 +256,15 @@ build_sbom_json_component_arr() {
 
   local lCOMPONENT_ARR=()
 
-  lCOMPONENT_ARR+=( "type=${lAPP_TYPE}" )
-  lCOMPONENT_ARR+=( "name=${lAPP_NAME:-NA}" )
-  lCOMPONENT_ARR+=( "-s" "version=${lAPP_VERS}" )
+  lCOMPONENT_ARR+=("type=${lAPP_TYPE}")
+  lCOMPONENT_ARR+=("name=${lAPP_NAME:-NA}")
+  lCOMPONENT_ARR+=("-s" "version=${lAPP_VERS}")
   if [[ -n "${lAPP_MAINT}" ]]; then
-    lCOMPONENT_ARR+=( "supplier=$(jo name="${lAPP_MAINT}")" )
+    lCOMPONENT_ARR+=("supplier=$(jo name="${lAPP_MAINT}")")
     # lCOMPONENT_ARR+=( "author=${lAPP_MAINT}" )
   fi
-  lCOMPONENT_ARR+=( "group=${lPACKAGING_SYSTEM}" )
-  lCOMPONENT_ARR+=( "bom-ref=${SBOM_COMP_BOM_REF}" )
+  lCOMPONENT_ARR+=("group=${lPACKAGING_SYSTEM}")
+  lCOMPONENT_ARR+=("bom-ref=${SBOM_COMP_BOM_REF}")
 
   # TODO: License information is currently disabled for Dependency Track compatibility.
   #       Set SBOM_INCLUDE_LICENSE=true to include license data in SBOM output.
@@ -273,24 +273,24 @@ build_sbom_json_component_arr() {
     local lTMP_IDENTIFIER="${RANDOM}"
     [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
     # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
-    jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" > "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
-    lCOMPONENT_ARR+=( "licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)" )
+    jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" >"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
+    lCOMPONENT_ARR+=("licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)")
     rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
   fi
-  lCOMPONENT_ARR+=( "scope=${lAPP_SCOPE}" )
-  lCOMPONENT_ARR+=( "cpe=${lCPE_IDENTIFIER}" )
-  lCOMPONENT_ARR+=( "purl=${lPURL_IDENTIFIER}" )
-  lCOMPONENT_ARR+=( "properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")" )
+  lCOMPONENT_ARR+=("scope=${lAPP_SCOPE}")
+  lCOMPONENT_ARR+=("cpe=${lCPE_IDENTIFIER}")
+  lCOMPONENT_ARR+=("purl=${lPURL_IDENTIFIER}")
+  lCOMPONENT_ARR+=("properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")")
   if [[ -v HASHES_ARR ]] && [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
-    lCOMPONENT_ARR+=( "hashes=$(jo -a "${HASHES_ARR[@]}")" )
+    lCOMPONENT_ARR+=("hashes=$(jo -a "${HASHES_ARR[@]}")")
   fi
-  lCOMPONENT_ARR+=( "description=${lAPP_DESC_NEW//\ /%SPACE%}" )
+  lCOMPONENT_ARR+=("description=${lAPP_DESC_NEW//\ /%SPACE%}")
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
     mkdir "${SBOM_LOG_PATH}" 2>/dev/null || true
   fi
 
-  jo -n -- "${lCOMPONENT_ARR[@]}" > "${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
+  jo -n -- "${lCOMPONENT_ARR[@]}" >"${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
 
   # we can unset it here again
   unset HASHES_ARR
@@ -306,7 +306,7 @@ translate_vendor() {
 
   if [[ -f "${CONFIG_DIR}"/vendor_list.cfg ]]; then
     lAPP_MAINT_NEW="$(grep "^${lAPP_MAINT};" "${CONFIG_DIR}"/vendor_list.cfg | cut -d ';' -f2- || true)"
-    lAPP_MAINT_NEW="${lAPP_MAINT_NEW//\"}"
+    lAPP_MAINT_NEW="${lAPP_MAINT_NEW//\"/}"
   fi
 
   [[ -z "${lAPP_MAINT_NEW}" ]] && lAPP_MAINT_NEW="${lAPP_MAINT}"
@@ -333,7 +333,7 @@ build_purl_identifier() {
   if [[ "${lOS_IDENTIFIED}" == "NA" ]]; then
     lOS_IDENTIFIED="generic"
   fi
-  lPURL_IDENTIFIER="pkg:${lPKG_TYPE}/${lOS_IDENTIFIED/-*}/${lAPP_NAME}"
+  lPURL_IDENTIFIER="pkg:${lPKG_TYPE}/${lOS_IDENTIFIED/-*/}/${lAPP_NAME}"
   if [[ -n "${lAPP_VERS}" ]]; then
     lPURL_IDENTIFIER+="@${lAPP_VERS}"
   fi
@@ -363,11 +363,11 @@ distri_check() {
   mapfile -t lOS_RELEASE_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -iwholename "*/etc/os-release" || true)
   for lOS_RELEASE_FILE in "${lOS_RELEASE_ARR[@]}"; do
     lOS_IDENTIFIED=$(grep "^ID=" "${lOS_RELEASE_FILE}" || true)
-    lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=}
+    lOS_IDENTIFIED=${lOS_IDENTIFIED//ID=/}
     lOS_VERS_IDENTIFIED=$(grep "^VERSION_ID=" "${lOS_RELEASE_FILE}" || true)
-    lOS_VERS_IDENTIFIED=${lOS_VERS_IDENTIFIED//VERSION_ID=}
+    lOS_VERS_IDENTIFIED=${lOS_VERS_IDENTIFIED//VERSION_ID=/}
     lOS_IDENTIFIED+="-${lOS_VERS_IDENTIFIED}"
-    lOS_IDENTIFIED=${lOS_IDENTIFIED//\"}
+    lOS_IDENTIFIED=${lOS_IDENTIFIED//\"/}
     lOS_IDENTIFIED=${lOS_IDENTIFIED,,}
     # if it looks like an os then we are happy for now :)
     # for the future we can do some further checks if it is some debian for debs and some rpm based for rpm systems

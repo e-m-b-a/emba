@@ -26,7 +26,7 @@ S18_capa_checker() {
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
-  if [[ ${BINARY_EXTENDED} -ne 1 ]] ; then
+  if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -43,7 +43,7 @@ S18_capa_checker() {
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      lNAME=$(basename "${lBINARY}" 2> /dev/null)
+      lNAME=$(basename "${lBINARY}" 2>/dev/null)
       if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue 2
       fi
@@ -52,17 +52,17 @@ S18_capa_checker() {
     # ensure we have not tested this binary
     local lBIN_MD5=""
     lBIN_MD5="$(md5sum "${lBINARY}" | awk '{print $1}')"
-    if ( grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
+    if (grep -q "${lBIN_MD5}" "${TMP_DIR}"/s18_checked.tmp 2>/dev/null); then
       # print_output "[*] ${ORANGE}${lBINARY}${NC} already tested with capa" "no_log"
       continue
     fi
-    echo "${lBIN_MD5}" >> "${TMP_DIR}"/s18_checked.tmp
+    echo "${lBIN_MD5}" >>"${TMP_DIR}"/s18_checked.tmp
 
     if [[ "${THREADED}" -eq 1 ]]; then
       capa_runner_fct "${lBINARY}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S18+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S18+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S18
     else
       capa_runner_fct "${lBINARY}"
@@ -107,11 +107,11 @@ capa_runner_fct() {
   fi
 
   print_output "[*] Testing binary behavior with capa for $(print_path "${lBINARY}")" "no_log"
-  "${EXT_DIR}"/capa "${lCAPA_OPTS[@]}" "${lBINARY}" > "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || print_error "[-] Capa analysis failed for ${lBINARY}"
+  "${EXT_DIR}"/capa "${lCAPA_OPTS[@]}" "${lBINARY}" >"${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || print_error "[-] Capa analysis failed for ${lBINARY}"
 
   if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || [[ ! -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"
-    if [[ -f  "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
+    if [[ -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
       rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
     fi
     return
@@ -127,4 +127,3 @@ capa_runner_fct() {
     sed -i '/\ MBC Objective/a \[REF\] https://github.com/MBCProject/mbc-markdown' "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
   fi
 }
-

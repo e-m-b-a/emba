@@ -55,13 +55,13 @@ F05_qs_resolver() {
           gpt_resolver_csv "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_F05_ARR+=( "${lTMP_PID}" )
+          lWAIT_PIDS_F05_ARR+=("${lTMP_PID}")
           # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F05_ARR[@]}"
         else
           gpt_resolver_csv "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}"
         fi
 
-      done < "${CSV_DIR}/q02_openai_question.csv"
+      done <"${CSV_DIR}/q02_openai_question.csv"
 
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
 
@@ -83,12 +83,12 @@ F05_qs_resolver() {
           gpt_resolver_csv_tmp "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_F05_ARR+=( "${lTMP_PID}" )
+          lWAIT_PIDS_F05_ARR+=("${lTMP_PID}")
           # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F05_ARR[@]}"
         else
           gpt_resolver_csv_tmp "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}"
         fi
-      done < "${CSV_DIR}/q02_openai_question.csv.tmp"
+      done <"${CSV_DIR}/q02_openai_question.csv.tmp"
 
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
 
@@ -131,7 +131,7 @@ gpt_resolver_csv() {
     else
       sed -i "s/${lGPT_ANCHOR_}/Q\: ${lGPT_QUESTION_}\nA\: /1" "${lGPT_OUTPUT_FILE_}"
       # grep "${lGPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${lGPT_OUTPUT_FILE_}"
-      printf '%q\n' "${lGPT_RESPONSE_//\\/}" >> "${lGPT_OUTPUT_FILE_}"
+      printf '%q\n' "${lGPT_RESPONSE_//\\/}" >>"${lGPT_OUTPUT_FILE_}"
       # replace anchor in html-report with link to response
 
       if [[ "${lGPT_OUTPUT_FILE_}" == *".log" ]]; then
@@ -147,17 +147,17 @@ gpt_resolver_csv() {
       # Todo: check this and fix it to only use the rules above
       lGPT_OUTPUT_FILE_NAME_bak="$(basename "${lGPT_OUTPUT_FILE_//\./}.html")"
       readarray -t GPT_OUTPUT_FILE_HTML_ARR_bak < <(find "${HTML_PATH}" -iname "${lGPT_OUTPUT_FILE_NAME_bak}" 2>/dev/null)
-      lGPT_OUTPUT_FILE_HTML_ARR_+=( "${GPT_OUTPUT_FILE_HTML_ARR_bak[@]}" )
+      lGPT_OUTPUT_FILE_HTML_ARR_+=("${GPT_OUTPUT_FILE_HTML_ARR_bak[@]}")
 
       for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
         # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
-        lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+        lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
         # we need to find the depth which we need to link to the file
         # shellcheck disable=SC2001
         lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
         print_output "[*] Linking GPT results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
-        depth_cnt="${lHTML_FILE_X//[^\/]}"
-        depth_cnt="$(( "${#depth_cnt}"-1 ))"
+        depth_cnt="${lHTML_FILE_X//[^\/]/}"
+        depth_cnt="$(("${#depth_cnt}" - 1))"
         local lDEPTH="\.\.\/"
         local lmyDEPTH=""
         lmyDEPTH=$(printf "%${depth_cnt}s")
@@ -205,14 +205,14 @@ gpt_resolver_csv_tmp() {
 
     for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
       # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
-      lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+      lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
 
       # we need to find the depth which we need to link to the file
       # shellcheck disable=SC2001
       lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
       print_output "[*] Linking GPT results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
-      depth_cnt="${lHTML_FILE_X//[^\/]}"
-      depth_cnt="$(( "${#depth_cnt}"-1 ))"
+      depth_cnt="${lHTML_FILE_X//[^\/]/}"
+      depth_cnt="$(("${#depth_cnt}" - 1))"
       local lDEPTH="\.\.\/"
       local lmyDEPTH=""
       lmyDEPTH=$(printf "%${depth_cnt}s")

@@ -31,7 +31,7 @@ IF50_aggregator_common() {
     echo -e "\\n""${ORANGE}""${BOLD}""cyclonedx""${NC}"
     echo -e "${ORANGE}""cyclonedx sbom converter will be installed.""${NC}"
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""cyclonedx, net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and installed!""${NC}"
@@ -39,34 +39,34 @@ IF50_aggregator_common() {
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
-        if [[ "${RHEL_OS}" -eq 1 ]]; then
-          dnf install -y --setopt=install_weak_deps=false "${INSTALL_APP_LIST[@]}"
-        else
-          apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        fi
-        pip_install "cve-searchsploit"
+    y | Y)
+      if [[ "${RHEL_OS}" -eq 1 ]]; then
+        dnf install -y --setopt=install_weak_deps=false "${INSTALL_APP_LIST[@]}"
+      else
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+      fi
+      pip_install "cve-searchsploit"
 
-        # we try to avoid downloading the exploit-database multiple times:
-        CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')
-        if [[ -d "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
-          rm -r "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database"
-        fi
-        if [[ -d "/usr/share/exploitdb" ]]; then
-          ln -s "/usr/share/exploitdb" "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database"
-        fi
+      # we try to avoid downloading the exploit-database multiple times:
+      CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')
+      if [[ -d "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
+        rm -r "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database"
+      fi
+      if [[ -d "/usr/share/exploitdb" ]]; then
+        ln -s "/usr/share/exploitdb" "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database"
+      fi
 
-        echo -e "\\n""${MAGENTA}""${BOLD}""Updating cve_searchsploit database mapping.""${NC}"
-        cve_searchsploit -u
+      echo -e "\\n""${MAGENTA}""${BOLD}""Updating cve_searchsploit database mapping.""${NC}"
+      cve_searchsploit -u
 
-        echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
-        if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
-          cd /home/linuxbrew/ || ( echo "Could not install EMBA component cyclonedx-cli" && exit 1 )
-          sudo -u linuxbrew NONINTERACTIVE=1 /home/linuxbrew/.linuxbrew/bin/brew install cyclonedx/cyclonedx/cyclonedx-cli
-          cd "${HOME_PATH}" || ( echo "Could not install EMBA component cyclonedx-cli" && exit 1 )
-        else
-          echo -e "${ORANGE}""WARNING: Brew installation not found - skipping cyclonedx installation.""${NC}"
-        fi
+      echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
+      if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
+        cd /home/linuxbrew/ || (echo "Could not install EMBA component cyclonedx-cli" && exit 1)
+        sudo -u linuxbrew NONINTERACTIVE=1 /home/linuxbrew/.linuxbrew/bin/brew install cyclonedx/cyclonedx/cyclonedx-cli
+        cd "${HOME_PATH}" || (echo "Could not install EMBA component cyclonedx-cli" && exit 1)
+      else
+        echo -e "${ORANGE}""WARNING: Brew installation not found - skipping cyclonedx installation.""${NC}"
+      fi
       ;;
     esac
   fi

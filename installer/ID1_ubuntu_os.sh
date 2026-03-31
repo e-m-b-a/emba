@@ -41,9 +41,9 @@ ID1_ubuntu_os() {
     apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
     if ! [[ -f "/usr/share/dbus-1/services/org.freedesktop.Notifications.service" ]] && [[ -f "/usr/lib/notification-daemon/notification-daemon" ]]; then
-      echo "[D-BUS Service]" > /usr/share/dbus-1/services/org.freedesktop.Notifications.service
-      echo "Name=org.freedesktop.Notifications" >> /usr/share/dbus-1/services/org.freedesktop.Notifications.service
-      echo "Exec=/usr/lib/notification-daemon/notification-daemon" >> /usr/share/dbus-1/services/org.freedesktop.Notifications.service
+      echo "[D-BUS Service]" >/usr/share/dbus-1/services/org.freedesktop.Notifications.service
+      echo "Name=org.freedesktop.Notifications" >>/usr/share/dbus-1/services/org.freedesktop.Notifications.service
+      echo "Exec=/usr/lib/notification-daemon/notification-daemon" >>/usr/share/dbus-1/services/org.freedesktop.Notifications.service
     fi
 
     if [[ "${WSL}" -eq 1 ]]; then
@@ -54,12 +54,10 @@ ID1_ubuntu_os() {
 
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list >/dev/null
 
       apt-get update
       apt-get install docker-ce -y
     fi
   fi
 }
-
-

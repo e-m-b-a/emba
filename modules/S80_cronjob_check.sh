@@ -17,8 +17,7 @@
 # Description:  Examine all files for cronjob configuration, e.g. cron or crontab
 #               and lists their jobs and other possible intriguing details.
 
-S80_cronjob_check()
-{
+S80_cronjob_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check cronjobs"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -30,42 +29,42 @@ S80_cronjob_check()
 
   mapfile -t lCJ_FILE_PATH_ARR < <(mod_path "/ETC_PATHS/cron")
   for lCJ_FILE in "${lCJ_FILE_PATH_ARR[@]}"; do
-    if [[ -e "${lCJ_FILE}" ]] ; then
+    if [[ -e "${lCJ_FILE}" ]]; then
       local lCRONJOBS=""
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
       # lCRONJOBS=$(ls -la "${lCJ_FILE}"* 2>/dev/null)
       lCRONJOBS=$(find "${lCJ_FILE}"* -xdev -type f 2>/dev/null)
-      if [[ "${lCRONJOBS}" ]] ; then
+      if [[ "${lCRONJOBS}" ]]; then
         print_output "[+] Cronjobs:"
         print_output "$(indent "${lCRONJOBS}")"
-        ((lRESULTS+=1))
+        ((lRESULTS += 1))
       fi
     fi
   done
 
-  for lCJ_FILE in "${lCJ_FILE_PATH_ARR[@]}" ; do
-    if [[ -e "${lCJ_FILE}" ]] ; then
+  for lCJ_FILE in "${lCJ_FILE_PATH_ARR[@]}"; do
+    if [[ -e "${lCJ_FILE}" ]]; then
       local lCRONJOBWWPERMS=""
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
       lCRONJOBWWPERMS=$(find "${lCJ_FILE}"* -xdev -perm -0002 -type f -exec ls -la {} \; -exec cat {} \; 2>/dev/null)
-      if [[ "${lCRONJOBWWPERMS}" ]] ; then
+      if [[ "${lCRONJOBWWPERMS}" ]]; then
         print_output "[+] World-writable cron jobs and file contents:"
         print_output "$(indent "${lCRONJOBWWPERMS}")"
-        ((lRESULTS+=1))
+        ((lRESULTS += 1))
       fi
     fi
   done
 
   mapfile -t lCJ_FILE_PATH_ARR < <(mod_path "/ETC_PATHS/crontab")
   for lCJ_FILE in "${lCJ_FILE_PATH_ARR[@]}"; do
-    if [[ -e "${lCJ_FILE}" ]] ; then
+    if [[ -e "${lCJ_FILE}" ]]; then
       local lCRONTABVALUE=""
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
       lCRONTABVALUE=$(cat "${lCJ_FILE}" 2>/dev/null)
-      if [[ "${lCRONTABVALUE}" ]] ; then
+      if [[ "${lCRONTABVALUE}" ]]; then
         print_output "[+] Crontab content:"
         print_output "$(indent "${lCRONTABVALUE}")"
-        ((lRESULTS+=1))
+        ((lRESULTS += 1))
       fi
     fi
   done
@@ -77,23 +76,26 @@ S80_cronjob_check()
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     # lCRONTABVAR=$(ls -la "${lCT_VAR}" 2>/dev/null)
     lCRONTABVAR=$(find "${lCT_VAR}"* -type f -ls 2>/dev/null)
-    if [[ "${lCRONTABVAR}" ]] ; then
+    if [[ "${lCRONTABVAR}" ]]; then
       print_output "[+] Anything interesting in ""$(print_path "${lCT_VAR}")"
       print_output "$(indent "${lCRONTABVAR}")"
-      ((lRESULTS+=1))
+      ((lRESULTS += 1))
     fi
   done
 
   mapfile -t lCJ_FILE_PATH_ARR < <(mod_path "/ETC_PATHS/anacrontab")
   for lCJ_FILE in "${lCJ_FILE_PATH_ARR[@]}"; do
-    if [[ -e "${lCJ_FILE}" ]] ; then
+    if [[ -e "${lCJ_FILE}" ]]; then
       local lANACRONJOBS=""
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-      lANACRONJOBS=$(ls -la "${lCJ_FILE}" 2>/dev/null; cat "${lCJ_FILE}" 2>/dev/null)
-      if [[ "${lANACRONJOBS}" ]] ; then
+      lANACRONJOBS=$(
+        ls -la "${lCJ_FILE}" 2>/dev/null
+        cat "${lCJ_FILE}" 2>/dev/null
+      )
+      if [[ "${lANACRONJOBS}" ]]; then
         print_output "[+] Anacron jobs and associated file permissions:"
         print_output "$(indent "${lANACRONJOBS}")"
-        ((lRESULTS+=1))
+        ((lRESULTS += 1))
       fi
     fi
   done
@@ -104,13 +106,12 @@ S80_cronjob_check()
     local lANACRONTAB=""
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     lANACRONTAB=$(ls -la "${lCT_VAR}" 2>/dev/null || true)
-    if [[ "${lANACRONTAB}" ]] ; then
+    if [[ "${lANACRONTAB}" ]]; then
       print_output "[+] When were jobs last executed (""$(print_path "${lCT_VAR}")"")"
       print_output "$(indent "${lANACRONTAB}")"
-      ((lRESULTS+=1))
+      ((lRESULTS += 1))
     fi
   done
 
   module_end_log "${FUNCNAME[0]}" "${lRESULTS}"
 }
-

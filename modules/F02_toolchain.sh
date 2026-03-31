@@ -16,7 +16,6 @@
 
 # Description:  Collects further details that are useful for building/identifying a working toolchain
 
-
 F02_toolchain() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Toolchain overview"
@@ -75,8 +74,8 @@ F02_toolchain() {
       if [[ -z "${lKERNEL_V}" ]]; then
         continue
       fi
-      lKERNEL_VERSION="${lKERNEL_V/;*}"
-      lKERNEL_CONFIG="${lKERNEL_V/*;}"
+      lKERNEL_VERSION="${lKERNEL_V/;*/}"
+      lKERNEL_CONFIG="${lKERNEL_V/*;/}"
 
       lK_RELEASE_DATE=""
       if [[ -f "${CONFIG_DIR}"/kernel_details.csv ]]; then
@@ -84,7 +83,7 @@ F02_toolchain() {
         # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
         if [[ -z "${lK_RELEASE_DATE}" ]] && [[ "${lKERNEL_VERSION}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
           lK_RELEASE_DATE=$(grep "^linux-${lKERNEL_VERSION%%\.0};" "${CONFIG_DIR}"/kernel_details.csv || true)
-          lK_RELEASE_DATE="${lK_RELEASE_DATE/*;}"
+          lK_RELEASE_DATE="${lK_RELEASE_DATE/*;/}"
         fi
       fi
 
@@ -118,7 +117,7 @@ F02_toolchain() {
         # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
         if [[ -z "${lK_RELEASE_DATE}" ]] && [[ "${lKERNEL_V}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
           lK_RELEASE_DATE=$(grep "^linux-${lKERNEL_V%%\.0};" "${CONFIG_DIR}"/kernel_details.csv || true)
-          lK_RELEASE_DATE="${lK_RELEASE_DATE/*;}"
+          lK_RELEASE_DATE="${lK_RELEASE_DATE/*;/}"
         fi
       fi
       if [[ -n "${lK_RELEASE_DATE}" ]]; then
@@ -139,7 +138,7 @@ F02_toolchain() {
 
       mapfile -t lGCC_VERSION_ARR < <(echo "${lKERNEL_STR}" | grep -o -i -E "gcc version [0-9](\.[0-9]+)+?" | sort -u || true)
       mapfile -t lGCC_VERSION_1_ARR < <(echo "${lKERNEL_STR}" | grep -o -E "GCC [0-9](\.[0-9]+)+?" | sort -u || true)
-      lGCC_VERSION_ARR=( "${lGCC_VERSION_ARR[@]}" "${lGCC_VERSION_1_ARR[@]}")
+      lGCC_VERSION_ARR=("${lGCC_VERSION_ARR[@]}" "${lGCC_VERSION_1_ARR[@]}")
       mapfile -t lGCC_VERSION_ARR < <(printf "%s\n" "${lGCC_VERSION_ARR[@]}" | sort -u)
 
       if [[ "${#lGCC_VERSION_ARR[@]}" -gt 0 ]]; then
@@ -148,11 +147,11 @@ F02_toolchain() {
           lGCC_VERSION_STRIPPED=$(echo "${lGCC_VERSION}" | grep -o -E "[0-9](\.[0-9]+)+?" || true)
           if [[ -n "${lGCC_VERSION_STRIPPED}" ]]; then
             lGCC_RELEASE_DATE=$(grep "\ ${lGCC_VERSION_STRIPPED};" "${CONFIG_DIR}"/gcc_details.csv || true)
-            lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;}"
+            lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;/}"
             # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
             if [[ -z "${lGCC_RELEASE_DATE}" ]] && [[ "${lGCC_VERSION_STRIPPED}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
               lGCC_RELEASE_DATE=$(grep "\ ${lGCC_VERSION_STRIPPED%%\.0};" "${CONFIG_DIR}"/gcc_details.csv || true)
-              lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;}"
+              lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;/}"
             fi
             if [[ -n "${lGCC_RELEASE_DATE}" ]]; then
               print_output "[+] Identified GCC version ${ORANGE}${lGCC_VERSION}${GREEN} released on ${ORANGE}${lGCC_RELEASE_DATE:-"NA"}${GREEN} in the Linux kernel identifier string."
@@ -201,8 +200,8 @@ F02_toolchain() {
     for lBINARY_DETAILS in "${lBINARY_DETAILS_ARR[@]}"; do
       lBINARY_END="NA"
       lBINARY_ARCH="NA"
-      lBINARY_MACHINE="${lBINARY_DETAILS/;*}"
-      lBINARY_DETAILS="${lBINARY_DETAILS/*;}"
+      lBINARY_MACHINE="${lBINARY_DETAILS/;*/}"
+      lBINARY_DETAILS="${lBINARY_DETAILS/*;/}"
       if [[ "${lBINARY_DETAILS}" == *"LSB"* ]]; then
         lBINARY_END="little"
       elif [[ "${lBINARY_DETAILS}" == *"MSB"* ]]; then
@@ -215,7 +214,7 @@ F02_toolchain() {
 
       print_output "[+] Identified firmware architecture ${ORANGE}${lBINARY_ARCH}${GREEN} / endianes ${ORANGE}${lBINARY_END}${GREEN} / machine configuration ${ORANGE}${lBINARY_MACHINE}${GREEN} on binary level."
       write_link "p99"
-      lTEMP_ARR+=( "${lBINARY_ARCH};${lBINARY_END};${lBINARY_MACHINE}" )
+      lTEMP_ARR+=("${lBINARY_ARCH};${lBINARY_END};${lBINARY_MACHINE}")
       lNEG_LOG=1
     done
     print_ln
@@ -234,14 +233,14 @@ F02_toolchain() {
       else
         lGCC_VERSION_STRIPPED=$(echo "${lBINARY_COMPILER_GUESSED}" | grep -o -E " [0-9]\.[0-9](\.[0-9]+)+?" | head -1 || true)
       fi
-      lGCC_VERSION_STRIPPED="${lGCC_VERSION_STRIPPED/ }"
+      lGCC_VERSION_STRIPPED="${lGCC_VERSION_STRIPPED/ /}"
       if [[ -n "${lGCC_VERSION_STRIPPED}" ]]; then
         lGCC_RELEASE_DATE=$(grep "\ ${lGCC_VERSION_STRIPPED};" "${CONFIG_DIR}"/gcc_details.csv || true)
-        lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;}"
+        lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;/}"
         # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
         if [[ -z "${lGCC_RELEASE_DATE}" ]] && [[ "${lGCC_VERSION_STRIPPED}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
           lGCC_RELEASE_DATE=$(grep "\ ${lGCC_VERSION_STRIPPED%%\.0};" "${CONFIG_DIR}"/gcc_details.csv || true)
-          lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;}"
+          lGCC_RELEASE_DATE="${lGCC_RELEASE_DATE/*;/}"
         fi
         if [[ -n "${lGCC_RELEASE_DATE}" ]]; then
           print_output "[+] Identified possible GCC version on binary level ${ORANGE}${lBINARY_COMPILER_GUESSED} / ${lGCC_VERSION_STRIPPED}${GREEN} released on ${ORANGE}${lGCC_RELEASE_DATE}${GREEN}."

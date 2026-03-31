@@ -18,8 +18,7 @@
 
 export THREAD_PRIO=1
 
-S24_kernel_bin_identifier()
-{
+S24_kernel_bin_identifier() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Kernel Binary and Configuration Identifier"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -42,7 +41,7 @@ S24_kernel_bin_identifier()
   while read -r lBINARY_ENTRY; do
     binary_kernel_check_threader "${lBINARY_ENTRY}" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_S24_main+=( "${lTMP_PID}" )
+    lWAIT_PIDS_S24_main+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S24_main
   done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | sort -u || true)
 
@@ -50,8 +49,8 @@ S24_kernel_bin_identifier()
   # shellcheck disable=SC2153
   find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -exec cat {} \; | tee -a "${LOG_FILE}"
   if [[ -f "${S24_CSV_LOG}" ]]; then
-    if [[ $(wc -l < "${S24_CSV_LOG}") -gt 1 ]]; then
-      lNEG_LOG=$(wc -l < "${S24_CSV_LOG}" 2>/dev/null || echo 0)
+    if [[ $(wc -l <"${S24_CSV_LOG}") -gt 1 ]]; then
+      lNEG_LOG=$(wc -l <"${S24_CSV_LOG}" 2>/dev/null || echo 0)
     else
       rm "${S24_CSV_LOG}"
     fi
@@ -96,7 +95,7 @@ binary_kernel_check_threader() {
     mkdir -p "${S09_LOG_DIR}/strings_bins"
   fi
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
-    strings "${lFILE_PATH}" | uniq > "${lSTRINGS_OUTPUT}" || true
+    strings "${lFILE_PATH}" | uniq >"${lSTRINGS_OUTPUT}" || true
   fi
 
   lVERSION_JSON_CFG="${CONFIG_DIR}/bin_version_identifiers/linux_kernel.json"
@@ -123,7 +122,7 @@ binary_kernel_check_threader() {
   mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
 
   for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-    mapfile -t lVERSION_IDENTIFIED_ARR < <(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}"| sort -u || true)
+    mapfile -t lVERSION_IDENTIFIED_ARR < <(grep -a -o -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u || true)
 
     if [[ "${#lVERSION_IDENTIFIED_ARR[@]}" -gt 0 ]]; then
       write_log "" "${lLOG_FILE}"
@@ -150,10 +149,10 @@ binary_kernel_check_threader() {
       if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
         write_log "" "${lLOG_FILE}"
-        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >> "${lLOG_FILE}" || true
+        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || true
         if [[ -f "${lFILE_PATH}".elf ]]; then
           lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
-          lMD5_SUM="${lMD5_SUM/\ *}"
+          lMD5_SUM="${lMD5_SUM/\ */}"
           if ! grep -q "${lMD5_SUM}" "${P99_CSV_LOG}"; then
             # we need to add our elf file to our main p99 csv file:
             binary_architecture_threader "${lFILE_PATH}.elf" "${FUNCNAME[0]}"
@@ -193,7 +192,7 @@ binary_kernel_check_threader() {
       fi
 
       # ensure this is only done in non SBOM_MINIMAL mode
-      if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
+      if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
         # we are using lBINARY_ENTRY which is already populated with our ELF data
         lK_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
 
@@ -262,7 +261,7 @@ binary_kernel_check_threader() {
     # ASCII kernel config files:
     elif file -b "${lFILE_PATH}" | grep -q "ASCII"; then
       # ensure this is only done in non SBOM_MINIMAL mode
-      if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]] ; then
+      if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
         lCFG_MD5=$(md5sum "${lFILE_PATH}" | awk '{print $1}')
         if [[ ! " ${KCFG_MD5_ARR[*]} " =~ ${lCFG_MD5} ]]; then
           lK_CON_DET=$(grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" "${lSTRINGS_OUTPUT}" || true)
@@ -317,19 +316,19 @@ extract_kconfig() {
   [[ $? -eq 4 ]] && return
 
   # That didn't work, so retry after decompression.
-  try_decompress '\037\213\010' xy    gunzip "${lLOG_FILE}"
+  try_decompress '\037\213\010' xy gunzip "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
   try_decompress '\3757zXZ\000' abcde unxz "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress 'BZh'          xy    bunzip2 "${lLOG_FILE}"
+  try_decompress 'BZh' xy bunzip2 "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\135\0\0\0'   xxx   unlzma "${lLOG_FILE}"
+  try_decompress '\135\0\0\0' xxx unlzma "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
-  try_decompress '\211\114\132' xy    'lzop -d' "${lLOG_FILE}"
+  try_decompress '\211\114\132' xy 'lzop -d' "${lLOG_FILE}"
   [[ $? -eq 4 ]] && return
 
   try_decompress '\002\041\114\030' xyy 'lz4 -d -l' "${lLOG_FILE}"
@@ -350,12 +349,12 @@ dump_config() {
     return
   fi
 
-  if POS=$(tr "${CF1}\n${CF2}" "\n${CF2}=" < "${lIMG_}" | grep -abo "^${CF2}"); then
+  if POS=$(tr "${CF1}\n${CF2}" "\n${CF2}=" <"${lIMG_}" | grep -abo "^${CF2}"); then
     POS=${POS%%:*}
 
-    tail -c+"$((POS + 8))" "${lIMG_}" | zcat > "${TMP1}" 2> /dev/null
+    tail -c+"$((POS + 8))" "${lIMG_}" | zcat >"${TMP1}" 2>/dev/null
 
-    if [[ $? != 1 ]]; then  # exit status must be 0 or 2 (trailing garbage warning)
+    if [[ $? != 1 ]]; then # exit status must be 0 or 2 (trailing garbage warning)
       [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
       if ! [[ -f "${TMP1}" ]]; then
@@ -382,9 +381,9 @@ try_decompress() {
   local lLOG_FILE="${1:-}"
 
   export POS=""
-  for POS in $(tr "$1\n$2" "\n$2=" < "${IMG}" | grep -abo "^$2"); do
+  for POS in $(tr "$1\n$2" "\n$2=" <"${IMG}" | grep -abo "^$2"); do
     POS=${POS%%:*}
-    tail -c+"${POS}" "${IMG}" | "${3}" > "${TMP2}" 2> /dev/null
+    tail -c+"${POS}" "${IMG}" | "${3}" >"${TMP2}" 2>/dev/null
     dump_config "${TMP2}" "${lLOG_FILE}"
     [[ $? -eq 4 ]] && return 4
   done

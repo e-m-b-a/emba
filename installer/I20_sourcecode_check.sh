@@ -22,7 +22,7 @@ I20_sourcecode_check() {
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
 
-    cd "${HOME_PATH}" || ( echo "Could not install EMBA components for code scanning" && exit 1 )
+    cd "${HOME_PATH}" || (echo "Could not install EMBA components for code scanning" && exit 1)
     INSTALL_APP_LIST=()
 
     echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
@@ -48,7 +48,7 @@ I20_sourcecode_check() {
     print_file_info "vineflower-1.11.2.jar" "Java decompiler" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"
     print_file_info "opengrep" "Semgrep alternative" "https://github.com/opengrep/opengrep/releases/download/v1.15.1/opengrep_manylinux_x86" "external/opengrep"
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""Composer, iniscan, luacheck  and semgrep (if not already on the system) will be downloaded!""${NC}"
@@ -56,49 +56,49 @@ I20_sourcecode_check() {
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+    y | Y)
+      apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        luarocks install luacheck
+      luarocks install luacheck
 
-        pip_install "pydantic" "-U"
-        pip_install "semgrep"
+      pip_install "pydantic" "-U"
+      pip_install "semgrep"
 
-        echo "Installing Opengrep now"
-        download_file "opengrep" "https://github.com/opengrep/opengrep/releases/download/v1.15.1/opengrep_manylinux_x86" "external/opengrep"
-        chmod +x "external/opengrep"
+      echo "Installing Opengrep now"
+      download_file "opengrep" "https://github.com/opengrep/opengrep/releases/download/v1.15.1/opengrep_manylinux_x86" "external/opengrep"
+      chmod +x "external/opengrep"
 
-        if ! [[ -d external/semgrep-rules ]]; then
-          # migrated to the 2024 rules without licensing issues
-          git clone https://github.com/opengrep/opengrep-rules.git external/semgrep-rules
-        fi
-        if ! [[ -d external/semgrep-rules-0xdea ]]; then
-          git clone https://github.com/EMBA-support-repos/semgrep-rules-0xdea.git external/semgrep-rules-0xdea
-        fi
+      if ! [[ -d external/semgrep-rules ]]; then
+        # migrated to the 2024 rules without licensing issues
+        git clone https://github.com/opengrep/opengrep-rules.git external/semgrep-rules
+      fi
+      if ! [[ -d external/semgrep-rules-0xdea ]]; then
+        git clone https://github.com/EMBA-support-repos/semgrep-rules-0xdea.git external/semgrep-rules-0xdea
+      fi
 
-        # zarn perl code analyser
-        if ! [[ -d external/zarn ]]; then
-          # git clone https://github.com/EMBA-support-repos/zarn.git external/zarn
-          git clone https://github.com/htrgouvea/zarn.git external/zarn
-          cd external/zarn || ( echo "Could not install EMBA component zarn" && exit 1 )
-          # https://github.com/htrgouvea/zarn/issues/3
-          git reset --hard 009331c
-          cpanm --installdeps .
-          cd "${HOME_PATH}" || ( echo "Could not install EMBA component zarn" && exit 1 )
-        fi
+      # zarn perl code analyser
+      if ! [[ -d external/zarn ]]; then
+        # git clone https://github.com/EMBA-support-repos/zarn.git external/zarn
+        git clone https://github.com/htrgouvea/zarn.git external/zarn
+        cd external/zarn || (echo "Could not install EMBA component zarn" && exit 1)
+        # https://github.com/htrgouvea/zarn/issues/3
+        git reset --hard 009331c
+        cpanm --installdeps .
+        cd "${HOME_PATH}" || (echo "Could not install EMBA component zarn" && exit 1)
+      fi
 
-        if ! [[ -d "external/iniscan" ]] ; then
-          mkdir external/iniscan
-        fi
-        download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
-        cd ./external/iniscan || ( echo "Could not install EMBA component iniscan" && exit 1 )
-        php composer.phar build --no-interaction || true
-        php composer.phar global require psecio/iniscan --no-interaction || true
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component iniscan" && exit 1 )
-        cp -r "${HOME}""/.config/composer/vendor/" "./external/iniscan/"
+      if ! [[ -d "external/iniscan" ]]; then
+        mkdir external/iniscan
+      fi
+      download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
+      cd ./external/iniscan || (echo "Could not install EMBA component iniscan" && exit 1)
+      php composer.phar build --no-interaction || true
+      php composer.phar global require psecio/iniscan --no-interaction || true
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component iniscan" && exit 1)
+      cp -r "${HOME}""/.config/composer/vendor/" "./external/iniscan/"
 
-        # vineflower Java decompiler
-        download_file "vineflower-1.11.2.jar" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"
+      # vineflower Java decompiler
+      download_file "vineflower-1.11.2.jar" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"
       ;;
     esac
   fi

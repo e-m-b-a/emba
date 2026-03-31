@@ -33,7 +33,7 @@ P22_Zyxel_zip_decrypt() {
 
     zyxel_zip_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       lNEG_LOG=1
     fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -68,7 +68,7 @@ zyxel_zip_extractor() {
   unblobber "${lRI_FILE_}" "${lEXTRACTION_DIR_}" 0
   print_ln
 
-  if command -v jchroot > /dev/null; then
+  if command -v jchroot >/dev/null; then
     local lCHROOT="jchroot"
     # OPTS see https://github.com/vincentbernat/jchroot#security-note
     local lOPTS=(-n emba -U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
@@ -117,16 +117,16 @@ zyxel_zip_extractor() {
         return
       fi
 
-      cp "$(command -v "${lEMULATOR}")" "${lZLD_DIR}" || ( print_output "[-] Something went wrong" && return)
-      cp "${lRI_FILE_BIN_PATH}" "${lZLD_DIR}" || ( print_output "[-] Something went wrong" && return)
+      cp "$(command -v "${lEMULATOR}")" "${lZLD_DIR}" || (print_output "[-] Something went wrong" && return)
+      cp "${lRI_FILE_BIN_PATH}" "${lZLD_DIR}" || (print_output "[-] Something went wrong" && return)
       lZLD_BIN=$(basename "${lZLD_BIN}")
 
       chmod +x "${lZLD_DIR}"/"${lZLD_BIN}"
-      timeout --preserve-status --signal SIGINT 2s "${lCHROOT}" "${lOPTS[@]}" "${lZLD_DIR}" -- ./"${lEMULATOR}" -strace ./"${lZLD_BIN}" "${lRI_FILE_BIN}" AABBCCDD >> "${LOG_PATH_MODULE}"/zld_strace.log 2>&1 || true
+      timeout --preserve-status --signal SIGINT 2s "${lCHROOT}" "${lOPTS[@]}" "${lZLD_DIR}" -- ./"${lEMULATOR}" -strace ./"${lZLD_BIN}" "${lRI_FILE_BIN}" AABBCCDD >>"${LOG_PATH_MODULE}"/zld_strace.log 2>&1 || true
       rm "${lZLD_DIR}"/"${lEMULATOR}" || true
 
       if [[ -f "${LOG_PATH_MODULE}"/zld_strace.log ]] && [[ -s "${LOG_PATH_MODULE}"/zld_strace.log ]]; then
-        lZIP_KEY=$(grep -a -E "^[0-9]+\ execve.*AABBCCDD\",\"-o" "${LOG_PATH_MODULE}"/zld_strace.log| cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
+        lZIP_KEY=$(grep -a -E "^[0-9]+\ execve.*AABBCCDD\",\"-o" "${LOG_PATH_MODULE}"/zld_strace.log | cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
       else
         print_output "[-] No qemu strace log generated -> no further processing possible"
       fi
@@ -143,10 +143,10 @@ zyxel_zip_extractor() {
         print_ln
         print_output "[*] Zyxel 1st stage - Extracted ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files from the firmware image."
         print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files ... could take some time" "no_log"
-        for lBINARY in "${lFILES_ZYXEL_ARR[@]}" ; do
+        for lBINARY in "${lFILES_ZYXEL_ARR[@]}"; do
           binary_architecture_threader "${lBINARY}" "P22_Zyxel_zip_decrypt" &
           local lTMP_PID="$!"
-          lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+          lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
         done
         wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -170,10 +170,10 @@ zyxel_zip_extractor() {
 
           print_output "[*] Zyxel 2nd stage - Extracted ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files from the firmware image."
           print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files ... could take some time" "no_log"
-          for lBINARY in "${lFILES_ZYXEL_ARR[@]}" ; do
+          for lBINARY in "${lFILES_ZYXEL_ARR[@]}"; do
             binary_architecture_threader "${lBINARY}" "P22_Zyxel_zip_decrypt" &
             local lTMP_PID="$!"
-            lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+            lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
           done
           wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

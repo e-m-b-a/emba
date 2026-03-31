@@ -22,7 +22,6 @@
 #               The module results should be reviewed in details. There are probably a lot of cases
 #               which we are currently not handling correct. Please report such issues!
 
-
 S36_lighttpd() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Lighttpd web server analysis"
@@ -35,10 +34,10 @@ S36_lighttpd() {
   local lCFG_FILE=""
   export LIGHT_VERSIONS_ARR=()
 
-  readarray -t lLIGHTTP_CFG_ARR < <( grep ".*lighttp.*conf.*" "${P99_CSV_LOG}" | sort -u || true)
-  readarray -t lLIGHTTP_BIN_ARR < <( grep "lighttpd.*ELF" "${P99_CSV_LOG}"| sort -u || true)
+  readarray -t lLIGHTTP_CFG_ARR < <(grep ".*lighttp.*conf.*" "${P99_CSV_LOG}" | sort -u || true)
+  readarray -t lLIGHTTP_BIN_ARR < <(grep "lighttpd.*ELF" "${P99_CSV_LOG}" | sort -u || true)
 
-  if [[ ${#lLIGHTTP_BIN_ARR[@]} -gt 0 ]] ; then
+  if [[ ${#lLIGHTTP_BIN_ARR[@]} -gt 0 ]]; then
     lighttpd_binary_analysis "${lLIGHTTP_BIN_ARR[@]}"
     # -> populates LIGHT_VERSIONS_ARR array which is used for some config analysis
     local lNEG_LOG=1
@@ -46,8 +45,8 @@ S36_lighttpd() {
     print_output "[-] No Lighttpd binary files found"
   fi
 
-  if [[ ${#lLIGHTTP_CFG_ARR[@]} -gt 0 ]] ; then
-    for lCFG_DATA in "${lLIGHTTP_CFG_ARR[@]}" ; do
+  if [[ ${#lLIGHTTP_CFG_ARR[@]} -gt 0 ]]; then
+    for lCFG_DATA in "${lLIGHTTP_CFG_ARR[@]}"; do
       lCFG_FILE=$(echo "${lCFG_DATA}" | cut -d ';' -f2 || true)
       lighttpd_config_analysis "${lCFG_FILE}" "${LIGHT_VERSIONS_ARR[@]}"
       write_csv_log "Lighttpd web server configuration file" "$(basename "${lCFG_FILE}")" "${lCFG_FILE}"
@@ -174,7 +173,7 @@ lighttpd_binary_analysis() {
   # check for binary protections on lighttpd binaries
   print_ln
   print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
-  for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}" ; do
+  for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}"; do
     lLIGHT_BIN="$(echo "${lLIGHT_BIN}" | cut -d ';' -f2)"
     print_output "$("${EXT_DIR}"/checksec --file="${lLIGHT_BIN}" || true)"
   done
@@ -184,28 +183,28 @@ lighttpd_binary_analysis() {
   lVULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
   # nosemgrep
   local IFS=" "
-  IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$( echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
+  IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')"
   for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
     lLIGHT_BIN="$(echo "${lBINARY_DATA}" | cut -d ';' -f2)"
     if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
       # skip binwalk raw files
       continue
     fi
-    if ( file "${lLIGHT_BIN}" | grep -q "x86-64" ) ; then
+    if (file "${lLIGHT_BIN}" | grep -q "x86-64"); then
       function_check_x86_64 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "Intel 80386" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "Intel 80386"); then
       function_check_x86 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "32-bit.*ARM" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "32-bit.*ARM"); then
       function_check_ARM32 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "64-bit.*ARM" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "64-bit.*ARM"); then
       function_check_ARM64 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "MIPS" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "MIPS"); then
       function_check_MIPS "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "PowerPC" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "PowerPC"); then
       function_check_PPC32 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "Altera Nios II" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "Altera Nios II"); then
       function_check_NIOS2 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif ( file "${lLIGHT_BIN}" | grep -q "QUALCOMM DSP6" ) ; then
+    elif (file "${lLIGHT_BIN}" | grep -q "QUALCOMM DSP6"); then
       radare_function_check_hexagon "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     fi
   done
@@ -303,7 +302,7 @@ lighttpd_config_analysis() {
 
     print_output "[*] Testing web server BEAST mitigation"
     if grep -E "ssl.disable-client-renegotiation.*disable" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
-      if [[ ${#lLIGHT_VERSIONS_ARR[@]} -gt 0 ]] ; then
+      if [[ ${#lLIGHT_VERSIONS_ARR[@]} -gt 0 ]]; then
         for lLIGHT_VER in "${lLIGHT_VERSIONS_ARR[@]}"; do
           if [[ "$(version "${lLIGHT_VER}")" -lt "$(version "1.4.68")" ]]; then
             print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not mitigating the BEAST attack (CVE-2009-3555) via ssl.disable-client-renegotiation.${NC}"
@@ -324,7 +323,7 @@ lighttpd_config_analysis() {
 
       print_output "[*] Testing web server POODLE attack mitigation"
       if grep -E "ssl.cipher-list.*:SSLv3" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
-        if [[ ${#lLIGHT_VERSIONS_ARR[@]} -eq 0 ]] ; then
+        if [[ ${#lLIGHT_VERSIONS_ARR[@]} -eq 0 ]]; then
           # if we have no version detected we show this issue:
           print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not mitigating the POODLE attack (CVE-2014-3566) via disabled SSLv3 ciphers.${NC}"
           print_output "[*] Note that SSLv3 is automatically disabled on lighttpd since version ${ORANGE}1.4.36${NC}"
@@ -372,7 +371,7 @@ lighttpd_config_analysis() {
       fi
 
       print_output "[*] Testing web server RC4 ciphers"
-      if grep -E  "ssl.cipher-list.*:RC4" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
+      if grep -E "ssl.cipher-list.*:RC4" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not disabling RC4 ciphers.${NC}"
         print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
@@ -392,19 +391,19 @@ lighttpd_config_analysis() {
       print_output "[*] Testing web server MD5 ciphers"
       if grep -E "ssl.cipher-list.*:MD5" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server not disabling MD5 ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
 
       # lighttpd implicitly applies ssl.cipher-list = "HIGH" (since lighttpd 1.4.54) if ssl.cipher-list is not explicitly set in lighttpd.conf.
       print_output "[*] Testing web server LOW ciphers"
       if grep -E "ssl.cipher-list.*:LOW" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server enabling LOW ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
       print_output "[*] Testing web server MEDIUM ciphers"
       if grep -E "ssl.cipher-list.*:MEDIUM" "${lLIGHTTPD_CONFIG}" | grep -q -E -v "^([[:space:]])?#"; then
         print_output "[+] Possible configuration issue detected: ${ORANGE}Web server enabling MEDIUM ciphers.${NC}"
-        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u  | grep -E -v "^([[:space:]])?#" || true)")")"
+        print_output "$(indent "$(orange "$(grep "ssl.cipher-list" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       fi
     fi
   fi

@@ -19,7 +19,6 @@
 #               This module is doing the main diffing job. This module needs the web reporter
 #               enabled, otherwise the results are very confusing.
 
-
 D10_firmware_diffing() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Diff analysis of two firmware images"
@@ -31,17 +30,17 @@ D10_firmware_diffing() {
   # local MAX_MOD_THREADS=10
   local lNEG_LOG=0
 
-  if ! command -v ssdeep > /dev/null ; then
+  if ! command -v ssdeep >/dev/null; then
     print_output "[-] Missing ssdeep installation"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
-  if ! command -v dot > /dev/null ; then
+  if ! command -v dot >/dev/null; then
     print_output "[-] Missing xdot installation"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
-  if ! command -v colordiff > /dev/null ; then
+  if ! command -v colordiff >/dev/null; then
     print_output "[-] Missing colordiff installation"
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -86,7 +85,7 @@ D10_firmware_diffing() {
       analyse_fw_files "${lFW_FILE1}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_D10_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_D10_ARR+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_D10_ARR
     else
       # echo "Testing ${lFW_FILE1}"
@@ -99,7 +98,7 @@ D10_firmware_diffing() {
       check_for_new_files "${lFW_FILE2}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_D10_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_D10_ARR+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_D10_ARR
     else
       check_for_new_files "${lFW_FILE2}"
@@ -154,7 +153,7 @@ analyse_fw_files() {
         lNEG_LOG=1
 
         local lLOG_FILE_SUB_NAME="diff_report_${lFW_FILE_NAME1}.txt"
-        export LOG_PATH_MODULE_SUB="${LOG_PATH_MODULE}"/"${lLOG_FILE_SUB_NAME/.txt}"
+        export LOG_PATH_MODULE_SUB="${LOG_PATH_MODULE}"/"${lLOG_FILE_SUB_NAME/.txt/}"
         export LOG_FILE_DETAILS="${LOG_PATH_MODULE_SUB}/${lLOG_FILE_SUB_NAME}"
 
         ! [[ -d "${LOG_PATH_MODULE_SUB}" ]] && mkdir "${LOG_PATH_MODULE_SUB}"
@@ -184,18 +183,18 @@ analyse_fw_files() {
             sub_module_title "Diff for clear text file ${lFW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
             # clear text handling - just colordiffing
             # colored diff output not possible in -y mode to file output -> change the diffs with sed
-            diff -yb --color=always --suppress-common-lines "${lFW_FILE1}" "${lFW_FILE2}" | sed 's/.*[[:blank:]]|[[:blank:]].*/\x1b[32m&\x1b[0m/' > "${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt || true
+            diff -yb --color=always --suppress-common-lines "${lFW_FILE1}" "${lFW_FILE2}" | sed 's/.*[[:blank:]]|[[:blank:]].*/\x1b[32m&\x1b[0m/' >"${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt || true
             if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt ]]; then
               print_output "[*] Diffing results from clear text file ${ORANGE}${lFW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${lFW_FILE_NAME1}.txt${NC}" "no_log"
               write_log "" "${LOG_FILE_DETAILS}"
               write_log "[*] Diffing results from clear text file ${ORANGE}${lFW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
-              cat "${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt >> "${LOG_FILE_DETAILS}"
+              cat "${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt >>"${LOG_FILE_DETAILS}"
             fi
           else
             sub_module_title "Diffing of binary file ${lFW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
             # binary handling - colordiffing the hex dump and some radare2 diffing
-            diff -yb --suppress-common-lines <(xxd "${lFW_FILE1}") <(xxd "${lFW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt || true
+            diff -yb --suppress-common-lines <(xxd "${lFW_FILE1}") <(xxd "${lFW_FILE2}") >"${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt || true
             if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${lFW_FILE_NAME1}".txt ]]; then
               print_output "[*] Diffing results from binary file ${ORANGE}${lFW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${lFW_FILE_NAME1}.txt${NC}" "no_log"
 
@@ -204,10 +203,10 @@ analyse_fw_files() {
               write_link "${LOG_PATH_MODULE_SUB}/colordiff_${lFW_FILE_NAME1}.txt" "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
             fi
-            strings -d -n 6 "${lFW_FILE1}" > "${LOG_PATH_MODULE_SUB}"/strings_"${lFW_FILE_NAME1}"_1.txt || true
-            strings -d -n 6 "${lFW_FILE2}" > "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt || true
+            strings -d -n 6 "${lFW_FILE1}" >"${LOG_PATH_MODULE_SUB}"/strings_"${lFW_FILE_NAME1}"_1.txt || true
+            strings -d -n 6 "${lFW_FILE2}" >"${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt || true
             if [[ -f "${LOG_PATH_MODULE_SUB}"/strings_"${lFW_FILE_NAME1}"_1.txt ]] && [[ -f "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt ]]; then
-              diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/strings_"${lFW_FILE_NAME1}"_1.txt "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt > "${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${lFW_FILE_NAME1}".txt || true
+              diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/strings_"${lFW_FILE_NAME1}"_1.txt "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt >"${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${lFW_FILE_NAME1}".txt || true
               if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${lFW_FILE_NAME1}".txt ]]; then
                 if [[ -s "${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${lFW_FILE_NAME1}".txt ]]; then
                   print_output "[*] Diffing results from binary strings ${ORANGE}${lFW_FILE_NAME1}${NC} - logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_strings_${lFW_FILE_NAME1}.txt${NC}" "no_log"
@@ -222,7 +221,7 @@ analyse_fw_files() {
 
             # radare2:
             # get the functions which are different with radiff2:
-            radiff2 -AC "${lFW_FILE1}" "${lFW_FILE2}" 2>/dev/null | grep UNMATCH > "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${lFW_FILE_NAME1}"_"${lFW_FILE_NAME1}".txt || true
+            radiff2 -AC "${lFW_FILE1}" "${lFW_FILE2}" 2>/dev/null | grep UNMATCH >"${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${lFW_FILE_NAME1}"_"${lFW_FILE_NAME1}".txt || true
 
             if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${lFW_FILE_NAME1}"_"${lFW_FILE_NAME1}".txt ]]; then
               sub_module_title "Non matching functions for binary file ${lFW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
@@ -233,7 +232,7 @@ analyse_fw_files() {
               write_log "" "${LOG_FILE_DETAILS}"
               write_log "[*] Non matching functions in binary ${ORANGE}${lFW_FILE_NAME1}${NC}:" "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
-              cat "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${lFW_FILE_NAME1}"_"${lFW_FILE_NAME1}".txt >> "${LOG_FILE_DETAILS}"
+              cat "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${lFW_FILE_NAME1}"_"${lFW_FILE_NAME1}".txt >>"${LOG_FILE_DETAILS}"
               mapfile -t lUNMATCHED_FCTs_ARR < <(awk '{print $1}' "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${lFW_FILE_NAME1}"_"${lFW_FILE_NAME1}".txt | sort -u)
             else
               write_log "[-] No function diff available for ${ORANGE}${lFW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
@@ -243,12 +242,12 @@ analyse_fw_files() {
             # let's do a diff on the complete radare2 output:
             # create disassembly from file in first directory:
             # shellcheck disable=SC2016
-            r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${lFW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_dir1.txt
+            r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${lFW_FILE1}" 2>/dev/null >"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_dir1.txt
             # create disassembly from file in second directory:
             # shellcheck disable=SC2016
-            r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${lFW_FILE2}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt
+            r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${lFW_FILE2}" 2>/dev/null >"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt
             # create diff of both disassemblies:
-            diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${lFW_FILE_NAME1}".txt || true
+            diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt 2>/dev/null >"${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${lFW_FILE_NAME1}".txt || true
 
             if [[ -s "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${lFW_FILE_NAME1}".txt ]]; then
               sub_module_title "Radare2 diff for binary file ${lFW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
@@ -301,7 +300,7 @@ analyse_bin_fct() {
   lFW_FILE_NAME1=$(basename "${lFW_FILE1}")
 
   write_log "" "${LOG_FILE_DETAILS}"
-  radiff2 -e bin.cache=true -md -g "${lFCT}" "${lFW_FILE2}" "${lFW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot || print_error "[-] Radiff diff analysis failed for function ${lFCT} / file 1 ${lFW_FILE2} / file 2 ${lFW_FILE1}"
+  radiff2 -e bin.cache=true -md -g "${lFCT}" "${lFW_FILE2}" "${lFW_FILE1}" 2>/dev/null >"${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot || print_error "[-] Radiff diff analysis failed for function ${lFCT} / file 1 ${lFW_FILE2} / file 2 ${lFW_FILE1}"
 
   if ! [[ -s "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot ]]; then
     return
@@ -311,17 +310,17 @@ analyse_bin_fct() {
   write_log "[*] Function analysis ${ORANGE}${lFCT}${NC} of binary ${ORANGE}${lFW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
   if [[ "$(grep -c "0x" "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot 2>/dev/null)" -gt 1 ]]; then
     print_output "[*] Generating diff image for function ${ORANGE}${lFCT}${NC} of binary ${ORANGE}${lFW_FILE_NAME1}${NC}" "no_log"
-    dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".png || true
+    dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".xdot 2>/dev/null >"${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${lFW_FILE_NAME1}"_"${lFCT}".png || true
 
     print_output "[*] Generating disasm for function ${ORANGE}${lFCT}${NC} of binary ${ORANGE}${lFW_FILE_NAME1}${NC}" "no_log"
     # now we need to generate the disassembly of the current function of both files to include it in the report for further manual tear-down
     write_log "[*] Disassembly function ${ORANGE}${lFCT}${NC} of ${ORANGE}${lFW_FILE_NAME1}${NC} in ${ORANGE}first${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt
     write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt
-    r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${lFCT}" "${lFW_FILE1}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt || true
+    r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${lFCT}" "${lFW_FILE1}" 2>/dev/null >>"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt || true
 
     write_log "[*] Disassembly function ${ORANGE}${lFCT}${NC} of ${ORANGE}${FW_FILE_NAME2}${NC} in ${ORANGE}second${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt
     write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt
-    r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${lFCT}" "${lFW_FILE2}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt || true
+    r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${lFCT}" "${lFW_FILE2}" 2>/dev/null >>"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt || true
   fi
 
   if [[ -s "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${lFW_FILE_NAME1}_${lFCT}.png" ]]; then
@@ -338,18 +337,18 @@ analyse_bin_fct() {
     if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt ]] && [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt ]]; then
       # letz diff it
       # extract only valid disassembly code:
-      grep "0x" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt | grep -v "; arg \|; var " | grep -v -E " XREF(S)? from " \
-        | sed 's/[^0x]*0x/0x/' | cut -d\  -f2- | sed 's/^[[:blank:]]*//' > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_mod_dir1.txt || true
-              grep "0x" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt | grep -v "; arg \|; var " | grep -v -E " XREF(S)? from " \
-        | sed 's/[^0x]*0x/0x/' | cut -d\  -f2- | sed 's/^[[:blank:]]*//' > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_mod_dir2.txt || true
+      grep "0x" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_dir1.txt | grep -v "; arg \|; var " | grep -v -E " XREF(S)? from " |
+        sed 's/[^0x]*0x/0x/' | cut -d\  -f2- | sed 's/^[[:blank:]]*//' >"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_mod_dir1.txt || true
+      grep "0x" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_dir2.txt | grep -v "; arg \|; var " | grep -v -E " XREF(S)? from " |
+        sed 's/[^0x]*0x/0x/' | cut -d\  -f2- | sed 's/^[[:blank:]]*//' >"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_mod_dir2.txt || true
 
       # if we have both disassemblies we can diff them:
       if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_mod_dir1.txt ]] && [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_mod_dir2.txt ]]; then
         write_log "[*] Function diff for function ${ORANGE}${lFCT}${NC} - file ${ORANGE}${FW_FILE_NAME2}${NC}" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_diff.txt
         write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_diff.txt
         # colorize diff changes orange (see the sed part):
-        diff -yb --color=always "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_mod_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_mod_dir2.txt \
-          | sed 's/.*[[:blank:]]|[[:blank:]].*/\x1b[33m&\x1b[0m/' > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_tmp.txt || true
+        diff -yb --color=always "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_mod_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_mod_dir2.txt |
+          sed 's/.*[[:blank:]]|[[:blank:]].*/\x1b[33m&\x1b[0m/' >"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_tmp.txt || true
 
         # we need to ensure a correct formatting of our output
         while read -r line; do
@@ -362,8 +361,8 @@ analyse_bin_fct() {
           [[ "${lDIFF_2nd:0:1}" == "|" ]] && lCOLOR="${ORANGE}"
           [[ "${lDIFF_2nd:0:1}" == ">" ]] && lCOLOR="${GREEN}"
           [[ "${lDIFF_2nd:0:1}" == "<" ]] && lCOLOR="${RED}"
-          printf "${lCOLOR}\t%-60.60s\t%-60.60s${NC}\n" "${lDIFF_1st}" "${lDIFF_2nd}" >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_diff.txt
-        done < "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_tmp.txt
+          printf "${lCOLOR}\t%-60.60s\t%-60.60s${NC}\n" "${lDIFF_1st}" "${lDIFF_2nd}" >>"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_diff.txt
+        done <"${LOG_PATH_MODULE_SUB}"/r2_disasm_"${lFW_FILE_NAME1}"_"${lFCT}"_tmp.txt
       fi
 
       if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${lFCT}"_diff.txt ]]; then

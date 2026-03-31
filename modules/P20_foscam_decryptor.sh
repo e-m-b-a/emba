@@ -31,7 +31,7 @@ P20_foscam_decryptor() {
     local lEXTRACTION_FILE="${LOG_DIR}"/firmware/firmware_foscam_dec.bin
 
     foscam_enc_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_FILE}"
-    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+    if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
       lNEG_LOG=1
     fi
     module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -65,7 +65,7 @@ foscam_enc_extractor() {
     print_output "[*] Testing FOSCAM decryption key ${ORANGE}${l_FOSCAM_KEY}${NC}."
     # shellcheck disable=SC2086
     # nosemgrep
-    openssl enc -d -aes-128-cbc -md md5 -k ${l_FOSCAM_KEY} -in "${lFOSCAM_ENC_PATH_}" > "${lEXTRACTION_FILE_}" || true
+    openssl enc -d -aes-128-cbc -md md5 -k ${l_FOSCAM_KEY} -in "${lFOSCAM_ENC_PATH_}" >"${lEXTRACTION_FILE_}" || true
 
     if [[ -f "${lEXTRACTION_FILE_}" ]]; then
       lFOSCAM_FILE_CHECK=$(file "${lEXTRACTION_FILE_}")
@@ -180,10 +180,10 @@ foscam_ubi_extractor() {
       print_output "[*] Extracted ${ORANGE}${#lFILES_FOSCAM_UBI_ARR[@]}${NC} files from the firmware image."
       print_output "[*] Populating backend data for ${ORANGE}${#lFILES_FOSCAM_UBI_ARR[@]}${NC} files ... could take some time" "no_log"
 
-      for lBINARY in "${lFILES_FOSCAM_UBI_ARR[@]}" ; do
+      for lBINARY in "${lFILES_FOSCAM_UBI_ARR[@]}"; do
         binary_architecture_threader "${lBINARY}" "P20_foscam_decryptor" &
         local lTMP_PID="$!"
-        lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+        lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
       done
       wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 

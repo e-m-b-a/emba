@@ -16,8 +16,7 @@
 
 # Description:  Searches in /var/mail for mail files.
 
-S90_mail_check()
-{
+S90_mail_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search Mail files"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -29,14 +28,14 @@ S90_mail_check()
   local lMAILS=""
 
   mapfile -t lMAILS_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail")
-  for lELEM in "${lMAILS_PATH_ARR[@]}" ; do
-    if [[ -e "${lELEM}" ]] ; then
+  for lELEM in "${lMAILS_PATH_ARR[@]}"; do
+    if [[ -e "${lELEM}" ]]; then
       # lMAILS="$(ls -la "${lELEM}" 2>/dev/null)"
       lMAILS="$(find "${lELEM}" -xdev -ls 2>/dev/null)"
-      if [[ -n "${lMAILS}" ]] ; then
+      if [[ -n "${lMAILS}" ]]; then
         print_output "[+] Content of ""$(print_path "${lELEM}")"":"
         print_output "$(indent "$(orange "${lMAILS}")")"
-        ((lFINDING+=1))
+        ((lFINDING += 1))
       fi
     fi
   done
@@ -46,17 +45,16 @@ S90_mail_check()
   local lMAILS_ROOT=""
 
   mapfile -t lMAILS_PATH_ROOT < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail/root")
-  for lELEM in "${lMAILS_PATH_ROOT[@]}" ; do
-    if [[ -e "${lELEM}" ]] ; then
+  for lELEM in "${lMAILS_PATH_ROOT[@]}"; do
+    if [[ -e "${lELEM}" ]]; then
       lMAILS_ROOT="$(head "${lELEM}" 2>/dev/null)"
-      if [[ -n "${lMAILS_ROOT}" ]] ; then
+      if [[ -n "${lMAILS_ROOT}" ]]; then
         print_output "[+] Content of ""$(print_path "${lELEM}")"":"
         print_output "$(indent "$(orange "${lMAILS_ROOT}")")"
-        ((lFINDING+=1))
+        ((lFINDING += 1))
       fi
     fi
   done
 
   module_end_log "${FUNCNAME[0]}" "${lFINDING}"
 }
-

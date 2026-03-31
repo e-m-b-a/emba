@@ -16,10 +16,10 @@
 
 # Description:  Installs basic tools which are always needed for EMBA and currently have no dedicated installer module
 
-I01_default_apps(){
+I01_default_apps() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]] ; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     print_tool_info "file" 1
     print_tool_info "jq" 1
     print_tool_info "bc" 1
@@ -76,7 +76,7 @@ I01_default_apps(){
       echo -e "${RED}""${BOLD}""Not installing metasploit-framework. Your EMBA installation will be incomplete""${NC}"
     fi
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""These applications will be installed/updated!""${NC}"
@@ -84,55 +84,54 @@ I01_default_apps(){
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
-        echo
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+    y | Y)
+      echo
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-        echo "[*] Installing qemu-nios2 support ..."
-        # the qemu-nios2-static binary was removed from latest debian packages
-        # we download an older package and extract the binary
-        curl -L "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" -o "external/qemu-user-static_7.2.deb"
-        echo "[*] Extracting qemu-user-static package ..."
-        dpkg-deb -xv "external/qemu-user-static_7.2.deb" "external/tmp-extract" || true
-        if [[ -f "external/tmp-extract/usr/bin/qemu-nios2-static" ]]; then
-          echo "[*] Installing nios2 qemu binary ..."
-          cp "external/tmp-extract/usr/bin/qemu-nios2-static" "/usr/bin/qemu-nios2-static" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
-          rm -rf "external/tmp-extract/"
-          rm -rf "external/qemu-user-static_7.2.deb"
-          echo "[+] Installation of qemu-nios2-static finished"
-        else
-          echo "[-] Installation of qemu-nios2-static failed"
-          exit 1
-        fi
+      echo "[*] Installing qemu-nios2 support ..."
+      # the qemu-nios2-static binary was removed from latest debian packages
+      # we download an older package and extract the binary
+      curl -L "https://snapshot.debian.org/archive/debian/20250104T205520Z/pool/main/q/qemu/qemu-user-static_7.2%2Bdfsg-7%2Bdeb12u12_amd64.deb" -o "external/qemu-user-static_7.2.deb"
+      echo "[*] Extracting qemu-user-static package ..."
+      dpkg-deb -xv "external/qemu-user-static_7.2.deb" "external/tmp-extract" || true
+      if [[ -f "external/tmp-extract/usr/bin/qemu-nios2-static" ]]; then
+        echo "[*] Installing nios2 qemu binary ..."
+        cp "external/tmp-extract/usr/bin/qemu-nios2-static" "/usr/bin/qemu-nios2-static" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
+        rm -rf "external/tmp-extract/"
+        rm -rf "external/qemu-user-static_7.2.deb"
+        echo "[+] Installation of qemu-nios2-static finished"
+      else
+        echo "[-] Installation of qemu-nios2-static failed"
+        exit 1
+      fi
 
-        # install brew installer - used later for cyclonex in IF20 installer
-        echo "[*] Installing linuxbrew ..."
-        if ! grep -q linuxbrew /etc/passwd; then
-          useradd -m -s /bin/bash linuxbrew
-        fi
-        usermod -aG sudo linuxbrew
-        if [[ -d /home/linuxbrew/.linuxbrew ]]; then
-          rm -r /home/linuxbrew/.linuxbrew
-        fi
-        mkdir -p /home/linuxbrew/.linuxbrew
-        chown -R linuxbrew: /home/linuxbrew/.linuxbrew
-        # sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-        # nosemgrep
-        sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      # install brew installer - used later for cyclonex in IF20 installer
+      echo "[*] Installing linuxbrew ..."
+      if ! grep -q linuxbrew /etc/passwd; then
+        useradd -m -s /bin/bash linuxbrew
+      fi
+      usermod -aG sudo linuxbrew
+      if [[ -d /home/linuxbrew/.linuxbrew ]]; then
+        rm -r /home/linuxbrew/.linuxbrew
+      fi
+      mkdir -p /home/linuxbrew/.linuxbrew
+      chown -R linuxbrew: /home/linuxbrew/.linuxbrew
+      # sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      # nosemgrep
+      sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        # Install Rust (used from cwe_checker and binwalk)
-        rm -rf "${HOME}"/.cargo
-        rm -rf "${HOME}"/.config
-        rm -rf external/rustup
+      # Install Rust (used from cwe_checker and binwalk)
+      rm -rf "${HOME}"/.cargo
+      rm -rf "${HOME}"/.config
+      rm -rf external/rustup
 
-        curl https://sh.rustup.rs -sSf | sh -s -- -y
-        # shellcheck disable=SC1091
-        . "${HOME}"/.cargo/env
+      curl https://sh.rustup.rs -sSf | sh -s -- -y
+      # shellcheck disable=SC1091
+      . "${HOME}"/.cargo/env
 
-        export PATH="${PATH}":"${HOME}"/.cargo/bin
+      export PATH="${PATH}":"${HOME}"/.cargo/bin
 
-
-        pip_install "requests" "-U"
+      pip_install "requests" "-U"
       ;;
     esac
   fi

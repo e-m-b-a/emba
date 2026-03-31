@@ -35,8 +35,8 @@ GCC_STC_MATCHING_FILE="$(mktemp)"
 # final EMBA csv config file
 GCC_OUTPUT_CSV="./config/gcc_libstdc_details.csv"
 
-curl -f "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
-curl -f "${GCC_STD_HTML}" > "${GCC_STC_MATCHING_FILE}"
+curl -f "${GCC_RELEASES_HTML}" >"${GCC_RELEASES_FILE}"
+curl -f "${GCC_STD_HTML}" >"${GCC_STC_MATCHING_FILE}"
 
 if ! [[ -f "${GCC_STC_MATCHING_FILE}" ]]; then
   print_output "[-] Error downloading ${GCC_STD_HTML}" "no_log"
@@ -62,10 +62,10 @@ for GCC_STC_MATCHING_ENTRY in "${GCC_STC_MATCHING_ARR[@]}"; do
     GCC_RELEASE_DATE="$(grep ">${GCC_ENTRY}<" "${GCC_RELEASES_FILE}")"
   fi
 
-  GCC_RELEASE_DATE="${GCC_RELEASE_DATE/*<td>}"
-  GCC_RELEASE_DATE="${GCC_RELEASE_DATE/<\/td>*}"
+  GCC_RELEASE_DATE="${GCC_RELEASE_DATE/*<td>/}"
+  GCC_RELEASE_DATE="${GCC_RELEASE_DATE/<\/td>*/}"
   print_output "[*] GCC version: ${GCC_ENTRY} / matching libstdc identified: ${LIBSTDC_ENTRY} / GCC release date: ${GCC_RELEASE_DATE}" "no_log"
-  echo "${GCC_ENTRY};${LIBSTDC_ENTRY};${GCC_RELEASE_DATE}" >> "${GCC_OUTPUT_CSV}"
+  echo "${GCC_ENTRY};${LIBSTDC_ENTRY};${GCC_RELEASE_DATE}" >>"${GCC_OUTPUT_CSV}"
 done
 
 [[ -f "${GCC_STC_MATCHING_FILE}" ]] && rm "${GCC_STC_MATCHING_FILE}"

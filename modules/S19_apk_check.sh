@@ -16,7 +16,6 @@
 # Description:  This module identifies Android apk packages and performs a static
 #               vulnerability test with APKHunt: https://github.com/Cyber-Buddy/APKHunt
 
-
 S19_apk_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Android apk checks"
@@ -58,7 +57,7 @@ apk_checker() {
       apk_checker_helper "${lAPK_FILE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S19_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S19_ARR+=("${lTMP_PID}")
     else
       apk_checker_helper "${lAPK_FILE}"
     fi

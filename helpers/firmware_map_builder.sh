@@ -106,7 +106,7 @@ setup_special_environment() {
   [[ ! -f "${JS_EMBA_LIB}" ]] && wget -q --timeout=15 "${JS_URL}" -O "${EXT_DIR}/${JS_LIB}"
   [[ ! -f "${LOGO_FILE_EMBA}" ]] && wget -q --timeout=15 "${LOGO_URL}" -O "${EXT_DIR}/${LOGO_FILE}"
   [[ ! -f "${EXT_DIR}/${LOGO_FILE}" || ! -f "${LOGO_FILE_EMBA}" ]] && exit 1
-  [[ ! -f "${EXT_DIR}/${JS_LIB}" ]] &&  exit 1
+  [[ ! -f "${EXT_DIR}/${JS_LIB}" ]] && exit 1
 }
 
 # job cleanup for multi processing
@@ -132,7 +132,7 @@ main() {
     print_help
     exit 1
   fi
-  if ! command -v neato > /dev/null ; then
+  if ! command -v neato >/dev/null; then
     echo -e "[-] ERROR: Install graphviz neato - graphviz, python3-pygraphviz"
     exit 1
   fi
@@ -156,4 +156,3 @@ else
   echo "[-] Process complete. EMBA dependency map not generated at."
   exit 1
 fi
-

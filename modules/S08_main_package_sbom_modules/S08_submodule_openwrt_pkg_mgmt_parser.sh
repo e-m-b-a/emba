@@ -46,10 +46,10 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
 
   mapfile -t lOPENWRT_MGMT_CONTROL_ARR < <(grep "opkg/info/.*.control" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lOPENWRT_MGMT_CONTROL_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPACKAGE_FILE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -57,7 +57,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lOPENWRT_MGMT_CONTROL_ARR[@]}${NC} OpenWRT package management files." "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}" ; do
+    for lPACKAGE_FILE in "${lOPENWRT_MGMT_CONTROL_ARR[@]}"; do
       # echo "lPACKAGE_FILE: ${lPACKAGE_FILE}"
       if ! [[ -f "${lPACKAGE_FILE}" ]]; then
         print_output "[-] WARNING: ${FUNCNAME[0]} - package file ${lPACKAGE_FILE} not available ... skipping"
@@ -68,7 +68,7 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
         print_output "[*] ${ORANGE}${lPACKAGE_FILE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         lMD5_CHECKSUM="$(md5sum "${lPACKAGE_FILE}" | awk '{print $1}')"
@@ -109,16 +109,16 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
         # Todo: in the future we should check for the package, package hashes and which files
         # are in the package
         local lPROP_ARRAY_INIT_ARR=()
-        lPROP_ARRAY_INIT_ARR+=( "source_path:${lPACKAGE_FILE}" )
-        lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-        lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-        lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-        lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+        lPROP_ARRAY_INIT_ARR+=("source_path:${lPACKAGE_FILE}")
+        lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+        lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+        lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+        lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
         if [[ "${#lAPP_DEPS_ARR[@]}" -gt 0 ]]; then
           for lAPP_DEP in "${lAPP_DEPS_ARR[@]}"; do
             lAPP_DEP=${lAPP_DEP//[![:print:]]/}
-            lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+            lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
           done
         fi
 
@@ -128,14 +128,14 @@ S08_submodule_openwrt_pkg_mgmt_parser() {
           local lPKG_LIST_ENTRY=""
           local lCNT=0
           while IFS= read -r lPKG_LIST_ENTRY; do
-            lCNT=$((lCNT+1))
-            lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_LIST_ENTRY}" )
+            lCNT=$((lCNT + 1))
+            lPROP_ARRAY_INIT_ARR+=("path:${lPKG_LIST_ENTRY}")
             # we limit the logging of the package files to 500 files per package
             if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-              lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+              lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
               break
             fi
-          done < "${lPACKAGE_FILE/\.control/\.list}"
+          done <"${lPACKAGE_FILE/\.control/\.list}"
         fi
 
         build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"

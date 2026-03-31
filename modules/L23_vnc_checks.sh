@@ -23,7 +23,7 @@ L23_vnc_checks() {
     module_title "Live VNC tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ "${IN_DOCKER}" -eq 0 ]] ; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
     local lVNC_PORT_ARR=()
@@ -63,14 +63,14 @@ check_basic_vnc() {
 
   sub_module_title "Nmap VNC enumeration for emulated system ${ORANGE}${IP_ADDRESS_} / ${lVNC_PORT}${NC}"
 
-  nmap -sV --script=*vnc* -p "${lVNC_PORT}" "${IP_ADDRESS_}" >> "${LOG_PATH_MODULE}"/vnc_basic-check.txt || true
+  nmap -sV --script=*vnc* -p "${lVNC_PORT}" "${IP_ADDRESS_}" >>"${LOG_PATH_MODULE}"/vnc_basic-check.txt || true
 
   if [[ -f "${LOG_PATH_MODULE}"/vnc_basic-check.txt ]]; then
     if [[ "$(grep -c "vnc" "${LOG_PATH_MODULE}"/vnc_basic-check.txt)" -gt 0 ]]; then
       VNC_UP=1
       print_output "[+] VNC service successfully identified"
       print_ln
-      tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/vnc_basic-check.txt
+      tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/vnc_basic-check.txt
       print_ln
     fi
   fi

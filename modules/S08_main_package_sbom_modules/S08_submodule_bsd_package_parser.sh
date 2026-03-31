@@ -54,10 +54,10 @@ S08_submodule_bsd_package_parser() {
   # mapfile -t lPKG_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name "*.pkg" -type f)
   mapfile -t lPKG_ARCHIVES_ARR < <(grep "\.pkg;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
-  if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]] ; then
+  if [[ "${#lPKG_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
-    for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}" ; do
+    for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}"; do
       write_log "$(indent "$(orange "$(print_path "${lPKG_ARCHIVE}")")")" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     done
 
@@ -65,7 +65,7 @@ S08_submodule_bsd_package_parser() {
     write_log "[*] Analyzing ${ORANGE}${#lPKG_ARCHIVES_ARR[@]}${NC} FreeBSD pkg archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
-    for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}" ; do
+    for lPKG_ARCHIVE in "${lPKG_ARCHIVES_ARR[@]}"; do
       lR_FILE=$(file "${lPKG_ARCHIVE}")
       if [[ ! "${lR_FILE}" == *"Zstandard"* ]]; then
         continue
@@ -77,7 +77,7 @@ S08_submodule_bsd_package_parser() {
         print_output "[*] ${ORANGE}${lPKG_ARCHIVE}${NC} already analyzed" "no_log"
         continue
       fi
-      lPKG_CHECKED_ARR+=( "${lPKG_MD5}" )
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       tar --zstd -x -f "${lPKG_ARCHIVE}" -C "${TMP_DIR}" +COMPACT_MANIFEST || print_error "[-] Extraction of FreeBSD package file ${lPKG_ARCHIVE} failed"
       if ! [[ -f "${TMP_DIR}"/+COMPACT_MANIFEST ]]; then
@@ -140,11 +140,11 @@ S08_submodule_bsd_package_parser() {
 
       # add deb path information to our properties array:
       local lPROP_ARRAY_INIT_ARR=()
-      lPROP_ARRAY_INIT_ARR+=( "source_path:${lPKG_ARCHIVE}" )
-      lPROP_ARRAY_INIT_ARR+=( "minimal_identifier:${lSTRIPPED_VERSION}" )
-      lPROP_ARRAY_INIT_ARR+=( "vendor_name:${lAPP_VENDOR}" )
-      lPROP_ARRAY_INIT_ARR+=( "product_name:${lAPP_NAME}" )
-      lPROP_ARRAY_INIT_ARR+=( "confidence:high" )
+      lPROP_ARRAY_INIT_ARR+=("source_path:${lPKG_ARCHIVE}")
+      lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
+      lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR}")
+      lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME}")
+      lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
       if ! [[ -d "${TMP_DIR}"/pkg_tmp ]]; then
         mkdir "${TMP_DIR}"/pkg_tmp || true
@@ -157,10 +157,10 @@ S08_submodule_bsd_package_parser() {
       if [[ "${#lPKG_FILES_ARR[@]}" -gt 0 ]]; then
         for lPKG_FILE_ID in "${!lPKG_FILES_ARR[@]}"; do
           lPKG_FILE="${lPKG_FILES_ARR["${lPKG_FILE_ID}"]}"
-          lPROP_ARRAY_INIT_ARR+=( "path:${lPKG_FILE#*pkg_tmp}" )
+          lPROP_ARRAY_INIT_ARR+=("path:${lPKG_FILE#*pkg_tmp}")
           # we limit the logging of the package files to 500 files per package
           if [[ "${lPKG_FILE_ID}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
-            lPROP_ARRAY_INIT_ARR+=( "path:limit-to-${SBOM_MAX_FILE_LOG}-results" )
+            lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
             break
           fi
         done
@@ -169,7 +169,7 @@ S08_submodule_bsd_package_parser() {
       # Add dependencies to properties
       for lPKG_DEP_ID in "${!lAPP_DEPS_ARR[@]}"; do
         lAPP_DEP="${lAPP_DEPS_ARR["${lPKG_DEP_ID}"]}"
-        lPROP_ARRAY_INIT_ARR+=( "dependency:${lAPP_DEP#\ }" )
+        lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
       done
 
       [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR}"/pkg_tmp

@@ -17,8 +17,7 @@
 #               and the included applets this module checks the possible vulnerabilities
 #               with the BusyBox against the CVE database
 
-S118_busybox_verifier()
-{
+S118_busybox_verifier() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Busybox vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -137,7 +136,7 @@ S118_busybox_verifier()
 
     # rewrite our minimal version to an array ":vendor:product:version"
     print_output "[*] Testing busybox version :${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION} - ${lBB_SBOM_JSON}" "no_log"
-    lBB_VERSION_DONE_ARR+=( "${lBB_VERSION}" )
+    lBB_VERSION_DONE_ARR+=("${lBB_VERSION}")
 
     local lBOM_REF=""
     lBOM_REF=$(jq -r '."bom-ref"' "${lBB_SBOM_JSON}" || true)
@@ -155,10 +154,10 @@ S118_busybox_verifier()
     get_busybox_applets_stat ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}" "${lBB_BIN}"
 
     if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_stat.txt" ]]; then
-      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_stat.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp"
+      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_stat.txt" >>"${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp"
     fi
     if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_emu.txt" ]]; then
-      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_emu.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp"
+      cat "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}_emu.txt" >>"${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp"
     fi
 
     if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" ]]; then
@@ -185,11 +184,11 @@ S118_busybox_verifier()
     local lVULN=""
     write_csv_log "BusyBox VERSION" "BusyBox APPLET" "Verified CVE" "CNT all CVEs" "CVE Summary"
     for lVULN in "${lALL_BB_VULNS_ARR[@]}"; do
-      lVULN_CNT=$((lVULN_CNT+1))
+      lVULN_CNT=$((lVULN_CNT + 1))
       busybox_vuln_testing_threader "${lVULN}" "${lVULN_CNT}" "${#lALL_BB_VULNS_ARR[@]}" ":${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S118_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_S118_ARR+=("${lTMP_PID}")
       lNEG_LOG=1
     done
     wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
@@ -197,7 +196,7 @@ S118_busybox_verifier()
 
   for lBB_RESULT_FILE in "${LOG_PATH_MODULE}"/tmp/*; do
     if [[ -f "${lBB_RESULT_FILE}" ]]; then
-      tee -a "${LOG_FILE}" < "${lBB_RESULT_FILE}"
+      tee -a "${LOG_FILE}" <"${lBB_RESULT_FILE}"
     fi
   done
 
@@ -212,18 +211,18 @@ S118_busybox_verifier()
       # replace the spaces with the verified entry -> :  CVEs: 1234 (123):
       lTMP_CVE_ENTRY=$(echo "${lTMP_CVE_ENTRY}" | sed -r 's/(CVEs:\ [0-9]+)\s+/\1 ('"${#lVERIFIED_BB_VULNS_ARR[@]}"')/')
       # ensure we have the right length -> :  CVEs: 1234 (123)  :
-      lTMP_CVE_ENTRY=$(printf '%s%*s' "${lTMP_CVE_ENTRY%:}" "$((22-"${#lTMP_CVE_ENTRY}"))" ":")
+      lTMP_CVE_ENTRY=$(printf '%s%*s' "${lTMP_CVE_ENTRY%:}" "$((22 - "${#lTMP_CVE_ENTRY}"))" ":")
 
       # final replacement in file:
       sed -i -r 's/:\s+CVEs:\ [0-9]+\s+:/'"${lTMP_CVE_ENTRY}"'/' "${LOG_PATH_MODULE}/vuln_summary.txt" || print_error "[-] BusyBox verification module - final replacement failed for ${lTMP_CVE_ENTRY}"
 
       # now add the (V) entry to every verified vulnerability
       for lVERIFIED_BB_CVE in "${lVERIFIED_BB_VULNS_ARR[@]}"; do
-        lVERIFIED_BB_CVE="${lVERIFIED_BB_CVE//;}"
+        lVERIFIED_BB_CVE="${lVERIFIED_BB_CVE//;/}"
         local lV_ENTRY="(V)"
         # ensure we have the correct length
         # shellcheck disable=SC2183
-        lV_ENTRY=$(printf '%s%*s' "${lV_ENTRY}" "$((19-"${#lVERIFIED_BB_CVE}"-"${#lV_ENTRY}"))")
+        lV_ENTRY=$(printf '%s%*s' "${lV_ENTRY}" "$((19 - "${#lVERIFIED_BB_CVE}" - "${#lV_ENTRY}"))")
         sed -i -r 's/('"${lVERIFIED_BB_CVE}"')\s+/\1 '"${lV_ENTRY}"'/' "${S118_LOG_DIR}/cve_sum/"*_finished.txt || true
       done
     fi
@@ -242,7 +241,6 @@ busybox_vuln_testing_threader() {
   local lVULN_CNT="${2:-}"
   local lALL_BB_VULNS_ARR_SIZE="${3:-}"
   local lBB_VERSION="${4:-}"
-
 
   # print_output "[*] VULN: ${lVULN}"
   local lCVE=""
@@ -286,15 +284,15 @@ get_busybox_applets_stat() {
 
   # quite often we only have the firmware path without the filesytem area: /bin/busybox
   # This results in another search for our binary
-  mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -print0|xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF" | cut -d: -f1' | sort -u || true)
+  mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF" | cut -d: -f1' | sort -u || true)
   for lBB_BIN_ in "${lBB_BINS_ARR[@]}"; do
     print_output "[*] Extract applet data for BusyBox version ${ORANGE}${lBB_VERSION_}${NC} from binary ${ORANGE}${lBB_BIN_}${NC}"
     mapfile -t lBB_DETECTED_APPLETS_ARR < <(grep -oUaP "\x00\x5b(\x5b)?\x00.*\x00\x00" "${lBB_BIN_}" | strings | sort -u || true)
     for lBB_DETECTED_APPLET in "${lBB_DETECTED_APPLETS_ARR[@]}"; do
       if grep -E -q "^${lBB_DETECTED_APPLET}$" "${CONFIG_DIR}/busybox_commands.cfg"; then
         print_output "[*] BusyBox Applet found and identified as real BusyBox applet ... ${ORANGE}${lBB_DETECTED_APPLET}${NC}" "no_log"
-        echo "${lBB_DETECTED_APPLET}" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION_/*:/}_stat.txt"
-        lAPP_CNT=$((lAPP_CNT+1))
+        echo "${lBB_DETECTED_APPLET}" >>"${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION_/*:/}_stat.txt"
+        lAPP_CNT=$((lAPP_CNT + 1))
       fi
     done
   done
@@ -320,8 +318,8 @@ get_busybox_applets_emu() {
     for lBB_DETECTED_APPLET in "${lBB_DETECTED_APPLETS_ARR[@]}"; do
       if grep -E -q "^${lBB_DETECTED_APPLET}$" "${CONFIG_DIR}/busybox_commands.cfg"; then
         print_output "[*] BusyBox Applet found and identified as real BusyBox applet ... ${ORANGE}${lBB_DETECTED_APPLET}${NC}" "no_log"
-        echo "${lBB_DETECTED_APPLET}" >> "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION_/*:/}_emu.txt"
-        lAPP_CNT=$((lAPP_CNT+1))
+        echo "${lBB_DETECTED_APPLET}" >>"${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION_/*:/}_emu.txt"
+        lAPP_CNT=$((lAPP_CNT + 1))
       fi
     done
   done
@@ -358,10 +356,10 @@ get_cve_busybox_data() {
   cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR
 
   if [[ -f "${CVE_DETAILS_PATH}" ]]; then
-    lVULN_CNT="$(wc -l < "${CVE_DETAILS_PATH}")"
+    lVULN_CNT="$(wc -l <"${CVE_DETAILS_PATH}")"
     if [[ "${lVULN_CNT}" -gt 0 ]]; then
       # remove the first csv line
-      lVULN_CNT=$((lVULN_CNT-1))
+      lVULN_CNT=$((lVULN_CNT - 1))
     fi
 
     # lets create a more beautifull log for the report:
@@ -370,13 +368,13 @@ get_cve_busybox_data() {
       get_cve_busybox_data_threader "${lCVE_LINE_ENTRY}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
-      lWAIT_PIDS_S118_ARR+=( "${lTMP_PID}" )
-    done < "${CVE_DETAILS_PATH}"
+      lWAIT_PIDS_S118_ARR+=("${lTMP_PID}")
+    done <"${CVE_DETAILS_PATH}"
 
     wait_for_pid "${lWAIT_PIDS_S118_ARR[@]}"
 
     for lCVE_NICE_REPORT in "${CVE_DETAILS_PATH/.csv/_CVE-}"*; do
-      cat "${lCVE_NICE_REPORT}" >> "${CVE_DETAILS_PATH/.csv/_nice.txt}"
+      cat "${lCVE_NICE_REPORT}" >>"${CVE_DETAILS_PATH/.csv/_nice.txt}"
       rm "${lCVE_NICE_REPORT}" >/dev/null || true
     done
 
@@ -396,7 +394,7 @@ get_cve_busybox_data_threader() {
   lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f4)
   lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f6)
   lFIRST_EPSS="$(get_epss_data "${lCVE_ID}")"
-  lFIRST_EPSS="${lFIRST_EPSS/\;*}"
+  lFIRST_EPSS="${lFIRST_EPSS/\;*/}"
   lCVE_SUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)
   # print_output "[*] ${lCVE_ID} - ${lCVSS_V3} - ${lFIRST_EPSS} - ${lCVE_SUMMARY}"
 

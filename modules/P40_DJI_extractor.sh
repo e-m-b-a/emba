@@ -22,7 +22,6 @@ P40_DJI_extractor() {
   local lNEG_LOG=0
   export DJI_DETECTED=0
 
-
   if ! [[ -d "${EXT_DIR}"/dji-firmware-tools/ ]]; then
     print_output "[-] WARNING: dji-firmware-tools not installed. Please update your installation." "main"
     return
@@ -67,7 +66,7 @@ P40_DJI_extractor() {
     fi
   fi
 
-  if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}" ; then
+  if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
     local lFILES_DJI=0
     lFILES_DJI=$(grep -c "^${FUNCNAME[0]};" "${P99_CSV_LOG}")
     print_output "[*] Extracted ${ORANGE}${lFILES_DJI}${NC} files from DJI drone firmware image."
@@ -110,16 +109,16 @@ dji_imah_firmware_extractor() {
     # usually we have a tar file that we need to extract first:
     unblobber "${FIRMWARE_PATH_BAK}" "${lEXTRACTION_DIR}" 0
     mapfile -t lFILES_UNBLOB_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
-    for lBINARY in "${lFILES_UNBLOB_ARR[@]}" ; do
+    for lBINARY in "${lFILES_UNBLOB_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
       local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
     # just in case unblob was already able to extract our rootfs:
     detect_root_dir_helper "${lEXTRACTION_DIR}"
     if [[ "${RTOS}" -ne 1 ]]; then
-    # if we have already found a Linux filesytem we do not need to walk through the rest of the module
+      # if we have already found a Linux filesytem we do not need to walk through the rest of the module
       # this means that unblob was already able to extract a Linux filesystem
       print_output "[+] Found some Linux filesytem - stopping extraction module"
       return
@@ -207,12 +206,12 @@ dji_imah_firmware_extractor() {
 
         print_ln "no_log"
         print_output "[+] Decrypted firmware files:"
-        for lBINARY in "${lFILES_DJI_ARR[@]}" ; do
+        for lBINARY in "${lFILES_DJI_ARR[@]}"; do
           # shellcheck disable=SC2010
           ls -1lh "${lBINARY}" | grep -v "total [0-9]" | tee -a "${LOG_FILE}" || true
           binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
           local lTMP_PID="$!"
-          lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+          lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
         done
         wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
       else
@@ -245,10 +244,10 @@ dji_imah_firmware_extractor() {
             print_output "[*] Extracted ${ORANGE}${#lUB_EXTRACTED_FILES_ARR[@]}${NC} files from ${ORANGE}$(basename "${lFILE_EXT_KEY}")${NC}." "no_log"
             print_output "[*] Populating backend data for ${ORANGE}${#lUB_EXTRACTED_FILES_ARR[@]}${NC} files ... could take some time" "no_log"
 
-            for lBINARY in "${lUB_EXTRACTED_FILES_ARR[@]}" ; do
+            for lBINARY in "${lUB_EXTRACTED_FILES_ARR[@]}"; do
               binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
               local lTMP_PID="$!"
-              lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+              lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
             done
             wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -307,11 +306,11 @@ dji_xv4_firmware_extractor() {
 
   lFIRMWARE_NAME_="$(basename "${lFIRMWARE_PATH_}")"
 
-  python3 "${EXT_DIR}"/dji-firmware-tools/dji_xv4_fwcon.py -vvv -x -m "${lEXTRACTION_DIR_}"/"${lFIRMWARE_NAME_}" -p "${lFIRMWARE_PATH_}" >> "${LOG_PATH_MODULE}"/dji_xv4_"${lFIRMWARE_NAME_}".log || true
+  python3 "${EXT_DIR}"/dji-firmware-tools/dji_xv4_fwcon.py -vvv -x -m "${lEXTRACTION_DIR_}"/"${lFIRMWARE_NAME_}" -p "${lFIRMWARE_PATH_}" >>"${LOG_PATH_MODULE}"/dji_xv4_"${lFIRMWARE_NAME_}".log || true
 
   if [[ -f "${LOG_PATH_MODULE}"/dji_xv4_"${lFIRMWARE_NAME_}".log ]]; then
     if [[ -s "${LOG_PATH_MODULE}"/dji_xv4_"${lFIRMWARE_NAME_}".log ]]; then
-      tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/dji_xv4_"${lFIRMWARE_NAME_}".log || true
+      tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/dji_xv4_"${lFIRMWARE_NAME_}".log || true
     fi
   else
     print_output "[-] xV4 extraction mechanism failed for ${lFIRMWARE_NAME_}:"
@@ -339,10 +338,10 @@ dji_xv4_firmware_extractor() {
   print_output "[*] Extracted ${ORANGE}${#lFILES_DJI_XV4_ARR[@]}${NC} files from ${ORANGE}${lFIRMWARE_NAME_}${NC}." "no_log"
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DJI_XV4_ARR[@]}${NC} files ... could take some time" "no_log"
 
-  for lBINARY in "${lFILES_DJI_XV4_ARR[@]}" ; do
+  for lBINARY in "${lFILES_DJI_XV4_ARR[@]}"; do
     binary_architecture_threader "${lBINARY}" "P40_DJI_extractor" &
     local lTMP_PID="$!"
-    lWAIT_PIDS_P99_ARR+=( "${lTMP_PID}" )
+    lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
   done
   wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
@@ -354,4 +353,3 @@ dji_xv4_firmware_extractor() {
   fi
   print_bar
 }
-

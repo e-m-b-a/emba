@@ -20,7 +20,7 @@ IL15_emulated_checks_init() {
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "${HOME_PATH}" || ( echo "Could not install EMBA component system emulator" && exit 1 )
+    cd "${HOME_PATH}" || (echo "Could not install EMBA component system emulator" && exit 1)
     print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
     print_git_info "Nikto" "sullo/nikto" "external/nikto"
 
@@ -72,7 +72,7 @@ IL15_emulated_checks_init() {
     print_tool_info "libasound2t64"
     print_tool_info "npm"
 
-    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
       echo -e "\\n""${MAGENTA}""${BOLD}""The live testing dependencies (if not already on the system) will be downloaded and installed!""${NC}"
@@ -80,7 +80,7 @@ IL15_emulated_checks_init() {
     fi
 
     case ${ANSWER:0:1} in
-      y|Y )
+    y | Y)
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
@@ -93,9 +93,9 @@ IL15_emulated_checks_init() {
       fi
 
       # chrome-headless-shell
-      cd ./external || ( echo "Could not install EMBA component chrome-headless-shell" && exit 1 )
+      cd ./external || (echo "Could not install EMBA component chrome-headless-shell" && exit 1)
       npx -y @puppeteer/browsers install chrome-headless-shell@stable
-      cd "${HOME_PATH}" || ( echo "Could not install EMBA component chrome-headless-shell@stable" && exit 1 )
+      cd "${HOME_PATH}" || (echo "Could not install EMBA component chrome-headless-shell@stable" && exit 1)
 
       # EMBAbite fuzzer used this:
       # pip_install "upnpclient"

@@ -33,7 +33,7 @@ GCC_RELEASES_FILE="/tmp/gcc_releases.html"
 # final EMBA csv config file
 GCC_OUTPUT_CSV="./config/gcc_details.csv"
 
-curl -sf "${GCC_RELEASES_HTML}" > "${GCC_RELEASES_FILE}"
+curl -sf "${GCC_RELEASES_HTML}" >"${GCC_RELEASES_FILE}"
 
 if ! [[ -f "${GCC_RELEASES_FILE}" ]]; then
   print_output "[-] Error downloading ${GCC_RELEASES_FILE}" "no_log"
@@ -47,12 +47,12 @@ mapfile -t GCC_RELEASES_ARR < <(grep "<tr><td>.*GCC [0-9].*</td></tr>" "${GCC_RE
 for GCC_ENTRY in "${GCC_RELEASES_ARR[@]}"; do
   print_output "[*] Testing GCC matching entry: ${ORANGE}${GCC_ENTRY}${NC}" "no_log"
   GCC_VERSION=${GCC_ENTRY/<tr><td><a href=\"*\">GCC/GCC}
-  GCC_RELEASE_DATE="${GCC_VERSION/*<td>}"
-  GCC_VERSION=${GCC_VERSION/<\/a><\/td>*}
-  GCC_RELEASE_DATE=${GCC_RELEASE_DATE/<\/td><\/tr>}
+  GCC_RELEASE_DATE="${GCC_VERSION/*<td>/}"
+  GCC_VERSION=${GCC_VERSION/<\/a><\/td>*/}
+  GCC_RELEASE_DATE=${GCC_RELEASE_DATE/<\/td><\/tr>/}
 
   print_output "[*] GCC version: ${GCC_VERSION} / GCC release date: ${GCC_RELEASE_DATE}" "no_log"
-  echo "${GCC_VERSION};${GCC_RELEASE_DATE}" >> "${GCC_OUTPUT_CSV}"
+  echo "${GCC_VERSION};${GCC_RELEASE_DATE}" >>"${GCC_OUTPUT_CSV}"
 done
 
 [[ -f "${GCC_RELEASES_FILE}" ]] && rm "${GCC_RELEASES_FILE}"

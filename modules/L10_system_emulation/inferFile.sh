@@ -59,10 +59,10 @@ if ("${EMBA_BOOT}"); then
     done
   done
 
-  if (( ${#arr[@]} )); then
+  if ((${#arr[@]})); then
     # convert to the unique array following the original order
     # shellcheck disable=SC2207,SC2016
-    uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
+    uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<<"${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
     for FILE in "${uniq_arr[@]}"; do
       if [ -d "${FILE}" ]; then
         continue
@@ -88,7 +88,7 @@ if ("${EMBA_BOOT}"); then
       fi
       if [ -e "${FILE}" ]; then
         "${BUSYBOX}" echo "[*] Writing firmadyne init ${FILE}"
-        "${BUSYBOX}" echo "${FILE}" >> /firmadyne/init_tmp
+        "${BUSYBOX}" echo "${FILE}" >>/firmadyne/init_tmp
       fi
     done
   fi
@@ -100,19 +100,19 @@ for entry in "${arr_prio[@]}"; do
   if [ -z "${entry}" ]; then
     continue
   fi
-  "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
+  "${BUSYBOX}" echo "${entry}" >>/firmadyne/init
 done
 if [ -s /firmadyne/init_tmp ]; then
   # let's sort the current results first
-  "${BUSYBOX}" sort -u /firmadyne/init_tmp > /firmadyne/init_tmp_sorted
+  "${BUSYBOX}" sort -u /firmadyne/init_tmp >/firmadyne/init_tmp_sorted
   while read -r entry; do
     if [ -z "${entry}" ]; then
       continue
     fi
     if ! "${BUSYBOX}" grep -q -E "^${entry}$" /firmadyne/init; then
-      "${BUSYBOX}" echo "${entry}" >> /firmadyne/init
+      "${BUSYBOX}" echo "${entry}" >>/firmadyne/init
     fi
-  done < /firmadyne/init_tmp_sorted
+  done </firmadyne/init_tmp_sorted
 fi
 
 # finally we check busybox for linuxrc and /bin/init
@@ -125,7 +125,7 @@ for POSSIBLE_BUSYBOX in $("${BUSYBOX}" find / -name "busybox" -type f); do
       "${BUSYBOX}" ln -s /bin/busybox /bin/linuxrc
     fi
     if ! "${BUSYBOX}" grep -q -E "^/bin/linuxrc$" /firmadyne/init; then
-      "${BUSYBOX}" echo "/bin/linuxrc" >> /firmadyne/init
+      "${BUSYBOX}" echo "/bin/linuxrc" >>/firmadyne/init
     fi
   fi
 done
@@ -135,12 +135,12 @@ if [[ ! -f "/bin/init" ]] && [[ ! -L "/bin/init" ]]; then
   "${BUSYBOX}" echo "[*] Re-creating BusyBox applet link for /bin/init"
   "${BUSYBOX}" ln -s /bin/busybox /bin/init
   if ! "${BUSYBOX}" grep -q -E "^/bin/init$" /firmadyne/init; then
-    "${BUSYBOX}" echo "/bin/init" >> /firmadyne/init
+    "${BUSYBOX}" echo "/bin/init" >>/firmadyne/init
   fi
 fi
 
 # finally add the EMBA default/backup entry, print it and remove the temp file
-"${BUSYBOX}" echo '/firmadyne/preInit.sh' >> /firmadyne/init
+"${BUSYBOX}" echo '/firmadyne/preInit.sh' >>/firmadyne/init
 "${BUSYBOX}" cat /firmadyne/init
 "${BUSYBOX}" rm /firmadyne/init_tmp
 
