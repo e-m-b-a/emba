@@ -177,10 +177,10 @@ check_docker_version() {
   if command -v docker >/dev/null; then
     if docker --help | grep -q compose; then
       export DOCKER_COMPOSE=("docker" "compose")
-      echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+      echo -e "${GREEN}""${DOCKER_COMPOSE[*]} ok""${NC}"
     elif command -v docker-compose >/dev/null; then
       export DOCKER_COMPOSE=("docker-compose")
-      echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+      echo -e "${GREEN}""${DOCKER_COMPOSE[*]} ok""${NC}"
     else
       echo -e "${RED}""not ok""${NC}"
       DEP_ERROR=1
