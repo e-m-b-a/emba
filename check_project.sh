@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -500,7 +500,7 @@ if [[ "${FAST_EXECUTION:-0}" -ne 1 ]]; then
   var_checker helpers
   function_entry_space_check
   dockerchecker
-  copy_right_check "Siemens Energy AG" 2025 ./ ./external
+  copy_right_check "Siemens Energy AG" 2026 ./ ./external
   list_linter_exceptions shellcheck ./ ./external
   list_linter_exceptions semgrep ./ ./external
 fi

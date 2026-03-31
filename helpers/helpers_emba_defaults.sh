@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 # Copyright 2020-2023 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -33,6 +33,7 @@ set_defaults() {
   export DISABLE_DEEP=0
   export DEEP_EXTRACTOR="unblob" # binwalk/unblob
   export DEEP_EXT_DEPTH=4
+  export BINWALK_DISABLE=0  # we can disable the binwalk module P50 to enforce unblob is taking over
   export FIRMWARE=0
   export FORCE=0
   export FORMAT_LOG=0
@@ -165,8 +166,8 @@ set_defaults() {
   # if this changes this option can be adjusted in the scanning profile
   export SBOM_LIFECYCLE_PHASE="operations"
 
-  # binary dependency map - enable via scanning profile
-  export EMBA_MAP_GENERATOR=1
+  # binary dependency map - disabled by default, can be adjusted via scanning profile
+  export EMBA_MAP_GENERATOR=0
   export MAX_MAP_FILES=1500 # maximum files to analyse and generate dependency map
   export MAX_MAP_JOBS=""    # maximum jobs used for map generation - no entry means the default from the module
 

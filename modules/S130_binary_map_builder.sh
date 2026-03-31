@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2026 Siemens Energy AG
+# Copyright 2026-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -23,6 +23,9 @@ S130_binary_map_builder() {
   fi
 
   module_wait "S115_usermode_emulator"
+
+  # needed if we start the module standalone via the helper script
+  [[ ! -d "${LOG_PATH_MODULE}" ]] && mkdir -p "${LOG_PATH_MODULE}"
 
   load_default_environment
   setup_environment
@@ -74,6 +77,8 @@ load_default_environment() {
     DETECTION_MECHANISMS_ARR=("${DETECTION_MECHANISMS_ARR[@]/QEMU-USER/}")
   fi
 
+  # system emulation checks are only possible in standalone run via the helper script
+  # During EMBA run the system emulation results are not available
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     print_output "[-] No system emualtion checks possible - missing L10 EMBA log directory (future extension)"
     DETECTION_MECHANISMS_ARR=("${DETECTION_MECHANISMS_ARR[@]/QEMU-SYS/}")
@@ -106,7 +111,7 @@ load_default_environment() {
   export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 
   # External assets - downloaded once for offline capability.
-  export JS_LIB="${HELP_DIR}/svg-pan-zoom.min.js"
+  export JS_LIB="${EXT_DIR}/svg-pan-zoom.min.js"
   export LOGO_FILE="${HELP_DIR}/emba.svg"
 
   export COLOR_BIN="#1a3a5f" # Deep Blue for Executables
@@ -118,9 +123,15 @@ load_default_environment() {
 setup_environment() {
   if [[ -f "${LOGO_FILE}" ]]; then
     cp "${LOGO_FILE}" "${LOG_PATH_MODULE}" || print_error "[-] No EMBA logo found"
+  elif [[ -f "/tmp/${LOGO_FILE}" ]]; then
+    # if we start it from external script without an EMBA directory we have the logo
+    # already loaded to /tmp
+    cp "/tmp/${LOGO_FILE}" "${LOG_PATH_MODULE}" || print_error "[-] No EMBA logo found"
   fi
   if [[ -f "${JS_LIB}" ]]; then
     cp "${JS_LIB}" "${LOG_PATH_MODULE}" || print_error "[-] No JS lib ${JS_LIB} found"
+  elif [[ -f "/tmp/${JS_LIB}" ]]; then
+    cp "/tmp/${JS_LIB}" "${LOG_PATH_MODULE}" || print_error "[-] No JS lib ${JS_LIB} found"
   fi
 
   # Count total files in search directory for the dashboard display.
@@ -135,10 +146,12 @@ setup_environment() {
   print_ln ""
 }
 
+# system emulation checks are only possible in standalone run via the helper script
+# During EMBA run the system emulation results are not available
 system_emulator_init_runner() {
   local lSYS_EMU_ENTRY=""
-  if [[ -f "${EMBA_LOG_DIR}"/emulator_online_results.log ]]; then
-    lSYS_EMU_ENTRY=$(grep "ICMP ok\|TCP ok" "${EMBA_LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 || true)
+  if [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
+    lSYS_EMU_ENTRY=$(grep "ICMP ok\|TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 || true)
   else
     print_output "[-] Identified NO system emulation details"
     return
@@ -147,7 +160,7 @@ system_emulator_init_runner() {
   print_output "  ->  ${lSYS_EMU_ENTRY}"
 
   lEMU_PATH=$(echo "${lSYS_EMU_ENTRY}" | cut -d ';' -f11)
-  lEMU_PATH=${EMBA_LOG_DIR}"/l10_system_emulation/${lEMU_PATH}"
+  lEMU_PATH=${LOG_DIR}"/l10_system_emulation/${lEMU_PATH}"
   if [[ ! -d "${lEMU_PATH}" ]]; then
     print_output "[-] No system emulation results available ... no checks performed"
     return
@@ -174,11 +187,18 @@ system_emulator_init_runner() {
     print_error "[-] S130 - Emulation run failed"
     return
   }
-  timeout 360 ./run.sh
+
+  if  [[ ${EUID} -eq 0 ]] ; then
+    timeout 360 ./run.sh
+  else
+    timeout 360 sudo ./run.sh
+  fi
+
   cd "${lHOME_DIR}" || {
     print_error "[-] S130 - Emulation run failed"
     return
   }
+
   grep -a ANALYZE "${LOG_PATH_MODULE}"/emulation_engine/qemu.map.log | sed -e 's/.*PID: //' | awk '{print $2,$3}' | sort -u | sed 's/^(//' | sed 's/)]: / -> /' >>"${LOG_PATH_MODULE}"/system_emulation_results.log
   # we should have something like "UPDATELEASES.sh -> /usr/sbin/phpsh"
   print_ln ""
@@ -663,6 +683,8 @@ build_dot() {
   local lFILE_TO_CHECK=""
   for lFILE_TO_CHECK in "${ALL_EXEC_FILES_ARR[@]}"; do
     lFILE_CNT=$((lFILE_CNT + 1))
+    print_output "[*] Testing file ${ORANGE}${lFILE_CNT} / ${#ALL_EXEC_FILES_ARR[@]}${NC} - ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
+
     if [[ "${lFILE_CNT}" -gt "${MAX_MAP_FILES}" ]]; then
       break
     fi
@@ -671,7 +693,6 @@ build_dot() {
     [[ "${lFILE_TO_CHECK}" == *"/decompressed.bin" ]] && continue
     [[ "${lFILE_TO_CHECK}" == *".raw" ]] && continue
 
-    print_output "[*] Testing file ${ORANGE}${lFILE_CNT} / ${#ALL_EXEC_FILES_ARR[@]}${NC} - ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
 
     main_processing_thread_helper "${lFILE_TO_CHECK}" &
     while (($(jobs -r | wc -l) >= MAX_MAP_JOBS)); do
