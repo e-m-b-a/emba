@@ -90,6 +90,8 @@ It also sketches the typical integration process of patches.
 
 - Code tests: Use shellcheck and semgrep to test your code
 
+- Code tests: Use shfmt for code style checking
+
 - Code tests: The included `./check_project.sh` script performs multiple coding checks automatically. It is highly recommended to run this script before initiating a PR.
 
 - Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct (new code has to be STRICT mode compatible and needs to pass shellcheck and semgrep tests).

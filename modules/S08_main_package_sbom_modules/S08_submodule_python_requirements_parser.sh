@@ -132,6 +132,10 @@ python_requirements_threader() {
     lAPP_NAME=${lRES_ENTRY/~=*/}
     lAPP_VERS=${lRES_ENTRY/*~=/}
     lAPP_VERS='~='"${lAPP_VERS}"
+  elif [[ "${lRES_ENTRY}" == "http"* ]]; then
+    # we have some extra resources that are not available offline
+    # we skip these entries for now
+    return
   else
     lAPP_NAME=${lRES_ENTRY}
     lAPP_VERS=""
