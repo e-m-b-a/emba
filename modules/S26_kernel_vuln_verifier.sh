@@ -543,53 +543,36 @@ S26_kernel_vuln_verifier() {
 #   Sets global variable ORIG_K_ARCH
 # ==========================================================================================
 extract_kernel_arch() {
-  local lKERNEL_ELF="${1:-}"
-  # Get machine type using readelf
-  local lK_ARCH=""
-  lK_ARCH=$(readelf -h "${lKERNEL_ELF}" 2>/dev/null | grep Machine | awk '{print $2}')
+  local lKERNEL_ELF_PATH="${1:-}"
+  export ORIG_K_ARCH=""
 
-  # ARM architecture
-  if [[ "${lK_ARCH}" == *"ARM"* ]]; then
-    ORIG_K_ARCH="arm"
+  ORIG_K_ARCH=$(grep ";${lKERNEL_ELF_PATH};" "${P99_CSV_LOG}" | cut -d ';' -f8 || true)
+
+  if [[ "${ORIG_K_ARCH}" == *"ARM aarch64"* ]]; then
+    # for ARM -> ARM aarch64 to ARM64
+    ORIG_K_ARCH="ARM64"
+  elif [[ "${ORIG_K_ARCH}" == *"ARM64"* ]]; then
+    # for ARM -> ARM aarch64 to ARM64
+    ORIG_K_ARCH="ARM64"
+  elif [[ "${ORIG_K_ARCH}" == *"ARM32"* ]]; then
+    ORIG_K_ARCH="ARM"
+  elif [[ "${ORIG_K_ARCH}" == *"ELF 32"*"ARM"* ]]; then
+    ORIG_K_ARCH="ARM"
   fi
-
-  # AArch64/ARM64 architecture
-  if [[ "${lK_ARCH}" == *"AArch64"* ]]; then
-    ORIG_K_ARCH="arm64"
+  if [[ "${ORIG_K_ARCH}" == *"MIPS"* ]]; then
+    ORIG_K_ARCH="MIPS"
   fi
-
-  # MIPS architecture
-  if [[ "${lK_ARCH}" == *"MIPS"* ]]; then
-    ORIG_K_ARCH="mips"
-  fi
-
-  # RISC-V architecture
-  if [[ "${lK_ARCH}" == *"RISC-V"* ]]; then
-    ORIG_K_ARCH="riscv"
-  fi
-
-  # PowerPC architecture
-  if [[ "${lK_ARCH}" == *"PowerPC"* ]]; then
+  if [[ "${ORIG_K_ARCH}" == *"PowerPC"* ]]; then
     ORIG_K_ARCH="powerpc"
   fi
-
-  # SuperH architecture
-  if [[ "${lK_ARCH}" == *"SuperH"* ]]; then
-    ORIG_K_ARCH="sh"
-  fi
-
-  # nios2 architecture
-  if [[ "${lK_ARCH}" == *"Altera Nios II"* ]]; then
+  if [[ "${ORIG_K_ARCH}" == *"Altera Nios II"* ]]; then
     ORIG_K_ARCH="nios2"
   fi
-
-  # x86 architecture
-  if [[ "${lK_ARCH}" == *"Intel"* ]]; then
+  if [[ "${ORIG_K_ARCH}" == *"Intel"* ]]; then
     ORIG_K_ARCH="x86"
   fi
 
-  # Convert to lowercase and remove spaces
-  export ORIG_K_ARCH="${ORIG_K_ARCH,,}"
+  ORIG_K_ARCH="${ORIG_K_ARCH,,}"
   ORIG_K_ARCH="${ORIG_K_ARCH//\ /}"
   print_output "[+] Identified kernel architecture ${ORANGE}${ORIG_K_ARCH}${NC}"
 }
