@@ -100,7 +100,7 @@ F17_cve_bin_tool() {
     local lPRODUCT_ARR=()
     local lPRODUCT_VERSION=""
     local lPRODUCT_NAME=""
-    print_output "[*] lSBOM_ENTRY: ${lSBOM_ENTRY}"
+    # print_output "[*] lSBOM_ENTRY: ${lSBOM_ENTRY}"
     lPRODUCT_NAME=$(jq --raw-output '.name' <<<"${lSBOM_ENTRY}")
 
     # extract all our possible vendor names and product names:
