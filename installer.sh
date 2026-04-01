@@ -46,6 +46,7 @@ fi
 
 # install docker EMBA
 export IN_DOCKER=0
+export DOCKER_SETUP=0
 # list dependencies
 export LIST_DEP=0
 export FULL=0
