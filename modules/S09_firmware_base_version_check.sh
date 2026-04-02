@@ -286,7 +286,7 @@ S09_identifier_threadings() {
     # we create an array with testing candidates based on the paths from the json configuration
     for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
       local lSTRICT_BINS_ARR_TMP=()
-      mapfile -t lSTRICT_BINS_ARR_TMP < <(awk -F';' '$2 ~ /'"${lAPP_NAME#/}"'/' "${P99_CSV_LOG}" | sort -u || true)
+      mapfile -t lSTRICT_BINS_ARR_TMP < <(awk -F';' -v pat="${lAPP_NAME#/}" 'index($2, pat) > 0' "${P99_CSV_LOG}" | sort -u || true)
       lSTRICT_BINS_ARR+=("${lSTRICT_BINS_ARR_TMP[@]}")
     done
 
