@@ -588,7 +588,7 @@ build_final_bins_threader() {
   # build the dependencies based on linker details
   if [[ "${lBIN_FILE}" == "dynamically linked" ]]; then
     # now we can create the dependencies based on ldd
-    mapfile -t lBIN_DEPS_ARR < <(ldd "${lFILE}" 2>&1 | grep -v "not a dynamic executable" | awk '{print $1}' || true)
+    mapfile -t lBIN_DEPS_ARR < <("${OBJDUMP}" -p "${lFILE}" 2>&1 | grep "NEEDED" | awk '{print $2}' || true)
     for lBIN_DEPENDENCY in "${lBIN_DEPS_ARR[@]}"; do
       lPROP_ARRAY_INIT_ARR+=("dependency:${lBIN_DEPENDENCY}")
     done

@@ -115,11 +115,18 @@ F17_cve_bin_tool() {
 
     lPRODUCT_VERSION=$(jq --raw-output '.version' <<<"${lSBOM_ENTRY}")
 
+    # the following is just needed to perform the early duplicate checks
+    local lVENDOR_STR=""
+    local lPRODUCT_STR=""
+    printf -v lVENDOR_STR "%s" "${lVENDOR_ARR[@]}"
+    printf -v lPRODUCT_STR "%s" "${lPRODUCT_ARR[@]}"
+
     # avoid duplicates
-    if (grep -q "${lVENDOR_ARR[*]//\\n/};${lPRODUCT_ARR[*]//\\n/};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
+    if (grep -q "${lVENDOR_STR};${lPRODUCT_STR};${lPRODUCT_VERSION}" "${LOG_PATH_MODULE}/sbom_entry_processed.tmp" 2>/dev/null); then
+      # print_output "[!] Duplicate detected for ${lVENDOR_STR};${lPRODUCT_STR};${lPRODUCT_VERSION}"
       continue
     fi
-    echo "${lVENDOR_ARR[*]//\\n/};${lPRODUCT_ARR[*]//\\n/};${lPRODUCT_VERSION}" >>"${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
+    echo "${lVENDOR_STR};${lPRODUCT_STR};${lPRODUCT_VERSION}" >>"${LOG_PATH_MODULE}/sbom_entry_processed.tmp"
 
     # BusyBox verification module handling - we already have all the data from s118. Now we just copy these details
     if [[ "${lPRODUCT_NAME}" == "busybox" ]] && [[ -s "${S118_LOG_DIR}/vuln_summary.txt" ]]; then
@@ -293,7 +300,7 @@ sbom_preprocessing_threader() {
   lPRODUCT_VERSION=$(jq --raw-output '.version' <<<"${lSBOM_ENTRY}")
 
   # ensure we have some version to test
-  if [[ -z "${lPRODUCT_VERSION}" ]]; then
+  if [[ -z "${lPRODUCT_VERSION}" ]] || [[ "${lPRODUCT_VERSION}" == "null" ]]; then
     return
   fi
 
