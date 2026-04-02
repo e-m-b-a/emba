@@ -266,6 +266,11 @@ S26_kernel_vuln_verifier() {
       sleep 5
     done
 
+    # If source file exists, mark as potentially available before integrity test
+    if [[ -f "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION_KORG}.tar.gz" ]] && ! [[ -f "${TMP_DIR}"/linux_download_failed ]]; then
+      KERNEL_SOURCE_AVAILABLE=1
+    fi
+
     # If source file exists, test archive integrity
     if [[ "${KERNEL_SOURCE_AVAILABLE}" -ne 0 ]] && [[ -f "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION_KORG}.tar.gz" ]]; then
       # Now we have a file with the kernel sources ... we do not know if this file is complete.
@@ -335,12 +340,20 @@ S26_kernel_vuln_verifier() {
     # Extract additional symbols from kernel modules in firmware
     if [[ -d "${LOG_DIR}""/firmware" ]]; then
       print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
+      # Create temporary directory for module symbol files
+      local lTMP_SYM_DIR="${TMP_DIR}/module_symbols"
+      mkdir -p "${lTMP_SYM_DIR}"
+      # Extract symbols to individual temp files to avoid concurrent write issues
       # shellcheck disable=SC2016
-      find "${LOG_DIR}/firmware" -name "*.ko" -print0 | xargs -r -0 -P 16 -I % sh -c 'readelf -W -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print \$4}" | sed "s/\[\.\.\.\]//"' >>"${LOG_PATH_MODULE}"/symbols.txt || true
+      find "${LOG_DIR}/firmware" -name "*.ko" -print0 | xargs -r -0 -P 16 -I % sh -c 'readelf -W -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print \$4}" | sed "s/\[\.\.\.\]//" >"${lTMP_SYM_DIR}/sym.$$.${RANDOM}"' || true
+      # Combine all temp files into symbols.txt
+      cat "${lTMP_SYM_DIR}"/* >>"${LOG_PATH_MODULE}"/symbols.txt 2>/dev/null || true
+      # Clean up temp directory
+      rm -rf "${lTMP_SYM_DIR}"
     fi
 
-    # Deduplicate and count unique symbols
-    uniq "${LOG_PATH_MODULE}"/symbols.txt >"${LOG_PATH_MODULE}"/symbols_uniq.txt
+    # Deduplicate and count unique symbols (global, not just adjacent duplicates)
+    sort -u "${LOG_PATH_MODULE}"/symbols.txt >"${LOG_PATH_MODULE}"/symbols_uniq.txt
     SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols_uniq.txt)
 
     print_ln
@@ -462,14 +475,7 @@ S26_kernel_vuln_verifier() {
   # Step 8: Update vulnerability summary with verified CVE info
   # ============================================================
   if [[ -f "${LOG_PATH_MODULE}/vuln_summary.txt" ]]; then
-    # Extract verified CVEs:
-    # Column description (semicolon separated):
-    #   f1: kernel version
-    #   f3: CVE number
-    #   f6: symbol verification result (1=verified, 0=unverified)
-    #   f7: compile verification result (1=verified, 0=unverified)
-    # Filter: column 6 or 7 is 1 (at least one verification passed)
-    # Extract column 1 (kernel version) and deduplicate
+    # extract the verified CVEs:
     local lVERIFIED_KERNEL_VERS_ARR=()
     local lVERIFIED_KVERS=""
     mapfile -t lVERIFIED_KERNEL_VERS_ARR < <(cut -d ';' -f1,3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
@@ -694,6 +700,12 @@ compile_kernel() {
   local lKERNEL_DIR="${2:-}"
   local lARCH="${3:-}"
 
+  # Reset compilation file verification variables
+  COMPILE_SOURCE_FILES_VERIFIED=0
+  
+  # Clear previous compilation log files
+  rm -f "${LOG_PATH_MODULE}"/kernel-compile-files.log "${LOG_PATH_MODULE}"/kernel-compile-files_uniq.log "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log 2>/dev/null
+
   # Check if config file exists
   if ! [[ -f "${lCONFIG}" ]]; then
     print_output "[-] No kernel configuration file available"
@@ -732,7 +744,7 @@ compile_kernel() {
   print_output "[*] Extract kernel source files from compile log"
   # Extract source file paths from compile log
   # Format: filename:linenumber or full path
-  sed -r 's/([0-9]+)\s+//' "${LOG_PATH_MODULE}"/kernel-compile-files.log | sed 's/\s+//' | sort -u >"${LOG_PATH_MODULE}"/kernel-compile-files_uniq.log || true
+  sed -E 's/^[0-9]+[[:space:]]+//' "${LOG_PATH_MODULE}"/kernel-compile-files.log | sed -E 's/[[:space:]]+//g' | sort -u >"${LOG_PATH_MODULE}"/kernel-compile-files_uniq.log || true
 
   # Filter to actually existing source files
   while read -r lCOMPILE_FILE; do
@@ -1039,8 +1051,8 @@ final_log_kernel_vulns() {
 
   print_output "[*] Generating final vulnerability report for kernel ${ORANGE}${lK_VERSION}${NC}"
 
-  # Create CSV report file (header)
-  echo "kernel_version;cve;cvss;verified_symbol;verified_compile;status" >"${LOG_PATH_MODULE}/cve_results_kernel_${lK_VERSION}.csv"
+  # Create CSV report file (header) -保持向后兼容格式
+  echo "kernel_version;unused;cve;unused;unused;verified_symbol;verified_compile;status" >"${LOG_PATH_MODULE}/cve_results_kernel_${lK_VERSION}.csv"
 
   if [[ "${KERNEL_SOURCE_AVAILABLE:-0}" -eq 0 ]]; then
     # ================================================================
@@ -1062,7 +1074,7 @@ final_log_kernel_vulns() {
         lSYMBOL_VERIFIED=1
         ((lVERIFIED_SYMBOL += 1))
         # Write CSV: compile_verified fixed at 0 (degraded mode has no compile verification capability)
-        echo "${lK_VERSION};${lCVE};${lCVSS};${lSYMBOL_VERIFIED};0;verified_degraded" >>"${LOG_PATH_MODULE}/cve_results_kernel_${lK_VERSION}.csv"
+        echo "${lK_VERSION};unused;${lCVE};unused;unused;${lSYMBOL_VERIFIED};0;verified_degraded" >>"${LOG_PATH_MODULE}/cve_results_kernel_${lK_VERSION}.csv"
       fi
       # Unmatched CVEs: NOT written to CSV, NOT counted in any verification statistics
       # (lNOT_VERIFIED not counted in degraded mode to avoid misleading users)
@@ -1117,7 +1129,7 @@ final_log_kernel_vulns() {
 
       # If any verification passed, write to CSV (avoid duplicate rows: merge both verifications into one row)
       if [[ "${lSYMBOL_VERIFIED}" -eq 1 ]] || [[ "${lCOMPILE_VERIFIED}" -eq 1 ]]; then
-        echo "${lK_VERSION};${lCVE};${lCVSS};${lSYMBOL_VERIFIED};${lCOMPILE_VERIFIED};verified" >>"${LOG_PATH_MODULE}/cve_results_kernel_${lK_VERSION}.csv"
+        echo "${lK_VERSION};unused;${lCVE};unused;unused;${lSYMBOL_VERIFIED};${lCOMPILE_VERIFIED};verified" >>"${LOG_PATH_MODULE}/cve_results_kernel_${lK_VERSION}.csv"
       fi
     done
 
