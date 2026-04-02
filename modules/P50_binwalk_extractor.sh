@@ -139,9 +139,11 @@ remove_uprintable_paths() {
       print_output "[*] Cleanup of ${lFW_FILE} with unprintable characters"
       # print_output "[*] Moving ${lFW_FILE} to ${lFW_FILE//[![:print:]]/_}"
       # mv "${lFW_FILE}" "${lFW_FILE//[![:print:]]/_}" || true
-      lNEW_FILE=$(iconv -f UTF-8 -t ASCII//TRANSLIT <<<"${lFW_FILE}")
-      print_output "[*] Moving ${lFW_FILE} to ${lNEW_FILE}"
-      mv "${lFW_FILE}" "${lNEW_FILE}" || print_output "[-] Cleanup of file ${lFW_FILE} not possible"
+      lNEW_FILE=$(iconv -f UTF-8 -t ASCII//TRANSLIT <<<"${lFW_FILE}" || true)
+      if [[ -n "${lNEW_FILE}" ]]; then
+        print_output "[*] Moving ${lFW_FILE} to ${lNEW_FILE}"
+        mv "${lFW_FILE}" "${lNEW_FILE}" || print_output "[-] Cleanup of file ${lFW_FILE} not possible"
+      fi
     done
   fi
 }
