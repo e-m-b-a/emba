@@ -702,7 +702,7 @@ compile_kernel() {
 
   # Reset compilation file verification variables
   COMPILE_SOURCE_FILES_VERIFIED=0
-  
+
   # Clear previous compilation log files
   rm -f "${LOG_PATH_MODULE}"/kernel-compile-files.log "${LOG_PATH_MODULE}"/kernel-compile-files_uniq.log "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log 2>/dev/null
 
