@@ -73,9 +73,9 @@ qcow_extractor() {
   local l7ZIP_BROKEN_LNK_TARGET=""
 
   l7ZIP_LOG_FILE="${LOG_PATH_MODULE}/7z_extraction_$(basename "${lQCOW_PATH}").log"
-  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}" |& tee -a "${l7ZIP_LOG_FILE}"
+  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}" |& tee -a "${l7ZIP_LOG_FILE}" || true
 
-  mapfile -t l7ZIP_BROKEN_LINKS_ARR < <(grep "Dangerous link via another link was ignored" "${l7ZIP_LOG_FILE}")
+  mapfile -t l7ZIP_BROKEN_LINKS_ARR < <(grep "Dangerous link via another link was ignored" "${l7ZIP_LOG_FILE}" || true)
   if [[ "${#l7ZIP_BROKEN_LINKS_ARR[@]}" -gt 0 ]]; then
     print_output "[*] Identified non extracted symlinks - trying to recover them now"
     for l7ZIP_BROKEN_LNK in "${l7ZIP_BROKEN_LINKS_ARR[@]}"; do
