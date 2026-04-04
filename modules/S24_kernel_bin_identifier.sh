@@ -148,7 +148,9 @@ binary_kernel_check_threader() {
       # if it is already an elf file we need the output for the module report
       write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
       write_log "" "${lLOG_FILE}"
-      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || true
+      # quick fix for vmlinux-to-elf
+      find "${EXT_DIR}/emba_venv/lib/" -wholename "*/vmlinux_to_elf/core/kallsyms.py" -exec sed -i 's/.*kernel.release_date.strftime.*/+ str\(kernel.release_date\)/' {} \;
+      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || print_error "[-] vmlinux-to-elf error for ${lELF_PATH}"
       if [[ -f "${lFILE_PATH}".elf ]]; then
         lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
         lMD5_SUM="${lMD5_SUM/\ */}"
@@ -234,7 +236,7 @@ binary_kernel_check_threader() {
         fi
 
         for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
-          # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
+          # print_output "[*] Check for ELF - ${lBINARY_ENTRY} - ${lVERSION_IDENTIFIED}"
 
           lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
           demess_kv_version "${lK_VER_TMP}"
