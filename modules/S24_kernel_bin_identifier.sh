@@ -30,7 +30,7 @@ S24_kernel_bin_identifier() {
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
-  # quick fix for vmlinux-to-elf
+  # quick fix for vmlinux-to-elf -> Todo: do it during installation
   find "${EXT_DIR}/emba_venv/lib/" -wholename "*/vmlinux_to_elf/core/kallsyms.py" -exec sed -i 's/.*kernel.release_date.strftime.*/+ str\(kernel.release_date\)/' {} \;
 
   write_csv_log "file path" "Kernel version stripped" "file output" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
