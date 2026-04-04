@@ -30,6 +30,9 @@ S24_kernel_bin_identifier() {
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
+  # quick fix for vmlinux-to-elf
+  find "${EXT_DIR}/emba_venv/lib/" -wholename "*/vmlinux_to_elf/core/kallsyms.py" -exec sed -i 's/.*kernel.release_date.strftime.*/+ str\(kernel.release_date\)/' {} \;
+
   write_csv_log "file path" "Kernel version stripped" "file output" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
   local lWAIT_PIDS_S24_main=()
@@ -148,9 +151,7 @@ binary_kernel_check_threader() {
       # if it is already an elf file we need the output for the module report
       write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
       write_log "" "${lLOG_FILE}"
-      # quick fix for vmlinux-to-elf
-      find "${EXT_DIR}/emba_venv/lib/" -wholename "*/vmlinux_to_elf/core/kallsyms.py" -exec sed -i 's/.*kernel.release_date.strftime.*/+ str\(kernel.release_date\)/' {} \;
-      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || print_error "[-] vmlinux-to-elf error for ${lELF_PATH}"
+      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || print_error "[-] vmlinux-to-elf error for ${lFILE_PATH}"
       if [[ -f "${lFILE_PATH}".elf ]]; then
         lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
         lMD5_SUM="${lMD5_SUM/\ */}"
