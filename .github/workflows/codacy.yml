@@ -59,4 +59,5 @@ jobs:
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@7434149006143a4d75b82a2f411ef15b03ccc2d7  # https://github.com/github/codeql-action/tree/7434149006143a4d75b82a2f411ef15b03ccc2d7
         with:
+          category: codacy-analysis
           sarif_file: results.sarif
