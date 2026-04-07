@@ -27,10 +27,10 @@ jobs:
     runs-on: "ubuntu-22.04"
     steps:
       - name: Checkout EMBA
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd   # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
 
       - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be    # v1.3.1 - https://github.com/jlumbroso/free-disk-space/releases/tag/v1.3.1
         with:
           tool-cache: true
           android: true
@@ -41,7 +41,8 @@ jobs:
 
       - name: Build trivy
         run: |
-          git clone --branch v0.25.0 https://github.com/aquasecurity/trivy-action.git /tmp/trivy-action
+          git clone https://github.com/aquasecurity/trivy-action.git /tmp/trivy-action
+          cd /tmp/trivy-action && git checkout 57a97c7e7821a5776cebc9bb87c984fa69cba8f1
           sudo docker build -t d6f297:4714451b1eca4e41a4cc10f0a8a8c25a -f "/tmp/trivy-action/Dockerfile" "/tmp/trivy-action/"
 
       - name: Run Trivy vulnerability scanner on EMBA image
@@ -67,7 +68,7 @@ jobs:
             "-l " "-m " "-n 60m" "-o " "-p " "-q " "-r false" "-s " "-t " "-u "
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@7434149006143a4d75b82a2f411ef15b03ccc2d7  # https://github.com/github/codeql-action/tree/7434149006143a4d75b82a2f411ef15b03ccc2d7
         with:
           sarif_file: 'trivy-results.sarif'
 

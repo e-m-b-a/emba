@@ -19,9 +19,9 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd   # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be    # v1.3.1 - https://github.com/jlumbroso/free-disk-space/releases/tag/v1.3.1
         with:
           tool-cache: true
           android: true
@@ -30,7 +30,7 @@ jobs:
           large-packages: false
           swap-storage: true
       - name: EMBA default install
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60  # v4.0.0 - https://github.com/nick-fields/retry/releases/tag/v4.0.0
         with:
           timeout_minutes: 800
           max_attempts: 3
@@ -48,7 +48,7 @@ jobs:
             NO_UPDATE_CHECK=1 sudo -E ./emba -f ./DIR-300_fw_revb_214b01_ALL_de_20130206.zip -l ./logs_emba -S -p ./scan-profiles/default-scan.emba -y
       - name: Check result files exist
         id: check_files
-        uses: andstor/file-existence-action@v2
+        uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029  # v3.1.0 - https://github.com/andstor/file-existence-action/releases/tag/v3.1.0
         with:
           files: "./logs_emba/emba.log, ./logs_emba/csv_logs/f50_base_aggregator.csv, ./logs_emba/html-report/index.html"
 
