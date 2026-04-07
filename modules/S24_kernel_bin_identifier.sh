@@ -30,6 +30,9 @@ S24_kernel_bin_identifier() {
   local lCFG_MD5=""
   export KCFG_MD5_ARR=()
 
+  # quick fix for vmlinux-to-elf -> Todo: do it during installation
+  find "${EXT_DIR}/emba_venv/lib/" -wholename "*/vmlinux_to_elf/core/kallsyms.py" -exec sed -i 's/.*kernel.release_date.strftime.*/+ str\(kernel.release_date\)/' {} \;
+
   write_csv_log "file path" "Kernel version stripped" "file output" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
   local lWAIT_PIDS_S24_main=()
@@ -146,39 +149,37 @@ binary_kernel_check_threader() {
 
       # we test all possible kernel files with vmlinux-to-elf. It does not matter if it is already an elf file or not
       # if it is already an elf file we need the output for the module report
-      if [[ -e "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf ]]; then
-        write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
-        write_log "" "${lLOG_FILE}"
-        "${EXT_DIR}"/vmlinux-to-elf/vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || true
-        if [[ -f "${lFILE_PATH}".elf ]]; then
-          lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
-          lMD5_SUM="${lMD5_SUM/\ */}"
-          if ! grep -q "${lMD5_SUM}" "${P99_CSV_LOG}"; then
-            # we need to add our elf file to our main p99 csv file:
-            binary_architecture_threader "${lFILE_PATH}.elf" "${FUNCNAME[0]}"
-            lBINARY_ENTRY="$(grep -F "${lFILE_PATH}.elf" "${P99_CSV_LOG}" | sort -u | head -1 || true)"
-          else
-            # there is already an entry available in our P99 csv log -> we extract this one
-            lBINARY_ENTRY="$(grep "${lMD5_SUM}" "${P99_CSV_LOG}" | sort -u | head -1 || true)"
-          fi
-          lBIN_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
-
-          if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
-            write_log "" "${lLOG_FILE}"
-            write_log "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}" "${lLOG_FILE}"
-            export CONFIDENCE_LEVEL=4
-            for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
-              version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"
-            done
-            # from now on we can work with our generated elf file
-            lFILE_PATH+=".elf"
-          else
-            write_log "" "${lLOG_FILE}"
-            write_log "[-] No Linux kernel elf file was created." "${lLOG_FILE}"
-          fi
+      write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
+      write_log "" "${lLOG_FILE}"
+      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || print_error "[-] vmlinux-to-elf error for ${lFILE_PATH}"
+      if [[ -f "${lFILE_PATH}".elf ]]; then
+        lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
+        lMD5_SUM="${lMD5_SUM/\ */}"
+        if ! grep -q "${lMD5_SUM}" "${P99_CSV_LOG}"; then
+          # we need to add our elf file to our main p99 csv file:
+          binary_architecture_threader "${lFILE_PATH}.elf" "${FUNCNAME[0]}"
+          lBINARY_ENTRY="$(grep -F "${lFILE_PATH}.elf" "${P99_CSV_LOG}" | sort -u | head -1 || true)"
+        else
+          # there is already an entry available in our P99 csv log -> we extract this one
+          lBINARY_ENTRY="$(grep "${lMD5_SUM}" "${P99_CSV_LOG}" | sort -u | head -1 || true)"
         fi
-        write_log "" "${lLOG_FILE}"
+        lBIN_FILE=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
+
+        if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
+          write_log "" "${lLOG_FILE}"
+          write_log "[+] Successfully generated Linux kernel elf file: ${ORANGE}${lFILE_PATH}.elf${NC}" "${lLOG_FILE}"
+          export CONFIDENCE_LEVEL=4
+          for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
+            version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"
+          done
+          # from now on we can work with our generated elf file
+          lFILE_PATH+=".elf"
+        else
+          write_log "" "${lLOG_FILE}"
+          write_log "[-] No Linux kernel elf file was created." "${lLOG_FILE}"
+        fi
       fi
+      write_log "" "${lLOG_FILE}"
 
       # if we have no elf file created and logged we now log the original kernel
       # in case we have an elf file lFILE_PATH was already included in the SBOM
@@ -236,7 +237,7 @@ binary_kernel_check_threader() {
         fi
 
         for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
-          # print_output "[*] Check for ELF - ${lBINARY_ENTRY}"
+          # print_output "[*] Check for ELF - ${lBINARY_ENTRY} - ${lVERSION_IDENTIFIED}"
 
           lK_VER_TMP="${lVERSION_IDENTIFIED/Linux version /}"
           demess_kv_version "${lK_VER_TMP}"
