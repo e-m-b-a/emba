@@ -8,7 +8,7 @@ on:
 
 jobs:
   gemini-review:
-    if: github.repository_owner == 'e-m-b-a'
+#    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-latest
     permissions:
       contents: read
