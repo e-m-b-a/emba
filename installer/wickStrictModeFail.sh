@@ -54,7 +54,7 @@ wickStrictModeFail() (
       argsList=""
     fi
 
-    echo "    [${i}] ${FUNCNAME[i]:+${FUNCNAME[i]}"():" }${BASH_SOURCE[i]}, line ${BASH_LINENO[i-1]} -> ${FUNCNAME[i]:-${BASH_SOURCE[i]##*/}}${argsList}"
+    echo "    [${i}] ${FUNCNAME[i]:+${FUNCNAME[i]}"():" }${BASH_SOURCE[i]}, line ${BASH_LINENO[i - 1]} -> ${FUNCNAME[i]:-${BASH_SOURCE[i]##*/}}${argsList}"
     ((i++))
   done
   echo -e "\n${BLUE}${BOLD}Important: Consider filling out a bug report at https://github.com/e-m-b-a/emba/issues${NC}\n"
