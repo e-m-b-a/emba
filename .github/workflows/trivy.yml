@@ -68,7 +68,8 @@ jobs:
             "-l " "-m " "-n 60m" "-o " "-p " "-q " "-r false" "-s " "-t " "-u "
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        # uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@7434149006143a4d75b82a2f411ef15b03ccc2d7  # https://github.com/github/codeql-action/tree/7434149006143a4d75b82a2f411ef15b03ccc2d7
         with:
           sarif_file: 'trivy-results.sarif'
 
