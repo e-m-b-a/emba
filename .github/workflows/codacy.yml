@@ -41,7 +41,6 @@ jobs:
 
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
-        # uses: codacy/codacy-analysis-cli-actionv@d840f886c4bd4edc059706d09c6a1586111c540b
         uses: codacy/codacy-analysis-cli-actionv@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08   # v4.4.7 - https://github.com/codacy/codacy-analysis-cli-action/releases/tag/v4.4.7
         with:
           # Check https://github.com/codacy/codacy-analysis-cli#project-token to get your project token from your Codacy repository
