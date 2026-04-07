@@ -12,14 +12,14 @@ on:
 
 jobs:
   shfmt:
-    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd   # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
 
       - name: Setup shfmt
-        uses: mfinelli/setup-shfmt@v3
+        uses: mfinelli/setup-shfmt@a25fda4c1fe115aec0f85e04126610841bc3141d # v4.0.1 - https://github.com/mfinelli/setup-shfmt/releases/tag/v4.0.1
 
       - name: Run shfmt check
         # -d: Diff anzeigen (zeigt Fehler im Log)
