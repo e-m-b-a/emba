@@ -58,6 +58,9 @@ S24_kernel_bin_identifier() {
       rm "${S24_CSV_LOG}"
     fi
   fi
+  if [[ "$(find "${LOG_PATH_MODULE}" -name "threading_*.tmp" | wc -l)" -gt 0 ]]; then
+    lNEG_LOG=$((lNEG_LOG+1))
+  fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
@@ -151,7 +154,7 @@ binary_kernel_check_threader() {
       # if it is already an elf file we need the output for the module report
       write_log "[*] Testing possible Linux kernel file ${ORANGE}${lFILE_PATH}${NC} with ${ORANGE}vmlinux-to-elf:${NC}" "${lLOG_FILE}"
       write_log "" "${lLOG_FILE}"
-      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf 2>/dev/null >>"${lLOG_FILE}" || print_error "[-] vmlinux-to-elf error for ${lFILE_PATH}"
+      vmlinux-to-elf "${lFILE_PATH}" "${lFILE_PATH}".elf |& tee -a "${lLOG_FILE}" || print_error "[-] vmlinux-to-elf error for ${lFILE_PATH}"
       if [[ -f "${lFILE_PATH}".elf ]]; then
         lMD5_SUM=$(md5sum "${lFILE_PATH}".elf)
         lMD5_SUM="${lMD5_SUM/\ */}"
