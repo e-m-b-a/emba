@@ -59,7 +59,7 @@ S24_kernel_bin_identifier() {
     fi
   fi
   if [[ "$(find "${LOG_PATH_MODULE}" -name "threading_*.tmp" | wc -l)" -gt 0 ]]; then
-    lNEG_LOG=$((lNEG_LOG+1))
+    lNEG_LOG=$((lNEG_LOG + 1))
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
