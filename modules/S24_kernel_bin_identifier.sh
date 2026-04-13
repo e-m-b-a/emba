@@ -58,7 +58,7 @@ S24_kernel_bin_identifier() {
       rm "${S24_CSV_LOG}"
     fi
   fi
-  if [[ "$(find "${LOG_PATH_MODULE}" -name "threading_*.tmp" | wc -l)" -gt 0 ]]; then
+  if [[ -n "$(find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -print -quit)" ]]; then
     lNEG_LOG=$((lNEG_LOG + 1))
   fi
 
