@@ -16,7 +16,6 @@ jobs:
     steps:
     - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d  # v3.1.0 - https://github.com/actions/first-interaction/releases/tag/v3.1.0
       with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
         issue-message: |
           Thank you for contributing an issue!
 
