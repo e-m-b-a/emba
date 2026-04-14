@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d  # v3.1.0 - https://github.com/actions/first-interaction/releases/tag/v3.1.0
       with:
-        issue-message: |
+        issue_message: |
           Thank you for contributing an issue!
 
           **Welcome to the EMBA firmware analysis community!**
@@ -35,7 +35,7 @@ jobs:
 
           This is an automatic message. Allow for time for the EMBA community to be able to read the issue and comment on it.
 
-        pr-message: |
+        pr_message: |
           Thank you for contributing a pull request!
 
           **Welcome to the EMBA firmware analysis community!**
