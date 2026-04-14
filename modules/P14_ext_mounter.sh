@@ -61,7 +61,7 @@ ext_extractor() {
     return
   }
   if mount | grep -q ext_mount; then
-    if [[ -n "$(find "${lTMP_EXT_MOUNT}" -mindepth 1 -print -quit)" ]]; then
+    if [[ -z "$(find "${lTMP_EXT_MOUNT}" -mindepth 1 -print -quit)" ]]; then
       print_output "[*] No mounted files found in ${ORANGE}${lTMP_EXT_MOUNT}${NC} -> return now"
       return
     fi
