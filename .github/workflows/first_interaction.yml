@@ -1,8 +1,12 @@
 name: First interaction
 
 on:
-  - pull_request_target
-  - issues
+  pull_request:
+    types:
+      - opened
+  issues:
+    types:
+      - opened
 
 permissions:
   issues: write
