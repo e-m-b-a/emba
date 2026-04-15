@@ -46,6 +46,8 @@ export GPT_OPTION=0
 
 # enable EMBA binary map dependency generator
 EMBA_MAP_GENERATOR=1
+MAX_MAP_FILES=1000
+SVG_BUILD_TIMEOUT="12h"
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

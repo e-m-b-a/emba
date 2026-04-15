@@ -124,10 +124,10 @@ build_sbom_json_hashes_arr() {
   # we return 1 if we already found something and the caller needs to handle it
   if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" && "${lAPP_VERS}" != "null" ]]; then
     # first check is for same hash, same name, same version:
-    if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}"; then
+    if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}" 2>/dev/null; then
       # if we have found some sbom log file with the matching sha512 checksum, we then check if
       # it is the same name and version. If so, we will skip it in the caller
-      mapfile -t lDUP_CHECK_FILE_ARR < <(grep -lr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}" || true)
+      mapfile -t lDUP_CHECK_FILE_ARR < <(grep -lr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}" 2>/dev/null || true)
       for lDUP_CHECK_FILE in "${lDUP_CHECK_FILE_ARR[@]}"; do
         lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
         lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")

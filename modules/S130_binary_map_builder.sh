@@ -757,13 +757,14 @@ build_svg() {
   sub_module_title "SVG dependency map"
 
   print_output "[*] Neato map with overlap prevention" "" "${SVG_FILE}"
-  neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
+  timeout --preserve-status --signal SIGINT "${SVG_BUILD_TIMEOUT}" neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
 
+  # probably some future extension:
   # in case the neato generator failed
-  if [[ ! -f "${SVG_FILE}" ]]; then
-    print_output "[*] Dot map with overlap prevention" "" "${SVG_FILE//\.svg/_dot.svg}"
-    dot -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE//\.svg/_dot.svg}" || print_output "[-] WARNING: Dot SVG generation failed"
-  fi
+  # if [[ ! -f "${SVG_FILE}" ]]; then
+  #   print_output "[*] Dot map with overlap prevention" "" "${SVG_FILE//\.svg/_dot.svg}"
+  #   timeout --preserve-status --signal SIGINT "${SVG_BUILD_TIMEOUT}" dot -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE//\.svg/_dot.svg}" || print_output "[-] WARNING: Dot SVG generation failed"
+  # fi
 
   if [[ -f "${SVG_FILE}" ]]; then
     # Modify SVG header to include an ID for the pan-zoom library.
