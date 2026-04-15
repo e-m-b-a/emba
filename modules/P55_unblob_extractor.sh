@@ -108,8 +108,6 @@ P55_unblob_extractor() {
       print_output "[*] Found ${ORANGE}${#lFILES_UNBLOB_ARR[@]}${NC} files."
       print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_UNBLOB}${NC}."
       print_ln
-      tree -sh "${lOUTPUT_DIR_UNBLOB}" | tee -a "${LOG_FILE}"
-      print_ln
     fi
   fi
 
@@ -121,9 +119,17 @@ P55_unblob_extractor() {
   if [[ "${FULL_EMULATION}" -eq 1 && "${RTOS}" -eq 1 ]]; then
     local lOUTPUT_DIR_BINWALK=""
     local lFILES_BINWALK_ARR=()
+    local lEXTRACTION_FILE_NAME=""
+    lEXTRACTION_FILE_NAME="$(basename "${lFW_PATH_UNBLOB}")"
 
     lOUTPUT_DIR_BINWALK="${lOUTPUT_DIR_UNBLOB//unblob/binwalk_recover}"
-    binwalker_matryoshka "${lFW_PATH_UNBLOB}" "${lOUTPUT_DIR_BINWALK}"
+    local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+    binwalker_matryoshka "${lFW_PATH_UNBLOB}" "${lOUTPUT_DIR_BINWALK}" "${lBINWALK_LOG_FILE}"
+
+    if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+      print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
+    fi
+
     if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
       remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}"
       mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
@@ -147,8 +153,6 @@ P55_unblob_extractor() {
       print_output "[*] Found ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
       print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
       print_ln
-      tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
-      detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"
       write_csv_log "FILES Binwalk recovery mode" "LINUX_PATH_COUNTER Binwalk"
       write_csv_log "${#lFILES_BINWALK_ARR[@]}" "${lLINUX_PATH_COUNTER_BINWALK}"
     fi

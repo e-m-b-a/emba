@@ -163,7 +163,11 @@ exe_extractor() {
     if [[ "$(grep -c "ERROR: " "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log)" -gt 0 ]]; then
       print_ln
       print_output "[*] Windows exe extraction error via 7zip detected -> using binwalk as fallback extraction mechanism"
-      binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk"
+      local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lFIRMWARE_NAME}.log"
+      binwalker_matryoshka "${lFIRMWARE_PATH}" "${lEXTRACTION_DIR%\/}_binwalk" "${lBINWALK_LOG_FILE}"
+      if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+        print_output "[+] Binwalk extraction output for ${lFIRMWARE_NAME}" "" "${lBINWALK_LOG_FILE}"
+      fi
 
       print_ln
       print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR%\/}_binwalk${NC}) as base directory:"

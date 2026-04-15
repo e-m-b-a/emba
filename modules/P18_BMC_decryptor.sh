@@ -42,6 +42,9 @@ bmc_extractor() {
   local lBMC_FILE_PATH_="${1:-}"
   local lEXTRACTION_FILE_="${2:-}"
 
+  local lEXTRACTION_FILE_NAME=""
+  lEXTRACTION_FILE_NAME="$(basename "${lEXTRACTION_FILE_}")"
+
   if ! [[ -f "${lBMC_FILE_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
     return
@@ -67,7 +70,13 @@ bmc_extractor() {
     local lEXTRACTION_PATH="${LOG_DIR}/firmware/firmware_bmc_failed_extracted"
   fi
 
-  binwalker_matryoshka "${FIRMWARE_PATH}" "${lEXTRACTION_PATH}"
+  local lBINWALK_LOG_FILE=""
+  lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+  binwalker_matryoshka "${FIRMWARE_PATH}" "${lEXTRACTION_PATH}" "${lBINWALK_LOG_FILE}"
+  if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+    print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
+  fi
+
   mapfile -t lFILES_BMC_ARR < <(find "${lEXTRACTION_PATH}" -type f ! -name "*.raw")
   print_output "[*] Extracted ${ORANGE}${#lFILES_BMC_ARR[@]}${NC} files from BMC encrypted firmware."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BMC_ARR[@]}${NC} files ... could take some time" "no_log"

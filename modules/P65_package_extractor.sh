@@ -87,7 +87,6 @@ P65_package_extractor() {
 
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_PCK}${NC}."
     print_ln
-    tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
     print_output "[*] Before package extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after package extraction we have now ${ORANGE}${#lFILES_POST_PACKAGE_ARR[@]}${NC} files extracted."
     lNEG_LOG=1
   fi
