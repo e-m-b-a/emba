@@ -51,14 +51,15 @@ P50_binwalk_extractor() {
 
   # we do not rely on any EMBA extraction mechanism -> we use the original firmware file
   local lFW_PATH_BINWALK="${FIRMWARE_PATH_BAK}"
-  local lFW_NAME_BINWALK=""
-  lFW_NAME_BINWALK="$(basename "${lFW_PATH_BINWALK}")"
 
   if [[ -d "${lFW_PATH_BINWALK}" ]]; then
     print_output "[-] Binwalk module only deals with firmware files - directories should be already handled via deep extractor"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
+
+  local lFW_NAME_BINWALK=""
+  lFW_NAME_BINWALK="$(basename "${lFW_PATH_BINWALK}")"
 
   local lFILES_BINWALK_ARR=()
   local lBINARY=""
