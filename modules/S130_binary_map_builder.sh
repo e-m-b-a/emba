@@ -670,7 +670,6 @@ main_processing_thread_helper() {
       fuzzy_string_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
     fi
   fi
-  wait
 }
 
 build_dot() {
