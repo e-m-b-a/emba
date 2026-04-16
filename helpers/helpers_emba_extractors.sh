@@ -45,7 +45,7 @@ docker_container_extractor() {
 binwalker_matryoshka() {
   local lFIRMWARE_PATH="${1:-}"
   local lOUTPUT_DIR_BINWALK="${2:-}"
-  local lBINWALK_LOG_FILE="${3:-}"
+  local lBINWALK_LOG_FILE="${3:-${LOG_FILE}}"
   local lTIMEOUT="300m"
 
   sub_module_title "Analyze binary firmware blob with binwalk"

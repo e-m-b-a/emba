@@ -59,10 +59,10 @@ filesystem_tree() {
     lTREE_OPTS_ARR+=(-n)
   fi
   tree "${lTREE_OPTS_ARR[@]}" "${lLPATH}" >>"${lTREE_LOG_FILE}" || print_error "[-] Filesystem tree generation issue"
-  if [[ "$(wc -l 2>/dev/null < "${lTREE_LOG_FILE}")" -gt 100000 ]]; then
+  if [[ "$(wc -l 2>/dev/null <"${lTREE_LOG_FILE}")" -gt 100000 ]]; then
     print_output "[*] Filesystem tree output available" "" "${lTREE_LOG_FILE}"
   else
-    cat "${lTREE_LOG_FILE}" >> "${LOG_FILE}"
+    cat "${lTREE_LOG_FILE}" >>"${LOG_FILE}"
   fi
 }
 

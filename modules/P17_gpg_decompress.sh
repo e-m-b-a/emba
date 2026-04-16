@@ -67,7 +67,7 @@ gpg_decompress_extractor() {
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     print_ln
     print_output "[*] Firmware file details: ${ORANGE}$(file -b "${lEXTRACTION_FILE_}")${NC}"
-    lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+    local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
     binwalker_matryoshka "${lEXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_gpg_extracted "${lBINWALK_LOG_FILE}"
 
     if [[ -f "${lBINWALK_LOG_FILE}" ]]; then

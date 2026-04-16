@@ -137,14 +137,14 @@ setup_environment() {
   # Get files for processing - if P99_CSV_LOG available we can use this
   export ALL_EXEC_FILES_ARR=()
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t ALL_EXEC_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw;")
+    mapfile -t ALL_EXEC_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw")
   else
     mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f ! -name "*.raw" 2>/dev/null | sort -u)
   fi
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
     print_output "[*] INFO: Too many files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit it to ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
-      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw;")
+      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw")
     else
       mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u)
     fi
@@ -323,7 +323,7 @@ fuzzy_string_dependency_checker() {
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and entries with slashes
   # as they are already handled from the strict_string_dependency_checker
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' | tr -d '[:blank:]' | grep -E '.{4,}' | uniq || true)
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -341,7 +341,7 @@ strict_string_dependency_checker() {
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and /dev/ entries
   # additionally we check for a slash / as path indicator
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' | grep '/' | tr -d '[:blank:]' | grep -E '.{4,}' | uniq || true)
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' | grep '/' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -506,7 +506,7 @@ objdump_dependency_checker() {
   local lOBJDUMP_DEP=""
 
   # Extract dynamic dependencies via objdump.
-  mapfile -t lOBJDUMP_DEPENDENCY_ARR < <(objdump -p "${lFILE_TO_CHECK}" 2>/dev/null | grep "NEEDED" | awk '{print $2}' | uniq || true)
+  mapfile -t lOBJDUMP_DEPENDENCY_ARR < <(objdump -p "${lFILE_TO_CHECK}" 2>/dev/null | grep "NEEDED" | awk '{print $2}' | sort -u || true)
   for lOBJDUMP_DEP in "${lOBJDUMP_DEPENDENCY_ARR[@]}"; do
     # print_output "[*] Testing OBJDUMP-LIB for $lFILE_TO_CHECK - dependency $lOBJDUMP_DEP"
     search_parse_log_helper "${lOBJDUMP_DEP}" "OBJDUMP-LIB" "${lFILE_TO_CHECK}" "${lDOT_FILE_tmp_FILE}" "${lSAFE_NAME}"
@@ -522,7 +522,7 @@ ldd_dependency_checker() {
   local lLDD_DEP=""
 
   # Extract dynamic dependencies via ldd.
-  mapfile -t lLDD_DEPENDENCY_ARR < <(ldd "${lFILE_TO_CHECK}" 2>/dev/null | grep -o '/lib[^ ]*' | uniq || true)
+  mapfile -t lLDD_DEPENDENCY_ARR < <(ldd "${lFILE_TO_CHECK}" 2>/dev/null | grep -o '/lib[^ ]*' | sort -u || true)
   for lLDD_DEP in "${lLDD_DEPENDENCY_ARR[@]}"; do
     # print_output "[*] Testing LDD-LIB for $lFILE_TO_CHECK - dependency $lLDD_DEP"
     search_parse_log_helper "${lLDD_DEP}" "LDD-LIB" "${lFILE_TO_CHECK}" "${lDOT_FILE_tmp_FILE}" "${lSAFE_NAME}"
@@ -649,25 +649,25 @@ main_processing_thread_helper() {
 
   # following we can find calls to all our dependency checking modules
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "LDD-LIB"; then
-    ldd_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}" &
+    ldd_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
   fi
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "OBJDUMP-LIB"; then
-    objdump_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}" &
+    objdump_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
   fi
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "QEMU-USER"; then
-    s115_emulation_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}" &
+    s115_emulation_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
   fi
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "QEMU-SYS"; then
-    qemu_system_emulation_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}" &
+    qemu_system_emulation_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
   fi
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "STRICT-STR"; then
     if [[ "${lFILE_BIN_DATA}" != *"Zip archive data"* ]]; then
-      strict_string_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}" &
+      strict_string_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
     fi
   fi
   if printf '%s\0' "${DETECTION_MECHANISMS_ARR[@]}" | grep -Fxqz -- "FUZZY-STR"; then
     if [[ "${lFILE_BIN_DATA}" != *"Zip archive data"* ]]; then
-      fuzzy_string_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}" &
+      fuzzy_string_dependency_checker "${lFILE_TO_CHECK}" "${lSAFE_NAME}" "${lDOT_FILE_tmp_FILE}"
     fi
   fi
   wait
