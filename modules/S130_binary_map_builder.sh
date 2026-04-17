@@ -324,7 +324,7 @@ fuzzy_string_dependency_checker() {
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and entries with slashes
   # as they are already handled from the strict_string_dependency_checker
   mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' |
-    tr -d '[:blank:]' | grep -E '^[a-zA-Z0-9./-]+$' | grep -E '.{4,}' | sed -E 's/([.,;!])\1+//g' | sort -u || true)
+    tr -d '[:blank:]' | sed -E 's/([.,;!])\1+//g' | grep -E "^[a-zA-Z0-9._-]+$" | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -343,7 +343,7 @@ strict_string_dependency_checker() {
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and /dev/ entries
   # additionally we check for a slash / as path indicator
   mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' |
-    grep -E '^[a-zA-Z0-9./-]+$' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
+    grep '/' | grep -E "^[a-zA-Z0-9./_-]+$" | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -403,7 +403,7 @@ search_parse_log_helper() {
   # print_output "[*] Testing ${lDEPENDENCY} from ${lFILE_TO_CHECK} against ${FIRMWARE_PATH} - marker ${lMARKER}"
   #
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY%\/}$" || true)
+    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -F "${lDEPENDENCY%\/}$" || true)
   else
     mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
   fi
