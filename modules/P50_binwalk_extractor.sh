@@ -58,6 +58,9 @@ P50_binwalk_extractor() {
     return
   fi
 
+  local lFW_NAME_BINWALK=""
+  lFW_NAME_BINWALK="$(basename "${lFW_PATH_BINWALK}")"
+
   local lFILES_BINWALK_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
@@ -67,9 +70,13 @@ P50_binwalk_extractor() {
 
   local lLINUX_PATH_COUNTER_BINWALK=0
   local lOUTPUT_DIR_BINWALK="${LOG_DIR}"/firmware/binwalk_extracted
+  local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lFW_NAME_BINWALK}.log"
 
   if [[ -f "${lFW_PATH_BINWALK}" ]]; then
-    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${lOUTPUT_DIR_BINWALK}"
+    binwalker_matryoshka "${lFW_PATH_BINWALK}" "${lOUTPUT_DIR_BINWALK}" "${lBINWALK_LOG_FILE}"
+    if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+      print_output "[+] Binwalk extraction output for ${lFW_NAME_BINWALK}" "" "${lBINWALK_LOG_FILE}"
+    fi
   fi
 
   print_ln
@@ -96,7 +103,6 @@ P50_binwalk_extractor() {
     print_output "[*] Found ${ORANGE}${#lFILES_BINWALK_ARR[@]}${NC} files."
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER_BINWALK}${NC}."
     print_ln
-    tree -sh "${lOUTPUT_DIR_BINWALK}" | tee -a "${LOG_FILE}"
   fi
 
   detect_root_dir_helper "${lOUTPUT_DIR_BINWALK}"

@@ -134,12 +134,21 @@ setup_environment() {
     cp "/tmp/${JS_LIB}" "${LOG_PATH_MODULE}" || print_error "[-] No JS lib ${JS_LIB} found"
   fi
 
-  # Count total files in search directory for the dashboard display.
+  # Get files for processing - if P99_CSV_LOG available we can use this
   export ALL_EXEC_FILES_ARR=()
-  mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f 2>/dev/null | sort -u)
+  if [[ -f "${P99_CSV_LOG}" ]]; then
+    mapfile -t ALL_EXEC_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw")
+  else
+    mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f ! -name "*.raw" 2>/dev/null | sort -u)
+  fi
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
-    print_output "[*] INFO: Too many files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit it to executables only"
-    mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u)
+    print_output "[*] INFO: Too many files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit it to ${MAX_MAP_FILES} executables only"
+    if [[ -f "${P99_CSV_LOG}" ]]; then
+      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw")
+    else
+      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u)
+    fi
+
   fi
   print_ln ""
   print_output "[+] Testing ${ORANGE}${#ALL_EXEC_FILES_ARR[@]}${GREEN} files/executables in ${ORANGE}${FIRMWARE_PATH}${NC}"
@@ -390,7 +399,13 @@ search_parse_log_helper() {
     lDEPENDENCY="/${lDEPENDENCY}"
   fi
   # print_output "[*] Testing ${lDEPENDENCY} from ${lFILE_TO_CHECK} against ${FIRMWARE_PATH} - marker ${lMARKER}"
-  mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
+  #
+  if [[ -f "${P99_CSV_LOG}" ]]; then
+    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY}" || true)
+  else
+    mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
+  fi
+
   if [[ "${#lDEPENDENCY_TARGET_ARR[@]}" -gt 0 ]]; then
     print_output "[*] ${lMARKER}: Testing ${#lDEPENDENCY_TARGET_ARR[@]} possible targets from source ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
     for lDEPENDENCY_TARGET in "${lDEPENDENCY_TARGET_ARR[@]}"; do
@@ -420,9 +435,11 @@ search_parse_log_helper() {
       # print_output "[!] Found ${lFILE_ARCH} - ${lDEPENDENCY_TARGET}"
       print_output "[*] ${lMARKER}: Found possible dependency ${ORANGE}${lDEPNAME}${NC} in ${ORANGE}${lSAFE_NAME}${NC}" "${DEPENDENCY_MAP_LOG}" "" 0
       if grep -q "  \"${lSAFE_NAME}\" -> \"${lSAFE_DEP_NAME}\";" "${lDOT_FILE_tmp_FILE}" 2>/dev/null; then
-        print_output "[*] ${lMARKER}: The dependency is already available ... lets check ..." "${DEPENDENCY_MAP_LOG}" "" 0
-        lURL="${lFILE_SIZE}|${lFILE_ARCH}|${lBIN_SEC_FLAGS}|${lFILE_PATH}|${lCAPABILITIES}"
-        write_entry_with_marker_check "${lURL}" "${lSAFE_DEP_NAME}" "${lMARKER}" "${lCOLOR}" "${lDOT_FILE_tmp_FILE}"
+        print_output "[*] ${lMARKER}: The dependency (${lSAFE_NAME} -> ${lSAFE_DEP_NAME}) is already available ..." "${DEPENDENCY_MAP_LOG}" "" 0
+        # the following is a future extension to also add the new marker as additional source
+        # Currently this is not used:
+        # lURL="${lFILE_SIZE}|${lFILE_ARCH}|${lBIN_SEC_FLAGS}|${lFILE_PATH}|${lCAPABILITIES}"
+        # write_entry_with_marker_check "${lURL}" "${lSAFE_DEP_NAME}" "${lMARKER}" "${lCOLOR}" "${lDOT_FILE_tmp_FILE}"
       else
         print_output "[*] ${lMARKER}: Creating new dependency ${ORANGE}${lSAFE_DEP_NAME}${NC} for ${ORANGE}${lSAFE_NAME}${NC}" "${DEPENDENCY_MAP_LOG}" "" 0
         echo "  \"${lSAFE_NAME}\" -> \"${lSAFE_DEP_NAME}\";" >>"${lDOT_FILE_tmp_FILE}"

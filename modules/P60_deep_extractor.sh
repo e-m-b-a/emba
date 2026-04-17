@@ -89,8 +89,6 @@ P60_deep_extractor() {
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
     print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_P99_BEFORE}${NC} files, after deep extraction we have now ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files extracted."
 
-    tree -csh "${FIRMWARE_PATH_CP}" | tee -a "${LOG_FILE}"
-
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
     export FIRMWARE_PATH="${FIRMWARE_PATH_CP}"
 
@@ -207,6 +205,8 @@ deeper_extractor_threader() {
   # to bring all the extractors to log to something we can work with,
   # we just rewrite the LOG_FILE variable in the threader now:
   export LOG_FILE="${LOG_PATH_MODULE}/tmp_out_${lFILE_MD5}"
+  local lEXTRACTION_FILE_NAME=""
+  lEXTRACTION_FILE_NAME="$(basename "${lFILE_TMP}")"
 
   sub_module_title "Deep extraction of ${lFILE_TMP}"
   print_output "[*] Details of file: ${ORANGE}${lFILE_TMP}${NC}"
@@ -253,7 +253,11 @@ deeper_extractor_threader() {
     # or via scanning profile
     # EMBA usually uses unblob as default for the deep extractor
     if [[ "${DEEP_EXTRACTOR}" == "binwalk" ]]; then
-      binwalker_matryoshka "${lFILE_TMP}" "${lFILE_TMP}_binwalk_extracted"
+      local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+      binwalker_matryoshka "${lFILE_TMP}" "${lFILE_TMP}_binwalk_extracted" "${lBINWALK_LOG_FILE}"
+      if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+        print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
+      fi
     else
       # default case to Unblob
       unblobber "${lFILE_TMP}" "${lFILE_TMP}_unblob_extracted" 0

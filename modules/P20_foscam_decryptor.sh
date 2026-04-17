@@ -172,7 +172,14 @@ foscam_ubi_extractor() {
     lUBI_FS_TARGET=$(find "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}" -name ubifs)
     if [[ -f "${lUBI_FS_TARGET}" ]]; then
       # unblobber "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_unblob_extracted" 0
-      binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted"
+      local lEXTRACTION_FILE_NAME=""
+      lEXTRACTION_FILE_NAME="$(basename "${lUBI_FS_TARGET}")"
+      local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+      binwalker_matryoshka "${lUBI_FS_TARGET}" "${lEXTRACTION_DIR_%\/}_binwalk_extracted" "${lBINWALK_LOG_FILE}"
+
+      if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+        print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
+      fi
 
       print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"
       mapfile -t lFILES_FOSCAM_UBI_ARR < <(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type f ! -name "*.raw")

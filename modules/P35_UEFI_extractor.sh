@@ -96,7 +96,12 @@ P35_UEFI_extractor() {
       # do an additional backup round with binwalk
       # e.g. https://ftp.hp.com/pub/softpaq/sp148001-148500/sp148108.exe
       lEXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${lFW_NAME_}"_binwalk_extracted
-      binwalker_matryoshka "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
+      local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lFW_NAME_}.log"
+      binwalker_matryoshka "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}" "${lBINWALK_LOG_FILE}"
+
+      if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+        print_output "[+] Binwalk extraction output for ${lFW_NAME_}" "" "${lBINWALK_LOG_FILE}"
+      fi
 
       mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
 

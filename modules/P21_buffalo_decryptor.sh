@@ -40,6 +40,10 @@ P21_buffalo_decryptor() {
 buffalo_enc_extractor() {
   local lBUFFALO_ENC_PATH_="${1:-}"
   local lEXTRACTION_FILE_="${2:-}"
+
+  local lEXTRACTION_FILE_NAME=""
+  lEXTRACTION_FILE_NAME="$(basename "${lEXTRACTION_FILE_}")"
+
   local lBUFFALO_FILE_CHECK=""
 
   local lFILES_BUFFALO_ARR=()
@@ -96,7 +100,12 @@ buffalo_enc_extractor() {
       print_ln
       print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
 
-      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted"
+      local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" "${lBINWALK_LOG_FILE}"
+
+      if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+        print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
+      fi
 
       print_output "[*] Checking ${lEXTRACTION_FILE/\.bin/}_binwalk_extracted for files and directories"
       if [[ -d "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" ]]; then

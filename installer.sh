@@ -58,10 +58,10 @@ export UBUNTU_OS=0
 export RHEL_OS=0
 export WSL=0
 export GH_ACTION=0
+export SSL_REPOS=0
 if [[ -f /installer/gh_action ]]; then
   export GH_ACTION=1
 fi
-export SSL_REPOS=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -161,6 +161,11 @@ while getopts CdDfFghlrsc: OPT; do
     ;;
   esac
 done
+
+# Hard workaround to disable the usage of ssl repos for github actions:
+if [[ "${GH_ACTION}" -eq 1 ]]; then
+  export SSL_REPOS=0
+fi
 
 # make sure the argument combination passed results in a valid install operation
 if [[ ! ("${LIST_DEP}" -eq 1 || "${DOCKER_SETUP}" -eq 1 || "${FULL}" -eq 1 || "${REMOVE}" -eq 1 || "${IN_DOCKER}" -eq 1) ]]; then

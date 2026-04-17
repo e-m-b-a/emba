@@ -49,20 +49,20 @@ filesystem_tree() {
   sub_module_title "Filesystem information"
   write_anchor "file_dirs"
   local lLPATH="${LOG_DIR}/firmware"
+  local lTREE_LOG_FILE="${LOG_PATH_MODULE}/filesystem_tree.log"
 
   # excluded paths will be also printed
-  if command -v tree >/dev/null 2>&1; then
-    if [[ ${FORMAT_LOG} -eq 1 ]]; then
-      tree -p -s -a -C "${lLPATH}" >>"${LOG_FILE}" || true
-    else
-      tree -p -s -a -n "${lLPATH}" >>"${LOG_FILE}" || true
-    fi
+  local lTREE_OPTS_ARR=(-p -s -a)
+  if [[ ${FORMAT_LOG} -eq 1 ]]; then
+    lTREE_OPTS_ARR+=(-C)
   else
-    if [[ ${FORMAT_LOG} -eq 1 ]]; then
-      ls -laR "${lLPATH}" >>"${LOG_FILE}"
-    else
-      ls -laR --color=never "${lLPATH}" >>"${LOG_FILE}"
-    fi
+    lTREE_OPTS_ARR+=(-n)
+  fi
+  tree "${lTREE_OPTS_ARR[@]}" "${lLPATH}" >>"${lTREE_LOG_FILE}" || print_error "[-] Filesystem tree generation issue"
+  if [[ "$(wc -l 2>/dev/null <"${lTREE_LOG_FILE}")" -gt 100000 ]]; then
+    print_output "[*] Filesystem tree output available" "" "${lTREE_LOG_FILE}"
+  else
+    cat "${lTREE_LOG_FILE}" >>"${LOG_FILE}"
   fi
 }
 

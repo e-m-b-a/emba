@@ -43,6 +43,9 @@ gpg_decompress_extractor() {
   local lGPG_FILE_PATH_="${1:-}"
   local lEXTRACTION_FILE_="${2:-}"
 
+  local lEXTRACTION_FILE_NAME=""
+  lEXTRACTION_FILE_NAME="$(basename "${lEXTRACTION_FILE_}")"
+
   local lFILES_GPG_ARR=()
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
@@ -64,7 +67,12 @@ gpg_decompress_extractor() {
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     print_ln
     print_output "[*] Firmware file details: ${ORANGE}$(file -b "${lEXTRACTION_FILE_}")${NC}"
-    binwalker_matryoshka "${lEXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_gpg_extracted
+    local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
+    binwalker_matryoshka "${lEXTRACTION_FILE_}" "${LOG_DIR}"/firmware/firmware_gpg_extracted "${lBINWALK_LOG_FILE}"
+
+    if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
+      print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
+    fi
 
     mapfile -t lFILES_GPG_ARR < <(find "${LOG_DIR}/firmware/firmware_gpg_extracted" -type f ! -name "*.raw")
     print_output "[*] Extracted ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files from GPG compressed file."
