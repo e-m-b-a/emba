@@ -146,9 +146,9 @@ setup_environment() {
     if [[ -f "${P99_CSV_LOG}" ]]; then
       mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw")
     else
+      # quick and dirty backup solution to not handle all the executable files
       mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u)
     fi
-
   fi
   print_ln ""
   print_output "[+] Testing ${ORANGE}${#ALL_EXEC_FILES_ARR[@]}${GREEN} files/executables in ${ORANGE}${FIRMWARE_PATH}${NC}"
@@ -323,7 +323,8 @@ fuzzy_string_dependency_checker() {
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and entries with slashes
   # as they are already handled from the strict_string_dependency_checker
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' \
+    | tr -d '[:blank:]' | grep -E '^[a-zA-Z0-9./-]+$' | grep -E '.{4,}' | sed -E 's/([.,;!])\1+//g' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -341,7 +342,8 @@ strict_string_dependency_checker() {
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and /dev/ entries
   # additionally we check for a slash / as path indicator
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' | grep '/' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' \
+    | grep -E '^[a-zA-Z0-9./-]+$' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -401,13 +403,13 @@ search_parse_log_helper() {
   # print_output "[*] Testing ${lDEPENDENCY} from ${lFILE_TO_CHECK} against ${FIRMWARE_PATH} - marker ${lMARKER}"
   #
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY}" || true)
+    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY%\/}$" || true)
   else
     mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
   fi
 
   if [[ "${#lDEPENDENCY_TARGET_ARR[@]}" -gt 0 ]]; then
-    print_output "[*] ${lMARKER}: Testing ${#lDEPENDENCY_TARGET_ARR[@]} possible targets from source ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
+    print_output "[*] ${lMARKER}: Testing ${#lDEPENDENCY_TARGET_ARR[@]} possible targets from source ${lFILE_TO_CHECK} / dependency: ${lDEPENDENCY}" "${DEPENDENCY_MAP_LOG}" "" 0
     for lDEPENDENCY_TARGET in "${lDEPENDENCY_TARGET_ARR[@]}"; do
       # print_output "[*] Testing dependency ${lDEPENDENCY_TARGET} from source ${lFILE_TO_CHECK}"
       [[ -d "${lDEPENDENCY_TARGET}" ]] && continue
