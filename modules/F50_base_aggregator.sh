@@ -172,14 +172,21 @@ output_details() {
   fi
   lENTROPY_PIC_PATH=$(find "${LOG_DIR}" -xdev -maxdepth 1 -type f -iname "*_entropy.png" 2>/dev/null)
   if [[ -n "${ENTROPY}" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is: ""${ORANGE}""${ENTROPY}"
+    print_output "[+] Entropy analysis of binary firmware is: ${ORANGE}${ENTROPY}"
     write_link "p02"
     write_csv_log "entropy_value" "${ENTROPY}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     lDATA_GENERATED=1
   fi
   if [[ -n "${lENTROPY_PIC_PATH}" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is available:""${ORANGE}"" ""${lENTROPY_PIC_PATH}"
+    print_output "[+] Entropy analysis of binary firmware is available"
+    write_link "p02"
     write_link "${lENTROPY_PIC_PATH}"
+    lDATA_GENERATED=1
+  fi
+  if [[ -f "${SVG_FILE}" ]]; then
+    print_output "[+] Neato map with overlap prevention is available"
+    write_link "s130"
+    write_link "${SVG_FILE}"
     lDATA_GENERATED=1
   fi
 

@@ -108,8 +108,6 @@ load_default_environment() {
   rm -rf "${DOT_FILE_tmp_dir}"
   mkdir "${DOT_FILE_tmp_dir}"
 
-  export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
-
   # External assets - downloaded once for offline capability.
   export JS_LIB="${EXT_DIR}/svg-pan-zoom.min.js"
   export LOGO_FILE="${HELP_DIR}/emba.svg"
@@ -403,7 +401,7 @@ search_parse_log_helper() {
   # print_output "[*] Testing ${lDEPENDENCY} from ${lFILE_TO_CHECK} against ${FIRMWARE_PATH} - marker ${lMARKER}"
   #
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -F "${lDEPENDENCY%\/}$" || true)
+    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY%\/}$" || true)
   else
     mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
   fi
@@ -775,7 +773,7 @@ build_dot() {
 build_svg() {
   sub_module_title "SVG dependency map"
 
-  print_output "[*] Neato map with overlap prevention" "" "${SVG_FILE}"
+  print_output "[*] Generating Neato map with overlap prevention" "no_log"
   timeout --preserve-status --signal SIGINT "${SVG_BUILD_TIMEOUT}" neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
 
   # probably some future extension:
@@ -786,6 +784,7 @@ build_svg() {
   # fi
 
   if [[ -f "${SVG_FILE}" ]]; then
+    print_output "[*] Neato map with overlap prevention" "" "${SVG_FILE}"
     # Modify SVG header to include an ID for the pan-zoom library.
     sed -i 's|<svg [^>]*>|<svg id="map-svg" style="width:100%;height:100%;">|' "${SVG_FILE}"
     # Optional: Falls Graphviz hartgecodete width/height reinschreibt, diese löschen
