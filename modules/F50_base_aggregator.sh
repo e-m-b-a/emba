@@ -174,10 +174,12 @@ output_details() {
   if [[ -n "${ENTROPY}" ]]; then
     print_output "[+] Entropy analysis of binary firmware is: ${ORANGE}${ENTROPY}"
     write_link "p02"
+    if [[ -n "${lENTROPY_PIC_PATH}" ]]; then
+      write_link "${lENTROPY_PIC_PATH}"
+    fi
     write_csv_log "entropy_value" "${ENTROPY}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     lDATA_GENERATED=1
-  fi
-  if [[ -n "${lENTROPY_PIC_PATH}" ]]; then
+  elif [[ -n "${lENTROPY_PIC_PATH}" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available"
     write_link "p02"
     write_link "${lENTROPY_PIC_PATH}"
