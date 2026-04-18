@@ -391,7 +391,7 @@ search_parse_log_helper() {
     return
   fi
   # remove paths like "/////////" or "asdf////bla"
-  if [[ "${lDEPENDENCY}" == *"//"* ]]; then
+  if [[ "${lDEPENDENCY}" == *".."* || "${lDEPENDENCY}" == *",,"* || "${lDEPENDENCY}" == *"//"* || "${lDEPENDENCY}" == *";;"* ]]; then
     return
   fi
   # as we always search for paths we add a / to the search term
