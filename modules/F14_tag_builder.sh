@@ -93,6 +93,7 @@ F14_tag_builder() {
 
   jo -p "tags=$(jo -a "${lTAGs_ARR[@]}")" >"${LOG_PATH_MODULE}"/tags.json
   if [[ -f "${LOG_PATH_MODULE}"/tags.json ]]; then
+    print_ln
     print_output "[*] Generated tags:" "" "${LOG_PATH_MODULE}"/tags.json
     for lTAG in "${lTAGs_ARR[@]}"; do
       print_output "$(indent "$(orange "${lTAG}")")"
