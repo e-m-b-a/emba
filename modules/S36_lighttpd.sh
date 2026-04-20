@@ -202,13 +202,13 @@ lighttpd_binary_analysis() {
       function_check_ARM64 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "MIPS"); then
       function_check_MIPS "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    elif (file "${lLIGHT_BIN}" | grep -q "PowerPC"); then 
+    elif (file "${lLIGHT_BIN}" | grep -q "PowerPC"); then
       function_check_PPC32 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "Altera Nios II"); then
       function_check_NIOS2 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "QUALCOMM DSP6"); then
       radare_function_check_hexagon "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-    fi 
+    fi
   done
 }
 

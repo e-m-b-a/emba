@@ -113,12 +113,10 @@ S13_weak_func_check() {
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
         fi
       fi
-      if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S13_ARR
-      fi
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S13_ARR
     done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S13_ARR[@]}"
+    wait_for_pid "${lWAIT_PIDS_S13_ARR[@]}"
 
     # ensure that we do not have result files without real results:
     find "${LOG_DIR}"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; 2>/dev/null || true
@@ -211,7 +209,7 @@ function_check_NIOS2() {
           COUNT_MMAP_OK="NA"
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -276,7 +274,7 @@ function_check_PPC32() {
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -354,7 +352,7 @@ function_check_MIPS() {
           COUNT_MMAP_OK=$(grep -c ",-1$" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -421,7 +419,7 @@ function_check_ARM64() {
         COUNT_MMAP_OK="NA"
       fi
       log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+      output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
@@ -486,7 +484,7 @@ function_check_ARM32() {
         COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "${FUNC_LOG}" 2>/dev/null || true)
       fi
       log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+      output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
@@ -550,7 +548,7 @@ function_check_x86() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -615,7 +613,7 @@ function_check_x86_64() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}" ${lBIN_MD5_SUM}
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
