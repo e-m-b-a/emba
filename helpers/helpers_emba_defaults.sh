@@ -171,6 +171,7 @@ set_defaults() {
   export MAX_MAP_FILES=1000 # maximum files to analyse and generate dependency map
   export MAX_MAP_JOBS=""    # maximum jobs used for map generation - no entry means the default from the module
   export SVG_BUILD_TIMEOUT="12h"
+  export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used

@@ -52,9 +52,9 @@ S130_binary_map_builder() {
 }
 
 load_default_environment() {
-  # Limit the number of processed files to 2000 for handling firmware images
+  # Limit the number of processed files to 1000 for handling firmware images
   # For testing this should be limited to something lower
-  [[ -z "${MAX_MAP_FILES}" ]] && export MAX_MAP_FILES=2000
+  [[ -z "${MAX_MAP_FILES}" ]] && export MAX_MAP_FILES=1000
 
   # hard-coded dependency blacklist - is fp prone and overwhelming output
   # add entries if you do not want to see them
@@ -108,8 +108,6 @@ load_default_environment() {
   rm -rf "${DOT_FILE_tmp_dir}"
   mkdir "${DOT_FILE_tmp_dir}"
 
-  export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
-
   # External assets - downloaded once for offline capability.
   export JS_LIB="${EXT_DIR}/svg-pan-zoom.min.js"
   export LOGO_FILE="${HELP_DIR}/emba.svg"
@@ -144,11 +142,11 @@ setup_environment() {
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
     print_output "[*] INFO: Too many files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit it to ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
-      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw")
+      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}")
     else
-      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u)
+      # quick and dirty backup solution to not handle all the executable files
+      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u | head -n "${MAX_MAP_FILES}")
     fi
-
   fi
   print_ln ""
   print_output "[+] Testing ${ORANGE}${#ALL_EXEC_FILES_ARR[@]}${GREEN} files/executables in ${ORANGE}${FIRMWARE_PATH}${NC}"
@@ -323,7 +321,8 @@ fuzzy_string_dependency_checker() {
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and entries with slashes
   # as they are already handled from the strict_string_dependency_checker
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/' |
+    tr -d '[:blank:]' | sed -E 's/([.,;!])\1+//g' | grep -E "^[a-zA-Z0-9._-]+$" | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -341,7 +340,8 @@ strict_string_dependency_checker() {
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and /dev/ entries
   # additionally we check for a slash / as path indicator
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' | grep '/' | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' |
+    grep '/' | grep -E "^[a-zA-Z0-9./_-]+$" | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem
   for lSTR_DEP in "${STRING_DEPS_SRC_ARR[@]}"; do
@@ -391,7 +391,7 @@ search_parse_log_helper() {
     return
   fi
   # remove paths like "/////////" or "asdf////bla"
-  if [[ "${lDEPENDENCY}" == *"//"* ]]; then
+  if [[ "${lDEPENDENCY}" == *".."* || "${lDEPENDENCY}" == *",,"* || "${lDEPENDENCY}" == *"//"* || "${lDEPENDENCY}" == *";;"* ]]; then
     return
   fi
   # as we always search for paths we add a / to the search term
@@ -401,13 +401,13 @@ search_parse_log_helper() {
   # print_output "[*] Testing ${lDEPENDENCY} from ${lFILE_TO_CHECK} against ${FIRMWARE_PATH} - marker ${lMARKER}"
   #
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY}" || true)
+    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY%\/}$" || true)
   else
     mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
   fi
 
   if [[ "${#lDEPENDENCY_TARGET_ARR[@]}" -gt 0 ]]; then
-    print_output "[*] ${lMARKER}: Testing ${#lDEPENDENCY_TARGET_ARR[@]} possible targets from source ${lFILE_TO_CHECK}" "${DEPENDENCY_MAP_LOG}" "" 0
+    print_output "[*] ${lMARKER}: Testing ${#lDEPENDENCY_TARGET_ARR[@]} possible targets from source ${lFILE_TO_CHECK} / dependency: ${lDEPENDENCY}" "${DEPENDENCY_MAP_LOG}" "" 0
     for lDEPENDENCY_TARGET in "${lDEPENDENCY_TARGET_ARR[@]}"; do
       # print_output "[*] Testing dependency ${lDEPENDENCY_TARGET} from source ${lFILE_TO_CHECK}"
       [[ -d "${lDEPENDENCY_TARGET}" ]] && continue
@@ -773,7 +773,7 @@ build_dot() {
 build_svg() {
   sub_module_title "SVG dependency map"
 
-  print_output "[*] Neato map with overlap prevention" "" "${SVG_FILE}"
+  print_output "[*] Generating Neato map with overlap prevention" "no_log"
   timeout --preserve-status --signal SIGINT "${SVG_BUILD_TIMEOUT}" neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
 
   # probably some future extension:
@@ -784,6 +784,7 @@ build_svg() {
   # fi
 
   if [[ -f "${SVG_FILE}" ]]; then
+    print_output "[*] Neato map with overlap prevention" "" "${SVG_FILE}"
     # Modify SVG header to include an ID for the pan-zoom library.
     sed -i 's|<svg [^>]*>|<svg id="map-svg" style="width:100%;height:100%;">|' "${SVG_FILE}"
     # Optional: Falls Graphviz hartgecodete width/height reinschreibt, diese löschen
