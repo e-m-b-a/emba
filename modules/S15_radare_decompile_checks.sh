@@ -129,7 +129,7 @@ radare_decompilation() {
 
       # from S14_weak_func_radare_check
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      radare_decomp_output_function_details "${lBINARY}" "${lFUNCTION}"
+      radare_decomp_output_function_details "${lBINARY}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
@@ -264,10 +264,10 @@ radare_decomp_output_function_details() {
     return
   fi
   local lFUNCTION="${2:-}"
+  local lBIN_MD5_SUM="${3:-}"
+
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY}")
-  local lBIN_MD5_SUM=""
-  lBIN_MD5_SUM=$(md5sum "${lBINARY}" | awk '{print $1}')
 
   local lLOG_FILE_LOC=""
   lLOG_FILE_LOC="${LOG_PATH_MODULE}/decompilation_vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
