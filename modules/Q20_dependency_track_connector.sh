@@ -91,6 +91,7 @@ dep_track_upload_sbom() {
       -H "X-Api-Key: ${DEPENDENCY_TRACK_API_KEY}" \
       -o "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_details_response.txt" --write-out "%{http_code}" || true)
 
+    print_ln
     print_output "[+] SBOM upload to Dependency Track environment was successful"
     if [[ "${lHTTP_CODE}" -eq 200 ]]; then
       lPROJ_UUID=$(jq -r .[].uuid "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_details_response.txt" || true)
@@ -98,7 +99,8 @@ dep_track_upload_sbom() {
       if [[ "${lPROJ_UUID}" =~ [0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+-[0-9A-Za-z]+ ]]; then
         # Usually dependency track API is listening on port 8081 and the web server is listening on port 8080:
         write_link "http://${DEPENDENCY_TRACK_HOST_IP/:*/}:8080/projects/${lPROJ_UUID}"
-        print_output "[*] Found dependency track project UUID ${lPROJ_UUID}:"
+        print_ln
+        print_output "[+] Dependency track project UUID ${ORANGE}${lPROJ_UUID}${NC}:"
         jq -r . "${LOG_PATH_MODULE}/${DEPENDENCY_TRACK_HOST_IP/:*/}_sbom_details_response.txt" | tee -a "${LOG_FILE}"
       fi
     fi
