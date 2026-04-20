@@ -44,6 +44,7 @@ S15_radare_decompile_checks() {
     local lVULNERABLE_FUNCTIONS_ARR=()
     local lVULNERABLE_FUNCTIONS_VAR=""
     export FUNC_LOG=""
+    local lBIN_MD5_SUM=""
 
     lVULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
     print_output "[*] Vulnerable functions: ""$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')""\\n"
@@ -55,19 +56,15 @@ S15_radare_decompile_checks() {
 
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
+      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
       lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       lBINARY="${lBINARY/;*/}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
 
-        if [[ "${THREADED}" -eq 1 ]]; then
-          radare_decompilation "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S15_ARR+=("${lTMP_PID}")
-        else
-          radare_decompilation "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-        fi
+        radare_decompilation "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+        local lTMP_PID="$!"
+        lWAIT_PIDS_S15_ARR+=("${lTMP_PID}")
       fi
 
       if [[ "${THREADED}" -eq 1 ]]; then
@@ -94,7 +91,8 @@ S15_radare_decompile_checks() {
 
 radare_decompilation() {
   local lBINARY="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
@@ -108,7 +106,7 @@ radare_decompilation() {
   NETWORKING=$(readelf -W -a "${lBINARY}" --use-dynamic 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     export COUNT_FUNC=0
-    FUNC_LOG="${LOG_PATH_MODULE}""/decompilation_vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+    FUNC_LOG="${LOG_PATH_MODULE}/decompilation_vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_decomp_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
@@ -200,6 +198,8 @@ radare_decomp_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
+          # remove the md5sum from name
+          lBINARY=${lBINARY%-*}
           lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
@@ -266,9 +266,11 @@ radare_decomp_output_function_details() {
   local lFUNCTION="${2:-}"
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY}")
+  local lBIN_MD5_SUM=""
+  lBIN_MD5_SUM=$(md5sum "${lBINARY}" | awk '{print $1}')
 
   local lLOG_FILE_LOC=""
-  lLOG_FILE_LOC="${LOG_PATH_MODULE}"/decompilation_vul_func_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  lLOG_FILE_LOC="${LOG_PATH_MODULE}/decompilation_vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   # check if this is common linux file:
   local lCOMMON_FILES_FOUND=""
@@ -291,7 +293,7 @@ radare_decomp_output_function_details() {
   fi
 
   local lLOG_FILE_LOC_OLD="${lLOG_FILE_LOC}"
-  local lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${COUNT_FUNC}"_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  local lLOG_FILE_LOC="${LOG_PATH_MODULE}/vul_func_${COUNT_FUNC}_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   if [[ -f "${lLOG_FILE_LOC_OLD}" ]]; then
     mv "${lLOG_FILE_LOC_OLD}" "${lLOG_FILE_LOC}" 2>/dev/null || true
