@@ -52,9 +52,9 @@ S130_binary_map_builder() {
 }
 
 load_default_environment() {
-  # Limit the number of processed files to 2000 for handling firmware images
+  # Limit the number of processed files to 1000 for handling firmware images
   # For testing this should be limited to something lower
-  [[ -z "${MAX_MAP_FILES}" ]] && export MAX_MAP_FILES=2000
+  [[ -z "${MAX_MAP_FILES}" ]] && export MAX_MAP_FILES=1000
 
   # hard-coded dependency blacklist - is fp prone and overwhelming output
   # add entries if you do not want to see them
@@ -142,10 +142,10 @@ setup_environment() {
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
     print_output "[*] INFO: Too many files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit it to ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
-      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw")
+      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}")
     else
       # quick and dirty backup solution to not handle all the executable files
-      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u)
+      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u | head -n "${MAX_MAP_FILES}")
     fi
   fi
   print_ln ""

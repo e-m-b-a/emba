@@ -10,3 +10,5 @@ https://www.gnu.org/*
 .*helpers/%25%25EMBA_LOGO%25%25.*
 https://emba-firmware-analyzer.myspreadshop.de/*
 https://medium.com/*
+.*external/.*
+.*EMBA-Non-free/.*
