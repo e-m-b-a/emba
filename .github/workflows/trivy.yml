@@ -47,7 +47,7 @@ jobs:
       - name: Run Trivy vulnerability scanner in tarball mode
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          input: /github/workspace/vuln-image.tar
+          input: /github/workspace/emba-image.tar
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy scan results to GitHub Security tab
