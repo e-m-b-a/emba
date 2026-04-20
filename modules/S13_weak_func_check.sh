@@ -648,10 +648,11 @@ print_top10_statistics() {
           write_anchor "systemsummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
+          lMD5_SUM=${lBINARY##*-}
           # remove the md5sum from name
-          lBINARY=${lBINARY%-*}
-          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
-          lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
+          lBINARY_NO_MD5=${lBINARY%-*}
+          lSEARCH_TERM="$(echo "${lBINARY_NO_MD5}" | awk '{print $2}')"
+          lF_COUNTER="$(echo "${lBINARY_NO_MD5}" | awk '{print $1}')"
           [[ ! "${lF_COUNTER}" =~ ^[0-9]+$ ]] && continue
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
@@ -665,8 +666,8 @@ print_top10_statistics() {
           else
             print_output "$(indent "$(orange "${lF_COUNTER}""\t:\t""${lSEARCH_TERM}")")"
           fi
-          if [[ -f "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt" ]]; then
-            write_link "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt"
+          if [[ -f "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt" ]]; then
+            write_link "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
           fi
         done
         print_ln

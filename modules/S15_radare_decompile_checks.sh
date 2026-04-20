@@ -196,11 +196,13 @@ radare_decomp_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
+          lMD5_SUM=${lBINARY##*-}
           # remove the md5sum from name
           lBINARY=${lBINARY%-*}
           lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
+          local lR2_BIN_LOG_PATH="${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
             # if we have the base linux config file we are checking it:
@@ -213,17 +215,17 @@ radare_decomp_print_top10_statistics() {
           else
             print_output "$(indent "$(orange "${lF_COUNTER}""\t:\t""${lSEARCH_TERM}")")"
           fi
-          if [[ -f "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt" ]]; then
-            write_link "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt"
+          if [[ -f "${lR2_BIN_LOG_PATH}" ]]; then
+            write_link "${lR2_BIN_LOG_PATH}"
             # FIXME
             if [[ "${GPT_OPTION}" -gt 0 ]]; then
-              print_output "[*] Asking OpenAI chatbot about ${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
+              print_output "[*] Asking OpenAI chatbot about ${lR2_BIN_LOG_PATH}"
               lGPT_ANCHOR_="$(openssl rand -hex 8)"
               # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-              write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" "" ""
+              write_csv_gpt_tmp "${lR2_BIN_LOG_PATH}" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${lR2_BIN_LOG_PATH}" "" ""
               # add ChatGPT link
-              printf '%s\n\n' "" >>"${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
-              write_anchor_gpt "${lGPT_ANCHOR_}" "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
+              printf '%s\n\n' "" >>"${lR2_BIN_LOG_PATH}"
+              write_anchor_gpt "${lGPT_ANCHOR_}" "${lR2_BIN_LOG_PATH}"
             fi
           fi
         done
