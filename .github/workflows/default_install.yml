@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   default-install:
-    if: github.repository_owner == 'e-m-b-a'
+#    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-22.04
 
     steps:
