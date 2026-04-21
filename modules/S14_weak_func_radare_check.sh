@@ -575,11 +575,16 @@ radare_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
+          lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
+          # check if lF_COUNTER is integer
+          if ! [[ "${lF_COUNTER}" -eq "${lF_COUNTER}" ]]; then
+            print_error "[-] S14 Error in Top 10 functionality for ${lBINARY}"
+            continue
+          fi
           lMD5_SUM=${lBINARY##*-}
           # remove the md5sum from name
           lBINARY=${lBINARY%-*}
           lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
-          lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
