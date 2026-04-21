@@ -18,7 +18,7 @@ on:
 
 jobs:
   build:
-#    if: github.repository_owner == 'e-m-b-a'
+    if: github.repository_owner == 'e-m-b-a'
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -40,7 +40,7 @@ jobs:
           swap-storage: true
 
       - name: Run Trivy vulnerability scanner on EMBA image
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1    # v0.35.0 - https://github.com/aquasecurity/trivy-action/releases/tag/v0.35.0
         with:
           image-ref: 'docker.io/embeddedanalyzer/emba:latest'
           format: 'sarif'
