@@ -83,7 +83,7 @@ S26_kernel_vuln_verifier() {
         if [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f1)" == "/"* ]]; then
           # field 1 is the matching kernel elf file - sometimes we have a config but no elf file
           KERNEL_ELF_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f1)
-          print_output "[+] Found kernel elf file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
+          print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
           lK_FOUND=1
           break
         fi
@@ -102,7 +102,7 @@ S26_kernel_vuln_verifier() {
           if ! [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f2)" == "NA" ]]; then
             KERNEL_ELF_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f1)
             # we use the first entry with a kernel init detected
-            print_output "[+] Found kernel elf file with init entry: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
+            print_output "[+] Found kernel binary file with init entry: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             lK_FOUND=1
             break
           fi
@@ -118,7 +118,7 @@ S26_kernel_vuln_verifier() {
           # and no init entry -> we just use the first valid elf file
           if ! [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f1)" == "NA" ]]; then
             KERNEL_ELF_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f1)
-            print_output "[+] Found kernel elf file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
+            print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             # we use the first entry as final resort
             lK_FOUND=1
             break
@@ -254,11 +254,15 @@ S26_kernel_vuln_verifier() {
     uniq "${LOG_PATH_MODULE}"/symbols.txt >"${LOG_PATH_MODULE}"/symbols_uniq.txt
     SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols_uniq.txt)
 
-    print_ln
-    print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
-    write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
-    print_ln
-    split_symbols_file
+    if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
+      print_output "[-] No symbols found for kernel modules."
+    else
+      print_ln
+      print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
+      write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
+      print_ln
+      split_symbols_file
+    fi
 
     sub_module_title "Linux kernel vulnerability verification"
 
