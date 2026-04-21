@@ -182,11 +182,14 @@ binary_kernel_check_threader() {
           write_log "[-] No Linux kernel elf file was created." "${lLOG_FILE}"
         fi
       fi
+
       write_log "" "${lLOG_FILE}"
 
       # if we have no elf file created and logged we now log the original kernel
       # in case we have an elf file lFILE_PATH was already included in the SBOM
       if [[ ! -f "${lFILE_PATH}.elf" ]] && [[ "${lBIN_FILE}" != *"ELF"* ]]; then
+        # as we were not able to create a ELF file we reduce the confidence level
+        export CONFIDENCE_LEVEL=3
         for lVERSION_IDENTIFIED in "${lVERSION_IDENTIFIED_ARR[@]}"; do
           if version_parsing_logging "${S09_CSV_LOG}" "S24_kernel_bin_identifier" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
             # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} for non ELF kernel -> continue to next binary"
