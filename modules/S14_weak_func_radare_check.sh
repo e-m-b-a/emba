@@ -577,7 +577,7 @@ radare_print_top10_statistics() {
         for lBINARY in "${lRESULTS_ARR[@]}"; do
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
           # check if lF_COUNTER is integer
-          if ! [[ "${lF_COUNTER}" -eq "${lF_COUNTER}" ]]; then
+          if ! [[ "${lF_COUNTER}" =~ ^[0-9]+$ ]]; then
             print_error "[-] S14 Error in Top 10 functionality for ${lBINARY}"
             continue
           fi
