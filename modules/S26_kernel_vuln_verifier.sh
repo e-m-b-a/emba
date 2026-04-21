@@ -232,18 +232,20 @@ S26_kernel_vuln_verifier() {
     fi
 
     sub_module_title "Identify kernel symbols ..."
-    readelf -W -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' |
-      sed 's/\[\.\.\.\]//' >"${LOG_PATH_MODULE}"/symbols.txt || true
-    SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols.txt)
-    print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
+    if file -b "${KERNEL_ELF_PATH}" | grep -q ELF; then
+      readelf -W -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' |
+        sed 's/\[\.\.\.\]//' >"${LOG_PATH_MODULE}"/symbols.txt || true
+      SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols.txt)
+      print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
+    fi
 
     if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
       print_output "[-] No symbols found for kernel ${lK_VERSION} - ${KERNEL_ELF_PATH}"
-      print_output "[*] No further analysis possible for ${lK_VERSION} - ${KERNEL_ELF_PATH}"
-      continue
+      # print_output "[*] No further analysis possible for ${lK_VERSION} - ${KERNEL_ELF_PATH}"
+      # continue
     fi
 
-    if [[ -d "${LOG_DIR}""/firmware" ]]; then
+    if [[ -d "${LOG_DIR}/firmware" ]]; then
       print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
       # shellcheck disable=SC2016
       find "${LOG_DIR}/firmware" -name "*.ko" -print0 | xargs -r -0 -P 16 -I % sh -c 'readelf -W -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >>"${LOG_PATH_MODULE}"/symbols.txt || true
@@ -267,7 +269,6 @@ S26_kernel_vuln_verifier() {
     for lVULN in "${lALL_KVULNS_ARR[@]}"; do
       vuln_checker_threader "${lVULN}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S26_ARR_MAIN+=("${lTMP_PID}")
       ((VULN_CNT += 1))
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S26_ARR_MAIN
@@ -283,7 +284,7 @@ S26_kernel_vuln_verifier() {
     # extract the verified CVEs:
     local lVERIFIED_KERNEL_VERS_ARR=()
     local lVERIFIED_KVERS=""
-    mapfile -t lVERIFIED_KERNEL_VERS_ARR < <(cut -d ';' -f1,3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
+    mapfile -t lVERIFIED_KERNEL_VERS_ARR < <(cut -d ';' -f1,3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv 2>/dev/null | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
 
     if [[ "${#lVERIFIED_KERNEL_VERS_ARR[@]}" -gt 0 ]]; then
       for lVERIFIED_KVERS in "${lVERIFIED_KERNEL_VERS_ARR[@]}"; do

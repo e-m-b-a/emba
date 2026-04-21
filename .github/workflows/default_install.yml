@@ -3,13 +3,7 @@ name: EMBA default installation on Ubuntu
 on:
   schedule:
     - cron: '0 0 * * */2' # do it every 2nd day
-#  push:
-#    branches:
-#      - '**'        # matches every branch
-#  pull_request:
-#    branches:
-#      - '**'
-#  # Allows you to run this workflow manually from the Actions tab
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
@@ -17,7 +11,7 @@ permissions:
 
 jobs:
   default-install:
-#    if: github.repository_owner == 'e-m-b-a'
+    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-22.04
 
     steps:
