@@ -151,7 +151,7 @@ radare_decomp_log_bin_hardening() {
     # write_link "$LOG_DIR/s12_binary_protection.txt" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
     # get headline:
-    lHEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${S12_LOG}" | sed 's/FORTIFY.*//' | sort -u || true)
+    lHEAD_BIN_PROT=$(grep "FORTI.*FILE" "${S12_LOG}" | sed 's/FORTI.*//' | sort -u || true)
     write_log "  ${lHEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
     lBIN_PROT=$(grep '/'"${lBIN_NAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)

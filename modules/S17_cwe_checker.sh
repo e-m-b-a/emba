@@ -153,7 +153,8 @@ cwe_checker_threaded() {
   fi
 
   ulimit -Sv "${lMEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 60m cwe_checker "${lBINARY}" --json --out "${lCWE_CHECKER_JSON_LOG_FILE}" "${lCWE_CHECKER_OPTS_ARR[@]}" || true
+  timeout --preserve-status --signal SIGINT "${CWE_CHECKER_RUNTIME}" cwe_checker "${lBINARY}" --json --out "${lCWE_CHECKER_JSON_LOG_FILE}" "${lCWE_CHECKER_OPTS_ARR[@]}" || print_error "[-] CWE-checker run failed for ${lBINARY}"
+
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}$(print_path "${lBINARY}")${NC}" "no_log"
 
