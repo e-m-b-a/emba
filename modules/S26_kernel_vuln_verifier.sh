@@ -368,7 +368,7 @@ vuln_checker_threader() {
   # extract kernel source paths from summary -> we use these paths to check if they are used by our
   # symbols or during kernel compilation
   mapfile -t lK_PATHS_ARR < <(echo "${lSUMMARY}" | tr ' ' '\n' | sed 's/\\$//' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' |
-    sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 || true)
+    sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 | grep -v "\*" || true)
 
   for lK_PATH in "${lK_PATHS_ARR[@]}"; do
     # we have only a filename without path -> we search for possible candidate files in the kernel sources
