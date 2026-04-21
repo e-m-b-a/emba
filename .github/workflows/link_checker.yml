@@ -5,8 +5,6 @@
 
 name: lychee Link Checker
 on:
-  schedule:
-    - cron: '0 0 * * *' # do it every day
   push:
     branches:
       - '**'        # matches every branch
