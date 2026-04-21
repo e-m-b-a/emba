@@ -31,5 +31,5 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411  # v2.8.0 - https://github.com/lycheeverse/lychee-action/releases/tag/v2.8.0
         with:
-          args: --insecure --accept 200,403 --timeout 20 --user-agent "Mozilla/5.0" .
+          args: --accept 200,403 --user-agent "Mozilla/5.0" .
           fail: true
