@@ -110,8 +110,7 @@ radare_decompilation() {
     # pdd is for decompilation - with @@ we are working through all the identified functions
     # We analyse only 150 functions per binary
     timeout --preserve-status --signal SIGINT 3600 r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >>"${FUNC_LOG}" || true
-    #      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" 2> /dev/null >> "${FUNC_LOG}" || true
+      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >>"${FUNC_LOG}" || print_error "[-] r2 error on ${lBINARY}"
 
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l <"${FUNC_LOG}") -gt 3 ]]; then
       radare_decomp_color_output "${lFUNCTION}" "${FUNC_LOG}"
