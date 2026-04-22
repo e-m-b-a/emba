@@ -67,7 +67,8 @@ S26_kernel_vuln_verifier() {
     [[ "${lK_VERSION}" =~ ^[0-9\.a-zA-Z]$ ]] && continue
 
     local lK_FOUND=0
-    print_output "[+] Identified kernel version: ${ORANGE}${lK_VERSION}${NC}"
+    sub_module_title "Kernel version ${ORANGE}${lK_VERSION}${NC}"
+    print_output "[*] Analyzing kernel version: ${ORANGE}${lK_VERSION}${NC}"
 
     mapfile -t lKERNEL_ELF_EMBA_ARR < <(grep "${lK_VERSION}" "${S24_CSV_LOG}" |
       grep -v "config extracted" | sort -u | sort -r -n -t\; -k4 || true)
