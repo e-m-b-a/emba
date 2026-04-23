@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 0 * * 1' # do it every week
 
+permissions:
+  contents: read
+
 jobs:
   update_routersploit_db:
     if: github.repository_owner == 'e-m-b-a'

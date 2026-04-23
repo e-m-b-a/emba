@@ -34,6 +34,7 @@ S13_weak_func_check() {
   local lERR_PRINTED=0
   local lWAIT_PIDS_S13_ARR=()
   local lBIN_FILE=""
+  local lBIN_MD5_SUM=""
 
   if [[ -n "${ARCH}" ]]; then
     # This module waits for S12 - binary protections
@@ -57,83 +58,43 @@ S13_weak_func_check() {
 
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
+      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
       lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_x86_64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_x86_64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_x86_64 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ Intel.80386 ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_x86 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ Intel\ i386 ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
-
+          function_check_x86 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ 32-bit.*ARM ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_ARM32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_ARM32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_ARM32 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ 64-bit.*ARM ]]; then
           # ARM 64 code is in alpha state and nearly not tested!
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_ARM64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_ARM64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_ARM64 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"MIPS"* ]]; then
           # MIPS32 and MIPS64
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_MIPS "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_MIPS "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_MIPS "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"PowerPC"* ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_PPC32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_PPC32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_PPC32 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"Altera Nios II"* ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            function_check_NIOS2 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
-          else
-            function_check_NIOS2 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          function_check_NIOS2 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S13_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"QUALCOMM DSP6"* ]]; then
           if [[ "${lERR_PRINTED}" -eq 0 ]]; then
             print_output "[-] Qualcom DSP6 is currently not supported from objdump"
@@ -152,12 +113,10 @@ S13_weak_func_check() {
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
         fi
       fi
-      if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S13_ARR
-      fi
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S13_ARR
     done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S13_ARR[@]}"
+    wait_for_pid "${lWAIT_PIDS_S13_ARR[@]}"
 
     # ensure that we do not have result files without real results:
     find "${LOG_DIR}"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; 2>/dev/null || true
@@ -181,7 +140,8 @@ S13_weak_func_check() {
 
 function_check_NIOS2() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   local lSTRCPY_CNT=0
@@ -221,7 +181,7 @@ function_check_NIOS2() {
 
     if (readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2>/dev/null); then
       NETWORKING=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E "[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
-      FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+      FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       lFUNC_ADDR=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E \ "${lFUNCTION}" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2>/dev/null || true)
       if [[ -z "${lFUNC_ADDR}" ]] || [[ "${lFUNC_ADDR}" == "00000000" ]]; then
         continue
@@ -249,7 +209,7 @@ function_check_NIOS2() {
           COUNT_MMAP_OK="NA"
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}"
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -263,7 +223,8 @@ function_check_NIOS2() {
 
 function_check_PPC32() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -313,7 +274,7 @@ function_check_PPC32() {
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}"
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -327,7 +288,8 @@ function_check_PPC32() {
 
 function_check_MIPS() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -368,7 +330,7 @@ function_check_MIPS() {
     lSTRLEN_ADDR=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2>/dev/null || true)
     NETWORKING=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
     if [[ -n "${lFUNC_ADDR}" ]]; then
-      export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+      export FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
@@ -390,7 +352,7 @@ function_check_MIPS() {
           COUNT_MMAP_OK=$(grep -c ",-1$" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}"
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -404,7 +366,8 @@ function_check_MIPS() {
 
 function_check_ARM64() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -434,7 +397,7 @@ function_check_ARM64() {
     if [[ -z "${NETWORKING}" ]] || [[ "${NETWORKING}" == "00000000" ]]; then
       NETWORKING=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" --use-dynamic 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
     fi
-    export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+    export FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]]; then
@@ -456,7 +419,7 @@ function_check_ARM64() {
         COUNT_MMAP_OK="NA"
       fi
       log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      output_function_details "${lBINARY_}" "${lFUNCTION}"
+      output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
@@ -469,7 +432,8 @@ function_check_ARM64() {
 
 function_check_ARM32() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -499,7 +463,7 @@ function_check_ARM32() {
       NETWORKING=$(readelf "${lBINARY_}" "${lREADELF_PARAM_ARR[@]}" --use-dynamic 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
     fi
 
-    export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+    export FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
     log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]]; then
@@ -520,7 +484,7 @@ function_check_ARM32() {
         COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "${FUNC_LOG}" 2>/dev/null || true)
       fi
       log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      output_function_details "${lBINARY_}" "${lFUNCTION}"
+      output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
@@ -533,7 +497,8 @@ function_check_ARM32() {
 
 function_check_x86() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -562,7 +527,7 @@ function_check_x86() {
 
     if (readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2>/dev/null); then
       NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
-      export FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}"".txt"
+      export FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
@@ -583,7 +548,7 @@ function_check_x86() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}"
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -597,7 +562,8 @@ function_check_x86() {
 
 function_check_x86_64() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -626,7 +592,7 @@ function_check_x86_64() {
 
     if (readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2>/dev/null); then
       NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
-      export FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+      export FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       log_bin_hardening "${lBINARY_}" "${FUNC_LOG}"
       log_func_header "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
@@ -647,7 +613,7 @@ function_check_x86_64() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        output_function_details "${lBINARY_}" "${lFUNCTION}"
+        output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
 
@@ -682,8 +648,11 @@ print_top10_statistics() {
           write_anchor "systemsummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
-          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
-          lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
+          lMD5_SUM=${lBINARY##*-}
+          # remove the md5sum from name
+          lBINARY_NO_MD5=${lBINARY%-*}
+          lSEARCH_TERM="$(echo "${lBINARY_NO_MD5}" | awk '{print $2}')"
+          lF_COUNTER="$(echo "${lBINARY_NO_MD5}" | awk '{print $1}')"
           [[ ! "${lF_COUNTER}" =~ ^[0-9]+$ ]] && continue
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
@@ -697,8 +666,8 @@ print_top10_statistics() {
           else
             print_output "$(indent "$(orange "${lF_COUNTER}""\t:\t""${lSEARCH_TERM}")")"
           fi
-          if [[ -f "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt" ]]; then
-            write_link "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt"
+          if [[ -f "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt" ]]; then
+            write_link "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
           fi
         done
         print_ln
@@ -785,11 +754,13 @@ output_function_details() {
     return
   fi
   local lFUNCTION="${2:-}"
+  local lBIN_MD5_SUM="${3:-}"
+
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}")
 
   local lLOG_FILE_LOC=""
-  lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  lLOG_FILE_LOC="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   # check if this is common linux file:
   local lCOMMON_FILES_FOUND=""
@@ -814,7 +785,7 @@ output_function_details() {
   fi
 
   local lLOG_FILE_LOC_OLD="${lLOG_FILE_LOC}"
-  lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${COUNT_FUNC}"_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  lLOG_FILE_LOC="${LOG_PATH_MODULE}/vul_func_${COUNT_FUNC}_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   if [[ -f "${lLOG_FILE_LOC_OLD}" ]]; then
     mv "${lLOG_FILE_LOC_OLD}" "${lLOG_FILE_LOC}" 2>/dev/null || true
@@ -831,13 +802,13 @@ output_function_details() {
   if [[ ${COUNT_FUNC} -ne 0 ]]; then
     local lOUTPUT=""
     if [[ "${lFUNCTION}" == "strcpy" ]]; then
-      lOUTPUT="[+] ""$(print_path "${lBINARY_}")""${lCOMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${lFUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${lNETWORKING_}""${NC}"
+      lOUTPUT="[+] $(print_path "${lBINARY_}")${lCOMMON_FILES_FOUND}${NC} Vulnerable function: ${CYAN}${lFUNCTION} ${NC}/ ${RED}Function count: ${COUNT_FUNC} ${NC}/ ${ORANGE}strlen: ${COUNT_STRLEN} ${NC}/ ${lNETWORKING_}${NC}"
     elif [[ "${lFUNCTION}" == "mmap" ]]; then
-      lOUTPUT="[+] ""$(print_path "${lBINARY_}")""${lCOMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${lFUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""${COUNT_MMAP_OK}"" ""${NC}"
+      lOUTPUT="[+] $(print_path "${lBINARY_}")${lCOMMON_FILES_FOUND}${NC} Vulnerable function: ${CYAN}${lFUNCTION} ${NC}/ ${RED}Function count: ${COUNT_FUNC} ${NC}/ ${ORANGE}Correct error handling: ${COUNT_MMAP_OK} ${NC}"
     else
-      lOUTPUT="[+] ""$(print_path "${lBINARY_}")""${lCOMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${lFUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${lNETWORKING_}""${NC}"
+      lOUTPUT="[+] $(print_path "${lBINARY_}")${lCOMMON_FILES_FOUND}${NC} Vulnerable function: ${CYAN}${lFUNCTION} ${NC}/ ${RED}Function count: ${COUNT_FUNC} ${NC}/ ${lNETWORKING_}${NC}"
     fi
-    write_s13_log "${lOUTPUT}" "${lLOG_FILE_LOC}" "${LOG_PATH_MODULE}""/vul_func_tmp_""${lFUNCTION}"-"${lBIN_NAME}"".txt"
+    write_s13_log "${lOUTPUT}" "${lLOG_FILE_LOC}" "${LOG_PATH_MODULE}/vul_func_tmp_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     write_csv_log "$(print_path "${lBINARY_}")" "${lFUNCTION}" "${COUNT_FUNC}" "${lCFF_CSV}" "${lNW_CSV}"
   fi
 }

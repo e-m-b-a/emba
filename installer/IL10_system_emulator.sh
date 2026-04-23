@@ -24,6 +24,7 @@ IL10_system_emulator() {
     cd "${HOME_PATH}" || (echo "Could not install EMBA component system emulator" && exit 1)
 
     UML_UTILITIES_URL="http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2.1_amd64.deb"
+    LIBFUSE_URL="http://ftp.de.debian.org/debian/pool/main/f/fuse/libfuse2t64_2.9.9-9+b1_amd64.deb"
 
     print_tool_info "busybox-static" 1
     print_tool_info "bash-static" 1
@@ -33,8 +34,9 @@ IL10_system_emulator() {
     print_tool_info "kpartx" 1
     # uml-utilities provides tunctl for L10 -> uml-utilities was removed somewhere in August 2024
     # print_tool_info "uml-utilities" 1
-    print_tool_info "libfuse2t64" 1
+    # print_tool_info "libfuse2t64" 1
     print_file_info "uml-utilities.deb" "uml-utilities" "${UML_UTILITIES_URL}" "external/uml-utilities.deb"
+    print_file_info "libfuse2t64" "libfuse2t64" "${LIBFUSE_URL}" "external/libfuse2t64.deb"
     print_tool_info "util-linux" 1
     print_tool_info "vlan" 1
     print_tool_info "qemu-utils" 1
@@ -84,7 +86,10 @@ IL10_system_emulator() {
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
       download_file "uml-utilities.deb" "${UML_UTILITIES_URL}" "external/uml-utilities.deb"
+      download_file "libfuse2t64" "${LIBFUSE_URL}" "external/libfuse2t64.deb"
+      dpkg -i "external/libfuse2t64.deb"
       dpkg -i "external/uml-utilities.deb"
+      rm -f "external/libfuse2t64.deb"
       rm -f "external/uml-utilities.deb"
 
       download_file "busybox.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/busybox-v${BB_VER}.zip" "external/EMBA_Live_bins/busybox.zip"

@@ -1,14 +1,5 @@
 https://twitter.com/*
 https://www.cyberciti.biz/*
 https://www.gnu.org/*
-.*style/style.css
-.*style/emba.svg
-.*style/favicon.png
-.*TIMELINK.*
-.*embarkBackUrl.*
-.*helpers/index.html
-.*helpers/%25%25EMBA_LOGO%25%25.*
 https://emba-firmware-analyzer.myspreadshop.de/*
 https://medium.com/*
-.*external/.*
-.*EMBA-Non-free/.*

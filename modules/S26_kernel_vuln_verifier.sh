@@ -67,7 +67,8 @@ S26_kernel_vuln_verifier() {
     [[ "${lK_VERSION}" =~ ^[0-9\.a-zA-Z]$ ]] && continue
 
     local lK_FOUND=0
-    print_output "[+] Identified kernel version: ${ORANGE}${lK_VERSION}${NC}"
+    sub_module_title "Kernel version ${ORANGE}${lK_VERSION}${NC}"
+    print_output "[*] Analyzing kernel version: ${ORANGE}${lK_VERSION}${NC}"
 
     mapfile -t lKERNEL_ELF_EMBA_ARR < <(grep "${lK_VERSION}" "${S24_CSV_LOG}" |
       grep -v "config extracted" | sort -u | sort -r -n -t\; -k4 || true)
@@ -83,7 +84,7 @@ S26_kernel_vuln_verifier() {
         if [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f1)" == "/"* ]]; then
           # field 1 is the matching kernel elf file - sometimes we have a config but no elf file
           KERNEL_ELF_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f1)
-          print_output "[+] Found kernel elf file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
+          print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
           lK_FOUND=1
           break
         fi
@@ -102,7 +103,7 @@ S26_kernel_vuln_verifier() {
           if ! [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f2)" == "NA" ]]; then
             KERNEL_ELF_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f1)
             # we use the first entry with a kernel init detected
-            print_output "[+] Found kernel elf file with init entry: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
+            print_output "[+] Found kernel binary file with init entry: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             lK_FOUND=1
             break
           fi
@@ -118,7 +119,7 @@ S26_kernel_vuln_verifier() {
           # and no init entry -> we just use the first valid elf file
           if ! [[ "$(echo "${lKERNEL_DATA}" | cut -d\; -f1)" == "NA" ]]; then
             KERNEL_ELF_PATH=$(echo "${lKERNEL_DATA}" | cut -d\; -f1)
-            print_output "[+] Found kernel elf file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
+            print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             # we use the first entry as final resort
             lK_FOUND=1
             break
@@ -232,18 +233,20 @@ S26_kernel_vuln_verifier() {
     fi
 
     sub_module_title "Identify kernel symbols ..."
-    readelf -W -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' |
-      sed 's/\[\.\.\.\]//' >"${LOG_PATH_MODULE}"/symbols.txt || true
-    SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols.txt)
-    print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
+    if file -b "${KERNEL_ELF_PATH}" | grep -q ELF; then
+      readelf -W -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' |
+        sed 's/\[\.\.\.\]//' >"${LOG_PATH_MODULE}"/symbols.txt || true
+      SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols.txt)
+      print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel (${KERNEL_ELF_PATH})"
+    fi
 
     if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
       print_output "[-] No symbols found for kernel ${lK_VERSION} - ${KERNEL_ELF_PATH}"
-      print_output "[*] No further analysis possible for ${lK_VERSION} - ${KERNEL_ELF_PATH}"
-      continue
+      # print_output "[*] No further analysis possible for ${lK_VERSION} - ${KERNEL_ELF_PATH}"
+      # continue
     fi
 
-    if [[ -d "${LOG_DIR}""/firmware" ]]; then
+    if [[ -d "${LOG_DIR}/firmware" ]]; then
       print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
       # shellcheck disable=SC2016
       find "${LOG_DIR}/firmware" -name "*.ko" -print0 | xargs -r -0 -P 16 -I % sh -c 'readelf -W -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >>"${LOG_PATH_MODULE}"/symbols.txt || true
@@ -252,11 +255,15 @@ S26_kernel_vuln_verifier() {
     uniq "${LOG_PATH_MODULE}"/symbols.txt >"${LOG_PATH_MODULE}"/symbols_uniq.txt
     SYMBOLS_CNT=$(wc -l <"${LOG_PATH_MODULE}"/symbols_uniq.txt)
 
-    print_ln
-    print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
-    write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
-    print_ln
-    split_symbols_file
+    if [[ "${SYMBOLS_CNT}" -eq 0 ]]; then
+      print_output "[-] No symbols found for kernel modules."
+    else
+      print_ln
+      print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols (kernel+modules)"
+      write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
+      print_ln
+      split_symbols_file
+    fi
 
     sub_module_title "Linux kernel vulnerability verification"
 
@@ -267,7 +274,6 @@ S26_kernel_vuln_verifier() {
     for lVULN in "${lALL_KVULNS_ARR[@]}"; do
       vuln_checker_threader "${lVULN}" &
       local lTMP_PID="$!"
-      store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S26_ARR_MAIN+=("${lTMP_PID}")
       ((VULN_CNT += 1))
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S26_ARR_MAIN
@@ -283,7 +289,7 @@ S26_kernel_vuln_verifier() {
     # extract the verified CVEs:
     local lVERIFIED_KERNEL_VERS_ARR=()
     local lVERIFIED_KVERS=""
-    mapfile -t lVERIFIED_KERNEL_VERS_ARR < <(cut -d ';' -f1,3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
+    mapfile -t lVERIFIED_KERNEL_VERS_ARR < <(cut -d ';' -f1,3,6,7 "${LOG_PATH_MODULE}"/cve_results_kernel_*.csv 2>/dev/null | grep ";1;\|;1$" | cut -d ';' -f1 | sort -u || true)
 
     if [[ "${#lVERIFIED_KERNEL_VERS_ARR[@]}" -gt 0 ]]; then
       for lVERIFIED_KVERS in "${lVERIFIED_KERNEL_VERS_ARR[@]}"; do
@@ -363,7 +369,7 @@ vuln_checker_threader() {
   # extract kernel source paths from summary -> we use these paths to check if they are used by our
   # symbols or during kernel compilation
   mapfile -t lK_PATHS_ARR < <(echo "${lSUMMARY}" | tr ' ' '\n' | sed 's/\\$//' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' |
-    sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 || true)
+    sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 | grep -v "\*" || true)
 
   for lK_PATH in "${lK_PATHS_ARR[@]}"; do
     # we have only a filename without path -> we search for possible candidate files in the kernel sources

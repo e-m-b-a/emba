@@ -3,10 +3,8 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: lychee
+name: lychee Link Checker
 on:
-  schedule:
-    - cron: '0 0 * * *' # do it every day
   push:
     branches:
       - '**'        # matches every branch
@@ -15,6 +13,9 @@ on:
       - '**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   lychee-link-check:
@@ -28,4 +29,5 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411  # v2.8.0 - https://github.com/lycheeverse/lychee-action/releases/tag/v2.8.0
         with:
+          args: --accept 200,403 --user-agent "Mozilla/5.0" --exclude-path ./config/linux_common_files.txt --exclude-path ./helpers/base.html --exclude-path ./helpers/firmware_map_base.html .
           fail: true

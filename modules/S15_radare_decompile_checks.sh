@@ -44,6 +44,7 @@ S15_radare_decompile_checks() {
     local lVULNERABLE_FUNCTIONS_ARR=()
     local lVULNERABLE_FUNCTIONS_VAR=""
     export FUNC_LOG=""
+    local lBIN_MD5_SUM=""
 
     lVULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
     print_output "[*] Vulnerable functions: ""$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')""\\n"
@@ -55,27 +56,21 @@ S15_radare_decompile_checks() {
 
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
+      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
       lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       lBINARY="${lBINARY/;*/}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
 
-        if [[ "${THREADED}" -eq 1 ]]; then
-          radare_decompilation "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_S15_ARR+=("${lTMP_PID}")
-        else
-          radare_decompilation "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-        fi
+        radare_decompilation "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+        local lTMP_PID="$!"
+        lWAIT_PIDS_S15_ARR+=("${lTMP_PID}")
       fi
 
-      if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S15_ARR
-      fi
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S15_ARR
     done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S15_ARR[@]}"
+    wait_for_pid "${lWAIT_PIDS_S15_ARR[@]}"
 
     radare_decomp_print_top10_statistics "${lVULNERABLE_FUNCTIONS_ARR[@]}"
 
@@ -94,7 +89,8 @@ S15_radare_decompile_checks() {
 
 radare_decompilation() {
   local lBINARY="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
@@ -108,14 +104,13 @@ radare_decompilation() {
   NETWORKING=$(readelf -W -a "${lBINARY}" --use-dynamic 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     export COUNT_FUNC=0
-    FUNC_LOG="${LOG_PATH_MODULE}""/decompilation_vul_func_""${lFUNCTION}""-""${lBIN_NAME}"".txt"
+    FUNC_LOG="${LOG_PATH_MODULE}/decompilation_vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_decomp_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
     # We analyse only 150 functions per binary
     timeout --preserve-status --signal SIGINT 3600 r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >>"${FUNC_LOG}" || true
-    #      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" 2> /dev/null >> "${FUNC_LOG}" || true
+      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >>"${FUNC_LOG}" || print_error "[-] r2 error on ${lBINARY}"
 
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l <"${FUNC_LOG}") -gt 3 ]]; then
       radare_decomp_color_output "${lFUNCTION}" "${FUNC_LOG}"
@@ -131,7 +126,7 @@ radare_decompilation() {
 
       # from S14_weak_func_radare_check
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      radare_decomp_output_function_details "${lBINARY}" "${lFUNCTION}"
+      radare_decomp_output_function_details "${lBINARY}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
@@ -155,7 +150,7 @@ radare_decomp_log_bin_hardening() {
     # write_link "$LOG_DIR/s12_binary_protection.txt" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
     # get headline:
-    lHEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${S12_LOG}" | sed 's/FORTIFY.*//' | sort -u || true)
+    lHEAD_BIN_PROT=$(grep "FORTI.*FILE" "${S12_LOG}" | sed 's/FORTI.*//' | sort -u || true)
     write_log "  ${lHEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
     lBIN_PROT=$(grep '/'"${lBIN_NAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
@@ -200,9 +195,13 @@ radare_decomp_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
+          lMD5_SUM=${lBINARY##*-}
+          # remove the md5sum from name
+          lBINARY=${lBINARY%-*}
           lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
+          local lR2_BIN_LOG_PATH="${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
             # if we have the base linux config file we are checking it:
@@ -215,17 +214,17 @@ radare_decomp_print_top10_statistics() {
           else
             print_output "$(indent "$(orange "${lF_COUNTER}""\t:\t""${lSEARCH_TERM}")")"
           fi
-          if [[ -f "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt" ]]; then
-            write_link "${LOG_PATH_MODULE}""/vul_func_""${lF_COUNTER}""_""${lFUNCTION}"-"${lSEARCH_TERM}"".txt"
+          if [[ -f "${lR2_BIN_LOG_PATH}" ]]; then
+            write_link "${lR2_BIN_LOG_PATH}"
             # FIXME
             if [[ "${GPT_OPTION}" -gt 0 ]]; then
-              print_output "[*] Asking OpenAI chatbot about ${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
+              print_output "[*] Asking OpenAI chatbot about ${lR2_BIN_LOG_PATH}"
               lGPT_ANCHOR_="$(openssl rand -hex 8)"
               # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-              write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" "" ""
+              write_csv_gpt_tmp "${lR2_BIN_LOG_PATH}" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${lR2_BIN_LOG_PATH}" "" ""
               # add ChatGPT link
-              printf '%s\n\n' "" >>"${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
-              write_anchor_gpt "${lGPT_ANCHOR_}" "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
+              printf '%s\n\n' "" >>"${lR2_BIN_LOG_PATH}"
+              write_anchor_gpt "${lGPT_ANCHOR_}" "${lR2_BIN_LOG_PATH}"
             fi
           fi
         done
@@ -264,11 +263,13 @@ radare_decomp_output_function_details() {
     return
   fi
   local lFUNCTION="${2:-}"
+  local lBIN_MD5_SUM="${3:-}"
+
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY}")
 
   local lLOG_FILE_LOC=""
-  lLOG_FILE_LOC="${LOG_PATH_MODULE}"/decompilation_vul_func_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  lLOG_FILE_LOC="${LOG_PATH_MODULE}/decompilation_vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   # check if this is common linux file:
   local lCOMMON_FILES_FOUND=""
@@ -291,7 +292,7 @@ radare_decomp_output_function_details() {
   fi
 
   local lLOG_FILE_LOC_OLD="${lLOG_FILE_LOC}"
-  local lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${COUNT_FUNC}"_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  local lLOG_FILE_LOC="${LOG_PATH_MODULE}/vul_func_${COUNT_FUNC}_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   if [[ -f "${lLOG_FILE_LOC_OLD}" ]]; then
     mv "${lLOG_FILE_LOC_OLD}" "${lLOG_FILE_LOC}" 2>/dev/null || true

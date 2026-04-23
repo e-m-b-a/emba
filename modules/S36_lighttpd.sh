@@ -180,32 +180,34 @@ lighttpd_binary_analysis() {
 
   print_ln
   print_output "[*] Testing lighttpd binaries for deprecated function calls:\\n"
+  local lBIN_MD5_SUM=""
   lVULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
   # nosemgrep
   local IFS=" "
   IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')"
   for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
+    lBIN_MD5_SUM="$(echo "${lBINARY_DATA}" | cut -d ';' -f9)"
     lLIGHT_BIN="$(echo "${lBINARY_DATA}" | cut -d ';' -f2)"
     if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
       # skip binwalk raw files
       continue
     fi
     if (file "${lLIGHT_BIN}" | grep -q "x86-64"); then
-      function_check_x86_64 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_x86_64 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "Intel 80386"); then
-      function_check_x86 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_x86 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "32-bit.*ARM"); then
-      function_check_ARM32 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_ARM32 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "64-bit.*ARM"); then
-      function_check_ARM64 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_ARM64 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "MIPS"); then
-      function_check_MIPS "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_MIPS "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "PowerPC"); then
-      function_check_PPC32 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_PPC32 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "Altera Nios II"); then
-      function_check_NIOS2 "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      function_check_NIOS2 "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     elif (file "${lLIGHT_BIN}" | grep -q "QUALCOMM DSP6"); then
-      radare_function_check_hexagon "${lLIGHT_BIN}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
+      radare_function_check_hexagon "${lLIGHT_BIN}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
     fi
   done
 }

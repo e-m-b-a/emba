@@ -29,6 +29,7 @@ set_defaults() {
   export RTOS=1 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export BINARY_EXTENDED=0
   export MAX_EXT_CHECK_BINS=20
+  export CWE_CHECKER_RUNTIME="120m"
   export CONTAINER_EXTRACT=0
   export DISABLE_DEEP=0
   export DEEP_EXTRACTOR="unblob" # binwalk/unblob

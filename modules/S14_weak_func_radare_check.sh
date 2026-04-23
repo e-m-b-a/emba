@@ -48,6 +48,7 @@ S14_weak_func_radare_check() {
     local lBIN_FILE=""
     local lVULNERABLE_FUNCTIONS_ARR=()
     local lVULNERABLE_FUNCTIONS_VAR=""
+    local lBIN_MD5_SUM=""
 
     lVULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}/functions.cfg")"
     print_output "[*] Vulnerable functions: $(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')\\n"
@@ -59,6 +60,7 @@ S14_weak_func_radare_check() {
 
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
+      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
       lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
@@ -67,92 +69,46 @@ S14_weak_func_radare_check() {
       fi
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_x86_64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_x86_64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_x86_64 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ Intel.80386 ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_x86 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ Intel\ i386 ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_x86 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
-
+          radare_function_check_x86 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ 32-bit.*ARM ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_ARM32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_ARM32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_ARM32 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" =~ 64-bit.*ARM ]]; then
           # ARM 64 code is in alpha state and nearly not tested!
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_ARM64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_ARM64 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_ARM64 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"MIPS"* ]]; then
           # MIPS32 and MIPS64
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_MIPS "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_MIPS "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_MIPS "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"PowerPC"* ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_PPC32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_PPC32 "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_PPC32 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"QUALCOMM DSP6"* ]]; then
-          if [[ "${THREADED}" -eq 1 ]]; then
-            radare_function_check_hexagon "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
-            local lTMP_PID="$!"
-            store_kill_pids "${lTMP_PID}"
-            lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
-          else
-            radare_function_check_hexagon "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          fi
+          radare_function_check_hexagon "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
+          local lTMP_PID="$!"
+          lWAIT_PIDS_S14_ARR+=("${lTMP_PID}")
         elif [[ "${lBIN_FILE}" == *"Tricore"* ]]; then
           print_output "[-] Tricore architecture currently not fully supported."
           print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
-          # if [[ "${THREADED}" -eq 1 ]]; then
           #   radare_function_check_tricore "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &
           #   local lTMP_PID="$!"
-          #   store_kill_pids "${lTMP_PID}"
           #   lWAIT_PIDS_S14_ARR+=( "${lTMP_PID}" )
-          # else
-          #   radare_function_check_tricore "${lBINARY}" "${lVULNERABLE_FUNCTIONS_ARR[@]}"
-          # fi
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: ${ORANGE}${lBINARY}${NC}"
@@ -160,12 +116,10 @@ S14_weak_func_radare_check() {
         fi
       fi
 
-      if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S14_ARR
-      fi
+      max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S14_ARR
     done < <(grep -v "ASCII text\|Unicode text\|.raw;" "${P99_CSV_LOG}" | grep "ELF" || true)
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S14_ARR[@]}"
+    wait_for_pid "${lWAIT_PIDS_S14_ARR[@]}"
 
     radare_print_top10_statistics "${lVULNERABLE_FUNCTIONS_ARR[@]}"
 
@@ -202,7 +156,8 @@ identify_readelf_params() {
 
 radare_function_check_PPC32() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -221,7 +176,7 @@ radare_function_check_PPC32() {
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     if (readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2>/dev/null); then
-      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
         # For the mmap check we need the disasm after the call
@@ -242,7 +197,7 @@ radare_function_check_PPC32() {
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+        radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
   done
@@ -251,7 +206,8 @@ radare_function_check_PPC32() {
 
 radare_function_check_MIPS() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -268,7 +224,7 @@ radare_function_check_MIPS() {
 
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
-    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]]; then
       # For the mmap check we need the disasm after the call
@@ -292,7 +248,7 @@ radare_function_check_MIPS() {
         COUNT_MMAP_OK="NA"
       fi
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+      radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
   done
   echo "${lSTRCPY_CNT}" >>"${TMP_DIR}"/S14_STRCPY_CNT.tmp
@@ -300,7 +256,8 @@ radare_function_check_MIPS() {
 
 radare_function_check_tricore() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -317,7 +274,7 @@ radare_function_check_tricore() {
 
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
-    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]]; then
       # For the mmap check we need the disasm after the call
@@ -341,7 +298,7 @@ radare_function_check_tricore() {
         COUNT_MMAP_OK="NA"
       fi
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+      radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
   done
   echo "${lSTRCPY_CNT}" >>"${TMP_DIR}"/S14_STRCPY_CNT.tmp
@@ -349,7 +306,8 @@ radare_function_check_tricore() {
 
 radare_function_check_ARM64() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -366,7 +324,7 @@ radare_function_check_ARM64() {
 
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
-    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]]; then
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -A 20 "bl.*${lFUNCTION}" 2>/dev/null >>"${FUNC_LOG}" || true
@@ -389,7 +347,7 @@ radare_function_check_ARM64() {
         COUNT_MMAP_OK="NA"
       fi
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+      radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
   done
   echo "${lSTRCPY_CNT}" >>"${TMP_DIR}"/S14_STRCPY_CNT.tmp
@@ -397,7 +355,8 @@ radare_function_check_ARM64() {
 
 radare_function_check_ARM32() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -417,7 +376,7 @@ radare_function_check_ARM32() {
     if ! readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -q -E "FUNC[[:space:]]+.*[[:space:]]+UND[[:space:]]+.*${lFUNCTION}"; then
       continue
     fi
-    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+    FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
     if [[ "${lFUNCTION}" == "mmap" ]]; then
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${lBINARY_}" | grep -E -A 20 "bl.*${lFUNCTION}" 2>/dev/null >>"${FUNC_LOG}" || true
@@ -440,7 +399,7 @@ radare_function_check_ARM32() {
         COUNT_MMAP_OK="NA"
       fi
       radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-      radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+      radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
     fi
   done
   echo "${lSTRCPY_CNT}" >>"${TMP_DIR}"/S14_STRCPY_CNT.tmp
@@ -448,7 +407,8 @@ radare_function_check_ARM32() {
 
 radare_function_check_hexagon() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -466,7 +426,7 @@ radare_function_check_hexagon() {
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     if (readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | grep -q "${lFUNCTION}" 2>/dev/null); then
-      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
         # For the mmap check we need the disasm after the call
@@ -488,7 +448,7 @@ radare_function_check_hexagon() {
           COUNT_MMAP_OK="NA"
         fi
         radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+        radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
   done
@@ -497,7 +457,8 @@ radare_function_check_hexagon() {
 
 radare_function_check_x86() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -515,7 +476,7 @@ radare_function_check_x86() {
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     if (readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2>/dev/null); then
-      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
         # For the mmap check we need the disasm after the call
@@ -537,7 +498,7 @@ radare_function_check_x86() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+        radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
   done
@@ -546,7 +507,8 @@ radare_function_check_x86() {
 
 radare_function_check_x86_64() {
   local lBINARY_="${1:-}"
-  shift 1
+  local lBIN_MD5_SUM="${2:-}"
+  shift 2
   local lVULNERABLE_FUNCTIONS_ARR=("$@")
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}" 2>/dev/null)
@@ -564,7 +526,7 @@ radare_function_check_x86_64() {
   NETWORKING=$(readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" 2>/dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2>/dev/null || true)
   for lFUNCTION in "${lVULNERABLE_FUNCTIONS_ARR[@]}"; do
     if (readelf "${lREADELF_PARAM_ARR[@]}" "${lBINARY_}" | awk '{print $5}' | grep -E -q "^${lFUNCTION}" 2>/dev/null); then
-      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}.txt"
+      FUNC_LOG="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
       radare_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
       if [[ "${lFUNCTION}" == "mmap" ]]; then
         # For the mmap check we need the disasm after the call
@@ -585,7 +547,7 @@ radare_function_check_x86_64() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "${FUNC_LOG}" 2>/dev/null || true)
         fi
         radare_log_func_footer "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
-        radare_output_function_details "${lBINARY_}" "${lFUNCTION}"
+        radare_output_function_details "${lBINARY_}" "${lFUNCTION}" "${lBIN_MD5_SUM}"
       fi
     fi
   done
@@ -613,8 +575,16 @@ radare_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
-          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
+          # check if lF_COUNTER is integer
+          if ! [[ "${lF_COUNTER}" =~ ^[0-9]+$ ]]; then
+            print_error "[-] S14 Error in Top 10 functionality for ${lBINARY}"
+            continue
+          fi
+          lMD5_SUM=${lBINARY##*-}
+          # remove the md5sum from name
+          lBINARY=${lBINARY%-*}
+          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
@@ -628,8 +598,8 @@ radare_print_top10_statistics() {
           else
             print_output "$(indent "$(orange "${lF_COUNTER}\t:\t${lSEARCH_TERM}")")"
           fi
-          if [[ -f "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt" ]]; then
-            write_link "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}.txt"
+          if [[ -f "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt" ]]; then
+            write_link "${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
           fi
         done
         print_ln
@@ -705,11 +675,12 @@ radare_output_function_details() {
   fi
 
   local lFUNCTION="${2:-}"
+  local lBIN_MD5_SUM="${3:-}"
   local lBIN_NAME=""
   lBIN_NAME=$(basename "${lBINARY_}")
 
   local lLOG_FILE_LOC
-  lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  lLOG_FILE_LOC="${LOG_PATH_MODULE}/vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
   local lOUTPUT=""
 
   # check if this is common linux file:
@@ -735,7 +706,7 @@ radare_output_function_details() {
   fi
 
   local lLOG_FILE_LOC_OLD="${lLOG_FILE_LOC}"
-  local lLOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${COUNT_FUNC}"_"${lFUNCTION}"-"${lBIN_NAME}".txt
+  local lLOG_FILE_LOC="${LOG_PATH_MODULE}/vul_func_${COUNT_FUNC}_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
 
   if [[ -f "${lLOG_FILE_LOC_OLD}" ]]; then
     mv "${lLOG_FILE_LOC_OLD}" "${lLOG_FILE_LOC}" 2>/dev/null || true
@@ -757,7 +728,7 @@ radare_output_function_details() {
     else
       lOUTPUT="[+] $(print_path "${lBINARY_}")${lCOMMON_FILES_FOUND}${NC} Vulnerable function: ${CYAN}${lFUNCTION} ${NC}/ ${RED}Function count: ${COUNT_FUNC} ${NC}/ ${lNETWORKING_}${NC}"
     fi
-    write_s14_log "${lOUTPUT}" "${lLOG_FILE_LOC}" "${LOG_PATH_MODULE}/vul_func_tmp_${lFUNCTION}-${lBIN_NAME}.txt"
+    write_s14_log "${lOUTPUT}" "${lLOG_FILE_LOC}" "${LOG_PATH_MODULE}/vul_func_tmp_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     write_csv_log "$(print_path "${lBINARY_}")" "${lFUNCTION}" "${COUNT_FUNC}" "${lCFF_CSV}" "${lNW_CSV}"
   fi
 }

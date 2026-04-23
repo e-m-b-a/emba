@@ -12,6 +12,8 @@ on:
   schedule:
     - cron: '0 0 * * */2' # do it every 2nd day
 
+permissions:
+  contents: read
 
 jobs:
   docker-build:
