@@ -45,6 +45,8 @@ IP99_binwalk_default() {
       git checkout FETCH_HEAD
 
       export PIP_BREAK_SYSTEM_PACKAGES=1
+      # we installed the relevant sasquatch version already via unblob
+      sed -i '/sasquatch/d' ./dependencies/ubuntu.sh
       ./dependencies/ubuntu.sh
       cargo build --release
 

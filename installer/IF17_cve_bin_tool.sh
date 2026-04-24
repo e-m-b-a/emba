@@ -43,7 +43,6 @@ IF17_cve_bin_tool() {
       echo -e "${ORANGE}""${BOLD}""Install cve-bin-tool""${NC}"
       git clone https://github.com/EMBA-support-repos/cve-bin-tool.git external/cve-bin-tool
       cd external/cve-bin-tool || (echo "Could not install EMBA component cve-bin-tool" && exit 1)
-      pip install -U -r requirements.txt
       python3 -m pip install -e .
 
       # we need a more up to date protobuf for the android extractor -> lets update it now
