@@ -23,8 +23,8 @@ IL10_system_emulator() {
     INSTALL_APP_LIST=()
     cd "${HOME_PATH}" || (echo "Could not install EMBA component system emulator" && exit 1)
 
-    UML_UTILITIES_URL="http://ftp.de.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2.1_amd64.deb"
-    LIBFUSE_URL="http://ftp.de.debian.org/debian/pool/main/f/fuse/libfuse2t64_2.9.9-9+b1_amd64.deb"
+    UML_UTILITIES_URL="http://deb.debian.org/debian/pool/main/u/uml-utilities/uml-utilities_20070815.4-2.1_amd64.deb"
+    LIBFUSE_URL="http://deb.debian.org/debian/pool/main/f/fuse/libfuse2t64_2.9.9-9_amd64.deb"
 
     print_tool_info "busybox-static" 1
     print_tool_info "bash-static" 1
