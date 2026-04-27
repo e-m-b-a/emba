@@ -24,7 +24,7 @@ on:
     - cron: '0 0 * * *'
 
 permissions:
-  contents: read
+  contents: write
   issues: write
   pull-requests: write
 
