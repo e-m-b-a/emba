@@ -75,7 +75,7 @@ IF50_aggregator_common() {
 
   if [[ "${RHEL_OS}" -eq 1 ]]; then
     dnf install -y p7zip p7zip-plugins
-  else
-    apt-get install 7zip -y
+#  else
+#    apt-get install 7zip -y
   fi
 }

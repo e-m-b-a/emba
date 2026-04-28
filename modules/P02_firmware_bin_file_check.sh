@@ -147,7 +147,7 @@ generate_entropy_graph() {
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
   if [[ -f "${lFIRMWARE_PATH_BIN}" ]] && ! [[ -f "${lENTROPY_PIC_PATH}" ]]; then
     print_output "[*] Entropy testing with binwalk ... "
-    print_output "$("${BINWALK_BIN[@]}" -E -p "${lENTROPY_PIC_PATH}" "${lFIRMWARE_PATH_BIN}")"
+    print_output "$("${BINWALK_BIN[@]}" --entropy --png "${lENTROPY_PIC_PATH}" "${lFIRMWARE_PATH_BIN}")"
     if [[ -s "${lENTROPY_PIC_PATH}" ]]; then
       write_link "${lENTROPY_PIC_PATH}"
     fi

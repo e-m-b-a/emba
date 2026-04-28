@@ -35,7 +35,7 @@ IP61_unblob() {
     print_tool_info "lz4" 1
     print_tool_info "lziprecover" 1
     print_tool_info "lzop" 1
-    print_tool_info "7zip" 1
+    # print_tool_info "7zip" 1
     print_tool_info "unar" 1
     print_tool_info "xz-utils" 1
     print_tool_info "zlib1g-dev" 1
@@ -53,6 +53,7 @@ IP61_unblob() {
     print_tool_info "e2fsprogs" 1
     print_tool_info "libext2fs2" 1
 
+    print_file_info "7zip.tar.xz" "7zip.tar.xz" "https://www.7-zip.org/a/7z2600-linux-x64.tar.xz" "external/7zip.tar.xz"
     print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-6/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
@@ -67,7 +68,15 @@ IP61_unblob() {
 
       cd "${HOME_PATH}" || (echo "Could not install EMBA component unblob" && exit 1)
 
+      download_file "7zip.tar.xz" "https://www.7-zip.org/a/7z2600-linux-x64.tar.xz" "external/7zip.tar.xz"
+      echo "[*] Installing 7zip"
+      install -d /usr/local/bin
+      tar -xf external/7zip.tar.xz -C /usr/local/bin 7zz 7zzs
+      ln -sf /usr/local/bin/7zz /usr/local/bin/7z
+      rm -f external/7zip.tar.xz
+
       download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-6/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+      echo "[*] Installing sasquatch"
       dpkg -i external/sasquatch_1.0_amd64.deb
       rm external/sasquatch_1.0_amd64.deb
 

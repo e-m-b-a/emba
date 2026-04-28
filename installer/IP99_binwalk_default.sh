@@ -24,7 +24,8 @@ IP99_binwalk_default() {
     INSTALL_APP_LIST=()
 
     print_tool_info "git" 1
-    print_tool_info "7zip-standalone" 1
+    # we install 7zip already via IP61
+    # print_tool_info "7zip-standalone" 1
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
@@ -38,11 +39,6 @@ IP99_binwalk_default() {
 
       git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
       cd external/binwalk || (echo "Could not install EMBA component binwalk" && exit 1)
-      # sed -i -r 's/(pip3.*)$/\1 --break-system-packages/' dependencies/pip.sh
-      # We currently stick to the commit right before the plotty changes
-      # otherwise we break the entropy generation in EMBA
-      git fetch origin 2916ddfed802c61b84f4567c9c1734d69c2e320d
-      git checkout FETCH_HEAD
 
       export PIP_BREAK_SYSTEM_PACKAGES=1
       # we installed the relevant sasquatch version already via unblob
