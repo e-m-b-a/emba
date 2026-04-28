@@ -1,7 +1,7 @@
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:2.0.0e
+    image: embeddedanalyzer/emba:2.0.0f
     container_name: emba
     read_only: false
     # all pre-checker mount modules need privileged mode
@@ -13,8 +13,9 @@ services:
     tmpfs:
       # exec on /tmp is needed for capa -> Todo: find better solution
       # exec on /root/.cache/opengrep is needed for opengrep
+      # exec on /root/.config/opengrep is needed for opengrep
       - /tmp:exec
-      - /root/.config/
+      - /root/.config/:exec
       - /root/.local/share/composer/
       - /root/.local/share/cwe_checker/
         # - /root/.local/share
@@ -53,7 +54,7 @@ services:
         soft: 0
 
   emba_quest:
-    image: embeddedanalyzer/emba:2.0.0e
+    image: embeddedanalyzer/emba:2.0.0f
     container_name: emba_quest
     read_only: true
     tmpfs:

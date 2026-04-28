@@ -100,6 +100,11 @@ prepare_docker_home_dir() {
     # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share/composer/.htaccess "${HOME}"/.local/share/composer/
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share/cwe_checker/* "${HOME}"/.local/share/cwe_checker/
+
+    # quick hack to have kaleido in place for binwalk
+    if [[ -L "${HOME}/.config/kaleido" ]]; then
+      ln -s "${EXT_DIR}/cwe_checker/.config/kaleido" "${HOME}/.config/kaleido"
+    fi
   fi
 }
 
