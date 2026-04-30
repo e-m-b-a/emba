@@ -544,10 +544,10 @@ output_binaries() {
 
     readarray -t lRESULTS_STRCPY_ARR < <(find "${LOG_DIR}"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2>/dev/null |
       sed "s/.*vul_func_//" | sort -g -r | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" | rev | cut -d '-' -f2- | rev |
-      uniq | head -10 2>/dev/null || true)
+      sort -u -t ' ' -k3 | sort -g -r | head -10 2>/dev/null || true)
     readarray -t lRESULTS_SYSTEM_ARR < <(find "${LOG_DIR}"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2>/dev/null |
       sed "s/.*vul_func_//" | sort -g -r | sed "s/_system-/ system /" | sed "s/\.txt//" | rev | cut -d '-' -f2- | rev |
-      uniq | head -10 2>/dev/null || true)
+      sort -u -t ' ' -k3 | sort -g -r | head -10 2>/dev/null || true)
 
     # strcpy:
     if [[ "${#lRESULTS_STRCPY_ARR[@]}" -gt 0 ]] && [[ $(echo "${lRESULTS_STRCPY_ARR[0]}" | awk '{print $1}') -gt 0 ]]; then
