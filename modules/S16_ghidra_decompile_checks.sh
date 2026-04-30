@@ -18,6 +18,9 @@
 #               The generated source code is further analysed with semgrep and the rules provided by 0xdea
 #               (https://github.com/0xdea/semgrep-rules)
 
+# Upcoming feature
+INTERNAL_LINKING=0
+
 S16_ghidra_decompile_checks() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check decompiled binary source code for vulnerabilities"
@@ -303,27 +306,32 @@ s16_semgrep_logger() {
 
   # we only handle decompiled code files with semgrep issues, otherwise we move to the next function
   # print_output "[*] Testing ${lHARUSPEX_FILE_NAME} against semgrep log ${lSEMGREPLOG}"
-  if ! grep -q "${lHARUSPEX_FILE_NAME}" "${lSEMGREPLOG_CSV}"; then
-    return
+  # for internal linking we need all the files in the future - currently we do not need further processing
+  if [[ "${INTERNAL_LINKING:-0}" -eq 0 ]]; then
+    if ! grep -q "${lHARUSPEX_FILE_NAME}" "${lSEMGREPLOG_CSV}"; then
+      return
+    fi
   fi
   if [[ -f "${lHARUSPEX_FILE}" ]]; then
     mv "${lHARUSPEX_FILE}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error storing Ghidra decompiled code for ${lNAME} in log directory"
   fi
   # print_output "[*] moved ${lHARUSPEX_FILE} to ${LOG_PATH_MODULE}/haruspex_${lNAME}" "no_log"
   if [[ -f "${lSEMGREPLOG}" ]]; then
+    local lC_SRC_FCT="${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}"
     # now we rebuild our logfile
     while IFS="," read -r lPATH lCHECK_ID lLINE_NR lMESSAGE; do
       if [[ "${lPATH}" != *"${lHARUSPEX_FILE_NAME}"* ]]; then
         continue
       fi
-      write_log "[+] Identified source function: ${ORANGE}${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}${NC}" "${lSEMGREPLOG_TMP}"
-      write_link "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "${lSEMGREPLOG_TMP}"
+
+      write_log "[+] Identified source function: ${ORANGE}${lC_SRC_FCT}${NC}" "${lSEMGREPLOG_TMP}"
+      write_link "${lC_SRC_FCT}" "${lSEMGREPLOG_TMP}"
       write_log "$(indent "$(indent "Semgrep rule: ${ORANGE}${lCHECK_ID}${NC}")")" "${lSEMGREPLOG_TMP}"
       write_log "$(indent "$(indent "Issue description:\\n${lMESSAGE}")")" "${lSEMGREPLOG_TMP}"
       write_log "" "${lSEMGREPLOG_TMP}"
-      if [[ -f "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" ]]; then
+      if [[ -f "${lC_SRC_FCT}" ]]; then
         # extract the identified code line from the source code to show it in the overview page
-        lCODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" 2>/dev/null)")"
+        lCODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${lC_SRC_FCT}" 2>/dev/null)")"
         shopt -s extglob
         lCODE_LINE="${lCODE_LINE##+([[:space:]])}"
         lCODE_LINE="$(echo -e "${lCODE_LINE}" | tr -d '\0')"
@@ -332,15 +340,38 @@ s16_semgrep_logger() {
         # shellcheck disable=SC2116
         lLINE_NR="$(echo "${lLINE_NR}")"
         # color the identified line in the source file:
-        sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" || true
+        sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${lC_SRC_FCT}" || true
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${lCODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
 
         # lBINARY;source function;semgrep rule;code line nr; code line
         write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${lCODE_LINE/\;/}" "${lMESSAGE/\;/}"
+
       fi
       write_log "\\n-----------------------------------------------------------------\\n" "${lSEMGREPLOG_TMP}"
     done <"${lSEMGREPLOG_CSV}"
+
+    # Finally we check for function calls and include links to the file of the function
+    # TODO: The linking on multiple sublevels is currently not working!
+    # We need to fix the webreporter for this
+    if [[ "${INTERNAL_LINKING:-0}" -eq 1 ]]; then
+      local lFCT_CALLS_ARR=()
+      mapfile -t lFCT_CALLS_ARR < <(grep -oE "FUN_[[:alnum:]_]+;" "${lC_SRC_FCT}" | sort -u || true)
+      for lFCT_CALL in "${lFCT_CALLS_ARR[@]}"; do
+        [[ -z "${lFCT_CALL}" ]] && continue
+        print_output "[*] Checking ${lFCT_CALL} in ${lC_SRC_FCT}" "no_log"
+        local lFCT_CALL_TARGET=""
+        lFCT_CALL_TARGET=$(find "${LOG_PATH_MODULE}/haruspex_${lNAME}/" -name "*${lFCT_CALL}*" -print -quit)
+        if [[ -n "${lFCT_CALL_TARGET}" ]]; then
+          # check if we have already linked the function
+          # if no link is avaialable, we include it now
+          if ! grep -q "[REF] ${lFCT_CALL_TARGET}" "${lC_SRC_FCT}"; then
+            print_output "[*] Adding linking to function ${lFCT_CALL} into ${lC_SRC_FCT}" "no_log"
+            sed -i "#${lFCT_CALL}#a \[REF\] ${lFCT_CALL_TARGET}" "${lC_SRC_FCT}" || true
+          fi
+        fi
+      done
+    fi
   fi
 
   # GPT integration
