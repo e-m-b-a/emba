@@ -356,10 +356,11 @@ s16_semgrep_logger() {
     # We need to fix the webreporter for this
     if [[ "${INTERNAL_LINKING:-0}" -eq 1 ]]; then
       local lFCT_CALLS_ARR=()
-      mapfile -t lFCT_CALLS_ARR < <(grep -o "FUN_\(.*\);" "${lC_SRC_FCT}" | cut -d ',' -f1 | cut -d '(' -f1 | sort -u || true)
+      mapfile -t lFCT_CALLS_ARR < <(grep -oE "FUN_[[:alnum:]_]+;" "${lC_SRC_FCT}" | sort -u || true)
       for lFCT_CALL in "${lFCT_CALLS_ARR[@]}"; do
         [[ -z "${lFCT_CALL}" ]] && continue
         print_output "[*] Checking ${lFCT_CALL} in ${lC_SRC_FCT}" "no_log"
+        local lFCT_CALL_TARGET=""
         lFCT_CALL_TARGET=$(find "${LOG_PATH_MODULE}/haruspex_${lNAME}/" -name "*${lFCT_CALL}*" -print -quit)
         if [[ -n "${lFCT_CALL_TARGET}" ]]; then
           # check if we have already linked the function

@@ -70,14 +70,16 @@ main_web_check() {
 
       # handle first https and afterwards http
       if [[ "${lSERVICE}" == *"ssl|http"* ]] || [[ "${lSERVICE}" == *"ssl/http"* ]]; then
-        # enable old cyphers and test access:
+        # enable old ciphers and test access:
         sed -i -E 's/MinProtocol[=\ ]+.*/MinProtocol = None/g' /etc/ssl/openssl.cnf
         local lCURL_OPTS_ARR=("-sS" "--noproxy" '*' '-k')
         timeout --preserve-status --signal SIGINT 4 curl "${lCURL_OPTS_ARR[@]}" "https://${lIP_ADDRESS_}:${lPORT}" |& tee "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log" || true
         if grep -q "unsupported protocol" "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log"; then
           print_output "[-] TLS/SSL service detected on ${lIP_ADDRESS_}:${lPORT} which is running on some unsupported protocol"
           print_output "[*] Switching to legacy OpenSSL and legacy curl version"
-          alias curl="LD_LIBRARY_PATH=${EXT_DIR}/legacy/lib ${EXT_DIR}/legacy/bin/curl --sslv2 --sslv3 -k"
+          # redefine curl via function (alias not working):
+          # alias curl="LD_LIBRARY_PATH=${EXT_DIR}/legacy/lib ${EXT_DIR}/legacy/bin/curl --sslv2 --sslv3 -k"
+          return
         fi
         lSSL=1
         if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
