@@ -40,6 +40,7 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 
 ## Latest news
 
+* [*EMBA v2.0.1 - The interactor*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.1-interactor)
 * [*EMBA v2.0.0 - A brave new world of firmware analysis*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.0-A-brave-new-world)
 * [*Recording of TROOPERS25 talk "SBOMs the right way" available*](https://github.com/e-m-b-a/emba/wiki#publications-talks-and-live-demos)
 * [*The EMBA book is available*](https://github.com/e-m-b-a/emba/wiki/The-EMBA-book-%E2%80%90-Overview)
