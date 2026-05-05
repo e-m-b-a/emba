@@ -114,7 +114,7 @@ add_link_tags() {
           # in some cases we link to files from different modules. Now we check if the html file is already
           # generated and we can directly use the already available html report file
           lORIG_SRC_MODULE_DIR=$(dirname "${lREF_LINK}")
-          lORIG_SRC_MODULE_DIR=${lORIG_SRC_MODULE_DIR//*\/}
+          lORIG_SRC_MODULE_DIR=${lORIG_SRC_MODULE_DIR//*\//}
           if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${MD5_REF_LINK}" ]]; then
             print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${MD5_REF_LINK}" "no_log"
             # link to the already available report file without generating a new one:
@@ -521,7 +521,7 @@ generate_info_file() {
 
     local lSUB_PATH=""
     lSUB_PATH="$(dirname "$(echo "${lINFO_FILE}" | sed -e "s#""${LOG_DIR}""##g")")"
-    lSUB_PATH="${lSUB_PATH/\/*}"
+    lSUB_PATH="${lSUB_PATH/\/*/}"
     print_debug "[*] Using lSUB_PATH ${lSUB_PATH} for lINFO_HTML_FILE ${lINFO_HTML_FILE}" "no_log"
     local lTMP_INFO_FILE="${ABS_HTML_PATH%/}/${TEMP_PATH}""/""${lSUB_PATH}""/""${lINFO_HTML_FILE}"
     local lTMP_INFO_DIR="${ABS_HTML_PATH%/}/${TEMP_PATH}""/""${lSUB_PATH}"
