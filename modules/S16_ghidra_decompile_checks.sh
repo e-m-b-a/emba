@@ -26,9 +26,8 @@ S16_ghidra_decompile_checks() {
   module_title "Check decompiled binary source code for vulnerabilities"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  # Upcoming feature
+  # Further testing needed:
   export INTERNAL_LINKING=1
-  export MAX_EXT_CHECK_BINS=2
   if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
@@ -355,8 +354,6 @@ s16_semgrep_logger() {
     done <"${lSEMGREPLOG_CSV}"
 
     # Finally we check for function calls and include links to the file of the function
-    # TODO: The linking on multiple sublevels is currently not working!
-    # We need to fix the webreporter for this
     if [[ "${INTERNAL_LINKING:-0}" -eq 1 ]]; then
       local lFCT_CALLS_ARR=()
       # we remove the first 4 lines to ensure we do not link the function byitself
