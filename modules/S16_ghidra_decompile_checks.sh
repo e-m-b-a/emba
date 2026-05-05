@@ -19,7 +19,7 @@
 #               (https://github.com/0xdea/semgrep-rules)
 
 # set DEBUG to 1 to enable further print statements
-DEBUG=0
+export DEBUG=0
 
 S16_ghidra_decompile_checks() {
   module_log_init "${FUNCNAME[0]}"
