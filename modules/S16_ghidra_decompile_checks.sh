@@ -342,8 +342,10 @@ s16_semgrep_logger() {
         # shellcheck disable=SC2116
         lLINE_NR="$(echo "${lLINE_NR}")"
         # color and mark the identified line in the source file:
-        sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m   //possible issue identified - semgrep/" "${lC_SRC_FCT}" || true
-        # this is the output
+        if [[ "${lCODE_LINE}" != *"possible issue identified - semgrep"* ]]; then
+          sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m   \/\/possible issue identified - semgrep/" "${lC_SRC_FCT}" || true
+        fi
+        # this is the output for the report
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${lCODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
 
         # lBINARY;source function;semgrep rule;code line nr; code line
