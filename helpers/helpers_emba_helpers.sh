@@ -30,7 +30,7 @@ run_web_reporter_mod_name() {
       if [[ -f "${lLOG_FILE}" ]]; then
         lMOD_NAME=$(basename -s .txt "${lLOG_FILE}")
         generate_report_file "${lLOG_FILE}"
-        if [[ "${DEBUG}" -ne 1 ]]; then
+        if [[ "${DEBUG:-0}" -ne 1 ]]; then
           sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
         fi
       else
@@ -46,13 +46,13 @@ wait_for_pid() {
 
   print_debug "[*] wait pid protection: ${#lWAIT_PIDS_ARR[@]}" "no_log"
   for lPID in "${lWAIT_PIDS_ARR[@]}"; do
-    print_debug "[*] wait pid protection: $lPID" "no_log"
+    print_debug "[*] wait pid protection: ${lPID}" "no_log"
     print_dot
     if ! [[ -e /proc/"${lPID}" ]]; then
       continue
     fi
     while [[ -e /proc/"${lPID}" ]]; do
-      print_debug "[*] wait pid protection - running pid: $lPID" "no_log"
+      print_debug "[*] wait pid protection - running pid: ${lPID}" "no_log"
       print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ -f "${LOG_DIR}/${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}/${MAIN_LOG_FILE}") -gt 0 && -v QRUNTIME ]]; then
