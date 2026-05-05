@@ -28,6 +28,7 @@ export MOD_DIR="./modules"
 # setup some paths for the module
 export EMBA_MAP_GENERATOR=1
 export MAX_MAP_FILES=2000
+export SVG_BUILD_TIMEOUT="2h"
 
 # import EMBA helpers
 # shellcheck source=/dev/null
@@ -77,6 +78,7 @@ parameter_parsing() {
   export S115_LOG="${LOG_DIR}/s115_usermode_emulator.txt"
   export S115_LOG_DIR="${S115_LOG/\.txt/\/}"
   export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
+  export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 }
 
 print_help() {
@@ -105,8 +107,14 @@ setup_special_environment() {
   # EXT_DIR -> /tmp
   [[ ! -f "${JS_EMBA_LIB}" ]] && wget -q --timeout=15 "${JS_URL}" -O "${EXT_DIR}/${JS_LIB}"
   [[ ! -f "${LOGO_FILE_EMBA}" ]] && wget -q --timeout=15 "${LOGO_URL}" -O "${EXT_DIR}/${LOGO_FILE}"
-  [[ ! -f "${EXT_DIR}/${LOGO_FILE}" && ! -f "${LOGO_FILE_EMBA}" ]] && { echo "[-] EMBA Logo missing"; exit 1; }
-  [[ ! -f "${EXT_DIR}/${JS_LIB}" ]] && { echo "[-] JS library missing"; exit 1; }
+  if [[ ! -f "${EXT_DIR}/${LOGO_FILE}" && ! -f "${LOGO_FILE_EMBA}" ]]; then
+    echo "[-] EMBA Logo missing"
+    exit 1
+  fi
+  if [[ ! -f "${EXT_DIR}/${JS_LIB}" ]]; then
+    echo "[-] JS library missing"
+    exit 1
+  fi
 }
 
 # job cleanup for multi processing
@@ -141,6 +149,9 @@ main() {
     echo "[-] WARNING: Log directory ${LOG_PATH_MODULE} available - remove before proceeding"
     exit 1
   fi
+
+  echo "[*] Ensure you have all needed dependencies installed."
+  echo "[*] EMBA map builder needs the following tools installed on your host: neato, grep, awk, sort, basename, sed, md5sum, wc, strings, readelf, file, objdump, ldd"
 
   export MAIN_LOG="${LOG_PATH_MODULE}.txt"
   setup_special_environment

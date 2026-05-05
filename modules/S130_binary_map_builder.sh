@@ -198,7 +198,7 @@ system_emulator_init_runner() {
   if [[ ${EUID} -eq 0 ]]; then
     timeout 360 ./run.sh
   else
-    timeout 360 sudo ./run.sh
+    (ulimit -t 360; exec sudo ./run.sh)
   fi
 
   cd "${lHOME_DIR}" || {
