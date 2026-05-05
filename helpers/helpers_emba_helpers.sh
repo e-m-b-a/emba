@@ -28,7 +28,7 @@ run_web_reporter_mod_name() {
       if [[ -f "${lLOG_FILE}" ]]; then
         lMOD_NAME=$(basename -s .txt "${lLOG_FILE}")
         generate_report_file "${lLOG_FILE}"
-        sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
+        # sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
       else
         print_error "[-] Some error occured during web report building for ${lLOG_FILE}"
       fi

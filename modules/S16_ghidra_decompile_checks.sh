@@ -18,14 +18,17 @@
 #               The generated source code is further analysed with semgrep and the rules provided by 0xdea
 #               (https://github.com/0xdea/semgrep-rules)
 
-# Upcoming feature
-INTERNAL_LINKING=0
+# set DEBUG to 1 to enable further print statements
+DEBUG=0
 
 S16_ghidra_decompile_checks() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check decompiled binary source code for vulnerabilities"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  # Upcoming feature
+  export INTERNAL_LINKING=1
+  export MAX_EXT_CHECK_BINS=2
   if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
@@ -339,8 +342,8 @@ s16_semgrep_logger() {
         # with a normal echo we automatically remove the null bytes which caused issues
         # shellcheck disable=SC2116
         lLINE_NR="$(echo "${lLINE_NR}")"
-        # color the identified line in the source file:
-        sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${lC_SRC_FCT}" || true
+        # color and mark the identified line in the source file:
+        sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m   //possible issue identified - semgrep/" "${lC_SRC_FCT}" || true
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${lCODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
 
@@ -356,18 +359,19 @@ s16_semgrep_logger() {
     # We need to fix the webreporter for this
     if [[ "${INTERNAL_LINKING:-0}" -eq 1 ]]; then
       local lFCT_CALLS_ARR=()
-      mapfile -t lFCT_CALLS_ARR < <(grep -oE "FUN_[[:alnum:]_]+;" "${lC_SRC_FCT}" | sort -u || true)
+      # we remove the first 4 lines to ensure we do not link the function byitself
+      mapfile -t lFCT_CALLS_ARR < <(tail -n +4 "${lC_SRC_FCT}" | grep -oE "FUN_[[:alnum:]_]+" | sort -u || true)
       for lFCT_CALL in "${lFCT_CALLS_ARR[@]}"; do
         [[ -z "${lFCT_CALL}" ]] && continue
-        print_output "[*] Checking ${lFCT_CALL} in ${lC_SRC_FCT}" "no_log"
+        print_debug "[*] Checking ${lFCT_CALL} in ${lC_SRC_FCT}" "no_log"
         local lFCT_CALL_TARGET=""
         lFCT_CALL_TARGET=$(find "${LOG_PATH_MODULE}/haruspex_${lNAME}/" -name "*${lFCT_CALL}*" -print -quit)
         if [[ -n "${lFCT_CALL_TARGET}" ]]; then
           # check if we have already linked the function
           # if no link is avaialable, we include it now
           if ! grep -q "[REF] ${lFCT_CALL_TARGET}" "${lC_SRC_FCT}"; then
-            print_output "[*] Adding linking to function ${lFCT_CALL} into ${lC_SRC_FCT}" "no_log"
-            sed -i "#${lFCT_CALL}#a \[REF\] ${lFCT_CALL_TARGET}" "${lC_SRC_FCT}" || true
+            print_debug "[*] Adding link for function ${lFCT_CALL} into ${lC_SRC_FCT}" "no_log"
+            sed -i "/${lFCT_CALL}/a \[REF\] ${lFCT_CALL_TARGET}" "${lC_SRC_FCT}" || true
           fi
         fi
       done
