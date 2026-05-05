@@ -150,8 +150,10 @@ main() {
     exit 1
   fi
 
+  echo ""
   echo "[*] Ensure you have all needed dependencies installed."
   echo "[*] EMBA map builder needs the following tools installed on your host: neato, grep, awk, sort, basename, sed, md5sum, wc, strings, readelf, file, objdump, ldd"
+  echo ""
 
   export MAIN_LOG="${LOG_PATH_MODULE}.txt"
   setup_special_environment
