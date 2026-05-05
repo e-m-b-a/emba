@@ -109,25 +109,26 @@ add_link_tags() {
           print_debug "[*] Generate info_file - REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK}" "no_log"
           # if we have a sub-page we only use a link like ./MD5-sum-of-sub-page.html
           # if we have a main page s16_asdf.html we need to link to the sub-directory
-          MD5_REF_LINK="$(md5sum "${lREF_LINK}" | awk '{print $1}').html"
+          local lMD5_REF_LINK=""
+          lMD5_REF_LINK="$(md5sum "${lREF_LINK}" | awk '{print $1}').html"
 
           # in some cases we link to files from different modules. Now we check if the html file is already
           # generated and we can directly use the already available html report file
           lORIG_SRC_MODULE_DIR=$(dirname "${lREF_LINK}")
           lORIG_SRC_MODULE_DIR=${lORIG_SRC_MODULE_DIR//*\//}
-          if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${MD5_REF_LINK}" ]]; then
-            print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${MD5_REF_LINK}" "no_log"
+          if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" ]]; then
+            print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" "no_log"
             # link to the already available report file without generating a new one:
-            lBACK_LINK_NEW="./${lORIG_SRC_MODULE_DIR}/${MD5_REF_LINK}"
+            lBACK_LINK_NEW="./${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}"
           else
             # generate reference file if it not already available
             generate_info_file "${lREF_LINK}" "${lBACK_LINK}" &
             lWAIT_PIDS_WR+=("$!")
 
             if [[ "${lBACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
-              lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${MD5_REF_LINK}"
+              lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${lMD5_REF_LINK}"
             else
-              lBACK_LINK_NEW="${MD5_REF_LINK}"
+              lBACK_LINK_NEW="${lMD5_REF_LINK}"
             fi
           fi
 
