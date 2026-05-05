@@ -105,8 +105,8 @@ setup_special_environment() {
   # EXT_DIR -> /tmp
   [[ ! -f "${JS_EMBA_LIB}" ]] && wget -q --timeout=15 "${JS_URL}" -O "${EXT_DIR}/${JS_LIB}"
   [[ ! -f "${LOGO_FILE_EMBA}" ]] && wget -q --timeout=15 "${LOGO_URL}" -O "${EXT_DIR}/${LOGO_FILE}"
-  [[ ! -f "${EXT_DIR}/${LOGO_FILE}" || ! -f "${LOGO_FILE_EMBA}" ]] && exit 1
-  [[ ! -f "${EXT_DIR}/${JS_LIB}" ]] && exit 1
+  [[ ! -f "${EXT_DIR}/${LOGO_FILE}" && ! -f "${LOGO_FILE_EMBA}" ]] && { echo "[-] EMBA Logo missing"; exit 1; }
+  [[ ! -f "${EXT_DIR}/${JS_LIB}" ]] && { echo "[-] JS library missing"; exit 1; }
 }
 
 # job cleanup for multi processing
