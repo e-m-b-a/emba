@@ -16,7 +16,9 @@
 # Author(s): Pascal Eckmann,
 # Contributors: Michael Messner, Stefan Haboeck
 
-export DEBUG=0
+# set DEBUG to 1 to enable further debug messages
+: "${DEBUG:=0}"
+export DEBUG
 
 export INDEX_FILE="index.html"
 export MAIN_LOG="./emba.log"
@@ -99,6 +101,11 @@ add_link_tags() {
       local lURL_REGEX='(www.|https?|ftp|file):\/\/'
       print_debug "[*] Checking REF ${lREF_LINK_NUMBER} - ${lREF_LINK} in ${lLINK_FILE}" "no_log"
       if [[ -f "$(echo "${lREF_LINK}" | cut -d"#" -f1)" ]]; then
+        # if we have a sub-page we only use a link like ./MD5-sum-of-sub-page.html
+        # if we have a main page s16_asdf.html we need to link to the sub-directory
+        local lMD5_REF_LINK=""
+        lMD5_REF_LINK="$(md5sum "${lREF_LINK}" | awk '{print $1}').html"
+
         if [[ (("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || (("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c")) ]]; then
           print_debug "[*] REF link ${lREF_LINK} found in ${lLINK_FILE}" "no_log"
           local lREF_ANCHOR=""
@@ -107,10 +114,6 @@ add_link_tags() {
             lREF_LINK="$(echo "${lREF_LINK}" | cut -d"#" -f1 || true)"
           fi
           print_debug "[*] Generate info_file - REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK}" "no_log"
-          # if we have a sub-page we only use a link like ./MD5-sum-of-sub-page.html
-          # if we have a main page s16_asdf.html we need to link to the sub-directory
-          local lMD5_REF_LINK=""
-          lMD5_REF_LINK="$(md5sum "${lREF_LINK}" | awk '{print $1}').html"
 
           # in some cases we link to files from different modules. Now we check if the html file is already
           # generated and we can directly use the already available html report file
@@ -145,6 +148,13 @@ add_link_tags() {
           lLINK_COMMAND_ARR+=("${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
         elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -5}" == ".spdx" || "${lREF_LINK: -5}" == ".html" ]]; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
+
+          if [[ "${lBACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+            lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${lMD5_REF_LINK}"
+          else
+            lBACK_LINK_NEW="${lMD5_REF_LINK}"
+          fi
+
           local lRES_PATH=""
           lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
           if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
@@ -160,6 +170,13 @@ add_link_tags() {
           lLINK_COMMAND_ARR+=("${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
         elif [[ "${lREF_LINK: -7}" == ".tar.gz" ]]; then
           local lRES_PATH=""
+
+          if [[ "${lBACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+            lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${lMD5_REF_LINK}"
+          else
+            lBACK_LINK_NEW="${lMD5_REF_LINK}"
+          fi
+
           lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
           if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
@@ -274,9 +291,9 @@ add_link_tags() {
           lEXPLOIT_FILE="${LOG_DIR}""/f20_vul_aggregator/exploit/""${lEXPLOIT_ID}"".txt"
           if [[ -f "${lEXPLOIT_FILE}" ]]; then
             # generate exploit file
-            generate_info_file "${lEXPLOIT_FILE}" "${lBACK_LINK_NEW}" &
+            generate_info_file "${lEXPLOIT_FILE}" "${lBACK_LINK}" &
             lWAIT_PIDS_WR+=("$!")
-            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)/${lEXPLOIT_ID}.html@g")""${lEXPLOIT_ID}""${LINK_END}"
+            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/${lEXPLOIT_ID}.html@g")""${lEXPLOIT_ID}""${LINK_END}"
           else
             lHTML_LINK="$(echo "${EXPLOIT_LINK}" | sed -e "s@LINK@${lEXPLOIT_ID}@g")""${lEXPLOIT_ID}""${LINK_END}"
           fi
@@ -304,10 +321,10 @@ add_link_tags() {
           if [[ -f "${lMSF_KEY_FILE}" ]]; then
             # copy msf file
             local lRES_PATH=""
-            lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
+            lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK}" | cut -d"." -f1)""/res"
             if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
             cp "${lMSF_KEY_FILE}" "${lRES_PATH}""/""$(basename "${lMSF_KEY_FILE}")" || true
-            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)/res/$(basename "${lMSF_KEY_FILE}")@g")""${lMSF_KEY_ELEM}""${LINK_END}"
+            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/res/$(basename "${lMSF_KEY_FILE}")@g")""${lMSF_KEY_ELEM}""${LINK_END}"
             lLINK_COMMAND_ARR+=("${lMSF_KEY_LINE}"'s@'"${lMSF_KEY_ELEM}"'@'"${lHTML_LINK}"'@')
           fi
         done
@@ -522,10 +539,10 @@ generate_info_file() {
 
     local lSUB_PATH=""
     lSUB_PATH="$(dirname "$(echo "${lINFO_FILE}" | sed -e "s#""${LOG_DIR}""##g")")"
-    lSUB_PATH="${lSUB_PATH/\/*/}"
+    lSUB_PATH="${lSUB_PATH#\/*}"
     print_debug "[*] Using lSUB_PATH ${lSUB_PATH} for lINFO_HTML_FILE ${lINFO_HTML_FILE}" "no_log"
-    local lTMP_INFO_FILE="${ABS_HTML_PATH%/}/${TEMP_PATH}""/""${lSUB_PATH}""/""${lINFO_HTML_FILE}"
-    local lTMP_INFO_DIR="${ABS_HTML_PATH%/}/${TEMP_PATH}""/""${lSUB_PATH}"
+    local lTMP_INFO_FILE="${ABS_HTML_PATH%/}/${TEMP_PATH}/${lSUB_PATH}/${lINFO_HTML_FILE}"
+    local lTMP_INFO_DIR="${ABS_HTML_PATH%/}/${TEMP_PATH}/${lSUB_PATH}"
 
     # add back Link anchor to navigation
     if [[ -n "${lSRC_FILE}" ]]; then
@@ -598,11 +615,9 @@ generate_report_file() {
   local lA_SUBMODUL_NAME=""
   local lLINE=""
   local lHTML_FILE=""
-  export MD5_SUM_OF_ORIGINAL_FILE=""
   if ! (grep -a -o -i -q "$(basename "${lREPORT_FILE%."${lREPORT_FILE##*.}"}")"" nothing reported" "${lREPORT_FILE}"); then
     # lHTML_FILE -> s16_ghidra_decompile_checks.html
     lHTML_FILE="$(basename "${lREPORT_FILE%."${lREPORT_FILE##*.}"}"".html" 2>/dev/null || true)"
-    MD5_SUM_OF_ORIGINAL_FILE=$(md5sum <"${lREPORT_FILE}" | awk '{print $1}')
     print_debug "Using lHTML_FILE: ${lHTML_FILE}" "no_log"
     print_debug "Using ABS_HTML_PATH: ${ABS_HTML_PATH}" "no_log"
     if [[ ${lSUPPL_FILE_GEN} -eq 1 ]]; then

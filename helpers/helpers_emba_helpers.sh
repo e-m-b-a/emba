@@ -16,7 +16,9 @@
 
 # Description: Multiple useful helpers
 
-export DEBUG=0
+# set DEBUG to 1 to enable further debug messages
+: "${DEBUG:=0}"
+export DEBUG
 
 run_web_reporter_mod_name() {
   local lMOD_NAME="${1:-}"

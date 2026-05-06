@@ -41,7 +41,7 @@ S130_binary_map_builder() {
     lS130_HTML_PAGE=$(find "${HTML_PATH}/s130_binary_map_builder" -type f -name "EMBA-dependency-map.html" | head -1)
     # lS130_HTML_PAGE=$(echo ${lS130_HTML_PAGE} | sed "s#${LOG_DIR}/html-report/##")
     # needed the path without the html directory for later replacement
-    lS130_HTML_PAGE="${lS130_HTML_PAGE//${LOG_DIR}\/html-report\//}"
+    lS130_HTML_PAGE="${lS130_HTML_PAGE#${HTML_PATH}/}"
     if [[ -f "${HTML_PATH}/s130_binary_map_builder.html" ]]; then
       # now we can add the link around our svg image
       sed -i "/img class.*EMBA-dependency-map.svg.*/i <a href=./${lS130_HTML_PAGE}>" "${HTML_PATH}/s130_binary_map_builder.html"
@@ -140,7 +140,7 @@ setup_environment() {
     mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f ! \( -name "*.uncompressed" -o -name "*.raw" \) 2>/dev/null | sort -u)
   fi
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
-    print_output "[*] INFO: A huge number of files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limthe module to a maximum of ${MAX_MAP_FILES} executables only"
+    print_output "[*] INFO: A huge number of files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit the module to a maximum of ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
       mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}")
     else
@@ -207,10 +207,17 @@ system_emulator_init_runner() {
   lTAP_INTERFACE=$(grep "ip route flush" ./run.sh || true)
   lTAP_INTERFACE=${lTAP_INTERFACE//*\ /}
   if [[ -n "${lTAP_INTERFACE}" ]]; then
-    sudo ip route flush dev "${lTAP_INTERFACE}"
-    sudo ip link set "${lTAP_INTERFACE}" down
-    sudo ip link delete "${lTAP_INTERFACE}"
-    sudo tunctl -d "${lTAP_INTERFACE}"
+    if [[ ${EUID} -eq 0 ]]; then
+      ip route flush dev "${lTAP_INTERFACE}"
+      ip link set "${lTAP_INTERFACE}" down
+      ip link delete "${lTAP_INTERFACE}"
+      tunctl -d "${lTAP_INTERFACE}"
+    else
+      sudo ip route flush dev "${lTAP_INTERFACE}"
+      sudo ip link set "${lTAP_INTERFACE}" down
+      sudo ip link delete "${lTAP_INTERFACE}"
+      sudo tunctl -d "${lTAP_INTERFACE}"
+    fi
   fi
 
   cd "${lHOME_DIR}" || {
