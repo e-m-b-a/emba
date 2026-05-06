@@ -41,7 +41,7 @@ S130_binary_map_builder() {
     lS130_HTML_PAGE=$(find "${HTML_PATH}/s130_binary_map_builder" -type f -name "EMBA-dependency-map.html" | head -1)
     # lS130_HTML_PAGE=$(echo ${lS130_HTML_PAGE} | sed "s#${LOG_DIR}/html-report/##")
     # needed the path without the html directory for later replacement
-    lS130_HTML_PAGE="${lS130_HTML_PAGE#${HTML_PATH}/}"
+    lS130_HTML_PAGE="${lS130_HTML_PAGE#"${HTML_PATH}"/}"
     if [[ -f "${HTML_PATH}/s130_binary_map_builder.html" ]]; then
       # now we can add the link around our svg image
       sed -i "/img class.*EMBA-dependency-map.svg.*/i <a href=./${lS130_HTML_PAGE}>" "${HTML_PATH}/s130_binary_map_builder.html"
