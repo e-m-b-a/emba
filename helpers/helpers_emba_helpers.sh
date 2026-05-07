@@ -16,6 +16,10 @@
 
 # Description: Multiple useful helpers
 
+# set DEBUG to 1 to enable further debug messages
+: "${DEBUG:=0}"
+export DEBUG
+
 run_web_reporter_mod_name() {
   local lMOD_NAME="${1:-}"
   local lLOG_FILES_ARR=()
@@ -28,7 +32,9 @@ run_web_reporter_mod_name() {
       if [[ -f "${lLOG_FILE}" ]]; then
         lMOD_NAME=$(basename -s .txt "${lLOG_FILE}")
         generate_report_file "${lLOG_FILE}"
-        sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
+        if [[ "${DEBUG:-0}" -ne 1 ]]; then
+          sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
+        fi
       else
         print_error "[-] Some error occured during web report building for ${lLOG_FILE}"
       fi
@@ -40,15 +46,15 @@ wait_for_pid() {
   local lWAIT_PIDS_ARR=("$@")
   local lPID=""
 
-  # print_output "[*] wait pid protection: ${#lWAIT_PIDS_ARR[@]}"
+  print_debug "[*] wait pid protection: ${#lWAIT_PIDS_ARR[@]}" "no_log"
   for lPID in "${lWAIT_PIDS_ARR[@]}"; do
-    # print_output "[*] wait pid protection: $lPID"
+    print_debug "[*] wait pid protection: ${lPID}" "no_log"
     print_dot
     if ! [[ -e /proc/"${lPID}" ]]; then
       continue
     fi
     while [[ -e /proc/"${lPID}" ]]; do
-      # print_output "[*] wait pid protection - running pid: $lPID"
+      print_debug "[*] wait pid protection - running pid: ${lPID}" "no_log"
       print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ -f "${LOG_DIR}/${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}/${MAIN_LOG_FILE}") -gt 0 && -v QRUNTIME ]]; then
@@ -69,7 +75,7 @@ max_pids_protection() {
     local lTEMP_PIDS_ARR=()
     # check for really running PIDs and re-create the array
     for lPID in "${lrWAIT_PIDS_ARR[@]}"; do
-      # print_output "[*] max pid protection: ${#lrWAIT_PIDS_ARR[@]}"
+      print_debug "[*] max pid protection: ${#lrWAIT_PIDS_ARR[@]}" "no_log"
       if [[ -e /proc/"${lPID}" ]]; then
         if ! grep -q "State:.*zombie.*" "/proc/${lPID}/status" 2>/dev/null; then
           lTEMP_PIDS_ARR+=("${lPID}")
@@ -81,7 +87,7 @@ max_pids_protection() {
       killall -9 --quiet --older-than "${QRUNTIME}" -r .*qemu.*sta.* || true
     fi
 
-    # print_output "[!] really running pids: ${#lTEMP_PIDS_ARR[@]}"
+    print_debug "[!] really running pids: ${#lTEMP_PIDS_ARR[@]}" "no_log"
 
     # recreate the arry with the current running PIDS
     lrWAIT_PIDS_ARR=()
@@ -380,7 +386,7 @@ disk_space_monitor() {
   done
 
   while true; do
-    # print_output "[*] Disk space monitoring active" "no_log"
+    print_debug "[*] Disk space monitoring active" "no_log"
     lFREE_SPACE=$(df --output=avail "${lDDISK}" | awk 'NR==2')
     if [[ "${lFREE_SPACE}" -lt 10000000 ]]; then
       print_ln "no_log"

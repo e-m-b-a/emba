@@ -16,6 +16,10 @@
 # Author(s): Pascal Eckmann,
 # Contributors: Michael Messner, Stefan Haboeck
 
+# set DEBUG to 1 to enable further debug messages
+: "${DEBUG:=0}"
+export DEBUG
+
 export INDEX_FILE="index.html"
 export MAIN_LOG="./emba.log"
 export STYLE_PATH="/style"
@@ -82,11 +86,12 @@ add_link_tags() {
   local lLINK_COMMAND_ARR=()
   local lWAIT_PIDS_WR=()
   local lREF_LINK_NUMBER=""
+  print_debug "[*] Reached add_link_tags - lLINK_FILE: ${lLINK_FILE} -> check for REF" "no_log"
 
   # [REF] anchor
   if (grep -a -q -E '\[REF\]' "${lLINK_FILE}"); then
     readarray -t lREF_LINKS_L_NUMBER_ARR < <(grep -a -n -E '\[REF\].*' "${lLINK_FILE}" | cut -d':' -f1 || true)
-    # print_output "[*] REF link found in ${lLINK_FILE}" "no_log"
+    print_debug "[*] REF link found in ${lLINK_FILE}" "no_log"
     for lREF_LINK_NUMBER in "${lREF_LINKS_L_NUMBER_ARR[@]}"; do
       DEPTH="."
       local lREF_LINK=""
@@ -94,22 +99,47 @@ add_link_tags() {
       local lLINE_NUMBER_INFO_PREV=""
       lREF_LINK="$(sed "${lREF_LINK_NUMBER}""q;d" "${lLINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       local lURL_REGEX='(www.|https?|ftp|file):\/\/'
+      print_debug "[*] Checking REF ${lREF_LINK_NUMBER} - ${lREF_LINK} in ${lLINK_FILE}" "no_log"
       if [[ -f "$(echo "${lREF_LINK}" | cut -d"#" -f1)" ]]; then
+        # if we have a sub-page we only use a link like ./MD5-sum-of-sub-page.html
+        # if we have a main page s16_asdf.html we need to link to the sub-directory
+        local lMD5_REF_LINK=""
+        lMD5_REF_LINK="$(md5sum "${lREF_LINK}" | awk '{print $1}').html"
+
         if [[ (("${lREF_LINK: -4}" == ".txt") || ("${lREF_LINK: -4}" == ".log") || ("${lREF_LINK: -4}" == ".csv")) || (("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*) || ("${lREF_LINK: -2}" == ".c")) ]]; then
+          print_debug "[*] REF link ${lREF_LINK} found in ${lLINK_FILE}" "no_log"
           local lREF_ANCHOR=""
           if [[ (("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*)) ]]; then
             lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
             lREF_LINK="$(echo "${lREF_LINK}" | cut -d"#" -f1 || true)"
           fi
-          # print_output "[*] REF link ${lREF_LINK} found in ${lLINK_FILE}" "no_log"
-          # generate reference file
-          generate_info_file "${lREF_LINK}" "${lBACK_LINK}" &
-          lWAIT_PIDS_WR+=("$!")
+          print_debug "[*] Generate info_file - REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK}" "no_log"
+
+          # in some cases we link to files from different modules. Now we check if the html file is already
+          # generated and we can directly use the already available html report file
+          lORIG_SRC_MODULE_DIR=$(dirname "${lREF_LINK}")
+          lORIG_SRC_MODULE_DIR=${lORIG_SRC_MODULE_DIR//*\//}
+          if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" ]]; then
+            print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" "no_log"
+            # link to the already available report file without generating a new one:
+            lBACK_LINK_NEW="./${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}"
+          else
+            # generate reference file if it not already available
+            generate_info_file "${lREF_LINK}" "${lBACK_LINK}" &
+            lWAIT_PIDS_WR+=("$!")
+
+            if [[ "${lBACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+              lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${lMD5_REF_LINK}"
+            else
+              lBACK_LINK_NEW="${lMD5_REF_LINK}"
+            fi
+          fi
 
           if [[ -n "${lREF_ANCHOR}" ]]; then
-            lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${lBACK_LINK}" | cut -d"." -f1)/$(basename "${lREF_LINK%."${lREF_LINK##*.}"}").html""#anchor_${lREF_ANCHOR}@g" || true)"
+            # lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${lBACK_LINK}" | cut -d"." -f1)/$(basename "${lREF_LINK%."${lREF_LINK##*.}"}").html""#anchor_${lREF_ANCHOR}@g" || true)"
+            lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@${DEPTH}/${lBACK_LINK_NEW}""#anchor_${lREF_ANCHOR}@g" || true)"
           else
-            lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${lBACK_LINK}" | cut -d"." -f1)/$(basename "${lREF_LINK%."${lREF_LINK##*.}"}").html@g" || true)"
+            lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@${DEPTH}/${lBACK_LINK_NEW}@g" || true)"
           fi
           lLINE_NUMBER_INFO_PREV="$((lREF_LINK_NUMBER - 1))"
           while [[ ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${P_START}${SPAN_END}${P_END}") || ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${BR}") ]]; do
@@ -118,8 +148,15 @@ add_link_tags() {
           lLINK_COMMAND_ARR+=("${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
         elif [[ "${lREF_LINK: -5}" == ".json" || "${lREF_LINK: -6}" == ".proto" || "${lREF_LINK: -4}" == ".xml" || "${lREF_LINK: -5}" == ".spdx" || "${lREF_LINK: -5}" == ".html" ]]; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
+
+          if [[ "${lBACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+            lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${lMD5_REF_LINK}"
+          else
+            lBACK_LINK_NEW="${lMD5_REF_LINK}"
+          fi
+
           local lRES_PATH=""
-          lRES_PATH="${ABS_HTML_PATH}""/""$(echo "${lBACK_LINK}" | cut -d"." -f1)""/res"
+          lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
           if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
           if [[ "${lREF_LINK}" == *"EMBA-dependency"* ]]; then
@@ -128,19 +165,26 @@ add_link_tags() {
           fi
 
           lLINE_NUMBER_INFO_PREV="$((lREF_LINK_NUMBER - 1))"
-          lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/res/$(basename "${lREF_LINK}")@g" || true)"
+          lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)/res/$(basename "${lREF_LINK}")@g" || true)"
 
           lLINK_COMMAND_ARR+=("${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
         elif [[ "${lREF_LINK: -7}" == ".tar.gz" ]]; then
           local lRES_PATH=""
-          lRES_PATH="${ABS_HTML_PATH}""/""$(echo "${lBACK_LINK}" | cut -d"." -f1)""/res"
+
+          if [[ "${lBACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+            lBACK_LINK_NEW="$(basename -s ".html" "${lBACK_LINK}")/${lMD5_REF_LINK}"
+          else
+            lBACK_LINK_NEW="${lMD5_REF_LINK}"
+          fi
+
+          lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
           if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
-          lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/res/$(basename "${lREF_LINK}")@g" || true)""Download Qemu emulation archive.""${LINK_END}"
+          lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)/res/$(basename "${lREF_LINK}")@g" || true)""Download Qemu emulation archive.""${LINK_END}"
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "${lREF_LINK}").*@${lHTML_LINK}${P_END}@" "${lLINK_FILE}"
         elif [[ "${lREF_LINK: -4}" == ".png" || "${lREF_LINK: -4}" == ".svg" ]]; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
-          cp "${lREF_LINK}" "${ABS_HTML_PATH}${STYLE_PATH}""/""$(basename "${lREF_LINK}")" || true
+          cp "${lREF_LINK}" "${ABS_HTML_PATH%/}/${STYLE_PATH}""/""$(basename "${lREF_LINK}")" || true
 
           if [[ "$(echo "${lREF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
             DEPTH=".."
@@ -277,7 +321,7 @@ add_link_tags() {
           if [[ -f "${lMSF_KEY_FILE}" ]]; then
             # copy msf file
             local lRES_PATH=""
-            lRES_PATH="${ABS_HTML_PATH}""/""$(echo "${lBACK_LINK}" | cut -d"." -f1)""/res"
+            lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK}" | cut -d"." -f1)""/res"
             if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
             cp "${lMSF_KEY_FILE}" "${lRES_PATH}""/""$(basename "${lMSF_KEY_FILE}")" || true
             lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/res/$(basename "${lMSF_KEY_FILE}")@g")""${lMSF_KEY_ELEM}""${LINK_END}"
@@ -403,35 +447,6 @@ add_link_tags() {
         fi
       done
     fi
-
-    # [LOV] anchor for JS popup messages - Todo!
-    if (grep -a -q -E '\[LOV\]' "${lLINK_FILE}"); then
-      local lLOV_LINKS_L_NUMBER=()
-      local lLOV_LINK=""
-      local lLOV_LINK_NUMBER=""
-      local lLOV_LINE_BEFORE=""
-      readarray -t lLOV_LINKS_L_NUMBER < <(grep -a -n -E '\[LOV\].*' "${lLINK_FILE}" | cut -d':' -f1)
-      for lLOV_LINK_NUMBER in "${lLOV_LINKS_L_NUMBER[@]}"; do
-        DEPTH="."
-        lLOV_LINK="$(sed "${lLOV_LINK_NUMBER}""q;d" "${lLINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
-        if [[ -f "$(echo "${lLOV_LINK}" | cut -d"#" -f1)" ]]; then
-          echo "LOV_LINK: ${lLOV_LINK}"
-          lLINE_NUMBER_INFO_PREV="$((lLOV_LINK_NUMBER - 1))"
-          while [[ ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${P_START}${SPAN_END}${P_END}") || ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${BR}") ]]; do
-            lLINE_NUMBER_INFO_PREV=$((lLINE_NUMBER_INFO_PREV - 1))
-            echo "X lLINE_NUMBER_INFO_PREV: ${lLINE_NUMBER_INFO_PREV}"
-          done
-          lLOV_LINE_BEFORE="$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}" || true)"
-          # lHTML_LINK="$(echo "${lLOV_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${lBACK_LINK}" | cut -d"." -f1)/$(basename "${lLOV_LINK%."${LOV_LINK##*.}"}").html@g" || true)"
-          lHTML_LINK="$(echo "${LOCAL_OVERLAY_LINK}" | sed -e "s@LINK@${lLOV_LINK}@g" || true)"
-          echo "lHTML_LINK: ${lHTML_LINK}"
-          echo "lLOV_LINE_BEFORE: ${lLOV_LINE_BEFORE}"
-          echo "lLINE_NUMBER_INFO_PREV: ${lLINE_NUMBER_INFO_PREV}"
-          lLINK_COMMAND_ARR+=("${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
-          echo "LINK_COMMAND_ARR: ${lLINK_COMMAND_ARR[*]}"
-        fi
-      done
-    fi
   fi
 
   if [[ "${#lLINK_COMMAND_ARR[@]}" -gt 0 ]]; then
@@ -448,14 +463,14 @@ add_link_tags() {
         if [[ (($((X % lINSERT_SIZE)) -eq 0) && ${X} -ne 0) || ($((${#lLINK_COMMAND_ARR[@]} - 1)) -eq ${X}) ]]; then
           lSED_ERROR="$(sed -i "${lINSERT_ARR[@]}" "${lLINK_FILE}" 2>&1 >/dev/null)"
           if [[ -n "${lSED_ERROR}" ]]; then
-            printf "ERROR:\nInsertion of Chunk failed:\n%s\n\nError message:\n%s\n" "${lINSERT_ARR[@]}" "${lSED_ERROR}" >>"${ABS_HTML_PATH}${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
+            printf "ERROR:\nInsertion of Chunk failed:\n%s\n\nError message:\n%s\n" "${lINSERT_ARR[@]}" "${lSED_ERROR}" >>"${ABS_HTML_PATH%/}/${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
             lSED_ERROR=""
-            printf "SINGLE_INSERTION:\n" >>"${ABS_HTML_PATH}${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
+            printf "SINGLE_INSERTION:\n" >>"${ABS_HTML_PATH%/}/${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
             for lLINE in "${lLOCAL_ARR[@]}"; do
-              printf "%s\n" "${lLINE}" >>"${ABS_HTML_PATH}${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
+              printf "%s\n" "${lLINE}" >>"${ABS_HTML_PATH%/}/${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
               lSED_ERROR=$(sed -i "${lLINE}" "${lLINK_FILE}" 2>&1 >/dev/null)
               if [[ -n "${lSED_ERROR}" ]]; then
-                printf "ERROR:\nInsertion of single link failed:\n%s\n" "${lSED_ERROR}" >>"${ABS_HTML_PATH}${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
+                printf "ERROR:\nInsertion of single link failed:\n%s\n" "${lSED_ERROR}" >>"${ABS_HTML_PATH%/}/${ERR_PATH}/web_report_error_$(basename "${lLINK_FILE}").txt"
               fi
             done
           fi
@@ -481,57 +496,68 @@ strip_color_tags() {
 # often we have additional information, like exploits or cve's
 generate_info_file() {
   local lINFO_FILE=${1:-}
+  # lSRC_FILE -> e.g.: s16_ghidra_decompile_checks.html
   local lSRC_FILE=${2:-}
-  local lCUSTOM_SUB_PATH=${3:-}
 
   local lDEPTH_HTML_HEADER="./.."
   local lINFO_PATH=""
   local lSRC_FILE_NAME=""
 
   local lINFO_HTML_FILE=""
+  local lMD5_SUM_OF_INFO_FILE=""
   lINFO_HTML_FILE="$(basename "${lINFO_FILE%."${lINFO_FILE##*.}"}"".html")"
+  lSRC_FILE_NAME="$(echo "${lSRC_FILE}" | cut -d"." -f1)"
+  print_debug "[*] Generate info_file for SRC_FILE ${lSRC_FILE} / ${lSRC_FILE_NAME} -> ${lINFO_HTML_FILE} / lINFO_FILE: ${lINFO_FILE}" "no_log"
+  # if we have no main module log like sXYZ_module.html, we use the md5sum of
+  # the original file as filename
+  if ! [[ "${lINFO_HTML_FILE}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+    lMD5_SUM_OF_INFO_FILE=$(md5sum <"${lINFO_FILE}" | awk '{print $1}')
+    lINFO_HTML_FILE="${lMD5_SUM_OF_INFO_FILE}.html"
+  fi
 
   # extract just the log directory name of the module:
   # export vs local?
   export LOG_DIR_MODULE=""
   LOG_DIR_MODULE="$(echo "${LOG_PATH_MODULE}" | sed -e "s#""${LOG_DIR}""##g")"
   LOG_DIR_MODULE="${LOG_DIR_MODULE//\//}"
-  lSRC_FILE_NAME="$(echo "${lSRC_FILE}" | cut -d"." -f1)"
 
-  if [[ -z "${lCUSTOM_SUB_PATH}" ]]; then
-    if [[ "${LOG_DIR_MODULE}" != "${lSRC_FILE_NAME}" ]]; then
-      lINFO_PATH="${ABS_HTML_PATH}/${LOG_DIR_MODULE}/${lSRC_FILE_NAME}"
-      # INFO: now we have another directory depth and we need to adjust the html header
-      lDEPTH_HTML_HEADER="./../.."
-    else
-      lINFO_PATH="${ABS_HTML_PATH}/${LOG_DIR_MODULE}"
-      lDEPTH_HTML_HEADER="./.."
-    fi
-  else
-    lINFO_PATH="${ABS_HTML_PATH}/${LOG_DIR_MODULE}/""${lCUSTOM_SUB_PATH}"
-  fi
+  lINFO_PATH="${ABS_HTML_PATH%/}/${LOG_DIR_MODULE}"
+  print_debug "[*] Info_file generation for ${lSRC_FILE_NAME} -> ${lINFO_HTML_FILE} / lINFO_FILE: ${lINFO_FILE} / INFO_PATH: ${lINFO_PATH}" "no_log"
 
-  local lRES_PATH="${lINFO_PATH}""/res"
+  local lRES_PATH="${lINFO_PATH}/res"
 
+  # we create something like html-report/sXYZ_module/
   if ! [[ -d "${lINFO_PATH}" ]]; then
     mkdir -p "${lINFO_PATH}" || true
   fi
 
   if [[ ! -f "${lINFO_PATH}""/""${lINFO_HTML_FILE}" ]] && [[ -f "${lINFO_FILE}" ]]; then
+    print_debug "[*] Lets generate the info_file ${lINFO_PATH}/${lINFO_HTML_FILE}" "no_log"
+
     cp "./helpers/base.html" "${lINFO_PATH}""/""${lINFO_HTML_FILE}" || true
     sed -i -e "s:\.\/:""${lDEPTH_HTML_HEADER}""/:g" "${lINFO_PATH}""/""${lINFO_HTML_FILE}"
 
     local lSUB_PATH=""
     lSUB_PATH="$(dirname "$(echo "${lINFO_FILE}" | sed -e "s#""${LOG_DIR}""##g")")"
-    local lTMP_INFO_FILE="${ABS_HTML_PATH}""${TEMP_PATH}""/""${lSUB_PATH}""/""${lINFO_HTML_FILE}"
-    local lTMP_INFO_DIR="${ABS_HTML_PATH}""${TEMP_PATH}""/""${lSUB_PATH}"
+    lSUB_PATH="${lSUB_PATH#\/*}"
+    print_debug "[*] Using lSUB_PATH ${lSUB_PATH} for lINFO_HTML_FILE ${lINFO_HTML_FILE}" "no_log"
+    local lTMP_INFO_FILE="${ABS_HTML_PATH%/}/${TEMP_PATH}/${lSUB_PATH}/${lINFO_HTML_FILE}"
+    local lTMP_INFO_DIR="${ABS_HTML_PATH%/}/${TEMP_PATH}/${lSUB_PATH}"
 
     # add back Link anchor to navigation
     if [[ -n "${lSRC_FILE}" ]]; then
       local lLINE_NUMBER_INFO_NAV=""
       local lNAV_INFO_BACK_LINK=""
       lLINE_NUMBER_INFO_NAV=$(grep -a -n "navigation start" "${lINFO_PATH}""/""${lINFO_HTML_FILE}" | cut -d":" -f1 || true)
-      lNAV_INFO_BACK_LINK="$(echo "${MODUL_LINK}" | sed -e "s@LINK@./../${lSRC_FILE}@g")"
+      if [[ "${lSRC_FILE_NAME}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+        # to get to the root level of the report
+        local lLINK_DEPTH="./.."
+      else
+        # stay in the sub-level of the module
+        local lLINK_DEPTH="."
+      fi
+      print_debug "[*] Adding Backlink to ${lSRC_FILE} for lINFO_HTML_FILE ${lINFO_HTML_FILE} / lSRC_FILE_NAME: ${lSRC_FILE_NAME}" "no_log"
+      lNAV_INFO_BACK_LINK="$(echo "${MODUL_LINK}" | sed -e "s@LINK@${lLINK_DEPTH}/${lSRC_FILE}@g")"
       sed -i "${lLINE_NUMBER_INFO_NAV}""i""${lNAV_INFO_BACK_LINK}""&laquo; Back to ""$(basename "${lSRC_FILE%.html}")""${LINK_END}" "${lINFO_PATH}""/""${lINFO_HTML_FILE}"
     fi
 
@@ -590,7 +616,10 @@ generate_report_file() {
   local lLINE=""
   local lHTML_FILE=""
   if ! (grep -a -o -i -q "$(basename "${lREPORT_FILE%."${lREPORT_FILE##*.}"}")"" nothing reported" "${lREPORT_FILE}"); then
+    # lHTML_FILE -> s16_ghidra_decompile_checks.html
     lHTML_FILE="$(basename "${lREPORT_FILE%."${lREPORT_FILE##*.}"}"".html" 2>/dev/null || true)"
+    print_debug "Using lHTML_FILE: ${lHTML_FILE}" "no_log"
+    print_debug "Using ABS_HTML_PATH: ${ABS_HTML_PATH}" "no_log"
     if [[ ${lSUPPL_FILE_GEN} -eq 1 ]]; then
       cp "./helpers/base.html" "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}/${lHTML_FILE}" || true
     else
@@ -604,8 +633,10 @@ generate_report_file() {
     # parse log content and add to html file
     lLINE_NUMBER_REP_NAV=$(grep -a -n "navigation start" "${ABS_HTML_PATH%/}/${lHTML_FILE}" | cut -d":" -f1)
 
+    print_debug "Copy original txt ${lREPORT_FILE} to html ${lTMP_FILE}" "no_log"
     cp "${lREPORT_FILE}" "${lTMP_FILE}" || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "${lTMP_FILE}"
+    # remove Statistics entries
     sed -i '\@\[\*\]\ Statistics@d' "${lTMP_FILE}"
 
     # module title anchor links
@@ -660,7 +691,7 @@ generate_report_file() {
 
     # add content of temporary html into template
     if [[ ${lSUPPL_FILE_GEN} -eq 1 ]]; then
-      sed -i "/content start/ r ${lTMP_FILE}" "${ABS_HTML_PATH}${SUPPL_PATH_HTML}""/""${lHTML_FILE}"
+      sed -i "/content start/ r ${lTMP_FILE}" "${ABS_HTML_PATH}${SUPPL_PATH_HTML}/${lHTML_FILE}"
     else
       sed -i "/content start/ r ${lTMP_FILE}" "${ABS_HTML_PATH}""/""${lHTML_FILE}"
     fi
@@ -681,9 +712,9 @@ add_link_to_index() {
     local lLINE_NUMBER_NAV_INSERT=""
     local lREP_NAV_LINK=""
 
-    lLINE_NUMBER_NAV_INSERT=$(grep -a -m 1 -n "${lSEARCH_VAL}" "${ABS_HTML_PATH}""/""${INDEX_FILE}" | cut -d ":" -f 1)
+    lLINE_NUMBER_NAV_INSERT=$(grep -a -m 1 -n "${lSEARCH_VAL}" "${ABS_HTML_PATH%/}/${INDEX_FILE}" | cut -d ":" -f 1)
     lREP_NAV_LINK="$(echo "${MODUL_INDEX_LINK}" | sed -e "s@LINK@.\/${HTML_FILE}@g" | sed -e "s@CLASS@${lCLASS}@g" | sed -e "s@DATA@${lDATA}@g")"
-    sed -i "${lLINE_NUMBER_NAV_INSERT}""i""${lREP_NAV_LINK}""${lMODUL_NAME}""${LINK_END}" "${ABS_HTML_PATH}""/""${INDEX_FILE}"
+    sed -i "${lLINE_NUMBER_NAV_INSERT}""i""${lREP_NAV_LINK}""${lMODUL_NAME}""${LINK_END}" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
   }
 
   HTML_FILE="${1:-}"
@@ -698,7 +729,7 @@ add_link_to_index() {
   lCLASS="${lDATA:0:1}"
   lC_NUMBER="$(echo "${lDATA:1}" | sed -E 's@^0*@@g')"
 
-  readarray -t lINDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "${ABS_HTML_PATH}""/""${INDEX_FILE}" | sed -e '1d;$d' | grep -a -P -o '(?<=data=\").*?(?=\")' || true)
+  readarray -t lINDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "${ABS_HTML_PATH%/}/${INDEX_FILE}" | sed -e '1d;$d' | grep -a -P -o '(?<=data=\").*?(?=\")' || true)
   readarray -t lINDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${lINDEX_NAV_ARR[@]}" | grep -a "${lCLASS}" || true)
 
   if [[ ${#lINDEX_NAV_GROUP_ARR[@]} -eq 0 ]]; then
@@ -732,26 +763,26 @@ update_index() {
 
   # add emba.log to webreport
   generate_report_file "${MAIN_LOG}"
-  sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%."${MAIN_LOG##*.}"}"".html")@" "${ABS_HTML_PATH}""/""${INDEX_FILE}"
+  sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%."${MAIN_LOG##*.}"}"".html")@" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
 
   # generate files in $SUPPL_PATH (supplementary files from modules)
   readarray -t lSUPPL_FILES_ARR < <(find "${SUPPL_PATH}" ! -path "${SUPPL_PATH}")
   if [[ "${#lSUPPL_FILES_ARR[@]}" -gt 0 ]]; then
-    sed -i 's@expand_njs hidden@expand_njs@g' "${ABS_HTML_PATH}""/""${INDEX_FILE}"
+    sed -i 's@expand_njs hidden@expand_njs@g' "${ABS_HTML_PATH%/}/${INDEX_FILE}"
   fi
   for lS_FILE in "${lSUPPL_FILES_ARR[@]}"; do
     generate_info_file "${lS_FILE}" "" "${SUPPL_PATH_HTML}"
-    lLINE_NUMBER_NAV=$(grep -a -n "etc start" "${ABS_HTML_PATH}""/""${INDEX_FILE}" | cut -d ":" -f 1)
+    lLINE_NUMBER_NAV=$(grep -a -n "etc start" "${ABS_HTML_PATH%/}/${INDEX_FILE}" | cut -d ":" -f 1)
     lREP_NAV_LINK="$(echo "${ETC_INDEX_LINK}" | sed -e "s@LINK@./${SUPPL_PATH_HTML}/$(basename "${lS_FILE%."${lS_FILE##*.}"}"".html")@g")"
-    sed -i "${lLINE_NUMBER_NAV}""i""${lREP_NAV_LINK}""$(basename "${lS_FILE%."${lS_FILE##*.}"}")""${LINK_END}" "${ABS_HTML_PATH}""/""${INDEX_FILE}"
+    sed -i "${lLINE_NUMBER_NAV}""i""${lREP_NAV_LINK}""$(basename "${lS_FILE%."${lS_FILE##*.}"}")""${LINK_END}" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
   done
   scan_report
   add_arrows
 
   # remove tempory files from web report
-  rm -R "${ABS_HTML_PATH}${TEMP_PATH}"
-  rmdir "${ABS_HTML_PATH}${ERR_PATH}" 2>/dev/null || true
-  rm -R "${ABS_HTML_PATH}"/qemu_init* 2>/dev/null || true
+  rm -R "${ABS_HTML_PATH:?}/${TEMP_PATH}"
+  rmdir "${ABS_HTML_PATH:?}/${ERR_PATH}" 2>/dev/null || true
+  rm -R "${ABS_HTML_PATH:?}"/qemu_init* 2>/dev/null || true
 }
 
 scan_report() {
@@ -764,7 +795,7 @@ scan_report() {
   readarray -t lLINK_FILE_ARR < <(grep -a -r -E -l "class\=\"refmodul\" href=\"(.*)" "${ABS_HTML_PATH}" || true)
   for lLINK in "${lLINK_ARR[@]}"; do
     for lFILE in "${lLINK_FILE_ARR[@]}"; do
-      if ! [[ -f "${ABS_HTML_PATH}""/""${lLINK}" ]]; then
+      if ! [[ -f "${ABS_HTML_PATH%/}/${lLINK}" ]]; then
         sed -i "s@class=\"refmodul\" href=\"(${lLINK})\"@@g" "${lFILE}"
       fi
     done
@@ -784,7 +815,7 @@ add_arrows() {
   readarray -t lF_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./f[0-9]*.*" | sort -V || true)
   local lQ_MODULE_ARR=()
   readarray -t lQ_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./q[0-9]*.*" | sort -V || true)
-  export ALL_MODULE_ARR=("${ABS_HTML_PATH}""/""${INDEX_FILE}" "${lD_MODULE_ARR[@]}" "${lP_MODULE_ARR[@]}" "${lS_MODULE_ARR[@]}" "${lQ_MODULE_ARR[@]}" "${lL_MODULE_ARR[@]}" "${lF_MODULE_ARR[@]}")
+  export ALL_MODULE_ARR=("${ABS_HTML_PATH%/}/${INDEX_FILE}" "${lD_MODULE_ARR[@]}" "${lP_MODULE_ARR[@]}" "${lS_MODULE_ARR[@]}" "${lQ_MODULE_ARR[@]}" "${lL_MODULE_ARR[@]}" "${lF_MODULE_ARR[@]}")
   local lM_NUM=""
 
   local lLINE_NUMBER_A_BUTTON=""
@@ -811,23 +842,23 @@ prepare_report() {
   export ABS_HTML_PATH=""
   ABS_HTML_PATH="$(abs_path "${HTML_PATH}")"
 
-  if [ ! -d "${ABS_HTML_PATH}${STYLE_PATH}" ]; then
-    mkdir -p "${ABS_HTML_PATH}${STYLE_PATH}" || true
-    cp "${HELP_DIR}/style.css" "${ABS_HTML_PATH}${STYLE_PATH}/style.css" || true
-    cp "${HELP_DIR}/emba.svg" "${ABS_HTML_PATH}${STYLE_PATH}/emba.svg" || true
-    cp "${HELP_DIR}/embark.svg" "${ABS_HTML_PATH}${STYLE_PATH}/embark.svg" || true
-    cp "${HELP_DIR}/favicon.png" "${ABS_HTML_PATH}${STYLE_PATH}/favicon.png" || true
+  if [ ! -d "${ABS_HTML_PATH%/}/${STYLE_PATH}" ]; then
+    mkdir -p "${ABS_HTML_PATH%/}/${STYLE_PATH}" || true
+    cp "${HELP_DIR}/style.css" "${ABS_HTML_PATH%/}/${STYLE_PATH}/style.css" || true
+    cp "${HELP_DIR}/emba.svg" "${ABS_HTML_PATH%/}/${STYLE_PATH}/emba.svg" || true
+    cp "${HELP_DIR}/embark.svg" "${ABS_HTML_PATH%/}/${STYLE_PATH}/embark.svg" || true
+    cp "${HELP_DIR}/favicon.png" "${ABS_HTML_PATH%/}/${STYLE_PATH}/favicon.png" || true
   fi
-  if [ ! -d "${ABS_HTML_PATH}${TEMP_PATH}" ]; then
-    mkdir -p "${ABS_HTML_PATH}${TEMP_PATH}" || true
+  if [ ! -d "${ABS_HTML_PATH%/}/${TEMP_PATH}" ]; then
+    mkdir -p "${ABS_HTML_PATH%/}/${TEMP_PATH}" || true
   fi
-  if [ ! -d "${ABS_HTML_PATH}${ERR_PATH}" ]; then
-    mkdir -p "${ABS_HTML_PATH}${ERR_PATH}" || true
+  if [ ! -d "${ABS_HTML_PATH%/}/${ERR_PATH}" ]; then
+    mkdir -p "${ABS_HTML_PATH%/}/${ERR_PATH}" || true
   fi
-  if [ ! -d "${ABS_HTML_PATH}${SUPPL_PATH_HTML}" ]; then
-    mkdir -p "${ABS_HTML_PATH}${SUPPL_PATH_HTML}" || true
+  if [ ! -d "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}" ]; then
+    mkdir -p "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}" || true
   fi
 
-  cp "./helpers/base.html" "${ABS_HTML_PATH}""/""${INDEX_FILE}" || true
-  sed -i 's@backButton@backButton hidden@g' "${ABS_HTML_PATH}""/""${INDEX_FILE}"
+  cp "./helpers/base.html" "${ABS_HTML_PATH%/}/${INDEX_FILE}" || true
+  sed -i 's@backButton@backButton hidden@g' "${ABS_HTML_PATH%/}/${INDEX_FILE}"
 }

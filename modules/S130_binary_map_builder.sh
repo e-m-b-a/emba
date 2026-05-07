@@ -37,16 +37,15 @@ S130_binary_map_builder() {
 
   # we need to adjust the html linking after the html report was created:
   if [[ "${HTML}" -eq 1 ]]; then
-    if [[ -f "${HTML_PATH}/s130_binary_map_builder.html" && -f "${HTML_PATH}/s130_binary_map_builder/res/EMBA-dependency-map.html" ]]; then
+    local lS130_HTML_PAGE=""
+    lS130_HTML_PAGE=$(find "${HTML_PATH}/s130_binary_map_builder" -type f -name "EMBA-dependency-map.html" | head -1)
+    # lS130_HTML_PAGE=$(echo ${lS130_HTML_PAGE} | sed "s#${LOG_DIR}/html-report/##")
+    # needed the path without the html directory for later replacement
+    lS130_HTML_PAGE="${lS130_HTML_PAGE#"${HTML_PATH}"/}"
+    if [[ -f "${HTML_PATH}/s130_binary_map_builder.html" ]]; then
       # now we can add the link around our svg image
-      sed -i '/img class.*EMBA-dependency-map.svg.*/i <a href=./s130_binary_map_builder/res/EMBA-dependency-map.html>' "${HTML_PATH}/s130_binary_map_builder.html"
+      sed -i "/img class.*EMBA-dependency-map.svg.*/i <a href=./${lS130_HTML_PAGE}>" "${HTML_PATH}/s130_binary_map_builder.html"
       sed -i '/img class.*EMBA-dependency-map.svg.*/a <\/a>' "${HTML_PATH}/s130_binary_map_builder.html"
-    fi
-
-    if [[ -f "${HTML_PATH}/s130_binary_map_builder.html" && -f "${HTML_PATH}/s130_binary_map_builder/res/EMBA-dependency-dot_map.html" ]]; then
-      # replace <img class="image" src="./style/EMBA-dependency-map_dot.svg">
-      sed -i '/img class.*EMBA-dependency-map_dot.svg.*/i <a href=./s130_binary_map_builder/res/EMBA-dependency-dot_map.html>' "${HTML_PATH}/s130_binary_map_builder.html"
-      sed -i '/img class.*EMBA-dependency-map_dot.svg.*/a <\/a>' "${HTML_PATH}/s130_binary_map_builder.html"
     fi
   fi
 }
@@ -80,6 +79,7 @@ load_default_environment() {
   # system emulation checks are only possible in standalone run via the helper script
   # During EMBA run the system emulation results are not available
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
+    print_ln ""
     print_output "[-] No system emualtion checks possible - missing L10 EMBA log directory (future extension)"
     DETECTION_MECHANISMS_ARR=("${DETECTION_MECHANISMS_ARR[@]/QEMU-SYS/}")
   fi
@@ -135,12 +135,12 @@ setup_environment() {
   # Get files for processing - if P99_CSV_LOG available we can use this
   export ALL_EXEC_FILES_ARR=()
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t ALL_EXEC_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw")
+    mapfile -t ALL_EXEC_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$\|\.uncompressed$")
   else
-    mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f ! -name "*.raw" 2>/dev/null | sort -u)
+    mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f ! \( -name "*.uncompressed" -o -name "*.raw" \) 2>/dev/null | sort -u)
   fi
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
-    print_output "[*] INFO: Too many files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit it to ${MAX_MAP_FILES} executables only"
+    print_output "[*] INFO: A huge number of files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit the module to a maximum of ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
       mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}")
     else
@@ -196,9 +196,28 @@ system_emulator_init_runner() {
   }
 
   if [[ ${EUID} -eq 0 ]]; then
-    timeout 360 ./run.sh
+    timeout 360s ./run.sh
   else
-    timeout 360 sudo ./run.sh
+    sudo timeout 360s ./run.sh
+  fi
+
+  # usually we were running into timeout and need to stop the interface now
+  local lTAP_INTERFACE=""
+  # extract the last field -> the tap interface
+  lTAP_INTERFACE=$(grep "ip route flush" ./run.sh || true)
+  lTAP_INTERFACE=${lTAP_INTERFACE//*\ /}
+  if [[ -n "${lTAP_INTERFACE}" ]]; then
+    if [[ ${EUID} -eq 0 ]]; then
+      ip route flush dev "${lTAP_INTERFACE}"
+      ip link set "${lTAP_INTERFACE}" down
+      ip link delete "${lTAP_INTERFACE}"
+      tunctl -d "${lTAP_INTERFACE}"
+    else
+      sudo ip route flush dev "${lTAP_INTERFACE}"
+      sudo ip link set "${lTAP_INTERFACE}" down
+      sudo ip link delete "${lTAP_INTERFACE}"
+      sudo tunctl -d "${lTAP_INTERFACE}"
+    fi
   fi
 
   cd "${lHOME_DIR}" || {
@@ -339,8 +358,9 @@ strict_string_dependency_checker() {
   local lSTR_DEP=""
 
   # lets check for fuzzy string dependencies - we check for a minimum of 4 character strings, remove commends and /dev/ entries
+  # we split every entry on spaces and on ':'
   # additionally we check for a slash / as path indicator
-  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | grep -v '/dev/' |
+  mapfile -t STRING_DEPS_SRC_ARR < <(strings -n 4 "${lFILE_TO_CHECK}" | sed -r 's/^[[:space:]]*#.*$//' | tr " " "\n" | tr ':' '\n' | grep -v '/dev/' |
     grep '/' | grep -E "^[a-zA-Z0-9./_-]+$" | tr -d '[:blank:]' | grep -E '.{4,}' | sort -u || true)
   # print_output "[*] Testing ${#STRING_DEPS_SRC_ARR[@]} strings from source ${lFILE_TO_CHECK}"
   # check for all identified strings - if they match a file in the filesystem

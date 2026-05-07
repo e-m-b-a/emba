@@ -1654,6 +1654,7 @@ get_networking_details_emulation() {
     if [[ -v lNVRAM_TMP[@] ]]; then
       for lNVRAM_ENTRY in "${lNVRAM_TMP[@]}"; do
         if [[ "${lNVRAM_ENTRY}" =~ [[:print:]] ]]; then
+          lNVRAM_ENTRY=${lNVRAM_ENTRY//[\'\"\`\[\]\{\}\;]/}
           if [[ ! " ${NVRAMS[*]} " =~ ${lNVRAM_ENTRY} ]]; then
             NVRAMS+=("${lNVRAM_ENTRY}")
           fi

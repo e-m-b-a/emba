@@ -134,6 +134,13 @@ print_error() {
   safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${ERROR_LOG}"
 }
 
+# print_debug is print_output but only if DEBUG is set to 1
+# in the module header
+print_debug() {
+  [[ "${DEBUG:-0}" != 1 ]] && return
+  print_output "${1}" "${2:-}" "${3:-}" "${4:-}"
+}
+
 # usage:
 # print_output "asdf" -> logs to screen and to default LOG_FILE
 # print_output "asdf" "main" -> logs to screen and to main log
