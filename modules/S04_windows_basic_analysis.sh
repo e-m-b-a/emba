@@ -19,13 +19,15 @@
 : <<'END_OF_DOCS'
 =pod
 
+=encoding UTF-8
+
 =head1 S04_windows_basic_analysis
 
-==head2 S04_windows_basic_analysis Short description
+=head2 S04_windows_basic_analysis Short description
 
 This module uses exiftool and readpe to access pe details details of Windows binaries.
 
-==head2 S04_windows_basic_analysis Detailed description
+=head2 S04_windows_basic_analysis Detailed description
 
 Module starts exiftool without further parameters and writes output to LOG_PATH_MODULE/$(basename $BIN).txt
 
@@ -77,7 +79,7 @@ Product Version                 : 1, 3, 6, 0
 Special Build                   :
 Tag 080904b 0                   :
 
-==head2 S04_windows_basic_analysis 3rd party tools
+=head2 S04_windows_basic_analysis 3rd party tools
 
 Any 3rd party tool that is needed from your module. Also include the tested and known working
 version and download link:
@@ -89,29 +91,29 @@ ii  libimage-exiftool-perl     12.76+dfsg-1        all       library and program
 
 ii  readpe                     0.84-1              amd64     command-line tools to manipulate Windows PE files
 
-==head2 S04_windows_basic_analysis Testfirmware
+=head2 S04_windows_basic_analysis Testfirmware
 
 Any Windows binary (exe) file should be fine.
 
-==head2 S04_windows_basic_analysis Output
+=head2 S04_windows_basic_analysis Output
 
 Example output of module see "Detailed description"
 
-==head2 S04_windows_basic_analysis License
+=head2 S04_windows_basic_analysis License
 
 EMBA module S04_windows_basic_analysis is licensed under GPLv3
 SPDX-License-Identifier: GPL-3.0-only
 Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
 
-==head2 S04_windows_basic_analysis Todo
+=head2 S04_windows_basic_analysis Todo
 
 None
 
-==head2 S04_windows_basic_analysis Known issues
+=head2 S04_windows_basic_analysis Known issues
 
 None
 
-==head2 S04_windows_basic_analysis Author(s)
+=head2 S04_windows_basic_analysis Author(s)
 
 Michael Messner
 
