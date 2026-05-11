@@ -25,7 +25,7 @@
 
 =head2 S04_windows_basic_analysis Short description
 
-This module uses exiftool and readpe to access pe details details of Windows binaries.
+This module uses exiftool and readpe to access PE details of Windows binaries.
 
 =head2 S04_windows_basic_analysis Detailed description
 
