@@ -19,18 +19,20 @@
 : <<'END_OF_DOCS'
 =pod
 
+=encoding UTF-8
+
 =head1 P07_windows_exe_extract
 
-==head2 P07_windows_exe_extract Short description
+=head2 P07_windows_exe_extract Short description
 
 This module extracts Windows executables with 7z.
 
-==head2 P07_windows_exe_extract Detailed description
+=head2 P07_windows_exe_extract Detailed description
 
 Please write a longer description of your module. This should also include further references and links
 that were used.
 
-==head2 P07_windows_exe_extract 3rd party tools
+=head2 P07_windows_exe_extract 3rd party tools
 
 Any 3rd party tool that is needed from your module. Also include the tested and known working
 version and download link:
@@ -41,11 +43,11 @@ version and download link:
 ii  7zip                      23.01+dfsg-8                    amd64        7-Zip file archiver with a high compression ratio
 ii  p7zip-full                16.02+transitional.1            all          transitional package
 
-==head2 P07_windows_exe_extract Testfirmware
+=head2 P07_windows_exe_extract Testfirmware
 
 Most Windows exe files should work fine.
 
-==head2 P07_windows_exe_extract Output
+=head2 P07_windows_exe_extract Output
 
 7-Zip 24.08 (x64) : Copyright (c) 1999-2024 Igor Pavlov : 2024-08-11
  64-bit locale=C.UTF-8 Threads:128 OPEN_MAX:1048576
@@ -88,13 +90,13 @@ Compressed: 1974272
 
 [*] Extracted 32 files and 1 directories from the Windows executable.
 
-==head2 P07_windows_exe_extract License
+=head2 P07_windows_exe_extract License
 
 EMBA module P07_windows_exe_extract is licensed under GPLv3
 SPDX-License-Identifier: GPL-3.0-only
 Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
 
-==head2 P07_windows_exe_extract Todo
+=head2 P07_windows_exe_extract Todo
 
 This module is in very early state and is currently only able to extract exe files that are provided via the -f switch
 to an EMBA analysis process.
@@ -103,11 +105,11 @@ approach.
 Additionally, we need to walk through the extracted content if we can extract further exe files. This could be also done
 via the deep extractor.
 
-==head2 P07_windows_exe_extract Known issues
+=head2 P07_windows_exe_extract Known issues
 
 See Todo section.
 
-==head2 P07_windows_exe_extract Author(s)
+=head2 P07_windows_exe_extract Author(s)
 
 Michael Messner
 
