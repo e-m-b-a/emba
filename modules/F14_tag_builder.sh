@@ -13,8 +13,99 @@
 #
 # Author(s): Michael Messner
 
-# Description:  Collects information from s-phase and builds tags that can be used for further tools
-#               like dependency track or EMBArk
+# The documentation can be generated with the following command:
+# perl -ne "s/^\t+//; print if m/END_OF_DOCS'?\$/ .. m/^\s*'?END_OF_DOCS'?\$/ and not m/END_OF_DOCS'?$/;" modules/F14_tag_builder.sh
+# or with pod2text modules/F14_tag_builder.sh
+: <<'END_OF_DOCS'
+=pod
+
+=head1 F14_tag_builder
+
+=head2 F14_tag_builder Short description
+
+This module collects results from multiple (S-, L-, and P-phase) modules and builds a unified tag file in JSON format.
+
+=head2 F14_tag_builder Detailed description
+
+F14_tag_builder aggregates findings from modules and generates tags.
+It extracts key metadata such as firmware vendor, detected CPU architecture, scripting languages
+(PHP, Python, Lua), operating system (Linux), password-cracking results, and emulation/exploitation
+outcomes. The collected tags are deduplicated, sorted, and written to a JSON file (LOG_PATH_MODULE/tags.json) 
+with jo.
+
+The following tags can be generated:
+
+=over 4
+
+=item * EMBA - Base tag, always included
+
+=item * Vendor name - From FW_VENDOR variable if detected
+
+=item * CPU architecture - From P99 file-type identification statistics
+
+=item * PHP - From S22 PHP analysis
+
+=item * Python - From S21 Python analysis
+
+=item * LUA - From S23 LUA analysis
+
+=item * Linux - From S03 OS detection, S25 kernel version analysis, or os_detector helper
+
+=item * cracked - From S109 password/credential cracking
+
+=item * emulated - From L10 emulation results
+
+=item * exploited - From L35 exploitation results
+
+=back
+
+If a module has not run before, it is silently skipped.
+However, the "emba"-tag is always included and thus the output is never empty
+
+=head2 F14_tag_builder 3rd party tools
+
+jo - JSON output tool to create the tags.json output file
+
+=head2 F14_tag_builder Testfirmware
+
+Any firmware image that produces results in the prerequisite S-phase and L-phase modules (see Detailed description)
+
+=head2 F14_tag_builder Output
+
+Example output:
+{
+  "tags": [
+    "ARM",
+    "EMBA",
+    "Linux",
+    "Python",
+    "cracked",
+    "emulated",
+    "exploited"
+  ]
+}
+
+=head2 F14_tag_builder License
+
+EMBA module F14_tag_builder is licensed under GPLv3
+SPDX-License-Identifier: GPL-3.0-only
+Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
+
+=head2 F14_tag_builder Todo
+
+None
+
+=head2 F14_tag_builder Known issues
+
+None
+
+=head2 F14_tag_builder Author(s)
+
+Michael Messner
+
+=cut
+
+END_OF_DOCS
 
 F14_tag_builder() {
   module_log_init "${FUNCNAME[0]}"
