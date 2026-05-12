@@ -19,6 +19,8 @@
 : <<'END_OF_DOCS'
 =pod
 
+=encoding UTF-8
+
 =head1 F14_tag_builder
 
 =head2 F14_tag_builder Short description
@@ -68,7 +70,7 @@ jo - JSON output tool to create the tags.json output file
 
 =head2 F14_tag_builder Testfirmware
 
-Any firmware image that produces results in the prerequisite S-phase and L-phase modules (see Detailed description)
+Any firmware image that produces results in the prerequisite modules (see Detailed description)
 
 =head2 F14_tag_builder Output
 
