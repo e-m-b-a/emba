@@ -32,7 +32,7 @@ This module collects results from multiple (S-, L-, and P-phase) modules and bui
 F14_tag_builder aggregates findings from modules and generates tags.
 It extracts key metadata such as firmware vendor, detected CPU architecture, scripting languages
 (PHP, Python, Lua), operating system (Linux), password-cracking results, and emulation/exploitation
-outcomes. The collected tags are deduplicated, sorted, and written to a JSON file (LOG_PATH_MODULE/tags.json) 
+outcomes. The collected tags are deduplicated, sorted, and written to a JSON file (LOG_PATH_MODULE/tags.json)
 with jo.
 
 The following tags can be generated:
