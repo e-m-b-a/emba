@@ -123,6 +123,7 @@ set_p02_default_exports() {
   export BMC_ENC_DETECTED=0
   export UBI_IMAGE=0
   export OPENSSL_ENC_DETECTED=0
+  export SREC_DETECTED=0
   export ENGENIUS_ENC_DETECTED=0
   export BUFFALO_ENC_DETECTED=0
   export QNAP_ENC_DETECTED=0
@@ -424,6 +425,12 @@ fw_bin_detector() {
     lUEFI_CHECK=0
     write_csv_log "OpenSSL encrypted" "yes" "NA"
   fi
+  if [[ "${lFILE_BIN_OUT}" == *"Motorola S-Record"* ]]; then
+    print_output "[+] Identified Motorola S-Record firmware - using S-Record extraction module"
+    export SREC_DETECTED=1
+    lUEFI_CHECK=0
+    write_csv_log "Motorola S-Record" "yes" "NA"
+  fi
   # This check is currently only tested on one firmware - further tests needed:
   if [[ "${lHEX_FIRST_LINE}" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\  ]]; then
     print_output "[+] Identified Buffalo encrpyted firmware - using Buffalo extraction module"
@@ -468,6 +475,7 @@ backup_p02_vars() {
   backup_var "GPG_COMPRESS" "${GPG_COMPRESS}"
   backup_var "ANDROID_OTA" "${ANDROID_OTA}"
   backup_var "OPENSSL_ENC_DETECTED" "${OPENSSL_ENC_DETECTED}"
+  backup_var "SREC_DETECTED" "${SREC_DETECTED}"
   backup_var "BUFFALO_ENC_DETECTED" "${BUFFALO_ENC_DETECTED}"
   backup_var "ZYXEL_ZIP" "${ZYXEL_ZIP}"
   backup_var "QCOW_DETECTED" "${QCOW_DETECTED}"
