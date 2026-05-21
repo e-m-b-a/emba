@@ -297,7 +297,7 @@ dependency_check() {
         check_nvd_db "${lNVD_GITHUB_HASH}"
       fi
     else
-      echo -e "${RED}""not ok""${NC}"
+      echo -e "${RED}not ok${NC}"
       print_output "[!] Warning: EMBA has NO internet connection!" "no_log"
       print_output "[!] Warning: Update checks and multiple EMBA modules are disabled!" "no_log"
       print_output "[!] Warning: GPT (Q02), kernel verification (S26) and further online modules are disabled!" "no_log"
@@ -306,14 +306,14 @@ dependency_check() {
 
   # running into this in Quest container and on host, but not on isolated EMBA container (as it is CONTAINER_NUMBER 1):
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-    if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
-      if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
-        # readin gpt_config.env
+    if [[ -f "${CONFIG_DIR}/ai_config.env" ]]; then
+      if grep -v -q "#" "${CONFIG_DIR}/ai_config.env"; then
+        # readin ai_config.env
         while read -r LINE; do
           if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
             export "$(echo "${LINE}" | xargs)"
           fi
-        done <"${CONFIG_DIR}/gpt_config.env"
+        done <"${CONFIG_DIR}/ai_config.env"
       fi
     fi
 
@@ -344,7 +344,7 @@ dependency_check() {
       print_output "$(indent "ChatGPT-API key not set - ${ORANGE}see https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis for more information${NC}")" "no_log"
       # The following if clause is currently not working! We have not loaded the profile in this stage
       # TODO: Find a workaround!
-      if [[ "${GPT_OPTION}" -eq 1 ]]; then
+      if [[ "${AI_OPTION}" -eq 1 ]]; then
         DEP_ERROR=1
       fi
     else

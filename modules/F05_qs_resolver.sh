@@ -18,90 +18,87 @@
 
 F05_qs_resolver() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "GPT Resolver"
+  module_title "AI Resolver"
 
-  if [[ "${GPT_OPTION}" -gt 0 ]]; then
-    # wait for completion or 1m
-    if grep -q "Q02_openai_question starting" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
-      print_output "[*] Waiting for the GPT testing module to stop ... " "no_log"
-      grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || sleep 1m
-      print_output "[*] GPT testing module stopped ... " "no_log"
+  if [[ "${AI_OPTION}" -gt 0 ]]; then
+    if grep -q "Q02_openai_question starting" "${MAIN_LOG}"; then
+      print_output "[*] Waiting for the GPT analysis module to stop ... " "no_log"
+      while ! grep -q "Q02_openai_question finished\|Quest container finished" "${MAIN_LOG}"; do
+        print_output "[*] Waiting for Q02 module"
+        sleep 5
+      done
+      print_output "[*] GPT testing module finished ... " "no_log"
+    fi
+
+    if grep -q "Q03_localai_connector starting" "${MAIN_LOG}"; then
+      print_output "[*] Waiting for the LocalAI analysis module to stop ... " "no_log"
+      while ! grep -q "Q03_localai_connector finished\|Quest container finished" "${MAIN_LOG}"; do
+        print_output "[*] Waiting for Q03 module"
+        sleep 5
+      done
+      print_output "[*] LocalAI testing module finished ... " "no_log"
     fi
 
     # local _GPT_INPUT_FILE_=""
-    local lGPT_ANCHOR_=""
+    local lAI_ANCHOR=""
     local l_GPT_PRIO_=3
     local lGPT_QUESTION_=""
     local lGPT_RESPONSE_=""
+    local lAI_RESPONSE_FILE=""
     local lGPT_TOKENS_=0
     local lGPT_OUTPUT_FILE_=""
     local lGPT_OUTPUT_FILE_HTML_ARR_=()
     local lGPT_REVERSE_LINK_=""
     local lWAIT_PIDS_F05_ARR=()
 
-    if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
+    if [[ -f "${CSV_DIR}/ai_question.csv" ]]; then
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
         lGPT_INPUT_FILE_="${COL1_}"
-        lGPT_ANCHOR_="${COL2_}"
+        lAI_ANCHOR="${COL2_}"
         l_GPT_PRIO_="${COL3_}"
         lGPT_QUESTION_="${COL4_}"
         lGPT_OUTPUT_FILE_="${COL5_}"
         lGPT_TOKENS_="${COL6_//cost\=/}"
-        lGPT_RESPONSE_="${COL7_//\"/}"
+        # file with AI response:
+        lAI_RESPONSE_FILE="${COL7_}"
 
-        print_output "[*] GPT resolver - testing ${ORANGE}${CSV_DIR}/q02_openai_question.csv${NC}"
+        print_output "[*] AI resolver - testing ${ORANGE}${CSV_DIR}/ai_question.csv${NC}"
 
-        if [[ "${THREADED}" -eq 1 ]]; then
-          gpt_resolver_csv "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_F05_ARR+=("${lTMP_PID}")
-          # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F05_ARR[@]}"
-        else
-          gpt_resolver_csv "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}"
-        fi
+        gpt_resolver_csv "${lGPT_INPUT_FILE_}" "${lAI_ANCHOR}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lAI_RESPONSE_FILE}" &
+      done <"${CSV_DIR}/ai_question.csv"
 
-      done <"${CSV_DIR}/q02_openai_question.csv"
-
-      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
-
+      wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
     fi
 
-    if [[ -f "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; then
+    if [[ -f "${CSV_DIR}/ai_question.csv.tmp" ]]; then
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
         local lGPT_INPUT_FILE_="${COL1_}"
-        local lGPT_ANCHOR_="${COL2_}"
+        local lAI_ANCHOR="${COL2_}"
         local l_GPT_PRIO_="${COL3_}"
         local lGPT_QUESTION_="${COL4_}"
         local lGPT_OUTPUT_FILE_="${COL5_}"
         local lGPT_TOKENS_="${COL6_//cost\=/}"
         local lGPT_RESPONSE_="${COL7_//\"/}"
 
-        print_output "[*] Trying to resolve ${ORANGE}Anchor ${lGPT_ANCHOR_}${NC} in ${ORANGE}Output_file ${lGPT_OUTPUT_FILE_}${NC}."
+        print_output "[*] Trying to resolve ${ORANGE}Anchor ${lAI_ANCHOR}${NC} in ${ORANGE}Output_file ${lGPT_OUTPUT_FILE_}${NC}."
 
-        if [[ "${THREADED}" -eq 1 ]]; then
-          gpt_resolver_csv_tmp "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}" &
-          local lTMP_PID="$!"
-          store_kill_pids "${lTMP_PID}"
-          lWAIT_PIDS_F05_ARR+=("${lTMP_PID}")
-          # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F05_ARR[@]}"
-        else
-          gpt_resolver_csv_tmp "${lGPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}"
-        fi
-      done <"${CSV_DIR}/q02_openai_question.csv.tmp"
+        gpt_resolver_csv_tmp "${lGPT_INPUT_FILE_}" "${lAI_ANCHOR}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}" &
+        local lTMP_PID="$!"
+        lWAIT_PIDS_F05_ARR+=("${lTMP_PID}")
+        # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F05_ARR[@]}"
+      done <"${CSV_DIR}/ai_question.csv.tmp"
 
-      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
-
+      wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
     fi
   fi
 
-  if [[ -d "${HTML_PATH}" ]]; then
-    # lets do a final cleanup to get rid of all the ASK_GPT entries:
-    find "${HTML_PATH}" -type f -name "*.html" -exec sed -i '/ASK_GPT/d' {} \;
-  fi
+  #if [[ -d "${HTML_PATH}" ]]; then
+    # lets do a final cleanup to get rid of all the ASK_AI entries:
+  #  find "${HTML_PATH}" -type f -name "*.html" -exec sed -i '/ASK_AI/d' {} \;
+  #fi
 
-  # lets do a final cleanup to get rid of all the ASK_GPT entries:
-  find "${LOG_DIR}" -maxdepth 1 -type f -name "*.txt" -exec sed -i '/ASK_GPT/d' {} \;
+  # lets do a final cleanup to get rid of all the ASK_AI entries:
+  #find "${LOG_DIR}" -maxdepth 1 -type f -name "*.txt" -exec sed -i '/ASK_AI/d' {} \;
 
   # do not create a web reporter page
   module_end_log "${FUNCNAME[0]}" 0
@@ -109,69 +106,58 @@ F05_qs_resolver() {
 
 gpt_resolver_csv() {
   local lGPT_INPUT_FILE_="${1:-}"
-  local lGPT_ANCHOR_="${2:-}"
+  local lAI_ANCHOR="${2:-}"
   local l_GPT_PRIO_="${3:-}"
   local lGPT_QUESTION_="${4:-}"
   local lGPT_OUTPUT_FILE_="${5:-}"
   local lGPT_TOKENS_="${6:-}"
-  local lGPT_RESPONSE_="${7:-}"
+  local lAI_RESPONSE_FILE="${7:-}"
   local lGPT_OUTPUT_FILE_NAME=""
-  local lGPT_OUTPUT_FILE_NAME_bak=""
   local lHTML_FILE_=""
   local lHTML_FILE_X=""
 
-  print_output "[*] Trying to resolve ${ORANGE}Anchor ${lGPT_ANCHOR_}${NC} in ${ORANGE}Output_file ${lGPT_OUTPUT_FILE_}${NC}."
+  print_output "[*] Trying to resolve ${ORANGE}Anchor ${lAI_ANCHOR}${NC}."
 
   if [[ ${lGPT_TOKENS_} -ne 0 ]]; then
-    if ! [ -f "${lGPT_OUTPUT_FILE_}" ]; then
-      print_output "[-] Something went wrong with the Output file ${lGPT_OUTPUT_FILE_}"
-      if [[ -z ${lGPT_OUTPUT_FILE_} ]]; then
-        print_output "    there is no file name for anchor: ${lGPT_ANCHOR_}"
+    # replace anchor in html-report with link to response
+
+    local lMD5_OF_AI_RESPONSE_FILE=""
+    lMD5_OF_AI_RESPONSE_FILE=$(md5sum "${lAI_RESPONSE_FILE}" | awk '{print $1}')
+    lAI_RESPONSE_FILE=$(find "${HTML_PATH}" -iname "${lMD5_OF_AI_RESPONSE_FILE}.html" 2>/dev/null | sort -u | head -1)
+    lAI_RESPONSE_FILE_NAME=$(basename "${lAI_RESPONSE_FILE}")
+    print_output "[*] Testing ${lAI_RESPONSE_FILE} with md5sum of ${lMD5_OF_AI_RESPONSE_FILE}" "no_log"
+
+    readarray -t lGPT_OUTPUT_FILE_HTML_ARR_ < <(grep -r -l "\[ASK_AI\]\ ${lAI_ANCHOR}" "${HTML_PATH}" 2>/dev/null || true)
+
+    for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
+      print_output "[*] Testing ${lHTML_FILE_} for anchor ${lAI_ANCHOR}" "no_log"
+      # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
+      lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+      # shellcheck disable=SC2001
+      lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
+      print_output "[*] Linking AI results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
+      local lDEPTH="\.\.\/"
+
+      if [[ "${AI_OPTION}" -eq 3 ]]; then
+        if [[ -f "${lAI_RESPONSE_FILE}" ]]; then
+          print_output "[*] Replacing Anchor ${lAI_ANCHOR} with link to ${lAI_RESPONSE_FILE_NAME} - ${lAI_RESPONSE_FILE} in ${lHTML_FILE_}"
+          sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q03\_localai\_connector\/${lAI_RESPONSE_FILE_NAME}\" title\=\"${lAI_RESPONSE_FILE_NAME}\"\ \>\<span\ class=\"green\"\>[+] LocalAI results are available\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
+        else
+          # link to localAI module results - q03_localai_connector.html
+          sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q03\_localai\_connector\.html\#aianalysisfor${lGPT_REVERSE_LINK_}\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] LocalAI results are available\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
+        fi
+      else
+        # openai mode - deprected and probably not working anymore
+        # Todo: remove OpenAI module environment from EMBA
+        sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q02\_openai\_question\.html\#aianalysisfor${lGPT_REVERSE_LINK_}\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
       fi
-    else
-      sed -i "s/${lGPT_ANCHOR_}/Q\: ${lGPT_QUESTION_}\nA\: /1" "${lGPT_OUTPUT_FILE_}"
-      # grep "${lGPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${lGPT_OUTPUT_FILE_}"
-      printf '%q\n' "${lGPT_RESPONSE_//\\/}" >>"${lGPT_OUTPUT_FILE_}"
-      # replace anchor in html-report with link to response
-
-      if [[ "${lGPT_OUTPUT_FILE_}" == *".log" ]]; then
-        lGPT_OUTPUT_FILE_NAME="$(basename "${lGPT_OUTPUT_FILE_//\.log/}.html")"
-      elif [[ "${lGPT_OUTPUT_FILE_}" == *".txt" ]]; then
-        lGPT_OUTPUT_FILE_NAME="$(basename "${lGPT_OUTPUT_FILE_//\.txt/}.html")"
-      elif [[ "${lGPT_OUTPUT_FILE_}" == *".c" ]]; then
-        lGPT_OUTPUT_FILE_NAME="$(basename "${lGPT_OUTPUT_FILE_//\.c/}.html")"
-      fi
-
-      readarray -t lGPT_OUTPUT_FILE_HTML_ARR_ < <(find "${HTML_PATH}" -iname "${lGPT_OUTPUT_FILE_NAME}" 2>/dev/null)
-      # the following search is because of inconsistency in file names.
-      # Todo: check this and fix it to only use the rules above
-      lGPT_OUTPUT_FILE_NAME_bak="$(basename "${lGPT_OUTPUT_FILE_//\./}.html")"
-      readarray -t GPT_OUTPUT_FILE_HTML_ARR_bak < <(find "${HTML_PATH}" -iname "${lGPT_OUTPUT_FILE_NAME_bak}" 2>/dev/null)
-      lGPT_OUTPUT_FILE_HTML_ARR_+=("${GPT_OUTPUT_FILE_HTML_ARR_bak[@]}")
-
-      for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
-        # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
-        lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
-        # we need to find the depth which we need to link to the file
-        # shellcheck disable=SC2001
-        lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
-        print_output "[*] Linking GPT results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
-        depth_cnt="${lHTML_FILE_X//[^\/]/}"
-        depth_cnt="$(("${#depth_cnt}" - 1))"
-        local lDEPTH="\.\.\/"
-        local lmyDEPTH=""
-        lmyDEPTH=$(printf "%${depth_cnt}s")
-        lDEPTH="${lmyDEPTH// /${lDEPTH}}"
-
-        sed -i "s/\[ASK_GPT\]\ ${lGPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q02\_openai\_question\.html\#aianalysisfor${lGPT_REVERSE_LINK_}\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
-      done
-    fi
+    done
   fi
 }
 
 gpt_resolver_csv_tmp() {
   local lGPT_INPUT_FILE_="${1:-}"
-  local lGPT_ANCHOR_="${2:-}"
+  local lAI_ANCHOR="${2:-}"
   local l_GPT_PRIO_="${3:-}"
   local lGPT_QUESTION_="${4:-}"
   local lGPT_OUTPUT_FILE_="${5:-}"
@@ -181,44 +167,31 @@ gpt_resolver_csv_tmp() {
   local lHTML_FILE_=""
   local lHTML_FILE_X=""
 
-  print_output "[*] Trying to resolve ${ORANGE}Anchor ${lGPT_ANCHOR_}${NC} in ${ORANGE}output_file ${lGPT_OUTPUT_FILE_}${NC}."
+  print_output "[*] Trying to resolve ${ORANGE}Anchor ${lAI_ANCHOR}${NC}."
 
-  if ! [ -f "${lGPT_OUTPUT_FILE_}" ]; then
-    print_output "[-] Something went wrong with the Output file ${lGPT_OUTPUT_FILE_}"
-    if [[ -z ${lGPT_OUTPUT_FILE_} ]]; then
-      print_output "    there is no file name for anchor: ${lGPT_ANCHOR_}"
+  print_output "[*] AI module didn't check ${lGPT_INPUT_FILE_}, linking to the GPT module page instead"
+
+  local lMD5_OF_ORIG_SRC_FILE=""
+  lMD5_OF_ORIG_SRC_FILE=$(md5sum "${lGPT_OUTPUT_FILE_}" | awk '{print $1}')
+
+  readarray -t lGPT_OUTPUT_FILE_HTML_ARR_ < <(grep -r -l "\[ASK_AI\]\ ${lAI_ANCHOR}" "${HTML_PATH}" 2>/dev/null || true)
+
+  for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
+    # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
+    lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+
+    # we need to find the depth which we need to link to the file
+    # shellcheck disable=SC2001
+    lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
+    print_output "[*] Linking AI results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
+    depth_cnt="${lHTML_FILE_X//[^\/]/}"
+    depth_cnt="$(("${#depth_cnt}" - 1))"
+    local lDEPTH="\.\.\/"
+
+    if [[ "${AI_OPTION}" -eq 3 ]]; then
+      sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q03\_localai\_connector\.html\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] LocalAI module did not finish\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
+    else
+      sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q02\_openai\_question\.html\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] OpenAI module did not finish\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
     fi
-  else
-    print_output "[*] Q02 didn't check ${lGPT_INPUT_FILE_}, linking to the GPT module page instead"
-
-    # sed -i "s/${lGPT_ANCHOR_}/Check did not finish!/1" "${lGPT_OUTPUT_FILE_}"
-
-    if [[ "${lGPT_OUTPUT_FILE_}" == *".log" ]]; then
-      lGPT_OUTPUT_FILE_NAME="$(basename "${lGPT_OUTPUT_FILE_//\.log/}.html")"
-    elif [[ "${lGPT_OUTPUT_FILE_}" == *".txt" ]]; then
-      lGPT_OUTPUT_FILE_NAME="$(basename "${lGPT_OUTPUT_FILE_//\.txt/}.html")"
-    elif [[ "${lGPT_OUTPUT_FILE_}" == *".c" ]]; then
-      lGPT_OUTPUT_FILE_NAME="$(basename "${lGPT_OUTPUT_FILE_//\.c/}.html")"
-    fi
-
-    readarray -t lGPT_OUTPUT_FILE_HTML_ARR_ < <(find "${HTML_PATH}" -iname "${lGPT_OUTPUT_FILE_NAME}" 2>/dev/null)
-
-    for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
-      # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
-      lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
-
-      # we need to find the depth which we need to link to the file
-      # shellcheck disable=SC2001
-      lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
-      print_output "[*] Linking GPT results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
-      depth_cnt="${lHTML_FILE_X//[^\/]/}"
-      depth_cnt="$(("${#depth_cnt}" - 1))"
-      local lDEPTH="\.\.\/"
-      local lmyDEPTH=""
-      lmyDEPTH=$(printf "%${depth_cnt}s")
-      lDEPTH="${lmyDEPTH// /${lDEPTH}}"
-
-      sed -i "s/\[ASK_GPT\]\ ${lGPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q02\_openai\_question\.html\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] OpenAI module did not finish\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
-    done
-  fi
+  done
 }

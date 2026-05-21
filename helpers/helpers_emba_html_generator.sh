@@ -113,18 +113,24 @@ add_link_tags() {
             lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
             lREF_LINK="$(echo "${lREF_LINK}" | cut -d"#" -f1 || true)"
           fi
-          print_debug "[*] Generate info_file - REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK}" "no_log"
 
-          # in some cases we link to files from different modules. Now we check if the html file is already
+          # in some cases we link to files from different modules. Now we check if the html report file is already
           # generated and we can directly use the already available html report file
-          lORIG_SRC_MODULE_DIR=$(dirname "${lREF_LINK}")
-          lORIG_SRC_MODULE_DIR=${lORIG_SRC_MODULE_DIR//*\//}
+          lORIG_SRC_MODULE_DIR=$(echo "${lREF_LINK}" | tr '/' '\n' | grep -E "^[psqfl][0-9]{2,3}_.*")
+          print_debug "[*] REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK} / lORIG_SRC_MODULE_DIR: ${lORIG_SRC_MODULE_DIR} / lLINK_FILE: ${lLINK_FILE}" "no_log"
           if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" ]]; then
             print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" "no_log"
-            # link to the already available report file without generating a new one:
-            lBACK_LINK_NEW="./${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}"
+            if [[ "$(basename ${lLINK_FILE})" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+              # link to the already available report file without generating a new one:
+              # we need to link to the original module directory of the file if we are in a main module log file
+              lBACK_LINK_NEW="${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}"
+            else
+              # if we are in our own sub-module log directory we do not need to include the module directory
+              lBACK_LINK_NEW="${lMD5_REF_LINK}"
+            fi
           else
             # generate reference file if it not already available
+            print_debug "[*] Generating info file lREF_LINK: ${lREF_LINK} / lBACK_LINK: ${lBACK_LINK}"
             generate_info_file "${lREF_LINK}" "${lBACK_LINK}" &
             lWAIT_PIDS_WR+=("$!")
 
@@ -141,6 +147,7 @@ add_link_tags() {
           else
             lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@${DEPTH}/${lBACK_LINK_NEW}@g" || true)"
           fi
+          print_debug "[*] Generating ${lBACK_LINK_NEW} / lBACK_LINK_NEW: ${lBACK_LINK_NEW} / lREF_LINK: ${lREF_LINK} / DEPTH: ${DEPTH} / lHTML_LINK: ${lHTML_LINK}"
           lLINE_NUMBER_INFO_PREV="$((lREF_LINK_NUMBER - 1))"
           while [[ ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${P_START}${SPAN_END}${P_END}") || ("$(sed "${lLINE_NUMBER_INFO_PREV}""q;d" "${lLINK_FILE}")" == "${BR}") ]]; do
             lLINE_NUMBER_INFO_PREV=$((lLINE_NUMBER_INFO_PREV - 1))
@@ -570,7 +577,8 @@ generate_info_file() {
     sed -i -e "s:^:${P_START}: ; s:$:${P_END}:" "${lTMP_INFO_FILE}" || true
     # add html tags for style
     add_color_tags "${lTMP_INFO_FILE}"
-    sed -i -e "s:[=]{65}:${HR_DOUBLE}:g ; s:^[-]{65}$:${HR_MONO}:g" "${lTMP_INFO_FILE}" || true
+    sed -i -E "s:[=]{65}:${HR_DOUBLE}:g" "${lTMP_INFO_FILE}" || true
+    sed -i -E "s:[-]{65}:${HR_MONO}:g" "${lTMP_INFO_FILE}" || true
 
     # add link tags to links/generate info files and link to them and write line to tmp file
     add_link_tags "${lTMP_INFO_FILE}" "${lINFO_HTML_FILE}"

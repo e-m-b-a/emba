@@ -447,9 +447,12 @@ write_link() {
 # The copy_and_link_file is used to copy files from the filesystem to the web-report and
 # automatically link it
 # This is usually used after a print_output "[*] asdf"
+# 3rd parameter is optional log file to write this link into
 copy_and_link_file() {
   local lSRC_FILE="${1:-}"
   local lDST_FILE="${2:-}"
+  # optional
+  local lLOG_FILE="${3:-}"
 
   if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
     mkdir -p "$(dirname "${lDST_FILE}")" || true
@@ -460,27 +463,10 @@ copy_and_link_file() {
       cp "${lSRC_FILE}" "${lDST_FILE}" 2>/dev/null || true
     fi
   fi
-  if [[ -f "${lDST_FILE}" ]]; then
+  if [[ -f "${lDST_FILE}" && -n "${lLOG_FILE}" ]]; then
+    write_link "${lDST_FILE}" "${lLOG_FILE}"
+  elif [[ -f "${lDST_FILE}" ]]; then
     write_link "${lDST_FILE}"
-  fi
-}
-
-# we add an entry like
-# [LOV] local_link
-# this entry is later replaced from web reporter with the
-# correct call to JS function
-write_local_overlay_link() {
-  if [[ ${HTML} -eq 1 ]]; then
-    local lLINK="${1:-}"
-    lLINK="$(format_log "[LOV] ""${lLINK}" 1)"
-    local lLOG_FILE_ALT="${2:-}"
-    if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]]; then
-      if [[ -f "${lLOG_FILE_ALT}" ]]; then
-        echo -e "${lLINK}" | tee -a "${lLOG_FILE_ALT}" >/dev/null
-      else
-        echo -e "${lLINK}" | tee -a "${LOG_FILE}" >/dev/null
-      fi
-    fi
   fi
 }
 
@@ -993,32 +979,32 @@ print_notification() {
 
 # writes inputs into csv for chatgpt
 # Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
-write_csv_gpt() {
+write_csv_AI() {
   local lCSV_ITEMS_ARR=("$@")
   if ! [[ -d "${CSV_DIR}" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  printf '%s;' "${lCSV_ITEMS_ARR[@]}" >>"${CSV_DIR}/q02_openai_question.csv" || true
-  printf '\n' >>"${CSV_DIR}/q02_openai_question.csv" || true
+  printf '%s;' "${lCSV_ITEMS_ARR[@]}" >>"${CSV_DIR}/ai_question.csv" || true
+  printf '\n' >>"${CSV_DIR}/ai_question.csv" || true
 }
 
 # writes inputs into tmp csv for chatgpt
 # Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
-write_csv_gpt_tmp() {
+write_csv_AI_tmp() {
   local lCSV_ITEMS_ARR=("$@")
   if ! [[ -d "${CSV_DIR}" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  printf '%s;' "${lCSV_ITEMS_ARR[@]}" >>"${CSV_DIR}/q02_openai_question.csv.tmp" || true
-  printf '\n' >>"${CSV_DIR}/q02_openai_question.csv.tmp" || true
+  printf '%s;' "${lCSV_ITEMS_ARR[@]}" >>"${CSV_DIR}/ai_question.csv.tmp" || true
+  printf '\n' >>"${CSV_DIR}/ai_question.csv.tmp" || true
 }
 
-write_anchor_gpt() {
+write_anchor_AI() {
   if [[ ${HTML} -eq 1 ]]; then
     local lLINK="${1:-}"
-    lLINK="$(format_log "[ASK_GPT] ""${lLINK}" 1)"
+    lLINK="$(format_log "[ASK_AI] ""${lLINK}" 1)"
     local lLOG_FILE_ALT="${2:-}"
     if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]]; then
       if [[ -f "${lLOG_FILE_ALT}" ]]; then

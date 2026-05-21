@@ -18,10 +18,9 @@
 #               The generated source code is further analysed with semgrep and the rules provided by 0xdea
 #               (https://github.com/0xdea/semgrep-rules)
 
-# set DEBUG to 1 to enable further print statements
-export DEBUG=0
 
 S16_ghidra_decompile_checks() {
+  # export MAX_EXT_CHECK_BINS=3
   module_log_init "${FUNCNAME[0]}"
   module_title "Check decompiled binary source code for vulnerabilities"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -47,6 +46,9 @@ S16_ghidra_decompile_checks() {
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
+  # the blacklist elements are handled as regex in the form *pattern*
+  local lBIN_BLACKLIST_ARR=("libc")
+
   if [[ "${FULL_TEST}" -ne 1 ]]; then
     # we need to wait in default mode for the results of S13 and S14
     module_wait "S13_weak_func_check"
@@ -64,6 +66,16 @@ S16_ghidra_decompile_checks() {
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
     lNAME=$(basename "${lBIN_TO_CHECK}" 2>/dev/null)
+    if [[ "${FULL_TEST}" -ne 1 ]]; then
+      # first of all we check our binary name against our blacklist
+      # the blacklist are handled as regex in the form *pattern*
+      for lBIN_BLACKLIST in "${lBIN_BLACKLIST_ARR[@]}"; do
+        if [[ "${lNAME}" == *"${lBIN_BLACKLIST}"* ]]; then
+          continue 2
+        fi
+      done
+    fi
+
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
@@ -379,14 +391,18 @@ s16_semgrep_logger() {
 
   # GPT integration
   lGPT_ANCHOR="$(openssl rand -hex 8)"
-  if [[ -f "${BASE_LINUX_FILES}" ]]; then
-    # if we have the base linux config file we are checking it:
-    if ! grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-      lGPT_PRIO=$((lGPT_PRIO + 1))
-    fi
+  # if we have some semgrep results for this function we increase our priority
+  if grep -q "possible issue identified - semgrep" "${lC_SRC_FCT}"; then
+    local lSEMGREP_CNT=0
+    lSEMGREP_CNT=$(grep -c "possible issue identified - semgrep" "${lC_SRC_FCT}" || echo 0)
+    lGPT_PRIO=$((lGPT_PRIO + lSEMGREP_CNT))
   fi
-  write_csv_gpt_tmp "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${GPT_QUESTION}" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "" ""
-  write_anchor_gpt "${lGPT_ANCHOR}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}"/"${lHARUSPEX_FILE_NAME}"
+  # if it is not a default (known) linux file we increase the priority
+  if ! grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+    lGPT_PRIO=$((lGPT_PRIO + 1))
+  fi
+  write_csv_AI_tmp "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${GPT_QUESTION}" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "" ""
+  write_anchor_AI "${lGPT_ANCHOR}" "${LOG_PATH_MODULE}"/haruspex_"${lNAME}"/"${lHARUSPEX_FILE_NAME}"
 
   if [[ -f "${lSEMGREPLOG_TMP}" ]]; then
     cat "${lSEMGREPLOG_TMP}" >>"${lSEMGREPLOG_TXT}"

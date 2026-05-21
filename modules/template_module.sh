@@ -35,21 +35,21 @@
 
 =head1 MODULE_NAME
 
-==head2 MODULE_NAME Short description
+=head2 MODULE_NAME Short description
 
 Please write a short description of your module. Usually ~2-3 sentences are fine to get an idea.
 
-==head2 MODULE_NAME Detailed description
+=head2 MODULE_NAME Detailed description
 
 Please write a longer description of your module. This should also include further references and links
 that were used.
 
-==head2 MODULE_NAME 3rd party tools
+=head2 MODULE_NAME 3rd party tools
 
 Any 3rd party tool that is needed from your module. Also include the tested and known working version and
 download link.
 
-==head2 MODULE_NAME Testfirmware
+=head2 MODULE_NAME Testfirmware
 
 For verification of the module we need some testfirmware.
 
@@ -59,26 +59,26 @@ Testfirmware details:
 - Checksum (MD5/SHA1/SHA256):
 - Download Link:
 
-==head2 MODULE_NAME Output
+=head2 MODULE_NAME Output
 
 Example output of module
 
-==head2 MODULE_NAME License
+=head2 MODULE_NAME License
 
 EMBA module MODULE_NAME is licensed under GPLv3
 SPDX-License-Identifier: GPL-3.0-only
 Link to license document: https://github.com/e-m-b-a/emba/blob/master/LICENSE
 Note: Only GPL-3.0 will be accepted in the master EMBA repository
 
-==head2 MODULE_NAME Todo
+=head2 MODULE_NAME Todo
 
 Missing stuff that we need to consider.
 
-==head2 MODULE_NAME Known issues
+=head2 MODULE_NAME Known issues
 
 Any known issues or known limitations.
 
-==head2 MODULE_NAME Author(s)
+=head2 MODULE_NAME Author(s)
 
 Michael Messner, Pascal Eckmann
 Note: List all authors including contributors to this module

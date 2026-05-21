@@ -19,7 +19,7 @@
 Q02_openai_question() {
   module_log_init "${FUNCNAME[0]}"
   export CHATGPT_RESULT_CNT=0
-  if [[ "${GPT_OPTION}" -gt 0 ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
+  if [[ "${AI_OPTION}" -gt 0 ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
     # Prints title to CLI and into log
     module_title "AI analysis via OpenAI"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -34,13 +34,13 @@ Q02_openai_question() {
     done
 
     if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
-      while ! [[ -f "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
+      while ! [[ -f "${CSV_DIR}/ai_question.csv.tmp" ]]; do
         sleep 3
       done
     fi
 
     export GTP_CHECKED_ARR=()
-    while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+    while ! grep -q "Reporting phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}" && [[ "${lMODULE_RUNTIME}" -le "${LOCAL_AI_MIN_RUNTIME}" ]]; do
       if [[ "${CHATGPT_RESULT_CNT}" -ge 0 ]]; then
         ask_chatgpt
       fi
@@ -79,7 +79,7 @@ ask_chatgpt() {
 
   # generating Array for GPT requests - sorting according the prio in field 3
   # this array gets regenerated on every round
-  readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+  readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/ai_question.csv.tmp")
 
   for ((lELE_INDEX = 0; lELE_INDEX < "${#Q02_OPENAI_QUESTIONS[@]}"; lELE_INDEX++)); do
     local lELEM="${Q02_OPENAI_QUESTIONS["${lELE_INDEX}"]}"
@@ -197,7 +197,7 @@ ask_chatgpt() {
                   lCNT=$((lCNT + 1))
                   local lTEMP_VAR="$(("${lCNT}" % 100))"
                   (("${lTEMP_VAR}" == 0)) && print_output "[*] Rate limit handling ... sleep mode - ${lCNT}" "no_log"
-                  if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+                  if grep -q "Reporting phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}" && [[ "${lMODULE_RUNTIME}" -ge "${LOCAL_AI_MIN_RUNTIME}" ]]; then
                     break 2
                   fi
                   sleep 1
@@ -211,10 +211,10 @@ ask_chatgpt() {
             fi
 
             cat "${TMP_DIR}/${lGPT_INPUT_FILE_mod}_response.json" >>"${lGPT_FILE_DIR}/openai_server_errors.log"
-            readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+            readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/ai_question.csv.tmp")
             # reset the array index to start again with the highest rated entry
             lELE_INDEX=0
-            if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+            if grep -q "Reporting phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}" && [[ "${lMODULE_RUNTIME}" -ge "${LOCAL_AI_MIN_RUNTIME}" ]]; then
               return
             fi
             sleep 30s
@@ -235,7 +235,7 @@ ask_chatgpt() {
         if [[ ${lGPT_TOKENS} -ne 0 ]]; then
           GTP_CHECKED_ARR+=("${lSCRIPT_PATH_TMP}")
           # write new into done csv
-          write_csv_gpt "${lGPT_INPUT_FILE}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${lGPT_QUESTION}" "${lGPT_OUTPUT_FILE}" "cost=${lGPT_TOKENS}" "'${lGPT_RESPONSE_CLEANED//\'/}'"
+          write_csv_AI "${lGPT_INPUT_FILE}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${lGPT_QUESTION}" "${lGPT_OUTPUT_FILE}" "cost=${lGPT_TOKENS}" "'${lGPT_RESPONSE_CLEANED//\'/}'"
 
           # we store the answers in dedicated files for further interlinking within the report
           if ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]]; then
@@ -275,26 +275,26 @@ ask_chatgpt() {
       fi
     fi
 
-    if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+    if grep -q "Reporting phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}" && [[ "${lMODULE_RUNTIME}" -ge "${LOCAL_AI_MIN_RUNTIME}" ]]; then
       break
     fi
 
-    if [[ "${GPT_OPTION}" -ne 2 ]]; then
+    if [[ "${AI_OPTION}" -ne 2 ]]; then
       sleep 20s
     fi
 
     # reload q02 results:
     print_output "[*] Regenerate analysis array ..." "no_log"
-    readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+    readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/ai_question.csv.tmp")
     # reset the array index to start again with the highest rated entry
     lELE_INDEX=0
   done
 
-  if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
+  if [[ -f "${CSV_DIR}/ai_question.csv" ]]; then
     local lGPT_ENTRY_LINE=""
     while read -r lGPT_ENTRY_LINE; do
       lGPT_ANCHOR="$(echo "${lGPT_ENTRY_LINE}" | cut -d ';' -f2)"
-      sed -i "/${lGPT_ANCHOR}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
-    done <"${CSV_DIR}/q02_openai_question.csv"
+      sed -i "/${lGPT_ANCHOR}/d" "${CSV_DIR}/ai_question.csv.tmp"
+    done <"${CSV_DIR}/ai_question.csv"
   fi
 }

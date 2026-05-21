@@ -217,14 +217,14 @@ radare_decomp_print_top10_statistics() {
           if [[ -f "${lR2_BIN_LOG_PATH}" ]]; then
             write_link "${lR2_BIN_LOG_PATH}"
             # FIXME
-            if [[ "${GPT_OPTION}" -gt 0 ]]; then
+            if [[ "${AI_OPTION}" -gt 0 ]]; then
               print_output "[*] Asking OpenAI chatbot about ${lR2_BIN_LOG_PATH}"
               lGPT_ANCHOR_="$(openssl rand -hex 8)"
               # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-              write_csv_gpt_tmp "${lR2_BIN_LOG_PATH}" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${lR2_BIN_LOG_PATH}" "" ""
+              write_csv_AI_tmp "${lR2_BIN_LOG_PATH}" "${lGPT_ANCHOR_}" "${lGPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${lR2_BIN_LOG_PATH}" "" ""
               # add ChatGPT link
               printf '%s\n\n' "" >>"${lR2_BIN_LOG_PATH}"
-              write_anchor_gpt "${lGPT_ANCHOR_}" "${lR2_BIN_LOG_PATH}"
+              write_anchor_AI "${lGPT_ANCHOR_}" "${lR2_BIN_LOG_PATH}"
             fi
           fi
         done

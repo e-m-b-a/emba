@@ -1,6 +1,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,7 @@
 # Author(s): Benedikt Kuehne
 # Contributor(s): Michael Messner
 #
-# Description: Profile for ChatGPT
+# Description: Profile for AI usage
 
 export FORMAT_LOG=1
 export THREADED=1
@@ -20,7 +20,8 @@ export HTML=1
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=1
-export GPT_OPTION=1
+# 0 -> off, 1-> unpaid GPT plan, 2 -> no GPT rate-limit, 3 -> LocalAI Server 
+export AI_OPTION=3
 
 # extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
 # it in the default profile.
@@ -33,11 +34,11 @@ export VEX_METRICS=1
 export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S26_kernel_vuln_verifier" "S99_grepit" "S110_yara_check" "F20_vul_aggregator" )
 
 # enable silent mode and status bar
-export DISABLE_STATUS_BAR=0
-export SILENT=1
+export DISABLE_STATUS_BAR=1
+export SILENT=0
 
 # enable EMBA binary map dependency generator
-EMBA_MAP_GENERATOR=1
+EMBA_MAP_GENERATOR=0
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

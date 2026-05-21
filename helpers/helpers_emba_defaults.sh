@@ -91,7 +91,7 @@ set_defaults() {
 
   export SHELLCHECK=1
 
-  export GPT_OPTION=0 # 0 -> off 1-> unpaid plan 2 -> no rate-limit
+  export AI_OPTION=0 # 0 -> off, 1-> unpaid plan, 2 -> no rate-limit, 3 -> LocalAI Server
   export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
   export MINIMUM_GPT_PRIO=1 # everything above this value gets checked
 
@@ -175,6 +175,9 @@ set_defaults() {
   export SVG_BUILD_TIMEOUT="12h"
   export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 
+  DEPENDENCY_TRACK_ENABLED=0
+  OPENAI_API_KEY=""
+
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
   # usually this should be done via a scan-profile
@@ -209,6 +212,7 @@ set_log_paths() {
   export P02_LOG="${LOG_DIR}/p02_firmware_bin_file_check.txt"
   export P02_LOG_DIR="${P02_LOG/\.txt/\/}"
   export P02_CSV_LOG="${CSV_DIR}/p02_firmware_bin_file_check.csv"
+  export P99_LOG="${LOG_DIR}/p99_prepare_analyzer.txt"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export P55_LOG="${LOG_DIR}/p55_unblob_extractor.txt"
   export P60_LOG="${LOG_DIR}/p60_deep_extractor.txt"
@@ -270,6 +274,7 @@ set_log_paths() {
   export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"
   export S118_LOG_DIR="${S118_LOG/\.txt/\/}"
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
+  export Q03_LOG="${LOG_DIR}/q03_localai_connector.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
   export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
   export L15_LOG="${LOG_DIR}/l15_emulated_checks_init.txt"

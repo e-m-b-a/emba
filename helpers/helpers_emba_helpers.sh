@@ -42,6 +42,43 @@ run_web_reporter_mod_name() {
   fi
 }
 
+# simple markdown to EMBA log parser
+# Parameter 1: markdown file
+# Parameter 2: EMBA log file to create and log to
+# Parameter 3: How many # symbols are used for the first headline -> module_title
+parse_markdown_to_emba_txt() {
+  local lMD_LOG="${1:-}"
+  local lEMBA_TXT_LOG="${2:-}"
+  # how many # signs are used for the first headline
+  local lHEADLINE_STARTER="${3:-1}"
+  [[ -z "${lEMBA_TXT_LOG}" ]] && lEMBA_TXT_LOG="${lMD_LOG//\.md/\.txt}"
+  [[ ! -f "${lEMBA_TXT_LOG}" ]] && touch "${lEMBA_TXT_LOG}"
+
+  local lMD_LINE=""
+  local lSTORED_IFS="${IFS}"
+
+  IFS=''
+  while read -r lMD_LINE; do
+    if [[ "${lMD_LINE}" =~ ^#{$((lHEADLINE_STARTER+1))}.* ]]; then
+      # other headlines -> sub-module-titles
+      # remove the # signs
+      lMD_LINE="${lMD_LINE//#}"
+      lMD_LINE="${lMD_LINE#\ }"
+      sub_module_title "${lMD_LINE}" "${lEMBA_TXT_LOG}"
+    elif [[ "${lMD_LINE}" =~ ^#{${lHEADLINE_STARTER}}\ .* ]]; then
+      # main headline
+      # remove the # signs
+      lMD_LINE="${lMD_LINE:${lHEADLINE_STARTER}}"
+      lMD_LINE="${lMD_LINE#\ }"
+      module_title "${lMD_LINE}" "${lEMBA_TXT_LOG}"
+    else
+      lMD_LINE=${lMD_LINE//\*/}
+      write_log "${lMD_LINE}" "${lEMBA_TXT_LOG}"
+    fi
+  done < "${lMD_LOG}"
+  IFS="${lSTORED_IFS}"
+}
+
 wait_for_pid() {
   local lWAIT_PIDS_ARR=("$@")
   local lPID=""
@@ -54,7 +91,7 @@ wait_for_pid() {
       continue
     fi
     while [[ -e /proc/"${lPID}" ]]; do
-      print_debug "[*] wait pid protection - running pid: ${lPID}" "no_log"
+      # print_debug "[*] wait pid protection - running pid: ${lPID}" "no_log"
       print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ -f "${LOG_DIR}/${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}/${MAIN_LOG_FILE}") -gt 0 && -v QRUNTIME ]]; then

@@ -84,6 +84,8 @@ s22_vuln_check_semgrep() {
   local lS22_SEMGREP_SCRIPTS=""
   local lSEMG_SOURCE_NOTE=""
 
+  local lS22_SOURCE_DIR="${LOG_PATH_MODULE}/php_sources"
+
   # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
   # but this output is not very beautiful to show in the report.
   semgrep --disable-version-check --metrics=off --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ &>"${lPHP_SEMGREP_LOG}" || true
@@ -111,10 +113,12 @@ s22_vuln_check_semgrep() {
       local lSEMG_SOURCE_FILE=""
       local lSEMG_SOURCE_FILE_NAME=""
       local lSEMG_LINE_NR=""
-      local lGPT_PRIO_=4
-      local lGPT_ANCHOR_=""
+      # we set the priority higher as the semgrep analysis on scripts is more reliable
+      local lGPT_PRIO_=5
+      local lAI_ANCHOR=""
 
-      ! [[ -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
+      [[ ! -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
+      [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p "${lS22_SOURCE_DIR}"
 
       lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
       lSEMG_ISSUE_NAME="${lSEMG_ISSUE_NAME/name=\"/}"
@@ -122,29 +126,39 @@ s22_vuln_check_semgrep() {
       lSEMG_SOURCE_FILE=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
       lSEMG_SOURCE_FILE="${lSEMG_SOURCE_FILE/file=\"/}"
       lSEMG_SOURCE_FILE_NAME=$(basename "${lSEMG_SOURCE_FILE}")
+      local lSEMG_SOURCE_FILE_log="${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
 
-      [[ -f "${lSEMG_SOURCE_FILE}" && ! -f "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log ]] && cp "${lSEMG_SOURCE_FILE}" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log
+      [[ -f "${lSEMG_SOURCE_FILE}" && ! -f "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log ]] && cp "${lSEMG_SOURCE_FILE}" "${lSEMG_SOURCE_FILE_log}"
 
       lSEMG_LINE_NR=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
       lSEMG_LINE_NR="${lSEMG_LINE_NR/line=\"/}"
 
-      sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}"/semgrep_sources/"${lSEMG_SOURCE_FILE_NAME}".log || true
-      print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
+      # make the identified line of code green and add a note
+      sed -i -r "${lSEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m   \/\/possible issue identified - semgrep/" "${lSEMG_SOURCE_FILE_log}" || true
+
+      print_output "[+] Found possible PHP vulnerability ${ORANGE}${lSEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${lSEMG_SOURCE_FILE_NAME}${GREEN}" "" "${lSEMG_SOURCE_FILE_log}"
       write_csv_log "${lSEMG_SOURCE_FILE}" "${lSEMG_ISSUE_NAME}" "semgrep" "unknown"
 
-      if [[ "${GPT_OPTION}" -gt 0 ]]; then
-        lGPT_ANCHOR_="$(openssl rand -hex 8)"
-        if [[ -f "${BASE_LINUX_FILES}" ]]; then
-          # if we have the base linux config file we are checking it:
-          if ! grep -E -q "^${lSEMG_SOURCE_FILE_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-            lGPT_PRIO_=$((lGPT_PRIO_ + 1))
-          fi
+      if [[ "${AI_OPTION}" -gt 0 ]]; then
+        lAI_ANCHOR="$(openssl rand -hex 8)"
+        if ! grep -E -q "^${lSEMG_SOURCE_FILE_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+          lGPT_PRIO_=$((lGPT_PRIO_ + 1))
+        else
+          # on well known files we lower the priority
+          lGPT_PRIO_=$((lGPT_PRIO_ - 2))
         fi
-        # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-        write_csv_gpt_tmp "$(cut_path "${lSEMG_SOURCE_FILE}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION} And I think there might be something in line ${lSEMG_LINE_NR}" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log" "" ""
+        # if we have some semgrep results for this function we increase our priority
+        if grep -q "possible issue identified - semgrep" "${lSEMG_SOURCE_FILE_log}"; then
+          local lSEMGREP_CNT=0
+          lSEMGREP_CNT=$(grep -c "possible issue identified - semgrep" "${lSEMG_SOURCE_FILE_log}" || echo 0)
+          lGPT_PRIO_=$((lGPT_PRIO_ + lSEMGREP_CNT))
+        fi
+
+        # "${GPT_INPUT_FILE_}" "${lAI_ANCHOR}" "${lGPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+        write_csv_AI_tmp "${lSEMG_SOURCE_FILE_log}" "${lAI_ANCHOR}" "${lGPT_PRIO_}" "${GPT_QUESTION} And I think there might be something in line ${lSEMG_LINE_NR}" "${lSEMG_SOURCE_FILE_log}" "" ""
         # add ChatGPT link
-        printf '%s\n\n' "" >>"${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
-        write_anchor_gpt "${lGPT_ANCHOR_}" "${LOG_PATH_MODULE}/semgrep_sources/${lSEMG_SOURCE_FILE_NAME}.log"
+        printf '%s\n\n' "" >>"${lSEMG_SOURCE_FILE_log}"
+        write_anchor_AI "${lAI_ANCHOR}" "${lSEMG_SOURCE_FILE_log}"
       fi
     done
   fi
@@ -193,6 +207,8 @@ s22_vuln_check() {
     return
   fi
 
+  local lS22_SOURCE_DIR="${LOG_PATH_MODULE}/php_sources"
+
   local lPHP_SCRIPT_NAME=""
   local lVULNS=0
   local lTOTAL_MEMORY=0
@@ -201,7 +217,7 @@ s22_vuln_check() {
   local lMEM_LIMIT=$(("${lTOTAL_MEMORY}" / 2))
 
   lPHP_SCRIPT_NAME=$(basename "${lPHP_SCRIPT_}" 2>/dev/null | sed -e 's/:/_/g')
-  local lPHP_LOG="${LOG_PATH_MODULE}""/php_vuln_""${lPHP_SCRIPT_NAME}""-${RANDOM}.txt"
+  local lPHP_LOG="${LOG_PATH_MODULE}/php_vuln_${lPHP_SCRIPT_NAME}-${RANDOM}.txt"
 
   ulimit -Sv "${lMEM_LIMIT}"
   "${EXT_DIR}"/progpilot "${lPHP_SCRIPT_}" >>"${lPHP_LOG}" 2>&1 || true
@@ -209,8 +225,9 @@ s22_vuln_check() {
 
   lVULNS=$(grep -c "vuln_name" "${lPHP_LOG}" 2>/dev/null || true)
   local lGPT_PRIO_=4
-  local lGPT_ANCHOR_=""
+  local lAI_ANCHOR=""
   if [[ "${lVULNS}" -gt 0 ]]; then
+    [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p "${lS22_SOURCE_DIR}"
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""
@@ -227,15 +244,25 @@ s22_vuln_check() {
       lCFF="NA"
     fi
     print_output "[+] Found ${ORANGE}${lVULNS} vulnerabilities${GREEN} in php file: ${ORANGE}$(print_path "${lPHP_SCRIPT_}")${GREEN}${lCOMMON_FILES_FOUND}${NC}" "" "${lPHP_LOG}"
+    
+    # safe the sources and link it in the lSHELL_LOG
+    write_log "" "${lPHP_LOG}"
+    write_log "[*] Source file ${ORANGE}${lPHP_SCRIPT_NAME}${NC}" "${lPHP_LOG}"
+    copy_and_link_file "${lPHP_SCRIPT_}" "${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log" "${lPHP_LOG}"
+
     write_csv_log "${lPHP_SCRIPT_}" "TODO" "progpilot" "${lCFF}"
 
-    if [[ "${GPT_OPTION}" -gt 0 ]]; then
-      lGPT_ANCHOR_="$(openssl rand -hex 8)"
-      # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-      write_csv_gpt_tmp "$(cut_path "${lPHP_SCRIPT_}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${TMP_DIR}/S22_VULNS.tmp" "" ""
-      # add ChatGPT link
-      printf '%s\n\n' "" >>"${TMP_DIR}"/S22_VULNS.tmp
-      write_anchor_gpt "${lGPT_ANCHOR_}" "${TMP_DIR}"/S22_VULNS.tmp
+    if [[ "${AI_OPTION}" -gt 0 ]]; then
+      lAI_ANCHOR="$(openssl rand -hex 8)"
+      lGPT_PRIO_=$((lGPT_PRIO_ + lVULNS))
+      # "${GPT_INPUT_FILE_}" "${lAI_ANCHOR}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+      write_csv_AI_tmp "${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log" "${lAI_ANCHOR}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lPHP_SCRIPT_}" "" ""
+
+      # add AI link
+      printf '%s\n\n' "" >>"${lPHP_SCRIPT_}"
+      write_anchor_AI "${lAI_ANCHOR}" "${lPHP_SCRIPT_}"
+      printf '%s\n\n' "" >>"${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log"
+      write_anchor_AI "${lAI_ANCHOR}" "${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log"
     fi
     echo "${lVULNS}" >>"${TMP_DIR}"/S22_VULNS.tmp
   else

@@ -80,7 +80,7 @@ apk_checker_helper() {
   lAPK_NAME=$(basename -s .apk "${lAPK_FILE}")
 
   print_output "[*] Testing Android apk with APKHunt - ${ORANGE}$(print_path "${lAPK_FILE}")${NC}"
-  go run "${EXT_DIR}"/APKHunt/apkhunt.go -p "${lAPK_FILE}" -l 2>&1 | tee -a "${LOG_PATH_MODULE}/APKHunt-${lAPK_NAME}.txt"
+  go run "${EXT_DIR}"/APKHunt/apkhunt.go -p "${lAPK_FILE}" -l 2>&1 | tee -a "${LOG_PATH_MODULE}/APKHunt-${lAPK_NAME}.txt" || print_error "[-] Failed to analyze apk file ${lAPK_FILE} with apkhunt"
 
   if [[ -f "${LOG_PATH_MODULE}/APKHunt-${lAPK_NAME}.txt" ]]; then
     lAPK_ISSUES=$(grep -c -E "^[0-9]+:" "${LOG_PATH_MODULE}/APKHunt-${lAPK_NAME}.txt" || true)

@@ -41,8 +41,8 @@ export MODULE_BLACKLIST+=( "S10_binaries_basic_check" "S15_radare_decompile_chec
 export DISABLE_STATUS_BAR=0
 export SILENT=1
 
-# enable GPT connection:
-export GPT_OPTION=0
+# enable AI connection:
+export AI_OPTION=0
 
 # enable EMBA binary map dependency generator
 EMBA_MAP_GENERATOR=1

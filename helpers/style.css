@@ -81,6 +81,11 @@ a.f {
   padding-right: 18px !important;
 }
 
+.double {
+  border: 0;
+  border-top: 5px double #9f9f9f;
+}
+
 hr.double {
   border: 0;
   border-top: 5px double #9f9f9f;

@@ -96,14 +96,6 @@ output_overview() {
   print_output "[+] EMBA version: ""${ORANGE}""${lSBOM_TOOL_VERS}""${NC}"
   write_csv_log "EMBA_version" "${lSBOM_TOOL_VERS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
 
-  if [[ -f "${Q02_LOG}" ]] && [[ "${GPT_OPTION}" -gt 0 ]]; then
-    lGPT_RESULTS_CNT=$(grep -c "AI analysis for" "${Q02_LOG}" || true)
-    if [[ "${lGPT_RESULTS_CNT}" -gt 0 ]]; then
-      print_output "[+] EMBA AI analysis discovered ${ORANGE}${lGPT_RESULTS_CNT}${GREEN} results."
-      write_link "q02"
-    fi
-  fi
-
   if [[ -n "${ARCH}" ]] && [[ "${ARCH}" != "NA" ]]; then
     if [[ -n "${D_END:-"NA"}" ]]; then
       write_csv_log "architecture_verified" "${ARCH}" "${D_END}" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -263,10 +255,27 @@ output_details() {
     fi
   fi
 
+  if [[ -f "${Q02_LOG}" ]] && [[ "${AI_OPTION}" -gt 0 ]]; then
+    lGPT_RESULTS_CNT=$(grep -c "AI analysis for" "${Q02_LOG}" || true)
+    if [[ "${lGPT_RESULTS_CNT}" -gt 0 ]]; then
+      print_output "[+] AI analysis identified ${ORANGE}${lGPT_RESULTS_CNT}${GREEN} results via ChatGPT."
+      write_link "q02"
+      write_csv_log "AI results" "${lGPT_RESULTS_CNT}" "ChatGPT" "NA" "NA" "NA" "NA" "NA" "NA"
+    fi
+  fi
+
+  if [[ -f "${Q03_LOG}" ]] && [[ "${AI_OPTION}" -gt 0 ]]; then
+    lAI_RESULTS_CNT=$(grep -c "AI analysis results for" "${Q03_LOG}" || true)
+    if [[ "${lAI_RESULTS_CNT}" -gt 0 ]]; then
+      print_output "[+] AI analysis discovered ${ORANGE}${lAI_RESULTS_CNT}${GREEN} results via LocalAI."
+      write_link "q03"
+      write_csv_log "AI results" "${lAI_RESULTS_CNT}" "LocalAI" "NA" "NA" "NA" "NA" "NA" "NA"
+    fi
+  fi
+
+
   if [[ "${lGPT_RESULTS_CNT:-0}" -gt 0 ]]; then
-    print_output "[+] EMBA AI tests identified ${ORANGE}${lGPT_RESULTS_CNT}${GREEN} results via ChatGPT."
     write_link "q02"
-    write_csv_log "AI results" "${lGPT_RESULTS_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
 
   if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR_CNT:-0}" -gt 0 ]]; then
