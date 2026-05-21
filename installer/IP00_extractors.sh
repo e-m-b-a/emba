@@ -36,6 +36,8 @@ IP00_extractors() {
     print_pip_info "python-lzo"
     # vmdk extractor:
     print_tool_info "guestfs-tools" 1
+    # srecord converter
+    print_tool_info "srecord" 1
     # payload_dumper:
     print_pip_info "fsspec"
     # Buffalo decryptor
