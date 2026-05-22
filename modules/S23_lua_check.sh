@@ -154,7 +154,7 @@ s23_luaseccheck() {
       write_csv_log "$(print_path "${lQUERY_FILE}")" "0" "${lISSUES_FILE}" "NA"
       if [[ "${AI_OPTION}" -gt 0 ]]; then
         lAI_ANCHOR="$(openssl rand -hex 8)"
-                       # "${GPT_INPUT_FILE_}"           "${lAI_ANCHOR}" "${lAI_PRIO}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+        # "${GPT_INPUT_FILE_}"           "${lAI_ANCHOR}" "${lAI_PRIO}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
         write_csv_AI_tmp "${lLOG_QUERYFILE}" "${lAI_ANCHOR}" "${lAI_PRIO}" "${GPT_QUESTION}" "${lLOG_QUERYFILE}" "" ""
         # add ChatGPT link
         print_output "" "${lLOG_QUERYFILE}"

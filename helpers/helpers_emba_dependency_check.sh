@@ -328,13 +328,6 @@ dependency_check() {
         done <"${CONFIG_DIR}/dependencytrack.env"
       fi
     fi
-
-    if [[ "${IN_DOCKER}" -eq 0 ]]; then
-      local lONLINE_CHECK_FILE="${EXT_DIR}""/onlinechecker/EMBA_VERSION.txt"
-    else
-      # in our containers we have mounted our current EMBA dir to /emba, this includes the host ./external with the onlinechecker
-      local lONLINE_CHECK_FILE="/emba/external/onlinechecker/EMBA_VERSION.txt"
-    fi
   else
     print_output "    Isolation - ${GREEN}""ok""${NC}" "no_log"
   fi

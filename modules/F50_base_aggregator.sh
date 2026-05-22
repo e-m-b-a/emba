@@ -262,15 +262,6 @@ output_details() {
     fi
   fi
 
-  if [[ -f "${Q02_LOG}" ]] && [[ "${AI_OPTION}" -gt 0 ]]; then
-    lGPT_RESULTS_CNT=$(grep -c "AI analysis for" "${Q02_LOG}" || true)
-    if [[ "${lGPT_RESULTS_CNT}" -gt 0 ]]; then
-      print_output "[+] AI analysis identified ${ORANGE}${lGPT_RESULTS_CNT}${GREEN} results via ChatGPT."
-      write_link "q02"
-      write_csv_log "AI results" "${lGPT_RESULTS_CNT}" "ChatGPT" "NA" "NA" "NA" "NA" "NA" "NA"
-    fi
-  fi
-
   if [[ -f "${Q03_LOG}" ]] && [[ "${AI_OPTION}" -gt 0 ]]; then
     lAI_RESULTS_CNT=$(grep -c "AI analysis results for" "${Q03_LOG}" || true)
     if [[ "${lAI_RESULTS_CNT}" -gt 0 ]]; then
@@ -278,11 +269,6 @@ output_details() {
       write_link "q03"
       write_csv_log "AI results" "${lAI_RESULTS_CNT}" "LocalAI" "NA" "NA" "NA" "NA" "NA" "NA"
     fi
-  fi
-
-
-  if [[ "${lGPT_RESULTS_CNT:-0}" -gt 0 ]]; then
-    write_link "q02"
   fi
 
   if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR_CNT:-0}" -gt 0 ]]; then

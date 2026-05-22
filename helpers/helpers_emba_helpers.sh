@@ -57,7 +57,7 @@ parse_markdown_to_emba_txt() {
   local lMD_LINE=""
   local lSTORED_IFS="${IFS}"
 
-  IFS=''
+  IFS=''  # nosemgrep
   while read -r lMD_LINE; do
     if [[ "${lMD_LINE}" =~ ^#{$((lHEADLINE_STARTER+1))}.* ]]; then
       # other headlines -> sub-module-titles
@@ -76,7 +76,7 @@ parse_markdown_to_emba_txt() {
       write_log "${lMD_LINE}" "${lEMBA_TXT_LOG}"
     fi
   done < "${lMD_LOG}"
-  IFS="${lSTORED_IFS}"
+  IFS="${lSTORED_IFS}"  # nosemgrep
 }
 
 wait_for_pid() {

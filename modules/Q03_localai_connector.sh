@@ -133,7 +133,7 @@ ask_localai() {
   local lAI_SOURCE_FILE=""
   local lSCRIPT_PATH_TMP=""
 
-  print_output "[*] Checking scripts with LocalAI that have a priority of ${ORANGE}${MINIMUM_GPT_PRIO}${NC} or lower" "no_log"
+  print_output "[*] Checking scripts with LocalAI that have a priority of ${ORANGE}${MINIMUM_GPT_PRIO}${NC} or higher" "no_log"
   if ! [[ -d "${lAI_FILE_DIR}" ]]; then
     mkdir "${lAI_FILE_DIR}"
   fi
@@ -438,7 +438,7 @@ identify_ai_model() {
 }
 
 extract_s16_fct_name() {
-  local lFUNCTION_NAME="${1:-}"
+  local lSCRIPT_PATH_TMP="${1:-}"
   # extract the function name from the beginning of the first part of the file
   # e.g.: bool fct_name(asdf)
   local lBINARY_NAME=""
@@ -484,6 +484,7 @@ generate_prompt_script() {
   # remove shell comment lines:
   lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
   # remove shell comments:
+  # shellcheck disable=SC2001
   lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
   # remove empty lines (includes also empty lines with spaces):
   lCODE_CONTENT=$(sed -r '/^\s*$/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
@@ -554,6 +555,7 @@ generate_prompt_binary() {
   # remove shell comment lines:
   lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
   # remove shell comments:
+  # shellcheck disable=SC2001
   lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
   # remove empty lines (includes also empty lines with spaces):
   lCODE_CONTENT=$(sed -r '/^\s*$/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")

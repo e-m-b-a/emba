@@ -18,7 +18,6 @@
 #               The generated source code is further analysed with semgrep and the rules provided by 0xdea
 #               (https://github.com/0xdea/semgrep-rules)
 
-
 S16_ghidra_decompile_checks() {
   # export MAX_EXT_CHECK_BINS=3
   module_log_init "${FUNCNAME[0]}"

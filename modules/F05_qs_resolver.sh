@@ -115,11 +115,14 @@ gpt_resolver_csv() {
   local lGPT_OUTPUT_FILE_="${5:-}"
   local lGPT_TOKENS_="${6:-}"
   local lAI_RESPONSE_FILE="${7:-}"
-  local lGPT_OUTPUT_FILE_NAME=""
   local lHTML_FILE_=""
   local lHTML_FILE_X=""
 
   print_output "[*] Trying to resolve ${ORANGE}Anchor ${lAI_ANCHOR}${NC}."
+  if [[ ! -f "${lAI_RESPONSE_FILE}" ]]; then
+    print_output "[-] WARNING: No AI response file available - ${lAI_RESPONSE_FILE}"
+    return
+  fi
 
   if [[ ${lGPT_TOKENS_} -ne 0 ]]; then
     # replace anchor in html-report with link to response
@@ -150,9 +153,7 @@ gpt_resolver_csv() {
           sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q03\_localai\_connector\.html\#aianalysisfor${lGPT_REVERSE_LINK_}\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] LocalAI results are available\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
         fi
       else
-        # openai mode - deprected and probably not working anymore
-        # Todo: remove OpenAI module environment from EMBA
-        sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q02\_openai\_question\.html\#aianalysisfor${lGPT_REVERSE_LINK_}\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
+        print_output "[-] Deprecated and unsupporte OpenAI mode - bypass"
       fi
     done
   fi
@@ -166,7 +167,6 @@ gpt_resolver_csv_tmp() {
   local lGPT_OUTPUT_FILE_="${5:-}"
   local lGPT_TOKENS_="${6:-}"
   local lGPT_RESPONSE_="${7:-}"
-  local lGPT_OUTPUT_FILE_NAME=""
   local lHTML_FILE_=""
   local lHTML_FILE_X=""
 
@@ -184,14 +184,12 @@ gpt_resolver_csv_tmp() {
     # shellcheck disable=SC2001
     lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
     print_output "[*] Linking AI results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
-    depth_cnt="${lHTML_FILE_X//[^\/]/}"
-    depth_cnt="$(("${#depth_cnt}" - 1))"
     local lDEPTH="\.\.\/"
 
     if [[ "${AI_OPTION}" -eq 3 ]]; then
       sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q03\_localai\_connector\.html\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] LocalAI module did not finish\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
     else
-      sed -i "s/\[ASK_AI\]\ ${lAI_ANCHOR}/\ \ \ \ \<a class\=\"reference\" href\=\"${lDEPTH}q02\_openai\_question\.html\" title\=\"${lGPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] OpenAI module did not finish\<\/span\>\<\/a\>\n/1" "${lHTML_FILE_}"
+      print_output "[-] Deprecated and unsupporte OpenAI mode - bypass"
     fi
   done
 }

@@ -30,7 +30,7 @@ S28_java_check() {
   local lJAVA_VULNS_CNT=0
   local lWAIT_PIDS_S28=()
   # shadow the original MAX_MOD_THREADS as adjusted local variable
-  local MAX_MOD_THREADS=$(( MAX_MOD_THREADS > 1 ? MAX_MOD_THREADS / 2 : 1 ))
+  local MAX_MOD_THREADS=$((MAX_MOD_THREADS > 1 ? MAX_MOD_THREADS / 2 : 1))
 
   export JAVA_DECOMPILER="${EXT_DIR}/vineflower-1.11.2.jar"
 
@@ -81,7 +81,7 @@ S28_java_check() {
       if grep -q '\"results\":' "${lSEMGREP_RESULT}"; then
         local lJAVA_SOURCE_FILE_ARR=()
         mapfile -t lJAVA_SOURCE_FILE_ARR < <(jq -r '.results[].path' "${lSEMGREP_RESULT}" | sort -u)
-        lJAVA_VULNS_CNT=$((lJAVA_VULNS_CNT+$(jq -r '.results[].check_id' "${lSEMGREP_RESULT}" | wc -l)))
+        lJAVA_VULNS_CNT=$((lJAVA_VULNS_CNT + $(jq -r '.results[].check_id' "${lSEMGREP_RESULT}" | wc -l)))
         local lJAVA_SOURCE_FILE=""
         for lJAVA_SOURCE_FILE in "${lJAVA_SOURCE_FILE_ARR[@]}"; do
           print_output "[+] Semgrep security scanning results for ${ORANGE}$(basename "${lJAVA_SOURCE_FILE}")${NC}" "" "${lSEMGREP_RESULT}"
