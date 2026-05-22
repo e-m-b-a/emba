@@ -68,15 +68,15 @@ Q03_localai_connector() {
     export SECONDS=0
     if [[ "${AI_MIN_RUNTIME}" == *"d" ]]; then
       AI_MIN_RUNTIME=${AI_MIN_RUNTIME//d/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*24*3600))
+      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 24 * 3600))
     fi
     if [[ "${AI_MIN_RUNTIME}" == *"h" ]]; then
       AI_MIN_RUNTIME=${AI_MIN_RUNTIME//h/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*3600))
+      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 3600))
     fi
     if [[ "${AI_MIN_RUNTIME}" == *"m" ]]; then
       AI_MIN_RUNTIME=${AI_MIN_RUNTIME//m/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*60))
+      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 60))
     fi
     if [[ "${AI_MIN_RUNTIME}" == *"s" ]]; then
       AI_MIN_RUNTIME=${AI_MIN_RUNTIME//s/}
@@ -106,13 +106,13 @@ adjust_minimum_runtime() {
   # if the minimum runtime is not set we adjust it to something bigger then the module runtime
   # with this we can start and the later rules to end this module will jump in
   if [[ -z "${AI_MIN_RUNTIME}" ]]; then
-    AI_MIN_RUNTIME=$((lMODULE_RUNTIME+10))
+    AI_MIN_RUNTIME=$((lMODULE_RUNTIME + 10))
     return
   fi
   # to enusure the AI module is running at least until the reporting phase started we tweak the minimum
   # runtime to a higher value as the module runtime as long as the reporting phase is not started
   if ! grep -q "Reporting phase started" "${MAIN_LOG}" && [[ "${lMODULE_RUNTIME}" -ge "${AI_MIN_RUNTIME}" ]]; then
-    AI_MIN_RUNTIME=$((lMODULE_RUNTIME+10))
+    AI_MIN_RUNTIME=$((lMODULE_RUNTIME + 10))
   fi
 }
 
@@ -211,7 +211,7 @@ ask_localai() {
 
     if [[ ${lAI_PRIO} -ge ${MINIMUM_GPT_PRIO} ]] && [[ "${lSCRIPT_PATH_TMP}" != '' ]]; then
       if [[ -f "${lSCRIPT_PATH_TMP}" ]]; then
-        sub_module_title "AI analysis for ${lAI_INPUT_FILE//\.log}"
+        sub_module_title "AI analysis for ${lAI_INPUT_FILE//\.log/}"
 
         local lBINARY_NAME="NA"
         local lFUNCTION_NAME="NA"
@@ -226,15 +226,15 @@ ask_localai() {
         elif [[ "${lSCRIPT_PATH_TMP}" == *"s28_java_check"* ]]; then
           # we start with a path like /logs/s28_java_check/java_decompile/i.class_16708/i.java
           # -> the last are we use as function name
-          lFUNCTION_NAME="${lSCRIPT_PATH_TMP//*\/}"
+          lFUNCTION_NAME="${lSCRIPT_PATH_TMP//*\//}"
           # -> the middle area is the binary name
           lBINARY_NAME="${lSCRIPT_PATH_TMP%\/*}"
-          lBINARY_NAME="${lBINARY_NAME//*\/}"
-          lBINARY_NAME="${lBINARY_NAME//_*}"
+          lBINARY_NAME="${lBINARY_NAME//*\//}"
+          lBINARY_NAME="${lBINARY_NAME//_*/}"
           print_output "[*] AI-Assisted analysis for decompiled Java binary function ${ORANGE}${lFUNCTION_NAME}${NC} of ${ORANGE}${lBINARY_NAME}${NC}" "" "${lSCRIPT_PATH_TMP}"
           # as we are using lSCRIPT_PATH_TMP in the prompt generator we get a prompt file like prompt_localai_NeoterisStatic.java_Java.txt which is the current lFUNCTION_NAME
           # later on we can't find the prompt file as we look for the lBINARY_NAME. This means we rewrite the lBINARY_NAME with the lFUNCTION_NAME
-          lBINARY_NAME="${lFUNCTION_NAME//\.log}"
+          lBINARY_NAME="${lFUNCTION_NAME//\.log/}"
 
           # we need to redefine the lFUNCTION_NAME now as the type of analysed binary
           # Todo: rename and cleanup variable names
@@ -244,8 +244,8 @@ ask_localai() {
         else
           # for all the default modules
           lBINARY_NAME=$(basename "${lSCRIPT_PATH_TMP}")
-          lBINARY_NAME="${lBINARY_NAME//*\/}"
-          lBINARY_NAME="${lBINARY_NAME//\.log}"
+          lBINARY_NAME="${lBINARY_NAME//*\//}"
+          lBINARY_NAME="${lBINARY_NAME//\.log/}"
 
           if [[ "${lAI_SOURCE_FILE}" == *"s22_php_check"* ]]; then
             lFUNCTION_NAME="PHP"
@@ -283,7 +283,7 @@ ask_localai() {
         lWC_M_FILE="${#lPROMPT}"
         lWC_L_FILE=$(echo "${lPROMPT}" | wc -l)
         # just a very rough estimation
-        lTOKENS_PRE=$((lWC_M_FILE/2))
+        lTOKENS_PRE=$((lWC_M_FILE / 2))
 
         print_output "[*] Testing prompt" "" "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
         print_output "${ORANGE}${lPROMPT}${NC}" "no_log"
@@ -299,16 +299,16 @@ ask_localai() {
         lJSON_PAYLOAD=$(jq -n \
           --arg model "${lMODEL_LOCALAI}" \
           --arg prompt "${lPROMPT}" \
-              '{model: $model, messages: [{role: "user", content: $prompt}], temperature: 0.2}')
+          '{model: $model, messages: [{role: "user", content: $prompt}], temperature: 0.2}')
 
         lstart_time=$(date +%s)
         lHTTP_CODE=$(curl --connect-timeout 10 --max-time 600 -s http://"${LOCAL_AI_IP}":8080/v1/chat/completions \
-            -H "Content-Type: application/json" \
-            -d "${lJSON_PAYLOAD}" -o "${lAI_LOG_FILE}.json" --write-out "%{http_code}" || true)
+          -H "Content-Type: application/json" \
+          -d "${lJSON_PAYLOAD}" -o "${lAI_LOG_FILE}.json" --write-out "%{http_code}" || true)
 
         if [[ -f "${lAI_LOG_FILE}.json" ]]; then
           # reformat the output to also have the token usage avaialble
-          jq -r '. | "\(.choices[].message.content)\n\nTokens used: \(.usage.total_tokens)"' "${lAI_LOG_FILE}.json" > "${lAI_LOG_FILE}" || print_error "[-] Q03 - AI parsing error for ${lAI_LOG_FILE}.json"
+          jq -r '. | "\(.choices[].message.content)\n\nTokens used: \(.usage.total_tokens)"' "${lAI_LOG_FILE}.json" >"${lAI_LOG_FILE}" || print_error "[-] Q03 - AI parsing error for ${lAI_LOG_FILE}.json"
         fi
 
         if [[ ! -f "${lAI_LOG_FILE}" ]] || [[ ! -s "${lAI_LOG_FILE}" ]]; then
@@ -324,17 +324,17 @@ ask_localai() {
         lTOKENS_POST=$(grep "Tokens used:" "${lAI_LOG_FILE}" | cut -d ':' -f2)
         lTOKENS_POST=${lTOKENS_POST//\ /}
         lfinished_time=$(date +%s)
-        lruntime=$((lfinished_time-lstart_time))
+        lruntime=$((lfinished_time - lstart_time))
 
         if [[ "${lTOKENS_POST}" -gt 0 && "${lruntime}" -gt 0 ]]; then
           print_output "[*] AI took ${ORANGE}${lruntime}${NC} seconds and ${ORANGE}${lTOKENS_POST}${NC} tokens to complete this request."
-          print_output "[*] Tokens/sec: ${ORANGE}~$((lTOKENS_POST/lruntime))${NC}" || true
+          print_output "[*] Tokens/sec: ${ORANGE}~$((lTOKENS_POST / lruntime))${NC}" || true
         fi
 
         if [[ "${lHTTP_CODE}" -ne 200 ]]; then
           print_output "[-] Something went wrong with the LocalAI requests"
           # track the errors. If we get too many we are going to stop AI requests
-          AI_ERROR_CNT=$((AI_ERROR_CNT+1))
+          AI_ERROR_CNT=$((AI_ERROR_CNT + 1))
 
           if [[ -f "${lAI_LOG_FILE}" ]]; then
             print_output "[-] ERROR response: $(cat "${lAI_LOG_FILE}")"
@@ -353,7 +353,7 @@ ask_localai() {
         if ! [[ -f "${lAI_LOG_FILE}" ]]; then
           # catches: (56) Recv failure: Connection reset by peer
           print_output "[-] Something went wrong with the LocalAI request for ${lAI_INPUT_FILE}"
-          AI_ERROR_CNT=$((AI_ERROR_CNT+1))
+          AI_ERROR_CNT=$((AI_ERROR_CNT + 1))
 
           continue
         fi
@@ -409,7 +409,6 @@ ask_localai() {
   done
 }
 
-
 regenerate_ai_todo_list() {
   print_output "[*] Regenerate analysis array ..." "no_log"
 
@@ -431,7 +430,7 @@ identify_ai_model() {
   while [[ -z "${lMODEL_LOCALAI}" ]]; do
     lMODEL_LOCALAI=$(curl --connect-timeout 10 --max-time 30 http://"${LOCAL_AI_IP}":8080/v1/models 2>/dev/null | jq -r .data[].id || true)
     [[ -z "${lMODEL_LOCALAI}" ]] && sleep 5
-    lCNT=$((lCNT+1))
+    lCNT=$((lCNT + 1))
     [[ "${lCNT}" -gt 5 ]] && break
   done
   echo "${lMODEL_LOCALAI}"
@@ -453,8 +452,8 @@ extract_s16_fct_name() {
   if [[ -z "${lFUNCTION_NAME}" ]]; then
     lFUNCTION_NAME="unknown_${lBINARY_NAME:-NA}"
   fi
-  lFUNCTION_NAME="${lFUNCTION_NAME//\(*}"
-  lFUNCTION_NAME="${lFUNCTION_NAME//* }"
+  lFUNCTION_NAME="${lFUNCTION_NAME//\(*/}"
+  lFUNCTION_NAME="${lFUNCTION_NAME//* /}"
   echo "${lFUNCTION_NAME}"
 }
 
@@ -467,27 +466,27 @@ generate_prompt_script() {
   local lPROMPT=""
   local lBINARY_NAME=""
   lBINARY_NAME=$(basename "${lSCRIPT_PATH_TMP}")
-  lBINARY_NAME="${lBINARY_NAME//*\/}"
-  lBINARY_NAME="${lBINARY_NAME//\.log}"
+  lBINARY_NAME="${lBINARY_NAME//*\//}"
+  lBINARY_NAME="${lBINARY_NAME//\.log/}"
 
   print_output "[*] Build prompt for ${lSCRIPT_PATH_TMP} - lSCRIPT_NAME: ${lBINARY_NAME} - script type: ${lSCRIPT_TYPE}" "no_log"
 
   # Read the file content and remove the ASK_AI marker
   lCODE_CONTENT_tmp=$(grep -v "ASK_AI" "${lSCRIPT_PATH_TMP}" || true)
   # remove REF entries for HTML links
-  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 1")
+  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 1")
   # remove semgrep identifiers
-  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
+  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
   # remove color codes
   lCODE_CONTENT_tmp=$(strip_color_codes "${lCODE_CONTENT_tmp}")
 
   # remove shell comment lines:
-  lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
+  lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
   # remove shell comments:
   # shellcheck disable=SC2001
-  lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
+  lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
   # remove empty lines (includes also empty lines with spaces):
-  lCODE_CONTENT=$(sed -r '/^\s*$/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
+  lCODE_CONTENT=$(sed -r '/^\s*$/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
 
   lPROMPT="You are an expert software architect. Analyze the provided source code."
   lPROMPT+=" The following source code is from a Linux based firmware ${lSCRIPT_TYPE} script called ${lBINARY_NAME}."
@@ -504,7 +503,7 @@ generate_prompt_script() {
   fi
   lPROMPT="${lPROMPT}\nHere is the code:\n\n${lCODE_CONTENT:0:${AI_MAX_CHARS_TO_ANALYSE}}\n"
 
-  echo -n "${lPROMPT}" > "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lSCRIPT_TYPE}.txt"
+  echo -n "${lPROMPT}" >"${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lSCRIPT_TYPE}.txt"
 }
 
 generate_prompt_binary() {
@@ -546,19 +545,19 @@ generate_prompt_binary() {
   # Read the file content and remove the ASK_AI marker
   lCODE_CONTENT_tmp=$(grep -v "ASK_AI" "${lSCRIPT_PATH_TMP}" || true)
   # remove REF entries for HTML links
-  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 1")
+  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 1")
   # remove semgrep identifiers
-  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
+  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
   # remove color codes
   lCODE_CONTENT=$(strip_color_codes "${lCODE_CONTENT_tmp}")
 
   # remove shell comment lines:
-  lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
+  lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
   # remove shell comments:
   # shellcheck disable=SC2001
-  lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
+  lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
   # remove empty lines (includes also empty lines with spaces):
-  lCODE_CONTENT=$(sed -r '/^\s*$/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
+  lCODE_CONTENT=$(sed -r '/^\s*$/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
 
   lPROMPT="You are an expert software architect. Analyze the provided source code."
   lPROMPT+=" The following source code is from a Linux based firmware binary called ${lBINARY_NAME}."
@@ -605,5 +604,5 @@ generate_prompt_binary() {
 
   # print_output "[*] Wrting prompt for ${lSCRIPT_PATH_TMP} - ${lPROMPT} to ${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
 
-  echo -n "${lPROMPT}" > "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
+  echo -n "${lPROMPT}" >"${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
 }
