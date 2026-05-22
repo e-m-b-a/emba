@@ -81,7 +81,7 @@ S28_java_check() {
         if jq '.results | length >0' "${lSEMGREP_RESULT}"; then
           local lJAVA_SOURCE_FILE_ARR=()
           mapfile -t lJAVA_SOURCE_FILE_ARR < <(jq -r '.results[].path' "${lSEMGREP_RESULT}" | sort -u)
-          lJAVA_VULNS_CNT=$((lJAVA_VULNS_CNT + $(jq -r '.results[].check_id' "${lSEMGREP_RESULT}" | wc -l)))
+          lJAVA_VULNS_CNT=$((lJAVA_VULNS_CNT + "$(jq -r '.results[].check_id' "${lSEMGREP_RESULT}" | wc -l)"))
           local lJAVA_SOURCE_FILE=""
           for lJAVA_SOURCE_FILE in "${lJAVA_SOURCE_FILE_ARR[@]}"; do
             print_output "[+] Semgrep security scanning results for ${ORANGE}$(basename "${lJAVA_SOURCE_FILE}")${NC}" "" "${lSEMGREP_RESULT}"
