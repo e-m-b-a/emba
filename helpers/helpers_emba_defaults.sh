@@ -91,8 +91,10 @@ set_defaults() {
 
   export SHELLCHECK=1
 
+  # Todo: remove option 1 and 2 and GPT_QUESTION usage
+  # Todo: rename all GPT to AI areas
   export AI_OPTION=0 # 0 -> off, 1-> unpaid plan, 2 -> no rate-limit, 3 -> LocalAI Server
-  export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
+  export GPT_QUESTION=""
   export MINIMUM_GPT_PRIO=1 # everything above this value gets checked
 
   export SHORT_PATH=0 # short paths in cli output
