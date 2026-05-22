@@ -300,7 +300,7 @@ dependency_check() {
       echo -e "${RED}not ok${NC}"
       print_output "[!] Warning: EMBA has NO internet connection!" "no_log"
       print_output "[!] Warning: Update checks and multiple EMBA modules are disabled!" "no_log"
-      print_output "[!] Warning: GPT (Q02), kernel verification (S26) and further online modules are disabled!" "no_log"
+      print_output "[!] Warning: Kernel verification (S26) and further online modules are disabled!" "no_log"
     fi
   fi
 
@@ -334,74 +334,6 @@ dependency_check() {
     else
       # in our containers we have mounted our current EMBA dir to /emba, this includes the host ./external with the onlinechecker
       local lONLINE_CHECK_FILE="/emba/external/onlinechecker/EMBA_VERSION.txt"
-    fi
-
-    # as we first check the onlinechecker/EMBA_VERSION.txt file we know if we are online or not:
-    if ! [[ -f "${lONLINE_CHECK_FILE}" ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
-      # if we have no EMBA_VERSION identified, we do not need to check our GPT key now -> there is no internet
-      print_output "$(indent "${ORANGE}As there is no Internet connection available, no GPT checks performed.${NC}")" "no_log"
-    elif [[ -z "${OPENAI_API_KEY}" ]]; then
-      print_output "$(indent "ChatGPT-API key not set - ${ORANGE}see https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis for more information${NC}")" "no_log"
-      # The following if clause is currently not working! We have not loaded the profile in this stage
-      # TODO: Find a workaround!
-      if [[ "${AI_OPTION}" -eq 1 ]]; then
-        DEP_ERROR=1
-      fi
-    else
-      local lRETRIES_=0
-      # on the host we try it only 10 times:
-      local lMAX_RETRIES=10
-      if [[ "${IN_DOCKER}" -eq 1 ]]; then
-        # within the Quest container we can keep trying it as it does not matter if the container starts up later
-        lMAX_RETRIES=200
-      fi
-      local lSLEEPTIME=30
-      while true; do
-        local lHTTP_CODE_=400
-        print_output "    OpenAI-API key  - \\c" "no_log"
-        lHTTP_CODE_=$(curl -sS https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
-          -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-          -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json 2>/dev/null)
-
-        if [[ "${lHTTP_CODE_}" -eq 200 ]]; then
-          echo -e "${GREEN}""ok""${NC}"
-          rm /tmp/chatgpt-test.json
-          break
-        else
-          if [[ -f /tmp/chatgpt-test.json ]]; then
-            if jq '.error.code' /tmp/chatgpt-test.json | grep -q "rate_limit_exceeded"; then
-              # rate limit handling - if we got a response like:
-              # Please try again in 20s
-              echo -e "${RED}""not ok (rate limit issues)""${NC}"
-              if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in "; then
-                # print_output "GPT API test #${lRETRIES_} - \\c" "no_log"
-                sleep "${lSLEEPTIME}"s
-                # sleeptime gets adjusted on every failure
-                lSLEEPTIME=$((lSLEEPTIME + 5))
-                ((lRETRIES_ += 1))
-                [[ "${lRETRIES_}" -lt "${lMAX_RETRIES}" ]] && continue
-              fi
-            fi
-            if jq '.error.code' /tmp/chatgpt-test.json | grep -q "insufficient_quota"; then
-              echo -e "${RED}""not ok (quota limit issues)""${NC}"
-              break
-            fi
-          fi
-          echo -e "${RED}""not ok""${NC}"
-          print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
-          if [[ -f /tmp/chatgpt-test.json ]]; then
-            print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
-          fi
-          # Note: we are running into issues in the case where the key can't be verified, but GPT is not enabled at all
-          #       In such a case we will fail the check without the need of GPT
-          # DEP_ERROR=1
-        fi
-        if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}" 2>/dev/null; then
-          print_output "    Testing phase ended  - \\c" "no_log"
-          echo -e "${RED}""exit now""${NC}"
-          DEP_ERROR=1
-        fi
-      done
     fi
   else
     print_output "    Isolation - ${GREEN}""ok""${NC}" "no_log"

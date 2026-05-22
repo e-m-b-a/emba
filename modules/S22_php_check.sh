@@ -259,8 +259,8 @@ s22_vuln_check() {
       write_csv_AI_tmp "${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log" "${lAI_ANCHOR}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lPHP_SCRIPT_}" "" ""
 
       # add AI link
-      printf '%s\n\n' "" >>"${lPHP_SCRIPT_}"
-      write_anchor_AI "${lAI_ANCHOR}" "${lPHP_SCRIPT_}"
+      printf '%s\n\n' "" >>"${lPHP_LOG}"
+      write_anchor_AI "${lAI_ANCHOR}" "${lPHP_LOG}"
       printf '%s\n\n' "" >>"${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log"
       write_anchor_AI "${lAI_ANCHOR}" "${lS22_SOURCE_DIR}/${lPHP_SCRIPT_NAME}.log"
     fi

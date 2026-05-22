@@ -29,7 +29,8 @@ S28_java_check() {
   local lJNAME=""
   local lJAVA_VULNS_CNT=0
   local lWAIT_PIDS_S28=()
-  local MAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
+  # shadow the original MAX_MOD_THREADS as adjusted local variable
+  local MAX_MOD_THREADS=$(( MAX_MOD_THREADS > 1 ? MAX_MOD_THREADS / 2 : 1 ))
 
   export JAVA_DECOMPILER="${EXT_DIR}/vineflower-1.11.2.jar"
 
@@ -90,7 +91,7 @@ S28_java_check() {
           # AI integration
           local lAI_ANCHOR=""
           lAI_ANCHOR="$(openssl rand -hex 8)"
-          lAI_PRIO=4
+          local lAI_PRIO=4
           write_csv_AI_tmp "${lJAVA_SOURCE_FILE}.log" "${lAI_ANCHOR}" "${lAI_PRIO}" "NA" "${lSEMGREP_RESULT}" "" ""
           printf '%s\n\n' "" >>"${lJAVA_SOURCE_FILE}.log"
           write_anchor_AI "${lAI_ANCHOR}" "${lJAVA_SOURCE_FILE}.log"

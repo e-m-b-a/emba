@@ -696,10 +696,10 @@ final_log_kernel_vulns() {
   local lCNT_PATHS_FOUND_WRONG_ARCH=0
 
   if [[ -s "${TMP_DIR}/s25_counting.tmp" ]]; then
-    lCNT_PATHS_UNK=$(grep -c "lCNT_PATHS_UNK" "${TMP_DIR}/s25_counting.tmp")
-    lCNT_PATHS_NOT_FOUND=$(grep -c "lCNT_PATHS_NOT_FOUND" "${TMP_DIR}/s25_counting.tmp")
-    lCNT_PATHS_FOUND=$(grep -c "lCNT_PATHS_FOUND" "${TMP_DIR}/s25_counting.tmp")
-    lCNT_PATHS_FOUND_WRONG_ARCH=$(grep -c "lCNT_PATHS_FOUND_WRONG_ARCH" "${TMP_DIR}/s25_counting.tmp")
+    lCNT_PATHS_UNK=$(grep -c "lCNT_PATHS_UNK" "${TMP_DIR}/s25_counting.tmp" || true)
+    lCNT_PATHS_NOT_FOUND=$(grep -c "lCNT_PATHS_NOT_FOUND" "${TMP_DIR}/s25_counting.tmp" || true)
+    lCNT_PATHS_FOUND=$(grep -c "lCNT_PATHS_FOUND" "${TMP_DIR}/s25_counting.tmp" || true)
+    lCNT_PATHS_FOUND_WRONG_ARCH=$(grep -c "lCNT_PATHS_FOUND_WRONG_ARCH" "${TMP_DIR}/s25_counting.tmp" || true)
   fi
 
   print_output "[*] Found ${ORANGE}${lCNT_PATHS_UNK}${NC} advisories with missing vulnerable path details"

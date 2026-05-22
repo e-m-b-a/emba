@@ -116,11 +116,11 @@ add_link_tags() {
 
           # in some cases we link to files from different modules. Now we check if the html report file is already
           # generated and we can directly use the already available html report file
-          lORIG_SRC_MODULE_DIR=$(echo "${lREF_LINK}" | tr '/' '\n' | grep -E "^[psqfl][0-9]{2,3}_.*")
+          lORIG_SRC_MODULE_DIR=$(echo "${lREF_LINK}" | tr '/' '\n' | grep -E "^[psqfl][0-9]{2,3}_.*" | head -n 1 || print_error "[-] HTML report linking issue for ${lREF_LINK}")
           print_debug "[*] REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK} / lORIG_SRC_MODULE_DIR: ${lORIG_SRC_MODULE_DIR} / lLINK_FILE: ${lLINK_FILE}" "no_log"
           if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" ]]; then
             print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" "no_log"
-            if [[ "$(basename ${lLINK_FILE})" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
+            if [[ "$(basename "${lLINK_FILE}")" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
               # link to the already available report file without generating a new one:
               # we need to link to the original module directory of the file if we are in a main module log file
               lBACK_LINK_NEW="${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}"

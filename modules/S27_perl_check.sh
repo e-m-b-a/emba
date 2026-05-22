@@ -55,7 +55,7 @@ S27_perl_check() {
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S27
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S27[@]}"
+  wait_for_pid "${lWAIT_PIDS_S27[@]}"
   [[ -d "${TMP_DIR}/s27" ]] && (rm -r "${TMP_DIR}"/s27 || true)
 
   if [[ -f "${TMP_DIR}/S27_VULNS.tmp" ]]; then

@@ -65,6 +65,8 @@ F05_qs_resolver() {
         print_output "[*] AI resolver - testing ${ORANGE}${CSV_DIR}/ai_question.csv${NC}"
 
         gpt_resolver_csv "${lGPT_INPUT_FILE_}" "${lAI_ANCHOR}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lAI_RESPONSE_FILE}" &
+        lWAIT_PIDS_F05_ARR+=("$!")
+        store_kill_pids "${lWAIT_PIDS_F05_ARR[-1]}"
       done <"${CSV_DIR}/ai_question.csv"
 
       wait_for_pid "${lWAIT_PIDS_F05_ARR[@]}"
@@ -85,6 +87,7 @@ F05_qs_resolver() {
         gpt_resolver_csv_tmp "${lGPT_INPUT_FILE_}" "${lAI_ANCHOR}" "${l_GPT_PRIO_}" "${lGPT_QUESTION_}" "${lGPT_OUTPUT_FILE_}" "${lGPT_TOKENS_}" "${lGPT_RESPONSE_}" &
         local lTMP_PID="$!"
         lWAIT_PIDS_F05_ARR+=("${lTMP_PID}")
+        store_kill_pids "${lTMP_PID}"
         # max_pids_protection "${MAX_MOD_THREADS}" "${lWAIT_PIDS_F05_ARR[@]}"
       done <"${CSV_DIR}/ai_question.csv.tmp"
 
@@ -170,9 +173,6 @@ gpt_resolver_csv_tmp() {
   print_output "[*] Trying to resolve ${ORANGE}Anchor ${lAI_ANCHOR}${NC}."
 
   print_output "[*] AI module didn't check ${lGPT_INPUT_FILE_}, linking to the GPT module page instead"
-
-  local lMD5_OF_ORIG_SRC_FILE=""
-  lMD5_OF_ORIG_SRC_FILE=$(md5sum "${lGPT_OUTPUT_FILE_}" | awk '{print $1}')
 
   readarray -t lGPT_OUTPUT_FILE_HTML_ARR_ < <(grep -r -l "\[ASK_AI\]\ ${lAI_ANCHOR}" "${HTML_PATH}" 2>/dev/null || true)
 

@@ -66,6 +66,10 @@ Q03_localai_connector() {
     fi
 
     export SECONDS=0
+    if [[ "${AI_MIN_RUNTIME}" == *"d" ]]; then
+      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//d/}
+      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*24*3600))
+    fi
     if [[ "${AI_MIN_RUNTIME}" == *"h" ]]; then
       AI_MIN_RUNTIME=${AI_MIN_RUNTIME//h/}
       AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*3600))
@@ -74,9 +78,8 @@ Q03_localai_connector() {
       AI_MIN_RUNTIME=${AI_MIN_RUNTIME//m/}
       AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*60))
     fi
-    if [[ "${AI_MIN_RUNTIME}" == *"d" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//d/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME*24*3600))
+    if [[ "${AI_MIN_RUNTIME}" == *"s" ]]; then
+      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//s/}
     fi
 
     export GTP_CHECKED_ARR=()
@@ -470,15 +473,20 @@ generate_prompt_script() {
   print_output "[*] Build prompt for ${lSCRIPT_PATH_TMP} - lSCRIPT_NAME: ${lBINARY_NAME} - script type: ${lSCRIPT_TYPE}" "no_log"
 
   # Read the file content and remove the ASK_AI marker
-  lCODE_CONTENT_tmp=$(grep -v "ASK_AI" "${lSCRIPT_PATH_TMP}")
+  lCODE_CONTENT_tmp=$(grep -v "ASK_AI" "${lSCRIPT_PATH_TMP}" || true)
   # remove REF entries for HTML links
-  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<< "${lCODE_CONTENT_tmp}")
+  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 1")
   # remove semgrep identifiers
-  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<< "${lCODE_CONTENT_tmp}")
+  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
   # remove color codes
   lCODE_CONTENT_tmp=$(strip_color_codes "${lCODE_CONTENT_tmp}")
-  # remove shell comments and empty lines:
-  lCODE_CONTENT=$(sed '/^[[:blank:]]*#/d;s/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}")
+
+  # remove shell comment lines:
+  lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
+  # remove shell comments:
+  lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
+  # remove empty lines (includes also empty lines with spaces):
+  lCODE_CONTENT=$(sed -r '/^\s*$/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
 
   lPROMPT="You are an expert software architect. Analyze the provided source code."
   lPROMPT+=" The following source code is from a Linux based firmware ${lSCRIPT_TYPE} script called ${lBINARY_NAME}."
@@ -495,7 +503,7 @@ generate_prompt_script() {
   fi
   lPROMPT="${lPROMPT}\nHere is the code:\n\n${lCODE_CONTENT:0:${AI_MAX_CHARS_TO_ANALYSE}}\n"
 
-  echo -n "${lPROMPT}" | iconv -f ISO-8859-1 -t UTF-8 > "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lSCRIPT_TYPE}.txt"
+  echo -n "${lPROMPT}" > "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lSCRIPT_TYPE}.txt"
 }
 
 generate_prompt_binary() {
@@ -535,13 +543,20 @@ generate_prompt_binary() {
   fi
 
   # Read the file content and remove the ASK_AI marker
-  lCODE_CONTENT_tmp=$(grep -v "ASK_AI" "${lSCRIPT_PATH_TMP}")
+  lCODE_CONTENT_tmp=$(grep -v "ASK_AI" "${lSCRIPT_PATH_TMP}" || true)
   # remove REF entries for HTML links
-  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<< "${lCODE_CONTENT_tmp}")
+  lCODE_CONTENT_tmp=$(sed '/^\[REF\] .*/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 1")
   # remove semgrep identifiers
-  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<< "${lCODE_CONTENT_tmp}")
+  lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
   # remove color codes
   lCODE_CONTENT=$(strip_color_codes "${lCODE_CONTENT_tmp}")
+
+  # remove shell comment lines:
+  lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
+  # remove shell comments:
+  lCODE_CONTENT_tmp=$(sed 's/[[:blank:]]*#.*//' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 5")
+  # remove empty lines (includes also empty lines with spaces):
+  lCODE_CONTENT=$(sed -r '/^\s*$/d' <<< "${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 3")
 
   lPROMPT="You are an expert software architect. Analyze the provided source code."
   lPROMPT+=" The following source code is from a Linux based firmware binary called ${lBINARY_NAME}."
@@ -588,5 +603,5 @@ generate_prompt_binary() {
 
   # print_output "[*] Wrting prompt for ${lSCRIPT_PATH_TMP} - ${lPROMPT} to ${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
 
-  echo -n "${lPROMPT}" | iconv -f ISO-8859-1 -t UTF-8 > "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
+  echo -n "${lPROMPT}" > "${AI_PROMPT_DIR}/prompt_localai_${lBINARY_NAME}_${lFUNCTION_NAME}.txt"
 }

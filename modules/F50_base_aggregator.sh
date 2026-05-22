@@ -95,6 +95,13 @@ output_overview() {
   fi
   print_output "[+] EMBA version: ""${ORANGE}""${lSBOM_TOOL_VERS}""${NC}"
   write_csv_log "EMBA_version" "${lSBOM_TOOL_VERS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+  if [[ -f "${LOG_DIR}/emba_error.log" ]]; then
+    if grep -q Location "${LOG_DIR}/emba_error.log"; then
+      print_output "[-] WARNING: EMBA ${ORANGE}errors${NC} to review" "" ""
+    else
+      print_output "[*] INFO: EMBA ${ORANGE}warnings${NC} to review" "" ""
+    fi
+  fi
 
   if [[ -n "${ARCH}" ]] && [[ "${ARCH}" != "NA" ]]; then
     if [[ -n "${D_END:-"NA"}" ]]; then

@@ -175,8 +175,7 @@ set_defaults() {
   export SVG_BUILD_TIMEOUT="12h"
   export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 
-  DEPENDENCY_TRACK_ENABLED=0
-  OPENAI_API_KEY=""
+  export DEPENDENCY_TRACK_ENABLED=0
 
   # we can enable/disable the s08 submodules with the following array configuration
   # -> just comment the submodule that should not be used
