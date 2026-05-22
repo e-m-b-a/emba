@@ -78,24 +78,26 @@ S28_java_check() {
     mapfile -t lSEMGREP_RESULTS_ARR < <(find "${LOG_PATH_MODULE}/java_semgrep/" -name "semgrep_*.json")
     for lSEMGREP_RESULT in "${lSEMGREP_RESULTS_ARR[@]}"; do
       if grep -q '\"results\":' "${lSEMGREP_RESULT}"; then
-        local lJAVA_SOURCE_FILE_ARR=()
-        mapfile -t lJAVA_SOURCE_FILE_ARR < <(jq -r '.results[].path' "${lSEMGREP_RESULT}" | sort -u)
-        lJAVA_VULNS_CNT=$((lJAVA_VULNS_CNT + $(jq -r '.results[].check_id' "${lSEMGREP_RESULT}" | wc -l)))
-        local lJAVA_SOURCE_FILE=""
-        for lJAVA_SOURCE_FILE in "${lJAVA_SOURCE_FILE_ARR[@]}"; do
-          print_output "[+] Semgrep security scanning results for ${ORANGE}$(basename "${lJAVA_SOURCE_FILE}")${NC}" "" "${lSEMGREP_RESULT}"
-          # we log ".log" for the web reporter
-          mv "${lJAVA_SOURCE_FILE}" "${lJAVA_SOURCE_FILE}.log" || true
-          print_output "$(indent "$(orange "Decompiled Java sources for ${ORANGE}$(basename "${lJAVA_SOURCE_FILE}")${NC}")")" "" "${lJAVA_SOURCE_FILE}.log"
-          # AI integration
-          local lAI_ANCHOR=""
-          lAI_ANCHOR="$(openssl rand -hex 8)"
-          local lAI_PRIO=4
-          write_csv_AI_tmp "${lJAVA_SOURCE_FILE}.log" "${lAI_ANCHOR}" "${lAI_PRIO}" "NA" "${lSEMGREP_RESULT}" "" ""
-          printf '%s\n\n' "" >>"${lJAVA_SOURCE_FILE}.log"
-          write_anchor_AI "${lAI_ANCHOR}" "${lJAVA_SOURCE_FILE}.log"
-        done
-        # Todo: color the affected lines of code
+        if jq '.results | length >0' "${lSEMGREP_RESULT}"; then
+          local lJAVA_SOURCE_FILE_ARR=()
+          mapfile -t lJAVA_SOURCE_FILE_ARR < <(jq -r '.results[].path' "${lSEMGREP_RESULT}" | sort -u)
+          lJAVA_VULNS_CNT=$((lJAVA_VULNS_CNT + $(jq -r '.results[].check_id' "${lSEMGREP_RESULT}" | wc -l)))
+          local lJAVA_SOURCE_FILE=""
+          for lJAVA_SOURCE_FILE in "${lJAVA_SOURCE_FILE_ARR[@]}"; do
+            print_output "[+] Semgrep security scanning results for ${ORANGE}$(basename "${lJAVA_SOURCE_FILE}")${NC}" "" "${lSEMGREP_RESULT}"
+            # we log ".log" for the web reporter
+            mv "${lJAVA_SOURCE_FILE}" "${lJAVA_SOURCE_FILE}.log" || true
+            print_output "$(indent "$(orange "Decompiled Java sources for ${ORANGE}$(basename "${lJAVA_SOURCE_FILE}")${NC}")")" "" "${lJAVA_SOURCE_FILE}.log"
+            # AI integration
+            local lAI_ANCHOR=""
+            lAI_ANCHOR="$(openssl rand -hex 8)"
+            local lAI_PRIO=4
+            write_csv_AI_tmp "${lJAVA_SOURCE_FILE}.log" "${lAI_ANCHOR}" "${lAI_PRIO}" "NA" "${lSEMGREP_RESULT}" "" ""
+            printf '%s\n\n' "" >>"${lJAVA_SOURCE_FILE}.log"
+            write_anchor_AI "${lAI_ANCHOR}" "${lJAVA_SOURCE_FILE}.log"
+          done
+          # Todo: color the affected lines of code
+        fi
       fi
     done
   fi
@@ -123,9 +125,6 @@ s28_java_semgrep() {
   local lJ_ANALYSE_RESULTS="${lJ_ANALYSE_DIR}/semgrep_${lJNAME}.json"
 
   semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules/java "${lJAVA_BIN_DIR}" >"${lJ_ANALYSE_RESULTS}" || true
-  if [[ -f "${lJ_ANALYSE_RESULTS}" ]] && [[ "$(grep -c '\"results\":' "${lJ_ANALYSE_RESULTS}")" -eq 0 ]]; then
-    rm "${lJ_ANALYSE_RESULTS}" || true
-  fi
 }
 
 s28_java_decompile() {
