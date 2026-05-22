@@ -72,7 +72,6 @@ S28_java_check() {
 
   wait_for_pid "${lWAIT_PIDS_S28[@]}"
 
-
   if [[ -d "${LOG_PATH_MODULE}/java_semgrep/" ]]; then
     local lSEMGREP_RESULTS_ARR=()
     local lSEMGREP_RESULT=""

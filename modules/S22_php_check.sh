@@ -244,7 +244,7 @@ s22_vuln_check() {
       lCFF="NA"
     fi
     print_output "[+] Found ${ORANGE}${lVULNS} vulnerabilities${GREEN} in php file: ${ORANGE}$(print_path "${lPHP_SCRIPT_}")${GREEN}${lCOMMON_FILES_FOUND}${NC}" "" "${lPHP_LOG}"
-    
+
     # safe the sources and link it in the lSHELL_LOG
     write_log "" "${lPHP_LOG}"
     write_log "[*] Source file ${ORANGE}${lPHP_SCRIPT_NAME}${NC}" "${lPHP_LOG}"
