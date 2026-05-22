@@ -549,7 +549,7 @@ generate_prompt_binary() {
   # remove semgrep identifiers
   lCODE_CONTENT_tmp=$(sed 's/\/\/possible issue identified -.*//' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 2")
   # remove color codes
-  lCODE_CONTENT=$(strip_color_codes "${lCODE_CONTENT_tmp}")
+  lCODE_CONTENT_tmp=$(strip_color_codes "${lCODE_CONTENT_tmp}")
 
   # remove shell comment lines:
   lCODE_CONTENT_tmp=$(sed '/^[[:blank:]]*#/d' <<<"${lCODE_CONTENT_tmp}" || print_error "[-] Code parsing issue for ${lSCRIPT_PATH_TMP} - 4")
