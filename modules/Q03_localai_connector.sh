@@ -312,7 +312,7 @@ ask_localai() {
         fi
 
         if [[ ! -f "${lAI_LOG_FILE}" ]] || [[ ! -s "${lAI_LOG_FILE}" ]]; then
-          print_output "[-] WARNING: No AI respoonse for function ${lFUNCTION_NAME}"
+          print_output "[-] WARNING: No AI response for function ${lFUNCTION_NAME}"
           continue
         fi
         # our currenty AI output starts the headlines with level 3 headlines ###
