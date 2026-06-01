@@ -214,7 +214,7 @@ S26_kernel_vuln_verifier() {
       [[ "${lCNT}" -gt 100 ]] && break
       print_output "[-] S26 - cve-bin-tool database not prepared - waiting #${lCNT}" "no_log"
       sleep 5
-      lCNT=$((lCNT+1))
+      lCNT=$((lCNT + 1))
     done
     # now for the error log
     if ! grep -q "cve-bin-tool database preparation finished" "${TMP_DIR}/tmp_state_data.log"; then
