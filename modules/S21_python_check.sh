@@ -92,7 +92,8 @@ s21_script_bandit() {
   local lPY_LOG=""
   local lVULNS=""
   local lGPT_PRIO_=2
-  local lGPT_ANCHOR_=""
+  local lAI_ANCHOR=""
+  local lS21_SOURCE_DIR="${LOG_PATH_MODULE}/py_sources"
 
   lSCRIPT_NAME=$(basename "${lPY_SCRIPT_}" 2>/dev/null | sed -e 's/:/_/g')
   lPY_LOG="${LOG_PATH_MODULE}""/bandit_""${lSCRIPT_NAME}"".txt"
@@ -100,6 +101,13 @@ s21_script_bandit() {
 
   lVULNS=$(grep -c ">> Issue: " "${lPY_LOG}" 2>/dev/null || true)
   if [[ "${lVULNS}" -ne 0 ]]; then
+    [[ ! -d "${lS21_SOURCE_DIR}" ]] && mkdir -p "${lS21_SOURCE_DIR}"
+
+    # safe the sources and link it in the lSHELL_LOG
+    write_log "" "${lPY_LOG}"
+    write_log "[*] Source file ${ORANGE}${lSCRIPT_NAME}${NC}" "${lPY_LOG}"
+    copy_and_link_file "${lPY_SCRIPT_}" "${lS21_SOURCE_DIR}/${lSCRIPT_NAME}.log" "${lPY_LOG}"
+
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""
@@ -115,26 +123,30 @@ s21_script_bandit() {
       lCFF="NA"
     fi
     if [[ "${lVULNS}" -gt 20 ]]; then
-      print_output "[+] Found ""${RED}""${lVULNS}"" issues""${GREEN}"" in script ""${lCOMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${lPY_SCRIPT_}")" "" "${lPY_LOG}"
+      print_output "[+] Found ${RED}${lVULNS} issues${GREEN} in script ${lCOMMON_FILES_FOUND}:${NC} $(print_path "${lPY_SCRIPT_}")" "" "${lPY_LOG}"
       lGPT_PRIO_=3
     else
-      print_output "[+] Found ""${ORANGE}""${lVULNS}"" issues""${GREEN}"" in script ""${lCOMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${lPY_SCRIPT_}")" "" "${lPY_LOG}"
+      print_output "[+] Found ${ORANGE}${lVULNS} issues${GREEN} in script ${lCOMMON_FILES_FOUND}:${NC} $(print_path "${lPY_SCRIPT_}")" "" "${lPY_LOG}"
     fi
 
     write_csv_log "$(print_path "${lPY_SCRIPT_}")" "${lVULNS}" "${lCFF}" "NA"
-    if [[ "${GPT_OPTION}" -gt 0 ]]; then
-      lGPT_ANCHOR_="$(openssl rand -hex 8)"
-      if [[ -f "${BASE_LINUX_FILES}" ]]; then
-        # if we have the base linux config file we are checking it:
-        if ! grep -E -q "^$(basename "${lPY_SCRIPT_}")$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-          lGPT_PRIO_=$((lGPT_PRIO_ + 1))
-        fi
+    if [[ "${AI_OPTION}" -gt 0 ]]; then
+      lAI_ANCHOR="$(openssl rand -hex 8)"
+      # if we have some default python packages we rate them lower
+      if [[ "${lPY_SCRIPT_}" == *"dist-packages"* || "${lPY_SCRIPT_}" == *"site-packages"* ]]; then
+        lGPT_PRIO_=$((lGPT_PRIO_ - 1))
+      elif ! grep -E -q "^$(basename "${lPY_SCRIPT_}")$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        # if no entry in our BASE_LINUX_FILES config we do not have a default
+        # linux file and we rate it higher for faster AI test
+        lGPT_PRIO_=$((lGPT_PRIO_ + 1))
       fi
-      # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-      write_csv_gpt_tmp "$(cut_path "${lPY_SCRIPT_}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lPY_LOG}" "" ""
+      # "${GPT_INPUT_FILE_}" "${lAI_ANCHOR}" "${lGPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+      write_csv_AI_tmp "${lS21_SOURCE_DIR}/${lSCRIPT_NAME}.log" "${lAI_ANCHOR}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lPY_LOG}" "" ""
       # add ChatGPT link to output file
       printf '%s\n\n' "" >>"${lPY_LOG}"
-      write_anchor_gpt "${lGPT_ANCHOR_}" "${lPY_LOG}"
+      write_anchor_AI "${lAI_ANCHOR}" "${lPY_LOG}"
+      printf '%s\n\n' "" >>"${lS21_SOURCE_DIR}/${lSCRIPT_NAME}.log"
+      write_anchor_AI "${lAI_ANCHOR}" "${lS21_SOURCE_DIR}/${lSCRIPT_NAME}.log"
     fi
     echo "${lVULNS}" >>"${TMP_DIR}"/S21_VULNS.tmp
   fi

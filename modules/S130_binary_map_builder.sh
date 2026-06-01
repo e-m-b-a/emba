@@ -142,10 +142,10 @@ setup_environment() {
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
     print_output "[*] INFO: A huge number of files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit the module to a maximum of ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
-      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}")
+      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}" || true)
     else
       # quick and dirty backup solution to not handle all the executable files
-      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u | head -n "${MAX_MAP_FILES}")
+      mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u | head -n "${MAX_MAP_FILES}" || true)
     fi
   fi
   print_ln ""

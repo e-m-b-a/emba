@@ -115,8 +115,9 @@ S20_shell_check() {
 s20_eval_script_check() {
   local lSH_SCRIPTS_ARR=("${@}")
   local lSH_SCRIPT=""
-  local lGPT_PRIO_=3
-  local lGPT_ANCHOR_=""
+  # we rate eval usages higher compared to other shellcheck issues
+  local lGPT_PRIO_=4
+  local lAI_ANCHOR_=""
   local lEVAL_RESULTS=0
   local lSH_SCRIPT_NAME=""
 
@@ -133,19 +134,19 @@ s20_eval_script_check() {
       sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "${lSHELL_LOG}"
       print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${lSH_SCRIPT_NAME}${NC}" "" "${lSHELL_LOG}"
 
-      if [[ "${GPT_OPTION}" -gt 0 ]]; then
-        lGPT_ANCHOR_="$(openssl rand -hex 8)"
+      if [[ "${AI_OPTION}" -gt 0 ]]; then
+        lAI_ANCHOR_="$(openssl rand -hex 8)"
         if [[ -f "${BASE_LINUX_FILES}" ]]; then
           # if we have the base linux config file we are checking it:
           if ! grep -E -q "^${lSH_SCRIPT_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
             lGPT_PRIO_=$((lGPT_PRIO_ + 1))
           fi
         fi
-        # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-        write_csv_gpt_tmp "$(cut_path "${lSH_SCRIPT/;*/}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lSHELL_LOG}" "" ""
+        # "${GPT_INPUT_FILE_}" "${lAI_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+        write_csv_AI_tmp "$(cut_path "${lSH_SCRIPT/;*/}")" "${lAI_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lSHELL_LOG}" "" ""
         # add ChatGPT link
         printf '%s\n\n' "" >>"${lSHELL_LOG}"
-        write_anchor_gpt "${lGPT_ANCHOR_}" "${lSHELL_LOG}"
+        write_anchor_AI "${lAI_ANCHOR_}" "${lSHELL_LOG}"
       fi
     fi
   done
@@ -173,11 +174,19 @@ s20_reporter() {
   local lSH_SCRIPT_="${2:-}"
   local lSHELL_LOG="${3:-}"
   local lGPT_PRIO_=2
-  local lGPT_ANCHOR_=""
+  local lAI_ANCHOR_=""
   local lSH_NAME=""
   lSH_NAME=$(basename "${lSH_SCRIPT_}" 2>/dev/null | sed -e 's/:/_/g')
+  local lS20_SOURCE_DIR="${LOG_PATH_MODULE}/sh_sources"
 
   if [[ "${lVULNS}" -ne 0 ]]; then
+    [[ ! -d "${lS20_SOURCE_DIR}" ]] && mkdir -p "${lS20_SOURCE_DIR}"
+
+    # safe the sources and link it in the lSHELL_LOG
+    write_log "" "${lSHELL_LOG}"
+    write_log "[*] Source file ${ORANGE}${lSH_NAME}${NC}" "${lSHELL_LOG}"
+    copy_and_link_file "${lSH_SCRIPT_}" "${lS20_SOURCE_DIR}/${lSH_NAME}.log" "${lSHELL_LOG}"
+
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""
@@ -198,15 +207,21 @@ s20_reporter() {
     else
       print_output "[+] Found ${ORANGE}${lVULNS} issues${GREEN} in script ${lCOMMON_FILES_FOUND}:${NC} $(print_path "${lSH_SCRIPT_}")" "" "${lSHELL_LOG}"
     fi
+    # scripts with eval usage are higher rated
+    if grep -q "eval" "${lS20_SOURCE_DIR}/${lSH_NAME}.log"; then
+      lGPT_PRIO_=$((lGPT_PRIO_ + 2))
+    fi
     write_csv_log "$(print_path "${lSH_SCRIPT_}")" "${lVULNS}" "${lCFF}" "NA"
 
-    if [[ "${GPT_OPTION}" -gt 0 ]]; then
-      lGPT_ANCHOR_="$(openssl rand -hex 8)"
-      # "${GPT_INPUT_FILE_}" "${lGPT_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-      write_csv_gpt_tmp "$(cut_path "${lSH_SCRIPT_}")" "${lGPT_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lSHELL_LOG}" "" ""
-      # add ChatGPT link
+    if [[ "${AI_OPTION}" -gt 0 ]]; then
+      lAI_ANCHOR_="$(openssl rand -hex 8)"
+      # "${GPT_INPUT_FILE_}" "${lAI_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
+      write_csv_AI_tmp "${lS20_SOURCE_DIR}/${lSH_NAME}.log" "${lAI_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lSHELL_LOG}" "" ""
+      # add AI link
       printf '%s\n\n' "" >>"${lSHELL_LOG}"
-      write_anchor_gpt "${lGPT_ANCHOR_}" "${lSHELL_LOG}"
+      write_anchor_AI "${lAI_ANCHOR_}" "${lSHELL_LOG}"
+      printf '%s\n\n' "" >>"${lS20_SOURCE_DIR}/${lSH_NAME}.log"
+      write_anchor_AI "${lAI_ANCHOR_}" "${lS20_SOURCE_DIR}/${lSH_NAME}.log"
     fi
 
     echo "${lVULNS}" >>"${TMP_DIR}"/S20_VULNS.tmp
