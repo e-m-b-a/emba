@@ -777,7 +777,7 @@ update_index() {
 
   if [[ -s "${ERROR_LOG}" ]]; then
     generate_report_file "${ERROR_LOG}"
-    sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${ERROR_LOG%."${ERROR_LOG##*.}"}"".html")@" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
+    sed -i -e "s@buttonErrorInvisible@buttonError@ ; s@ERRORLINK@.\/$(basename "${ERROR_LOG%."${ERROR_LOG##*.}"}"".html")@" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
   fi
 
   # generate files in $SUPPL_PATH (supplementary files from modules)
