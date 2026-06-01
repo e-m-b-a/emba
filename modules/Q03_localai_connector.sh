@@ -429,10 +429,10 @@ identify_ai_model() {
   local lCNT=1
   while [[ -z "${lMODEL_LOCALAI}" ]]; do
     lMODEL_LOCALAI=$(curl --connect-timeout 10 --max-time 30 http://"${LOCAL_AI_IP}":8080/v1/models 2>/dev/null | jq -r .data[].id || true)
-    [[ -z "${lMODEL_LOCALAI}" ]] && sleep 5
+    [[ -n "${lMODEL_LOCALAI}" ]] && break
+    sleep 5
     lCNT=$((lCNT + 1))
     [[ "${lCNT}" -gt 10 ]] && break
-    sleep 2
   done
   echo "${lMODEL_LOCALAI}"
 }
