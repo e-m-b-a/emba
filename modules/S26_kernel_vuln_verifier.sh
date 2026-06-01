@@ -210,14 +210,14 @@ S26_kernel_vuln_verifier() {
 
     print_output "[*] Kernel version ${ORANGE}${lK_VERSION}${NC} CVE detection ... "
     local lCNT=1
-    while ! grep -q "cve-bin-tool database preparation finished" "${TMP_DIR}/tmp_state_data.log"; do
+    while ! grep -q "cve-bin-tool database preparation finished" "${TMP_DIR}/tmp_state_data.log" 2>/dev/null; do
       [[ "${lCNT}" -gt 100 ]] && break
       print_output "[-] S26 - cve-bin-tool database not prepared - waiting #${lCNT}" "no_log"
       sleep 5
       lCNT=$((lCNT + 1))
     done
     # now for the error log
-    if ! grep -q "cve-bin-tool database preparation finished" "${TMP_DIR}/tmp_state_data.log"; then
+    if ! grep -q "cve-bin-tool database preparation finished" "${TMP_DIR}/tmp_state_data.log" 2>/dev/null; then
       print_error "[-] S26 - cve-bin-tool database not prepared - waiting #${lCNT}"
     fi
     cve_bin_tool_threader "${lBOM_REF}" "${lK_VERSION}" "${lORIG_SOURCE:-kernel_verification}" lVENDOR_ARR lPRODUCT_ARR
