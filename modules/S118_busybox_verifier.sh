@@ -117,11 +117,11 @@ S118_busybox_verifier() {
     lBB_BIN="${lBB_BIN#\'}"
     lBB_BIN="${lBB_BIN%\'}"
     if ! [[ -f "${lBB_BIN}" ]]; then
-      print_output "[-] No file detected for ${lBB_BIN} ... testing for further SBOM entries"
+      print_error "[-] S118 - No file detected for ${lBB_BIN} ... testing for further SBOM entries"
       continue
     fi
     if ! [[ "$(grep "${lBB_BIN}" "${P99_CSV_LOG}" | cut -d ';' -f8 || true)" == *"ELF"* ]]; then
-      print_output "[-] No ELF file detected for ${lBB_BIN} ... testing for further SBOM entries"
+      print_error "[-] No ELF file detected for ${lBB_BIN} ... testing for further SBOM entries"
       continue
     fi
     local lALL_BB_VULNS_ARR=()

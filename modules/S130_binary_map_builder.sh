@@ -16,6 +16,7 @@
 S130_binary_map_builder() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary dependency map builder"
+  local lNEG_LOG=0
 
   if [[ "${EMBA_MAP_GENERATOR:-0}" -eq 0 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
@@ -30,10 +31,19 @@ S130_binary_map_builder() {
   load_default_environment
   setup_environment
   build_dot
-  build_svg
-  build_html
 
-  module_end_log "${FUNCNAME[0]}" 1
+  if [[ -f "${DOT_FILE}" ]]; then
+    build_svg
+    # as soon as we have a dot file generated we build the HTML report file for this module
+    lNEG_LOG=1
+  fi
+
+  if [[ -f "${SVG_FILE}" ]]; then
+    build_html
+    lNEG_LOG=1
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 
   # we need to adjust the html linking after the html report was created:
   if [[ "${HTML}" -eq 1 ]]; then
