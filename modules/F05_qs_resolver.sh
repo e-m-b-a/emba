@@ -21,15 +21,6 @@ F05_qs_resolver() {
   module_title "AI Resolver"
 
   if [[ "${AI_OPTION}" -gt 0 ]]; then
-    if grep -q "Q02_openai_question starting" "${MAIN_LOG}"; then
-      print_output "[*] Waiting for the GPT analysis module to stop ... " "no_log"
-      while ! grep -q "Q02_openai_question finished\|Quest container finished" "${MAIN_LOG}"; do
-        print_output "[*] Waiting for Q02 module"
-        sleep 5
-      done
-      print_output "[*] GPT testing module finished ... " "no_log"
-    fi
-
     if grep -q "Q03_localai_connector starting" "${MAIN_LOG}"; then
       print_output "[*] Waiting for the LocalAI analysis module to stop ... " "no_log"
       while ! grep -q "Q03_localai_connector finished\|Quest container finished" "${MAIN_LOG}"; do
