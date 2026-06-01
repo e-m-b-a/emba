@@ -78,7 +78,6 @@ add_color_tags() {
 }
 
 add_link_tags() {
-  export DEBUG=1
   local lLINK_FILE="${1:-}"
   local lBACK_LINK="${2:-}"
   # If a module generates for example a list with links to referenced files ([REF]-tag), you don't want additional links in this list
