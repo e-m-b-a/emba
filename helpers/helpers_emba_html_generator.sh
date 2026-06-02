@@ -22,6 +22,7 @@ export DEBUG
 
 export INDEX_FILE="index.html"
 export MAIN_LOG="./emba.log"
+export ERROR_LOG="./emba_error.log"
 export STYLE_PATH="/style"
 export TEMP_PATH="/tmp"
 export ERR_PATH="/err"
@@ -118,7 +119,7 @@ add_link_tags() {
           # generated and we can directly use the already available html report file
           lORIG_SRC_MODULE_DIR=$(echo "${lREF_LINK}" | tr '/' '\n' | grep -E "^[psqfl][0-9]{2,3}_.*" | head -n 1 || print_error "[-] HTML report linking issue for ${lREF_LINK}")
           print_debug "[*] REF link ${lREF_LINK} / BACK_LINK ${lBACK_LINK} / lORIG_SRC_MODULE_DIR: ${lORIG_SRC_MODULE_DIR} / lLINK_FILE: ${lLINK_FILE}" "no_log"
-          if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" ]]; then
+          if [[ -f "${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR%/}/${lMD5_REF_LINK}" ]]; then
             print_debug "[*] Found already generated log file in ${ABS_HTML_PATH%/}/${lORIG_SRC_MODULE_DIR}/${lMD5_REF_LINK}" "no_log"
             if [[ "$(basename "${lLINK_FILE}")" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}_.*$ ]]; then
               # link to the already available report file without generating a new one:
@@ -772,6 +773,11 @@ update_index() {
   # add emba.log to webreport
   generate_report_file "${MAIN_LOG}"
   sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%."${MAIN_LOG##*.}"}"".html")@" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
+
+  if [[ -s "${ERROR_LOG}" ]]; then
+    generate_report_file "${ERROR_LOG}"
+    sed -i -e "s@buttonErrorInvisible@buttonError@ ; s@ERRORLINK@.\/$(basename "${ERROR_LOG%."${ERROR_LOG##*.}"}"".html")@" "${ABS_HTML_PATH%/}/${INDEX_FILE}"
+  fi
 
   # generate files in $SUPPL_PATH (supplementary files from modules)
   readarray -t lSUPPL_FILES_ARR < <(find "${SUPPL_PATH}" ! -path "${SUPPL_PATH}")

@@ -72,6 +72,7 @@ output_overview() {
     lEMBA_COMMAND_ORIG="$(sort -u "${BASIC_DATA_LOG_DIR}"/emba_command.log)"
     for lFW_PATH_ORIG in "${lFW_PATH_ORIG_ARR[@]}"; do
       print_output "[+] Tested firmware:""${ORANGE}"" ""${lFW_PATH_ORIG}""${NC}"
+      write_link "p02"
       write_csv_log "FW_path" "${lFW_PATH_ORIG}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     done
     print_output "[+] EMBA start command:""${ORANGE}"" ""${lEMBA_COMMAND_ORIG}""${NC}"
@@ -96,14 +97,6 @@ output_overview() {
 
   print_output "[+] EMBA version: ""${ORANGE}""${lSBOM_TOOL_VERS}""${NC}"
   write_csv_log "EMBA_version" "${lSBOM_TOOL_VERS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-
-  if [[ -f "${LOG_DIR}/emba_error.log" ]]; then
-    if grep -q Location "${LOG_DIR}/emba_error.log"; then
-      print_output "[-] WARNING: EMBA ${ORANGE}errors${NC} to review" "" "${LOG_DIR}/emba_error.log"
-    else
-      print_output "[*] INFO: EMBA ${ORANGE}warnings${NC} to review" "" "${LOG_DIR}/emba_error.log"
-    fi
-  fi
 
   print_bar
 
@@ -516,7 +509,7 @@ output_binaries() {
 
   if [[ "${STRCPY_CNT:-0}" -gt 0 ]]; then
     print_output "[+] Found ""${ORANGE}""${STRCPY_CNT}""${GREEN}"" usages of strcpy in ""${ORANGE}""${lBINS_CHECKED_CNT}""${GREEN}"" binaries.""${NC}"
-    if [[ $(find "${LOG_DIR}""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "${LOG_DIR}""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
+    if [[ $(find "${LOG_DIR}/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "${LOG_DIR}""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
       write_link "s13"
     else
       write_link "s14"
