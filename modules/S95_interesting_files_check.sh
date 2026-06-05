@@ -72,7 +72,6 @@ S95_interesting_files_check() {
       lNEG_LOG=1
     fi
   fi
-
   write_log ""
   write_log "[*] Statistics:${lINT_COUNT}:${lPOST_COUNT}"
 
