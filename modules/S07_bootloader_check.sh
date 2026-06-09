@@ -49,10 +49,12 @@ check_dtb() {
       write_link "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt"
       write_log "$(fdtdump "${lDTB_FILE}" 2>/dev/null || true)" "${LOG_PATH_MODULE}""/""$(basename "${lDTB_FILE}" .dtb)""-DUMP.txt" "g"
       ((STARTUP_FINDS += 1))
+      write_csv_log "bootloader status" "device tree blobs" "found"
     done
     print_ln
   else
     print_output "[-] No device tree blobs found"
+    write_csv_log "bootloader status" "device tree blobs" "not_found"
   fi
 }
 
@@ -73,10 +75,12 @@ check_bootloader() {
       print_output "[+] Found Syslinux config: ""$(print_path "${lSYSLINUX_FILE}")"
       lBOOTLOADER="Syslinux"
       ((STARTUP_FINDS += 1))
+      write_csv_log "bootloader status" "Syslinux configuration file" "found"
     fi
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No Syslinux configuration file found"
+      write_csv_log "bootloader status" "Syslinux configuration file" "not_found"
   fi
 
   # Grub
@@ -93,6 +97,7 @@ check_bootloader() {
       lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub"
       ((STARTUP_FINDS += 1))
+      write_csv_log "bootloader status" "Grub configuration file" "found"
     fi
   done
   # mapfile -t lGRUB_PATHS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/grub/menu.lst" || true)
@@ -104,10 +109,12 @@ check_bootloader() {
       lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub"
       ((STARTUP_FINDS += 1))
+      write_csv_log "bootloader status" "Grub configuration file" "found"
     fi
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No Grub configuration file found"
+    write_csv_log "bootloader status" "Grub configuration file" "not_found"
   fi
 
   # Grub2
@@ -132,10 +139,12 @@ check_bootloader() {
       lGRUB="${lGRUB_FILE}"
       lBOOTLOADER="Grub2"
       ((STARTUP_FINDS += 1))
+      write_csv_log "bootloader status" "Grub configuration file" "found"
     fi
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No Grub configuration file found"
+    write_csv_log "bootloader status" "Grub configuration file" "not_found"
   fi
 
   # Grub configuration
@@ -164,11 +173,14 @@ check_bootloader() {
     fi
     if [[ ${lFOUND} -eq 1 ]]; then
       print_output "[+] GRUB has password protection"
+      write_csv_log "bootloader status" "Grub configuration check" "found"
     else
       print_output "[-] No hashed password line in GRUB boot file"
+      write_csv_log "bootloader status" "Grub configuration check" "not_found"
     fi
   else
     print_output "[-] No Grub configuration check"
+    write_csv_log "bootloader status" "Grub configuration check" "found"
   fi
 
   # FreeBSD or DragonFly
@@ -194,12 +206,14 @@ check_bootloader() {
           print_output "[+] Found ""$(print_path "${lB1}")"", ""$(print_path "${lB2}")"" and ""$(print_path "${lBL}")"" (FreeBSD or DragonFly)"
           lBOOTLOADER="FreeBSD / DragonFly"
           ((STARTUP_FINDS += 1))
+          write_csv_log "bootloader status" "FreeBSD or DragonFly bootloader files" "found"
         fi
       done
     done
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No FreeBSD or DragonFly bootloader files found"
+    write_csv_log "bootloader status" "FreeBSD or DragonFly bootloader files" "not_found"
   fi
 
   # LILO=""
@@ -212,6 +226,7 @@ check_bootloader() {
       lCHECK=1
       print_output "[+] Found lilo.conf: ""$(print_path "${lLILO_FILE}")"" (LILO)"
       lFIND=$(grep 'password[[:space:]]?=' "${lLILO_FILE}" | grep -v "^#" || true)
+      write_csv_log "bootloader status" "LILO configuration file" "found"
       if [[ -z "${lFIND}" ]]; then
         print_output "[+] LILO has password protection"
         ((STARTUP_FINDS += 1))
@@ -221,6 +236,7 @@ check_bootloader() {
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No LILO configuration file found"
+    write_csv_log "bootloader status" "LILO configuration file" "not_found"
   fi
 
   # SILO
@@ -234,10 +250,12 @@ check_bootloader() {
       print_output "[+] Found silo.conf: ""$(print_path "${lSILO_FILE}")"" (SILO)"
       lBOOTLOADER="SILO"
       ((STARTUP_FINDS += 1))
+      write_csv_log "bootloader status" "SILO configuration file" "found"
     fi
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No SILO configuration file found"
+    write_csv_log "bootloader status" "SILO configuration file" "not_found"
   fi
 
   # YABOOT
@@ -251,10 +269,12 @@ check_bootloader() {
       print_output "[+] Found yaboot.conf: ""$(print_path "${lYABOOT_FILE}")"" (YABOOT)"
       lBOOTLOADER="Yaboot"
       ((STARTUP_FINDS += 1))
+       write_csv_log "bootloader status" "YABOOT configuration file" "found"
     fi
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No YABOOT configuration file found"
+     write_csv_log "bootloader status" "YABOOT configuration fileot_found"
   fi
 
   # OpenBSD
@@ -274,11 +294,13 @@ check_bootloader() {
         print_output "[+] Found first and second stage bootstrap in ""$(print_path "${lOBSD_FILE1}")"" and ""$(print_path "${lOBSD_FILE2}")"" (OpenBSD)"
         lBOOTLOADER="OpenBSD"
         ((STARTUP_FINDS += 1))
+        write_csv_log "bootloader status" "OpenBSD/bootstrap files" "found"
       fi
     done
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No OpenBSD/bootstrap files found"
+    write_csv_log "bootloader status" "OpenBSD/bootstrap files" "not_found"
   fi
 
   # OpenBSD boot configuration
@@ -292,6 +314,7 @@ check_bootloader() {
     if [[ -f "${lOPENBSD}" ]]; then
       lCHECK=1
       print_output "[+] Found ""$(print_path "${lOPENBSD}")"" (OpenBSD)"
+      write_csv_log "bootloader status" "OpenBSD configuration file" "found"
       lFIND=$(grep '^boot' "${lOPENBSD}" || true)
       if [[ -z "${lFIND}" ]]; then
         print_output "[+] System can be booted into single user mode without password"
@@ -312,6 +335,7 @@ check_bootloader() {
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No OpenBSD configuration file found"
+    write_csv_log "bootloader status" "OpenBSD configuration file" "not_found"
   fi
 
   # U-Boot quick check on firmware file
@@ -321,13 +345,16 @@ check_bootloader() {
     print_output "[+] Found uboot image: ""$(print_path "${FIRMWARE_PATH}")"" (U-BOOT)"
     lBOOTLOADER="U-Boot"
     ((STARTUP_FINDS += 1))
+    write_csv_log "bootloader status" "U-Boot image" "found"
   fi
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No U-Boot image found"
+    write_csv_log "bootloader status" "U-Boot image" "not_found"
   fi
 
   if [[ -z "${lBOOTLOADER:-}" ]]; then
     print_output "[-] No bootloader found"
+    write_csv_log "bootloader status" "bootloader" "not_found"
   fi
 }
 
@@ -342,8 +369,10 @@ find_boot_files() {
     print_output "[!] Config not found"
   elif [[ "${#lBOOT_FILES_ARR[@]}" -ne 0 ]]; then
     print_output "[+] Found ""${#lBOOT_FILES_ARR[@]}"" startup files:"
+    write_csv_log "startup files count" "${#lBOOT_FILES_ARR[@]}" ""
     for lLINE in "${lBOOT_FILES_ARR[@]}"; do
       print_output "$(indent "$(orange "$(print_path "${lLINE}")")")"
+      write_csv_log "startup file" "${lLINE}" ""
       if [[ "$(basename "${lLINE}")" == "inittab" ]]; then
         INITTAB_V=("${INITTAB_V[@]}" "${lLINE}")
       fi
@@ -351,6 +380,7 @@ find_boot_files() {
     done
   else
     print_output "[-] No startup files found"
+    write_csv_log "startup files count" "0" ""
   fi
 }
 
