@@ -47,7 +47,8 @@ jobs:
           output: 'trivy-results.sarif'
           skip-dirs: '/external/semgrep-rules/*, /external/emba_venv/lib/**/site-packages/cve_searchsploit/exploitdb/exploits/*, '
           skip-files: '/usr/lib/llvm-21/libexec/analyze-c++'
-
+          hide-progress: true
+          timeout: 30m
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@7434149006143a4d75b82a2f411ef15b03ccc2d7  # https://github.com/github/codeql-action/tree/7434149006143a4d75b82a2f411ef15b03ccc2d7
         with:
