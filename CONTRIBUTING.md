@@ -80,6 +80,8 @@ It also sketches the typical integration process of patches.
 
 - Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](https://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). Using bash internals is faster as it does not fork, fopen and pipes the results back.
 
+- Try to avoid echoing into other commands. If possible use bash parameter substitution, alternatively the following also works in a lot of use cases `param=$(cut -d ';' -f4 <<< "${line}")`
+
 - At least ["weak quoting"](https://flokoe.github.io/bash-hackers-wiki/syntax/quoting/#quotes-and-escaping) is required - unquoted variable processing is not permitted
 
 - To make an array unique we prefer using the printf method instead of the eval method: `mapfile -t ARRAY < <(printf "%s\n" "${ARRAY[@]}" | sort -u)`
