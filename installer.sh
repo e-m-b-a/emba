@@ -321,8 +321,15 @@ if [[ ${LIST_DEP} -eq 0 ]]; then
 
   echo -e "\\n""${ORANGE}""Update package lists.""${NC}"
   if [[ "${SSL_REPOS}" -eq 1 ]]; then
-    sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
-    sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
+    if [[ -f /etc/apt/sources.list ]]; then
+      sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
+      sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
+    fi
+    if [[ -f /etc/apt/sources.list.d/kali.sources ]]; then
+      sed -i 's/http:\/\//https:\/\//g' /etc/apt/sources.list.d/kali.sources
+    fi
+    apt-get -y update
+    apt-get -y install apt-transport-https
   fi
   if [[ "${RHEL_OS}" -eq 1 ]]; then
     dnf install epel-release -y
