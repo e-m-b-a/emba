@@ -62,7 +62,7 @@ IF50_aggregator_common() {
       echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
       if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
         cd /home/linuxbrew/ || (echo "Could not install EMBA component cyclonedx-cli" && exit 1)
-        sudo -u linuxbrew brew trust cyclonedx/cyclonedx
+        sudo -u linuxbrew NONINTERACTIVE=1 HOMEBREW_NO_SANDBOX_LINUX=1 /home/linuxbrew/.linuxbrew/bin/brew tap cyclonedx/cyclonedx || { echo "Could not add Homebrew tap cyclonedx/cyclonedx"; exit 1; }
         sudo -u linuxbrew NONINTERACTIVE=1 HOMEBREW_NO_SANDBOX_LINUX=1 /home/linuxbrew/.linuxbrew/bin/brew install cyclonedx/cyclonedx/cyclonedx-cli || {
           echo "Could not install EMBA component cyclonedx-cli via brew"
           exit 1
