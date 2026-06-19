@@ -79,7 +79,7 @@ main_web_check() {
           print_output "[*] Switching to legacy OpenSSL and legacy curl version"
           # redefine curl via function (alias not working):
           # alias curl="LD_LIBRARY_PATH=${EXT_DIR}/legacy/lib ${EXT_DIR}/legacy/bin/curl --sslv2 --sslv3 -k"
-          return
+          continue
         fi
         lSSL=1
         if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
