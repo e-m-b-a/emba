@@ -80,7 +80,7 @@ check_bootloader() {
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No Syslinux configuration file found"
-      write_csv_log "bootloader status" "Syslinux configuration file" "not_found"
+    write_csv_log "bootloader status" "Syslinux configuration file" "not_found"
   fi
 
   # Grub
@@ -269,12 +269,12 @@ check_bootloader() {
       print_output "[+] Found yaboot.conf: ""$(print_path "${lYABOOT_FILE}")"" (YABOOT)"
       lBOOTLOADER="Yaboot"
       ((STARTUP_FINDS += 1))
-       write_csv_log "bootloader status" "YABOOT configuration file" "found"
+      write_csv_log "bootloader status" "YABOOT configuration file" "found"
     fi
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No YABOOT configuration file found"
-     write_csv_log "bootloader status" "YABOOT configuration fileot_found"
+    write_csv_log "bootloader status" "YABOOT configuration fileot_found"
   fi
 
   # OpenBSD
