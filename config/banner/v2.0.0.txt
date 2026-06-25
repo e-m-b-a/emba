@@ -1,5 +1,5 @@
 
-EMBA version 2.0.0 - A brave new world of firmware analysis
+EMBA version 2.0.0 (Historic edt.) - A brave new world of firmware analysis
 
 Your perfect pentesting day looks like the following:
  - Installed EMBA
