@@ -304,19 +304,19 @@ dependency_check() {
     fi
   fi
 
+  if [[ -f "${CONFIG_DIR}/ai_config.env" ]]; then
+    if grep -v -q "#" "${CONFIG_DIR}/ai_config.env"; then
+      # readin ai_config.env
+      while read -r LINE; do
+        if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
+          export "$(echo "${LINE}" | xargs)"
+        fi
+      done <"${CONFIG_DIR}/ai_config.env"
+    fi
+  fi
+
   # running into this in Quest container and on host, but not on isolated EMBA container (as it is CONTAINER_NUMBER 1):
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-    if [[ -f "${CONFIG_DIR}/ai_config.env" ]]; then
-      if grep -v -q "#" "${CONFIG_DIR}/ai_config.env"; then
-        # readin ai_config.env
-        while read -r LINE; do
-          if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
-            export "$(echo "${LINE}" | xargs)"
-          fi
-        done <"${CONFIG_DIR}/ai_config.env"
-      fi
-    fi
-
     # load the dependency track connection details from config
     if [[ -f "${CONFIG_DIR}/dependencytrack.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/dependencytrack.env"; then

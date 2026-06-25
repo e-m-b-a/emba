@@ -66,21 +66,7 @@ Q03_localai_connector() {
     fi
 
     export SECONDS=0
-    if [[ "${AI_MIN_RUNTIME}" == *"d" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//d/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 24 * 3600))
-    fi
-    if [[ "${AI_MIN_RUNTIME}" == *"h" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//h/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 3600))
-    fi
-    if [[ "${AI_MIN_RUNTIME}" == *"m" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//m/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 60))
-    fi
-    if [[ "${AI_MIN_RUNTIME}" == *"s" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//s/}
-    fi
+    AI_MIN_RUNTIME=$(convert_min_runtime "${AI_MIN_RUNTIME}")
 
     export GTP_CHECKED_ARR=()
     local lMODULE_RUNTIME=${SECONDS}
@@ -98,6 +84,27 @@ Q03_localai_connector() {
     done
   fi
   module_end_log "${FUNCNAME[0]}" "${AI_RESULT_CNT}"
+}
+
+convert_min_runtime() {
+  local lAI_MIN_RUNTIME="${1:-}"
+
+  if [[ "${lAI_MIN_RUNTIME}" == *"d" ]]; then
+    lAI_MIN_RUNTIME=${lAI_MIN_RUNTIME//d/}
+    lAI_MIN_RUNTIME=$((lAI_MIN_RUNTIME * 24 * 3600))
+  fi
+  if [[ "${lAI_MIN_RUNTIME}" == *"h" ]]; then
+    lAI_MIN_RUNTIME=${lAI_MIN_RUNTIME//h/}
+    lAI_MIN_RUNTIME=$((lAI_MIN_RUNTIME * 3600))
+  fi
+  if [[ "${lAI_MIN_RUNTIME}" == *"m" ]]; then
+    lAI_MIN_RUNTIME=${lAI_MIN_RUNTIME//m/}
+    lAI_MIN_RUNTIME=$((lAI_MIN_RUNTIME * 60))
+  fi
+  if [[ "${lAI_MIN_RUNTIME}" == *"s" ]]; then
+    lAI_MIN_RUNTIME=${lAI_MIN_RUNTIME//s/}
+  fi
+  echo "${lAI_MIN_RUNTIME}"
 }
 
 adjust_minimum_runtime() {
