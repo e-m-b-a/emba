@@ -58,6 +58,7 @@ main_web_check() {
   local lWEB_DONE=0
   WEB_RESULTS=0
   export CURL_CMD_ARR=("curl")
+  export LEGACY_SSL_DETECTED=0
 
   # NMAP_PORTS_SERVICES from L15
   if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
@@ -78,6 +79,7 @@ main_web_check() {
         if grep -q "unsupported protocol" "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log"; then
           print_output "[-] TLS/SSL service detected on ${lIP_ADDRESS_}:${lPORT} which is running on some unsupported protocol"
           print_output "[*] Switching to legacy OpenSSL and legacy curl version"
+          export LEGACY_SSL_DETECTED=1
           CURL_CMD_SSL_ARR=("env" "LD_LIBRARY_PATH=${EXT_DIR}/legacy/lib" "${EXT_DIR}/legacy/bin/curl" "--sslv2" "--sslv3" "--tlsv1")
         fi
         lSSL=1
@@ -335,7 +337,9 @@ web_access_crawler() {
   if [[ "${lSSL_}" -eq 1 ]]; then
     lPROTO="https"
     lCURL_OPTS_ARR+=("-k")
-    local CURL_CMD_ARR=("${CURL_CMD_SSL_ARR[@]}")
+    if [[ "${LEGACY_SSL_DETECTED}" -eq 1 ]]; then
+      local CURL_CMD_ARR=("${CURL_CMD_SSL_ARR[@]}")
+    fi
   else
     lPROTO="http"
   fi

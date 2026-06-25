@@ -28,7 +28,7 @@ export YARA=0
 # extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
 # it in the default profile.
 export BINARY_EXTENDED=1
-# let the s16 and s17 modules run over the weekend (48h -> 172800 seconds)
+# let the s16 and s17 modules run over the weekend (48h -> 172800 seconds / 6h -> 21600)
 export S16_MIN_RUNTIME=21600
 # export S17_MIN_RUNTIME="${S16_MIN_RUNTIME}"
 # we test only the first 10 binaries with cwe_checker and extended semgrep rules
