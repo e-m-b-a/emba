@@ -58,7 +58,6 @@ main_web_check() {
   local lWEB_DONE=0
   WEB_RESULTS=0
   export CURL_CMD_ARR=("curl")
-  export LEGACY_SSL_DETECTED=0
 
   # NMAP_PORTS_SERVICES from L15
   if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
@@ -72,6 +71,7 @@ main_web_check() {
 
       # handle first https and afterwards http
       if [[ "${lSERVICE}" == *"ssl|http"* ]] || [[ "${lSERVICE}" == *"ssl/http"* ]]; then
+        export LEGACY_SSL_DETECTED=0
         # enable old ciphers and test access:
         sed -i -E 's/MinProtocol[=\ ]+.*/MinProtocol = None/g' /etc/ssl/openssl.cnf
         local lCURL_OPTS_ARR=("-sS" "--noproxy" '*' '-k')
