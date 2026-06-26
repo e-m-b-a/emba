@@ -130,7 +130,7 @@ S16_ghidra_decompile_checks() {
     # enough binaries are tested as soon as our checked array has more elements then defined in MAX_EXT_CHECK_BINS
     local lMODULE_RUNTIME="${SECONDS}"
     if [[ "${lMODULE_RUNTIME}" -gt "${lS16_MIN_RUNTIME}" ]]; then
-      print_output "[*] $(print_date) - Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS16_MIN_RUNTIME}"
+      print_output "[*] S16 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS16_MIN_RUNTIME}" "no_log"
       # we stop checking after testing MAX_EXT_CHECK_BINS binaries
       if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
         print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now."
@@ -140,7 +140,6 @@ S16_ghidra_decompile_checks() {
     fi
   done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" || true)
 
-  print_output "[*] $(print_date) - Just waiting for S16 ghidra runs to finish"
   wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
   # cleanup - remove the rest without issues now
@@ -207,20 +206,21 @@ ghidra_analyzer() {
   fi
 
   # adjust the max runtime for Ghidra with the current runtime
-  if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -le 0 ]]; then
+  if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -eq 0 ]]; then
     # GHIDRA_DECOMPILE_RUNTIME includes unit
     lS16_GHIDRA_MAX_RUNTIME="${GHIDRA_DECOMPILE_RUNTIME}"
   else
     lS16_GHIDRA_MAX_RUNTIME=$((lS16_GHIDRA_MAX_RUNTIME - SECONDS))
-    if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -le 0 ]]; then
-      # GHIDRA_DECOMPILE_RUNTIME includes unit
-      lS16_GHIDRA_MAX_RUNTIME="${GHIDRA_DECOMPILE_RUNTIME}"
+    # minimum Ghidra runtime of 60 seconds
+    if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -lt 60 ]]; then
+      print_error "[*] Out of time for decompiling code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra"
+      return
     else
       # add unit for our calculated time
       lS16_GHIDRA_MAX_RUNTIME+="s"
     fi
   fi
-  print_output "[*] $(print_date) - Starting Ghidra for binary ${lNAME} with runtime ${lS16_GHIDRA_MAX_RUNTIME}"
+  print_output "[*] Starting Ghidra for binary ${ORANGE}${lNAME}${NC} with runtime ${ORANGE}${lS16_GHIDRA_MAX_RUNTIME}${NC}" "no_log"
   timeout --preserve-status --signal SIGINT "${lS16_GHIDRA_MAX_RUNTIME}" "${GHIDRA_PATH}"/support/analyzeHeadless "${LOG_PATH_MODULE}" "ghidra_${lNAME}_${lIDENTIFIER}" -import "${lBINARY}" -log "${LOG_PATH_MODULE}"/ghidra_"${lNAME}"_"${lIDENTIFIER}".txt -scriptPath "${EXT_DIR}"/ghidra_scripts -postScript Haruspex "${lGHIDRA_OPTS_ARR[@]}" || print_error "[-] Error detected while Ghidra Headless run for ${lNAME}"
 
   # Ghidra cleanup:

@@ -62,6 +62,21 @@ cwe_check() {
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
+  # start timer for track the runtime of the module
+  export SECONDS=0
+  # default behavior:
+  # Option 1: no minimum runtime -> MAX_EXT_CHECK_BINS binaries are tested
+  # Option 2: define S16_MIN_RUNTIME (in seconds) in scan-profile
+  local lS17_MIN_RUNTIME="${S17_MIN_RUNTIME:-0}"
+  # if we have a AI_MIN_RUNTIME set and this is bigger then our current S16_MIN_RUNTIME we adjust S16 to the AI runtime
+  if [[ "${AI_OPTION}" -gt 0 ]]; then
+    AI_MIN_RUNTIME="$(convert_timeformat "${AI_MIN_RUNTIME:-0s}")"
+    if [[ "${lS17_MIN_RUNTIME}" -lt "${AI_MIN_RUNTIME}" ]]; then
+      print_output "[*] S17 - setting minimum runtime to AI_MIN_RUNTIME - ${AI_MIN_RUNTIME} seconds"
+      lS17_MIN_RUNTIME="${AI_MIN_RUNTIME}"
+    fi
+  fi
+
   local lBINARIES_ARR=()
   if [[ "$(wc -l 2>/dev/null <"${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
@@ -104,16 +119,21 @@ cwe_check() {
     if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
       local lMAX_MOD_THREADS=1
     fi
-    cwe_checker_threaded "${lBIN_TO_CHECK}" &
+    cwe_checker_threaded "${lBIN_TO_CHECK}" "${lS17_MIN_RUNTIME}" "${SECONDS}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S17+=("${lTMP_PID}")
     max_pids_protection "${lMAX_MOD_THREADS}" lWAIT_PIDS_S17
     # we stop checking after the first MAX_EXT_CHECK_BINS binaries
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-    if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
-      print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
-      print_output "[*] For complete analysis enable FULL_TEST." "no_log"
-      break
+    local lMODULE_RUNTIME="${SECONDS}"
+    if [[ "${lMODULE_RUNTIME}" -gt "${lS17_MIN_RUNTIME}" ]]; then
+      print_output "[*] $(print_date) - S17 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS17_MIN_RUNTIME}"
+      # we stop checking after testing MAX_EXT_CHECK_BINS binaries
+      if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
+        print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+        break
+      fi
     fi
   done
 
@@ -122,6 +142,7 @@ cwe_check() {
 
 cwe_checker_threaded() {
   local lBINARY="${1:-}"
+  local lS17_CWE_CHECKER_MAX_RUNTIME="${2:-}"
   local lCWE_OUT=()
   local lCWE_LINE=""
   local lCWE=""
@@ -152,11 +173,27 @@ cwe_checker_threaded() {
     lCWE_CHECKER_OPTS_ARR+=("--bare-metal-config" "${lCWE_CHECKER_BARE_METAL_CFG}")
   fi
 
+  if [[ "${lS17_CWE_CHECKER_MAX_RUNTIME}" -eq 0 ]]; then
+    # CWE_CHECKER_RUNTIME includes unit
+    lS17_CWE_CHECKER_MAX_RUNTIME="${CWE_CHECKER_RUNTIME}"
+  else
+    lS17_CWE_CHECKER_MAX_RUNTIME=$((lS17_CWE_CHECKER_MAX_RUNTIME - SECONDS))
+    # minimum Ghidra runtime of 60 seconds
+    if [[ "${lS17_CWE_CHECKER_MAX_RUNTIME}" -lt 60 ]]; then
+      print_error "[*] Out of time for analyzing binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with cwe_checker" "no_log"
+      return
+    else
+      # add unit for our calculated time
+      lS17_CWE_CHECKER_MAX_RUNTIME+="s"
+    fi
+  fi
+
+  print_output "[*] Starting cwe_checker for binary ${ORANGE}${lNAME}${NC} with runtime ${ORANGE}${lS17_CWE_CHECKER_MAX_RUNTIME}${NC}" "no_log"
   ulimit -Sv "${lMEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT "${CWE_CHECKER_RUNTIME}" cwe_checker "${lBINARY}" --json --out "${lCWE_CHECKER_JSON_LOG_FILE}" "${lCWE_CHECKER_OPTS_ARR[@]}" || print_error "[-] CWE-checker run failed for ${lBINARY}"
+  timeout --preserve-status --signal SIGINT "${lS17_CWE_CHECKER_MAX_RUNTIME}" cwe_checker "${lBINARY}" --json --out "${lCWE_CHECKER_JSON_LOG_FILE}" "${lCWE_CHECKER_OPTS_ARR[@]}" || print_error "[-] CWE-checker run failed for ${lBINARY}"
 
   ulimit -Sv unlimited
-  print_output "[*] Tested ${ORANGE}$(print_path "${lBINARY}")${NC}" "no_log"
+  print_output "[*] Tested ${ORANGE}$(print_path "${lBINARY}")${NC} with cwe_checker" "no_log"
 
   if [[ -s "${lCWE_CHECKER_JSON_LOG_FILE}" ]]; then
     log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
