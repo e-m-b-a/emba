@@ -748,3 +748,26 @@ check_init_size() {
     print_ln "no_log"
   fi
 }
+
+# Converts time in the form of 123d or 123h or 123m or 123s to seconds without s -> 123s -> 123
+# Parameter: Time in d/h/m/s format
+convert_timeformat() {
+  local lTIME_TO_CONVERT="${1:-}"
+
+  if [[ "${lTIME_TO_CONVERT}" == *"d" ]]; then
+    lTIME_TO_CONVERT=${lTIME_TO_CONVERT//d/}
+    lTIME_TO_CONVERT=$((lTIME_TO_CONVERT * 24 * 3600))
+  fi
+  if [[ "${lTIME_TO_CONVERT}" == *"h" ]]; then
+    lTIME_TO_CONVERT=${lTIME_TO_CONVERT//h/}
+    lTIME_TO_CONVERT=$((lTIME_TO_CONVERT * 3600))
+  fi
+  if [[ "${lTIME_TO_CONVERT}" == *"m" ]]; then
+    lTIME_TO_CONVERT=${lTIME_TO_CONVERT//m/}
+    lTIME_TO_CONVERT=$((lTIME_TO_CONVERT * 60))
+  fi
+  if [[ "${lTIME_TO_CONVERT}" == *"s" ]]; then
+    lTIME_TO_CONVERT=${lTIME_TO_CONVERT//s/}
+  fi
+  echo "${lTIME_TO_CONVERT}"
+}

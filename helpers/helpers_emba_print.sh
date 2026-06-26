@@ -834,6 +834,7 @@ module_end_log() {
   if [[ "${lMODULE_REPORT_STATE}" -eq 0 ]]; then
     print_output "[-] $(print_date) - ${lMODULE_MAIN_NAME} nothing reported"
   fi
+  print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finishing report ... stay tuned" "no_log"
 
   # we do not report the templates on restarted tests
   if [[ "${lMODULE_REPORT_STATE}" -ne 0 ]]; then

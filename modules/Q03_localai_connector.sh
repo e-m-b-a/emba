@@ -66,21 +66,7 @@ Q03_localai_connector() {
     fi
 
     export SECONDS=0
-    if [[ "${AI_MIN_RUNTIME}" == *"d" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//d/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 24 * 3600))
-    fi
-    if [[ "${AI_MIN_RUNTIME}" == *"h" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//h/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 3600))
-    fi
-    if [[ "${AI_MIN_RUNTIME}" == *"m" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//m/}
-      AI_MIN_RUNTIME=$((AI_MIN_RUNTIME * 60))
-    fi
-    if [[ "${AI_MIN_RUNTIME}" == *"s" ]]; then
-      AI_MIN_RUNTIME=${AI_MIN_RUNTIME//s/}
-    fi
+    AI_MIN_RUNTIME=$(convert_timeformat "${AI_MIN_RUNTIME}")
 
     export GTP_CHECKED_ARR=()
     local lMODULE_RUNTIME=${SECONDS}

@@ -493,8 +493,7 @@ if [[ "${CVE_SEARCH}" -ne 1 ]] || [[ "${DOCKER_SETUP}" -ne 1 ]] || [[ "${IN_DOCK
 
   IL15_emulated_checks_init
 
-  # Upcoming feature
-  # IL16_legacy_ssl_curl
+  IL16_legacy_ssl_curl
 
   IF17_cve_bin_tool
 

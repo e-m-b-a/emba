@@ -113,7 +113,8 @@ S118_busybox_verifier() {
     lBB_VENDOR=${lBB_VENDOR,,}
 
     local lBB_BIN=""
-    lBB_BIN="$(jq -r '.properties[]? | select(.name | test("source_path")) | .value' "${lBB_SBOM_JSON}" || print_error "[-] S118 - BB source_path extraction failed for ${lBB_SBOM_JSON}")"
+    # Todo: switch to array and remove the '| head -1'
+    lBB_BIN="$(jq -r '.properties[]? | select(.name | test("source_path")) | .value' "${lBB_SBOM_JSON}" | sort -u | head -1 || print_error "[-] S118 - BB source_path extraction failed for ${lBB_SBOM_JSON}")"
     lBB_BIN="${lBB_BIN#\'}"
     lBB_BIN="${lBB_BIN%\'}"
     if ! [[ -f "${lBB_BIN}" ]]; then
