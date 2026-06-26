@@ -64,7 +64,7 @@ S16_ghidra_decompile_checks() {
   if [[ "${AI_OPTION}" -gt 0 ]]; then
     AI_MIN_RUNTIME="$(convert_min_runtime "${AI_MIN_RUNTIME:-0s}")"
     if [[ "${lS16_MIN_RUNTIME}" -lt "${AI_MIN_RUNTIME}" ]]; then
-      print_output "[*] S16 - setting minimum rutime to AI_MIN_RUNTIME - ${AI_MIN_RUNTIME} seconds"
+      print_output "[*] S16 - setting minimum runtime to AI_MIN_RUNTIME - ${AI_MIN_RUNTIME} seconds"
       lS16_MIN_RUNTIME="${AI_MIN_RUNTIME}"
     fi
   fi
