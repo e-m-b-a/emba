@@ -67,6 +67,8 @@ IL16_legacy_ssl_curl() {
       echo "make install curl v7.76.1"
       make install || (echo "Could not install EMBA legacy curl and openssl components" && exit 1)
       cd "${HOME_PATH}" || (echo "Could not install EMBA legacy curl and openssl components" && exit 1)
+
+      ;;
     esac
   fi
 }
