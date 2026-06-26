@@ -26,7 +26,8 @@ S130_binary_map_builder() {
   module_wait "S115_usermode_emulator"
 
   # default behavior:
-  local lSVG_BUILD_TIMEOUT="${SVG_BUILD_TIMEOUT:-0}"
+  local lSVG_BUILD_TIMEOUT=0
+  lSVG_BUILD_TIMEOUT="$(convert_timeformat "${SVG_BUILD_TIMEOUT:-0s}")"
   # if we have a AI_MIN_RUNTIME set and this is bigger then our current S16_MIN_RUNTIME we adjust S16 to the AI runtime
   if [[ "${AI_OPTION}" -gt 0 ]]; then
     AI_MIN_RUNTIME="$(convert_timeformat "${AI_MIN_RUNTIME:-0s}")"
@@ -832,7 +833,7 @@ build_svg() {
   fi
 
   print_output "[*] Generating Neato map with overlap prevention - runtime max ${lSVG_BUILD_TIMEOUT} seconds" "no_log"
-  timeout --preserve-status --signal SIGINT "${lSVG_BUILD_TIMEOUT}" neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
+  timeout --preserve-status --signal SIGINT "${lSVG_BUILD_TIMEOUT}s" neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
 
   # probably some future extension:
   # in case the neato generator failed
