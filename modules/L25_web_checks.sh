@@ -58,6 +58,7 @@ main_web_check() {
   local lWEB_DONE=0
   WEB_RESULTS=0
   export CURL_CMD_ARR=("curl")
+  export CURL_CMD_SSL_ARR=()
 
   # NMAP_PORTS_SERVICES from L15
   if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
