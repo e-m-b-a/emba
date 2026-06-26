@@ -771,4 +771,3 @@ convert_timeformat() {
   fi
   echo "${lTIME_TO_CONVERT}"
 }
-
