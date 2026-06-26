@@ -46,7 +46,7 @@ S16_ghidra_decompile_checks() {
   local lBINS_CHECKED_ARR=()
 
   # the blacklist elements are handled as regex in the form *pattern*
-  local lBIN_BLACKLIST_ARR=("libc")
+  local lBIN_BLACKLIST_ARR=("libc" "coreutils")
 
   if [[ "${FULL_TEST}" -ne 1 ]]; then
     # we need to wait in default mode for the results of S13 and S14
@@ -83,6 +83,7 @@ S16_ghidra_decompile_checks() {
     if [[ "${FULL_TEST}" -ne 1 ]]; then
       # first of all we check our binary name against our blacklist
       # the blacklist are handled as regex in the form *pattern*
+      local lBIN_BLACKLIST=""
       for lBIN_BLACKLIST in "${lBIN_BLACKLIST_ARR[@]}"; do
         if [[ "${lNAME}" == *"${lBIN_BLACKLIST}"* ]]; then
           continue 2

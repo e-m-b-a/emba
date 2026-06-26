@@ -832,7 +832,7 @@ build_svg() {
     return
   fi
 
-  print_output "[*] Generating Neato map with overlap prevention - runtime max ${lSVG_BUILD_TIMEOUT} seconds" "no_log"
+  print_output "[*] Generating Neato map with overlap prevention - runtime max ${lSVG_BUILD_TIMEOUT} seconds"
   timeout --preserve-status --signal SIGINT "${lSVG_BUILD_TIMEOUT}s" neato -Goverlap=false -Gsep=+20 -Tsvg "${DOT_FILE}" -o "${SVG_FILE}" || print_output "[-] WARNING: Neato SVG generation failed"
 
   # probably some future extension:

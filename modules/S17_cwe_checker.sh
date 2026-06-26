@@ -62,6 +62,9 @@ cwe_check() {
   local lNAME=""
   local lBINS_CHECKED_ARR=()
 
+  # the blacklist elements are handled as regex in the form *pattern*
+  local lBIN_BLACKLIST_ARR=("libc" "coreutils")
+
   # start timer for track the runtime of the module
   export SECONDS=0
   # default behavior:
@@ -96,6 +99,13 @@ cwe_check() {
         continue
       fi
     fi
+
+    local lBIN_BLACKLIST=""
+    for lBIN_BLACKLIST in "${lBIN_BLACKLIST_ARR[@]}"; do
+      if [[ "${lNAME}" == *"${lBIN_BLACKLIST}"* ]]; then
+        continue 2
+      fi
+    done
 
     # do not try to analyze kernel modules:
     [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
