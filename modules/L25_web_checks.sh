@@ -57,6 +57,8 @@ main_web_check() {
   local lVERSION=""
   local lWEB_DONE=0
   WEB_RESULTS=0
+  export CURL_CMD_ARR=("curl")
+  export CURL_CMD_SSL_ARR=()
 
   # NMAP_PORTS_SERVICES from L15
   if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
@@ -70,16 +72,16 @@ main_web_check() {
 
       # handle first https and afterwards http
       if [[ "${lSERVICE}" == *"ssl|http"* ]] || [[ "${lSERVICE}" == *"ssl/http"* ]]; then
+        export LEGACY_SSL_DETECTED=0
         # enable old ciphers and test access:
         sed -i -E 's/MinProtocol[=\ ]+.*/MinProtocol = None/g' /etc/ssl/openssl.cnf
         local lCURL_OPTS_ARR=("-sS" "--noproxy" '*' '-k')
-        timeout --preserve-status --signal SIGINT 4 curl "${lCURL_OPTS_ARR[@]}" "https://${lIP_ADDRESS_}:${lPORT}" |& tee "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log" || true
+        timeout --preserve-status --signal SIGINT 4 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "https://${lIP_ADDRESS_}:${lPORT}" |& tee "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log" || true
         if grep -q "unsupported protocol" "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log"; then
           print_output "[-] TLS/SSL service detected on ${lIP_ADDRESS_}:${lPORT} which is running on some unsupported protocol"
           print_output "[*] Switching to legacy OpenSSL and legacy curl version"
-          # redefine curl via function (alias not working):
-          # alias curl="LD_LIBRARY_PATH=${EXT_DIR}/legacy/lib ${EXT_DIR}/legacy/bin/curl --sslv2 --sslv3 -k"
-          continue
+          export LEGACY_SSL_DETECTED=1
+          CURL_CMD_SSL_ARR=("env" "LD_LIBRARY_PATH=${EXT_DIR}/legacy/lib" "${EXT_DIR}/legacy/bin/curl" "--sslv2" "--sslv3" "--tlsv1")
         fi
         lSSL=1
         if system_online_check "${lIP_ADDRESS_}" "${lPORT}"; then
@@ -214,23 +216,23 @@ check_for_basic_auth_init() {
     disable_strict_mode "${STRICT_MODE}" 1
     print_output "[*] Web server with basic auth protected ... performing login attempt"
     # basic auth from nmap found
-    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+    "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
     local lCURL_RET="$?"
 
     # if authentication required, we try user "admin" without password and "admin":"password"
     if [[ "${lCURL_RET}" == 22 ]]; then
       local lCREDS="admin:"
-      curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
       local lCURL_RET="$?"
     fi
     if [[ "${lCURL_RET}" == 22 ]]; then
       local lCREDS="user:"
-      curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
       local lCURL_RET="$?"
     fi
     if [[ "${lCURL_RET}" == 22 ]]; then
       local lCREDS="admin:password"
-      curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
       local lCURL_RET="$?"
     fi
     enable_strict_mode "${STRICT_MODE}" 1
@@ -336,6 +338,9 @@ web_access_crawler() {
   if [[ "${lSSL_}" -eq 1 ]]; then
     lPROTO="https"
     lCURL_OPTS_ARR+=("-k")
+    if [[ "${LEGACY_SSL_DETECTED}" -eq 1 ]]; then
+      local CURL_CMD_ARR=("${CURL_CMD_SSL_ARR[@]}")
+    fi
   else
     lPROTO="http"
   fi
@@ -360,7 +365,7 @@ web_access_crawler() {
     fi
     print_output "[*] Checking for return values on web server access #${lCNT}/${lRETRY_MAX}" "no_log"
 
-    lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
+    lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
     if [[ "${lCNT}" -ne 0 ]]; then
       # don't wait on first round
       sleep 10
@@ -370,7 +375,7 @@ web_access_crawler() {
 
   # the reference size is used for identifying incorrect 200 ok results
   local lCURL_RET=""
-  lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
+  lCURL_RET=$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lPROTO}://${lIP_}:${lPORT_}/EMBA/${RANDOM}/${RANDOM}.${RANDOM}" -o /dev/null -w '%{http_code}:%{size_download}')
   CURL_RET_CODE="${lCURL_RET//:*/}"
   if [[ "${CURL_RET_CODE}" -eq 200 ]]; then
     # we only use the reponse size if we get a 200 ok on a non existing site
@@ -409,7 +414,7 @@ web_access_crawler() {
 
       if [[ -n "${lWEB_FILE}" ]] && ! [[ "${lCRAWLED_ARR[*]}" == *" ${lWEB_FILE} "* ]]; then
         write_log "[*] Testing ${ORANGE}${lREQUEST_URL}/${lWEB_FILE}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
-        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
+        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
         check_curl_ret "${lIP_}" "${lPORT_}" "${lCURL_RET}"
         lCRAWLED_ARR+=("${lWEB_FILE}")
       fi
@@ -419,7 +424,7 @@ web_access_crawler() {
       lWEB_DIR_L1="${lWEB_DIR_L1#\/}"
       if [[ -n "${lWEB_DIR_L1}" ]] && ! [[ "${lCRAWLED_ARR[*]}" == *" ${lWEB_DIR_L1}/${lWEB_FILE} "* ]]; then
         write_log "[*] Testing ${ORANGE}${lREQUEST_URL}/${lWEB_DIR_L1}/${lWEB_FILE}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
-        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_DIR_L1}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
+        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_DIR_L1}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
         check_curl_ret "${lIP_}" "${lPORT_}" "${lCURL_RET}"
         lCRAWLED_ARR+=("${lWEB_DIR_L1}/${lWEB_FILE}")
       fi
@@ -430,7 +435,7 @@ web_access_crawler() {
       if [[ -n "${lWEB_DIR_L2}" ]] && [[ "${lWEB_DIR_L2}" != "${lWEB_DIR_L1}" ]] &&
         ! [[ "${lCRAWLED_ARR[*]}" == *" ${lWEB_DIR_L2}/${lWEB_FILE} "* ]]; then
         write_log "[*] Testing ${ORANGE}${lREQUEST_URL}/${lWEB_DIR_L2}/${lWEB_FILE}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
-        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_DIR_L2}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
+        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_DIR_L2}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
         check_curl_ret "${lIP_}" "${lPORT_}" "${lCURL_RET}"
         lCRAWLED_ARR+=("${lWEB_DIR_L2}/${lWEB_FILE}")
       fi
@@ -441,7 +446,7 @@ web_access_crawler() {
       if [[ -n "${lWEB_DIR_L3}" ]] && [[ "${lWEB_DIR_L3}" != "${lWEB_DIR_L2}" ]] &&
         [[ "${lWEB_DIR_L3}" != "${lWEB_DIR_L1}" ]] && ! [[ "${lCRAWLED_ARR[*]}" == *" ${lWEB_DIR_L3}/${lWEB_FILE} "* ]]; then
         write_log "[*] Testing ${ORANGE}${lREQUEST_URL}/${lWEB_DIR_L3}/${lWEB_FILE}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
-        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_DIR_L3}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
+        lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lWEB_DIR_L3}/${lWEB_FILE}" -o /dev/null -w '%{http_code}:%{size_download}')"
         check_curl_ret "${lIP_}" "${lPORT_}" "${lCURL_RET}"
 
         lCRAWLED_ARR+=("${lWEB_DIR_L3}/${lWEB_FILE}")
@@ -490,7 +495,7 @@ web_access_crawler() {
         # crawl all the files:
         for lFILE_QEMU_TEST in "${lPOSSIBLE_FILES_ARR[@]}"; do
           write_log "[*] Testing ${ORANGE}${lREQUEST_URL}/${lFILE_QEMU_TEST}${NC}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
-          lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lFILE_QEMU_TEST}" -o /dev/null -w '%{http_code}:%{size_download}' || true)"
+          lCURL_RET="$(timeout --preserve-status --signal SIGINT 2 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "${lREQUEST_URL}/${lFILE_QEMU_TEST}" -o /dev/null -w '%{http_code}:%{size_download}' || true)"
           check_curl_ret "${lIP_}" "${lPORT_}" "${lCURL_RET}"
         done
       done

@@ -13,7 +13,7 @@ Want to contribute as well? Here are some suggestions:
 - Improve code quality
 - Improve performance
 - Improve textblocks for [report templates](https://github.com/e-m-b-a/emba/tree/master/config/report_templates)
-- Improve license and version detection [configuration](https://github.com/e-m-b-a/emba/blob/master/config/bin_version_strings.cfg)
+- Improve license and version detection [configuration](https://github.com/e-m-b-a/emba/tree/master/config/bin_version_identifiers)
 - Review the [wiki](https://github.com/e-m-b-a/emba/wiki) for outdated information and open dedicated issues
 - Check the current [issues](https://github.com/e-m-b-a/emba/issues) if some issue needs help.
 - For interested first-time contributors we created the label [good first issue](https://github.com/e-m-b-a/emba/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)

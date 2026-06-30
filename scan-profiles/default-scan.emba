@@ -1,6 +1,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2025 Siemens Energy AG
+# Copyright 2020-2026 Siemens Energy AG
 # Copyright 2020-2023 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -28,7 +28,16 @@ export YARA=0
 # extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
 # it in the default profile.
 export BINARY_EXTENDED=1
-# we test only the first 10 binaries with cwe_checker and extended semgrep rules
+# set S16 and S17 runtime to 0 if default ghidra runtime with MAX_EXT_CHECK_BINS should be used
+# or just use default times the following way:
+export S16_MIN_RUNTIME=$(("${GHIDRA_DECOMPILE_RUNTIME%m}"*60))
+export S17_MIN_RUNTIME=$(("${CWE_CHECKER_RUNTIME%m}"*60))
+# If you would like to run the s16 and s17 modules over the weekend set it 48h -> 172800 seconds or for overnight runs to 6h -> 21600
+
+# We test MAX_EXT_CHECK_BINS with cwe_checker and extended semgrep rules
+# Note: if (S16_/S17_MIN_RUNTIME is set above the minimum runtime needs to be fullfilled first
+# -> after S16_MIN_RUNTIME/S17_MIN_RUNTIME runtime is over MAX_EXT_CHECK_BINS is checked
+# If no minimum runtime is set then the MAX_EXT_CHECK_BINS is used as limitation
 export MAX_EXT_CHECK_BINS=15
 
 # VEX metrics (check for KEV, Exploits, EPSS)
