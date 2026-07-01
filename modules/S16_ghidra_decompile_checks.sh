@@ -389,6 +389,7 @@ s16_semgrep_logger() {
         shopt -s extglob
         lCODE_LINE="${lCODE_LINE##+([[:space:]])}"
         lCODE_LINE="$(echo -e "${lCODE_LINE}" | tr -d '\0')"
+        lCODE_LINE="$(echo -e "${lCODE_LINE}" | tr -d '\n')"
         shopt -u extglob
         # with a normal echo we automatically remove the null bytes which caused issues
         # shellcheck disable=SC2116
