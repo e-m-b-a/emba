@@ -175,7 +175,6 @@ set_defaults() {
   export MAX_MAP_FILES=1000 # maximum files to analyse and generate dependency map
   export MAX_MAP_JOBS=""    # maximum jobs used for map generation - no entry means the default from the module
   export SVG_BUILD_TIMEOUT="12h"
-  export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 
   export DEPENDENCY_TRACK_ENABLED=0
 
@@ -274,6 +273,9 @@ set_log_paths() {
   export S118_CSV_LOG="${CSV_DIR}/s118_busybox_verifier.csv"
   export S118_LOG="${LOG_DIR}/s118_busybox_verifier.txt"
   export S118_LOG_DIR="${S118_LOG/\.txt/\/}"
+  export S130_LOG="${LOG_DIR}/s130_binary_map_builder.txt"
+  export S130_LOG_DIR="${S130_LOG/\.txt/\/}"
+  export SVG_FILE="${S130_LOG_DIR}/EMBA-dependency-map.svg"
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
   export Q03_LOG="${LOG_DIR}/q03_localai_connector.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
