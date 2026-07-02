@@ -171,7 +171,9 @@ gpt_resolver_csv_tmp() {
 
   for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
     # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
-    lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+    lGPT_REVERSE_LINK_="${lGPT_INPUT_FILE_,,}"
+    lGPT_REVERSE_LINK_="${lGPT_REVERSE_LINK_//[^a-zA-Z0-9]/}"
+    [[ -z "${lGPT_REVERSE_LINK_}" ]] && continue
 
     # we need to find the depth which we need to link to the file
     # shellcheck disable=SC2001
