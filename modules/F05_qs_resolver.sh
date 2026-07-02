@@ -129,7 +129,8 @@ gpt_resolver_csv() {
     for lHTML_FILE_ in "${lGPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
       print_output "[*] Testing ${lHTML_FILE_} for anchor ${lAI_ANCHOR}" "no_log"
       # should point back to q02-submodule with name "${lGPT_INPUT_FILE_}"
-      lGPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<<"${lGPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+      lGPT_REVERSE_LINK_="${lGPT_INPUT_FILE_,,}"
+      lGPT_REVERSE_LINK_="${lGPT_REVERSE_LINK_//[^a-zA-Z0-9]/}"
       [[ -z "${lGPT_REVERSE_LINK_}" ]] && continue
       # shellcheck disable=SC2001
       lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
