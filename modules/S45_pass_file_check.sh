@@ -49,8 +49,10 @@ S45_pass_file_check() {
 
     if [[ "${#lPASSWD_STUFF_ARR[@]}" -gt 0 ]] || [[ -n "${lSUDOERS}" ]] || [[ -n "${lWHO_HAS_BEEN_SUDO}" ]]; then
       print_output "[+] Found ""${#lPASSWD_STUFF_ARR[@]}"" password related files:"
+      write_csv_log "password files count" "${#lPASSWD_STUFF_ARR[@]}"
       for lLINE in "${lPASSWD_STUFF_ARR[@]}"; do
         print_output "$(indent "$(print_path "${lLINE}")")"
+        write_csv_log "password file" "${lLINE}"
         if [[ -f "${lLINE}" ]] && ! [[ -x "${lLINE}" ]]; then
           local lPOSSIBLE_PASSWD=""
           # regex source: https://serverfault.com/questions/972572/regex-for-etc-passwd-content

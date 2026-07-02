@@ -41,7 +41,8 @@ S05_firmware_details() {
 
   write_log ""
   write_log "[*] Statistics:${lFILE_CNT}:${lDETECTED_DIR}"
-
+  write_csv_log "Files" "Directories"
+  write_csv_log "${lFILE_CNT}" "${lDETECTED_DIR}"
   module_end_log "${FUNCNAME[0]}" "${lFILE_CNT}"
 }
 
