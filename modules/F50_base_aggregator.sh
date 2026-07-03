@@ -170,7 +170,9 @@ output_details() {
     print_output "[+] Entropy analysis of binary firmware is: ${ORANGE}${ENTROPY}"
     write_link "p02"
     if [[ -n "${lENTROPY_PIC_PATH}" ]]; then
-      write_link "${lENTROPY_PIC_PATH}"
+      if [[ ! -s "${lENTROPY_PIC_PATH}" ]]; then
+        write_link "${lENTROPY_PIC_PATH}"
+      fi
     fi
     write_csv_log "entropy_value" "${ENTROPY}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     lDATA_GENERATED=1
