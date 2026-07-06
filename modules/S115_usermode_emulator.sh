@@ -338,7 +338,12 @@ prepare_emulator() {
       mount -o bind /run "${lR_PATH}""/run" 2>/dev/null || true
     fi
     if ! mount | grep "${lR_PATH}/sys" >/dev/null; then
+      # Bind-mounted read-only: the emulated init system (procd/ubus etc.) only needs to
+      # read hardware info from /sys. Mounting it writable lets the firmware's own init
+      # scripts mutate real host sysfs state (rfkill toggles, PCI/DRM unbind/reprobe),
+      # which has been observed to crash the host Xorg session via a udev hotplug race.
       mount -o bind /sys "${lR_PATH}""/sys" 2>/dev/null || true
+      mount -o remount,bind,ro "${lR_PATH}""/sys" 2>/dev/null || true
     fi
 
     creating_dev_area "${lR_PATH}"
