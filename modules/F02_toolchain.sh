@@ -55,7 +55,7 @@ F02_toolchain() {
 
   local lNEG_LOG=0
 
-  # extract the kernel version and the extracted kernel configuration and sort it in reverse order according the available configuration
+  # extract the kernel version and the extracted kernel configuration and sort it in reverse order according to the available configuration
   mapfile -t lKERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,5 | grep -v -e '^$' | grep -v "^;" | sort -t ';' -k2 -u -r || true)
   mapfile -t lKERNEL_V_ARR_S25 < <(tail -n +2 "${CSV_DIR}"/s25_*.csv 2>/dev/null | cut -d\; -f2 | grep -v -e '^$' | sort -u || true)
   mapfile -t lKERNEL_STRING_ARR < <(cat "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | grep -v -e '^$' | sort -u || true)
@@ -118,7 +118,7 @@ F02_toolchain() {
       if [[ -z "${lKERNEL_V}" ]]; then
         continue
       fi
-      if printf '%s\0' "${lKCONFIG_REPORTED_ARR[@]}" | grep -Fxqz -- "${lKERNEL_VERSION}"; then
+      if printf '%s\0' "${lKCONFIG_REPORTED_ARR[@]}" | grep -Fxqz -- "${lKERNEL_V}"; then
         continue
       fi
       lK_RELEASE_DATE=""
@@ -135,9 +135,9 @@ F02_toolchain() {
       else
         print_output "[+] Identified kernel version ${ORANGE}${lKERNEL_V}${GREEN} without a known release date - no kernel configuration available."
       fi
+      lKCONFIG_REPORTED_ARR+=("${lKERNEL_V}")
     done
     print_ln
-    lKCONFIG_REPORTED_ARR+=("${lKERNEL_V}")
   fi
 
   # kernel version string with GCC notes
