@@ -55,7 +55,8 @@ F02_toolchain() {
 
   local lNEG_LOG=0
 
-  mapfile -t lKERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | grep -v -e '^$' | grep -v "^;" | sort -u || true)
+  # extract the kernel version and the extracted kernel configuration and sort it in reverse order according the available configuration
+  mapfile -t lKERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,5 | grep -v -e '^$' | grep -v "^;" | sort -t ';' -k2 -u -r || true)
   mapfile -t lKERNEL_V_ARR_S25 < <(tail -n +2 "${CSV_DIR}"/s25_*.csv 2>/dev/null | cut -d\; -f2 | grep -v -e '^$' | sort -u || true)
   mapfile -t lKERNEL_STRING_ARR < <(cat "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | grep -v -e '^$' | sort -u || true)
 
@@ -68,6 +69,8 @@ F02_toolchain() {
   # GCC (Buildroot 2012.11.1)
   # GCC (GNU) 3.3.2
 
+  # duplicate handling
+  local lKCONFIG_REPORTED_ARR=()
   # kernel with release date from s24 (s25 only holds the kernel version and is used as fallback)
   if [[ "${#lKERNEL_V_ARR[@]}" -gt 0 ]]; then
     for lKERNEL_V in "${lKERNEL_V_ARR[@]}"; do
@@ -76,6 +79,9 @@ F02_toolchain() {
       fi
       lKERNEL_VERSION="${lKERNEL_V/;*/}"
       lKERNEL_CONFIG="${lKERNEL_V/*;/}"
+      if printf '%s\0' "${lKCONFIG_REPORTED_ARR[@]}" | grep -Fxqz -- "${lKERNEL_VERSION}"; then
+        continue
+      fi
 
       lK_RELEASE_DATE=""
       if [[ -f "${CONFIG_DIR}"/kernel_details.csv ]]; then
@@ -100,6 +106,7 @@ F02_toolchain() {
           print_output "[+] Identified kernel version ${ORANGE}${lKERNEL_VERSION}${GREEN} without a known release date - no kernel configuration available."
         fi
       fi
+      lKCONFIG_REPORTED_ARR+=("${lKERNEL_VERSION}")
       write_link "s24"
       lNEG_LOG=1
     done
@@ -109,6 +116,9 @@ F02_toolchain() {
   elif [[ "${#lKERNEL_V_ARR_S25[@]}" -gt 0 ]]; then
     for lKERNEL_V in "${lKERNEL_V_ARR_S25[@]}"; do
       if [[ -z "${lKERNEL_V}" ]]; then
+        continue
+      fi
+      if printf '%s\0' "${lKCONFIG_REPORTED_ARR[@]}" | grep -Fxqz -- "${lKERNEL_VERSION}"; then
         continue
       fi
       lK_RELEASE_DATE=""
@@ -127,6 +137,7 @@ F02_toolchain() {
       fi
     done
     print_ln
+    lKCONFIG_REPORTED_ARR+=("${lKERNEL_V}")
   fi
 
   # kernel version string with GCC notes
