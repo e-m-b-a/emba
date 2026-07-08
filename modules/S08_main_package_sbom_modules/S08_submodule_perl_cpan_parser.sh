@@ -142,7 +142,7 @@ perl_cpanfiles_analysis_threader() {
   # cpe data looks like: "criteria": "cpe:2.3:a:cpan:parallel\\:\\:forkmanager:*:*:*:*:*:*:*:*",
   # escaping hell looks like: grep "cpe.*cpan:parallel\\\\\\\\:\\\\\\\\:forkmanager" external/nvd-json-data-feeds/CVE-2011/CVE-2011-41xx/CVE-2011-4115.json
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "cpan" "${lPACKAGE}" "${lVERSION}" "${lAPP_ARCH:-NA}")
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:cpan:${lPACKAGE//:/\\\\\\\\:}:${lVERSION//:/\\\\\\\\:}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER=$(build_cpe23_identifier "a" "cpan" "${lPACKAGE//:/\\\\\\\\:}" "${lVERSION//:/\\\\\\\\:}")
   local lSTRIPPED_VERSION=":cpan:${lPACKAGE//:/\\\\\\\\:}:${lVERSION//:/\\\\\\\\:}"
 
   # add source file path information to our properties array:

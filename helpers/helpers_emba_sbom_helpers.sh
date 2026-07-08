@@ -16,6 +16,58 @@
 # Description: Helper functions for SBOM building
 #
 
+normalize_cpe23_value() {
+  local lVALUE="${1:-}"
+
+  if [[ -z "${lVALUE}" || "${lVALUE}" == "NA" || "${lVALUE}" == "null" ]]; then
+    lVALUE="*"
+  fi
+
+  echo "${lVALUE}"
+}
+
+build_cpe23_identifier() {
+  local lPART="${1:-a}"
+  local lVENDOR=""
+  local lPRODUCT=""
+  local lVERSION=""
+  local lUPDATE=""
+
+  lVENDOR="$(normalize_cpe23_value "${2:-}")"
+  lPRODUCT="$(normalize_cpe23_value "${3:-}")"
+  lVERSION="$(normalize_cpe23_value "${4:-}")"
+  lUPDATE="$(normalize_cpe23_value "${5:-}")"
+
+  echo "cpe:${CPE_VERSION}:${lPART}:${lVENDOR}:${lPRODUCT}:${lVERSION}:${lUPDATE}:*:*:*:*:*:*"
+}
+
+build_cpe23_from_csv_rule() {
+  local lPART="${1:-a}"
+  local lCSV_RULE="${2:-}"
+  local lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${lPART}"
+  local lCSV_FIELD=""
+  local lCSV_RULE_FIELDS_ARR=()
+  local lCPE_FIELD_COUNT=3
+  local lFIELD_ID=0
+
+  IFS=':' read -r -a lCSV_RULE_FIELDS_ARR <<<"${lCSV_RULE}"
+
+  for lFIELD_ID in "${!lCSV_RULE_FIELDS_ARR[@]}"; do
+    [[ "${lFIELD_ID}" -eq 0 && -z "${lCSV_RULE_FIELDS_ARR["${lFIELD_ID}"]}" ]] && continue
+    [[ "${lCPE_FIELD_COUNT}" -ge 13 ]] && break
+    lCSV_FIELD="$(normalize_cpe23_value "${lCSV_RULE_FIELDS_ARR["${lFIELD_ID}"]}")"
+    lCPE_IDENTIFIER+=":${lCSV_FIELD}"
+    lCPE_FIELD_COUNT=$((lCPE_FIELD_COUNT + 1))
+  done
+
+  while [[ "${lCPE_FIELD_COUNT}" -lt 13 ]]; do
+    lCPE_IDENTIFIER+=":*"
+    lCPE_FIELD_COUNT=$((lCPE_FIELD_COUNT + 1))
+  done
+
+  echo "${lCPE_IDENTIFIER}"
+}
+
 # first: build the properties path array
 # This can be used for the binary path (source_path) and for paths extracted from a
 # package like deb or rpm (path). Additionally, it is commonly used for the architecture
@@ -281,7 +333,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=("cpe=${lCPE_IDENTIFIER}")
   lCOMPONENT_ARR+=("purl=${lPURL_IDENTIFIER}")
   lCOMPONENT_ARR+=("properties=$(jo -a "${PROPERTIES_JSON_ARR[@]}")")
-  if [[ -v HASHES_ARR ]] && [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
+  if declare -p HASHES_ARR >/dev/null 2>&1 && [[ "${#HASHES_ARR[@]}" -gt 0 ]]; then
     lCOMPONENT_ARR+=("hashes=$(jo -a "${HASHES_ARR[@]}")")
   fi
   lCOMPONENT_ARR+=("description=${lAPP_DESC_NEW//\ /%SPACE%}")

@@ -103,7 +103,7 @@ S08_submodule_sinamics_version_xml_parser() {
 
         lAPP_VENDOR="Siemens"
         lAPP_MAINT="${lAPP_VENDOR}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+        lCPE_IDENTIFIER=$(build_cpe23_identifier "a" "${lAPP_VENDOR}" "${lAPP_NAME}" "${lAPP_VERS}")
 
         if [[ -z "${lOS_IDENTIFIED}" ]]; then
           lOS_IDENTIFIED="Sinamics"

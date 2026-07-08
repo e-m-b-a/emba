@@ -664,7 +664,6 @@ build_cpe_identifier() {
   local lBIN_VENDOR=""
   local lBIN_NAME=""
   local lBIN_VERS=""
-  local lCPE_LENGTH=""
   local lCPE_IDENTIFIER=""
 
   lBIN_VENDOR=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
@@ -674,15 +673,7 @@ build_cpe_identifier() {
     lBIN_VENDOR="${lBIN_NAME}"
   fi
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
-  # our CPE identifier should have 14 fields - sometimes our lBIN_VERS has multiple fields -> we need to count our fields and fill the rest
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lBIN_VENDOR:-*}:${lBIN_NAME:-*}:${lBIN_VERS:-*}:"
-  lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
-
-  while [[ "${lCPE_LENGTH}" -lt 14 ]]; do
-    lCPE_IDENTIFIER+='*:'
-    lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
-  done
-  lCPE_IDENTIFIER+='*'
+  lCPE_IDENTIFIER=$(build_cpe23_from_csv_rule "a" ":${lBIN_VENDOR}:${lBIN_NAME}:${lBIN_VERS}")
 
   echo "${lCPE_IDENTIFIER}"
 }

@@ -107,7 +107,7 @@ S08_submodule_ruby_gem_archive_parser() {
       lSHA512_CHECKSUM="$(sha512sum "${lGEM_ARCHIVE}" | awk '{print $1}')"
 
       lAPP_VENDOR="${lAPP_NAME}"
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+      lCPE_IDENTIFIER=$(build_cpe23_identifier "a" "${lAPP_VENDOR}" "${lAPP_NAME}" "${lAPP_VERS}")
 
       if [[ -z "${lOS_IDENTIFIED}" ]]; then
         lOS_IDENTIFIED="generic"

@@ -147,7 +147,7 @@ apk_pkg_analysis_threader() {
   fi
   lPURL_IDENTIFIER=$(build_purl_identifier "${lOS_IDENTIFIED:-NA}" "apk" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_ARCH:-NA}")
   lAPP_VENDOR="${lAPP_NAME}"
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER=$(build_cpe23_identifier "a" "${lAPP_VENDOR}" "${lAPP_NAME}" "${lAPP_VERS}")
   local lSTRIPPED_VERSION="::${lAPP_NAME}:${lAPP_VERS:-NA}"
 
   # add source file path information to our properties array:

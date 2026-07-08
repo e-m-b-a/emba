@@ -124,7 +124,7 @@ php_composer_lock_threader() {
   [[ -z "${lAPP_NAME}" ]] && return
 
   lAPP_VENDOR="${lAPP_NAME}"
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER=$(build_cpe23_identifier "a" "${lAPP_VENDOR}" "${lAPP_NAME}" "${lAPP_VERS}")
 
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="generic"

@@ -111,7 +111,7 @@ S08_submodule_c_conanfile_txt_parser() {
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
         lAPP_VENDOR="${lAPP_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+        lCPE_IDENTIFIER=$(build_cpe23_identifier "a" "${lAPP_VENDOR}" "${lAPP_NAME}" "${lAPP_VERS}")
 
         if [[ -z "${lOS_IDENTIFIED}" ]]; then
           lOS_IDENTIFIED="generic"
