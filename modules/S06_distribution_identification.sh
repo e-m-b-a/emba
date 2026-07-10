@@ -106,7 +106,7 @@ S06_distribution_identification() {
             copy_and_link_file "${lFILE}" "${lLOG_DEST_PATH}"
             lCSV_RULE=$(get_csv_rule_distri "${lIDENTIFIER}")
             # lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
-            lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
+            lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}" "o")
             lOS_IDENTIFIED=$(distri_check)
             lPURL_IDENTIFIER=$(build_generic_purl "${lCSV_RULE}" "${lOS_IDENTIFIED}" "${lBIN_ARCH:-NA}")
             write_log "${lPACKAGING_SYSTEM};${lFILE:-NA};${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lFILENAME};${lIDENTIFIER:-NA};${lCSV_RULE:-NA};${LIC:-NA};maintainer unknown;NA;${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};Linux distribution identification module" "${S08_CSV_LOG}"
@@ -155,7 +155,7 @@ S06_distribution_identification() {
             fi
             # lCSV_RULE has 5 fields and looks like the following: :dlink:device:version:*
             # lCPE_IDENTIFIER="cpe:${CPE_VERSION}${lCSV_RULE}:*:*:*:*:*:*"
-            lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
+            lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}" "o")
             lOS_IDENTIFIED=$(distri_check)
             local lAPP_TYPE="operating-system"
             local lAPP_LIC=""
