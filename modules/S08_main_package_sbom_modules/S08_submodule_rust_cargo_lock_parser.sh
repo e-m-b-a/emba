@@ -108,7 +108,7 @@ S08_submodule_rust_cargo_lock_parser() {
         lSHA256_CHECKSUM=$(clean_package_versions "${lSHA256_CHECKSUM}")
 
         lAPP_VENDOR="${lAPP_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+        lCPE_IDENTIFIER=$(build_cpe_identifier ":${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}")
 
         if [[ -z "${lOS_IDENTIFIED}" ]]; then
           lOS_IDENTIFIED="generic"

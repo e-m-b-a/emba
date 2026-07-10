@@ -173,7 +173,8 @@ windows_exifparser_threader() {
     fi
   fi
 
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR%.exe}:${lAPP_NAME%.exe}:${lAPP_VERS:-*}:*:*:*:*:*:*"
+  # lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR%.exe}:${lAPP_NAME%.exe}:${lAPP_VERS:-*}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER=$(build_cpe_identifier ":${lAPP_VENDOR%.exe}:${lAPP_NAME%.exe}:${lAPP_VERS:-*}")
 
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="windows-based"

@@ -112,7 +112,7 @@ S08_submodule_python_poetry_lock_parser() {
         mapfile -t lAPP_FILES_ARR < <(echo "${lPOETRY_ENTRY}" | cut -d\| -f5 | sed 's/ - /\n/g')
 
         lAPP_VENDOR="${lAPP_NAME}"
-        lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+        lCPE_IDENTIFIER=$(build_cpe_identifier ":${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}")
 
         if [[ -z "${lOS_IDENTIFIED}" ]]; then
           lOS_IDENTIFIED="generic"

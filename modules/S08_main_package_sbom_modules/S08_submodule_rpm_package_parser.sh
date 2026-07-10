@@ -105,7 +105,7 @@ S08_submodule_rpm_package_parser() {
       lSHA512_CHECKSUM="$(sha512sum "${lRPM_ARCHIVE}" | awk '{print $1}')"
 
       lAPP_VENDOR="${lAPP_NAME}"
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+      lCPE_IDENTIFIER=$(build_cpe_identifier ":${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}")
 
       if [[ -z "${lOS_IDENTIFIED}" ]]; then
         lOS_IDENTIFIED="rpm-based"

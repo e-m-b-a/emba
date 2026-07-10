@@ -437,7 +437,9 @@ module_analyzer() {
       local lAPP_NAME="linux_kernel"
       local lPACKAGING_SYSTEM="${lAPP_NAME}+module"
 
-      lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
+      # lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}:*:*:*:*:*:*"
+      lCPE_IDENTIFIER=$(build_cpe_identifier ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "o")
+
       lPURL_IDENTIFIER=$(build_generic_purl ":${lK_AUTHOR}:${lAPP_NAME}:${KV_ARR[*]}" "${lOS_IDENTIFIED}" "${lK_ARCH:-NA}")
 
       # add source file path information to our properties array:
