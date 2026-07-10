@@ -125,7 +125,7 @@ node_js_package_lock_threader() {
   lAPP_LIC=$(clean_package_details "${lAPP_LIC}")
 
   lAPP_VENDOR="${lAPP_NAME}"
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER=$(build_cpe_identifier ":${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}")
 
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="generic"

@@ -148,7 +148,7 @@ rpm_pkg_mgmt_analysis_threader() {
   mapfile -t lAPP_FILES_ARR < <(rpm -ql --dbpath "${lRPM_DIR}" "${lPACKAGE_AND_VERSION}" || true)
 
   lAPP_VENDOR="${lAPP_NAME}"
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}:*:*:*:*:*:*"
+  lCPE_IDENTIFIER=$(build_cpe_identifier ":${lAPP_VENDOR}:${lAPP_NAME}:${lAPP_VERS}")
 
   if [[ -z "${lOS_IDENTIFIED}" ]]; then
     lOS_IDENTIFIED="rpm-based"
