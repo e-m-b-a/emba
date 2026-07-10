@@ -663,20 +663,26 @@ build_cpe_identifier() {
   local lCSV_RULE="${1:-}"
   local lCPE_PART="${2:-a}"
 
+  # ensure our lCSV_RULE starts with a :
+  # otherwise our field based extraction will fail
+  [[ ! "${lCSV_RULE}" == ":"* ]] && lCSV_RULE=":${lCSV_RULE}"
+
   local lBIN_NAME=""
-  lBIN_NAME=$(cut -d ':' -f3 <<<"${lCSV_RULE}")
   local lBIN_VENDOR=""
   local lBIN_VERS=""
   local lCPE_LENGTH=""
   local lCPE_IDENTIFIER=""
   local lCPE_FMT_LENGTH=13
 
-  lBIN_VENDOR=$(cut -d ':' -f2 <<<"${lCSV_RULE}")
+  lBIN_NAME=$(cut -d ':' -f3 <<<"${lCSV_RULE}")
   [[ "${lBIN_NAME}" == *"linux_kernel"* ]] && lCPE_PART="o"
+
+  lBIN_VENDOR=$(cut -d ':' -f2 <<<"${lCSV_RULE}")
   if [[ -z "${lBIN_VENDOR}" ]]; then
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
+
   lBIN_VERS=$(cut -d ':' -f4- <<<"${lCSV_RULE}")
   # our CPE identifier should have 13 fields - sometimes our lBIN_VERS has multiple fields -> we need to count our fields and fill the rest
   lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${lCPE_PART}:${lBIN_VENDOR:-*}:${lBIN_NAME:-*}:${lBIN_VERS:-*}:"
