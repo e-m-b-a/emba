@@ -684,7 +684,7 @@ build_cpe_identifier() {
 
   while [[ "${lCPE_LENGTH}" -lt "${lCPE_FMT_LENGTH}" ]]; do
     lCPE_IDENTIFIER+='*:'
-    lCPE_LENGTH=$(tr ':' '\n' <<<"${lCPE_IDENTIFIER}"| wc -l)
+    lCPE_LENGTH=$(tr ':' '\n' <<<"${lCPE_IDENTIFIER}" | wc -l)
   done
   lCPE_IDENTIFIER+='*'
 
