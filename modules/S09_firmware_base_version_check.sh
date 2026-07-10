@@ -666,19 +666,22 @@ build_cpe_identifier() {
   local lBIN_VERS=""
   local lCPE_LENGTH=""
   local lCPE_IDENTIFIER=""
+  local lCPE_FMT_LENGTH=13
+  local lCPE_PART="a"
 
   lBIN_VENDOR=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
   lBIN_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+  [[ "${lBIN_NAME}" == *"linux_kernel"* ]] && lCPE_PART="o"
   if [[ -z "${lBIN_VENDOR}" ]]; then
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
   lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
-  # our CPE identifier should have 14 fields - sometimes our lBIN_VERS has multiple fields -> we need to count our fields and fill the rest
-  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:a:${lBIN_VENDOR:-*}:${lBIN_NAME:-*}:${lBIN_VERS:-*}:"
+  # our CPE identifier should have 13 fields - sometimes our lBIN_VERS has multiple fields -> we need to count our fields and fill the rest
+  lCPE_IDENTIFIER="cpe:${CPE_VERSION}:${lCPE_PART}:${lBIN_VENDOR:-*}:${lBIN_NAME:-*}:${lBIN_VERS:-*}:"
   lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
 
-  while [[ "${lCPE_LENGTH}" -lt 14 ]]; do
+  while [[ "${lCPE_LENGTH}" -lt "${lCPE_FMT_LENGTH}" ]]; do
     lCPE_IDENTIFIER+='*:'
     lCPE_LENGTH=$(echo "${lCPE_IDENTIFIER}" | tr ':' '\n' | wc -l)
   done
