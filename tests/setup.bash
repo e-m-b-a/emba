@@ -1,5 +1,17 @@
 #!/bin/bash -p
 
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2026-2026 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
+#
+
 setup_emba_test_env() {
   # BATS_TEST_FILENAME is tests/helpers/foo.bats or tests/modules/foo.bats
   # Go up 2 levels to reach repo root
