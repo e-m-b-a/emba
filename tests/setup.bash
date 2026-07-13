@@ -1,3 +1,5 @@
+#!/bin/bash -p
+
 setup_emba_test_env() {
   # BATS_TEST_FILENAME is tests/helpers/foo.bats or tests/modules/foo.bats
   # Go up 2 levels to reach repo root

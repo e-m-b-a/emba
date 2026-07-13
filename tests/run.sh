@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 # EMBA test runner
 # Runs bats unit tests for EMBA helper and module functions
 
