@@ -1,0 +1,30 @@
+name: EMBA Unit Tests (bats)
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup bats
+        run: |
+          curl -sL https://github.com/bats-core/bats-core/archive/refs/tags/v1.11.0.tar.gz | tar xz
+          mv bats-core-1.11.0 tests/bats-core
+          echo "${PWD}/tests/bats-core/bin" >> "${GITHUB_PATH}"
+
+      - name: Run unit tests
+        run: |
+          bats tests/helpers/ tests/modules/
