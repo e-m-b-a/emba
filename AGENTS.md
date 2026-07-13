@@ -13,8 +13,11 @@ EMBA (Embedded Linux Analyzer) is a firmware security analysis and SBOM tool. It
 | All scan profiles | `./scan-profiles/*.emba` |
 | GUI launcher | `./launcher` (requires `zenity`) |
 
-## Verification (CI checks, no unit tests)
+## Verification (CI checks + unit tests)
 ```bash
+# Unit tests (bats framework, ~126 tests across 11 suites)
+./tests/run.sh
+
 # ShellCheck + semgrep on all .sh files
 ./check_project.sh           # with --fast for quicker runs
 ./check_project.sh --fast
