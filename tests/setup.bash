@@ -43,5 +43,7 @@ setup_emba_test_env() {
 }
 
 teardown_emba_test_env() {
-  rm -rf "${LOG_DIR}" 2>/dev/null || true
+  if [[ -n "${LOG_DIR-}" && "${LOG_DIR}" == /tmp/emba_test_* ]]; then
+    rm -rf "${LOG_DIR}" 2>/dev/null || true
+  fi
 }

@@ -5,6 +5,8 @@ load ../setup
 setup() {
   setup_emba_test_env
   # shellcheck disable=SC1091
+  source "${HELP_DIR}/helpers_emba_print.sh"
+  # shellcheck disable=SC1091
   source "${HELP_DIR}/helpers_emba_helpers.sh"
 }
 
@@ -13,15 +15,12 @@ teardown() {
 }
 
 @test "function_exists returns 0 for defined function" {
-  function_exists() {
-    return 0
-  }
-  run function_exists "test_func"
+  run function_exists "function_exists"
   [ "${status}" -eq 0 ]
 }
 
 @test "function_exists returns non-zero for undefined function" {
-  run declare -f -F "non_existent_function" >/dev/null
+  run function_exists "nonexistent_func"
   [ "${status}" -ne 0 ]
 }
 

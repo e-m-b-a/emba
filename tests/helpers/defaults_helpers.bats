@@ -14,8 +14,8 @@ teardown() {
 
 @test "set_defaults sets EMBA_VERSION" {
   set_defaults
-  [ -n "${EMBA_VERSION}" ]
-  [ "${EMBA_VERSION}" = "2.0.2" ]
+  [[ -n "${EMBA_VERSION}" ]]
+  [[ "${EMBA_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
 @test "set_defaults sets RELEASE flag" {

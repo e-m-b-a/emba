@@ -32,7 +32,7 @@ while IFS= read -r -d '' TEST_FILE; do
   fi
   TOTAL=$((TOTAL + 1))
   echo ""
-done < <(find "${INVOCATION_PATH}" -path '*/bats-core/*' -prune -o -name '*.bats' -print0)
+done < <(find "${INVOCATION_PATH}" -name 'bats-core' -prune -o -name '*.bats' -print0)
 
 echo "==================================="
 echo " Results: ${PASSED}/${TOTAL} passed, ${FAILED} failed"
