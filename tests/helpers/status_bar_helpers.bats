@@ -1,6 +1,6 @@
 # shellcheck disable=SC1091
 
-load ../setup
+load ../setup.bash
 
 setup() {
   setup_emba_test_env
