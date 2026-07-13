@@ -111,21 +111,21 @@ teardown() {
 
 @test "validate_xml rejects DOCTYPE" {
   local lXML="${LOG_DIR}/test.xml"
-  echo '<!DOCTYPE foo>' > "${lXML}"
+  echo '<!DOCTYPE foo>' >"${lXML}"
   run validate_xml "${lXML}"
   [ "${status}" -eq 1 ]
 }
 
 @test "validate_xml rejects ENTITY" {
   local lXML="${LOG_DIR}/test.xml"
-  echo '<!ENTITY foo>' > "${lXML}"
+  echo '<!ENTITY foo>' >"${lXML}"
   run validate_xml "${lXML}"
   [ "${status}" -eq 1 ]
 }
 
 @test "validate_xml accepts clean xml" {
   local lXML="${LOG_DIR}/test.xml"
-  echo '<root><item/></root>' > "${lXML}"
+  echo '<root><item/></root>' >"${lXML}"
   run validate_xml "${lXML}"
   [ "${status}" -eq 0 ]
 }

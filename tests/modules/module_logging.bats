@@ -81,7 +81,7 @@ teardown() {
 @test "multiple module_log_init creates backup of old log" {
   module_log_init "S01_test"
   local lFIRST_LOG="${LOG_FILE}"
-  echo "old content" > "${lFIRST_LOG}"
+  echo "old content" >"${lFIRST_LOG}"
   module_log_init "S01_test"
   local lFOUND_BACKUPS
   lFOUND_BACKUPS=$(find "${LOG_DIR}" -name "s01_test.txt.bak.*" 2>/dev/null | wc -l)

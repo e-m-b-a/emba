@@ -4,7 +4,7 @@ load ../setup
 
 setup() {
   setup_emba_test_env
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   source "${HELP_DIR}/helpers_emba_dependency_check.sh"
 }
 
