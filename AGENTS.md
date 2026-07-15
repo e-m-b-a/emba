@@ -50,7 +50,7 @@ sudo ./emba -S -l ~/log -f ~/firmware -p ./scan-profiles/quick-scan.emba
 - **Indent**: 2 spaces, no tabs. Enforced by `shfmt`.
 - **Functions**: `snake_case()`. One blank line between functions.
 - **Global vars**: `CAPITALIZED_WITH_UNDERSCORES`.
-- **Local vars**: `l`-prefixed camelCase (e.g., `lMODULE_FILE`). Always initialize: `local lVAR=""`.
+- **Local vars**: `l`-prefixed `UPPER_SNAKE_CASE` (e.g., `lMODULE_FILE`).
 - **Strict mode**: All scripts must pass `wickStrictModeFail` (loaded via `installer/wickStrictModeFail.sh`).
 - **ShellCheck**: Do not disable checks; fix the issue instead.
 - **Copyright header**: GPLv3, Siemens Energy AG, on every new file.
