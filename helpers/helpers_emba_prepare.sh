@@ -127,7 +127,7 @@ log_folder() {
     esac
   fi
 
-  readarray -t lD_LOG_FILES_ARR < <(find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools -o -path ./EMBA-Non-free \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100)
+  readarray -t lD_LOG_FILES_ARR < <(find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools -o -path ./EMBA-Non-free -o -path ./tests \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100)
   if [[ ${USE_DOCKER} -eq 1 && ${#lD_LOG_FILES_ARR[@]} -gt 0 ]]; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
