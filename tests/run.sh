@@ -19,7 +19,7 @@ BATS_BIN="${INVOCATION_PATH}/bats-core/bin/bats"
 
 if ! [[ -x "${BATS_BIN}" ]]; then
   echo "[-] bats not found at ${BATS_BIN}"
-  echo "[*] Install it via: cd tests && curl -sL https://github.com/bats-core/bats-core/archive/refs/tags/v1.11.0.tar.gz | tar xz"
+  echo "[*] Install it via: cd tests && curl -sL https://github.com/bats-core/bats-core/archive/refs/tags/v1.11.0.tar.gz | tar xz && mv bats-core-1.11.0 bats-core"
   echo "[*]   or: sudo apt-get install bats"
   exit 1
 fi
