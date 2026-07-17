@@ -101,7 +101,7 @@ add_link_tags() {
       lREF_LINK="$(sed "${lREF_LINK_NUMBER}""q;d" "${lLINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       local lURL_REGEX='(www.|https?|ftp|file):\/\/'
       print_debug "[*] Checking REF ${lREF_LINK_NUMBER} - ${lREF_LINK} in ${lLINK_FILE}" "no_log"
-      if [[ -f "$(echo "${lREF_LINK}" | cut -d"#" -f1)" ]]; then
+      if [[ -f "${lREF_LINK%%#*}" ]]; then # field 1
         # if we have a sub-page we only use a link like ./MD5-sum-of-sub-page.html
         # if we have a main page s16_asdf.html we need to link to the sub-directory
         local lMD5_REF_LINK=""
@@ -111,8 +111,8 @@ add_link_tags() {
           print_debug "[*] REF link ${lREF_LINK} found in ${lLINK_FILE}" "no_log"
           local lREF_ANCHOR=""
           if [[ (("${lREF_LINK}" == *".txt#"*) || ("${lREF_LINK}" == *".log#"*)) ]]; then
-            lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
-            lREF_LINK="$(echo "${lREF_LINK}" | cut -d"#" -f1 || true)"
+            lREF_ANCHOR="$(cut -d"#" -f2 <<<"${lREF_LINK}" || true)" # field 2
+            lREF_LINK="${lREF_LINK%%#*}"                             # field 1
           fi
 
           # in some cases we link to files from different modules. Now we check if the html report file is already
@@ -164,7 +164,7 @@ add_link_tags() {
           fi
 
           local lRES_PATH=""
-          lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
+          lRES_PATH="${ABS_HTML_PATH%/}/${lBACK_LINK_NEW%%.*}/res" # field 1
           if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
           if [[ "${lREF_LINK}" == *"EMBA-dependency"* ]]; then
@@ -173,7 +173,7 @@ add_link_tags() {
           fi
 
           lLINE_NUMBER_INFO_PREV="$((lREF_LINK_NUMBER - 1))"
-          lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)/res/$(basename "${lREF_LINK}")@g" || true)"
+          lHTML_LINK="$(echo "${REFERENCE_LINK}" | sed -e "s@LINK@./${lBACK_LINK_NEW%%.*}/res/$(basename "${lREF_LINK}")@g" || true)" # field 1
 
           lLINK_COMMAND_ARR+=("${lLINE_NUMBER_INFO_PREV}"'s@^@'"${lHTML_LINK}"'@' "${lLINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
         elif [[ "${lREF_LINK: -7}" == ".tar.gz" ]]; then
@@ -185,10 +185,10 @@ add_link_tags() {
             lBACK_LINK_NEW="${lMD5_REF_LINK}"
           fi
 
-          lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)""/res"
+          lRES_PATH="${ABS_HTML_PATH%/}/${lBACK_LINK_NEW%%.*}/res" # field 1
           if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
-          lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK_NEW}" | cut -d"." -f1)/res/$(basename "${lREF_LINK}")@g" || true)""Download Qemu emulation archive.""${LINK_END}"
+          lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./${lBACK_LINK_NEW%%.*}/res/$(basename "${lREF_LINK}")@g" || true)""Download Qemu emulation archive.""${LINK_END}" # field 1
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "${lREF_LINK}").*@${lHTML_LINK}${P_END}@" "${lLINK_FILE}"
         elif [[ "${lREF_LINK: -4}" == ".png" || "${lREF_LINK: -4}" == ".svg" ]]; then
           lLINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""${lREF_LINK}" "${lLINK_FILE}" | cut -d":" -f1 || true)"
@@ -206,15 +206,15 @@ add_link_tags() {
       elif [[ ("${lREF_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}$) || ("${lREF_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$) ]]; then
         local lREF_ANCHOR=""
         if [[ "${lREF_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$ ]]; then
-          lREF_ANCHOR="$(echo "${lREF_LINK}" | cut -d"#" -f2 || true)"
-          lREF_LINK="$(echo "${lREF_LINK}" | cut -d"#" -f1 || true)"
+          lREF_ANCHOR="$(cut -d"#" -f2 <<<"${lREF_LINK}" || true)" # field 2
+          lREF_LINK="${lREF_LINK%%#*}"                             # field 1
         fi
         # link modules
         local lMODUL_ARR_LINK=()
         readarray -t lMODUL_ARR_LINK < <(find ./modules \( -iname "${lREF_LINK}""_*.sh" ! -iname "*pre.sh" ! -iname "*post.sh" \) || true)
         if [[ "${#lMODUL_ARR_LINK[@]}" -gt 0 ]]; then
           local lMODUL_ARR_LINK_E=""
-          lMODUL_ARR_LINK_E="$(echo "${lMODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]' || true)"
+          lMODUL_ARR_LINK_E="${lMODUL_ARR_LINK[0],,}"
           if [[ -n "${lREF_ANCHOR}" ]]; then
             lHTML_LINK="$(echo "${REFERENCE_MODUL_LINK}" | sed -e "s@LINK@./$(basename "${lMODUL_ARR_LINK_E%.sh}").html\#anchor_${lREF_ANCHOR}@" || true)"
           else
@@ -248,8 +248,8 @@ add_link_tags() {
       local lWEB_LINK_URL=""
       readarray -t lWEB_LINKS < <(grep -a -n -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' "${lLINK_FILE}" | uniq || true)
       for lWEB_LINK in "${lWEB_LINKS[@]}"; do
-        lWEB_LINK_LINE_NUM="$(echo "${lWEB_LINK}" | cut -d ":" -f 1 || true)"
-        lWEB_LINK_URL="$(echo "${lWEB_LINK}" | cut -d ":" -f 2- || true)"
+        lWEB_LINK_LINE_NUM="${lWEB_LINK%%:*}" # field 1
+        lWEB_LINK_URL="${lWEB_LINK#*:}"       # field 2-
         lWEB_LINK_URL="${lWEB_LINK_URL%\\}"
         if [[ -n "${lWEB_LINK}" ]]; then
           lHTML_LINK="$(echo "${LINK}" | sed -e "s@LINK@${lWEB_LINK_URL}@g")""${lWEB_LINK_URL}""${LINK_END}" || true
@@ -292,8 +292,8 @@ add_link_tags() {
       local lEXPLOIT_FILE=""
       readarray -t lEXPLOITS_IDS < <(grep -a -n -o -E ".*EDB ID: ([0-9]*)[\ ]?*.*" "${lLINK_FILE}" | uniq || true)
       for lEXPLOIT_ID in "${lEXPLOITS_IDS[@]}"; do
-        lEXPLOIT_ID_LINE="$(echo "${lEXPLOIT_ID}" | cut -d ":" -f 1)"
-        lEXPLOIT_ID_STRING="$(echo "${lEXPLOIT_ID}" | cut -d ":" -f 2-)"
+        lEXPLOIT_ID_LINE="${lEXPLOIT_ID%%:*}"  # field 1
+        lEXPLOIT_ID_STRING="${lEXPLOIT_ID#*:}" # field 2-
         if [[ -n "${lEXPLOIT_ID_STRING}" ]]; then
           lEXPLOIT_ID="$(echo "${lEXPLOIT_ID_STRING}" | grep -a -o -E "EDB ID: ([0-9]*)" | cut -d ":" -f 2 | sed -e 's/^[[:space:]]*//' || true)"
           lEXPLOIT_FILE="${LOG_DIR}""/f20_vul_aggregator/exploit/""${lEXPLOIT_ID}"".txt"
@@ -301,7 +301,7 @@ add_link_tags() {
             # generate exploit file
             generate_info_file "${lEXPLOIT_FILE}" "${lBACK_LINK}" &
             lWAIT_PIDS_WR+=("$!")
-            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/${lEXPLOIT_ID}.html@g")""${lEXPLOIT_ID}""${LINK_END}"
+            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./${lBACK_LINK%%.*}/${lEXPLOIT_ID}.html@g")""${lEXPLOIT_ID}""${LINK_END}" # field 1
           else
             lHTML_LINK="$(echo "${EXPLOIT_LINK}" | sed -e "s@LINK@${lEXPLOIT_ID}@g")""${lEXPLOIT_ID}""${LINK_END}"
           fi
@@ -321,7 +321,7 @@ add_link_tags() {
       local lMSF_KEY_FILE=""
       readarray -t lMSF_KEY_F < <(grep -a -n -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "${lLINK_FILE}" | uniq || true)
       for lMSF_KEY in "${lMSF_KEY_F[@]}"; do
-        lMSF_KEY_LINE="$(echo "${lMSF_KEY}" | cut -d ":" -f 1)"
+        lMSF_KEY_LINE="${lMSF_KEY%%:*}" # field 1
         lMSF_KEY_STRING="$(echo "${lMSF_KEY}" | cut -d ":" -f 3- | sed -e 's/^[[:space:]]*//')"
         readarray -t lMSF_KEY_STRING_ARR < <(echo "${lMSF_KEY_STRING}" | tr " " "\n" | uniq)
         for lMSF_KEY_ELEM in "${lMSF_KEY_STRING_ARR[@]}"; do
@@ -329,10 +329,10 @@ add_link_tags() {
           if [[ -f "${lMSF_KEY_FILE}" ]]; then
             # copy msf file
             local lRES_PATH=""
-            lRES_PATH="${ABS_HTML_PATH%/}/$(echo "${lBACK_LINK}" | cut -d"." -f1)""/res"
+            lRES_PATH="${ABS_HTML_PATH%/}/${lBACK_LINK%%.*}/res" # field 1
             if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
             cp "${lMSF_KEY_FILE}" "${lRES_PATH}""/""$(basename "${lMSF_KEY_FILE}")" || true
-            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./$(echo "${lBACK_LINK}" | cut -d"." -f1)/res/$(basename "${lMSF_KEY_FILE}")@g")""${lMSF_KEY_ELEM}""${LINK_END}"
+            lHTML_LINK="$(echo "${LOCAL_LINK}" | sed -e "s@LINK@./${lBACK_LINK%%.*}/res/$(basename "${lMSF_KEY_FILE}")@g")""${lMSF_KEY_ELEM}""${LINK_END}" # field 1
             lLINK_COMMAND_ARR+=("${lMSF_KEY_LINE}"'s@'"${lMSF_KEY_ELEM}"'@'"${lHTML_LINK}"'@')
           fi
         done
@@ -348,8 +348,8 @@ add_link_tags() {
       local lSNYK_KEY_ELEM=""
       readarray -t lSNYK_KEY_F < <(grep -a -n -o -E "Snyk: .*" "${lLINK_FILE}" | sed 's/Snyk: //' | uniq || true)
       for lSNYK_KEY in "${lSNYK_KEY_F[@]}"; do
-        lSNYK_ID_LINE="$(echo "${lSNYK_KEY}" | cut -d ":" -f 1)"
-        lSNYK_ID_STRING="$(echo "${lSNYK_KEY}" | cut -d ":" -f 2-)"
+        lSNYK_ID_LINE="${lSNYK_KEY%%:*}"  # field 1
+        lSNYK_ID_STRING="${lSNYK_KEY#*:}" # field 2-
         readarray -t lSNYK_KEY_STRING_ARR < <(echo "${lSNYK_ID_STRING}" | tr " " "\n" | grep "SNYK-" | uniq || true)
         for lSNYK_KEY_ELEM in "${lSNYK_KEY_STRING_ARR[@]}"; do
           lHTML_LINK="$(echo "${SNYK_LINK}" | sed -e "s@LINKNAME@${lSNYK_KEY_ELEM}@g" | sed -e "s@LINK@${lSNYK_KEY_ELEM}@g")""${lSNYK_KEY_ELEM}""${LINK_END}"
@@ -367,8 +367,8 @@ add_link_tags() {
       local lPSS_KEY_NAME=""
       readarray -t lPSS_KEY_F < <(grep -a -n -o -E "PSS: .*" "${lLINK_FILE}" | sed 's/PSS: //' | uniq || true)
       for lPSS_KEY in "${lPSS_KEY_F[@]}"; do
-        lPSS_ID_LINE="$(echo "${lPSS_KEY}" | cut -d ":" -f 1)"
-        lPSS_ID_STRING="$(echo "${lPSS_KEY}" | cut -d ":" -f 2-)"
+        lPSS_ID_LINE="${lPSS_KEY%%:*}"  # field 1
+        lPSS_ID_STRING="${lPSS_KEY#*:}" # field 2-
         readarray -t lPSS_KEY_STRING_ARR < <(echo "${lPSS_ID_STRING}" | tr " " "\n" | grep -E "[0-9]+/.*\.html" | uniq || true)
         for lPSS_KEY_NAME in "${lPSS_KEY_STRING_ARR[@]}"; do
           # lPSS_KEY_NAME="$(echo "${PSS_KEY_ELEM}" | tr "/" "_")"
@@ -388,8 +388,8 @@ add_link_tags() {
       if ! [[ "${lLINK_FILE}" == *"l35_"* ]]; then
         readarray -t lCVE_IDS < <(grep -a -n -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "${lLINK_FILE}" | uniq || true)
         for lCVE_ID in "${lCVE_IDS[@]}"; do
-          lCVE_ID_LINE="$(echo "${lCVE_ID}" | cut -d ":" -f 1)"
-          lCVE_ID_STRING="$(echo "${lCVE_ID}" | cut -d ":" -f 2-)"
+          lCVE_ID_LINE="${lCVE_ID%%:*}"  # field 1
+          lCVE_ID_STRING="${lCVE_ID#*:}" # field 2-
           if [[ -n "${lCVE_ID_STRING}" ]]; then
             lHTML_LINK="$(echo "${CVE_LINK}" | sed -e "s@LINK@${lCVE_ID_STRING}@g")""${lCVE_ID_STRING}""${LINK_END}"
             if [[ "${lLINK_FILE}" == *"f20_vul_aggregator"* ]]; then
@@ -411,8 +411,8 @@ add_link_tags() {
       local lCWE_ID_NUMBER=""
       readarray -t lCWE_IDS < <(grep -a -n -E -o 'CWE[0-9]{3,4}' "${lLINK_FILE}" | uniq || true)
       for lCWE_ID in "${lCWE_IDS[@]}"; do
-        lCWE_ID_LINE="$(echo "${lCWE_ID}" | cut -d ":" -f 1)"
-        lCWE_ID_STRING="$(echo "${lCWE_ID}" | cut -d ":" -f 2-)"
+        lCWE_ID_LINE="${lCWE_ID%%:*}"  # field 1
+        lCWE_ID_STRING="${lCWE_ID#*:}" # field 2-
         lCWE_ID_NUMBER="${lCWE_ID_STRING:3}"
         if [[ -n "${lCWE_ID_STRING}" ]]; then
           lHTML_LINK="$(echo "${CWE_LINK}" | sed -e "s@LINK@${lCWE_ID_NUMBER}@g")""${lCWE_ID_STRING}""${LINK_END}"
@@ -429,8 +429,8 @@ add_link_tags() {
         if echo "${LICENSE_LINK_LINE}" | grep -v -q "^[^#*/;]"; then
           continue
         fi
-        lLIC_CODE_ARR=("${lLIC_CODE_ARR[@]}" "$(echo "${LICENSE_LINK_LINE}" | cut -d';' -f1)")
-        lLIC_URL_ARR=("${lLIC_URL_ARR[@]}" "$(echo "${LICENSE_LINK_LINE}" | cut -d';' -f2-)")
+        lLIC_CODE_ARR=("${lLIC_CODE_ARR[@]}" "${LICENSE_LINK_LINE%%;*}") # field 1
+        lLIC_URL_ARR=("${lLIC_URL_ARR[@]}" "${LICENSE_LINK_LINE#*;}")    # field 2-
       done <"${CONFIG_DIR}"/bin_version_strings_links.cfg
 
       local lLICENSE_LINES=()
@@ -440,7 +440,7 @@ add_link_tags() {
 
       readarray -t lLICENSE_LINES < <(grep -a -n -E -o 'License: .*$' "${lLINK_FILE}" | uniq)
       for lLICENSE_LINE in "${lLICENSE_LINES[@]}"; do
-        lLICENSE_LINE_NUM="$(echo "${lLICENSE_LINE}" | cut -d: -f1)"
+        lLICENSE_LINE_NUM="${lLICENSE_LINE%%:*}" # field 1
         lLICENSE_STRING="$(echo "${lLICENSE_LINE}" | cut -d: -f3 | sed -e 's/<[^>]*>//g')"
         local lLIC_URL=""
         local lI=""
@@ -514,7 +514,7 @@ generate_info_file() {
   local lINFO_HTML_FILE=""
   local lMD5_SUM_OF_INFO_FILE=""
   lINFO_HTML_FILE="$(basename "${lINFO_FILE%."${lINFO_FILE##*.}"}"".html")"
-  lSRC_FILE_NAME="$(echo "${lSRC_FILE}" | cut -d"." -f1)"
+  lSRC_FILE_NAME="${lSRC_FILE%%.*}" # field 1
   print_debug "[*] Generate info_file for SRC_FILE ${lSRC_FILE} / ${lSRC_FILE_NAME} -> ${lINFO_HTML_FILE} / lINFO_FILE: ${lINFO_FILE}" "no_log"
   # if we have no main module log like sXYZ_module.html, we use the md5sum of
   # the original file as filename
@@ -734,7 +734,7 @@ add_link_to_index() {
   local lINDEX_NAV_GROUP_ARR=()
   local lINDEX_NAV_ARR=()
 
-  lDATA="$(echo "${HTML_FILE}" | cut -d "_" -f 1)"
+  lDATA="${HTML_FILE%%_*}" # field 1
   lCLASS="${lDATA:0:1}"
   lC_NUMBER="$(echo "${lDATA:1}" | sed -E 's@^0*@@g')"
 

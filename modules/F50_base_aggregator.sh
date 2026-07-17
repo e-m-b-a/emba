@@ -550,7 +550,7 @@ output_binaries() {
       sort -u -t ' ' -k3 | sort -g -r | head -10 2>/dev/null || true)
 
     # strcpy:
-    if [[ "${#lRESULTS_STRCPY_ARR[@]}" -gt 0 ]] && [[ $(echo "${lRESULTS_STRCPY_ARR[0]}" | awk '{print $1}') -gt 0 ]]; then
+    if [[ "${#lRESULTS_STRCPY_ARR[@]}" -gt 0 ]] && [[ ${lRESULTS_STRCPY_ARR[0]%% *} -gt 0 ]]; then
       print_ln
       print_output "[+] STRCPY - top 10 results:"
       if [[ -d "${LOG_DIR}""/s13_weak_func_check/" ]]; then
@@ -568,7 +568,7 @@ output_binaries() {
     fi
 
     # system:
-    if [[ "${#lRESULTS_SYSTEM_ARR[@]}" -gt 0 ]] && [[ $(echo "${lRESULTS_SYSTEM_ARR[0]}" | awk '{print $1}') -gt 0 ]]; then
+    if [[ "${#lRESULTS_SYSTEM_ARR[@]}" -gt 0 ]] && [[ ${lRESULTS_SYSTEM_ARR[0]%% *} -gt 0 ]]; then
       print_ln
       print_output "[+] SYSTEM - top 10 results:"
       if [[ -d "${LOG_DIR}""/s13_weak_func_check/" ]]; then
@@ -1180,8 +1180,8 @@ cwe_logging() {
       print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
       write_link "s17"
       for lCWE_ENTRY in "${lCWE_OUT_ARR[@]}"; do
-        lCWE="$(echo "${lCWE_ENTRY}" | awk '{print $1}')"
-        lCWE_DESC="${lCWE_ENTRY#* }" # field 2-
+        read -r lCWE _ <<<"${lCWE_ENTRY}" # field 1
+        lCWE_DESC="${lCWE_ENTRY#* }"      # field 2-
         # do not change this to grep -c!
         # shellcheck disable=SC2126
         lBINS_CWE_CHCK_CNT="$(grep "${lCWE}" "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json 2>/dev/null | wc -l || true)"

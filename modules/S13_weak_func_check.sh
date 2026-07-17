@@ -652,7 +652,7 @@ print_top10_statistics() {
           # remove the md5sum from name
           lBINARY_NO_MD5=${lBINARY%-*}
           lSEARCH_TERM="$(echo "${lBINARY_NO_MD5}" | awk '{print $2}')"
-          lF_COUNTER="$(echo "${lBINARY_NO_MD5}" | awk '{print $1}')"
+          read -r lF_COUNTER _ <<<"${lBINARY_NO_MD5}" # field 1
           [[ ! "${lF_COUNTER}" =~ ^[0-9]+$ ]] && continue
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           if [[ -f "${BASE_LINUX_FILES}" ]]; then

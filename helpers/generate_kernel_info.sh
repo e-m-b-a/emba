@@ -58,7 +58,7 @@ for KERNEL_ENTRY in "${KERNEL_VER_ARR[@]}"; do
   # Validate that KERNEL_VER is not empty
   [[ -z "${KERNEL_VER}" ]] && continue
   KERNEL_RELEASE=${KERNEL_ENTRY/*<\/a>/}
-  KERNEL_RELEASE=$(echo "${KERNEL_RELEASE}" | awk '{print $1}')
+  read -r KERNEL_RELEASE _ <<<"${KERNEL_RELEASE}" # field 1
   print_output "[*] Kernel version: ${ORANGE}${KERNEL_VER}${NC} / release date: ${ORANGE}${KERNEL_RELEASE}${NC}" "no_log"
   echo "${KERNEL_VER};${KERNEL_RELEASE}" >>"${KERNEL_OUTPUT_CSV}"
 done

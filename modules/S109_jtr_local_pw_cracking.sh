@@ -178,7 +178,7 @@ S109_jtr_local_pw_cracking() {
 
       mapfile -t lCRACKED_HASHES_ARR < <(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$" || true)
       lJTR_FINAL_STAT=$(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
-      lCRACKED=$(echo "${lJTR_FINAL_STAT}" | awk '{print $1}')
+      read -r lCRACKED _ <<<"${lJTR_FINAL_STAT}" # field 1
       if [[ -n "${lJTR_FINAL_STAT}" ]]; then
         print_ln
         print_output "[*] John the ripper final status: ${ORANGE}${lJTR_FINAL_STAT}${NC}"
