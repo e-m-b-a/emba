@@ -701,7 +701,7 @@ detect_root_dir_helper() {
   mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
   # currently not working: mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "/bin/\|/lib/\|/etc/\|/root/\|/dev/\|/opt/\|/proc/\|/lib64\|/boot/\|/home/" | cut -d ';' -f2 | grep "${lSEARCH_PATH}" | sort -u || true)
   for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    read -r lCNT _ <<<"${lR_PATH}" # field 1
+    lCNT="$(awk '{print $1}' <<<"${lR_PATH}")" # field 1
     if [[ "${lCNT}" -lt 5 ]]; then
       # we only use paths with more then 4 matches as possible root path
       continue

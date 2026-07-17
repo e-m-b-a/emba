@@ -1180,8 +1180,8 @@ cwe_logging() {
       print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
       write_link "s17"
       for lCWE_ENTRY in "${lCWE_OUT_ARR[@]}"; do
-        read -r lCWE _ <<<"${lCWE_ENTRY}" # field 1
-        lCWE_DESC="${lCWE_ENTRY#* }"      # field 2-
+        lCWE="$(awk '{print $1}' <<<"${lCWE_ENTRY}")" # field 1
+        lCWE_DESC="${lCWE_ENTRY#* }"                  # field 2-
         # do not change this to grep -c!
         # shellcheck disable=SC2126
         lBINS_CWE_CHCK_CNT="$(grep "${lCWE}" "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json 2>/dev/null | wc -l || true)"

@@ -575,7 +575,7 @@ radare_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
-          read -r lF_COUNTER _ <<<"${lBINARY}" # field 1
+          lF_COUNTER="$(awk '{print $1}' <<<"${lBINARY}")" # field 1
           # check if lF_COUNTER is integer
           if ! [[ "${lF_COUNTER}" =~ ^[0-9]+$ ]]; then
             print_error "[-] S14 Error in Top 10 functionality for ${lBINARY}"
