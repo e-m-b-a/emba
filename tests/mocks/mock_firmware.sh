@@ -14,6 +14,10 @@
 
 create_mock_firmware() {
   local lFW_DIR="${1:-/tmp/test_fw}"
+  if [[ -z "${lFW_DIR}" || "${lFW_DIR}" == "/" || "${lFW_DIR}" == "/tmp" || "${lFW_DIR}" != /tmp/* ]]; then
+     echo "Refusing to create mock firmware in unsafe directory: ${lFW_DIR}" >&2
+     return 1
+   fi
   rm -rf "${lFW_DIR}"
   mkdir -p "${lFW_DIR}/bin" "${lFW_DIR}/etc" "${lFW_DIR}/lib" "${lFW_DIR}/usr/bin"
   echo "#!/bin/sh" >"${lFW_DIR}/bin/busybox"
