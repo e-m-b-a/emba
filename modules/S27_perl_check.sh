@@ -133,9 +133,9 @@ s27_zarn_perl_checks() {
     write_log "\n" "${lPL_LOG_LINKED}"
 
     for lSARIF_RESULT in "${lZARN_SARIF_RESULTS_ARR[@]}"; do
-      lZARN_VULN_TITLE=$(echo "${lSARIF_RESULT}" | jq -rc '.properties.title' || true)
-      lZARN_VULN_MESSAGE=$(echo "${lSARIF_RESULT}" | jq -rc '.message.text' || true)
-      lZARN_VULN_LINE=$(echo "${lSARIF_RESULT}" | jq -rc '.locations[].physicalLocation.region.startLine' || true)
+      lZARN_VULN_TITLE="$(jq -rc '.properties.title' <<<"${lSARIF_RESULT}" || true)"
+      lZARN_VULN_MESSAGE="$(jq -rc '.message.text' <<<"${lSARIF_RESULT}" || true)"
+      lZARN_VULN_LINE="$(jq -rc '.locations[].physicalLocation.region.startLine' <<<"${lSARIF_RESULT}" || true)"
 
       write_csv_log "$(print_path "${lPL_SCRIPT}")" "${lVULNS}" "${lCFF}" "${lZARN_VULN_TITLE}" "${lZARN_VULN_LINE}" "${lZARN_VULN_MESSAGE}"
       write_log "$(indent "$(indent "Vulnerability title: ${ORANGE}${lZARN_VULN_TITLE}${NC}")")" "${lPL_LOG_LINKED}"
