@@ -124,7 +124,7 @@ binary_protection_threader() {
     lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Symbols)/${RED_}&${NC_}/g")
   fi
 
-  lRELRO=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f1)
+  lRELRO="${lCSV_BIN_OUT%%;*}"
   lCANARY=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f2)
   lNX=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f3)
   lPIE=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f4)

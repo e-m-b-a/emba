@@ -166,7 +166,7 @@ check_live_nmap_basic() {
     print_ln
     local lWAIT_PIDS_L15_ARR=()
     for lSERVICE in "${lNMAP_SERVICES_ARR[@]}"; do
-      if ! echo "${lSERVICE}" | grep -q "[0-9]"; then
+      if ! [[ "${lSERVICE}" =~ [0-9] ]]; then
         continue
       fi
       l15_version_detector "${lSERVICE}" "${lTYPE}" &

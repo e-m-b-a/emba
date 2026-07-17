@@ -85,7 +85,7 @@ echo ""
 ID=1
 while read -r ADV; do
   ((ID += 1))
-  FILENAME="$(echo "${ADV}" | rev | cut -d '/' -f1 | rev)"
+  FILENAME="${ADV##*/}"
   if [[ -f "${SAVE_PATH}/vuln/${FILENAME}" ]]; then
     echo -e "[-] Already downloaded ${ORANGE}${FILENAME}${NC}"
     continue

@@ -663,7 +663,7 @@ detect_root_dir_helper() {
         ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="busybox"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "busybox"; then
+        elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"busybox"* ]]; then
           lMECHANISM="${lMECHANISM} / busybox"
         fi
       fi
@@ -675,7 +675,7 @@ detect_root_dir_helper() {
         ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="shell"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+        elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"shell"* ]]; then
           lMECHANISM="${lMECHANISM} / shell"
         fi
       fi
@@ -687,7 +687,7 @@ detect_root_dir_helper() {
         ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="shell"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+        elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"shell"* ]]; then
           lMECHANISM="${lMECHANISM} / shell"
         fi
       fi
@@ -707,7 +707,7 @@ detect_root_dir_helper() {
       ROOT_PATH+=("${lR_PATH}")
       if [[ -z "${lMECHANISM}" ]]; then
         lMECHANISM="dir names"
-      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
+      elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"dir names"* ]]; then
         lMECHANISM="${lMECHANISM} / dir names"
       fi
     fi

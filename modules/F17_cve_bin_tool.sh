@@ -632,7 +632,7 @@ tear_down_cve_threader() {
     # now, we check the exploit-db results if we have a routersploit module:
     if [[ " ${lEXPLOIT_AVAIL_EDB_ARR[*]} " =~ "Exploit DB Id:" ]]; then
       for lEID_VALUE in "${EXPLOIT_AVAIL_EDB_ARR[@]}"; do
-        if ! echo "${lEID_VALUE}" | grep -q "Exploit DB Id:"; then
+        if ! [[ "${lEID_VALUE}" == *"Exploit DB Id:"* ]]; then
           continue
         fi
         lEID_VALUE=$(echo "${lEID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
@@ -689,9 +689,9 @@ tear_down_cve_threader() {
 
       for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}"; do
         if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
-          lEXPLOIT_PATH=$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
+          lEXPLOIT_PATH="${lEXPLOIT_MSF%%:*}"
         else
-          lEXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${lEXPLOIT_MSF}" | cut -d: -f1)
+          lEXPLOIT_PATH="${MSF_INSTALL_PATH}${lEXPLOIT_MSF%%:*}"
         fi
         lEXPLOIT_NAME=$(basename -s .rb "${lEXPLOIT_PATH}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:MSF:${lEXPLOIT_NAME}")
@@ -727,7 +727,7 @@ tear_down_cve_threader() {
       fi
 
       for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}"; do
-        lEXPLOIT_NAME=$(echo "${lEXPLOIT_SNYK}" | cut -d\; -f2)
+        lEXPLOIT_NAME="${lEXPLOIT_SNYK#*;}"
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:SNYK:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
         if [[ "${lTYPE}" != "NA" ]]; then
@@ -788,7 +788,7 @@ tear_down_cve_threader() {
       local lEXPLOIT_ROUTERSPLOIT_ARR=("${lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" "${lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}")
 
       for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}"; do
-        lEXPLOIT_PATH=$(echo "${lEXPLOIT_RS}" | cut -d: -f1)
+        lEXPLOIT_PATH="${lEXPLOIT_RS%%:*}"
         lEXPLOIT_NAME=$(basename -s .py "${lEXPLOIT_PATH}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:RS:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"

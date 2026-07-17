@@ -63,7 +63,7 @@ main_web_check() {
   # NMAP_PORTS_SERVICES from L15
   if [[ "${#NMAP_PORTS_SERVICES_ARR[@]}" -gt 0 ]]; then
     for lPORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
-      lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
+      lPORT="${lPORT_SERVICE%%/*}"; lPORT="${lPORT//[[:blank:]]/}"
       lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
       print_output "[*] Analyzing service ${ORANGE}${lSERVICE} - ${lPORT} - ${lIP_ADDRESS_}${NC}" "no_log"
       if [[ "${lSERVICE}" == "unknown" ]] || [[ "${lSERVICE}" == "tcpwrapped" ]]; then
@@ -286,8 +286,8 @@ check_curl_ret() {
   local lCURL_RET_CODE=""
   local lCURL_RET_SIZE=""
 
-  lCURL_RET_CODE="$(echo "${lCURL_RET}" | cut -d: -f1 || true)"
-  lCURL_RET_SIZE="$(echo "${lCURL_RET}" | cut -d: -f2 || true)"
+  lCURL_RET_CODE="${lCURL_RET%%:*}"
+  lCURL_RET_SIZE="${lCURL_RET#*:}"
   # print_output "[*] lCURL_RET: $lCURL_RET / ${HTTP_RAND_REF_SIZE} / Port: ${lPORT}" "no_log"
 
   if [[ "${lCURL_RET_CODE}" -eq 200 ]]; then
@@ -524,7 +524,7 @@ web_access_crawler() {
         lWEB_NAME="$(basename "${lWEB_PATH}")"
         mapfile -t lCRAWLED_VULNS_ARR < <(grep "${lWEB_NAME}.*semgrep-rules.php.lang.security" "${S22_CSV_LOG}" || true)
         for lC_VULN in "${lCRAWLED_VULNS_ARR[@]}"; do
-          lVULN_NAME=$(echo "${lC_VULN}" | cut -d ';' -f2)
+          lVULN_NAME="${lC_VULN#*;}"
           lVULN_FILE="${lC_VULN/;*/}"
           lVULN_FILE=$(basename "${lVULN_FILE}")
 

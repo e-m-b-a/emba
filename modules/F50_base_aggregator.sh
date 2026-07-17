@@ -593,7 +593,7 @@ output_binaries() {
 binary_fct_output() {
   local lBINARY_DETAILS="${1:-}"
   export F_COUNTER=""
-  F_COUNTER="$(echo "${lBINARY_DETAILS}" | cut -d\  -f1)"
+  F_COUNTER="${lBINARY_DETAILS%% *}"
   export BINARY=""
   BINARY="$(echo "${lBINARY_DETAILS}" | cut -d\  -f3)"
   local lBINS_FCT=""
@@ -1179,7 +1179,7 @@ cwe_logging() {
       write_link "s17"
       for lCWE_ENTRY in "${lCWE_OUT_ARR[@]}"; do
         lCWE="$(echo "${lCWE_ENTRY}" | awk '{print $1}')"
-        lCWE_DESC="$(echo "${lCWE_ENTRY}" | cut -d\  -f2-)"
+        lCWE_DESC="${lCWE_ENTRY#* }"
         # do not change this to grep -c!
         # shellcheck disable=SC2126
         lBINS_CWE_CHCK_CNT="$(grep "${lCWE}" "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json 2>/dev/null | wc -l || true)"

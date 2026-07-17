@@ -71,7 +71,7 @@ binary_kernel_check_threader() {
   local lFILE_PATH=""
   local lFILE_NAME=""
 
-  lFILE_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
+  lFILE_PATH="${lBINARY_ENTRY#*;}"
   lFILE_NAME=$(basename "${lFILE_PATH}")
 
   local lLOG_FILE="${LOG_PATH_MODULE}/threading_${lFILE_NAME}.tmp"

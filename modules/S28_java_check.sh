@@ -46,13 +46,13 @@ S28_java_check() {
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      lJNAME=$(basename "$(echo "${lJAVA_BINARY}" | cut -d';' -f2)" 2>/dev/null)
+      lJNAME=$(basename "${lJAVA_BINARY#*;}" 2>/dev/null)
       if grep -E -q "^${lJNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
     ((lS28_JAVA_SCRIPTS += 1))
-    s28_java_decompile "$(echo "${lJAVA_BINARY}" | cut -d';' -f2)" &
+    s28_java_decompile "${lJAVA_BINARY#*;}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S28+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S28

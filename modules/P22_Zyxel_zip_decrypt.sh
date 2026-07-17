@@ -163,7 +163,7 @@ zyxel_zip_extractor() {
         if [[ "${lCOMPRESS_IMG}" == *"Squashfs"* ]]; then
           print_output "[+] Found valid ${ORANGE}compress.img${GREEN} and extract it now"
           # extract the path to compress.img
-          lCOMPRESS_IMG=$(echo "${lCOMPRESS_IMG}" | cut -d ';' -f2)
+          lCOMPRESS_IMG="${lCOMPRESS_IMG#*;}"
           unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" 0
           local lFILES_ZYXEL_ARR=()
           mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" -type f ! -name "*.raw")
