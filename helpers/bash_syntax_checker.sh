@@ -1,11 +1,26 @@
-#!/bin/bash
+#!/bin/bash -p
 
-export GREEN='\033[0;32m'
-export ORANGE='\033[0;33m'
-export RED='\033[0;31m'
-export BLUE='\033[0;34m'
-export BOLD='\033[1m'
-export NC='\033[0m' # no color
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2026-2026 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Author(s): Michael Messner
+
+# Description: Checks all EMBA source files with bash -n for syntax errors
+#
+
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+RED='\033[0;31m'
+BOLD='\033[1m'
+NC='\033[0m' # no color
 
 EMBA_SOURCES_ARR=()
 EMBA_SOURCE_FILE=""
@@ -44,7 +59,7 @@ for EMBA_SOURCE_FILE in "${EMBA_SOURCES_ARR[@]}"; do
 done
 
 if [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]]; then
-  echo "${RED}[-] WARNING: Syntax errors detected -> Fix before pushing to EMBA repo${NC}"
+  echo -e "${RED}[-] WARNING: Syntax errors detected -> Fix before pushing to EMBA repo${NC}"
   exit 1
 fi
 exit 0
