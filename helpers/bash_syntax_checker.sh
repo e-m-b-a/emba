@@ -7,8 +7,9 @@ export BLUE='\033[0;34m'
 export BOLD='\033[1m'
 export NC='\033[0m' # no color
 
-export EMBA_SOURCES_ARR=()
+EMBA_SOURCES_ARR=()
 EMBA_SOURCE_FILE=""
+MODULES_TO_CHECK_ARR=()
 
 import_emba_scripts() {
   local lFILES_ARR=()
@@ -16,7 +17,7 @@ import_emba_scripts() {
 
   mapfile -t lFILES_ARR < <(find ./ \( -name .git -o -name external \) -prune -o -type f -print 2>/dev/null)
   for lEMBA_FILE in "${lFILES_ARR[@]}"; do
-    if (file "${lEMBA_FILE}" | grep -q "shell script"); then
+    if file "${lEMBA_FILE}" | grep -q "shell script"; then
       echo "${lEMBA_FILE}"
       EMBA_SOURCES_ARR+=("${lEMBA_FILE}")
     fi
