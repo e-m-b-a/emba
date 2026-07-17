@@ -162,7 +162,11 @@ set_exclude() {
   # exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   EXCLUDE_PATHS="$(set_excluded_path)"
   export EXCL_FIND=()
-  IFS=" " read -r -a EXCL_FIND <<<"$(echo -e "$(get_excluded_find "${EXCLUDE_PATHS}")" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
+  local lEXCL_TMP
+  lEXCL_TMP="$(get_excluded_find "${EXCLUDE_PATHS}")"
+  lEXCL_TMP="${lEXCL_TMP//$'\r'/ }"
+  lEXCL_TMP="${lEXCL_TMP//$'\n'/}"
+  IFS=" " read -r -a EXCL_FIND <<<"${lEXCL_TMP}"
   print_excluded
 }
 
@@ -207,17 +211,17 @@ binary_architecture_threader() {
     lD_MACHINE=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Machine:" || true)
     lD_MACHINE="${lD_MACHINE// /}"
     lD_MACHINE="${lD_MACHINE/*Machine:/}"
-    lD_MACHINE=$(echo "${lD_MACHINE}" | sed -E 's/^[[:space:]]+//')
+    lD_MACHINE=$(sed -E 's/^[[:space:]]+//' <<<"${lD_MACHINE}")
 
     # ELF32/64
     lD_CLASS=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Class:" || true)
     lD_CLASS="${lD_CLASS/*Class:/}"
-    lD_CLASS=$(echo "${lD_CLASS}" | sed -E 's/^[[:space:]]+//')
+    lD_CLASS=$(sed -E 's/^[[:space:]]+//' <<<"${lD_CLASS}")
 
     # endianes
     lD_DATA=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Data:" || true)
     lD_DATA="${lD_DATA/*Data:/}"
-    lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
+    lD_DATA=$(sed -E 's/^[[:space:]]+//' <<<"${lD_DATA}")
 
     lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null | grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
@@ -640,7 +644,7 @@ detect_root_dir_helper() {
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
         # now we have a result like this "/lib/ld-uClibc.so.0"
         # lets escape it
-        lINTERPRETER_ESCAPED=$(echo "${lINTERPRETER_PATH}" | sed -e 's/\//\\\//g')
+        lINTERPRETER_ESCAPED=$(sed -e 's/\//\\\//g' <<<"${lINTERPRETER_PATH}")
         # mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
         mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true)
         for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
@@ -663,7 +667,7 @@ detect_root_dir_helper() {
         ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="busybox"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "busybox"; then
+        elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"busybox"* ]]; then
           lMECHANISM="${lMECHANISM} / busybox"
         fi
       fi
@@ -675,7 +679,7 @@ detect_root_dir_helper() {
         ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="shell"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+        elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"shell"* ]]; then
           lMECHANISM="${lMECHANISM} / shell"
         fi
       fi
@@ -687,7 +691,7 @@ detect_root_dir_helper() {
         ROOT_PATH+=("${lR_PATH}")
         if [[ -z "${lMECHANISM}" ]]; then
           lMECHANISM="shell"
-        elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+        elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"shell"* ]]; then
           lMECHANISM="${lMECHANISM} / shell"
         fi
       fi
@@ -697,17 +701,17 @@ detect_root_dir_helper() {
   mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
   # currently not working: mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "/bin/\|/lib/\|/etc/\|/root/\|/dev/\|/opt/\|/proc/\|/lib64\|/boot/\|/home/" | cut -d ';' -f2 | grep "${lSEARCH_PATH}" | sort -u || true)
   for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    lCNT=$(echo "${lR_PATH}" | awk '{print $1}')
+    lCNT="$(awk '{print $1}' <<<"${lR_PATH}")" # field 1
     if [[ "${lCNT}" -lt 5 ]]; then
       # we only use paths with more then 4 matches as possible root path
       continue
     fi
-    lR_PATH=$(echo "${lR_PATH}" | awk '{print $2}')
+    lR_PATH=$(awk '{print $2}' <<<"${lR_PATH}") # field 2
     if [[ -d "${lR_PATH}" ]]; then
       ROOT_PATH+=("${lR_PATH}")
       if [[ -z "${lMECHANISM}" ]]; then
         lMECHANISM="dir names"
-      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
+      elif [[ -n "${lMECHANISM}" ]] && [[ "${lMECHANISM}" != *"dir names"* ]]; then
         lMECHANISM="${lMECHANISM} / dir names"
       fi
     fi

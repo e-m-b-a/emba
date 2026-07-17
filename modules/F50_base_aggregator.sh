@@ -550,7 +550,7 @@ output_binaries() {
       sort -u -t ' ' -k3 | sort -g -r | head -10 2>/dev/null || true)
 
     # strcpy:
-    if [[ "${#lRESULTS_STRCPY_ARR[@]}" -gt 0 ]] && [[ $(echo "${lRESULTS_STRCPY_ARR[0]}" | awk '{print $1}') -gt 0 ]]; then
+    if [[ "${#lRESULTS_STRCPY_ARR[@]}" -gt 0 ]] && [[ ${lRESULTS_STRCPY_ARR[0]%% *} -gt 0 ]]; then
       print_ln
       print_output "[+] STRCPY - top 10 results:"
       if [[ -d "${LOG_DIR}""/s13_weak_func_check/" ]]; then
@@ -568,7 +568,7 @@ output_binaries() {
     fi
 
     # system:
-    if [[ "${#lRESULTS_SYSTEM_ARR[@]}" -gt 0 ]] && [[ $(echo "${lRESULTS_SYSTEM_ARR[0]}" | awk '{print $1}') -gt 0 ]]; then
+    if [[ "${#lRESULTS_SYSTEM_ARR[@]}" -gt 0 ]] && [[ ${lRESULTS_SYSTEM_ARR[0]%% *} -gt 0 ]]; then
       print_ln
       print_output "[+] SYSTEM - top 10 results:"
       if [[ -d "${LOG_DIR}""/s13_weak_func_check/" ]]; then
@@ -593,11 +593,11 @@ output_binaries() {
 binary_fct_output() {
   local lBINARY_DETAILS="${1:-}"
   export F_COUNTER=""
-  F_COUNTER="$(echo "${lBINARY_DETAILS}" | cut -d\  -f1)"
+  F_COUNTER="${lBINARY_DETAILS%% *}" # field 1
   export BINARY=""
-  BINARY="$(echo "${lBINARY_DETAILS}" | cut -d\  -f3)"
+  BINARY="$(cut -d ' ' -f3 <<<"${lBINARY_DETAILS}")" # field 3
   local lBINS_FCT=""
-  lBINS_FCT="$(echo "${lBINARY_DETAILS}" | cut -d\  -f2)"
+  lBINS_FCT="$(cut -d ' ' -f2 <<<"${lBINARY_DETAILS}")" # field 2
   local lBIN_RELRO_STRING=""
   local lBIN_CANARY_STRING=""
   local lBIN_NX_STRING=""
@@ -693,8 +693,10 @@ output_cve_exploits() {
 
       # run over F17/vuln_summary.txt and add links - need to do this here and not in f17 as there the threading mode kicks us
       while read -r OVERVIEW_LINE; do
-        lBINARY="$(echo "${OVERVIEW_LINE}" | cut -d: -f2 | tr -d '[:blank:]')"
-        lBIN_VERS="$(echo "${OVERVIEW_LINE}" | cut -d: -f3 | tr -d '[:blank:]')"
+        lBINARY="$(cut -d: -f2 <<<"${OVERVIEW_LINE}")" # field 2
+        lBINARY="${lBINARY//[[:blank:]]/}"
+        lBIN_VERS="$(cut -d: -f3 <<<"${OVERVIEW_LINE}")" # field 3
+        lBIN_VERS="${lBIN_VERS//[[:blank:]]/}"
         print_output "${OVERVIEW_LINE}"
         write_link "f17#cve_${lBINARY}_${lBIN_VERS}"
       done <"${F17_LOG_DIR}/vuln_summary.txt"
@@ -1178,8 +1180,8 @@ cwe_logging() {
       print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
       write_link "s17"
       for lCWE_ENTRY in "${lCWE_OUT_ARR[@]}"; do
-        lCWE="$(echo "${lCWE_ENTRY}" | awk '{print $1}')"
-        lCWE_DESC="$(echo "${lCWE_ENTRY}" | cut -d\  -f2-)"
+        lCWE="$(awk '{print $1}' <<<"${lCWE_ENTRY}")" # field 1
+        lCWE_DESC="${lCWE_ENTRY#* }"                  # field 2-
         # do not change this to grep -c!
         # shellcheck disable=SC2126
         lBINS_CWE_CHCK_CNT="$(grep "${lCWE}" "${LOG_DIR}"/"${lLOG_DIR_MOD}"/cwe_*.json 2>/dev/null | wc -l || true)"

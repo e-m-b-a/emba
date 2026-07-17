@@ -147,7 +147,7 @@ S115_usermode_emulator() {
           continue
         fi
 
-        if echo "${lBIN_BLACKLIST_ARR[@]}" | grep -q -F -w "${lBIN_EMU_NAME_}"; then
+        if [[ " ${lBIN_BLACKLIST_ARR[*]} " == *" ${lBIN_EMU_NAME_} "* ]]; then
           print_output "[*] Binary ${ORANGE}${BIN_}${NC} (${ORANGE}${lBIN_CNT}/${#lBIN_EMU_ARR[@]}${NC}) not emulated - blacklist triggered"
           continue
         else
@@ -861,7 +861,7 @@ s115_cleanup() {
   if [[ "${#lCHECK_MOUNTS_ARR[@]}" -gt 0 ]]; then
     for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
       print_output "[*] Unmounting ${lMOUNT}" "no_log"
-      lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
+      lMOUNT=$(cut -d ' ' -f3 <<<"${lMOUNT}") # field 3
       umount -l "${lMOUNT}" || true
     done
   fi

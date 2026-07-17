@@ -370,7 +370,7 @@ module_analyzer() {
     lK_AUTHOR=$(modinfo "${lKMODULE}" | grep "^author:" || true)
     lK_AUTHOR="${lK_AUTHOR//author:\ /}"
     lK_AUTHOR="${lK_AUTHOR//Maintainer:\ /}"
-    lK_AUTHOR="$(echo "${lK_AUTHOR}" | tr '\n' '-')"
+    lK_AUTHOR="${lK_AUTHOR//$'\n'/-}"
     lK_AUTHOR=$(clean_package_details "${lK_AUTHOR}")
 
     lK_DESC=$(modinfo "${lKMODULE}" | grep "^description:" || true)
@@ -382,7 +382,7 @@ module_analyzer() {
     lSHA512_CHECKSUM="$(sha512sum "${lKMODULE}" | awk '{print $1}')"
 
     lK_FILE_OUT=$(file -b "${lKMODULE}" 2>/dev/null)
-    lK_ARCH=$(echo "${lK_FILE_OUT}" | cut -d ',' -f2)
+    lK_ARCH=$(cut -d ',' -f2 <<<"${lK_FILE_OUT}") # field 2
     lK_ARCH=${lK_ARCH#\ }
 
     if [[ "${lK_FILE_OUT}" == *"not stripped"* ]]; then

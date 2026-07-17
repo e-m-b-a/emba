@@ -133,7 +133,7 @@ gpt_resolver_csv() {
       lGPT_REVERSE_LINK_="${lGPT_REVERSE_LINK_//[^a-zA-Z0-9]/}"
       [[ -z "${lGPT_REVERSE_LINK_}" ]] && continue
       # shellcheck disable=SC2001
-      lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
+      lHTML_FILE_X=$(sed 's#'"${HTML_PATH}"'##' <<<"${lHTML_FILE_}")
       print_output "[*] Linking AI results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
       local lDEPTH="\.\.\/"
 
@@ -177,7 +177,7 @@ gpt_resolver_csv_tmp() {
 
     # we need to find the depth which we need to link to the file
     # shellcheck disable=SC2001
-    lHTML_FILE_X=$(echo "${lHTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
+    lHTML_FILE_X=$(sed 's#'"${HTML_PATH}"'##' <<<"${lHTML_FILE_}")
     print_output "[*] Linking AI results ${ORANGE}${lGPT_REVERSE_LINK_}${NC} into ${ORANGE}${lHTML_FILE_X}${NC}" "no_log"
     local lDEPTH="\.\.\/"
 

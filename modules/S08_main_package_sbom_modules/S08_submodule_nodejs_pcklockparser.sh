@@ -116,7 +116,7 @@ node_js_package_lock_threader() {
   local lJS_DEP_ID=""
   local lAPP_DEP=""
 
-  lAPP_NAME=$(echo "${lAPP_NAME}" | rev | cut -d '/' -f1 | rev)
+  lAPP_NAME="${lAPP_NAME##*/}" # basename
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   [[ -z "${lAPP_NAME}" ]] && return
   [[ "${lAPP_NAME}" == "null" ]] && return
@@ -135,7 +135,7 @@ node_js_package_lock_threader() {
 
   if [[ "${lAPP_DEPS}" != "null" ]]; then
     # extract the dependencies lAPP_DEPS from '{"ansi-styles":"^4.0.0","string-width":"^4.1.0","strip-ansi":"^6.0.0"}'
-    mapfile -t lAPP_DEPS_ARR < <(echo "${lAPP_DEPS}" | jq -r '. | to_entries[] | "\(.key)(\(.value))"' || true)
+    mapfile -t lAPP_DEPS_ARR < <(jq -r '. | to_entries[] | "\(.key)(\(.value))"' <<<"${lAPP_DEPS}" || true)
   fi
 
   # add the node lock path information to our properties array:

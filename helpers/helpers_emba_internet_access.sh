@@ -66,10 +66,10 @@ kernel_downloader() {
     local lKERNEL_DETAILS_TMP_ARCH=""
     local lKERNEL_DETAILS_TMP_END=""
 
-    lKERNEL_DETAILS_TMP_FILE=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f1)
-    lKERNEL_DETAILS_TMP_VERSION=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f2)
-    lKERNEL_DETAILS_TMP_ARCH=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f7)
-    lKERNEL_DETAILS_TMP_END=$(echo "${lKERNEL_DETAILS_TMP_ENTRY}" | cut -d ';' -f8)
+    lKERNEL_DETAILS_TMP_FILE="${lKERNEL_DETAILS_TMP_ENTRY%%;*}"                     # field 1
+    lKERNEL_DETAILS_TMP_VERSION=$(cut -d ';' -f2 <<<"${lKERNEL_DETAILS_TMP_ENTRY}") # field 2
+    lKERNEL_DETAILS_TMP_ARCH=$(cut -d ';' -f7 <<<"${lKERNEL_DETAILS_TMP_ENTRY}")    # field 7
+    lKERNEL_DETAILS_TMP_END=$(cut -d ';' -f8 <<<"${lKERNEL_DETAILS_TMP_ENTRY}")     # field 8
     if [[ -z "${lKERNEL_DETAILS_TMP_VERSION}" ]]; then
       continue
     fi
@@ -83,8 +83,9 @@ kernel_downloader() {
     local lK_VER_2nd=""
     # local K_VER_3rd=""
 
-    lK_VER_1st=$(echo "${lK_VERSION}" | cut -d. -f1)
-    lK_VER_2nd=$(echo "${lK_VERSION}" | cut -d. -f2)
+    lK_VER_1st="${lK_VERSION%%.*}" # field 1
+    lK_VER_2nd="${lK_VERSION#*.}"
+    lK_VER_2nd="${lK_VER_2nd%%.*}" # field 2
     # K_VER_3rd=$(echo "${lK_VERSION}" | cut -d. -f3)
 
     # prepare the path in the URL:

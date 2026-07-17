@@ -190,7 +190,7 @@ system_emulator_init_runner() {
   print_output "[*] Identified the following system emulation details"
   print_output "  ->  ${lSYS_EMU_ENTRY}"
 
-  lEMU_PATH=$(echo "${lSYS_EMU_ENTRY}" | cut -d ';' -f11)
+  lEMU_PATH=$(cut -d ';' -f11 <<<"${lSYS_EMU_ENTRY}") # field 11
   lEMU_PATH=${LOG_DIR}"/l10_system_emulation/${lEMU_PATH}"
   if [[ ! -d "${lEMU_PATH}" ]]; then
     print_output "[-] No system emulation results available ... no checks performed"
@@ -401,7 +401,7 @@ get_arch() {
   if [[ "${lFILE_OUTPUT}" == *"ELF"* ]]; then
     # e.g. ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV)
     # -> we need the part after the ','
-    lARCH=$(echo "${lFILE_OUTPUT}" | cut -d ',' -f2-3)
+    lARCH=$(cut -d ',' -f2-3 <<<"${lFILE_OUTPUT}") # fields 2-3
   else
     # e.g. HTML document, ASCII text, with CRLF line terminators
     # -> we need the part in front of the ','

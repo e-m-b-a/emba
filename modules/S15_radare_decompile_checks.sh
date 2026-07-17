@@ -55,9 +55,9 @@ S15_radare_decompile_checks() {
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
-      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
-      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
-      lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
+      lBIN_FILE="$(cut -d ';' -f8 <<<"${lBINARY}")"    # field 8
+      lBIN_MD5_SUM="$(cut -d ';' -f9 <<<"${lBINARY}")" # field 9
+      lBINARY=$(cut -d ';' -f2 <<<"${lBINARY}")        # field 2
       lBINARY="${lBINARY/;*/}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
@@ -198,8 +198,8 @@ radare_decomp_print_top10_statistics() {
           lMD5_SUM=${lBINARY##*-}
           # remove the md5sum from name
           lBINARY=${lBINARY%-*}
-          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
-          lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
+          lSEARCH_TERM="$(awk '{print $2}' <<<"${lBINARY}")" # field 2
+          lF_COUNTER="$(awk '{print $1}' <<<"${lBINARY}")"   # field 1
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           local lR2_BIN_LOG_PATH="${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
 

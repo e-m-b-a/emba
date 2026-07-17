@@ -91,18 +91,18 @@ S08_submodule_rust_cargo_lock_parser() {
 
         lAPP_LIC="NA"
 
-        lAPP_VERS=$(echo "${lCARGO_ENTRY}" | cut -d\| -f2)
+        lAPP_VERS=$(cut -d '|' -f2 <<<"${lCARGO_ENTRY}") # field 2
         lAPP_VERS=${lAPP_VERS/version\ =\ /}
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_SOURCE=$(echo "${lCARGO_ENTRY}" | cut -d\| -f3)
+        lAPP_SOURCE=$(cut -d '|' -f3 <<<"${lCARGO_ENTRY}") # field 3
         lAPP_SOURCE=${lAPP_SOURCE/source\ =\ /}
         lAPP_SOURCE=$(clean_package_details "${lAPP_SOURCE}")
         lAPP_SOURCE=$(clean_package_versions "${lAPP_SOURCE}")
         # lAPP_SOURCE should be added to the properties: name: EMBA:cargo:source
 
-        lSHA256_CHECKSUM=$(echo "${lCARGO_ENTRY}" | cut -d\| -f4)
+        lSHA256_CHECKSUM=$(cut -d '|' -f4 <<<"${lCARGO_ENTRY}") # field 4
         lSHA256_CHECKSUM=${lSHA256_CHECKSUM/checksum\ =\ /}
         lSHA256_CHECKSUM=$(clean_package_details "${lSHA256_CHECKSUM}")
         lSHA256_CHECKSUM=$(clean_package_versions "${lSHA256_CHECKSUM}")

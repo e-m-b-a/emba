@@ -56,7 +56,8 @@ module_log_init() {
   local lFILE_NAME=""
   # local lMODULE_NUMBER=""
   # lMODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
-  lFILE_NAME=$(echo "${LOG_FILE_NAME}" | sed -e 's/\(.*\)/\L\1/' | tr " " _)
+  lFILE_NAME="${LOG_FILE_NAME,,}"
+  lFILE_NAME="${lFILE_NAME// /_}"
   LOG_FILE="${LOG_DIR}""/""${lFILE_NAME}"".txt"
   LOG_FILE_NAME="${lFILE_NAME}"".txt"
 
@@ -120,7 +121,7 @@ print_error() {
   # local lLOG_SETTING="${2:-}"
 
   local lTYPE_CHECK=""
-  lTYPE_CHECK="$(echo "${lOUTPUT}" | cut -c1-3)"
+  lTYPE_CHECK="${lOUTPUT:0:3}" # chars 1-3
 
   if [[ ! -f "${ERROR_LOG}" ]]; then
     touch "${ERROR_LOG}"
@@ -159,7 +160,7 @@ print_output() {
   # log into default log LOG_FILE
   local lDEF_LOG="${4:-1}"
   local lTYPE_CHECK=""
-  lTYPE_CHECK="$(echo "${lOUTPUT}" | cut -c1-3)"
+  lTYPE_CHECK="${lOUTPUT:0:3}" # chars 1-3
 
   if [[ "${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]" ]]; then
     local lCOLOR_OUTPUT_STRING=""
@@ -313,7 +314,7 @@ write_log() {
 
   for lENTRY in "${lTEXT_ARR[@]}"; do
     local lTYPE_CHECK=""
-    lTYPE_CHECK="$(echo "${lENTRY}" | cut -c1-3)"
+    lTYPE_CHECK="${lENTRY:0:3}" # chars 1-3
     if [[ ("${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]") && ("${lENTRY}" != "[*] Statistic"*) ]]; then
       local lCOLOR_OUTPUT_STRING=""
       lCOLOR_OUTPUT_STRING="$(color_output "${lENTRY}")"
@@ -498,10 +499,10 @@ color_output() {
 
   for lENTRY in "${lTEXT_ARR[@]}"; do
     local lTYPE_CHECK=""
-    lTYPE_CHECK="$(echo "${lENTRY}" | cut -c1-3)"
+    lTYPE_CHECK="${lENTRY:0:3}" # chars 1-3
     if [[ "${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]" ]]; then
       local lSTR=""
-      lSTR="$(echo "${lENTRY}" | cut -c 4- || true)"
+      lSTR="${lENTRY:3}" # chars 4-
       if [[ "${lTYPE_CHECK}" == "[-]" ]]; then
         lTEXT="${lTEXT}""[""${RED}""-""${NC}""]""${lSTR}"
       elif [[ "${lTYPE_CHECK}" == "[*]" ]]; then

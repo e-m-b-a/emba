@@ -68,19 +68,19 @@ S45_pass_file_check() {
           lROOT_ACCOUNTS=$(grep -v -E "^#" "${lLINE}" 2>/dev/null | awk -F: '$3 == 0 { print $1}' 2>/dev/null || true)
 
           local lL_BREAK=0
-          if [[ "$(echo "${lROOT_ACCOUNTS}" | wc -w)" -gt 0 ]]; then
+          if [[ "$(wc -w <<<"${lROOT_ACCOUNTS}")" -gt 0 ]]; then
             print_output "$(indent "$(green "Identified the following root accounts:")")"
             print_output "$(indent "$(indent "$(orange "${lROOT_ACCOUNTS}")")")"
             lL_BREAK=1
           fi
 
-          if [[ "$(echo "${lPOSSIBLE_SHADOWS}" | wc -w)" -gt 0 ]] || [[ "$(echo "${lPOSSIBLE_PASSWD}" | wc -w)" -gt 0 ]]; then
+          if [[ "$(wc -w <<<"${lPOSSIBLE_SHADOWS}")" -gt 0 ]] || [[ "$(wc -w <<<"${lPOSSIBLE_PASSWD}")" -gt 0 ]]; then
             print_output "$(indent "$(green "Found passwords or weak configuration:")")"
             lPASS_FILES_FOUND=1
-            if [[ "$(echo "${lPOSSIBLE_SHADOWS}" | wc -w)" -gt 0 ]]; then
+            if [[ "$(wc -w <<<"${lPOSSIBLE_SHADOWS}")" -gt 0 ]]; then
               print_output "$(indent "$(indent "$(orange "${lPOSSIBLE_SHADOWS}")")")"
             fi
-            if [[ "$(echo "${lPOSSIBLE_PASSWD}" | wc -w)" -gt 0 ]]; then
+            if [[ "$(wc -w <<<"${lPOSSIBLE_PASSWD}")" -gt 0 ]]; then
               print_output "$(indent "$(indent "$(orange "${lPOSSIBLE_PASSWD}")")")"
             fi
             lL_BREAK=1

@@ -69,7 +69,8 @@ check_basic_upnp() {
 
   # we check for UPnP services in our Nmap logs and ensure we can reach a UPnP service
   for lPORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
-    lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
+    lPORT="${lPORT_SERVICE%%/*}"
+    lPORT="${lPORT//[[:blank:]]/}" # field 1
     # 23/tcp telnet => tcp telnet
     lTCP_UDP="${lPORT_SERVICE/*\//}"
     # tcp telnet => tcp
@@ -139,7 +140,8 @@ check_basic_hnap_jnap() {
     for lPORT_SERVICE in "${NMAP_PORTS_SERVICES_ARR[@]}"; do
       [[ "${HNAP_UP}" -eq 1 && "${JNAP_UP}" -eq 1 ]] && break
 
-      lPORT=$(echo "${lPORT_SERVICE}" | cut -d/ -f1 | tr -d "[:blank:]")
+      lPORT="${lPORT_SERVICE%%/*}"
+      lPORT="${lPORT//[[:blank:]]/}" # field 1
       lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
       print_output "[*] Analyzing service ${ORANGE}${lPORT_SERVICE} - ${lPORT} - ${IP_ADDRESS_}${NC}" "no_log"
       if [[ "${lSERVICE}" == "unknown" ]] || [[ "${lSERVICE}" == "tcpwrapped" ]]; then
@@ -274,7 +276,7 @@ check_jnap_access() {
 
   for lJNAP_EPT in "${lJNAP_ENDPOINTS_ARR[@]}"; do
     print_output "[*] Testing JNAP action: ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
-    lJNAP_EPT_NAME="$(echo "${lJNAP_EPT}" | rev | cut -d '/' -f1 | rev)"
+    lJNAP_EPT_NAME="${lJNAP_EPT##*/}" # basename
     local lJNAP_ACTION="X-JNAP-Action: ${lJNAP_EPT}"
     local lDATA="{}"
     curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "${lDATA}" http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >"${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log || true

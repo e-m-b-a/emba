@@ -58,8 +58,8 @@ find "${ROUTERSPLOIT_MOD_PATH}" -type f -iname "*.py" -exec grep -i -o -H -E "CV
 find "${ROUTERSPLOIT_MOD_PATH}" -type f -iname "*.py" -exec grep -i -o -H -E "exploit-db.com/exploits/[0-9]+" {} \; | sed 's/exploit-db\.com\/exploits\///' | sed 's/.*external\/routersploit//' | sort -u >"${ROUTERSPLOIT_EDB_PATH}"
 
 if [[ -f "${ROUTERSPLOIT_CVE_PATH}" ]]; then
-  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l "${ROUTERSPLOIT_CVE_PATH}" | awk '{print $1}')${GREEN} CVE matching exploit entries (after update).${NC}"
+  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l <"${ROUTERSPLOIT_CVE_PATH}")${GREEN} CVE matching exploit entries (after update).${NC}"
 fi
 if [[ -f "${ROUTERSPLOIT_EDB_PATH}" ]]; then
-  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l "${ROUTERSPLOIT_EDB_PATH}" | awk '{print $1}')${GREEN} EDB matching exploit entries (after update).${NC}"
+  echo -e "${GREEN}[*] Routersploit exploit database has ${ORANGE}$(wc -l <"${ROUTERSPLOIT_EDB_PATH}")${GREEN} EDB matching exploit entries (after update).${NC}"
 fi

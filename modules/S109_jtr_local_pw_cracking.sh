@@ -61,18 +61,19 @@ S109_jtr_local_pw_cracking() {
     lHASHES_ARR=("${lHASHES_S107_ARR[@]}" "${lHASHES_S108_ARR[@]}")
 
     for lHASH in "${lHASHES_ARR[@]}"; do
-      lHASH_SOURCE=$(basename "$(echo "${lHASH}" | cut -d\; -f1)")
-      lHASH=$(echo "${lHASH}" | cut -d\; -f2 | tr -d \")
+      lHASH_SOURCE=$(basename "${lHASH%%;*}") # field 1
+      lHASH="$(cut -d\; -f2 <<<"${lHASH}")"   # field 2
+      lHASH="${lHASH//\"/}"
 
       [[ "${lHASH}" == *"BEGIN"*"KEY"* ]] && continue
 
-      if echo "${lHASH}" | cut -d: -f1-3 | grep -q "::[0-9]"; then
+      if [[ "$(cut -d: -f1-3 <<<"${lHASH}")" =~ ::[0-9] ]]; then
         # nosemgrep
         # removing entries: root::0:0:99999:7:::
         continue
       fi
 
-      if echo "${lHASH}" | cut -d: -f1-4 | grep -q ":::"; then
+      if [[ "$(cut -d: -f1-4 <<<"${lHASH}")" == *:::* ]]; then
         # nosemgrep
         # removing entries: root:::0:99999:7:::
         continue
@@ -134,13 +135,17 @@ S109_jtr_local_pw_cracking() {
         print_ln
         print_output "[*] Further password hashes detected:"
         for lJTR_FORMAT in "${lJTR_FORMATS_ARR[@]}"; do
-          lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"')"
+          lJTR_FORMAT="$(cut -d '=' -f2 <<<"${lJTR_FORMAT}")"   # field 2
+          lJTR_FORMAT="$(awk '{print $1}' <<<"${lJTR_FORMAT}")" # field 1
+          lJTR_FORMAT="${lJTR_FORMAT//\"/}"
           print_output "$(indent "$(orange "Detected hash type: ${lJTR_FORMAT}")")"
         done
 
         for lJTR_FORMAT in "${lJTR_FORMATS_ARR[@]}"; do
           print_ln
-          lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"')"
+          lJTR_FORMAT="$(cut -d '=' -f2 <<<"${lJTR_FORMAT}")"   # field 2
+          lJTR_FORMAT="$(awk '{print $1}' <<<"${lJTR_FORMAT}")" # field 1
+          lJTR_FORMAT="${lJTR_FORMAT//\"/}"
           print_output "[*] Testing password hash types ${ORANGE}${lJTR_FORMAT}${NC}"
           if [[ -f "${lJTR_WORDLIST}" ]]; then
             print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l <"${lJTR_WORDLIST}")${NC} entries."
@@ -173,7 +178,7 @@ S109_jtr_local_pw_cracking() {
 
       mapfile -t lCRACKED_HASHES_ARR < <(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$" || true)
       lJTR_FINAL_STAT=$(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
-      lCRACKED=$(echo "${lJTR_FINAL_STAT}" | awk '{print $1}')
+      lCRACKED="$(awk '{print $1}' <<<"${lJTR_FINAL_STAT}")" # field 1
       if [[ -n "${lJTR_FINAL_STAT}" ]]; then
         print_ln
         print_output "[*] John the ripper final status: ${ORANGE}${lJTR_FINAL_STAT}${NC}"

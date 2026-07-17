@@ -354,7 +354,7 @@ analyse_bin_fct() {
         while read -r line; do
           local lCOLOR="${NC}"
           local lDIFF_1st=""
-          lDIFF_1st="$(echo "${line}" | cut -d $'\t' -f1)"
+          lDIFF_1st="$(cut -d $'\t' -f1 <<<"${line}")" # field 1
           local lDIFF_2nd=""
           lDIFF_2nd="$(echo "${line}" | cut -d $'\t' -f2- | sed -e 's/^[ \t]*//g')"
 

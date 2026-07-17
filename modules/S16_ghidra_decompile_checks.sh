@@ -388,7 +388,7 @@ s16_semgrep_logger() {
         lCODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${lC_SRC_FCT}" 2>/dev/null)")"
         shopt -s extglob
         lCODE_LINE="${lCODE_LINE##+([[:space:]])}"
-        lCODE_LINE="$(echo -e "${lCODE_LINE}" | tr -d '\0')"
+        lCODE_LINE="$(tr -d '\0' <<<"${lCODE_LINE}")"
         lCODE_LINE="${lCODE_LINE//$'\n'/}"
         shopt -u extglob
         # with a normal echo we automatically remove the null bytes which caused issues

@@ -52,7 +52,7 @@ S110_yara_check() {
     while read -r lYARA_OUT_LINE; do
       local lAUTHOR_STRING=" [] [author="
       if [[ "${lYARA_OUT_LINE}" == *"${lAUTHOR_STRING}"* ]]; then
-        lYRULE=$(echo "${lYARA_OUT_LINE}" | awk '{print $1}')
+        lYRULE="$(awk '{print $1}' <<<"${lYARA_OUT_LINE}")" # field 1
         lMATCH_FILE=$(echo "${lYARA_OUT_LINE}" | grep "\ \[\]\ \[author=\"" | rev | awk '{print $1}' | rev)
         lMATCH_FILE_NAME=$(basename "${lMATCH_FILE}")
         # this rule does not help us a lot ... remove it from results

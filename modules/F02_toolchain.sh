@@ -194,8 +194,8 @@ F02_toolchain() {
       lCOMPILE_FILE_NAME=$(basename "${lCOMPILE_FILE}")
       mapfile -t lCOMPILE_FILE_NAME_GCC_DATE_ARR < <(grep ";${lCOMPILE_FILE_NAME};" "${CONFIG_DIR}"/gcc_libstdc_details.csv | sort -u || true)
       for lCOMPILE_FILE_NAME_GCC_DATE in "${lCOMPILE_FILE_NAME_GCC_DATE_ARR[@]}"; do
-        lGCC_VERSION=$(echo "${lCOMPILE_FILE_NAME_GCC_DATE}" | cut -d\; -f1 || true)
-        lGCC_RELEASE_DATE=$(echo "${lCOMPILE_FILE_NAME_GCC_DATE}" | cut -d\; -f3 || true)
+        lGCC_VERSION="${lCOMPILE_FILE_NAME_GCC_DATE%%;*}"                               # field 1
+        lGCC_RELEASE_DATE=$(cut -d ';' -f3 <<<"${lCOMPILE_FILE_NAME_GCC_DATE}" || true) # field 3
         if [[ -n "${lGCC_VERSION}" ]] || [[ -n "${lGCC_RELEASE_DATE}" ]]; then
           print_output "[+] Identified GCC version ${ORANGE}${lGCC_VERSION:-"NA"}${GREEN} released on ${ORANGE}${lGCC_RELEASE_DATE:-"NA"}${GREEN} via libstdc++ ${ORANGE}${lCOMPILE_FILE_NAME}${GREEN}."
           write_link "s95"

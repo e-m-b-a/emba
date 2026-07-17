@@ -116,9 +116,9 @@ grepit_reporter() {
   if [[ -f "${lCSV_LOG}" ]]; then
     readarray -t lGREPIT_RESULTS_DETAILS_ARR < <(cut -d\; -f1,2,5 "${lCSV_LOG}" | grep -v "Grepit test" | grep -v "^$" | sort -u)
     for lRESULT in "${lGREPIT_RESULTS_DETAILS_ARR[@]}"; do
-      lCURRENT_TEST=$(echo "${lRESULT}" | cut -d\; -f1)
-      lLINES_OF_OUTPUT=$(echo "${lRESULT}" | cut -d\; -f2)
-      lCOMMENT=$(echo "${lRESULT}" | cut -d\; -f3)
+      lCURRENT_TEST="${lRESULT%%;*}"                     # field 1
+      lLINES_OF_OUTPUT=$(cut -d ';' -f2 <<<"${lRESULT}") # field 2
+      lCOMMENT=$(cut -d ';' -f3 <<<"${lRESULT}")         # field 3
       lOUTFILE="${lCURRENT_TEST}".txt
 
       print_output "[*] ${ORANGE}${lLINES_OF_OUTPUT}${NC} results of grepit module ${ORANGE}${lCURRENT_TEST}${NC} (${ORANGE}${lCOMMENT}${NC})." "" "${LOG_PATH_MODULE}/${lOUTFILE}"

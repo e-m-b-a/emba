@@ -97,16 +97,16 @@ add_partition_emulation() {
     local lLOSETUP_OUT_ARR=()
     mapfile -t lLOSETUP_OUT_ARR < <(losetup | grep -v "BACK-FILE")
     for LINE in "${lLOSETUP_OUT_ARR[@]}"; do
-      lIMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
+      lIMAGE_PATH=$(awk '{print $6}' <<<"${LINE}") # field 6
       if [[ "${lIMAGE_PATH}" == "${1}" ]]; then
-        lDEV_PATH=$(echo "${LINE}" | awk '{print $1}')
+        lDEV_PATH=$(awk '{print $1}' <<<"${LINE}") # field 1
         if [[ "$(dirname "${lDEV_PATH}")" == "/dev/loop" ]]; then
           # if we have the new naming like /dev/loop/0 -> dirname results in /dev/loop
-          lDEV_NR=$(echo "${lDEV_PATH}" | rev | cut -d '/' -f1 | rev)
+          lDEV_NR="${lDEV_PATH##*/}" # basename
           lDEV_PATH="/dev/loop${lDEV_NR}p1"
         else
           # old naming like /dev/loop0 -> dirname results in /dev/
-          lDEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
+          lDEV_PATH=$(awk '{print $1}' <<<"${LINE}")p1 # field 1
         fi
         if [[ -b "${lDEV_PATH}" ]]; then
           lFOUND=true

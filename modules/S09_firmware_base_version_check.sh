@@ -296,11 +296,11 @@ S09_identifier_threadings() {
     for lBINARY_ENTRY in "${lSTRICT_BINS_ARR[@]}"; do
       # as the STRICT_BINS array could also include other files we have to check for ELF files now
       # This information is already stored in P99_CSV_LOG and in our lBINARY_ENTRY details
-      lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
+      lBIN_FILE_DETAILS=$(cut -d ';' -f8 <<<"${lBINARY_ENTRY}") # field 8
       if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]]; then
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
-        MD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
-        lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
+        MD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")      # field 9
+        lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
         lAPP_NAME="$(basename "${lBINARY_PATH}")"
         local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
@@ -336,7 +336,7 @@ S09_identifier_threadings() {
     done
 
     for lBINARY_ENTRY in "${lZGREP_BINS_ARR[@]}"; do
-      lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
+      lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
       if ! [[ -f "${lBINARY_PATH}" ]]; then
         continue
       fi
@@ -439,19 +439,19 @@ version_parsing_logging() {
   local lPURL_IDENTIFIER=""
 
   if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
-    lBINARY_PATH=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f2)
-    lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
-    lMD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
+    lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}")      # field 2
+    lBIN_FILE_DETAILS=$(cut -d ';' -f8 <<<"${lBINARY_ENTRY}") # field 8
+    lMD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")          # field 9
   fi
 
   for lCSV_REGEX in "${lrCSV_REGEX_ARR_ref[@]}"; do
     lCSV_RULE=$(get_csv_rule "${lVERSION_IDENTIFIED}" "${lCSV_REGEX}")
     lCSV_RULE="${lCSV_RULE//\ /}"
 
-    lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
+    lAPP_MAINT=$(cut -d ':' -f2 <<<"${lCSV_RULE}") # field 2
     # lAPP_NAME is the name from the json configuration
-    lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
-    lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
+    lAPP_NAME=$(cut -d ':' -f3 <<<"${lCSV_RULE}")   # field 3
+    lAPP_VERS=$(cut -d ':' -f4-5 <<<"${lCSV_RULE}") # fields 4-5
 
     if [[ "${lCSV_RULE}" != *":"*":"*":"* ]]; then
       # our csv rule not working ... continue with the next rule
@@ -466,7 +466,7 @@ version_parsing_logging() {
     if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
       [[ -f "${lBINARY_PATH}" ]] && lSHA256_CHECKSUM="$(sha256sum "${lBINARY_PATH}" | awk '{print $1}')"
       [[ -f "${lBINARY_PATH}" ]] && lSHA512_CHECKSUM="$(sha512sum "${lBINARY_PATH}" | awk '{print $1}')"
-      lBIN_ARCH=$(echo "${lBIN_FILE_DETAILS}" | cut -d ',' -f2)
+      lBIN_ARCH=$(cut -d ',' -f2 <<<"${lBIN_FILE_DETAILS}") # field 2
       lBIN_ARCH=${lBIN_ARCH#\ }
     fi
     lCPE_IDENTIFIER=$(build_cpe_identifier "${lCSV_RULE}")
@@ -577,7 +577,7 @@ build_final_bins_threader() {
   fi
   local lPACKAGING_SYSTEM="unhandled_file"
   local lPROP_ARRAY_INIT_ARR=()
-  lBIN_ARCH=$(echo "${lBIN_FILE}" | cut -d ',' -f2)
+  lBIN_ARCH=$(cut -d ',' -f2 <<<"${lBIN_FILE}") # field 2
   lBIN_ARCH=${lBIN_ARCH#\ }
   lPROP_ARRAY_INIT_ARR+=("source_path:${lFILE}")
   if [[ -n "${lBIN_ARCH}" ]]; then
@@ -632,14 +632,14 @@ build_generic_purl() {
   local lBIN_VERS=""
   local lPURL_IDENTIFIER=""
 
-  lBIN_VENDOR=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
-  lBIN_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+  lBIN_VENDOR=$(cut -d ':' -f2 <<<"${lCSV_RULE}") # field 2
+  lBIN_NAME=$(cut -d ':' -f3 <<<"${lCSV_RULE}")   # field 3
   if [[ -z "${lBIN_VENDOR}" ]]; then
     # backup mode for setting the vendor in the CPE to the software component
     lBIN_VENDOR="${lBIN_NAME}"
   fi
   lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED/-*/}/${lBIN_NAME}"
-  lBIN_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-)
+  lBIN_VERS="${lCSV_RULE#*:*:*:}" # field 4-
 
   if [[ -n "${lBIN_VERS}" ]]; then
     lPURL_IDENTIFIER+="@${lBIN_VERS}"
@@ -804,7 +804,7 @@ bin_string_checker() {
     local lBIN_NAME_REAL=""
     local lBIN_FILE=""
 
-    mapfile -t lBIN_DATA_ARR < <(echo "${lBINARY_DATA}" | tr ';' '\n')
+    mapfile -t lBIN_DATA_ARR < <(tr ';' '\n' <<<"${lBINARY_DATA}")
     lBINARY_PATH="${lBIN_DATA_ARR[1]}"
     if [[ ! -f "${lBINARY_PATH}" ]]; then
       print_output "[-] Binary ${lBINARY_PATH} not found - Not testing for versions"

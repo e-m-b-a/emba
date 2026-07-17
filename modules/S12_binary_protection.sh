@@ -83,56 +83,56 @@ binary_protection_threader() {
   echo "${lCSV_BIN_OUT}" >>"${lCSV_LOG}"
 
   # coloring the output from csv
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RELRO)/${RED_}&${NC_}/g")
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Partial\ RELRO)/${ORANGE_}&${NC_}/g")
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Full\ RELRO)/${GREEN_}&${NC_}/g")
+  lCSV_BIN_OUT=$(sed -r "s/(No\ RELRO)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  lCSV_BIN_OUT=$(sed -r "s/(Partial\ RELRO)/${ORANGE_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  lCSV_BIN_OUT=$(sed -r "s/(Full\ RELRO)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
 
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(NX\ enabled)/${GREEN_}&${NC_}/g")
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(NX\ disabled)/${RED_}&${NC_}/g")
+  lCSV_BIN_OUT=$(sed -r "s/(NX\ enabled)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  lCSV_BIN_OUT=$(sed -r "s/(NX\ disabled)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
 
   if [[ "${lCSV_BIN_OUT}" == *"No PIE"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ PIE)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ PIE)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   elif [[ "${lCSV_BIN_OUT}" == *"PIE enabled"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(PIE\ enabled)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(PIE\ enabled)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   elif [[ "${lCSV_BIN_OUT}" == *"DSO"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(DSO)/${ORANGE_}&${NC_}/g")
-  elif [[ "$(echo "${lCSV_BIN_OUT}" | cut -d\; -f4)" == "REL" ]]; then
+    lCSV_BIN_OUT=$(sed -r "s/(DSO)/${ORANGE_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  elif [[ "$(cut -d ';' -f4 <<<"${lCSV_BIN_OUT}")" == "REL" ]]; then # field 4
     lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | awk -F ';' -v repl="${ORANGE_}REL${NC_}" '$4 == "REL"{OFS = ";"; $4=repl}1')
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No Canary found"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ Canary\ found)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ Canary\ found)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Canary\ found)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(Canary\ found)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No RPATH"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RPATH)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ RPATH)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(RPATH)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(RPATH)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No RUNPATH"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RUNPATH)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ RUNPATH)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(RUNPATH)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(RUNPATH)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No Symbols"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ Symbols)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ Symbols)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Symbols)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(Symbols)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
-  lRELRO=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f1)
-  lCANARY=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f2)
-  lNX=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f3)
-  lPIE=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f4)
-  lRPATH=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f5)
-  lRUNPATH=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f6)
-  lSYMBOLS=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f7)
-  lFORTIFY=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f8)
-  lFILE=$(echo "${lCSV_BIN_OUT}" | cut -d\; -f11)
+  lRELRO="${lCSV_BIN_OUT%%;*}"                    # field 1
+  lCANARY=$(cut -d ';' -f2 <<<"${lCSV_BIN_OUT}")  # field 2
+  lNX=$(cut -d ';' -f3 <<<"${lCSV_BIN_OUT}")      # field 3
+  lPIE=$(cut -d ';' -f4 <<<"${lCSV_BIN_OUT}")     # field 4
+  lRPATH=$(cut -d ';' -f5 <<<"${lCSV_BIN_OUT}")   # field 5
+  lRUNPATH=$(cut -d ';' -f6 <<<"${lCSV_BIN_OUT}") # field 6
+  lSYMBOLS=$(cut -d ';' -f7 <<<"${lCSV_BIN_OUT}") # field 7
+  lFORTIFY=$(cut -d ';' -f8 <<<"${lCSV_BIN_OUT}") # field 8
+  lFILE=$(cut -d ';' -f11 <<<"${lCSV_BIN_OUT}")   # field 11
   lFILE=$(print_path "${lFILE}")
 
   printf "\t%-22.22s  %-25.25s  %-20.20s  %-20.20s  %-20.20s  %-20.20s  %-20.20s  %-5.5s  %s\n" \

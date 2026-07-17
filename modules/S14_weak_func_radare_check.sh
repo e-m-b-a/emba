@@ -59,9 +59,9 @@ S14_weak_func_radare_check() {
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
-      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
-      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
-      lBINARY="$(echo "${lBINARY}" | cut -d ';' -f2)"
+      lBIN_FILE="$(cut -d ';' -f8 <<<"${lBINARY}")"    # field 8
+      lBIN_MD5_SUM="$(cut -d ';' -f9 <<<"${lBINARY}")" # field 9
+      lBINARY=$(cut -d ';' -f2 <<<"${lBINARY}")        # field 2
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
       if [[ -n "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${lBIN_NAME}".txt -print -quit 2>/dev/null)" ]]; then
@@ -575,7 +575,7 @@ radare_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for lBINARY in "${lRESULTS_ARR[@]}"; do
-          lF_COUNTER="$(echo "${lBINARY}" | awk '{print $1}')"
+          lF_COUNTER="$(awk '{print $1}' <<<"${lBINARY}")" # field 1
           # check if lF_COUNTER is integer
           if ! [[ "${lF_COUNTER}" =~ ^[0-9]+$ ]]; then
             print_error "[-] S14 Error in Top 10 functionality for ${lBINARY}"
@@ -584,7 +584,7 @@ radare_print_top10_statistics() {
           lMD5_SUM=${lBINARY##*-}
           # remove the md5sum from name
           lBINARY=${lBINARY%-*}
-          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
+          lSEARCH_TERM="$(awk '{print $2}' <<<"${lBINARY}")" # field 2
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then

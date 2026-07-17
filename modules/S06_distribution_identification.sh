@@ -67,7 +67,7 @@ S06_distribution_identification() {
           lR_FILE=$(file -b "${lFILE}")
           lPATTERN="$(safe_echo "${lCONFIG}" | cut -d\; -f3)"
           # do not use safe_echo for lSED_COMMAND
-          lSED_COMMAND="$(echo "${lCONFIG}" | cut -d\; -f4)"
+          lSED_COMMAND="$(cut -d ';' -f4 <<<"${lCONFIG}")" # field 4
           lFILE_QUOTED=$(escape_echo "${lFILE}")
           lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
           lOUT1="${lOUT1//\'/}"
@@ -160,11 +160,11 @@ S06_distribution_identification() {
             local lAPP_TYPE="operating-system"
             local lAPP_LIC=""
             local lAPP_MAINT=""
-            lAPP_MAINT=$(echo "${lCSV_RULE}" | cut -d ':' -f2)
+            lAPP_MAINT=$(cut -d ':' -f2 <<<"${lCSV_RULE}") # field 2
             local lAPP_NAME=""
-            lAPP_NAME=$(echo "${lCSV_RULE}" | cut -d ':' -f3)
+            lAPP_NAME=$(cut -d ':' -f3 <<<"${lCSV_RULE}") # field 3
             local lAPP_VERS=""
-            lAPP_VERS=$(echo "${lCSV_RULE}" | cut -d ':' -f4-5)
+            lAPP_VERS=$(cut -d ':' -f4-5 <<<"${lCSV_RULE}") # fields 4-5
             # it could be that we have a version like 2.14b:* -> we remove the last field
             lAPP_VERS="${lAPP_VERS/:\*/}"
             # we use the already (p99) identified architecture for the distri
