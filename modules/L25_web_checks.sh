@@ -397,6 +397,7 @@ web_access_crawler() {
 
   local lHOME_=""
   lHOME_=$(pwd)
+  local lOUTPUT=""
 
   local lREQUEST_URL="${lPROTO}://${lIP_}:${lPORT_}"
   for lR_PATH in "${ROOT_PATH[@]}"; do
@@ -408,7 +409,6 @@ web_access_crawler() {
       print_dot
 
       lWEB_FILE="$(basename "${lWEB_PATH}")"
-      local lOUTPUT=""
 
       # some basic filtering to not handle defect file names
       ! [[ "${lWEB_FILE}" =~ ^[a-zA-Z0-9./_~'-']+$ ]] && continue
