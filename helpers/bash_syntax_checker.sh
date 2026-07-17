@@ -45,7 +45,7 @@ echo -e "${BOLD}================================================================
 echo -e "\\n${GREEN}Load all sources to check:${NC}\\n"
 import_emba_scripts
 
-echo -e "\\n${GREEN}Check all source for correct bash syntax:${NC}\\n"
+echo -e "\\n${GREEN}Check all source files for correct bash syntax:${NC}\\n"
 for EMBA_SOURCE_FILE in "${EMBA_SOURCES_ARR[@]}"; do
   [[ ! -f "${EMBA_SOURCE_FILE}" ]] && continue
   echo -e "\\n${GREEN}Run ${ORANGE}bash -n${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"
