@@ -199,7 +199,7 @@ radare_decomp_print_top10_statistics() {
           # remove the md5sum from name
           lBINARY=${lBINARY%-*}
           lSEARCH_TERM="$(awk '{print $2}' <<<"${lBINARY}")" # field 2
-          lF_COUNTER="$(awk '{print $1}' <<<"${lBINARY}")" # field 1
+          lF_COUNTER="$(awk '{print $1}' <<<"${lBINARY}")"   # field 1
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           local lR2_BIN_LOG_PATH="${LOG_PATH_MODULE}/vul_func_${lF_COUNTER}_${lFUNCTION}-${lSEARCH_TERM}-${lMD5_SUM}.txt"
 
