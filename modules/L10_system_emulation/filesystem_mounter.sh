@@ -102,7 +102,7 @@ add_partition_emulation() {
         lDEV_PATH=$(echo "${LINE}" | awk '{print $1}')
         if [[ "$(dirname "${lDEV_PATH}")" == "/dev/loop" ]]; then
           # if we have the new naming like /dev/loop/0 -> dirname results in /dev/loop
-          lDEV_NR=$(echo "${lDEV_PATH}" | rev | cut -d '/' -f1 | rev)
+          lDEV_NR="${lDEV_PATH##*/}" # basename
           lDEV_PATH="/dev/loop${lDEV_NR}p1"
         else
           # old naming like /dev/loop0 -> dirname results in /dev/

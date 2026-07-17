@@ -247,7 +247,7 @@ print_system_emulation_results() {
     local lEMU_RES=""
 
     while read -r lEMU_RES; do
-      lEMU_RES=$(echo "${lEMU_RES}" | cut -d\; -f2-)
+      lEMU_RES="${lEMU_RES#*;}" # field 2-
       if [[ "${lEMU_RES}" == *"ICMP ok"* ]] || [[ "${lEMU_RES}" == *"TCP-0 ok"* ]] || [[ "${lEMU_RES}" == *"TCP ok"* ]]; then
         print_output "[+] ${lEMU_RES}"
       else
@@ -266,7 +266,7 @@ pre_cleanup_emulator() {
   mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
   for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
     print_output "[*] Unmounting ${lMOUNT}" "no_log"
-    lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
+    lMOUNT="$(cut -d' ' -f3 <<<"${lMOUNT}")" # field 3
     umount -l "${lMOUNT}" || true
   done
 }
@@ -875,11 +875,11 @@ main_emulation() {
       print_output "[*] Unsorted configuration"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
-        lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-        lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-        lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-        lVLAN_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
-        lCFG_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+        lIP_CFG="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")"                # field 2
+        lINTERFACE_CFG="$(cut -d\; -f3 <<<"${lIPS_INT_VLAN_CFG}")"         # field 3
+        lNETWORK_INTERFACE_CFG="$(cut -d\; -f4 <<<"${lIPS_INT_VLAN_CFG}")" # field 4
+        lVLAN_CFG="$(cut -d\; -f5 <<<"${lIPS_INT_VLAN_CFG}")"              # field 5
+        lCFG_CFG="$(cut -d\; -f6 <<<"${lIPS_INT_VLAN_CFG}")"               # field 6
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
           print_output "$(indent "Duplicate: ${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")"
         fi
@@ -894,11 +894,11 @@ main_emulation() {
       print_output "[*] Sorted and unique configuration"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
-        lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-        lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-        lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-        lVLAN_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
-        lCFG_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+        lIP_CFG="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")"                # field 2
+        lINTERFACE_CFG="$(cut -d\; -f3 <<<"${lIPS_INT_VLAN_CFG}")"         # field 3
+        lNETWORK_INTERFACE_CFG="$(cut -d\; -f4 <<<"${lIPS_INT_VLAN_CFG}")" # field 4
+        lVLAN_CFG="$(cut -d\; -f5 <<<"${lIPS_INT_VLAN_CFG}")"              # field 5
+        lCFG_CFG="$(cut -d\; -f6 <<<"${lIPS_INT_VLAN_CFG}")"               # field 6
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
           print_output "$(indent "Duplicate: ${lIP_CFG} - ${lINTERFACE_CFG} - ${lNETWORK_INTERFACE_CFG} - ${lVLAN_CFG} - ${lCFG_CFG} - ${lNW_ENTRY_PRIO}")"
         fi
@@ -908,11 +908,11 @@ main_emulation() {
       print_output "[*] Final configuration"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
-        lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-        lINTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-        lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-        lVLAN_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
-        lCFG_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+        lIP_CFG="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")"                # field 2
+        lINTERFACE_CFG="$(cut -d\; -f3 <<<"${lIPS_INT_VLAN_CFG}")"         # field 3
+        lNETWORK_INTERFACE_CFG="$(cut -d\; -f4 <<<"${lIPS_INT_VLAN_CFG}")" # field 4
+        lVLAN_CFG="$(cut -d\; -f5 <<<"${lIPS_INT_VLAN_CFG}")"              # field 5
+        lCFG_CFG="$(cut -d\; -f6 <<<"${lIPS_INT_VLAN_CFG}")"               # field 6
         if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
           continue
         fi
@@ -1012,11 +1012,11 @@ emulation_with_config() {
   local lENTRY_PRIO=""
   local lVLAN_ID=""
   lENTRY_PRIO="${lIPS_INT_VLAN_CFG/\;*/}"
-  IP_ADDRESS_=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-  lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-  lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-  lVLAN_ID=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
-  lNETWORK_MODE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+  IP_ADDRESS_="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")"     # field 2
+  lNETWORK_DEVICE="$(cut -d\; -f3 <<<"${lIPS_INT_VLAN_CFG}")" # field 3
+  lETH_INT="$(cut -d\; -f4 <<<"${lIPS_INT_VLAN_CFG}")"        # field 4
+  lVLAN_ID="$(cut -d\; -f5 <<<"${lIPS_INT_VLAN_CFG}")"        # field 5
+  lNETWORK_MODE="$(cut -d\; -f6 <<<"${lIPS_INT_VLAN_CFG}")"   # field 6
   export NMAP_LOG="nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}.txt"
 
   setup_network_emulation "${lIPS_INT_VLAN_CFG}"
@@ -2099,11 +2099,11 @@ setup_network_emulation() {
   sub_module_title "Setup networking - ${lIPS_INT_VLAN_CFG//\;/-}"
 
   # Source: IPS_INT_VLAN+=( "PRIO"-"${IP_ADDRESS_}"-"${lNETWORK_DEVICE}"-"${lETH_INT}"-"${lVLAN_ID}"-"${lNETWORK_MODE}" )
-  lIP_ADDRESS=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
-  lNETWORK_DEVICE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f3)
-  lETH_INT=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
-  lVLAN_ID=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
-  lNETWORK_MODE=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+  lIP_ADDRESS="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")"     # field 2
+  lNETWORK_DEVICE="$(cut -d\; -f3 <<<"${lIPS_INT_VLAN_CFG}")" # field 3
+  lETH_INT="$(cut -d\; -f4 <<<"${lIPS_INT_VLAN_CFG}")"        # field 4
+  lVLAN_ID="$(cut -d\; -f5 <<<"${lIPS_INT_VLAN_CFG}")"        # field 5
+  lNETWORK_MODE="$(cut -d\; -f6 <<<"${lIPS_INT_VLAN_CFG}")"   # field 6
 
   # a br interface with a number ... eg br0, br1 ... but no br-lan interface
   if [[ "${lNETWORK_DEVICE}" == *"br"* ]] && [[ "${lNETWORK_DEVICE}" == *[0-9]* ]]; then
@@ -2635,7 +2635,7 @@ check_online_stat() {
   local lIMAGE_NAME="${3:-}"
 
   local lIP_ADDRESS=""
-  lIP_ADDRESS=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
+  lIP_ADDRESS="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")" # field 2
 
   local lNMAP_LOG="nmap_emba_${lIPS_INT_VLAN_CFG//\;/-}.txt"
 
@@ -3076,7 +3076,7 @@ add_partition_emulation() {
         lDEV_PATH=$(echo "${lLINE}" | awk '{print $1}')
         if [[ "$(dirname "${lDEV_PATH}")" == "/dev/loop" ]]; then
           # if we have the new naming like /dev/loop/0 -> dirname results in /dev/loop
-          lDEV_NR=$(echo "${lDEV_PATH}" | rev | cut -d '/' -f1 | rev)
+          lDEV_NR="${lDEV_PATH##*/}" # basename
           lDEV_PATH="/dev/loop${lDEV_NR}p1"
         else
           # old naming like /dev/loop0 -> dirname results in /dev/
@@ -3175,7 +3175,7 @@ write_results() {
   lSERVICES="$(grep -h "\/udp.*open\ \|\/tcp.*open\ " "${ARCHIVE_PATH}"/*"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ',' || true)"
 
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
-  lARCHIVE_PATH="$(echo "${lARCHIVE_PATH}" | rev | cut -d '/' -f1 | rev)"
+  lARCHIVE_PATH="${lARCHIVE_PATH##*/}" # basename
   if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
     write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services cnt;available network services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
   fi
