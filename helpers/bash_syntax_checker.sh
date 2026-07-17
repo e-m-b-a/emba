@@ -14,7 +14,7 @@ import_emba_scripts() {
   local lFILES_ARR=()
   local lEMBA_FILE=""
 
-  mapfile -t lFILES_ARR < <(find ./ -type f -not \( -path "*/.git/*" -o -path "*/external/*" \) -prune 2>/dev/null)
+  mapfile -t lFILES_ARR < <(find ./ \( -name .git -o -name external \) -prune -o -type f -print 2>/dev/null)
   for lEMBA_FILE in "${lFILES_ARR[@]}"; do
     if (file "${lEMBA_FILE}" | grep -q "shell script"); then
       echo "${lEMBA_FILE}"
@@ -33,11 +33,12 @@ echo -e "\\n${GREEN}Check all source for correct bash syntax:${NC}\\n"
 for EMBA_SOURCE_FILE in "${EMBA_SOURCES_ARR[@]}"; do
   [[ ! -f "${EMBA_SOURCE_FILE}" ]] && continue
   echo -e "\\n${GREEN}Run ${ORANGE}bash -n${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"
-  if [[ $(bash -n "${EMBA_SOURCE_FILE}") -eq 0 ]]; then
+  if bash -n "${EMBA_SOURCE_FILE}" 2>/dev/null; then
     echo -e "${GREEN}${BOLD}==> SUCCESS${NC}\\n"
   else
     echo -e "\\n${ORANGE}${BOLD}==> FIX ERRORS${NC}\\n"
-    MODULES_TO_CHECK_ARR+=("${SOURCE}")
+    bash -n "${EMBA_SOURCE_FILE}"
+    MODULES_TO_CHECK_ARR+=("${EMBA_SOURCE_FILE}")
   fi
 done
 
