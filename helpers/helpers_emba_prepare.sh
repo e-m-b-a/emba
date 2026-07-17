@@ -162,7 +162,11 @@ set_exclude() {
   # exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   EXCLUDE_PATHS="$(set_excluded_path)"
   export EXCL_FIND=()
-  IFS=" " read -r -a EXCL_FIND <<<"$(echo -e "$(get_excluded_find "${EXCLUDE_PATHS}")" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
+  local lEXCL_TMP
+  lEXCL_TMP="$(get_excluded_find "${EXCLUDE_PATHS}")"
+  lEXCL_TMP="${lEXCL_TMP//$'\r'/ }"
+  lEXCL_TMP="${lEXCL_TMP//$'\n'/}"
+  IFS=" " read -r -a EXCL_FIND <<<"${lEXCL_TMP}"
   print_excluded
 }
 

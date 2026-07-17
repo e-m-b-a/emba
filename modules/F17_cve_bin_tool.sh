@@ -485,7 +485,7 @@ tear_down_cve_threader() {
   local lCVE_LINE="${1:-}"
   local lCVE_DATA_ARR=()
 
-  mapfile -t lCVE_DATA_ARR < <(echo "${lCVE_LINE}" | tr ',' '\n')
+  mapfile -t lCVE_DATA_ARR < <(tr ',' '\n' <<<"${lCVE_LINE}")
   # echo "lCVE_LINE: ${lCVE_LINE}"
   local lBOM_REF="${lCVE_DATA_ARR[*]:0:1}"
   local lORIG_SOURCE="${lCVE_DATA_ARR[*]:1:1}"

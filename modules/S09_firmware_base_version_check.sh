@@ -804,7 +804,7 @@ bin_string_checker() {
     local lBIN_NAME_REAL=""
     local lBIN_FILE=""
 
-    mapfile -t lBIN_DATA_ARR < <(echo "${lBINARY_DATA}" | tr ';' '\n')
+    mapfile -t lBIN_DATA_ARR < <(tr ';' '\n' <<<"${lBINARY_DATA}")
     lBINARY_PATH="${lBIN_DATA_ARR[1]}"
     if [[ ! -f "${lBINARY_PATH}" ]]; then
       print_output "[-] Binary ${lBINARY_PATH} not found - Not testing for versions"

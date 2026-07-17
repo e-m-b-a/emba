@@ -693,8 +693,10 @@ output_cve_exploits() {
 
       # run over F17/vuln_summary.txt and add links - need to do this here and not in f17 as there the threading mode kicks us
       while read -r OVERVIEW_LINE; do
-        lBINARY="$(echo "${OVERVIEW_LINE}" | cut -d: -f2 | tr -d '[:blank:]')"
-        lBIN_VERS="$(echo "${OVERVIEW_LINE}" | cut -d: -f3 | tr -d '[:blank:]')"
+        lBINARY="$(cut -d: -f2 <<<"${OVERVIEW_LINE}")" # field 2
+        lBINARY="${lBINARY//[[:blank:]]/}"
+        lBIN_VERS="$(cut -d: -f3 <<<"${OVERVIEW_LINE}")" # field 3
+        lBIN_VERS="${lBIN_VERS//[[:blank:]]/}"
         print_output "${OVERVIEW_LINE}"
         write_link "f17#cve_${lBINARY}_${lBIN_VERS}"
       done <"${F17_LOG_DIR}/vuln_summary.txt"

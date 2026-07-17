@@ -284,7 +284,7 @@ lighttpd_config_analysis() {
       print_output "$(indent "$(orange "$(grep -E "ssl.pemfile" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
       mapfile -t lPEM_FILES_ARR < <(grep -E "ssl.pemfile" "${lLIGHTTPD_CONFIG}" | sort -u | grep -E -v "^([[:space:]])?#" | cut -d= -f2 | tr -d '"' || true)
       for lPEM_FILE in "${lPEM_FILES_ARR[@]}"; do
-        lPEM_FILE=$(echo "${lPEM_FILE}" | tr -d "[:space:]")
+        lPEM_FILE="${lPEM_FILE//[[:space:]]/}"
         mapfile -t lREAL_PEMS_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lPEM_FILE}" || true)
         for lREAL_PEM in "${lREAL_PEMS_ARR[@]}"; do
           print_output "[*] ${ORANGE}Configuration note:${NC} Web server pem file found: ${ORANGE}${lREAL_PEM}${NC}"

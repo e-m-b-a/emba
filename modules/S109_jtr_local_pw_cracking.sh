@@ -62,7 +62,8 @@ S109_jtr_local_pw_cracking() {
 
     for lHASH in "${lHASHES_ARR[@]}"; do
       lHASH_SOURCE=$(basename "${lHASH%%;*}") # field 1
-      lHASH=$(echo "${lHASH}" | cut -d\; -f2 | tr -d \")
+      lHASH="$(cut -d\; -f2 <<<"${lHASH}")"   # field 2
+      lHASH="${lHASH//\"/}"
 
       [[ "${lHASH}" == *"BEGIN"*"KEY"* ]] && continue
 
@@ -134,13 +135,17 @@ S109_jtr_local_pw_cracking() {
         print_ln
         print_output "[*] Further password hashes detected:"
         for lJTR_FORMAT in "${lJTR_FORMATS_ARR[@]}"; do
-          lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"')"
+          lJTR_FORMAT="$(cut -d '=' -f2 <<<"${lJTR_FORMAT}")" # field 2
+          read -r lJTR_FORMAT _ <<<"${lJTR_FORMAT}"           # field 1
+          lJTR_FORMAT="${lJTR_FORMAT//\"/}"
           print_output "$(indent "$(orange "Detected hash type: ${lJTR_FORMAT}")")"
         done
 
         for lJTR_FORMAT in "${lJTR_FORMATS_ARR[@]}"; do
           print_ln
-          lJTR_FORMAT="$(echo "${lJTR_FORMAT}" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"')"
+          lJTR_FORMAT="$(cut -d '=' -f2 <<<"${lJTR_FORMAT}")" # field 2
+          read -r lJTR_FORMAT _ <<<"${lJTR_FORMAT}"           # field 1
+          lJTR_FORMAT="${lJTR_FORMAT//\"/}"
           print_output "[*] Testing password hash types ${ORANGE}${lJTR_FORMAT}${NC}"
           if [[ -f "${lJTR_WORDLIST}" ]]; then
             print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${lJTR_WORDLIST}${NC} with ${ORANGE}$(wc -l <"${lJTR_WORDLIST}")${NC} entries."
