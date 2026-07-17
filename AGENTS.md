@@ -15,7 +15,7 @@ EMBA (Embedded Linux Analyzer) is a firmware security analysis and SBOM tool. It
 
 ## Verification (CI checks + unit tests)
 ```bash
-# Unit tests (bats framework, ~126 tests across 11 suites)
+# Unit tests (bats framework, ~140 tests across 11 suites)
 ./tests/run.sh
 
 # ShellCheck + semgrep on all .sh files
