@@ -585,7 +585,7 @@ tear_down_cve_threader() {
 
     if [[ "${lBIN_NAME}" == *kernel* ]]; then
       for lKERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS_ARR[@]}"; do
-        lKERNEL_CVE_EXPLOIT=$(echo "${lKERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
+        lKERNEL_CVE_EXPLOIT=$(cut -d ';' -f3 <<<"${lKERNEL_CVE_EXPLOIT}") # field 3
         if [[ "${lKERNEL_CVE_EXPLOIT}" == "${lCVE_ID}" ]]; then
           lEXPLOIT="Exploit (linux-exploit-suggester"
           if [[ "${lTYPE}" != "NA" ]]; then
@@ -689,9 +689,9 @@ tear_down_cve_threader() {
 
       for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}"; do
         if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
-          lEXPLOIT_PATH="${lEXPLOIT_MSF%%:*}"  # field 1
+          lEXPLOIT_PATH="${lEXPLOIT_MSF%%:*}" # field 1
         else
-          lEXPLOIT_PATH="${MSF_INSTALL_PATH}${lEXPLOIT_MSF%%:*}"  # field 1
+          lEXPLOIT_PATH="${MSF_INSTALL_PATH}${lEXPLOIT_MSF%%:*}" # field 1
         fi
         lEXPLOIT_NAME=$(basename -s .rb "${lEXPLOIT_PATH}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:MSF:${lEXPLOIT_NAME}")
@@ -727,7 +727,7 @@ tear_down_cve_threader() {
       fi
 
       for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}"; do
-        lEXPLOIT_NAME=$(cut -d ';' -f2 <<< "${lEXPLOIT_SNYK}")  # field 2
+        lEXPLOIT_NAME=$(cut -d ';' -f2 <<<"${lEXPLOIT_SNYK}") # field 2
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:SNYK:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
         if [[ "${lTYPE}" != "NA" ]]; then
@@ -788,7 +788,7 @@ tear_down_cve_threader() {
       local lEXPLOIT_ROUTERSPLOIT_ARR=("${lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" "${lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}")
 
       for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}"; do
-        lEXPLOIT_PATH="${lEXPLOIT_RS%%:*}"  # field 1
+        lEXPLOIT_PATH="${lEXPLOIT_RS%%:*}" # field 1
         lEXPLOIT_NAME=$(basename -s .py "${lEXPLOIT_PATH}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:RS:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
@@ -928,14 +928,14 @@ get_epss_data() {
   local lEPSS_DATA=""
   local lCVE_YEAR=""
 
-  lCVE_YEAR="$(echo "${lCVE_ID}" | cut -d '-' -f2)"
+  lCVE_YEAR="$(cut -d '-' -f2 <<<"${lCVE_ID}")" # field 2
   lCVE_EPSS_PATH="${EPSS_DATA_PATH}/CVE_${lCVE_YEAR}_EPSS.csv"
   if [[ -f "${lCVE_EPSS_PATH}" ]]; then
     lEPSS_DATA=$(grep "^${lCVE_ID};" "${lCVE_EPSS_PATH}" || true)
-    lEPSS_PERC=$(echo "${lEPSS_DATA}" | cut -d ';' -f3)
+    lEPSS_PERC=$(cut -d ';' -f3 <<<"${lEPSS_DATA}") # field 3
     lEPSS_PERC=$(echo "${lEPSS_PERC} 100" | awk '{printf "%d", $1 * $2}')
     # just cut it for now ...
-    lEPSS_EPSS=$(echo "${lEPSS_DATA}" | cut -d ';' -f2)
+    lEPSS_EPSS=$(cut -d ';' -f2 <<<"${lEPSS_DATA}") # field 2
     lEPSS_EPSS=$(echo "${lEPSS_EPSS} 100" | awk '{printf "%d", $1 * $2}')
   fi
   [[ ! "${lEPSS_EPSS}" =~ ^[0-9]+$ ]] && lEPSS_EPSS="NA"

@@ -245,7 +245,7 @@ busybox_vuln_testing_threader() {
 
   # print_output "[*] VULN: ${lVULN}"
   local lCVE=""
-  lCVE=$(echo "${lVULN}" | cut -d, -f3)
+  lCVE=$(cut -d ',' -f3 <<<"${lVULN}") # field 3
   local lLOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${lCVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
@@ -392,8 +392,8 @@ get_cve_busybox_data_threader() {
   local lFIRST_EPSS=""
   local lCVE_SUMMARY=""
 
-  lCVE_ID=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f4)
-  lCVSS_V3=$(echo "${lCVE_LINE_ENTRY}" | cut -d, -f6)
+  lCVE_ID=$(cut -d ',' -f4 <<<"${lCVE_LINE_ENTRY}")  # field 4
+  lCVSS_V3=$(cut -d ',' -f6 <<<"${lCVE_LINE_ENTRY}") # field 6
   lFIRST_EPSS="$(get_epss_data "${lCVE_ID}")"
   lFIRST_EPSS="${lFIRST_EPSS/\;*/}"
   lCVE_SUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE_ID%-*}/${lCVE_ID:0:11}"*"xx/${lCVE_ID}.json" 2>/dev/null || true)

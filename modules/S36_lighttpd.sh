@@ -47,7 +47,7 @@ S36_lighttpd() {
 
   if [[ ${#lLIGHTTP_CFG_ARR[@]} -gt 0 ]]; then
     for lCFG_DATA in "${lLIGHTTP_CFG_ARR[@]}"; do
-      lCFG_FILE="${lCFG_DATA#*;}"  # field 2-
+      lCFG_FILE=$(cut -d ';' -f2 <<<"${lCFG_DATA}") # field 2
       lighttpd_config_analysis "${lCFG_FILE}" "${LIGHT_VERSIONS_ARR[@]}"
       write_csv_log "Lighttpd web server configuration file" "$(basename "${lCFG_FILE}")" "${lCFG_FILE}"
       local lNEG_LOG=1
@@ -80,7 +80,7 @@ lighttpd_binary_analysis() {
   if [[ "${#lLIGHT_SBOMs_ARR[@]}" -eq 0 ]]; then
     local lBINARY_DATA=""
     for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
-      lLIGHT_BIN=$(cut -d ';' -f2 <<< "${lBINARY_DATA}")  # field 2
+      lLIGHT_BIN=$(cut -d ';' -f2 <<<"${lBINARY_DATA}") # field 2
       if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
         # skip binwalk raw files
         continue
@@ -174,7 +174,7 @@ lighttpd_binary_analysis() {
   print_ln
   print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
   for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}"; do
-    lLIGHT_BIN=$(cut -d ';' -f2 <<< "${lLIGHT_BIN}")  # field 2
+    lLIGHT_BIN=$(cut -d ';' -f2 <<<"${lLIGHT_BIN}") # field 2
     print_output "$("${EXT_DIR}"/checksec --file="${lLIGHT_BIN}" || true)"
   done
 
@@ -186,8 +186,8 @@ lighttpd_binary_analysis() {
   local IFS=" "
   IFS=" " read -r -a lVULNERABLE_FUNCTIONS_ARR <<<"$(echo -e "${lVULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g')"
   for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
-    lBIN_MD5_SUM="$(echo "${lBINARY_DATA}" | cut -d ';' -f9)"
-    lLIGHT_BIN="${lBINARY_DATA#*;}"  # field 2-
+    lBIN_MD5_SUM="$(cut -d ';' -f9 <<<"${lBINARY_DATA}")" # field 9
+    lLIGHT_BIN=$(cut -d ';' -f2 <<<"${lBINARY_DATA}")     # field 2
     if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
       # skip binwalk raw files
       continue

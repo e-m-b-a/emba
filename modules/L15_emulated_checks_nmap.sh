@@ -138,7 +138,7 @@ check_live_nmap_basic() {
         mapfile -t lS09_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$3 $4 ~ /'"${lSERVICE_NAME}"'/' "${S09_CSV_LOG}" | sort -u || true)
         if [[ "${#lS09_L15_CHECK_ARR[@]}" -gt 0 ]]; then
           for lS09_L15_MATCH in "${lS09_L15_CHECK_ARR[@]}"; do
-            lS09_L15_MATCH=$(echo "${lS09_L15_MATCH}" | cut -d ';' -f4)
+            lS09_L15_MATCH=$(cut -d ';' -f4 <<<"${lS09_L15_MATCH}") # field 4
             if ! grep -q ";${lS09_L15_MATCH};" "${L15_CSV_LOG}" 2>/dev/null; then
               print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${lS09_L15_MATCH}${NC}"
               echo "${lS09_L15_MATCH}" >>"${L15_CSV_LOG}"
@@ -151,7 +151,7 @@ check_live_nmap_basic() {
         mapfile -t lS116_L15_CHECK_ARR < <(awk -v IGNORECASE=1 -F\; '$3 $4 ~ /'"${lSERVICE_NAME}"'/' "${S116_CSV_LOG}" | sort -u || true)
         if [[ "${#lS116_L15_CHECK_ARR[@]}" -gt 0 ]]; then
           for lS116_L15_MATCH in "${lS116_L15_CHECK_ARR[@]}"; do
-            lS116_L15_MATCH=$(echo "${lS116_L15_MATCH}" | cut -d ';' -f4)
+            lS116_L15_MATCH=$(cut -d ';' -f4 <<<"${lS116_L15_MATCH}") # field 4
             if ! grep -q ";${lS116_L15_MATCH};" "${L15_CSV_LOG}" 2>/dev/null; then
               print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${lS116_L15_MATCH}${NC}"
               echo "${lS116_L15_MATCH}" >>"${L15_CSV_LOG}"

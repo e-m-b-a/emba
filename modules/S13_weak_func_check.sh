@@ -57,9 +57,9 @@ S13_weak_func_check() {
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
     while read -r lBINARY; do
-      lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
-      lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
-      lBINARY=$(cut -d ';' -f2 <<< "${lBINARY}")  # field 2
+      lBIN_FILE="$(cut -d ';' -f8 <<<"${lBINARY}")"    # field 8
+      lBIN_MD5_SUM="$(cut -d ';' -f9 <<<"${lBINARY}")" # field 9
+      lBINARY=$(cut -d ';' -f2 <<<"${lBINARY}")        # field 2
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           function_check_x86_64 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &

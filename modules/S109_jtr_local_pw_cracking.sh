@@ -61,18 +61,18 @@ S109_jtr_local_pw_cracking() {
     lHASHES_ARR=("${lHASHES_S107_ARR[@]}" "${lHASHES_S108_ARR[@]}")
 
     for lHASH in "${lHASHES_ARR[@]}"; do
-      lHASH_SOURCE=$(basename "${lHASH%%;*}")  # field 1
+      lHASH_SOURCE=$(basename "${lHASH%%;*}") # field 1
       lHASH=$(echo "${lHASH}" | cut -d\; -f2 | tr -d \")
 
       [[ "${lHASH}" == *"BEGIN"*"KEY"* ]] && continue
 
-      if [[ "${lHASH}" =~ ::[0-9] ]]; then
+      if [[ "$(cut -d: -f1-3 <<<"${lHASH}")" =~ ::[0-9] ]]; then
         # nosemgrep
         # removing entries: root::0:0:99999:7:::
         continue
       fi
 
-      if [[ "${lHASH}" == *:::* ]]; then
+      if [[ "$(cut -d: -f1-4 <<<"${lHASH}")" == *:::* ]]; then
         # nosemgrep
         # removing entries: root:::0:99999:7:::
         continue

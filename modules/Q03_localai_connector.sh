@@ -133,7 +133,7 @@ ask_localai() {
 
   for ((lELE_INDEX = 0; lELE_INDEX < "${#Q03_LOCALAI_QUESTIONS[@]}"; lELE_INDEX++)); do
     local lELEM="${Q03_LOCALAI_QUESTIONS["${lELE_INDEX}"]}"
-    lSCRIPT_PATH_TMP="${lELEM%%;*}"  # field 1
+    lSCRIPT_PATH_TMP="${lELEM%%;*}" # field 1
 
     # as we always start with the highest rated entry, we need to check if this entry was already tested:
     if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${lSCRIPT_PATH_TMP} ]]; then
@@ -142,9 +142,10 @@ ask_localai() {
       continue
     fi
 
-    lAI_PRIO="$(echo "${lELEM}" | cut -d\; -f3)"
-    lAI_SOURCE_FILE="$(echo "${lELEM}" | cut -d\; -f5)"
-    lAI_ANCHOR="${lELEM#*;}"; lAI_ANCHOR="${lAI_ANCHOR%%;*}"  # field 2
+    lAI_PRIO="$(cut -d ';' -f3 <<<"${lELEM}")"        # field 3
+    lAI_SOURCE_FILE="$(cut -d ';' -f5 <<<"${lELEM}")" # field 5
+    lAI_ANCHOR="${lELEM#*;}"
+    lAI_ANCHOR="${lAI_ANCHOR%%;*}" # field 2
     lAI_INPUT_FILE="$(basename "${lSCRIPT_PATH_TMP}")"
     lAI_INPUT_FILE_mod="${lAI_INPUT_FILE//\./}"
 
@@ -401,7 +402,8 @@ regenerate_ai_todo_list() {
   if [[ -f "${CSV_DIR}/ai_question.csv" ]]; then
     local lGPT_ENTRY_LINE=""
     while read -r lGPT_ENTRY_LINE; do
-      lAI_ANCHOR="${lGPT_ENTRY_LINE#*;}"; lAI_ANCHOR="${lAI_ANCHOR%%;*}"  # field 2
+      lAI_ANCHOR="${lGPT_ENTRY_LINE#*;}"
+      lAI_ANCHOR="${lAI_ANCHOR%%;*}" # field 2
       sed -i "/${lAI_ANCHOR}/d" "${CSV_DIR}/ai_question.csv.tmp"
     done <"${CSV_DIR}/ai_question.csv"
   fi

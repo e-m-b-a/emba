@@ -96,12 +96,12 @@ S08_submodule_python_poetry_lock_parser() {
 
         lAPP_LIC="NA"
 
-        lAPP_VERS=$(echo "${lPOETRY_ENTRY}" | cut -d\| -f2)
+        lAPP_VERS=$(cut -d '|' -f2 <<<"${lPOETRY_ENTRY}") # field 2
         lAPP_VERS=${lAPP_VERS/version\ =\ /}
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 
-        lAPP_DESC=$(echo "${lPOETRY_ENTRY}" | cut -d\| -f3)
+        lAPP_DESC=$(cut -d '|' -f3 <<<"${lPOETRY_ENTRY}") # field 3
         lAPP_DESC=${lAPP_DESC/description\ =\ /}
         lAPP_DESC=$(clean_package_details "${lAPP_DESC}")
 
@@ -133,7 +133,7 @@ S08_submodule_python_poetry_lock_parser() {
 
         local lCNT=0
         for lPOETRY_FILE_ENTRY in "${lAPP_FILES_ARR[@]}"; do
-          lPOETRY_FILE_ENTRY=$(echo "${lPOETRY_FILE_ENTRY}" | cut -d '"' -f2)
+          lPOETRY_FILE_ENTRY=$(cut -d '"' -f2 <<<"${lPOETRY_FILE_ENTRY}") # field 2
           lPROP_ARRAY_INIT_ARR+=("path:${lPOETRY_FILE_ENTRY}")
           # we limit the logging of the package files to 500 files per package
           if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then

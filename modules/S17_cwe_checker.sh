@@ -235,7 +235,7 @@ cwe_checker_threaded() {
 
       for lCWE_LINE in "${lCWE_OUT[@]}"; do
         lCWE="$(echo "${lCWE_LINE}" | awk '{print $1}')"
-        lCWE_DESC="${lCWE_LINE#* }"  # field 2-
+        lCWE_DESC="${lCWE_LINE#* }" # field 2-
         lCWE_CNT="$(grep -c "${lCWE}" "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null || true)"
         # get a list of all affected addresses:
         lADDRESSES="$(jq -cr '.[]? | select(.name=="'"${lCWE}"'") | .addresses' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d '\n' | sed 's/\]\[/,/g')"
@@ -275,7 +275,7 @@ final_cwe_log() {
         print_output "[+] cwe-checker found a total of ${ORANGE}${lTOTAL_CWE_CNT}${GREEN} of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
         for lCWE_LINE in "${lCWE_OUT_ARR[@]}"; do
           lCWE_ID="$(echo "${lCWE_LINE}" | awk '{print $1}')"
-          lCWE_DESC="${lCWE_LINE#* }"  # field 2-
+          lCWE_DESC="${lCWE_LINE#* }" # field 2-
           # do not change this to grep -c!
           # shellcheck disable=SC2126
           lCWE_CNT="$(grep "${lCWE_ID}" "${LOG_PATH_MODULE}"/cwe_*.json 2>/dev/null | wc -l || true)"

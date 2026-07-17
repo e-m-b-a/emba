@@ -37,7 +37,7 @@ S02_UEFI_FwHunt() {
     fwhunter "${FIRMWARE_PATH_BAK}"
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
       while read -r lFILE_DETAILS; do
-        lEXTRACTED_FILE=$(echo "${lFILE_DETAILS}" | cut -d ';' -f2)
+        lEXTRACTED_FILE=$(cut -d ';' -f2 <<<"${lFILE_DETAILS}") # field 2
         if [[ ${THREADED} -eq 1 ]]; then
           fwhunter "${lEXTRACTED_FILE}" &
           local lTMP_PID="$!"
@@ -111,8 +111,8 @@ fwhunter_logging() {
   for lFWHUNTER_RESULT in "${FWHUNTER_RESULTS_ARR[@]}"; do
     local lCVE_RESULTS_BINARLY_ARR=()
 
-    lFWHUNTER_RESULT_FILE="${lFWHUNTER_RESULT%%:*}"  # field 1
-    lFWHUNTER_RESULT="${lFWHUNTER_RESULT#*:}"  # field 2-
+    lFWHUNTER_RESULT_FILE="${lFWHUNTER_RESULT%%:*}" # field 1
+    lFWHUNTER_RESULT="${lFWHUNTER_RESULT#*:}"       # field 2-
     lFWHUNTER_BINARLY_ID=$(echo "${lFWHUNTER_RESULT}" | grep -E -o "BRLY-[0-9]+-[0-9]+" | sort -u || true)
     lFWHUNTER_CVE_ID=$(echo "${lFWHUNTER_RESULT}" | grep -E -o "CVE-[0-9]+-[0-9]+" | sort -u || true)
     # lCVE_RESULTS_BINARLY_ARR+=("${lFWHUNTER_CVE_ID}")

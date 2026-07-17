@@ -76,14 +76,15 @@ S26_kernel_vuln_verifier() {
     # we check for a kernel configuration
     for lKERNEL_DATA in "${lKERNEL_ELF_EMBA_ARR[@]}"; do
       # print_output "[*] KERNEL_DATA: ${lKERNEL_DATA}" "no_log"
-      if [[ "${lKERNEL_DATA#*;*;*;*;}" == "/"* ]]; then
+      if [[ "$(cut -d ';' -f5 <<<"${lKERNEL_DATA}")" == "/"* ]]; then
         # field 5 is the kernel config file
-        KERNEL_CONFIG_PATH="${lKERNEL_DATA#*;*;*;*;}"; KERNEL_CONFIG_PATH="${KERNEL_CONFIG_PATH%%;*}"  # field 5
+        KERNEL_CONFIG_PATH="${lKERNEL_DATA#*;*;*;*;}"
+        KERNEL_CONFIG_PATH="${KERNEL_CONFIG_PATH%%;*}" # field 5
         print_output "[+] Found kernel configuration file: ${ORANGE}${KERNEL_CONFIG_PATH}${NC}"
         # we use the first entry with a kernel config detected
         if [[ "${lKERNEL_DATA%%;*}" == "/"* ]]; then
           # field 1 is the matching kernel elf file - sometimes we have a config but no elf file
-          KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"  # field 1
+          KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}" # field 1
           print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
           lK_FOUND=1
           break
@@ -100,8 +101,8 @@ S26_kernel_vuln_verifier() {
         # check for some path indicator for the elf file
         if [[ "${lKERNEL_DATA%%;*}" == "/"* ]]; then
           # now we check for init entries
-          if ! [[ "${lKERNEL_DATA#*;}" == "NA" ]]; then
-            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"  # field 1
+          if ! [[ "$(cut -d ';' -f2 <<<"${lKERNEL_DATA}")" == "NA" ]]; then
+            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}" # field 1
             # we use the first entry with a kernel init detected
             print_output "[+] Found kernel binary file with init entry: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             lK_FOUND=1
@@ -118,7 +119,7 @@ S26_kernel_vuln_verifier() {
           # this means we have no kernel configuration found
           # and no init entry -> we just use the first valid elf file
           if ! [[ "${lKERNEL_DATA%%;*}" == "NA" ]]; then
-            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"  # field 1
+            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}" # field 1
             print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             # we use the first entry as final resort
             lK_FOUND=1
@@ -332,7 +333,7 @@ S26_kernel_vuln_verifier() {
         local lVULN_SUMMARY_ENTRY=""
         while read -r lVULN_SUMMARY_ENTRY; do
           local lkVERSION=""
-          lkVERSION=$(echo "${lVULN_SUMMARY_ENTRY}" | cut -d ':' -f3)
+          lkVERSION=$(cut -d ':' -f3 <<<"${lVULN_SUMMARY_ENTRY}") # field 3
           # remove all spaces
           lkVERSION="${lkVERSION//\ /}"
           if grep -q "${lkVERSION}" "${LOG_PATH_MODULE}/vuln_summary_new.txt"; then
@@ -359,7 +360,7 @@ vuln_checker_threader() {
   local lK_PATH="missing vulnerability path from advisory"
 
   # print_output "[*] VULN data: ${lVULN}" "no_log"
-  lCVE=$(echo "${lVULN}" | cut -d, -f4)
+  lCVE=$(cut -d ',' -f4 <<<"${lVULN}") # field 4
   if ! [[ "${lCVE}" == "CVE-"* ]]; then
     print_output "[-] No CVE identifier extracted for ${lVULN} ..."
     return
@@ -368,7 +369,7 @@ vuln_checker_threader() {
   print_output "${lOUTx}" "no_log"
   write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
 
-  lCVSS3="$(echo "${lVULN}" | cut -d, -f6)"
+  lCVSS3="$(cut -d ',' -f6 <<<"${lVULN}")" # field 6
   # lSUMMARY="$(echo "${lVULN}" | cut -d: -f6-)"
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
 
@@ -625,8 +626,8 @@ report_kvulns_csv() {
   local lCVE_SYMBOL_FOUND=0
   local lCVE_COMPILE_FOUND=0
 
-  lCVE=$(echo "${lVULN}" | cut -d, -f4)
-  lCVSS="$(echo "${lVULN}" | cut -d, -f6)"
+  lCVE=$(cut -d ',' -f4 <<<"${lVULN}")    # field 4
+  lCVSS="$(cut -d ',' -f6 <<<"${lVULN}")" # field 6
   lCVE_SYMBOL_FOUND=$(find "${LOG_PATH_MODULE}" -maxdepth 1 -name "${lCVE}_symbol_verified.txt" | wc -l)
   lCVE_COMPILE_FOUND=$(find "${LOG_PATH_MODULE}" -maxdepth 1 -name "${lCVE}_compiled_verified.txt" | wc -l)
   write_log "${lK_VERSION};${ORIG_K_ARCH};${lCVE};NA;${lCVSS};${lCVE_SYMBOL_FOUND:-0};${lCVE_COMPILE_FOUND:-0}" "${LOG_PATH_MODULE}"/cve_results_kernel_"${lK_VERSION}".csv
@@ -744,9 +745,9 @@ final_log_kernel_vulns() {
     print_ln
     print_output "[+] Verified CRITICAL CVEs: ${ORANGE}${#lCVE_VERIFIED_ONE_CRITICAL_ARR[@]}${GREEN} (one mechanism succeeded)"
     for lCVE_VERIFIED_ONE_CRITICAL in "${lCVE_VERIFIED_ONE_CRITICAL_ARR[@]}"; do
-      lCVE_CRITICAL=$(echo "${lCVE_VERIFIED_ONE_CRITICAL}" | cut -d\; -f3)
-      lCVSS2_CRITICAL=$(echo "${lCVE_VERIFIED_ONE_CRITICAL}" | cut -d\; -f4)
-      lCVSS3_CRITICAL=$(echo "${lCVE_VERIFIED_ONE_CRITICAL}" | cut -d\; -f5)
+      lCVE_CRITICAL=$(cut -d ';' -f3 <<<"${lCVE_VERIFIED_ONE_CRITICAL}")   # field 3
+      lCVSS2_CRITICAL=$(cut -d ';' -f4 <<<"${lCVE_VERIFIED_ONE_CRITICAL}") # field 4
+      lCVSS3_CRITICAL=$(cut -d ';' -f5 <<<"${lCVE_VERIFIED_ONE_CRITICAL}") # field 5
       # disabled because it is too slow
       # identify_exploits "${lCVE_CRITICAL}"
       if [[ "${EXPLOIT_DETECTED:-"no"}" == "yes" ]] || [[ "${POC_DETECTED:-"no"}" == "yes" ]]; then
@@ -761,9 +762,9 @@ final_log_kernel_vulns() {
     print_ln
     print_output "[+] Verified CRITICAL CVEs: ${ORANGE}${#lCVE_VERIFIED_OVERLAP_CRITICAL_ARR[@]}${GREEN} (both mechanisms overlap)"
     for lCVE_VERIFIED_OVERLAP_CRITICAL in "${lCVE_VERIFIED_OVERLAP_CRITICAL_ARR[@]}"; do
-      lCVE_CRITICAL=$(echo "${lCVE_VERIFIED_OVERLAP_CRITICAL}" | cut -d\; -f3)
-      lCVSS2_CRITICAL=$(echo "${lCVE_VERIFIED_OVERLAP_CRITICAL}" | cut -d\; -f4)
-      lCVSS3_CRITICAL=$(echo "${lCVE_VERIFIED_OVERLAP_CRITICAL}" | cut -d\; -f5)
+      lCVE_CRITICAL=$(cut -d ';' -f3 <<<"${lCVE_VERIFIED_OVERLAP_CRITICAL}")   # field 3
+      lCVSS2_CRITICAL=$(cut -d ';' -f4 <<<"${lCVE_VERIFIED_OVERLAP_CRITICAL}") # field 4
+      lCVSS3_CRITICAL=$(cut -d ';' -f5 <<<"${lCVE_VERIFIED_OVERLAP_CRITICAL}") # field 5
       # disabled because it is too slow
       # identify_exploits "${lCVE_CRITICAL}"
       if [[ "${EXPLOIT_DETECTED:-"no"}" == "yes" ]] || [[ "${POC_DETECTED:-"no"}" == "yes" ]]; then

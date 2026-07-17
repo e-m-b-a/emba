@@ -195,7 +195,7 @@ cleaner() {
       # now we can unmount the stuff from emulator and delete temporary stuff
       for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
         print_output "[*] $(print_date) - Unmounting ${lMOUNT}" "no_log"
-        lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
+        lMOUNT=$(cut -d ' ' -f3 <<<"${lMOUNT}") # field 3
         umount -l "${lMOUNT}" || true
       done
 
