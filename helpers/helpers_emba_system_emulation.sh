@@ -204,7 +204,7 @@ service_online_check() {
   # lNW_SERVICE -> if set we check the availability of this service
   local lNW_SERVICE="${4:-NA}"
 
-  local lMAX_CNT=100
+  local lMAX_CNT=200
   local lCNT=0
 
   local lNMAP_SERV_TCP_ARR=()
