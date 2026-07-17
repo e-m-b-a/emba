@@ -183,7 +183,7 @@ ask_localai() {
         lSCRIPT_PATH_TMP="${lSCRIPT_PATH_TMP:1}"
         # remove the LOG_DIR
         # shellcheck disable=SC2001
-        lSCRIPT_PATH_TMP="$(echo "${lSCRIPT_PATH_TMP}" | sed 's#'"${LOG_DIR}"'##')"
+        lSCRIPT_PATH_TMP="$(sed 's#'"${LOG_DIR}"'##' <<<"${lSCRIPT_PATH_TMP}")"
         print_output "[*] Stripped path ${lSCRIPT_PATH_TMP}" "no_log"
       fi
       # dirty fix - Todo: use array in future

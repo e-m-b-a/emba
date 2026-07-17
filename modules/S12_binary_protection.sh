@@ -83,45 +83,45 @@ binary_protection_threader() {
   echo "${lCSV_BIN_OUT}" >>"${lCSV_LOG}"
 
   # coloring the output from csv
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RELRO)/${RED_}&${NC_}/g")
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Partial\ RELRO)/${ORANGE_}&${NC_}/g")
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Full\ RELRO)/${GREEN_}&${NC_}/g")
+  lCSV_BIN_OUT=$(sed -r "s/(No\ RELRO)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  lCSV_BIN_OUT=$(sed -r "s/(Partial\ RELRO)/${ORANGE_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  lCSV_BIN_OUT=$(sed -r "s/(Full\ RELRO)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
 
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(NX\ enabled)/${GREEN_}&${NC_}/g")
-  lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(NX\ disabled)/${RED_}&${NC_}/g")
+  lCSV_BIN_OUT=$(sed -r "s/(NX\ enabled)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
+  lCSV_BIN_OUT=$(sed -r "s/(NX\ disabled)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
 
   if [[ "${lCSV_BIN_OUT}" == *"No PIE"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ PIE)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ PIE)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   elif [[ "${lCSV_BIN_OUT}" == *"PIE enabled"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(PIE\ enabled)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(PIE\ enabled)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   elif [[ "${lCSV_BIN_OUT}" == *"DSO"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(DSO)/${ORANGE_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(DSO)/${ORANGE_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   elif [[ "$(cut -d ';' -f4 <<<"${lCSV_BIN_OUT}")" == "REL" ]]; then # field 4
     lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | awk -F ';' -v repl="${ORANGE_}REL${NC_}" '$4 == "REL"{OFS = ";"; $4=repl}1')
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No Canary found"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ Canary\ found)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ Canary\ found)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Canary\ found)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(Canary\ found)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No RPATH"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RPATH)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ RPATH)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(RPATH)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(RPATH)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No RUNPATH"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ RUNPATH)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ RUNPATH)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(RUNPATH)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(RUNPATH)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   if [[ "${lCSV_BIN_OUT}" == *"No Symbols"* ]]; then
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(No\ Symbols)/${GREEN_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(No\ Symbols)/${GREEN_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   else
-    lCSV_BIN_OUT=$(echo "${lCSV_BIN_OUT}" | sed -r "s/(Symbols)/${RED_}&${NC_}/g")
+    lCSV_BIN_OUT=$(sed -r "s/(Symbols)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")
   fi
 
   lRELRO="${lCSV_BIN_OUT%%;*}"                    # field 1

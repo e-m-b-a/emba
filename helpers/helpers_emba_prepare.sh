@@ -211,17 +211,17 @@ binary_architecture_threader() {
     lD_MACHINE=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Machine:" || true)
     lD_MACHINE="${lD_MACHINE// /}"
     lD_MACHINE="${lD_MACHINE/*Machine:/}"
-    lD_MACHINE=$(echo "${lD_MACHINE}" | sed -E 's/^[[:space:]]+//')
+    lD_MACHINE=$(sed -E 's/^[[:space:]]+//' <<<"${lD_MACHINE}")
 
     # ELF32/64
     lD_CLASS=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Class:" || true)
     lD_CLASS="${lD_CLASS/*Class:/}"
-    lD_CLASS=$(echo "${lD_CLASS}" | sed -E 's/^[[:space:]]+//')
+    lD_CLASS=$(sed -E 's/^[[:space:]]+//' <<<"${lD_CLASS}")
 
     # endianes
     lD_DATA=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Data:" || true)
     lD_DATA="${lD_DATA/*Data:/}"
-    lD_DATA=$(echo "${lD_DATA}" | sed -E 's/^[[:space:]]+//')
+    lD_DATA=$(sed -E 's/^[[:space:]]+//' <<<"${lD_DATA}")
 
     lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null | grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
@@ -644,7 +644,7 @@ detect_root_dir_helper() {
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
         # now we have a result like this "/lib/ld-uClibc.so.0"
         # lets escape it
-        lINTERPRETER_ESCAPED=$(echo "${lINTERPRETER_PATH}" | sed -e 's/\//\\\//g')
+        lINTERPRETER_ESCAPED=$(sed -e 's/\//\\\//g' <<<"${lINTERPRETER_PATH}")
         # mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
         mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true)
         for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
