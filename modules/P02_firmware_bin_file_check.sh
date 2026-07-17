@@ -151,6 +151,8 @@ generate_entropy_graph() {
     print_output "$("${BINWALK_BIN[@]}" --entropy --png "${lENTROPY_PIC_PATH}" "${lFIRMWARE_PATH_BIN}")"
     if [[ -s "${lENTROPY_PIC_PATH}" ]]; then
       write_link "${lENTROPY_PIC_PATH}"
+    else
+      rm -f "${lENTROPY_PIC_PATH}" || print_error "[-] P02 - entropy pic removal error"
     fi
   fi
 }
