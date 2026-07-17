@@ -1217,14 +1217,14 @@ handle_fs_mounts() {
       return
     fi
 
-    lMOUNT_PT=$(echo "${lFS_MOUNT}" | awk '{print $5}')
+    lMOUNT_PT=$(awk '{print $5}' <<<"${lFS_MOUNT}") # field 5
     lMOUNT_FS=$(echo "${lFS_MOUNT}" | grep " \-t " | sed 's/.*-t //g' | awk '{print $1}')
     if [[ "${lMOUNT_FS}" != *"jffs"* ]] && [[ "${lMOUNT_FS}" != *"cramfs"* ]]; then
       print_output "[-] Warning: ${ORANGE}${lMOUNT_FS}${NC} filesystem currently not supported"
       print_output "[-] Warning: If further results are wrong please open a ticket"
     fi
     if [[ "${lMOUNT_PT}" != *"/"* ]]; then
-      lMOUNT_PT=$(echo "${lFS_MOUNT}" | awk '{print $NF}')
+      lMOUNT_PT=$(awk '{print $NF}' <<<"${lFS_MOUNT}") # field NF
       if [[ "${lMOUNT_PT}" != *"/"* ]]; then
         print_output "[-] Warning: Mount point ${ORANGE}${lMOUNT_PT}${NC} currently not supported"
         print_output "[-] Warning: If further results are wrong please open a ticket"
@@ -3071,16 +3071,16 @@ add_partition_emulation() {
     mapfile -t lLOSETUP_OUT_ARR < <(losetup | grep -v "BACK-FILE" || true)
     local lLINE=""
     for lLINE in "${lLOSETUP_OUT_ARR[@]}"; do
-      lIMAGE_PATH=$(echo "${lLINE}" | awk '{print $6}')
+      lIMAGE_PATH=$(awk '{print $6}' <<<"${lLINE}") # field 6
       if [[ "${lIMAGE_PATH}" == "${1}" ]]; then
-        lDEV_PATH=$(echo "${lLINE}" | awk '{print $1}')
+        lDEV_PATH=$(awk '{print $1}' <<<"${lLINE}") # field 1
         if [[ "$(dirname "${lDEV_PATH}")" == "/dev/loop" ]]; then
           # if we have the new naming like /dev/loop/0 -> dirname results in /dev/loop
           lDEV_NR="${lDEV_PATH##*/}" # basename
           lDEV_PATH="/dev/loop${lDEV_NR}p1"
         else
           # old naming like /dev/loop0 -> dirname results in /dev/
-          lDEV_PATH=$(echo "${lLINE}" | awk '{print $1}')p1
+          lDEV_PATH=$(awk '{print $1}' <<<"${lLINE}")p1 # field 1
         fi
         if [[ -b "${lDEV_PATH}" ]]; then
           lFOUND=true

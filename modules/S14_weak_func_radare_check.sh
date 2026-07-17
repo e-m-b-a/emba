@@ -584,7 +584,7 @@ radare_print_top10_statistics() {
           lMD5_SUM=${lBINARY##*-}
           # remove the md5sum from name
           lBINARY=${lBINARY%-*}
-          lSEARCH_TERM="$(echo "${lBINARY}" | awk '{print $2}')"
+          lSEARCH_TERM="$(awk '{print $2}' <<<"${lBINARY}")" # field 2
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then

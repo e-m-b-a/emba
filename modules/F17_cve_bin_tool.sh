@@ -672,7 +672,7 @@ tear_down_cve_threader() {
       # copy the exploit-db exploits to the report
       for lEXPLOIT_ENTRY in "${lEXPLOIT_AVAIL_EDB_ARR[@]}"; do
         if [[ "${lEXPLOIT_ENTRY}" =~ "File:" ]]; then
-          lE_FILE=$(echo "${lEXPLOIT_ENTRY}" | awk '{print $2}')
+          lE_FILE=$(awk '{print $2}' <<<"${lEXPLOIT_ENTRY}") # field 2
           if [[ -f "${lE_FILE}" ]]; then
             cp "${lE_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${lE_FILE}")" || print_error "[-] Copy exploit error for ${lE_FILE}"
           fi
