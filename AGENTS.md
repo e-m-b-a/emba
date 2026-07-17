@@ -58,7 +58,7 @@ sudo ./emba -S -l ~/log -f ~/firmware -p ./scan-profiles/quick-scan.emba
 ## Docker
 Primary deployment method. Build - uses Dockerfile (Kali base):
 ```bash
-BUILDKIT_NO_CLIENT_TOKEN=1 DOCKER_BUILDKIT=1 sudo -E docker compose --progress=plain build --no-cache --pull 
+BUILDKIT_NO_CLIENT_TOKEN=1 DOCKER_BUILDKIT=1 sudo -E docker compose --progress=plain build --no-cache --pull
 ```
 Run: EMBA is automatically starting up the required docker images.
 
