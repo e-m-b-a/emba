@@ -78,12 +78,12 @@ S26_kernel_vuln_verifier() {
       # print_output "[*] KERNEL_DATA: ${lKERNEL_DATA}" "no_log"
       if [[ "${lKERNEL_DATA#*;*;*;*;}" == "/"* ]]; then
         # field 5 is the kernel config file
-        KERNEL_CONFIG_PATH="${lKERNEL_DATA#*;*;*;*;}"; KERNEL_CONFIG_PATH="${KERNEL_CONFIG_PATH%%;*}"
+        KERNEL_CONFIG_PATH="${lKERNEL_DATA#*;*;*;*;}"; KERNEL_CONFIG_PATH="${KERNEL_CONFIG_PATH%%;*}"  # field 5
         print_output "[+] Found kernel configuration file: ${ORANGE}${KERNEL_CONFIG_PATH}${NC}"
         # we use the first entry with a kernel config detected
         if [[ "${lKERNEL_DATA%%;*}" == "/"* ]]; then
           # field 1 is the matching kernel elf file - sometimes we have a config but no elf file
-          KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"
+          KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"  # field 1
           print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
           lK_FOUND=1
           break
@@ -101,7 +101,7 @@ S26_kernel_vuln_verifier() {
         if [[ "${lKERNEL_DATA%%;*}" == "/"* ]]; then
           # now we check for init entries
           if ! [[ "${lKERNEL_DATA#*;}" == "NA" ]]; then
-            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"
+            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"  # field 1
             # we use the first entry with a kernel init detected
             print_output "[+] Found kernel binary file with init entry: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             lK_FOUND=1
@@ -118,7 +118,7 @@ S26_kernel_vuln_verifier() {
           # this means we have no kernel configuration found
           # and no init entry -> we just use the first valid elf file
           if ! [[ "${lKERNEL_DATA%%;*}" == "NA" ]]; then
-            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"
+            KERNEL_ELF_PATH="${lKERNEL_DATA%%;*}"  # field 1
             print_output "[+] Found kernel binary file: ${ORANGE}${KERNEL_ELF_PATH}${NC}"
             # we use the first entry as final resort
             lK_FOUND=1

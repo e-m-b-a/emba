@@ -61,7 +61,7 @@ S14_weak_func_radare_check() {
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
       lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
-      lBINARY=$(cut -d ';' -f2 <<< "${lBINARY}")
+      lBINARY=$(cut -d ';' -f2 <<< "${lBINARY}")  # field 2
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
       if [[ -n "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${lBIN_NAME}".txt -print -quit 2>/dev/null)" ]]; then

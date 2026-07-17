@@ -116,7 +116,7 @@ node_js_package_lock_threader() {
   local lJS_DEP_ID=""
   local lAPP_DEP=""
 
-  lAPP_NAME="${lAPP_NAME##*/}"
+  lAPP_NAME="${lAPP_NAME##*/}"  # basename
   lAPP_NAME=$(clean_package_details "${lAPP_NAME}")
   [[ -z "${lAPP_NAME}" ]] && return
   [[ "${lAPP_NAME}" == "null" ]] && return

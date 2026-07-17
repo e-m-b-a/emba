@@ -67,7 +67,7 @@ S116_qemu_version_detection() {
           # this should prevent double checking - if a version identifier was already successful we do not need to
           # test the other identifiers. In threaded mode this usually does not decrease testing speed
           local lBINARY=""
-          lBINARY="${lVERSION_LINE%%;*}"
+          lBINARY="${lVERSION_LINE%%;*}"  # field 1
           if [[ "$(tail -n +2 "${CSV_DIR}"/s116_qemu_version_detection.csv | cut -d\; -f2 | grep -c "^${lBINARY}$")" -gt 0 ]]; then
             print_output "[*] Already identified component for identifier ${ORANGE}${lBINARY}${NC} ... skipping further tests" "no_log"
             continue

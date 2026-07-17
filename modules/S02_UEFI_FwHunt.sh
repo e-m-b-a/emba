@@ -111,8 +111,8 @@ fwhunter_logging() {
   for lFWHUNTER_RESULT in "${FWHUNTER_RESULTS_ARR[@]}"; do
     local lCVE_RESULTS_BINARLY_ARR=()
 
-    lFWHUNTER_RESULT_FILE="${lFWHUNTER_RESULT%%:*}"
-    lFWHUNTER_RESULT="${lFWHUNTER_RESULT#*:}"
+    lFWHUNTER_RESULT_FILE="${lFWHUNTER_RESULT%%:*}"  # field 1
+    lFWHUNTER_RESULT="${lFWHUNTER_RESULT#*:}"  # field 2-
     lFWHUNTER_BINARLY_ID=$(echo "${lFWHUNTER_RESULT}" | grep -E -o "BRLY-[0-9]+-[0-9]+" | sort -u || true)
     lFWHUNTER_CVE_ID=$(echo "${lFWHUNTER_RESULT}" | grep -E -o "CVE-[0-9]+-[0-9]+" | sort -u || true)
     # lCVE_RESULTS_BINARLY_ARR+=("${lFWHUNTER_CVE_ID}")

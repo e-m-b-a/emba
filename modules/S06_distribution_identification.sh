@@ -45,7 +45,7 @@ S06_distribution_identification() {
   write_csv_log "file" "type" "identifier" "csv_rule"
 
   while read -r lCONFIG; do
-    if [[ "${lCONFIG}" =~ ^[^#*/;] ]]; then
+    if safe_echo "${lCONFIG}" | grep -q "^[^#*/;]"; then
       lSEARCH_FILE="$(safe_echo "${lCONFIG}" | cut -d\; -f2)"
       # echo "lSEARCH_FILE: $lSEARCH_FILE"
       # echo "FIRMWARE_PATH: $FIRMWARE_PATH"

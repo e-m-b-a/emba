@@ -106,7 +106,7 @@ S08_submodule_c_conanfile_txt_parser() {
 
         lAPP_LIC="NA"
 
-        lAPP_VERS="${lCONAN_ENTRY#*/}"
+        lAPP_VERS="${lCONAN_ENTRY#*/}"  # field 2-
         lAPP_VERS=$(clean_package_details "${lAPP_VERS}")
         lAPP_VERS=$(clean_package_versions "${lAPP_VERS}")
 

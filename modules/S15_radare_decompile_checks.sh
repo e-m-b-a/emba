@@ -57,7 +57,7 @@ S15_radare_decompile_checks() {
     while read -r lBINARY; do
       lBIN_FILE="$(echo "${lBINARY}" | cut -d ';' -f8)"
       lBIN_MD5_SUM="$(echo "${lBINARY}" | cut -d ';' -f9)"
-      lBINARY=$(cut -d ';' -f2 <<< "${lBINARY}")
+      lBINARY=$(cut -d ';' -f2 <<< "${lBINARY}")  # field 2
       lBINARY="${lBINARY/;*/}"
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)

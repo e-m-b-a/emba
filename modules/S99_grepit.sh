@@ -116,7 +116,7 @@ grepit_reporter() {
   if [[ -f "${lCSV_LOG}" ]]; then
     readarray -t lGREPIT_RESULTS_DETAILS_ARR < <(cut -d\; -f1,2,5 "${lCSV_LOG}" | grep -v "Grepit test" | grep -v "^$" | sort -u)
     for lRESULT in "${lGREPIT_RESULTS_DETAILS_ARR[@]}"; do
-      lCURRENT_TEST="${lRESULT%%;*}"
+      lCURRENT_TEST="${lRESULT%%;*}"  # field 1
       lLINES_OF_OUTPUT=$(echo "${lRESULT}" | cut -d\; -f2)
       lCOMMENT=$(echo "${lRESULT}" | cut -d\; -f3)
       lOUTFILE="${lCURRENT_TEST}".txt

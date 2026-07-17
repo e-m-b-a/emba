@@ -38,9 +38,9 @@ build_sbom_json_properties_arr() {
   for lPROPERTIES_ELEMENT_ID in "${!lPROPERTIES_ARRAY_INIT_ARR[@]}"; do
     lPROPERTIES_ELEMENT="${lPROPERTIES_ARRAY_INIT_ARR["${lPROPERTIES_ELEMENT_ID}"]}"
     # lPROPERTIES_ELEMENT_1 -> path, source or something else
-    lPROPERTIES_ELEMENT_1="${lPROPERTIES_ELEMENT%%:*}"
+    lPROPERTIES_ELEMENT_1="${lPROPERTIES_ELEMENT%%:*}"  # field 1
     # lPROPERTIES_ELEMENT_2 -> the real value
-    lPROPERTIES_ELEMENT_2="${lPROPERTIES_ELEMENT#*:}"
+    lPROPERTIES_ELEMENT_2="${lPROPERTIES_ELEMENT#*:}"  # field 2-
     if [[ -z "${lPROPERTIES_ELEMENT_2}" ]]; then
       continue
     fi

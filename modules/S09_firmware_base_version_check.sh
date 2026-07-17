@@ -300,7 +300,7 @@ S09_identifier_threadings() {
       if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]]; then
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
         MD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
-        lBINARY_PATH=$(cut -d ';' -f2 <<< "${lBINARY_ENTRY}")
+        lBINARY_PATH=$(cut -d ';' -f2 <<< "${lBINARY_ENTRY}")  # field 2
         lAPP_NAME="$(basename "${lBINARY_PATH}")"
         local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
@@ -336,7 +336,7 @@ S09_identifier_threadings() {
     done
 
     for lBINARY_ENTRY in "${lZGREP_BINS_ARR[@]}"; do
-      lBINARY_PATH="${lBINARY_ENTRY#*;}"
+      lBINARY_PATH="${lBINARY_ENTRY#*;}"  # field 2-
       if ! [[ -f "${lBINARY_PATH}" ]]; then
         continue
       fi
@@ -439,7 +439,7 @@ version_parsing_logging() {
   local lPURL_IDENTIFIER=""
 
   if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
-    lBINARY_PATH="${lBINARY_ENTRY#*;}"
+    lBINARY_PATH="${lBINARY_ENTRY#*;}"  # field 2-
     lBIN_FILE_DETAILS=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f8)
     lMD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
   fi
@@ -639,7 +639,7 @@ build_generic_purl() {
     lBIN_VENDOR="${lBIN_NAME}"
   fi
   lPURL_IDENTIFIER="pkg:binary/${lOS_IDENTIFIED/-*/}/${lBIN_NAME}"
-  lBIN_VERS="${lCSV_RULE#*:*:*:}"
+  lBIN_VERS="${lCSV_RULE#*:*:*:}"  # field 4-
 
   if [[ -n "${lBIN_VERS}" ]]; then
     lPURL_IDENTIFIER+="@${lBIN_VERS}"

@@ -689,9 +689,9 @@ tear_down_cve_threader() {
 
       for lEXPLOIT_MSF in "${lEXPLOIT_AVAIL_MSF_ARR[@]}"; do
         if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
-          lEXPLOIT_PATH="${lEXPLOIT_MSF%%:*}"
+          lEXPLOIT_PATH="${lEXPLOIT_MSF%%:*}"  # field 1
         else
-          lEXPLOIT_PATH="${MSF_INSTALL_PATH}${lEXPLOIT_MSF%%:*}"
+          lEXPLOIT_PATH="${MSF_INSTALL_PATH}${lEXPLOIT_MSF%%:*}"  # field 1
         fi
         lEXPLOIT_NAME=$(basename -s .rb "${lEXPLOIT_PATH}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:MSF:${lEXPLOIT_NAME}")
@@ -727,7 +727,7 @@ tear_down_cve_threader() {
       fi
 
       for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}"; do
-        lEXPLOIT_NAME=$(cut -d ';' -f2 <<< "${lEXPLOIT_SNYK}")
+        lEXPLOIT_NAME=$(cut -d ';' -f2 <<< "${lEXPLOIT_SNYK}")  # field 2
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:SNYK:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
         if [[ "${lTYPE}" != "NA" ]]; then
@@ -788,7 +788,7 @@ tear_down_cve_threader() {
       local lEXPLOIT_ROUTERSPLOIT_ARR=("${lEXPLOIT_AVAIL_ROUTERSPLOIT_ARR[@]}" "${lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}")
 
       for lEXPLOIT_RS in "${lEXPLOIT_ROUTERSPLOIT_ARR[@]}"; do
-        lEXPLOIT_PATH="${lEXPLOIT_RS%%:*}"
+        lEXPLOIT_PATH="${lEXPLOIT_RS%%:*}"  # field 1
         lEXPLOIT_NAME=$(basename -s .py "${lEXPLOIT_PATH}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:RS:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
