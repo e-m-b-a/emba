@@ -524,7 +524,7 @@ web_access_crawler() {
         lWEB_NAME="$(basename "${lWEB_PATH}")"
         mapfile -t lCRAWLED_VULNS_ARR < <(grep "${lWEB_NAME}.*semgrep-rules.php.lang.security" "${S22_CSV_LOG}" || true)
         for lC_VULN in "${lCRAWLED_VULNS_ARR[@]}"; do
-          lVULN_NAME="${lC_VULN#*;}"
+          lVULN_NAME=$(cut -d ';' -f2 <<< "${lC_VULN}")
           lVULN_FILE="${lC_VULN/;*/}"
           lVULN_FILE=$(basename "${lVULN_FILE}")
 

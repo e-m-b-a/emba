@@ -727,7 +727,7 @@ tear_down_cve_threader() {
       fi
 
       for lEXPLOIT_SNYK in "${lEXPLOIT_AVAIL_SNYK_ARR[@]}"; do
-        lEXPLOIT_NAME="${lEXPLOIT_SNYK#*;}"
+        lEXPLOIT_NAME=$(cut -d ';' -f2 <<< "${lEXPLOIT_SNYK}")
         lVEX_EXPLOIT_PROP_ARRAY_ARR+=("exploit:SNYK:${lEXPLOIT_NAME}")
         lEXPLOIT+=" ${lEXPLOIT_NAME}"
         if [[ "${lTYPE}" != "NA" ]]; then

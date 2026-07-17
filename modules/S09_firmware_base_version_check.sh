@@ -300,7 +300,7 @@ S09_identifier_threadings() {
       if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]]; then
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
         MD5_SUM=$(echo "${lBINARY_ENTRY}" | cut -d ';' -f9)
-        lBINARY_PATH="${lBINARY_ENTRY#*;}"
+        lBINARY_PATH=$(cut -d ';' -f2 <<< "${lBINARY_ENTRY}")
         lAPP_NAME="$(basename "${lBINARY_PATH}")"
         local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then

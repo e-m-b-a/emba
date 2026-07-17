@@ -74,7 +74,7 @@ ubi_extractor() {
 
     for lUBI_DATA in "${lUBI_1st_ROUND_ARR[@]}"; do
       lUBI_FILE="${lUBI_DATA%%:*}"
-      lUBI_INFO="${lUBI_DATA#*:}"
+      lUBI_INFO=$(cut -d: -f2 <<< "${lUBI_DATA}")
       if [[ "${lUBI_INFO}" == *"UBIfs image"* ]]; then
         sub_module_title "UBIfs deep extraction"
         print_output "[*] Extracts UBIfs firmware image ${ORANGE}${lUBI_PATH}${NC} with ${ORANGE}ubireader_extract_files${NC}."

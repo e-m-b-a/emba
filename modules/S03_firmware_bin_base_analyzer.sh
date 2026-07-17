@@ -249,7 +249,7 @@ binary_architecture_reporter() {
 
   while read -r lPRE_ARCH_; do
     lSOURCE="${lPRE_ARCH_%%;*}"
-    lPRE_ARCH_="${lPRE_ARCH_#*;}"
+    lPRE_ARCH_=$(cut -d ';' -f2 <<< "${lPRE_ARCH_}")
     print_ln
     print_output "[+] Possible architecture details found (${ORANGE}${lSOURCE}${GREEN}): ${ORANGE}${lPRE_ARCH_}${NC}"
     echo "${lPRE_ARCH_}" >>"${TMP_DIR}"/s03.tmp

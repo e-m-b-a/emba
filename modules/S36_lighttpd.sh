@@ -80,7 +80,7 @@ lighttpd_binary_analysis() {
   if [[ "${#lLIGHT_SBOMs_ARR[@]}" -eq 0 ]]; then
     local lBINARY_DATA=""
     for lBINARY_DATA in "${lLIGHTTP_BIN_ARR[@]}"; do
-      lLIGHT_BIN="${lBINARY_DATA#*;}"
+      lLIGHT_BIN=$(cut -d ';' -f2 <<< "${lBINARY_DATA}")
       if [[ "${lLIGHT_BIN}" == *".raw" ]]; then
         # skip binwalk raw files
         continue
@@ -174,7 +174,7 @@ lighttpd_binary_analysis() {
   print_ln
   print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
   for lLIGHT_BIN in "${lLIGHTTP_BIN_ARR[@]}"; do
-    lLIGHT_BIN="${lLIGHT_BIN#*;}"
+    lLIGHT_BIN=$(cut -d ';' -f2 <<< "${lLIGHT_BIN}")
     print_output "$("${EXT_DIR}"/checksec --file="${lLIGHT_BIN}" || true)"
   done
 
