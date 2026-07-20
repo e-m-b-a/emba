@@ -40,6 +40,7 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 
 ## Latest news
 
+* [*EMBA v2.0.3 - No more legacy*](https://github.com/e-m-b-a/emba/releases)
 * [*Black Hat Arsenal - EMBArk demo - USA 2026*](https://github.com/e-m-b-a/emba/wiki#publications-talks-and-live-demos)
 * [*Black Hat Arsenal - EMBA lab - USA 2026*](https://github.com/e-m-b-a/emba/wiki#publications-talks-and-live-demos)
 * [*EMBA v2.0.2 - Party the big 2k*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.2-big-2k)
