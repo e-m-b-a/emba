@@ -40,6 +40,8 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 
 ## Latest news
 
+* [*Black Hat Arsenal - EMBArk demo - USA 2026*](https://github.com/e-m-b-a/emba/wiki#publications-talks-and-live-demos)
+* [*Black Hat Arsenal - EMBA lab - USA 2026*](https://github.com/e-m-b-a/emba/wiki#publications-talks-and-live-demos)
 * [*EMBA v2.0.2 - Party the big 2k*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.2-big-2k)
 * [*EMBA v2.0.1 - The interactor*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.1-interactor)
 * [*EMBA v2.0.0 - A brave new world of firmware analysis*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.0-A-brave-new-world)
