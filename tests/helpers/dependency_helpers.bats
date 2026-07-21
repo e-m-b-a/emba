@@ -70,15 +70,15 @@ teardown() {
 
 @test "check_emba_version detects current version" {
   # shellcheck disable=SC2030,SC2031
-  export EMBA_VERSION="2.0.2"
-  run check_emba_version "2.0.2"
+  export EMBA_VERSION="2.0.3"
+  run check_emba_version "2.0.3"
   [ "${status}" -eq 0 ]
   [[ "${output}" == *"ok"* ]]
 }
 
 @test "check_emba_version detects available update" {
   # shellcheck disable=SC2030,SC2031
-  export EMBA_VERSION="2.0.2"
+  export EMBA_VERSION="2.0.3"
   run check_emba_version "9.9.9"
   [ "${status}" -eq 0 ]
   [[ "${output}" == *"Updates available"* ]]
