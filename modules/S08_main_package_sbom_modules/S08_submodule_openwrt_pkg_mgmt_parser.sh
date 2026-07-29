@@ -111,6 +111,7 @@ openwrt_pkg_mgmt_parser_threader() {
   local lAPP_NAME="NA"
   local lAPP_VERS=""
   local lAPP_MAINT="NA"
+  local lAPP_ARCH="NA"
   local lAPP_DESC="NA"
   local lAPP_VENDOR="NA"
   local lCPE_IDENTIFIER="NA"
