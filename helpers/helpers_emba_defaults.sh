@@ -94,6 +94,9 @@ set_defaults() {
   # Todo: remove option 1 and 2 and GPT_QUESTION usage
   # Todo: rename all GPT to AI areas
   export AI_OPTION=0 # 0 -> off, 1-> unpaid plan, 2 -> no rate-limit, 3 -> LocalAI Server
+  export LOCAL_AI_SCHEME="http"
+  export LOCAL_AI_PORT="8080"
+  export LOCAL_AI_API_ENDPOINT="/v1"
   export GPT_QUESTION=""
   export MINIMUM_GPT_PRIO=1 # everything above this value gets checked
 

@@ -75,6 +75,13 @@ teardown() {
   [ "${SHELLCHECK}" -eq 1 ]
 }
 
+@test "set_defaults sets local connector endpoint defaults" {
+  set_defaults
+  [ "${LOCAL_AI_SCHEME}" = "http" ]
+  [ "${LOCAL_AI_PORT}" = "8080" ]
+  [ "${LOCAL_AI_API_ENDPOINT}" = "/v1" ]
+}
+
 @test "set_defaults sets SBOM_MAX_FILE_LOG" {
   set_defaults
   [ "${SBOM_MAX_FILE_LOG}" -eq 200 ]
