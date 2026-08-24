@@ -24,6 +24,8 @@ S75_network_check() {
 
   export NET_CFG_FOUND=0
 
+  write_csv_log "network config type" "file"
+
   check_resolv
   check_iptables
   check_snmp
@@ -45,6 +47,7 @@ check_resolv() {
     if [[ -e "${lRES_INFO_P}" ]]; then
       lCHECK=1
       print_output "[+] DNS config ""$(print_path "${lRES_INFO_P}")"
+      write_csv_log "resolv.conf" "${lRES_INFO_P}"
 
       lDNS_INFO=$(grep "nameserver" "${lRES_INFO_P}" 2>/dev/null || true)
       if [[ "${lDNS_INFO}" ]]; then
@@ -70,6 +73,7 @@ check_iptables() {
     if [[ -e "${lIPT_INFO_P}" ]]; then
       lCHECK=1
       print_output "[+] iptables config ""$(print_path "${lIPT_INFO_P}")"
+      write_csv_log "iptables" "${lIPT_INFO_P}"
       ((NET_CFG_FOUND += 1))
     fi
   done
@@ -93,6 +97,7 @@ check_snmp() {
     if [[ -e "${lSNMP_CONF_P}" ]]; then
       lCHECK=1
       print_output "[+] SNMP config ""$(print_path "${lSNMP_CONF_P}")"
+      write_csv_log "snmp" "${lSNMP_CONF_P}"
       mapfile -t lFIND_ARR < <(awk '/^com2sec/ { print $4 }' "${lSNMP_CONF_P}")
       if [[ "${#lFIND_ARR[@]}" -ne 0 ]]; then
         print_output "[*] com2sec line/s:"
@@ -122,6 +127,7 @@ check_network_configs() {
     print_output "[+] Found ""${#lNETWORK_CONFS_ARR[@]}"" possible network configs:"
     for lNW_CONF in "${lNETWORK_CONFS_ARR[@]}"; do
       print_output "$(indent "$(orange "$(print_path "${lNW_CONF}")")")"
+      write_csv_log "network config" "${lNW_CONF}"
       ((NET_CFG_FOUND += 1))
     done
   else
