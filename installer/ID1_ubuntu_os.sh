@@ -29,7 +29,7 @@ ID1_ubuntu_os() {
     if [[ "${WSL}" -ne 1 ]]; then
       # To using ubi and nandsim with modprobe, the linux-modules-extra package must be installed. (Ubuntu 22.04)
       if apt-cache show "linux-modules-extra-$(uname -r)" &>/dev/null; then
-			print_tool_info "linux-modules-extra-$(uname -r)" 1
+        print_tool_info "linux-modules-extra-$(uname -r)" 1
       else
         echo -e "\\n""${ORANGE}""${BOLD}""linux-modules-extra-$(uname -r) not available - skipping (modules now ship in linux-modules).""${NC}"
       fi
