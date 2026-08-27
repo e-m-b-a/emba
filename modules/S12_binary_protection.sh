@@ -28,11 +28,7 @@ S12_binary_protection() {
   local lWAIT_PIDS_S12=()
 
   if [[ -f "${EXT_DIR}"/checksec ]]; then
-    local lCSV_LOG=""
-    lCSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
-    lCSV_LOG="${CSV_DIR}""/""${lCSV_LOG}"
-
-    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >>"${lCSV_LOG}"
+    write_csv_log "RELRO" "STACK CANARY" "NX" "PIE" "RPATH" "RUNPATH" "Symbols" "FORTIFY" "Fortified" "Fortifiable" "FILE"
     printf "\t%-13.13s  %-16.16s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
       "RELRO" "CANARY" "NX" "PIE" "RPATH" "RUNPATH" "SYMBOLS" "FORTIFY" "FILE" | tee -a "${TMP_DIR}"/s12.tmp
 
@@ -59,10 +55,6 @@ S12_binary_protection() {
 
 binary_protection_threader() {
   local lBINARY="${1:-}"
-
-  local lCSV_LOG=""
-  lCSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
-  lCSV_LOG="${CSV_DIR}""/""${lCSV_LOG}"
   local lCANARY=""
   local lFORTIFY=""
   local lNX=""
@@ -80,7 +72,7 @@ binary_protection_threader() {
 
   # we usually use ; instead of , for csv ...
   lCSV_BIN_OUT=${lCSV_BIN_OUT//,/\;}
-  echo "${lCSV_BIN_OUT}" >>"${lCSV_LOG}"
+  write_csv_log "${lCSV_BIN_OUT}"
 
   # coloring the output from csv
   lCSV_BIN_OUT=$(sed -r "s/(No\ RELRO)/${RED_}&${NC_}/g" <<<"${lCSV_BIN_OUT}")

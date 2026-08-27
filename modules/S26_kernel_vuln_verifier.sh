@@ -52,6 +52,8 @@ S26_kernel_vuln_verifier() {
   # extract kernel version
   get_kernel_version_csv_data_s24 "${S24_CSV_LOG}"
 
+  write_csv_log "CVE" "CVSS" "kernel version" "vulnerable path" "verification method"
+
   local lKERNEL_DATA=""
   local lKERNEL_ELF_EMBA_ARR=()
   local lALL_KVULNS_ARR=()
@@ -507,6 +509,7 @@ symbol_verifier() {
       print_output "${lOUTx}"
       write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
       echo "${lCVE} (${lCVSS}) - ${lK_VERSION} - exported symbol verified - ${lK_PATH}" >>"${LOG_PATH_MODULE}""/${lCVE}_symbol_verified.txt"
+      write_csv_log "${lCVE}" "${lCVSS}" "${lK_VERSION}" "${lK_PATH}" "exported symbol"
       lVULN_FOUND=1
       break
     fi
@@ -524,6 +527,7 @@ symbol_verifier() {
       print_output "${lOUTx}"
       write_log "${lOUTx}" "${LOG_PATH_MODULE}/kernel_verification_${lK_VERSION}_detailed.log"
       echo "${lCVE} (${lCVSS}) - ${lK_VERSION} - exported symbol verified (gpl) - ${lK_PATH}" >>"${LOG_PATH_MODULE}""/${lCVE}_symbol_verified.txt"
+      write_csv_log "${lCVE}" "${lCVSS}" "${lK_VERSION}" "${lK_PATH}" "exported symbol (GPL)"
       lVULN_FOUND=1
       break
     fi
@@ -542,6 +546,7 @@ compile_verifier() {
   if grep -q "${lK_PATH}" "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log; then
     print_output "[+] ${ORANGE}${lCVE}${GREEN} (${ORANGE}${lCVSS}${GREEN}) - ${ORANGE}${lK_PATH}${GREEN} verified - compiled path${NC}"
     echo "${lCVE} (${lCVSS}) - ${lK_VERSION} - compiled path verified - ${lK_PATH}" >>"${LOG_PATH_MODULE}""/${lCVE}_compiled_verified.txt"
+    write_csv_log "${lCVE}" "${lCVSS}" "${lK_VERSION}" "${lK_PATH}" "compiled path"
   fi
 }
 

@@ -31,6 +31,7 @@ S100_command_inj_check() {
   local lNEG_LOG=0
   local lCHECK_=""
 
+  write_csv_log "type" "file" "matched pattern"
   if [[ "${lCMD_INJ_DIRS_ARR[0]-}" == "C_N_F" ]]; then
     print_output "[!] Config not found"
   elif [[ "${#lCMD_INJ_DIRS_ARR[@]}" -ne 0 ]]; then
@@ -43,6 +44,7 @@ S100_command_inj_check() {
         for lFILE_S in "${lFILE_ARRX[@]}"; do
           if file "${lFILE_S}" | grep -q -E "script.*executable"; then
             print_output "$(indent "$(orange "$(print_path "${lFILE_S}")"" -> Executable script")")"
+            write_csv_log "web script" "${lFILE_S}" "NA"
 
             local lQUERY_L_ARR=()
             mapfile -t lQUERY_L_ARR < <(config_list "${CONFIG_DIR}""/check_command_injections.cfg" "")
@@ -53,6 +55,7 @@ S100_command_inj_check() {
                 if [[ "${#lCHECK_ARR[@]}" -gt 0 ]]; then
                   print_ln
                   print_output "$(indent "[${GREEN}+${NC}]${GREEN} Found ""${lQUERY}"" in ""$(print_path "${lFILE_S}")${NC}")"
+                  write_csv_log "command injection match" "${lFILE_S}" "${lQUERY}"
                   for lCHECK_ in "${lCHECK_ARR[@]}"; do
                     print_output "$(indent "[${GREEN}+${NC}]${GREEN} ${lCHECK_}${NC}")"
                     lNEG_LOG=1

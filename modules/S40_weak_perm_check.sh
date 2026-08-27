@@ -50,6 +50,8 @@ S40_weak_perm_check() {
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
   readarray -t lWEAK_INIT_FILES_ARR < <(find "${lETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -print0 2>/dev/null | xargs -r -0 -P 16 -I % sh -c 'md5sum "%"' | sort -u -k1,1 | cut -d\  -f3 || true)
 
+  write_csv_log "weak permission type" "file" "GTFOBins link"
+
   if [[ ${#lSETUID_FILES_ARR[@]} -gt 0 ]]; then
     print_output "[+] Found ${#lSETUID_FILES_ARR[@]} setuid files:"
     for lLINE in "${lSETUID_FILES_ARR[@]}"; do
@@ -58,8 +60,10 @@ S40_weak_perm_check() {
       if [[ "${lGTFO_LINK}" == "https://"* ]]; then
         print_output "$(indent "${GREEN}$(print_path "${lLINE}")${NC}")"
         write_link "${lGTFO_LINK}"
+        write_csv_log "setuid" "${lLINE}" "${lGTFO_LINK}"
       else
         print_output "$(indent "$(print_path "${lLINE}")")"
+        write_csv_log "setuid" "${lLINE}" "NA"
       fi
       ((lWEAK_PERM_COUNTER += 1))
     done
@@ -72,6 +76,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ${#lSETGID_FILES_ARR[@]} setgid files:"
     for lLINE in "${lSETGID_FILES_ARR[@]}"; do
       print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "setgid" "${lLINE}" "NA"
       ((lWEAK_PERM_COUNTER += 1))
     done
     print_ln "no_log"
@@ -83,6 +88,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ${#lWORLD_WRITE_FILES_ARR[@]} world writable files:"
     for lLINE in "${lWORLD_WRITE_FILES_ARR[@]}"; do
       print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "world-writable" "${lLINE}" "NA"
       ((lWEAK_PERM_COUNTER += 1))
     done
     print_ln "no_log"
@@ -94,6 +100,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ${#lWEAK_SHADOW_FILES_ARR[@]} weak shadow files:"
     for lLINE in "${lWEAK_SHADOW_FILES_ARR[@]}"; do
       print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "weak shadow" "${lLINE}" "NA"
       ((lWEAK_PERM_COUNTER += 1))
     done
     print_ln "no_log"
@@ -105,6 +112,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ${#lWEAK_RC_FILES_ARR[@]} rc.d files not belonging to root:"
     for lLINE in "${lWEAK_RC_FILES_ARR[@]}"; do
       print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "rc.d not root-owned" "${lLINE}" "NA"
       ((lWEAK_PERM_COUNTER += 1))
     done
     print_ln "no_log"
@@ -116,6 +124,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ${#lWEAK_INIT_FILES_ARR[@]} init.d files not belonging to root:"
     for lLINE in "${lWEAK_INIT_FILES_ARR[@]}"; do
       print_output "$(indent "$(print_path "${lLINE}")")"
+      write_csv_log "init.d not root-owned" "${lLINE}" "NA"
       ((lWEAK_PERM_COUNTER += 1))
     done
     print_ln "no_log"

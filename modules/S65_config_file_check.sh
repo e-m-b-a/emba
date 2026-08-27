@@ -24,6 +24,8 @@ S65_config_file_check() {
   local lNEG_LOG=0
   export CONF_FILES_ARR=()
 
+  write_csv_log "type" "file"
+
   scan_config
   check_fstab
 
@@ -46,6 +48,7 @@ scan_config() {
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for lCONFIG_FILE in "${CONF_FILES_ARR[@]}"; do
       print_output "$(indent "$(orange "$(print_path "${lCONFIG_FILE}")")")"
+      write_csv_log "config file" "${lCONFIG_FILE}"
     done
   else
     print_output "[-] No configuration files found"
@@ -68,6 +71,7 @@ check_fstab() {
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
     for lFSTAB_FILE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "${lFSTAB_FILE}")")"
+      write_csv_log "fstab user details" "${lFSTAB_FILE}"
     done
     print_ln "no_log"
   else
@@ -78,6 +82,7 @@ check_fstab() {
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
     for lFSTAB_FILE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "${lFSTAB_FILE}")")"
+      write_csv_log "fstab password" "${lFSTAB_FILE}"
     done
     print_ln "no_log"
   else
