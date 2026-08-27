@@ -22,6 +22,14 @@
 : "${DEBUG:=0}"
 export DEBUG
 
+local_ai_api_url() {
+  local lAPI_PATH="${1#/}"
+  local lAPI_ENDPOINT="/${LOCAL_AI_API_ENDPOINT#/}"
+  lAPI_ENDPOINT="${lAPI_ENDPOINT%/}"
+
+  printf '%s://%s:%s%s/%s' "${LOCAL_AI_SCHEME}" "${LOCAL_AI_IP}" "${LOCAL_AI_PORT}" "${lAPI_ENDPOINT}" "${lAPI_PATH}"
+}
+
 Q03_localai_connector() {
   module_log_init "${FUNCNAME[0]}"
   export AI_RESULT_CNT=0
@@ -289,7 +297,7 @@ ask_localai() {
           '{model: $model, messages: [{role: "user", content: $prompt}], temperature: 0.2}')
 
         lstart_time=$(date +%s)
-        lHTTP_CODE=$(curl --connect-timeout 10 --max-time 600 -s http://"${LOCAL_AI_IP}":8080/v1/chat/completions \
+        lHTTP_CODE=$(curl --connect-timeout 10 --max-time 600 -s "$(local_ai_api_url "chat/completions")" \
           -H "Content-Type: application/json" \
           -d "${lJSON_PAYLOAD}" -o "${lAI_LOG_FILE}.json" --write-out "%{http_code}" || true)
 
@@ -416,7 +424,7 @@ identify_ai_model() {
   local lMODEL_LOCALAI=""
   local lCNT=1
   while [[ -z "${lMODEL_LOCALAI}" ]]; do
-    lMODEL_LOCALAI=$(curl --connect-timeout 10 --max-time 30 http://"${LOCAL_AI_IP}":8080/v1/models 2>/dev/null | jq -r .data[].id || true)
+    lMODEL_LOCALAI=$(curl --connect-timeout 10 --max-time 30 "$(local_ai_api_url "models")" 2>/dev/null | jq -r .data[].id || true)
     [[ -n "${lMODEL_LOCALAI}" ]] && break
     sleep 5
     lCNT=$((lCNT + 1))
