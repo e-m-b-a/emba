@@ -19,6 +19,8 @@ export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
 export FULL_EMULATION=1
+# adjust the minimum services EMBA is trying to detect
+export MIN_TCP_SERV=1
 export SELECT_MODULES+=( "S05" "S21" "S22" "S23" "S24" "F14" "F50" )
 
 # enable silent mode and status bar
