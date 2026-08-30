@@ -76,7 +76,7 @@ set_defaults() {
   export L10_DEBUG_MODE=0
   export FULL_EMULATION=0 # full system emulation - set it via command line parameter -Q
   export MIN_TCP_SERV=1
-  export QEMULATION=0     # user-mode emulation - set it via command line parameter -E
+  export QEMULATION=0 # user-mode emulation - set it via command line parameter -E
   # some processes are running long and logging a lot
   # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
   export QEMU_KILL_SIZE="10M"
