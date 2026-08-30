@@ -26,6 +26,8 @@ S85_ssh_check() {
   export SQUID_VUL_CNT=0
   local lNEG_LOG=0
 
+  write_csv_log "finding" "file" "detail"
+
   search_ssh_files
   check_lzma_backdoor
   check_squid
@@ -68,6 +70,7 @@ check_lzma_backdoor() {
         print_output "${lOUTPUT}"
         print_output "[+] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${GREEN} with affected version in ${ORANGE}${lSSH_FILE/:*/}${GREEN}."
         write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
+        write_csv_log "xz/lzma backdoor" "${lSSH_FILE/:*/}" "CVE-2024-3094 (${lLZMA_SSHD_ENTRY})"
         ((SSH_VUL_CNT += 1))
         lCHECK=1
       else
@@ -84,6 +87,7 @@ check_lzma_backdoor() {
       print_output "${lOUTPUT}"
       print_output "[+] Found ${ORANGE}${lLZMA_FILE/:*/}${GREEN} with affected version."
       write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
+      write_csv_log "xz/lzma backdoor" "${lLZMA_FILE/:*/}" "CVE-2024-3094"
       ((SSH_VUL_CNT += 1))
       lCHECK=1
     fi
@@ -99,6 +103,7 @@ check_lzma_backdoor() {
       print_output "[+] Found ${ORANGE}${lXZ_FILE/:*/}${GREEN} with affected version."
       write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
       strings "${lXZ_FILE}" | grep -q "5\.6\.[01]" | tee -a "${LOG_FILE}" || true
+      write_csv_log "xz/lzma backdoor" "${lXZ_FILE/:*/}" "CVE-2024-3094 (${lXZ_V_OUT})"
       ((SSH_VUL_CNT += 1))
       lCHECK=1
     fi
@@ -134,6 +139,7 @@ search_ssh_files() {
                 # print finding title as EMBA finding:
                 if [[ "${lS_ISSUE}" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
                   print_output "[+] ${lS_ISSUE}"
+                  write_csv_log "sshd config issue" "${lSSH_FILE}" "${lS_ISSUE//[[:space:]]/ }"
                   ((SSH_VUL_CNT += 1))
                 # print everything else (except RESULTS and done) as usual output
                 elif ! [[ "${lS_ISSUE}" == *RESULTS* || "${lS_ISSUE}" == *done* ]]; then
@@ -146,6 +152,7 @@ search_ssh_files() {
             done
           elif [[ "$(basename "${lSSH_FILE}")" == *"authorized_key"* ]]; then
             print_output "[+] Warning: Possible ${ORANGE}authorized_key${GREEN} backdoor detected: ${ORANGE}${lSSH_FILE}${NC}"
+            write_csv_log "authorized_key backdoor" "${lSSH_FILE}" "Possible Backdoor"
             ((SSH_VUL_CNT += 1))
           fi
         fi
@@ -168,6 +175,7 @@ check_squid() {
   while read -r lSQUID_FILE; do
     lSQUID_FILE=$(cut -d ';' -f2 <<<"${lSQUID_FILE}") # field 2
     print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lSQUID_FILE/;*/}")${NC}"
+    write_csv_log "Squid executable" "${lSQUID_FILE}" "NA"
     ((SQUID_VUL_CNT += 1))
   done < <(grep "squid" "${P99_CSV_LOG}" | grep ";ELF" || true)
   [[ ${SQUID_VUL_CNT} -eq 0 ]] && print_output "[-] No possible squid executable found"
@@ -181,10 +189,12 @@ check_squid() {
       if [[ -f "${lSQUID_E}""/squid.conf" ]]; then
         lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${lSQUID_E}")${NC}"
+        write_csv_log "Squid config" "${lSQUID_E}/squid.conf" "NA"
         ((SQUID_VUL_CNT += 1))
       elif [[ -f "${lSQUID_E}""/squid3.conf" ]]; then
         lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${lSQUID_E}")${NC}"
+        write_csv_log "Squid config" "${lSQUID_E}/squid3.conf" "NA"
         ((SQUID_VUL_CNT += 1))
       fi
       if [[ ${lCHECK} -eq 1 ]]; then

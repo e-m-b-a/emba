@@ -27,6 +27,8 @@ S80_cronjob_check() {
   local lCJ_FILE=""
   local lCT_VAR=""
 
+  write_csv_log "type" "path"
+
   mapfile -t lCJ_FILE_PATH_ARR < <(mod_path "/ETC_PATHS/cron")
   for lCJ_FILE in "${lCJ_FILE_PATH_ARR[@]}"; do
     if [[ -e "${lCJ_FILE}" ]]; then
@@ -37,6 +39,7 @@ S80_cronjob_check() {
       if [[ "${lCRONJOBS}" ]]; then
         print_output "[+] Cronjobs:"
         print_output "$(indent "${lCRONJOBS}")"
+        write_csv_log "cronjob" "${lCJ_FILE}"
         ((lRESULTS += 1))
       fi
     fi
@@ -50,6 +53,7 @@ S80_cronjob_check() {
       if [[ "${lCRONJOBWWPERMS}" ]]; then
         print_output "[+] World-writable cron jobs and file contents:"
         print_output "$(indent "${lCRONJOBWWPERMS}")"
+        write_csv_log "world-writable cronjob" "${lCJ_FILE}"
         ((lRESULTS += 1))
       fi
     fi
@@ -64,6 +68,7 @@ S80_cronjob_check() {
       if [[ "${lCRONTABVALUE}" ]]; then
         print_output "[+] Crontab content:"
         print_output "$(indent "${lCRONTABVALUE}")"
+        write_csv_log "crontab" "${lCJ_FILE}"
         ((lRESULTS += 1))
       fi
     fi
@@ -79,6 +84,7 @@ S80_cronjob_check() {
     if [[ "${lCRONTABVAR}" ]]; then
       print_output "[+] Anything interesting in ""$(print_path "${lCT_VAR}")"
       print_output "$(indent "${lCRONTABVAR}")"
+      write_csv_log "crontab spool" "${lCT_VAR}"
       ((lRESULTS += 1))
     fi
   done
@@ -95,6 +101,7 @@ S80_cronjob_check() {
       if [[ "${lANACRONJOBS}" ]]; then
         print_output "[+] Anacron jobs and associated file permissions:"
         print_output "$(indent "${lANACRONJOBS}")"
+        write_csv_log "anacron job" "${lCJ_FILE}"
         ((lRESULTS += 1))
       fi
     fi
@@ -109,6 +116,7 @@ S80_cronjob_check() {
     if [[ "${lANACRONTAB}" ]]; then
       print_output "[+] When were jobs last executed (""$(print_path "${lCT_VAR}")"")"
       print_output "$(indent "${lANACRONTAB}")"
+      write_csv_log "anacron spool" "${lCT_VAR}"
       ((lRESULTS += 1))
     fi
   done

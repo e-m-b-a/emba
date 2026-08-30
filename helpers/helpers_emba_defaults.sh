@@ -19,7 +19,7 @@
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=1
-  export EMBA_VERSION="2.0.2"
+  export EMBA_VERSION="2.0.3"
 
   export CLEANED=0 # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
@@ -94,6 +94,9 @@ set_defaults() {
   # Todo: remove option 1 and 2 and GPT_QUESTION usage
   # Todo: rename all GPT to AI areas
   export AI_OPTION=0 # 0 -> off, 1-> unpaid plan, 2 -> no rate-limit, 3 -> LocalAI Server
+  export LOCAL_AI_SCHEME="http"
+  export LOCAL_AI_PORT="8080"
+  export LOCAL_AI_API_ENDPOINT="/v1"
   export GPT_QUESTION=""
   export MINIMUM_GPT_PRIO=1 # everything above this value gets checked
 

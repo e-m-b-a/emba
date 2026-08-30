@@ -45,6 +45,8 @@ S110_yara_check() {
       find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n' | sort -n >"${lDIR_COMB_YARA}"
     fi
 
+    write_csv_log "yara rule" "matched file"
+
     ulimit -Sv "${lMEM_LIMIT}"
     yara -p "${lMAX_MOD_THREADS}" -r -w -s -m -L -g "${lDIR_COMB_YARA}" "${LOG_DIR}"/firmware >"${LOG_PATH_MODULE}"/yara_complete_output.txt || true
     ulimit -Sv unlimited
@@ -62,6 +64,7 @@ S110_yara_check() {
           write_log "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           write_log "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           echo "" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
+          write_csv_log "${lYRULE}" "${lMATCH_FILE}"
           lCOUNTING=$((lCOUNTING + 1))
         fi
       fi

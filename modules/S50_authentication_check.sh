@@ -27,6 +27,7 @@ S50_authentication_check() {
   local lAUTH_ISSUES=0
   local lWAIT_PIDS_S50_ARR=()
 
+  write_csv_log "issue type" "file" "account/detail" "hash" "hashtype"
   # disabled internal module threading as the output is not readable anymore
   if [[ "${THREADED}" -eq 9 ]]; then
     user_zero &
@@ -111,10 +112,12 @@ search_shadow() {
         fi
         if [[ "${lHTYPE}" == "unknown" ]]; then
           print_output "[+] Found shadow file ""${ORANGE}$(print_path "${lSHADOW_FILE}")${GREEN} with possible hash ${ORANGE}${lHASH}${NC}"
+          write_csv_log "shadow hash" "${lSHADOW_FILE}" "NA" "${lHASH}" "unknown"
           ((lAUTH_ISSUES += 1))
           continue
         fi
         print_output "[+] Found shadow file ""${ORANGE}$(print_path "${lSHADOW_FILE}")${GREEN} with possible hash ${ORANGE}${lHASH}${GREEN} of hashtype: ${ORANGE}${lHTYPE}${NC}"
+        write_csv_log "shadow hash" "${lSHADOW_FILE}" "NA" "${lHASH}" "${lHTYPE}"
         ((lAUTH_ISSUES += 1))
       done
       lCHECK=1
@@ -144,6 +147,7 @@ user_zero() {
       if [[ -n "${lFIND}" ]]; then
         print_output "[+] Found administrator account/s with UID 0 in ""$(print_path "${lPASSWD_FILE}")"
         print_output "$(indent "$(orange "Administrator account: ${lFIND}")")"
+        write_csv_log "UID 0 account" "${lPASSWD_FILE}" "${lFIND}" "NA" "NA"
         ((lAUTH_ISSUES += 1))
       else
         print_output "[-] Found no administrator account (root) with UID 0"
@@ -175,6 +179,7 @@ non_unique_acc() {
       else
         print_output "[+] Non-unique accounts found in ""$(print_path "${lPASSWD_FILE}")"
         print_output "$(indent "$(orange "${lFIND}")")"
+        write_csv_log "non-unique account" "${lPASSWD_FILE}" "${lFIND}" "NA" "NA"
         ((lAUTH_ISSUES += 1))
       fi
     fi

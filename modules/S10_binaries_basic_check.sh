@@ -35,6 +35,8 @@ S10_binaries_basic_check() {
   local IFS=" "
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$(echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ -e /g')"
 
+  write_csv_log "binary" "interesting function count"
+
   if [[ "${lVULNERABLE_FUNCTIONS}" == "C_N_F" ]]; then
     print_output "[!] Config not found"
   elif [[ -n "${lVULNERABLE_FUNCTIONS}" ]]; then
@@ -54,6 +56,7 @@ S10_binaries_basic_check() {
           lVUL_FUNC="$(echo "${lVUL_FUNC}" | sed -e 's/[[:space:]]\+/\t/g')"
           print_output "$(indent "${lVUL_FUNC}")"
         done
+        write_csv_log "${lBINARY}" "${#lVUL_FUNC_RESULT_ARR[@]}"
         lCOUNTER=$((lCOUNTER + 1))
       fi
     done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)

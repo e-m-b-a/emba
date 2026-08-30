@@ -167,12 +167,10 @@ output_details() {
   fi
   lENTROPY_PIC_PATH=$(find "${LOG_DIR}" -xdev -maxdepth 1 -type f -iname "*_entropy.png" 2>/dev/null)
   if [[ -n "${ENTROPY}" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is: ${ORANGE}${ENTROPY}"
+    print_output "[+] Entropy analysis of binary firmware is: ${ORANGE}${ENTROPY}${NC}"
     write_link "p02"
-    if [[ -n "${lENTROPY_PIC_PATH}" ]]; then
-      if [[ ! -s "${lENTROPY_PIC_PATH}" ]]; then
-        write_link "${lENTROPY_PIC_PATH}"
-      fi
+    if [[ -f "${lENTROPY_PIC_PATH}" ]]; then
+      write_link "${lENTROPY_PIC_PATH}"
     fi
     write_csv_log "entropy_value" "${ENTROPY}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     lDATA_GENERATED=1
@@ -670,13 +668,13 @@ binary_fct_output() {
 
     # if we have the base linux config file we are checking it:
     if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: yes | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
+      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: yes | Vulns: %-4.4s / %-4.4s | %-23.23s | %-23.23s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
     else
-      printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: no  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
+      printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: no  | Vulns: %-4.4s / %-4.4s | %-23.23s | %-23.23s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
     fi
     write_link "${lFCT_LINK}"
   else
-    printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: NA  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
+    printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: NA  | Vulns: %-4.4s / %-4.4s | %-23.23s | %-23.23s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
     write_link "${lFCT_LINK}"
   fi
 }

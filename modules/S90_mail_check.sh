@@ -27,6 +27,8 @@ S90_mail_check() {
   local lELEM=""
   local lMAILS=""
 
+  write_csv_log "type" "path"
+
   mapfile -t lMAILS_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail")
   for lELEM in "${lMAILS_PATH_ARR[@]}"; do
     if [[ -e "${lELEM}" ]]; then
@@ -35,6 +37,7 @@ S90_mail_check() {
       if [[ -n "${lMAILS}" ]]; then
         print_output "[+] Content of ""$(print_path "${lELEM}")"":"
         print_output "$(indent "$(orange "${lMAILS}")")"
+        write_csv_log "mail dir" "${lELEM}"
         ((lFINDING += 1))
       fi
     fi
@@ -51,6 +54,7 @@ S90_mail_check() {
       if [[ -n "${lMAILS_ROOT}" ]]; then
         print_output "[+] Content of ""$(print_path "${lELEM}")"":"
         print_output "$(indent "$(orange "${lMAILS_ROOT}")")"
+        write_csv_log "root mailbox" "${lELEM}"
         ((lFINDING += 1))
       fi
     fi

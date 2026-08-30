@@ -35,6 +35,8 @@ S106_deep_key_search() {
 
   export SORTED_OCC_LIST=()
 
+  write_csv_log "file" "pattern" "occurrences"
+
   deep_key_search
   deep_key_reporter
 
@@ -74,6 +76,7 @@ deep_key_search() {
         lF_COUNT=$(grep -c "${lPATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_"${lFILE_NAME}"".txt" || true)
         if [[ ${lF_COUNT} -gt 0 ]]; then
           lD_S_FINDINGS="${lD_S_FINDINGS}""    ""${lF_COUNT}""\t:\t""${lPATTERN}""\n"
+          write_csv_log "${lMATCH_FILE}" "${lPATTERN}" "${lF_COUNT}"
         fi
       done
       print_output "${lD_S_FINDINGS}"
