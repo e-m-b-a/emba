@@ -106,7 +106,7 @@ if ("${EMBA_ETC}"); then
       fi
 
       # normal service startups
-      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}")); then
+      if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
         "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
         "${BUSYBOX}" echo -e "\tBINARY: ${_BINARY}"
 
@@ -116,7 +116,7 @@ if ("${EMBA_ETC}"); then
         ${_BINARY} &
 
         "${BUSYBOX}" sleep 2
-        if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}")); then
+        if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqiw "${BINARY_NAME}") ); then
           # shellcheck disable=SC2086
           "${BUSYBOX}" sh ${_BINARY} &
         fi
