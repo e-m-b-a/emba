@@ -70,12 +70,15 @@ set_defaults() {
   # afterwards do a default EMBA scan
   export SKIP_PRE_CHECKERS=0 # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
   export PYTHON_CHECK=1
+  export FULL_EMULATION=0 # full system emulation - set it via command line parameter -Q
   # enable L10_DEBUG_MODE in scan profile or default config for further debugging capabilities:
   # * create_emulation_archive for all attempts
-  # * do not stop after 2 detected network services
+  # * do not stop early based on MIN_TCP_SERV threshold:
   export L10_DEBUG_MODE=0
-  export FULL_EMULATION=0 # full system emulation - set it via command line parameter -Q
-  export QEMULATION=0     # user-mode emulation - set it via command line parameter -E
+  # In default setting we try to detect 2 network services. If this does not fit the need, it is possible
+  # to adjust this setting via the scanning-profile. Check the scan-profiles/default-scan-emulation.emba as example
+  export MIN_TCP_SERV=2
+  export QEMULATION=0 # user-mode emulation - set it via command line parameter -E
   # some processes are running long and logging a lot
   # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
   export QEMU_KILL_SIZE="10M"
