@@ -75,7 +75,9 @@ set_defaults() {
   # * create_emulation_archive for all attempts
   # * do not stop early based on MIN_TCP_SERV threshold:
   export L10_DEBUG_MODE=0
-  export MIN_TCP_SERV=1
+  # In default setting we try to detect 2 network services. If this does not fit the need, it is possible
+  # to adjust this setting via the scanning-profile. Check the scan-profiles/default-scan-emulation.emba as example
+  export MIN_TCP_SERV=2
   export QEMULATION=0 # user-mode emulation - set it via command line parameter -E
   # some processes are running long and logging a lot
   # to protect the host we are going to kill them on a QEMU_KILL_SIZE limit
