@@ -93,10 +93,14 @@ wait_for_pid() {
     while [[ -e /proc/"${lPID}" ]]; do
       # print_debug "[*] wait pid protection - running pid: ${lPID}" "no_log"
       print_dot
+      # zombie-skip: stop waiting on a reaped zombie
+      if grep -q "^State:.*Z" "/proc/${lPID}/status" 2>/dev/null; then break; fi
       # if S115 is running we have to kill old qemu processes
       if [[ -f "${LOG_DIR}/${MAIN_LOG_FILE}" ]] && [[ $(grep -i -c S115_ "${LOG_DIR}/${MAIN_LOG_FILE}") -gt 0 && -v QRUNTIME ]]; then
         killall -9 --quiet --older-than "${QRUNTIME}" -r .*qemu-.*-sta.* || true
       fi
+      # explicit sleep — eliminates ~28% CPU busy-spin observed on our build host
+      sleep 1
     done
   done
 }
