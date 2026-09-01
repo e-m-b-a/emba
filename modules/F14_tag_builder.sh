@@ -171,8 +171,8 @@ F14_tag_builder() {
   fi
 
   # emulation
-  if [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    if [[ $(grep -c "TCP ok;" "${L10_SYS_EMU_RESULTS}" || true) -gt 0 ]]; then
+  if [[ -f "${L10_CSV_LOG}" ]]; then
+    if [[ $(grep -c "TCP ok;" "${L10_CSV_LOG}" || true) -gt 0 ]]; then
       lTAGs_ARR+=("emulated")
     fi
   fi

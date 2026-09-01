@@ -978,14 +978,14 @@ get_data() {
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${S17_LOG}" | cut -d: -f2 || true)
     TOTAL_CWE_BINS=$(grep -a "\[\*\]\ Statistics:" "${S17_LOG}" | cut -d: -f3 || true)
   fi
-  if [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    BOOTED=$(grep -c "Booted yes;" "${L10_SYS_EMU_RESULTS}" || true)
-    ICMP=$(grep -c "ICMP ok;" "${L10_SYS_EMU_RESULTS}" || true)
-    TCP_0=$(grep -c "TCP-0 ok;" "${L10_SYS_EMU_RESULTS}" || true)
-    TCP=$(grep -c "TCP ok;" "${L10_SYS_EMU_RESULTS}" || true)
-    IP_ADDR_CNT=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | grep -E -c "IP\ address:\ [0-9]+" || true)
+  if [[ -f "${L10_CSV_LOG}" ]]; then
+    BOOTED=$(grep -c "Booted yes;" "${L10_CSV_LOG}" || true)
+    ICMP=$(grep -c "ICMP ok;" "${L10_CSV_LOG}" || true)
+    TCP_0=$(grep -c "TCP-0 ok;" "${L10_CSV_LOG}" || true)
+    TCP=$(grep -c "TCP ok;" "${L10_CSV_LOG}" || true)
+    IP_ADDR_CNT=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_CSV_LOG}" | grep -E -c "IP\ address:\ [0-9]+" || true)
     # we make something like this: "bridge-default-normal"
-    L10_EMULATION_MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_SYS_EMU_RESULTS}" | cut -d\; -f10 | sed 's/Network mode: //g' | tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
+    L10_EMULATION_MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "${L10_CSV_LOG}" | cut -d\; -f10 | sed 's/Network mode: //g' | tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "${L20_LOG}" ]]; then
     # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "${L15_LOG}" | cut -d: -f2 || true)

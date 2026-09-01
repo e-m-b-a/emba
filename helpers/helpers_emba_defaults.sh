@@ -285,7 +285,7 @@ set_log_paths() {
   export Q02_LOG="${LOG_DIR}/q02_openai_question.txt"
   export Q03_LOG="${LOG_DIR}/q03_localai_connector.txt"
   export L10_LOG="${LOG_DIR}/l10_system_emulator.txt"
-  export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
+  export L10_CSV_LOG="${CSV_DIR}/l10_system_emulator.csv"
   export L15_LOG="${LOG_DIR}/l15_emulated_checks_init.txt"
   export L15_CSV_LOG="${CSV_DIR}/l15_emulated_checks_nmap.csv"
   export L20_LOG="${LOG_DIR}/l20_snmp_checks.txt"
