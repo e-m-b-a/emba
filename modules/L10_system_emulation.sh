@@ -1748,7 +1748,7 @@ get_networking_details_emulation() {
           IP_ADDRESS_="${lNVRAM_BACKUP_IP}"
           print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
         elif [[ -s "${L10_CSV_LOG}" ]]; then
-          IP_ADDRESS_=$(cut -d\; -f8 "${L10_CSV_LOG}" | sort -u | tail -n1)
+          IP_ADDRESS_=$(cut -d\; -f9 "${L10_CSV_LOG}" | sort -u | tail -n1)
           IP_ADDRESS_="${IP_ADDRESS_/*\ /}"
           print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
         else

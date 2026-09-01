@@ -104,7 +104,7 @@ load_default_environment() {
   # During EMBA run the system emulation results are not available
   if ! [[ -f "${L10_CSV_LOG}" ]]; then
     print_ln ""
-    print_output "[-] No system emualtion checks possible - missing L10 EMBA log directory (future extension)"
+    print_output "[-] No system emulation checks possible - missing L10 EMBA log directory (future extension)"
     DETECTION_MECHANISMS_ARR=("${DETECTION_MECHANISMS_ARR[@]/QEMU-SYS/}")
   fi
 
