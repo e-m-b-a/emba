@@ -77,7 +77,7 @@ parameter_parsing() {
   export HTML_PATH="${LOG_DIR}/html-report"
   export S115_LOG="${LOG_DIR}/s115_usermode_emulator.txt"
   export S115_LOG_DIR="${S115_LOG/\.txt/\/}"
-  export L10_SYS_EMU_RESULTS="${LOG_DIR}/emulator_online_results.log"
+  export L10_CSV_LOG="${LOG_DIR}/csv_logs/l10_system_emulation.csv"
   export SVG_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.svg"
 }
 

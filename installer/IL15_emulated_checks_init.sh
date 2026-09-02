@@ -72,6 +72,11 @@ IL15_emulated_checks_init() {
     print_tool_info "libasound2t64"
     print_tool_info "npm"
 
+    # nikto
+    print_tool_info "libjson-perl"
+    print_tool_info "libxml-writer-perl"
+    print_tool_info "libnet-ssleay-perl"
+
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else

@@ -72,14 +72,14 @@ L10_system_emulation() {
       find "${LOG_PATH_MODULE}" -name "run.sh" --delete 2>/dev/null || true
 
       # handling restarted scans with old emulation processes:
-      if [[ -f "${L10_SYS_EMU_RESULTS}" ]] && grep -q "L10_system_emulation finished" "${LOG_DIR}"/emba.log; then
+      if [[ -f "${L10_CSV_LOG}" ]] && grep -q "L10_system_emulation finished" "${LOG_DIR}"/emba.log; then
         print_ln
         print_output "[*] Found finished emulation process - trying to recover old emulation process"
 
-        lEMULATION_ENTRY="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1)"
-        lIP_ADDRESS=$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f9 | awk '{print $3}')
-        lIMAGE_DIR="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f11)"
-        ARCHIVE_PATH="${OLD_LOG_DIR}""/""${lIMAGE_DIR}"
+        lEMULATION_ENTRY="$(grep "TCP ok" "${L10_CSV_LOG}" | sort -k 7 -t ';' | tail -1)"
+        lIP_ADDRESS=$(grep "TCP ok" "${L10_CSV_LOG}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f9 | awk '{print $3}')
+        lIMAGE_DIR="$(grep "TCP ok" "${L10_CSV_LOG}" | sort -k 7 -t ';' | tail -1 | cut -d\; -f11)"
+        ARCHIVE_PATH="${OLD_LOG_DIR}/${lIMAGE_DIR}"
 
         print_output "[*] Recovered IP address: ${ORANGE}${lIP_ADDRESS}${NC}"
         print_output "[*] Recovered IMAGE_DIR: ${ORANGE}${lIMAGE_DIR}${NC}"
@@ -179,14 +179,14 @@ L10_system_emulation() {
     fi
   fi
 
-  if [[ "${lMODULE_END}" -ne 0 ]] && [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    if [[ $(grep -c "TCP ok" "${L10_SYS_EMU_RESULTS}" || true) -gt 0 ]]; then
+  if [[ "${lMODULE_END}" -ne 0 ]] && [[ -f "${L10_CSV_LOG}" ]]; then
+    if [[ $(grep -c "TCP ok" "${L10_CSV_LOG}" || true) -gt 0 ]]; then
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
       export HOSTNETDEV_ARR=()
       local lIMAGE_DIR=""
       local lSYS_EMUL_POS_ENTRY=""
-      lSYS_EMUL_POS_ENTRY="$(grep "TCP ok" "${L10_SYS_EMU_RESULTS}" | sort -t ';' -k7 -n -r | head -1 || true)"
+      lSYS_EMUL_POS_ENTRY="$(grep "TCP ok" "${L10_CSV_LOG}" | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "${lSYS_EMUL_POS_ENTRY}")")"
 
       lIP_ADDRESS=$(echo "${lSYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f9 | awk '{print $3}')
@@ -238,7 +238,7 @@ check_bmc_supermicro() {
 }
 
 print_system_emulation_results() {
-  if [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
+  if [[ -f "${L10_CSV_LOG}" ]]; then
     sub_module_title "System emulation results"
     print_output "EMBA was able to identify the following system emulation results:"
     print_ln
@@ -252,7 +252,7 @@ print_system_emulation_results() {
       else
         print_output "[*] ${lEMU_RES}"
       fi
-    done <"${L10_SYS_EMU_RESULTS}"
+    done <"${L10_CSV_LOG}"
   fi
 }
 
@@ -1747,8 +1747,8 @@ get_networking_details_emulation() {
         if [[ "${lNVRAM_BACKUP_IP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           IP_ADDRESS_="${lNVRAM_BACKUP_IP}"
           print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
-        elif [[ -s "${L10_SYS_EMU_RESULTS}" ]]; then
-          IP_ADDRESS_=$(cut -d\; -f8 "${L10_SYS_EMU_RESULTS}" | sort -u | tail -n1)
+        elif [[ -s "${L10_CSV_LOG}" ]]; then
+          IP_ADDRESS_=$(cut -d\; -f9 "${L10_CSV_LOG}" | sort -u | tail -n1)
           IP_ADDRESS_="${IP_ADDRESS_/*\ /}"
           print_output "[*] Originally identified IP 0.0.0.0 -> using backup IP ${IP_ADDRESS_}"
         else
@@ -2975,7 +2975,7 @@ create_emulation_archive() {
   fi
 
   echo "${lIPS_INT_VLAN_CFG_mod}" >>"${lARCHIVE_PATH}"/emulation_config.txt || true
-  cat "${L10_SYS_EMU_RESULTS}" >>"${lARCHIVE_PATH}"/emulation_config.txt || true
+  cat "${L10_CSV_LOG}" >>"${lARCHIVE_PATH}"/emulation_config.txt || true
 
   if [[ -v ARCHIVE_PATH ]] && [[ -f "${lARCHIVE_PATH}"/run.sh ]]; then
     chmod +x "${lARCHIVE_PATH}"/run.sh
@@ -3175,10 +3175,10 @@ write_results() {
 
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   lARCHIVE_PATH="${lARCHIVE_PATH##*/}" # basename
-  if ! [[ -f "${L10_SYS_EMU_RESULTS}" ]]; then
-    write_log "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services cnt;available network services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" "${L10_SYS_EMU_RESULTS}"
+  if ! [[ -f "${L10_CSV_LOG}" ]]; then
+    write_csv_log "FIRMWARE_PATH" "RESULT_SOURCE" "Booted state" "ICMP state" "TCP-0 state" "TCP state" "online services cnt" "available network services" "IP address" "Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM)" "ARCHIVE_PATH_" "R_PATH"
   fi
-  write_log "${lFIRMWARE_PATH_orig:-NA};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};${lSERVICES%,};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*/});${lARCHIVE_PATH};${lR_PATH_mod}" "${L10_SYS_EMU_RESULTS}"
+  write_csv_log "${lFIRMWARE_PATH_orig:-NA}" "${lRESULT_SOURCE}" "Booted ${BOOTED}" "ICMP ${ICMP}" "TCP-0 ${TCP_0}" "TCP ${TCP}" "${lTCP_SERV_CNT}" "${lSERVICES%,}" "IP address: ${IP_ADDRESS_}" "Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lVLAN_ID}|${lINIT_FILE}|${KINIT/=*/})" "${lARCHIVE_PATH}" "${lR_PATH_mod}"
   print_bar ""
 }
 
