@@ -240,6 +240,7 @@ check_for_basic_auth_init() {
     if [[ "${lCURL_RET}" != 22 ]] && [[ "${lCREDS}" != "NA" ]]; then
       print_output "[+] Basic auth credentials for web server found: ${ORANGE}${lCREDS}${NC}"
       CURL_CREDS_ARR=("--user" "${lCREDS}")
+      WEB_RESULTS=1
     fi
   else
     print_output "[*] No basic auth found in Nmap logs"
@@ -527,9 +528,11 @@ web_access_crawler() {
 
     if [[ "${lCRAWL_RESP_200}" -gt 0 ]]; then
       print_output "[+] Found ${ORANGE}${lCRAWL_RESP_200}${GREEN} unique valid responses - please check the log for further details" "" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
+      WEB_RESULTS=1
     fi
     if [[ "${lCRAWL_RESP_401}" -gt 0 ]]; then
       print_output "[+] Found ${ORANGE}${lCRAWL_RESP_401}${GREEN} unique unauthorized responses - please check the log for further details" "" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log"
+      WEB_RESULTS=1
     fi
 
     if [[ -f "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log" ]] && [[ -f "${LOG_DIR}"/s22_php_check/semgrep_php_results_xml.log ]]; then
@@ -545,6 +548,7 @@ web_access_crawler() {
             write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
           fi
           print_output "[+] Found possible vulnerability ${ORANGE}${lVULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${lWEB_NAME}${NC}."
+          WEB_RESULTS=1
           write_link "s22"
           write_csv_log "${lWEB_NAME}" "semgrep" "php" "${lVULN_NAME}" "${lVULN_FILE}"
         done
@@ -563,6 +567,7 @@ web_access_crawler() {
             write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
           fi
           print_output "[+] Found possible vulnerability in lua analysis for ${ORANGE}${lWEB_NAME}${NC}." "${S23_LOG}"
+          WEB_RESULTS=1
           write_csv_log "${lWEB_NAME}" "lua check" "lua" "${lVULN_NAME}" "${lWEB_PATH}"
         done
       done <"${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}-200ok.log"
