@@ -34,7 +34,7 @@ print_help() {
   echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection (deprecated)"
   echo -e "${CYAN}""-S""${NC}""                STRICT mode - developer option for error tracing / not deleting docker container logs"
   #  echo -e "${CYAN}""-i""${NC}""                EMBA internally used for container identification (do not use it as cli parameter)"
-  echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automaticially, even if it is not empty"
+  echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automatically, even if it is not empty"
   echo -e "\\nSystem check"
   echo -e "${CYAN}""-d [1/2]""${NC}""          Only checks dependencies (1 - on host and in container, 2 - only container)"
   echo -e "${CYAN}""-F""${NC}""                Checks dependencies but ignore errors"
