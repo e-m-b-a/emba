@@ -80,15 +80,19 @@ cwe_check() {
     fi
   fi
 
+  # we are going to use the lBINARIES_ARR for further analysis. This includes binaries with known usage of strcpy/system in the beginning
+  # Afterwards we add all the other binaries to ensure we are going to test everything if we have enough time
   local lBINARIES_ARR=()
+  local lBINARIES_ALL_ARR=()
   if [[ "$(wc -l 2>/dev/null <"${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
     # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
-  else
-    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f2 || true)
   fi
+  mapfile -t lBINARIES_ALL_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
+  # as we do duplicate checking later on we do not care about duplicate entries now
+  lBINARIES_ARR=("${lBINARIES_ARR[@]}" "${lBINARIES_ALL_ARR[@]}")
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
     if [[ -f "${BASE_LINUX_FILES}" ]]; then

@@ -69,14 +69,18 @@ S16_ghidra_decompile_checks() {
     fi
   fi
 
+  # we are going to use the lBINARIES_ARR for further analysis. This includes binaries with known usage of strcpy/system in the beginning
+  # Afterwards we add all the other binaries to ensure we are going to test everything if we have enough time
   local lBINARIES_ARR=()
+  local lBINARIES_ALL_ARR=()
   if [[ "$(wc -l 2>/dev/null <"${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
-  else
-    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
   fi
+  mapfile -t lBINARIES_ALL_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
+  # as we do duplicate checking later on we do not care about duplicate entries now
+  lBINARIES_ARR=("${lBINARIES_ARR[@]}" "${lBINARIES_ALL_ARR[@]}")
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
     lNAME=$(basename "${lBIN_TO_CHECK}" 2>/dev/null)
@@ -139,7 +143,7 @@ S16_ghidra_decompile_checks() {
         break
       fi
     fi
-  done < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" || true)
+  done
 
   wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
@@ -214,7 +218,7 @@ ghidra_analyzer() {
     lS16_GHIDRA_MAX_RUNTIME=$((lS16_GHIDRA_MAX_RUNTIME - SECONDS))
     # minimum Ghidra runtime of 60 seconds
     if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -lt 60 ]]; then
-      print_error "[*] Out of time for decompiling code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra"
+      print_error "[-] Out of time for decompiling code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra"
       return
     else
       # add unit for our calculated time
