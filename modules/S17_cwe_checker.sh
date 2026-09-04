@@ -157,7 +157,7 @@ cwe_check() {
 cwe_checker_threaded() {
   local lBINARY="${1:-}"
   local lS17_CWE_CHECKER_MAX_RUNTIME="${2:-}"
-  local lCWE_OUT=()
+  local lCWE_OUT_ARR=()
   local lCWE_LINE=""
   local lCWE=""
   local lCWE_DESC=""
@@ -212,32 +212,56 @@ cwe_checker_threaded() {
   if [[ -s "${lCWE_CHECKER_JSON_LOG_FILE}" ]]; then
     log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     sub_module_title "CWE-Checker results for ${lNAME}" "${lCWE_CHECKER_TXT_LOG_FILE}"
-    # The following is just for getting some nice output to the cli interface:
-    jq -r '.[] | "\(.name) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | sort -u || true
+    printf "${GREEN_}\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s${NC}\n" "CWE id" "address" "tids" "symbols" "description" > "${lCWE_CHECKER_TXT_LOG_FILE}"
+    # The following is just for getting some nice to the cli interface:
+    jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["()' | sort -u || true
 
     # get the total number of vulnerabilities in the binary
     lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | wc -l || true)
-    mapfile -t lCWE_OUT < <(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
+    mapfile -t lCWE_OUT_ARR < <(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | cut -d\) -f1 | tr -d '(' | sort -u || true)
     # this is the logging after every tested file
-    if [[ ${#lCWE_OUT[@]} -ne 0 ]]; then
+    if [[ ${#lCWE_OUT_ARR[@]} -ne 0 ]]; then
       print_ln
 
-      jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["' >>"${lCWE_CHECKER_TXT_LOG_FILE}" || true
+      # jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["' >>"${lCWE_CHECKER_TXT_LOG_FILE}" || true
+
+      local lCWE_CHECKER_JSON_LOG_ARR=()
+      local lCWE_ID=""
+      local lADDRESSES=""
+      local lTIDS=""
+      local lSYMB=""
+      local lDESC=""
+
+      mapfile -t lCWE_CHECKER_JSON_LOG_ARR < <(jq -c '.[]' "${lCWE_CHECKER_JSON_LOG_FILE}")
+
+      for lS17_LOG_ENTRY_LINE in "${lCWE_CHECKER_JSON_LOG_ARR[@]}"; do
+        lCWE_ID=$(jq -r '.name' <<< "${lS17_LOG_ENTRY_LINE}" || true)
+        lADDRESSES=$(jq -cr '.addresses[]' <<< "${lS17_LOG_ENTRY_LINE}" || true)
+        lADDRESSES="${lADDRESSES//[\"\[\]]/}"
+        lADDRESSES="${lADDRESSES//$'\n'/,}"
+        lTIDS=$(jq -r '.tids[]' <<< "${lS17_LOG_ENTRY_LINE}" || true)
+        lTIDS="${lTIDS//[\"\[\]]/}"
+        lSYMB=$(jq -r '.symbols[]' <<< "${lS17_LOG_ENTRY_LINE}" || true)
+        lSYMB="${lSYMB//[\"\[\]]/}"
+        lDESC=$(jq -r '.description' <<< "${lS17_LOG_ENTRY_LINE}" || true)
+        lDESC="${lDESC//[\"\[\]\(\)]/}"
+        printf "\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s\n" "${lCWE_ID:-NA}" "${lADDRESSES:-NA}" "${lTIDS:-NA}" "${lSYMB:-NA}" "${lDESC:-NA}" >> "${lCWE_CHECKER_TXT_LOG_FILE}"
+      done
 
       # check for known linux files
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
         # if we have the base linux config file we are checking it:
         if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           # shellcheck disable=SC2153
-          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
+          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT_ARR[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
         else
-          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${RED}common linux file: no${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
+          print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT_ARR[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${RED}common linux file: no${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
         fi
       else
-        print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
+        print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT_ARR[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
       fi
 
-      for lCWE_LINE in "${lCWE_OUT[@]}"; do
+      for lCWE_LINE in "${lCWE_OUT_ARR[@]}"; do
         lCWE="$(awk '{print $1}' <<<"${lCWE_LINE}")" # field 1
         lCWE_DESC="${lCWE_LINE#* }"                  # field 2-
         lCWE_CNT="$(grep -c "${lCWE}" "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null || true)"
