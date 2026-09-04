@@ -212,8 +212,8 @@ cwe_checker_threaded() {
   if [[ -s "${lCWE_CHECKER_JSON_LOG_FILE}" ]]; then
     log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     sub_module_title "CWE-Checker results for ${lNAME}" "${lCWE_CHECKER_TXT_LOG_FILE}"
-    printf "${GREEN_}\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s${NC}\n" "CWE id" "address" "tids" "symbols" "description" > "${lCWE_CHECKER_TXT_LOG_FILE}"
-    # The following is just for getting some nice to the cli interface:
+    printf "${GREEN_}\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s${NC}\n" "CWE id" "address" "tids" "symbols" "description" >> "${lCWE_CHECKER_TXT_LOG_FILE}"
+    # The following is just for getting some output to the cli interface:
     jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["()' | sort -u || true
 
     # get the total number of vulnerabilities in the binary
@@ -222,8 +222,6 @@ cwe_checker_threaded() {
     # this is the logging after every tested file
     if [[ ${#lCWE_OUT_ARR[@]} -ne 0 ]]; then
       print_ln
-
-      # jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["' >>"${lCWE_CHECKER_TXT_LOG_FILE}" || true
 
       local lCWE_CHECKER_JSON_LOG_ARR=()
       local lCWE_ID=""
