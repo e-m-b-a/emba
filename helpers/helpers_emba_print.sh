@@ -150,7 +150,7 @@ print_debug() {
 # print_output "asdf" "" "link" -> logs to LOG_FILE and includes a link (REF)
 # print_output "asdf" "other_log_file" "" 0 -> does not log to default LOG_FILE. Logs to screen and to other_log_file
 print_output() {
-  local lOUTPUT="${1:-\n}"
+  local lOUTPUT="${1:-}"
   local lLOG_SETTING="${2:-}"
   if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_FILE_MOD:-}" ]]; then
     local lLOG_FILE_MOD="${2:-}"
@@ -167,7 +167,11 @@ print_output() {
     lCOLOR_OUTPUT_STRING="$(color_output "${lOUTPUT}")"
     safe_echo "${lCOLOR_OUTPUT_STRING}"
     if [[ "${lLOG_SETTING}" == "main" ]]; then
-      safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
+      if [[ -z "${lREF_LINK:-}" ]]; then
+        safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")" "${MAIN_LOG}"
+      else
+        safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${MAIN_LOG}"
+      fi
     elif [[ "${lLOG_SETTING}" != "no_log" ]]; then
       if [[ -z "${lREF_LINK:-}" ]]; then
         if [[ "${lDEF_LOG}" -eq 1 ]]; then
@@ -178,10 +182,10 @@ print_output() {
         fi
       else
         if [[ "${lDEF_LOG}" -eq 1 ]]; then
-          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${LOG_FILE}"
         fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
@@ -201,10 +205,10 @@ print_output() {
         fi
       else
         if [[ "${lDEF_LOG}" -eq 1 ]]; then
-          safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+          safe_echo "$(format_log "${lOUTPUT}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${LOG_FILE}"
         fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
+          safe_echo "$(format_log "${lOUTPUT}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
@@ -427,13 +431,13 @@ write_pid_log() {
   fi
 
   # shellcheck disable=SC2153
-  echo "${lLOG_MESSAGE}" >>"${TMP_DIR}"/"${PID_LOG_FILE}" || true
+  echo "${lLOG_MESSAGE}" >>"${TMP_DIR}/${PID_LOG_FILE}" || true
 }
 
 write_link() {
   if [[ ${HTML} -eq 1 ]]; then
     local lLINK="${1:-}"
-    lLINK="$(format_log "[REF] ""${lLINK}" 1)"
+    lLINK="$(format_log "[REF] ${lLINK}" 1)"
     local lLOG_FILE_ALT="${2:-}"
     if [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" != "main" ]]; then
       if [[ -f "${lLOG_FILE_ALT}" ]]; then
@@ -441,6 +445,8 @@ write_link() {
       else
         echo -e "${lLINK}" | tee -a "${LOG_FILE}" >/dev/null
       fi
+    elif [[ "${lLOG_FILE_ALT}" != "no_log" ]] && [[ "${lLOG_FILE_ALT}" == "main" ]]; then
+      echo -e "${lLINK}" | tee -a "${MAIN_LOG}" >/dev/null
     fi
   fi
 }
@@ -825,7 +831,12 @@ module_end_log() {
   if [[ "${DISABLE_NOTIFICATIONS}" -eq 0 ]]; then
     write_notification "Module ${lMODULE_MAIN_NAME} finished"
   fi
-  print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main"
+  if [[ "${HTML}" -eq 1 ]]; then
+    # Todo: While we add the link marker here it is not further processed from the HTML report generator
+    print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main" "${lMODULE_MAIN_NAME//_*/}"
+  else
+    print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main"
+  fi
 }
 
 strip_color_codes() {
