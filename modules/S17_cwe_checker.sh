@@ -213,8 +213,6 @@ cwe_checker_threaded() {
     log_bin_hardening "${lBINARY}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     sub_module_title "CWE-Checker results for ${lNAME}" "${lCWE_CHECKER_TXT_LOG_FILE}"
     printf "${GREEN_}\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s${NC}\n" "CWE id" "address" "tids" "symbols" "description" >>"${lCWE_CHECKER_TXT_LOG_FILE}"
-    # The following is just for getting some output to the cli interface:
-    jq -r '.[] | "\(.name) - \(.addresses) - \(.tids) - \(.symbols) - \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | tr -d ']["()' | sort -u || true
 
     # get the total number of vulnerabilities in the binary
     lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${lCWE_CHECKER_JSON_LOG_FILE}" | wc -l || true)
@@ -229,8 +227,9 @@ cwe_checker_threaded() {
       local lTIDS=""
       local lSYMB=""
       local lDESC=""
+      local lS17_LOG_ENTRY_LINE=""
 
-      mapfile -t lCWE_CHECKER_JSON_LOG_ARR < <(jq -c '.[]' "${lCWE_CHECKER_JSON_LOG_FILE}")
+      mapfile -t lCWE_CHECKER_JSON_LOG_ARR < <(jq -c '.[]' "${lCWE_CHECKER_JSON_LOG_FILE}" || true)
 
       for lS17_LOG_ENTRY_LINE in "${lCWE_CHECKER_JSON_LOG_ARR[@]}"; do
         lCWE_ID=$(jq -r '.name' <<<"${lS17_LOG_ENTRY_LINE}" || true)
@@ -239,11 +238,13 @@ cwe_checker_threaded() {
         lADDRESSES="${lADDRESSES//$'\n'/,}"
         lTIDS=$(jq -r '.tids[]' <<<"${lS17_LOG_ENTRY_LINE}" || true)
         lTIDS="${lTIDS//[\"\[\]]/}"
+        lTIDS="${lTIDS//$'\n'/,}"
         lSYMB=$(jq -r '.symbols[]' <<<"${lS17_LOG_ENTRY_LINE}" || true)
         lSYMB="${lSYMB//[\"\[\]]/}"
+        lSYMB="${lSYMB//$'\n'/,}"
         lDESC=$(jq -r '.description' <<<"${lS17_LOG_ENTRY_LINE}" || true)
         lDESC="${lDESC//[\"\[\]\(\)]/}"
-        printf "\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s\n" "${lCWE_ID:-NA}" "${lADDRESSES:-NA}" "${lTIDS:-NA}" "${lSYMB:-NA}" "${lDESC:-NA}" >>"${lCWE_CHECKER_TXT_LOG_FILE}"
+        printf "\t%-9.9s | %-15.15s | %-15.15s | %-15.15s | %s\n" "${lCWE_ID:-NA}" "${lADDRESSES:-NA}" "${lTIDS:-NA}" "${lSYMB:-NA}" "${lDESC:-NA}" | tee -a "${lCWE_CHECKER_TXT_LOG_FILE}"
       done
 
       # check for known linux files
