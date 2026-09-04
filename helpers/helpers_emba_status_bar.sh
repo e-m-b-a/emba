@@ -535,7 +535,7 @@ initial_status_bar() {
   # resets and clears the screen for the status bar
   printf "\x1Bc"
 
-  tail -f "${LOG_DIR}"/emba.log | grep -v "\[REF\]\ "&
+  tail -f "${LOG_DIR}"/emba.log | grep -v "\[REF\]\ " &
   local lTAIL_PID="$!"
   disown "${lTAIL_PID}" 2>/dev/null || true
 

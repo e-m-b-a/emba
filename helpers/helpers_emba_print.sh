@@ -833,7 +833,7 @@ module_end_log() {
   fi
   if [[ "${HTML}" -eq 1 ]]; then
     # Todo: While we add the link marker here it is not further processed from the HTML report generator
-    print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main" "${lMODULE_MAIN_NAME//_*}"
+    print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main" "${lMODULE_MAIN_NAME//_*/}"
   else
     print_output "[*] $(print_date) - ${lMODULE_MAIN_NAME} finished" "main"
   fi
