@@ -80,15 +80,19 @@ cwe_check() {
     fi
   fi
 
+  # we are going to use the lBINARIES_ARR for further analysis. This includes binaries with known usage of strcpy/system in the beginning
+  # Afterwards we add all the other binaries to ensure we are going to test everything if we have enough time
   local lBINARIES_ARR=()
+  local lBINARIES_ALL_ARR=()
   if [[ "$(wc -l 2>/dev/null <"${S13_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S14_CSV_LOG}")" -gt 1 ]] || [[ "$(wc -l 2>/dev/null <"${S15_CSV_LOG}")" -gt 1 ]]; then
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
     # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
-  else
-    mapfile -t lBINARIES_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep "ELF" | cut -d ';' -f2 || true)
   fi
+  mapfile -t lBINARIES_ALL_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
+  # as we do duplicate checking later on we do not care about duplicate entries now
+  lBINARIES_ARR=("${lBINARIES_ARR[@]}" "${lBINARIES_ALL_ARR[@]}")
 
   for lBIN_TO_CHECK in "${lBINARIES_ARR[@]}"; do
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
@@ -137,7 +141,7 @@ cwe_check() {
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
     local lMODULE_RUNTIME="${SECONDS}"
     if [[ "${lMODULE_RUNTIME}" -gt "${lS17_MIN_RUNTIME}" ]]; then
-      print_output "[*] $(print_date) - S17 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS17_MIN_RUNTIME}"
+      print_error "[*] $(print_date) - S17 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS17_MIN_RUNTIME}s"
       # we stop checking after testing MAX_EXT_CHECK_BINS binaries
       if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
         print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
@@ -190,7 +194,7 @@ cwe_checker_threaded() {
     lS17_CWE_CHECKER_MAX_RUNTIME=$((lS17_CWE_CHECKER_MAX_RUNTIME - SECONDS))
     # minimum Ghidra runtime of 60 seconds
     if [[ "${lS17_CWE_CHECKER_MAX_RUNTIME}" -lt 60 ]]; then
-      print_error "[*] Out of time for analyzing binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with cwe_checker" "no_log"
+      print_error "[*] Out of time for analyzing binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with cwe_checker - skipping" "no_log"
       return
     else
       # add unit for our calculated time

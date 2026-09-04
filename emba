@@ -752,11 +752,15 @@ main() {
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
     disable_strict_mode "${STRICT_MODE}" 0
+    local lDOCKER_COMPOSE_OPTS_ARR=("run")
+    if [[ "${STRICT_MODE}" -ne 1 ]]; then
+      lDOCKER_COMPOSE_OPTS_ARR+=("--rm")
+    fi
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       # check dependencies mode:
-      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" "${lDOCKER_COMPOSE_OPTS_ARR[@]}" emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" "${lDOCKER_COMPOSE_OPTS_ARR[@]}" emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       if [[ $? -ne ${D_RETURN} ]]; then
         D_RETURN=1
       fi
@@ -771,7 +775,7 @@ main() {
       # default EMBA analysis mode:
       if [[ "${RESCAN_SBOM}" -ne 1 ]]; then
         local lQUEST_CONTAINER_=""
-        lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        lQUEST_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" "${lDOCKER_COMPOSE_OPTS_ARR[@]}" --detach emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
         export QUEST_CONTAINER="${lQUEST_CONTAINER_}"
         print_output "[+] $(print_date) - Quest container ${lQUEST_CONTAINER_} started and detached.\\n" "no_log"
       fi
@@ -779,13 +783,13 @@ main() {
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then
         # EMBA container starts in the foreground and we can see all the logs
-        COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" "${lDOCKER_COMPOSE_OPTS_ARR[@]}" emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
         D_RETURN=$?
       else
         # EMBA container starts in the background
         print_output "[*] $(print_date) - EMBA main container starting and detaching.\\n" "no_log"
         local lMAIN_CONTAINER_=""
-        lMAIN_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        lMAIN_CONTAINER_="$(COMPOSE_IGNORE_ORPHANS=True EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" "${lDOCKER_COMPOSE_OPTS_ARR[@]}" --detach emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
         export MAIN_CONTAINER="${lMAIN_CONTAINER_}"
 
         print_output "[+] $(print_date) - EMBA main container ${lMAIN_CONTAINER_} started and detached." "no_log"
