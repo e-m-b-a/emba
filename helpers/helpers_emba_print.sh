@@ -150,7 +150,7 @@ print_debug() {
 # print_output "asdf" "" "link" -> logs to LOG_FILE and includes a link (REF)
 # print_output "asdf" "other_log_file" "" 0 -> does not log to default LOG_FILE. Logs to screen and to other_log_file
 print_output() {
-  local lOUTPUT="${1:-\n}"
+  local lOUTPUT="${1:-}"
   local lLOG_SETTING="${2:-}"
   if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_FILE_MOD:-}" ]]; then
     local lLOG_FILE_MOD="${2:-}"
@@ -178,10 +178,12 @@ print_output() {
         fi
       else
         if [[ "${lDEF_LOG}" -eq 1 ]]; then
-          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+          # safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${LOG_FILE}"
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")$(format_log "[REF] ${lREF_LINK}" 1)" "${LOG_FILE}"
         fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
+          # safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
+          safe_echo "$(format_log "${lCOLOR_OUTPUT_STRING}")$(format_log "[REF] ${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
@@ -201,10 +203,12 @@ print_output() {
         fi
       else
         if [[ "${lDEF_LOG}" -eq 1 ]]; then
-          safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${LOG_FILE}"
+          # safe_echo "$(format_log "${lOUTPUT}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${LOG_FILE}"
+          safe_echo "$(format_log "${lOUTPUT}")$(format_log "[REF] ${lREF_LINK}" 1)" "${LOG_FILE}"
         fi
         if [[ -n "${lLOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "${lOUTPUT}")""\\r\\n""$(format_log "[REF] ""${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
+          # safe_echo "$(format_log "${lOUTPUT}")\\r\\n$(format_log "[REF] ${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
+          safe_echo "$(format_log "${lOUTPUT}")$(format_log "[REF] ${lREF_LINK}" 1)" "${lLOG_FILE_MOD}"
         fi
       fi
     fi
