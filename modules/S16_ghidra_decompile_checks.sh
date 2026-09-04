@@ -135,7 +135,7 @@ S16_ghidra_decompile_checks() {
     # enough binaries are tested as soon as our checked array has more elements then defined in MAX_EXT_CHECK_BINS
     local lMODULE_RUNTIME="${SECONDS}"
     if [[ "${lMODULE_RUNTIME}" -gt "${lS16_MIN_RUNTIME}" ]]; then
-      print_output "[*] S16 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS16_MIN_RUNTIME}" "no_log"
+      print_error "[-] S16 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS16_MIN_RUNTIME}"
       # we stop checking after testing MAX_EXT_CHECK_BINS binaries
       if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
         print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now."
@@ -218,7 +218,7 @@ ghidra_analyzer() {
     lS16_GHIDRA_MAX_RUNTIME=$((lS16_GHIDRA_MAX_RUNTIME - SECONDS))
     # minimum Ghidra runtime of 60 seconds
     if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -lt 60 ]]; then
-      print_error "[-] Out of time for decompiling code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra"
+      print_error "[-] Out of time for decompiling code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra - skipping"
       return
     else
       # add unit for our calculated time
@@ -269,7 +269,7 @@ ghidra_analyzer() {
     fi
   done
 
-  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}"/semgrep-rules-0xdea/rules /tmp/haruspex_"${lNAME}"/* >>"${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
+  semgrep --disable-version-check --metrics=off --severity ERROR --severity WARNING --json --config "${EXT_DIR}/semgrep-rules-0xdea/rules" "/tmp/haruspex_${lNAME}" >>"${lSEMGREPLOG}" || print_error "[-] Semgrep error detected on testing ${lNAME}"
 
   # check if there are more details in our log (not only the header with the binary protections)
   if [[ "$(wc -l <"${lSEMGREPLOG}")" -gt 0 ]]; then
@@ -398,6 +398,8 @@ s16_semgrep_logger() {
         # with a normal echo we automatically remove the null bytes which caused issues
         # shellcheck disable=SC2116
         lLINE_NR="$(echo "${lLINE_NR}")"
+        # enforce it now
+        lLINE_NR="$(tr -d '\0' <<<"${lLINE_NR}")"
         # color and mark the identified line in the source file:
         if [[ "${lCODE_LINE}" != *"possible issue identified - semgrep"* ]]; then
           sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m   \/\/possible issue identified - semgrep/" "${lC_SRC_FCT}" || true

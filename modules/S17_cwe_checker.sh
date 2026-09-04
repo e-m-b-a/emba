@@ -141,7 +141,7 @@ cwe_check() {
     # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
     local lMODULE_RUNTIME="${SECONDS}"
     if [[ "${lMODULE_RUNTIME}" -gt "${lS17_MIN_RUNTIME}" ]]; then
-      print_output "[*] $(print_date) - S17 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS17_MIN_RUNTIME}"
+      print_error "[*] $(print_date) - S17 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS17_MIN_RUNTIME}s"
       # we stop checking after testing MAX_EXT_CHECK_BINS binaries
       if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
         print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending cwe_checker binary analysis now." "no_log"
@@ -194,7 +194,7 @@ cwe_checker_threaded() {
     lS17_CWE_CHECKER_MAX_RUNTIME=$((lS17_CWE_CHECKER_MAX_RUNTIME - SECONDS))
     # minimum Ghidra runtime of 60 seconds
     if [[ "${lS17_CWE_CHECKER_MAX_RUNTIME}" -lt 60 ]]; then
-      print_error "[*] Out of time for analyzing binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with cwe_checker" "no_log"
+      print_error "[*] Out of time for analyzing binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with cwe_checker - skipping" "no_log"
       return
     else
       # add unit for our calculated time
