@@ -135,9 +135,9 @@ S16_ghidra_decompile_checks() {
     # enough binaries are tested as soon as our checked array has more elements then defined in MAX_EXT_CHECK_BINS
     local lMODULE_RUNTIME="${SECONDS}"
     if [[ "${lMODULE_RUNTIME}" -gt "${lS16_MIN_RUNTIME}" ]]; then
-      print_error "[-] S16 Module runtime limitation kicked - ${lMODULE_RUNTIME} -gt ${lS16_MIN_RUNTIME}"
       # we stop checking after testing MAX_EXT_CHECK_BINS binaries
       if [[ "${#lBINS_CHECKED_ARR[@]}" -ge "${MAX_EXT_CHECK_BINS}" ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        print_error "[-] S16 Module runtime limitation kicked - current runtime ${lMODULE_RUNTIME} -gt module runtime ${lS16_MIN_RUNTIME}"
         print_output "[*] ${MAX_EXT_CHECK_BINS} binaries already analysed - ending Ghidra binary analysis now."
         print_output "[*] For complete analysis enable FULL_TEST option in your scanning profile."
         break
