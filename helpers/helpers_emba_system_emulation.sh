@@ -166,7 +166,7 @@ write_script_exec() {
   local lPID=""
 
   if [[ "${lEXECUTE}" -ne 0 ]]; then
-    eval "${lCOMMAND}" || true &
+    bash -p -c "${lCOMMAND}" || true &
     lPID="$!"
     disown "${lPID}" 2>/dev/null || true
   fi

@@ -58,7 +58,7 @@ S06_distribution_identification() {
           continue
         fi
       fi
-      mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+      mapfile -t lFOUND_FILES_ARR < <(grep -F "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         local lLOG_DEST_PATH=""
         local lSINAMICS_VERSION=""
@@ -69,7 +69,7 @@ S06_distribution_identification() {
           # do not use safe_echo for lSED_COMMAND
           lSED_COMMAND="$(cut -d ';' -f4 <<<"${lCONFIG}")" # field 4
           lFILE_QUOTED=$(escape_echo "${lFILE}")
-          lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
+          lOUT1="$(run_distri_identifier_pattern "${lPATTERN}" "${lFILE_QUOTED}")"
           lOUT1="${lOUT1//\'/}"
           # print_output "lCONFIG: ${lCONFIG}"
           # print_output "lPATTERN: ${lPATTERN}"
@@ -80,7 +80,7 @@ S06_distribution_identification() {
           lOUT1="${lOUT1//\"/}"
           # print_output "identified mod: ${lOUT1}"
           if [[ -n "${lSED_COMMAND}" ]]; then
-            lIDENTIFIER=$(echo "${lOUT1}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+            lIDENTIFIER=$(normalize_distri_identifier "${lOUT1}" "${lSED_COMMAND}")
           else
             lIDENTIFIER=$(echo "${lOUT1}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
           fi
@@ -204,6 +204,33 @@ S06_distribution_identification() {
 
   write_log ""
   module_end_log "${FUNCNAME[0]}" "${lOUTPUT}"
+}
+
+run_distri_identifier_pattern() {
+  local lPATTERN="${1:-}"
+  local lFILE_QUOTED="${2:-}"
+  local lOUT1=""
+
+  if [[ -z "${lPATTERN}" ]] || [[ -z "${lFILE_QUOTED}" ]]; then
+    return
+  fi
+
+  lOUT1="$(bash -p -c "${lPATTERN} \"\$1\"" _ "${lFILE_QUOTED}" || true)"
+  printf "%s" "${lOUT1}"
+}
+
+normalize_distri_identifier() {
+  local lRAW_IDENTIFIER="${1:-}"
+  local lSED_COMMAND="${2:-}"
+  local lIDENTIFIER=""
+
+  if [[ -n "${lSED_COMMAND}" ]]; then
+    lIDENTIFIER=$(printf "%s\n" "${lRAW_IDENTIFIER}" | bash -p -c "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+  else
+    lIDENTIFIER=$(printf "%s\n" "${lRAW_IDENTIFIER}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+  fi
+
+  printf "%s" "${lIDENTIFIER}"
 }
 
 dlink_image_sign() {

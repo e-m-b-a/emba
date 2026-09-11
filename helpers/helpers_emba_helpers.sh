@@ -349,7 +349,7 @@ get_csv_rule() {
   lCSV_REGEX=$(echo "${2:-}" | sed 's/^\"//' | sed 's/\"$//')
   local lCSV_RULE="NA"
 
-  lCSV_RULE="$(echo "${lVERSION_STRING}" | eval "${lCSV_REGEX}" || true)"
+  lCSV_RULE="$(printf "%s\n" "${lVERSION_STRING}" | bash -p -c "${lCSV_REGEX}" || true)"
 
   echo "${lCSV_RULE}"
 }
