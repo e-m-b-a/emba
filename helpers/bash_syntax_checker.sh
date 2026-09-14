@@ -32,6 +32,9 @@ import_emba_scripts() {
 
   mapfile -t lFILES_ARR < <(find ./ \( -name .git -o -name external \) -prune -o -type f -print 2>/dev/null)
   for lEMBA_FILE in "${lFILES_ARR[@]}"; do
+    if [[ "${lEMBA_FILE}" == *.bats ]]; then
+      continue
+    fi
     if file "${lEMBA_FILE}" | grep -q "shell script"; then
       echo "${lEMBA_FILE}"
       EMBA_SOURCES_ARR+=("${lEMBA_FILE}")
