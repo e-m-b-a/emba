@@ -44,6 +44,23 @@ import_emba_scripts() {
   done
 }
 
+check_bats_syntax() {
+  local lBATS_FILE="${1:-}"
+  local lBATS_TEMP_FILE=""
+
+  lBATS_TEMP_FILE="$(mktemp)"
+  trap 'rm -f "${lBATS_TEMP_FILE}"' RETURN
+  awk '
+    BEGIN { lTEST_CNT=0 }
+    /^[[:space:]]*@test[[:space:]].*\{$/ {
+      lTEST_CNT+=1
+      sub(/^[[:space:]]*@test[[:space:]].*\{$/, "function bats_test_placeholder_" lTEST_CNT "() {")
+    }
+    { print }
+  ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}"
+  bash -n "${lBATS_TEMP_FILE}"
+}
+
 echo -e "\\n${ORANGE}${BOLD}Embedded Linux Analyzer Bash syntax checker${NC}"
 echo -e "${BOLD}=================================================================${NC}"
 
@@ -54,18 +71,14 @@ echo -e "\\n${GREEN}Check all source files for correct bash syntax:${NC}\\n"
 for EMBA_SOURCE_FILE in "${EMBA_SOURCES_ARR[@]}"; do
   [[ ! -f "${EMBA_SOURCE_FILE}" ]] && continue
   if [[ "${EMBA_SOURCE_FILE}" == *.bats ]]; then
-    lBATS_TEMP_FILE=""
-    lBATS_TEMP_FILE="$(mktemp)"
-    sed -E 's/^@test[[:space:]]+.*\{$/function bats_test_placeholder() {/' "${EMBA_SOURCE_FILE}" >"${lBATS_TEMP_FILE}"
     echo -e "\\n${GREEN}Run ${ORANGE}bash -n (Bats-mode)${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"
-    if bash -n "${lBATS_TEMP_FILE}" 2>/dev/null; then
+    if check_bats_syntax "${EMBA_SOURCE_FILE}" 2>/dev/null; then
       echo -e "${GREEN}${BOLD}==> SUCCESS${NC}\\n"
     else
       echo -e "\\n${ORANGE}${BOLD}==> FIX ERRORS${NC}\\n"
-      bash -n "${lBATS_TEMP_FILE}"
+      check_bats_syntax "${EMBA_SOURCE_FILE}"
       MODULES_TO_CHECK_ARR+=("${EMBA_SOURCE_FILE}")
     fi
-    rm -f "${lBATS_TEMP_FILE}"
     continue
   fi
   echo -e "\\n${GREEN}Run ${ORANGE}bash -n${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"

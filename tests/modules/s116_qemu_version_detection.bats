@@ -15,11 +15,12 @@
 load ../setup.bash
 
 module_log_init() {
-  LOG_FILE="${LOG_DIR}/s116_qemu_version_detection.txt"
+  MODULE_LOG_FILE="${LOG_DIR}/s116_qemu_version_detection.txt"
+  LOG_FILE="${MODULE_LOG_FILE}"
 }
 
 module_end_log() {
-  LAST_MODULE_END_LOG="${1}:${2}"
+  LAST_MODULE_END_LOG_RESULT="${1}:${2}"
 }
 
 module_title() { :; }
@@ -61,11 +62,11 @@ teardown() {
 
 @test "S116 exits cleanly when QEMULATION is disabled" {
   export QEMULATION=0
-  LAST_MODULE_END_LOG=""
+  LAST_MODULE_END_LOG_RESULT=""
 
   S116_qemu_version_detection
 
-  [ "${LAST_MODULE_END_LOG}" = "S116_qemu_version_detection:0" ]
+  [ "${LAST_MODULE_END_LOG_RESULT}" = "S116_qemu_version_detection:0" ]
   [ ! -f "${VERSION_LOG_CAPTURE_FILE}" ]
 }
 

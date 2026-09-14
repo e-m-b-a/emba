@@ -44,3 +44,13 @@ EOF
 
   [ "${lOUT}" = "openwrt 23.05.2" ]
 }
+
+@test "run_distri_identifier_pattern returns empty output for missing inputs" {
+  local lOUT
+
+  lOUT="$(run_distri_identifier_pattern "" "${TMP_DIR}/os-release")"
+  [ -z "${lOUT}" ]
+
+  lOUT="$(run_distri_identifier_pattern "grep -a ID=" "")"
+  [ -z "${lOUT}" ]
+}
