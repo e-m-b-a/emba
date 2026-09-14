@@ -215,7 +215,7 @@ run_distri_identifier_pattern() {
     return
   fi
 
-  lOUT1="$(bash -p -c "${lPATTERN} \"\$1\"" _ "${lFILE_QUOTED}" || true)"
+  lOUT1="$(eval "${lPATTERN}" "${lFILE_QUOTED}" || true)"
   printf "%s" "${lOUT1}"
 }
 
@@ -225,9 +225,9 @@ normalize_distri_identifier() {
   local lIDENTIFIER=""
 
   if [[ -n "${lSED_COMMAND}" ]]; then
-    lIDENTIFIER=$(printf "%s\n" "${lRAW_IDENTIFIER}" | bash -p -c "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+    lIDENTIFIER=$(echo "${lRAW_IDENTIFIER}" | eval "${lSED_COMMAND}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
   else
-    lIDENTIFIER=$(printf "%s\n" "${lRAW_IDENTIFIER}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
+    lIDENTIFIER=$(echo "${lRAW_IDENTIFIER}" | sed 's/  \+/ /g' | sed 's/ $//' || true)
   fi
 
   printf "%s" "${lIDENTIFIER}"
