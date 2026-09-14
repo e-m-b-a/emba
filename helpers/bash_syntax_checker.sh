@@ -46,37 +46,38 @@ import_emba_scripts() {
 
 check_bats_syntax() {
   local lBATS_FILE="${1:-}"
-  local lBATS_TEMP_FILE=""
-  local lBASH_CHECK_RC=0
+  (
+    local lBATS_TEMP_FILE=""
+    local lBASH_CHECK_RC=0
 
-  lBATS_TEMP_FILE="$(mktemp)"
-  awk '
-    BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
-    /^[[:space:]]*@test[[:space:]]+/ {
-      lTEST_CNT+=1
-      if ($0 ~ /\{/) {
-        print "function bats_test_placeholder_" lTEST_CNT "() {"
-      } else {
-        print "function bats_test_placeholder_" lTEST_CNT "()"
-        lTEST_DECL=1
+    lBATS_TEMP_FILE="$(mktemp)"
+    trap 'rm -f "${lBATS_TEMP_FILE}"' EXIT
+    awk '
+      BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
+      /^[[:space:]]*@test[[:space:]]+/ {
+        lTEST_CNT+=1
+        lOPENING_BRACE=index($0, "{")
+        if (lOPENING_BRACE > 0) {
+          lINLINE_TEST_BODY=substr($0, lOPENING_BRACE + 1)
+          print "function bats_test_placeholder_" lTEST_CNT "() {" lINLINE_TEST_BODY
+        } else {
+          print "function bats_test_placeholder_" lTEST_CNT "()"
+          lTEST_DECL=1
+        }
+        next
       }
-      next
-    }
-    lTEST_DECL == 1 {
-      if ($0 ~ /\{/) {
-        lTEST_DECL=0
+      lTEST_DECL == 1 {
+        if ($0 ~ /\{/) {
+          lTEST_DECL=0
+        }
+        print
+        next
       }
-      print
-      next
-    }
-    { print }
-  ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}" || {
-    rm -f "${lBATS_TEMP_FILE}"
-    return 1
-  }
-  bash -n "${lBATS_TEMP_FILE}" || lBASH_CHECK_RC=$?
-  rm -f "${lBATS_TEMP_FILE}"
-  return "${lBASH_CHECK_RC}"
+      { print }
+    ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}" || exit 1
+    bash -n "${lBATS_TEMP_FILE}" || lBASH_CHECK_RC=$?
+    exit "${lBASH_CHECK_RC}"
+  )
 }
 
 echo -e "\\n${ORANGE}${BOLD}Embedded Linux Analyzer Bash syntax checker${NC}"
