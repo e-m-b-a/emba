@@ -1,3 +1,5 @@
+#!/usr/bin/env bats
+
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2026-2026 Siemens Energy AG
