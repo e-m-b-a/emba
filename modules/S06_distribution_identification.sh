@@ -58,7 +58,7 @@ S06_distribution_identification() {
           continue
         fi
       fi
-      mapfile -t lFOUND_FILES_ARR < <(grep -F "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+      mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         local lLOG_DEST_PATH=""
         local lSINAMICS_VERSION=""
