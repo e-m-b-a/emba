@@ -66,6 +66,7 @@ teardown() {
   S116_qemu_version_detection
 
   [ "${LAST_MODULE_END_LOG}" = "S116_qemu_version_detection:0" ]
+  [ ! -f "${VERSION_LOG_CAPTURE_FILE}" ]
 }
 
 @test "version_detection_thread reports normal-mode matches from S115 logs" {
@@ -126,4 +127,34 @@ EOF
   [ -f "${VERSION_LOG_CAPTURE_FILE}" ]
   grep -q "BusyBox v1.35.0" "${VERSION_LOG_CAPTURE_FILE}"
   grep -q "busybox_strict" "${VERSION_LOG_CAPTURE_FILE}"
+}
+
+@test "version_detection_thread strict mode ignores non-affected binary logs" {
+  mkdir -p "${LOG_DIR}/s115_usermode_emulator"
+  cat >"${LOG_DIR}/s115_usermode_emulator/qemu_tmp_dropbear_1.txt" <<'EOF'
+Emulating binary: /usr/bin/dropbear
+BusyBox v1.35.0
+EOF
+  cat >"${P99_CSV_LOG}" <<'EOF'
+entry;/usr/bin/dropbear;3;4;5;6;7;ELF 64-bit;beadfeed
+EOF
+  cat >"${TMP_DIR}/s116_rule_strict_negative.json" <<'EOF'
+{
+  "parsing_mode": ["strict"],
+  "identifier": "busybox_strict",
+  "licenses": ["GPL-2.0"],
+  "product_names": ["busybox"],
+  "vendor_names": ["busybox"],
+  "version_extraction": ["sed -E 's/.*v([0-9.]+)/\\1/'"],
+  "strict_grep_commands": ["BusyBox v[0-9]+\\.[0-9]+\\.[0-9]+"],
+  "grep_commands": ["BusyBox v[0-9]+\\.[0-9]+\\.[0-9]+"],
+  "affected_paths": ["/usr/bin/busybox"]
+}
+EOF
+
+  version_detection_thread "${TMP_DIR}/s116_rule_strict_negative.json"
+
+  if [[ -f "${VERSION_LOG_CAPTURE_FILE}" ]]; then
+    [ ! -s "${VERSION_LOG_CAPTURE_FILE}" ]
+  fi
 }
