@@ -56,9 +56,12 @@ check_bats_syntax() {
       BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
       /^[[:space:]]*@test[[:space:]]+/ {
         lTEST_CNT+=1
-        lOPENING_BRACE=index($0, "{")
-        if (lOPENING_BRACE > 0) {
-          lINLINE_TEST_BODY=substr($0, lOPENING_BRACE + 1)
+        lINLINE_TEST_BODY=$0
+        if (lINLINE_TEST_BODY ~ /^[[:space:]]*@test[[:space:]]+"[^"]*"[[:space:]]*\{/) {
+          sub(/^[[:space:]]*@test[[:space:]]+"[^"]*"[[:space:]]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
+          print "function bats_test_placeholder_" lTEST_CNT "() {" lINLINE_TEST_BODY
+        } else if (lINLINE_TEST_BODY ~ /^[[:space:]]*@test[[:space:]]+'\''[^'\'']*'\''[[:space:]]*\{/) {
+          sub(/^[[:space:]]*@test[[:space:]]+'\''[^'\'']*'\''[[:space:]]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
           print "function bats_test_placeholder_" lTEST_CNT "() {" lINLINE_TEST_BODY
         } else {
           print "function bats_test_placeholder_" lTEST_CNT "()"
