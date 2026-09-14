@@ -27,52 +27,62 @@ teardown() {
 }
 
 @test "clean_package_details normalizes spaces punctuation and case" {
-  result="$(clean_package_details " OpenSSL (FIPS), Inc. ")"
-  [ "${result}" = "openssl_fips._inc." ]
+  local lRESULT=""
+  lRESULT="$(clean_package_details " OpenSSL (FIPS), Inc. ")"
+  [ "${lRESULT}" = "openssl_fips._inc." ]
 }
 
 @test "clean_package_details removes brackets and slashes" {
-  result="$(clean_package_details "lib[crypto]/ssl")"
-  [ "${result}" = "libcryptossl" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_details "lib[crypto]/ssl")"
+  [ "${lRESULT}" = "libcryptossl" ]
 }
 
 @test "clean_package_details collapses repeated underscores" {
-  result="$(clean_package_details "A__B   C")"
-  [ "${result}" = "a_b_c" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_details "A__B   C")"
+  [ "${lRESULT}" = "a_b_c" ]
 }
 
 @test "clean_package_details strips quotes" {
-  result="$(clean_package_details "\"Quoted\"")"
-  [ "${result}" = "quoted" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_details "\"Quoted\"")"
+  [ "${lRESULT}" = "quoted" ]
 }
 
 @test "clean_package_details removes non printable bytes" {
   local lINPUT=$'abc\x01def'
-  result="$(clean_package_details "${lINPUT}")"
-  [ "${result}" = "abcdef" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_details "${lINPUT}")"
+  [ "${lRESULT}" = "abcdef" ]
 }
 
 @test "clean_package_versions keeps plain semantic version" {
-  result="$(clean_package_versions "1.2.3")"
-  [ "${result}" = "1.2.3" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_versions "1.2.3")"
+  [ "${lRESULT}" = "1.2.3" ]
 }
 
 @test "clean_package_versions strips kali suffix patterns" {
-  result="$(clean_package_versions "1.2.3-0kali1bla")"
-  [ "${result}" = "1.2.3" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_versions "1.2.3-0kali1bla")"
+  [ "${lRESULT}" = "1.2.3" ]
 }
 
 @test "clean_package_versions strips ubuntu suffix patterns" {
-  result="$(clean_package_versions "1.2.3-0ubuntu1.2")"
-  [ "${result}" = "1.2.3" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_versions "1.2.3-0ubuntu1.2")"
+  [ "${lRESULT}" = "1.2.3" ]
 }
 
 @test "clean_package_versions strips epoch prefix" {
-  result="$(clean_package_versions "2:1.4.5")"
-  [ "${result}" = "1.4.5" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_versions "2:1.4.5")"
+  [ "${lRESULT}" = "1.4.5" ]
 }
 
 @test "clean_package_versions rewrites comma as dot" {
-  result="$(clean_package_versions "1.2.3,4")"
-  [ "${result}" = "1.2.3.4" ]
+  local lRESULT=""
+  lRESULT="$(clean_package_versions "1.2.3,4")"
+  [ "${lRESULT}" = "1.2.3.4" ]
 }

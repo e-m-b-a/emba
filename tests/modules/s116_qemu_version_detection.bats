@@ -49,7 +49,7 @@ setup() {
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   export S09_CSV_LOG="${CSV_DIR}/s09_firmware_base_version_check.csv"
   export VERSION_LOG_CAPTURE_FILE="${TMP_DIR}/s116_version_parsing_calls.log"
-  export MODULES_EXPORTED=()
+  MODULES_EXPORTED=()
   export QEMULATION=1
   export RTOS=0
   export MAIN_LOG_FILE="emba.log"
