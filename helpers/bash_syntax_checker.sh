@@ -64,14 +64,20 @@ check_bats_syntax() {
           sub(/^[[:space:]]*@test[[:space:]]+'\''[^'\'']*'\''[[:space:]]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
           print "function bats_test_placeholder_" lTEST_CNT "() {" lINLINE_TEST_BODY
         } else {
-          print "function bats_test_placeholder_" lTEST_CNT "()"
+          print "function bats_test_placeholder_" lTEST_CNT "() {"
           lTEST_DECL=1
         }
         next
       }
       lTEST_DECL == 1 {
         if ($0 ~ /\{/) {
+          lINLINE_TEST_BODY=$0
+          sub(/^[^{]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
+          if (length(lINLINE_TEST_BODY) > 0) {
+            print lINLINE_TEST_BODY
+          }
           lTEST_DECL=0
+          next
         }
         print
         next

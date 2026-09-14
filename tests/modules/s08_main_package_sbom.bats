@@ -26,7 +26,8 @@ teardown() {
   teardown_emba_test_env
 }
 
-@test "clean_package_details normalizes spaces punctuation and case" {
+@test "clean_package_details normalizes spaces punctuation and case"
+{
   local lRESULT=""
   lRESULT="$(clean_package_details " OpenSSL (FIPS), Inc. ")"
   [ "${lRESULT}" = "openssl_fips._inc." ]
