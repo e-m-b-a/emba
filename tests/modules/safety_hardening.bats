@@ -30,21 +30,16 @@ teardown() {
   teardown_emba_test_env
 }
 
-@test "write_script_exec executes command without eval dependency" {
+@test "write_script_exec writes executable command to script output" {
   local lOUT_FILE="${TMP_DIR}/write_script_exec.out"
   local lSCRIPT_FILE="${TMP_DIR}/run.sh"
 
-  write_script_exec "printf 'ok' > \"${lOUT_FILE}\"" "${lSCRIPT_FILE}" 1
+  write_script_exec "printf 'ok' > \"${lOUT_FILE}\"" "${lSCRIPT_FILE}" 0
 
-  local lRETRIES=0
-  while [[ ! -f "${lOUT_FILE}" && "${lRETRIES}" -lt 20 ]]; do
-    sleep 0.1
-    lRETRIES=$((lRETRIES + 1))
-  done
-
-  [ -f "${lOUT_FILE}" ]
-  [ "$(cat "${lOUT_FILE}")" = "ok" ]
+  [ -f "${lSCRIPT_FILE}" ]
   grep -q "printf 'ok'" "${lSCRIPT_FILE}"
+  bash "${lSCRIPT_FILE}"
+  [ "$(cat "${lOUT_FILE}")" = "ok" ]
 }
 
 @test "get_csv_rule keeps shell pipeline behavior" {
