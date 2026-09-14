@@ -51,10 +51,25 @@ check_bats_syntax() {
   lBATS_TEMP_FILE="$(mktemp)"
   trap 'rm -f "${lBATS_TEMP_FILE}"' RETURN
   awk '
-    BEGIN { lTEST_CNT=0 }
-    /^[[:space:]]*@test[[:space:]].*\{$/ {
+    BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
+    lTEST_DECL == 1 {
+      if ($0 ~ /^[[:space:]]*{[[:space:]]*$/) {
+        lTEST_DECL=0
+        next
+      }
+      lTEST_DECL=0
+    }
+    /^[[:space:]]*@test[[:space:]].*\{[[:space:]]*$/ {
       lTEST_CNT+=1
       sub(/^[[:space:]]*@test[[:space:]].*\{$/, "function bats_test_placeholder_" lTEST_CNT "() {")
+      print
+      next
+    }
+    /^[[:space:]]*@test[[:space:]]+/ {
+      lTEST_CNT+=1
+      print "function bats_test_placeholder_" lTEST_CNT "() {"
+      lTEST_DECL=1
+      next
     }
     { print }
   ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}"
