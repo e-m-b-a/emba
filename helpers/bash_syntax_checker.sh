@@ -47,9 +47,9 @@ import_emba_scripts() {
 check_bats_syntax() {
   local lBATS_FILE="${1:-}"
   local lBATS_TEMP_FILE=""
+  local lBASH_CHECK_RC=0
 
   lBATS_TEMP_FILE="$(mktemp)"
-  trap 'rm -f "${lBATS_TEMP_FILE}"' RETURN
   awk '
     BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
     lTEST_DECL == 1 {
@@ -72,8 +72,13 @@ check_bats_syntax() {
       next
     }
     { print }
-  ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}"
-  bash -n "${lBATS_TEMP_FILE}"
+  ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}" || {
+    rm -f "${lBATS_TEMP_FILE}"
+    return 1
+  }
+  bash -n "${lBATS_TEMP_FILE}" || lBASH_CHECK_RC=$?
+  rm -f "${lBATS_TEMP_FILE}"
+  return "${lBASH_CHECK_RC}"
 }
 
 echo -e "\\n${ORANGE}${BOLD}Embedded Linux Analyzer Bash syntax checker${NC}"
