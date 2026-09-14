@@ -27,6 +27,9 @@ EMBA_SOURCE_FILE=""
 MODULES_TO_CHECK_ARR=()
 BASH_HELPERS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BATS_BIN="${BASH_HELPERS_PATH%/helpers}/tests/bats-core/bin/bats"
+if [[ ! -x "${BATS_BIN}" ]]; then
+  BATS_BIN="$(command -v bats || true)"
+fi
 
 import_emba_scripts() {
   local lFILES_ARR=()
@@ -57,7 +60,11 @@ for EMBA_SOURCE_FILE in "${EMBA_SOURCES_ARR[@]}"; do
   [[ ! -f "${EMBA_SOURCE_FILE}" ]] && continue
   if [[ "${EMBA_SOURCE_FILE}" == *.bats ]]; then
     echo -e "\\n${GREEN}Run ${ORANGE}bats --count${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"
-    if "${BATS_BIN}" --count "${EMBA_SOURCE_FILE}" 2>/dev/null; then
+    if [[ -z "${BATS_BIN}" ]]; then
+      echo -e "\\n${ORANGE}${BOLD}==> FIX ERRORS${NC}\\n"
+      echo "bats executable not found. Install bats or provide tests/bats-core/bin/bats."
+      MODULES_TO_CHECK_ARR+=("${EMBA_SOURCE_FILE}")
+    elif "${BATS_BIN}" --count "${EMBA_SOURCE_FILE}" 2>/dev/null; then
       echo -e "${GREEN}${BOLD}==> SUCCESS${NC}\\n"
     else
       echo -e "\\n${ORANGE}${BOLD}==> FIX ERRORS${NC}\\n"
