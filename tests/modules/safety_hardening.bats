@@ -43,9 +43,9 @@ teardown() {
 }
 
 @test "get_csv_rule keeps shell pipeline behavior" {
-  local lRULE=""
+  local lRULE_OUT=""
 
-  lRULE="$(get_csv_rule "OpenWrt 23.05.2" "sed -E 's/(OpenWrt) ([0-9.]+)/:\\1:openwrt:\\2/'")"
+  lRULE_OUT="$(get_csv_rule "OpenWrt 23.05.2" "sed -E 's/(OpenWrt) ([0-9.]+)/:\\1:openwrt:\\2/'")"
 
-  [ "${lRULE}" = ":OpenWrt:openwrt:23.05.2" ]
+  [ "${lRULE_OUT}" = ":OpenWrt:openwrt:23.05.2" ]
 }

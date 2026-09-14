@@ -32,7 +32,7 @@ import_emba_scripts() {
 
   mapfile -t lFILES_ARR < <(find ./ \( -name .git -o -name external -o -path "./tests/bats-core" \) -prune -o -type f -print 2>/dev/null)
   for lEMBA_FILE in "${lFILES_ARR[@]}"; do
-    if [[ "${lEMBA_FILE}" == *.bats ]]; then
+    if [[ "${lEMBA_FILE}" == ./tests/*.bats || "${lEMBA_FILE}" == ./tests/*/*.bats ]] && [[ "${lEMBA_FILE}" == *.bats ]]; then
       echo "${lEMBA_FILE}"
       EMBA_SOURCES_ARR+=("${lEMBA_FILE}")
       continue
@@ -53,22 +53,17 @@ check_bats_syntax() {
   awk '
     BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
     lTEST_DECL == 1 {
-      if ($0 ~ /^[[:space:]]*{[[:space:]]*$/) {
+      if ($0 ~ /\{[[:space:]]*$/) {
         lTEST_DECL=0
-        next
       }
-      lTEST_DECL=0
-    }
-    /^[[:space:]]*@test[[:space:]].*\{[[:space:]]*$/ {
-      lTEST_CNT+=1
-      sub(/^[[:space:]]*@test[[:space:]].*\{$/, "function bats_test_placeholder_" lTEST_CNT "() {")
-      print
       next
     }
     /^[[:space:]]*@test[[:space:]]+/ {
       lTEST_CNT+=1
       print "function bats_test_placeholder_" lTEST_CNT "() {"
-      lTEST_DECL=1
+      if ($0 !~ /\{[[:space:]]*$/) {
+        lTEST_DECL=1
+      }
       next
     }
     { print }
