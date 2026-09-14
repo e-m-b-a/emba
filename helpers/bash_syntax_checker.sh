@@ -30,9 +30,11 @@ import_emba_scripts() {
   local lFILES_ARR=()
   local lEMBA_FILE=""
 
-  mapfile -t lFILES_ARR < <(find ./ \( -name .git -o -name external \) -prune -o -type f -print 2>/dev/null)
+  mapfile -t lFILES_ARR < <(find ./ \( -name .git -o -name external -o -path "./tests/bats-core" \) -prune -o -type f -print 2>/dev/null)
   for lEMBA_FILE in "${lFILES_ARR[@]}"; do
     if [[ "${lEMBA_FILE}" == *.bats ]]; then
+      echo "${lEMBA_FILE}"
+      EMBA_SOURCES_ARR+=("${lEMBA_FILE}")
       continue
     fi
     if file "${lEMBA_FILE}" | grep -q "shell script"; then
@@ -51,6 +53,17 @@ import_emba_scripts
 echo -e "\\n${GREEN}Check all source files for correct bash syntax:${NC}\\n"
 for EMBA_SOURCE_FILE in "${EMBA_SOURCES_ARR[@]}"; do
   [[ ! -f "${EMBA_SOURCE_FILE}" ]] && continue
+  if [[ "${EMBA_SOURCE_FILE}" == *.bats ]]; then
+    echo -e "\\n${GREEN}Run ${ORANGE}bats --count${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"
+    if ./tests/bats-core/bin/bats --count "${EMBA_SOURCE_FILE}" 2>/dev/null; then
+      echo -e "${GREEN}${BOLD}==> SUCCESS${NC}\\n"
+    else
+      echo -e "\\n${ORANGE}${BOLD}==> FIX ERRORS${NC}\\n"
+      ./tests/bats-core/bin/bats --count "${EMBA_SOURCE_FILE}"
+      MODULES_TO_CHECK_ARR+=("${EMBA_SOURCE_FILE}")
+    fi
+    continue
+  fi
   echo -e "\\n${GREEN}Run ${ORANGE}bash -n${GREEN} on ${ORANGE}${EMBA_SOURCE_FILE}${NC}\\n"
   if bash -n "${EMBA_SOURCE_FILE}" 2>/dev/null; then
     echo -e "${GREEN}${BOLD}==> SUCCESS${NC}\\n"
