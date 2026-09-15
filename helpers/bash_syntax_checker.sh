@@ -46,44 +46,53 @@ import_emba_scripts() {
 
 check_bats_syntax() {
   local lBATS_FILE="${1:-}"
+  local lREGEX_DOUBLE='^[[:space:]]*@test[[:space:]]+"[^"]*"[[:space:]]*\{(.*)$'
+  local lREGEX_SINGLE="^[[:space:]]*@test[[:space:]]+'[^']*'[[:space:]]*\\{(.*)$"
   (
     local lBATS_TEMP_FILE=""
     local lBASH_CHECK_RC=0
+    local lTEST_CNT=0
+    local lTEST_DECL=0
+    local lLINE=""
+    local lINLINE_TEST_BODY=""
 
     lBATS_TEMP_FILE="$(mktemp)"
     trap 'rm -f "${lBATS_TEMP_FILE}"' EXIT
-    awk '
-      BEGIN { lTEST_CNT=0; lTEST_DECL=0 }
-      /^[[:space:]]*@test[[:space:]]+/ {
-        lTEST_CNT+=1
-        lINLINE_TEST_BODY=$0
-        if (lINLINE_TEST_BODY ~ /^[[:space:]]*@test[[:space:]]+"[^"]*"[[:space:]]*\{/) {
-          sub(/^[[:space:]]*@test[[:space:]]+"[^"]*"[[:space:]]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
-          print "function bats_test_placeholder_" lTEST_CNT "() {" lINLINE_TEST_BODY
-        } else if (lINLINE_TEST_BODY ~ /^[[:space:]]*@test[[:space:]]+'\''[^'\'']*'\''[[:space:]]*\{/) {
-          sub(/^[[:space:]]*@test[[:space:]]+'\''[^'\'']*'\''[[:space:]]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
-          print "function bats_test_placeholder_" lTEST_CNT "() {" lINLINE_TEST_BODY
-        } else {
-          print "function bats_test_placeholder_" lTEST_CNT "() {"
-          lTEST_DECL=1
-        }
-        next
-      }
-      lTEST_DECL == 1 {
-        if ($0 ~ /\{/) {
-          lINLINE_TEST_BODY=$0
-          sub(/^[^{]*\{[[:space:]]*/, "", lINLINE_TEST_BODY)
-          if (length(lINLINE_TEST_BODY) > 0) {
-            print lINLINE_TEST_BODY
-          }
+
+    while IFS= read -r lLINE || [[ -n "${lLINE}" ]]; do
+      if [[ "${lTEST_DECL}" -eq 1 ]]; then
+        if [[ "${lLINE}" == *"{"* ]]; then
+          lINLINE_TEST_BODY="${lLINE#*\{}"
+          while [[ "${lINLINE_TEST_BODY}" == [[:space:]]* ]]; do
+            lINLINE_TEST_BODY="${lINLINE_TEST_BODY#?}"
+          done
+          if [[ -n "${lINLINE_TEST_BODY}" ]]; then
+            printf "%s\n" "${lINLINE_TEST_BODY}" >>"${lBATS_TEMP_FILE}"
+          fi
           lTEST_DECL=0
-          next
-        }
-        print
-        next
-      }
-      { print }
-    ' "${lBATS_FILE}" >"${lBATS_TEMP_FILE}" || exit 1
+        else
+          printf "%s\n" "${lLINE}" >>"${lBATS_TEMP_FILE}"
+        fi
+        continue
+      fi
+
+      if [[ "${lLINE}" =~ ${lREGEX_DOUBLE} ]] || [[ "${lLINE}" =~ ${lREGEX_SINGLE} ]]; then
+        lINLINE_TEST_BODY="${BASH_REMATCH[1]}"
+        ((lTEST_CNT+=1))
+        printf "function bats_test_placeholder_%s() {%s\n" "${lTEST_CNT}" "${lINLINE_TEST_BODY}" >>"${lBATS_TEMP_FILE}"
+        continue
+      fi
+
+      if [[ "${lLINE}" =~ ^[[:space:]]*@test[[:space:]]+ ]]; then
+        ((lTEST_CNT+=1))
+        printf "function bats_test_placeholder_%s() {\n" "${lTEST_CNT}" >>"${lBATS_TEMP_FILE}"
+        lTEST_DECL=1
+        continue
+      fi
+
+      printf "%s\n" "${lLINE}" >>"${lBATS_TEMP_FILE}"
+    done <"${lBATS_FILE}" || exit 1
+
     bash -n "${lBATS_TEMP_FILE}" || lBASH_CHECK_RC=$?
     exit "${lBASH_CHECK_RC}"
   )
