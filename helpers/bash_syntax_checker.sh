@@ -109,7 +109,7 @@ check_bats_syntax() {
       # on one line.  Rewrite it as a plain bash function.
       if [[ "${lLINE}" =~ ${lREGEX_DOUBLE} ]] || [[ "${lLINE}" =~ ${lREGEX_SINGLE} ]]; then
         lINLINE_TEST_BODY="${BASH_REMATCH[1]}"
-        ((lTEST_CNT+=1))
+        ((lTEST_CNT += 1))
         printf "function bats_test_placeholder_%s() {%s\n" "${lTEST_CNT}" "${lINLINE_TEST_BODY}" >>"${lBATS_TEMP_FILE}"
         continue
       fi
@@ -118,7 +118,7 @@ check_bats_syntax() {
       # Write only the function header now; the body lines will be copied
       # in subsequent iterations while lTEST_DECL == 1.
       if [[ "${lLINE}" =~ ^[[:space:]]*@test[[:space:]]+ ]]; then
-        ((lTEST_CNT+=1))
+        ((lTEST_CNT += 1))
         printf "function bats_test_placeholder_%s() {\n" "${lTEST_CNT}" >>"${lBATS_TEMP_FILE}"
         lTEST_DECL=1
         continue
