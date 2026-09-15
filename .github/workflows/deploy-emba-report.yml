@@ -1,0 +1,41 @@
+name: Deploy EMBA Report to GitHub Pages
+
+on:
+  # Allows you to trigger this manually or via an API webhook from your build server
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1' # Runs every Monday at midnight to refresh public demos
+
+permissions:
+  contents: write # Crucial: Allows the runner to push data to the gh-pages branch
+
+jobs:
+  analyze-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run EMBA Firmware Analyzer
+        run: |
+          # Example step running EMBA via Docker. 
+          # Ensure your firmware image is available in the runner environment.
+          sudo apt-get update
+          sudo apt-get install wget
+          mkdir /firmware
+          wget https://ftp.dlink.de/dir/dir-300/archive/driver_software/DIR-300_fw_revb_214b01_ALL_de_20130206.zip -O /firmware/dir300.bin
+          mkdir -p emba_output
+          docker run --rm -v $(pwd)/firmware:/firmware -v $(pwd)/emba_output:/output e-m-b-a/emba -f /firmware/dir300.bin -l /output
+          
+          # Standardize the output folder name for the deployment step
+          # EMBA creates timestamped folders; we move the contents to a clean 'public-report' directory
+          mkdir -p public-report
+          cp -r emba_output/html-report/* public-report/
+
+      - name: Deploy HTML Report to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: public-report # The directory containing EMBA's index.html and assets
+          branch: gh-pages # The branch GitHub Pages will serve from
+          clean: true # Automatically removes old files if you only want the 'latest' scan visible
+
