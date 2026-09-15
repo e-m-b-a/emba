@@ -725,7 +725,9 @@ detect_root_dir_helper() {
     export RTOS=0
   fi
 
-  eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}"; do echo "\"${i}\""; done | sort -u))"
+  if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
+    mapfile -t ROOT_PATH < <(printf "%s\n" "${ROOT_PATH[@]}" | sed '/^$/d' | sort -u)
+  fi
   if [[ -v ROOT_PATH[@] && "${RTOS}" -eq 0 ]]; then
     print_output "[*] Found ${ORANGE}${#ROOT_PATH[@]}${NC} different root directories:"
     write_link "s05#file_dirs"
