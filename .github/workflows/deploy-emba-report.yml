@@ -42,8 +42,8 @@ jobs:
           NO_UPDATE_CHECK=1 sudo -E ./emba -f ./DIR-600_fw_revb5_214b01_ALL_de_20130122.zip -l ./logs_emba -p ./scan-profiles/default-scan.emba -y -Q
       - name: Prepare public html report
         run: |
-          mkdir -p public-report
-          cp -r logs_emba/html-report/* public-report/
+          mkdir -p emba-report
+          cp -r logs_emba/html-report/* emba-report/
       - name: Deploy HTML Report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0 - https://github.com/JamesIves/github-pages-deploy-action/releases/tag/v4.9.0
         with:
