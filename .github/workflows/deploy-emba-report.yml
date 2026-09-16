@@ -14,28 +14,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Run EMBA Firmware Analyzer
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd   # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be    # v1.3.1 - https://github.com/jlumbroso/free-disk-space/releases/tag/v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          swap-storage: true
+      - name: EMBA default install
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60  # v4.0.0 - https://github.com/nick-fields/retry/releases/tag/v4.0.0
+        with:
+          timeout_minutes: 800
+          max_attempts: 3
+          command: |
+            sudo rm -r ./external || true
+            sudo ./installer.sh -d
+      - name: Run Firmware Download
         run: |
-          # Example step running EMBA via Docker. 
-          # Ensure your firmware image is available in the runner environment.
           sudo apt-get update
           sudo apt-get install wget
-          mkdir /firmware
-          wget https://ftp.dlink.de/dir/dir-300/archive/driver_software/DIR-300_fw_revb_214b01_ALL_de_20130206.zip -O /firmware/dir300.bin
-          mkdir -p emba_output
-          docker run --rm -v $(pwd)/firmware:/firmware -v $(pwd)/emba_output:/output e-m-b-a/emba -f /firmware/dir300.bin -l /output
-          
-          # Standardize the output folder name for the deployment step
-          # EMBA creates timestamped folders; we move the contents to a clean 'public-report' directory
+          wget https://ftp.dlink.de/dir/dir-600/archive/driver_software/DIR-600_fw_revb5_214b01_ALL_de_20130122.zip
+      - name: Run EMBA Firmware Analyzer
+        run: |
+          NO_UPDATE_CHECK=1 sudo -E ./emba -f ./DIR-600_fw_revb5_214b01_ALL_de_20130122.zip -l ./logs_emba -p ./scan-profiles/default-scan.emba -y -Q
+      - name: Prepare public html report
+        run: |
           mkdir -p public-report
-          cp -r emba_output/html-report/* public-report/
-
+          cp -r logs_emba/html-report/* public-report/
       - name: Deploy HTML Report to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0 - https://github.com/JamesIves/github-pages-deploy-action/releases/tag/v4.9.0
         with:
-          folder: public-report # The directory containing EMBA's index.html and assets
-          branch: gh-pages # The branch GitHub Pages will serve from
+          folder: emba-report # The directory containing EMBA's index.html and assets
+          branch: emba_report # The branch GitHub Pages will serve from
           clean: true # Automatically removes old files if you only want the 'latest' scan visible
 
