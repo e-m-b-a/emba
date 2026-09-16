@@ -1,0 +1,1092 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#check_http_files" title="#check_http_files" >Check HTTP files</a><a class="submodul" href="#checkforphpini" title="#checkforphpini" >Check for php.ini</a><a class="submodul" href="#searchwebservedfiles" title="#searchwebservedfiles" >Search web served files</a><a class="submodul" href="#searchhttpfiles" title="#searchhttpfiles" >Search http files</a><a class="submodul" href="#checkforapacheornginxrelatedfiles" title="#checkforapacheornginxrelatedfiles" >Check for apache or nginx related files</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="check_http_files">Check HTTP files</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>This module tries to identify httpd-related files including Nginx, Apache, httpd, lighttpd, cherokee and php.ini files.</pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="checkforphpini">Check for php.ini</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="red">-</span>] No php.ini found</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="searchwebservedfiles">Search web served files</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Found web related files:</pre>
+<pre></span></pre>
+<pre>    /etc/defnodes/S10phyinf.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S11devdata.xml (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S12flashspeed.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S20device.xml (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S30device.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S22timezone.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S30device.xml (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S31diagnostic.xml (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S31locale.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S32layout.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S33wifi.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S40device.xml (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S90upnpigd.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S90upnpwfa.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S90sessions.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/S91upnpigd2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/defnodes/defaultvalue.xml (-rw-r--r-- root root)</pre>
+<pre>    /etc/events/AUTOCONFIG.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/DELETECFG.WIFI.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/DHCPS-REDETECT.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/DHCPS-RESTART.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/DNSCACHE-FLUSH.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/DISABLE.3G.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/ENABLE.3G.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/SEALPAC.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/INF-RESTART.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/UPDATELEASES.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/SENDMAIL.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/UPDATERESOLV.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WAN-DETECT.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WANV6-DETECT.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WANV6_AUTOCONF_DETECT.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WANV6_ppp_chk.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WANV6_ppp_dis.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WAN_dhcp_chk.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WAN_dhcp_pri.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/WAN_ppp_dis.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/option.discover.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/events/dhcp_pri_chk.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/IP-WAIT.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/IPV4.INET.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/IPV4.DSLITE.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/IPV6.CHILD.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/IPV6.INET.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/RA-WAIT.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/V6IN4-TUNNEL.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/adapter_cmd.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/delpathbytarget.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/dhcp6s_helper.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/dlcfg_hlper.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/delpathbytarget.sh (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/libs/igmpproxy_helper.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/libs/dns-helper.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/libs/lld2d-helper.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/stopchild.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/scripts/upnp/NOTIFYAB.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/upnp/M-SEARCH.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/upnp/__M-SEARCH.resp.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/upnp/run.NOTIFY-PROPCHANGE.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/upnp/__NOTIFY.req.ab.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/upnp/run.NOTIFY-WFADEV.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/upnp/ssdp.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/wifi/wps2cfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/wifi/wpscfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/wifi/wpsset.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/scripts/wifi/wpsupstate.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ACL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ACL6.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/BRIDGE.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DDNS/ddnsserver.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DDNS4.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DDNS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DDNS4.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DDNS4.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DEVICE.ACCOUNT.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DEVICE.LAYOUT.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DEVICE.HOSTNAME.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DEVICE.PASSTHROUGH.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DEVICE.TIME.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPC6.WAN-4.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/DHCPS/dhcps6.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPC/dhcpc6.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/DHCPS/dhcpserver.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS4.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS4.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS4.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS4.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS4.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS6.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS6.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS6.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS6.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DHCPS6.LAN-5.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/DHCPS6.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DMZ.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DNS.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DNS/dnscfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DNS/dnsrestart.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/DNS4.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/FIREWALL-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ENLAN.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/FIREWALL6.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/FIREWALL/firewall.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP/hnapasswd.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP/httpsvcs.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP/httpcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ICMP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ICMP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ICMP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INACTIVE.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.COMBO.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.LAN-5.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/INET.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET.WAN-5.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/INET/inet6_dhcpc_helper.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet4_dhcpc_helper.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet6_rdisc6_helper.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/INET/inet_child.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet_ipv4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet_ppp4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet_ppp4_combo.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/inet_ppp6.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/interface.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/options_ppp4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/ppp4_ipdown.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/ppp4_ipup.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/ppp4_status.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INET/ppp6_ipdown.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/INET/ppp6_ipup.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/INFSVCS.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.LAN-5.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/INFSVCS.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/INFSVCS/infservices.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6TABLES.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6T.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6TABLES/ip6tlan.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6TABLES/ip6twan.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6TABLES/ip6tlib.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6TDEFCHAIN.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IP6TFIREWALL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPT.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTABLES.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTABLES/iptlan.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTABLES/iptlib.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTABLES/iptwan.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTDEFCHAIN.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTDMZ.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTFIREWALL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTMACCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTMASQ.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTPFWD.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTPORTT.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTURLCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/LAN.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/IPTVSVR.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/LAYOUT.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/LLD2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/MACCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/LOG/logd_helper.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/LOGD.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/MULTICAST.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NAMERESOLV.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NAMERESOLV.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NAMERESOLV.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NAMERESOLV/nameresolv.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NAMERESOLV.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NAT.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NEAP.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NEAP/neapscfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NEAP.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NEAP.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NEAP.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/NEAP/neapserver.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/PFWD.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/PHYINF.ETH-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/PHYINF.ETH-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/PORTT.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/PHYINF.ETH-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/QOS.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/PHYINF/phyinf.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ROUTE.DESTNET.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ROUTE.IPUNNUMBERED.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ROUTE.DOMAIN.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ROUTE.STATIC.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ROUTE6.DYNAMIC.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/ROUTE6.STATIC.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/RUNTIME.DDNS4.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/SMS.SEND.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/services/UPNP.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/UPNP.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/UPNP.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/UPNP.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/URLCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/UPNP.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/VSVR.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WAN.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI.PHYINF.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI.WLAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI.WLAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI/rtcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI/hostapdcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WIFI/wifi.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/WPS.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/_add_chains_to_pfwd.php (-rwxr-xr-x root root)</pre>
+<pre>    /etc/templates/hnap/AddPortMapping.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/DeletePortMapping.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetClientStats.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetDeviceSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetConnectedDevices.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetDeviceSettings2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetForwardedPorts.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetMACFilters2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetMACFilters.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetNetworkStats.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetOpenDNS.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetPortMappings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetRouterLanSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetRouterSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWLanRadioSecurity.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWLanRadioSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWLanSettings24.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWLanRadios.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWLanSecurity.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWLanSettings54.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWanStatus.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/GetWanSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/IsDeviceReady.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/Reboot.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetAccessPointMode.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/RestoreFactoryDefaults.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/RenewWanConnection.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetDeviceSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetDeviceSettings2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetForwardedPorts.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetMACFilters.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetMACFilters2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetRouterSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetRouterLanSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetWLanRadioSecurity.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetWLanRadioSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetWLanSettings24.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetWLanSettings54.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/templates/hnap/SetWLanSecurity.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/cgibin (-rwxr-xr-x root root)</pre>
+<pre>    /etc/templates/hnap/SetWanSettings.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.10.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.11.0.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.10.3.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.11.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.11.2.12.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.11.2.11.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.11.2.13.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.11.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.1.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.1.2.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.1.2.3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.1.2.4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.2.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.1.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.2.2.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.2.2.3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.2.2.4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.3.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.3.2.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.3.2.4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.3.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.4.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.4.2.2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.12.4.2.4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.13.1.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP_LIB.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/neap/NEAP.13.1.2.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/dumplog.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/BWC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ACL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/BWC/bwc.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/CALLMGR.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DDNS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.ACCOUNT.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DDNS4.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.DIAGNOSTIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.DLOB.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.HOSTNAME.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.LAYOUT.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.LOG.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.PASSTHROUGH.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.RDNSS.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DEVICE.TIME.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS/dhcps4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS/dhcps6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS/dhcpserver.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS4.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS4.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS4.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS6.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS6.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS6.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS6.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS6.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DHCPS6.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DMZ.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DNS/dns4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DNS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DNS4.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/DNS6.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/FDISK.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/FIREWALL-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/FIREWALL-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/FIREWALL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/FIREWALL6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/FIREWALL/firewall.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/HTTP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/HTTP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ICMP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET.WAN-5.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET/inet.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET/inet_ipv4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET/inet_ipv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET/inet_ppp4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/INET/inet_ppp6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/NAT.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/MULTICAST.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/MACCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/PFWD.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/PHYINF.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/PFWD/pfwd.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/PHYINF/phyinf.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/PORTT.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/QOS.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ROUTE.DESTNET.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ROUTE.IPUNNUMBERED.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ROUTE.STATIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ROUTE6.DYNAMIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/RUNTIME.DDNS4.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/ROUTE6.STATIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/RUNTIME.TIME.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/SCHEDULE.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/RUNTIME.WPS.WLAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/SMS.SEND.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/UPNP.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/UPNP.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/VSVR.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/URLCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/WIFI.PHYINF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/WIFI.WLAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/WIFI.WLAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/WIFI/wifi.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/html.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/inet.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/inet6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/inf.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/phyinf.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ACL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/BWC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/CALLMGR.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DDNS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DDNS4.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DDNS4.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.ACCOUNT.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.DIAGNOSTIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.LAYOUT.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.DLOB.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.HOSTNAME.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.PASSTHROUGH.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.LOG.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.RDNSS.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS4.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DEVICE.TIME.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS4.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS4.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS6.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS6.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS6.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS6.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS6.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DHCPS6.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DMZ.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DNS4.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/DNS4.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/FDISK.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/FIREWALL-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/FIREWALL-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/FIREWALL6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/FIREWALL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/HTTP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/HTTP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/HTTP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ICMP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ICMP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ICMP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/INET.INF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/INET.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/MACCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/IUM.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/INET.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/NAT.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/MULTICAST.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/NETSNIPER.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/PFWD.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/PHYINF.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/PORTT.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/QOS.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ROUTE.DESTNET.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ROUTE.IPUNNUMBERED.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ROUTE.STATIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ROUTE6.DYNAMIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/ROUTE6.STATIC.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/RUNTIME.DDNS4.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/SCHEDULE.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/RUNTIME.TIME.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/RUNTIME.WPS.WLAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/SMS.SEND.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/SMS.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/setcfg/UPNP.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/URLCTRL.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/UPNP.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/VSVR.NAT-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/WIFI.PHYINF.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/WIFI.WLAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/WIFI.WLAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/bwc.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/dhcps6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/dhcpserver.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/dmz.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/dns.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/inet.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/netsniper.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/pfwd.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/phyinf.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/portt.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/libs/wifi.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/time.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/slp.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/trace.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/upnp.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/xnode.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/wifi.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/ACTION.L3Forwarding1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/ACTION.OSInfo1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/ACTION.WANCommonIFC1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/ACTION.WANEthLinkC1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/ACTION.WANIPConn1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/ACTION.WFAWLANConfig1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/NOTIFY.Layer3Forwarding.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/NOTIFY.OSInfo.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/NOTIFY.WANCommonInterfaceConfig.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/NOTIFY.WANEthernetLinkConfig.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/NOTIFY.WANIPConnection.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/NOTIFY.WFAWLANConfig.1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnp/run.NOTIFY.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/InternetGatewayDevice.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/OSInfo.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/Layer3Forwarding.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/WANCommonInterfaceConfig.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/WANEthernetLinkConfig.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/WANIPConnection.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/WFADevice.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpdevdesc/WFAWLANConfig.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/ACTION.DO.GetConnectionTypeInfo.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/ACTION.GetTotalBytesReceived.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/ACTION.GetTotalPacketsSent.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/gena.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/gvar.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/L3Forwarding1/ACTION.GetDefaultConnectionService.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANCommonIFC1/ACTION.GetCommonLinkProperties.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANCommonIFC1/ACTION.GetTotalBytesSent.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANCommonIFC1/ACTION.GetTotalPacketsReceived.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANCommonIFC1/ACTION.X_GetICSStatistics.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANEthLinkC1/ACTION.GetEthernetLinkStatus.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.AddPortMapping.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.ForceTermination.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.DeletePortMapping.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.GetExternalIPAddress.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.GetGenericPortMappingEntry.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.GetNATRSIPStatus.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.GetSpecificPortMappingEntry.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.GetStatusInfo.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.SetConnectionType.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.DO.RequestConnection.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.GetConnectionTypeInfo.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.GetGenericPortMappingEntry.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.GetExternalIPAddress.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.GetSpecificPortMappingEntry.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.GetNATRSIPStatus.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/soap.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/upnpinc/igd/WANIPConn1/ACTION.GetStatusInfo.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/__login_head.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/DevInfo.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_app.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_firewallv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_firewall.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_network.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_mac_filter.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_pfwd.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_qos.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_vsvr.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_routingv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_routing.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_web_filter.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_wlan_wifitest.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/adv_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/advanced.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_easy.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_internet.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_internetv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/web/bsc_ipv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/web/bsc_lan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_sms.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_sms_inbox.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_sms_inbox_rlt.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_sms_send.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_wan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_wlan_main.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/bsc_wlan_wifitest.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/check_stats.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/command.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/ddns_act.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/firmversion.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/diagnostic.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/getcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/index.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/js/postxml.js (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/log_get.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/post_login.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/log_clear.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/router_info.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/setup.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/spt_adv.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/spt_menu.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/spt_setup.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/spt_status.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_device.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/spt_tools.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_log.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_missed_call.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_routingv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/web/st_session.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_stats.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/st_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/status.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/support.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_admin.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_ddns.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_check.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_email.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_firmware.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_fw_rlt.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_sch.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_sys_ulcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_system.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/tools_time.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/wiz_wan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/version.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/wiz_wan_fresetv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/web/wiz_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/web_filter_info.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/wiz_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/wandetect.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/web/wpsacts.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_app.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_app_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_firewall_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_firewallv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_firewall.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_firewallv6_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_mac_filter.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_mac_filter_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_network.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_pfwd.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_pfwd_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_qos.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_routing.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_routing_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_routingv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_routingv6_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_vsvr.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_vsvr_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_web_filter.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_web_filter_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_wlan_wifitest.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/adv_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_easy.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_internet.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_internetv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_ipv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_lan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_lan_list.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_sms.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_sms_inbox.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_sms_send.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_wan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_wlan_wifitest.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/bsc_wlan_main.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/draw_elements.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/spt_adv.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/spt_setup.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/spt_menu.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/spt_status.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/spt_tools.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_device.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_log.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_missed_call.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_session.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_routingv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/body/st_stats.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/st_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_admin.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_check.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_ddns.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_email.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_firmware.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_sch.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_sys_ulcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_system.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/tools_time.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/web_filter_info.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/version.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/wiz_wan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/wiz_wan_fresetv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/body/wiz_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/body/wiz_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/config.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/fatlady.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/feature.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ACL.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/BRIDGE.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/BWC.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/CALL.MISSED.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DDNS4.INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/CALLMGR.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DDNS4.WAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DDNS4.WAN-3.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.DIAGNOSTIC.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.ACCOUNT.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.HOSTNAME.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.LOG.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.LAYOUT.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.PASSTHROUGH.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.RDNSS.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DEVICE.TIME.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DHCPS4.INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DHCPS4.LAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DHCPS4.LAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DHCPS6.LAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DHCPS6.INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DNS4.INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DHCPS6.LAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DNS4.LAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/DNS4.LAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/FDISK.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/FIREWALL-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/FIREWALL.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/FIREWALL6.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/HTTP.WAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/HTTP.WAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ICMP.WAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/HTTP.WAN-3.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ICMP.WAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ICMP.WAN-3.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/INET.INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/INET.BRIDGE-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/INET.WAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/INET.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/IUM.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/LAN.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/MULTICAST.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/NAT.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/NETSNIPER.NAT-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/PFWD.NAT-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/PHYINF.BRIDGE-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/PHYINF.LAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/QOS.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/PHYINF.WIFI.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/PORTT.NAT-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ROUTE.IPUNNUMBERED.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ROUTE.DESTNET.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ROUTE.STATIC.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ROUTE6.DYNAMIC.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/ROUTE6.STATIC.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.CLIENTS.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.CONNSTA.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.DDNS4.WAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.DFS.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.DEVICE.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.INF.BRIDGE-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.INF.WAN-3.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.INF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.OPERATOR.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.LOG.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.PHYINF.ETH-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.PHYINF.WLAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.ROUTE.DYNAMIC.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.PHYINF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.TIME.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.UPNP.PORTM.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.TTY.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/RUNTIME.WPS.WLAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/SCHEDULE.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/SMS.SEND.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/STARSPEED.WAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/SMS.xml.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/UPNP.BRIDGE-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/WAN.RESTART.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/UPNP.LAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/WAN.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/WIFI.PHYINF.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/WIFI.WLAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/WIFI.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_firewall.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/getcfg/WIFI.WLAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_firewallv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_app.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/adv_mac_filter.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/adv_network.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/adv_pfwd.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_qos.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_routing.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/adv_routingv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_vsvr.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_web_filter.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/adv_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/adv_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_internet.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_internetv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_ipv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_lan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_sms_send.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_wan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/bsc_wlan_main.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/callmgr.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/help/st_device.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_log.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_missed_call.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_session.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_routingv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_stats.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/st_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_admin.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_check.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_ddns.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_email.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_sch.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_firmware.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_system.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/help/tools_time.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_app.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_firewall.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_firewallv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_ipv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_mac_filter.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_network.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_qos.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_pfwd.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_routing.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_vsvr.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_routingv6.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_web_filter.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_easy.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/adv_wlan_wifitest.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_ipv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/js/adv_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_lan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_sms.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_sms_inbox.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_sms_inbox_rlt.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_sms_send.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_wan.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_wlan_main.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/bsc_wlan_wifitest.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/st_device.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/st_ipv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/js/st_log.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/st_missed_call.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/st_routingv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/js/st_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/st_session.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_admin.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/js/tools_check.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_ddns.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_email.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_firmware.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_fw_rlt.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_sch.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_sys_ulcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_time.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/tools_system.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/version.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/wiz_wan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/wiz_wan_fresetv6.php (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/webinc/js/wiz_wlan.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/menu.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/js/wiz_wps.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/wand.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/templates.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/dhcp_server.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/lan_stats.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/misc_config.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/qos.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/system_info.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/wan_stats.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/wlan_stats.xml (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/widget/wps.xml (-rw-r--r-- root root)</pre>
+<pre>    /usr/sbin/phpsh (-rwxr-xr-x root root)</pre>
+<pre>    /usr/sbin/rgbin (-rwxr-xr-x root root)</pre>
+<pre>    /usr/sbin/xmldb (-rwxr-xr-x root root)</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="searchhttpfiles">Search http files</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Found http related files:</pre>
+<pre></span></pre>
+<pre>    /etc/services/HTTP (drwxrwxr-x root root)</pre>
+<pre>    /etc/services/HTTP.BRIDGE-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.LAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.WAN-4.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP/hnapasswd.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP/httpcfg.php (-rw-r--r-- root root)</pre>
+<pre>    /etc/services/HTTP/httpsvcs.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/cgibin (-rwxr-xr-x root root)</pre>
+<pre>    /htdocs/phplib/fatlady/HTTP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/HTTP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/fatlady/HTTP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/HTTP.WAN-1.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/HTTP.WAN-2.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/phplib/setcfg/HTTP.WAN-3.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/HTTP.WAN-1.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/HTTP.WAN-2.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /htdocs/webinc/getcfg/HTTP.WAN-3.xml.php (-rw-r--r-- root root)</pre>
+<pre>    /sbin/httpd (-rwxr-xr-x root root)</pre>
+<pre>    /usr/sbin/rgbin (-rwxr-xr-x root root)</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="checkforapacheornginxrelatedfiles">Check for apache or nginx related files</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="red">-</span>] No Apache related files found</pre>
+<pre>[</span><span class="red">-</span>] No nginx related files found</pre>
+<pre>[</span><span class="red">-</span>] No Lighttpd related files found</pre>
+<pre>[</span><span class="red">-</span>] No Cherokee related files found</pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Found HTTPd related files:</pre>
+<pre></span></pre>
+<pre>    /sbin/httpd (-rwxr-xr-x root root)</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./s45_pass_file_check.html" title="./s45_pass_file_check.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s26_kernel_vuln_verifier.html" title="./s26_kernel_vuln_verifier.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

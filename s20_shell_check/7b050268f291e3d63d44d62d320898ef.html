@@ -1,0 +1,660 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./63e3ea5effb59578343ead87fa870be8.html" title="./63e3ea5effb59578343ead87fa870be8.html" >&laquo; Back to 63e3ea5effb59578343ead87fa870be8</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>#!/bin/sh</pre>
+<pre>&lt;? /* vi: set sw=4 ts=4: */</pre>
+<pre>include "/htdocs/phplib/trace.php";</pre>
+<pre>include "/htdocs/phplib/xnode.php";</pre>
+<pre>include "/htdocs/phplib/phyinf.php";</pre>
+<br />
+<pre>function cmd($cmd) {echo $cmd."\n";}</pre>
+<pre>function msg($msg) {cmd("echo [DHCP6C]: ".$msg." &gt; /dev/console");}</pre>
+<br />
+<pre>/*****************************************/</pre>
+<pre>function add_each($list, $path, $node)</pre>
+<pre>{</pre>
+<pre>	//echo "# add_each(".$list.",".$path.",".$node.")\n";</pre>
+<pre>	$i = 0;</pre>
+<pre>	$cnt = scut_count($list, "");</pre>
+<pre>	while ($i &lt; $cnt)</pre>
+<pre>	{</pre>
+<pre>		$val = scut($list, $i, "");</pre>
+<pre>		if ($val!="") add($path."/".$node, $val);</pre>
+<pre>		$i++;</pre>
+<pre>	}</pre>
+<pre>	return $cnt;</pre>
+<pre>}</pre>
+<pre>/*****************************************/</pre>
+<br />
+<pre>function handle_stateful($inf, $devnam, $opt)</pre>
+<pre>{</pre>
+<pre>	$stsp = XNODE_getpathbytarget("/runtime",  "inf", "uid", $inf, 0);</pre>
+<pre>	if ($stsp=="" || $devnam=="") return;</pre>
+<br />
+<pre>	/* Preparing ... */</pre>
+<pre>	//$conf	= "/proc/sys/net/ipv6/conf/".$devnam;</pre>
+<pre>	$conf	= "/var/run/".$devnam;</pre>
+<pre>	$child	= query($stsp."/child/uid");</pre>
+<pre>	$childgz	= query($stsp."/childgz/uid");</pre>
+<br />
+<pre>	/* Strip the tailing spaces. */</pre>
+<pre>	$DNS			= strip($_GLOBALS["DNS"]);</pre>
+<pre>	$NAMESERVERS	= strip($_GLOBALS["NAMESERVERS"]);</pre>
+<pre>	$DOMAIN			= strip($_GLOBALS["DOMAIN"]);</pre>
+<pre>	$NEW_ADDR		= strip($_GLOBALS["NEW_ADDR"]);</pre>
+<pre>	$NEW_PD_PREFIX	= strip($_GLOBALS["NEW_PD_PREFIX"]);</pre>
+<pre>	$NEW_PD_PLEN	= strip($_GLOBALS["NEW_PD_PLEN"]);</pre>
+<pre>	$NEW_AFTR_NAME	= strip($_GLOBALS["NEW_AFTR_NAME"]);</pre>
+<pre>	$NEW_PD_PLFT	= strip($_GLOBALS["NEW_PD_PLTIME"]);</pre>
+<pre>	$NEW_PD_VLFT	= strip($_GLOBALS["NEW_PD_VLTIME"]);</pre>
+<br />
+<pre>	if($DOMAIN!="")</pre>
+<pre>	{</pre>
+<pre>		XNODE_set_var($child."_DOMAIN", $DOMAIN);</pre>
+<pre>		XNODE_set_var($childgz."_DOMAIN", $DOMAIN);</pre>
+<pre>	}</pre>
+<pre>	XNODE_set_var($child."_PDPLFT", $NEW_PD_PLFT);</pre>
+<pre>	XNODE_set_var($child."_PDVLFT", $NEW_PD_VLFT);</pre>
+<br />
+<pre>	XNODE_set_var($childgz."_PDPLFT", $NEW_PD_PLFT);</pre>
+<pre>	XNODE_set_var($childgz."_PDVLFT", $NEW_PD_VLFT);</pre>
+<br />
+<pre>	/* Combine the user config and DHCP server setting. */</pre>
+<pre>	$dns = $DNS;</pre>
+<br />
+<pre>	/* get primary dns and secondary dns */</pre>
+<pre>	$pdns = '';</pre>
+<pre>	$sdns = '';</pre>
+<pre>	$dns_cnt = scut_count($dns, "");</pre>
+<pre>	if($dns_cnt!=0)</pre>
+<pre>	{</pre>
+<pre>		$pdns = scut($dns, 0, "");</pre>
+<pre>		$sdns = scut($dns, 1, "");</pre>
+<pre>	}</pre>
+<pre>	$nameserver = ''; </pre>
+<pre>	if($NAMESERVERS!="")</pre>
+<pre>	{</pre>
+<pre>		$i=0;</pre>
+<pre>		$cnt = scut_count($NAMESERVERS, "");</pre>
+<pre>		while($i&lt;$cnt)</pre>
+<pre>		{</pre>
+<pre>			$val = scut($NAMESERVERS, $i, "");</pre>
+<pre>			if($val==$pdns || $val==$sdns)</pre>
+<pre>			{</pre>
+<pre>				msg("Got the same dns server as dns manual setting");</pre>
+<pre>			}</pre>
+<pre>			else</pre>
+<pre>			{</pre>
+<pre>				if($nameserver=="") $nameserver = $val;</pre>
+<pre>				else				$nameserver = $nameserver." ".$val; </pre>
+<pre>			}</pre>
+<pre>			$i++;</pre>
+<pre>		}</pre>
+<pre>		$NAMESERVERS = $nameserver;</pre>
+<pre>	}</pre>
+<pre>	 </pre>
+<pre>    </pre>
+<pre>	$oflag = fread("e", $conf.".ra_oflag");</pre>
+<pre>	//if($oflag=="1") // for M flag = 1, O flag = 0 case</pre>
+<pre>	//{</pre>
+<pre>	if ($NAMESERVERS!="")</pre>
+<pre>	{</pre>
+<pre>		if ($dns=="")	$dns = $NAMESERVERS;</pre>
+<pre>		else			$dns = $dns." ".$NAMESERVERS;</pre>
+<pre>	}</pre>
+<pre>	//}</pre>
+<br />
+<pre>	/* Get RA info. */</pre>
+<pre>	if ($_GLOBALS["MODE"]!="PPPDHCP")</pre>
+<pre>	{</pre>
+<pre>		$prefix	= fread("e", $conf.".ra_prefix");</pre>
+<pre>		$pfxlen	= fread("e", $conf.".ra_prefix_len");</pre>
+<pre>		$router	= fread("e", $conf.".ra_saddr");</pre>
+<pre>		//if ($router=="" || $router=="NULL") {msg("no ra_saddr"); return;}/*TR-124 issue 2 */</pre>
+<pre>		//if ($prefix=="" || $prefix=="NULL") {msg("no ra_prefix"); return;}</pre>
+<pre>		//if ($pfxlen==0) {msg("no ra_prefix_len"); return;}</pre>
+<pre>	}</pre>
+<br />
+<pre>	/* Check renew, do nothing if we got the same prefix and prefix len as previous ones */</pre>
+<pre>	$ip = query($stsp."/inet/ipv6/ipaddr");</pre>
+<pre>	$pfl = query($stsp."/inet/ipv6/prefix");	</pre>
+<pre>	$childip = query($stsp."/child/ipaddr");</pre>
+<pre>	$childpfl = query($stsp."/child/prefix");	</pre>
+<pre>	if($opt=="IA-NA+IA-PD") </pre>
+<pre>	{</pre>
+<pre>		if ($NEW_ADDR!="" &amp;&amp; $NEW_PD_PREFIX=="" &amp;&amp; $NEW_PD_PLEN== "") { $renew=1; $renewip=1; msg("STATEFUL - opt: ".$opt." RENEW IANA...");}</pre>
+<pre>		if ($NEW_ADDR=="" &amp;&amp; $NEW_PD_PREFIX!="" &amp;&amp; $NEW_PD_PLEN!= "") { $renew=1; $renewip=0; msg("STATEFUL - opt: ".$opt." RENEW IAPD...");}</pre>
+<pre>	}</pre>
+<br />
+<pre>	if($opt=="IA-NA") </pre>
+<pre>	{</pre>
+<pre>		if ($NEW_ADDR!="" &amp;&amp; $NEW_PD_PREFIX=="" &amp;&amp; $NEW_PD_PLEN== "") { $renew=1</span>sg("STATEFUL - opt: ".$opt." RENEW IANA...");}</pre>
+<pre>	}</pre>
+<br />
+<pre>	if ($opt=="IA-PD")</pre>
+<pre>	{</pre>
+<pre>		if ($child!="")</pre>
+<pre>		{</pre>
+<pre>			$mac	= PHYINF_getphymac($child);</pre>
+<pre>			$hostid	= ipv6eui64($mac);</pre>
+<pre>			if($NEW_PD_PLEN &lt; 64)</pre>
+<pre>			{</pre>
+<pre>				$slalen = 64-$NEW_PD_PLEN;</pre>
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 1, $slalen);</pre>
+<pre>				$cpfxlen = 64;</pre>
+<pre>			}</pre>
+<pre>			else</pre>
+<pre>			{</pre>
+<pre>				$slalen = 1;</pre>
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 1, 1);</pre>
+<pre>				$cpfxlen = $NEW_PD_PLEN+1;</pre>
+<pre>			}</pre>
+<pre>			if($childip == $ipaddr &amp;&amp; $childpfl == $NEW_PD_PLEN+1) {msg("STATEFUL - Renew but do nothing"); return;}</pre>
+<br />
+<pre>			msg("PREFIX=".$NEW_PD_PREFIX.", PLEN=".$NEW_PD_PLEN.", HOSTID=".$hostid.", SLA=1, SLALEN=".$slalen);</pre>
+<pre>			msg("IPADDR=".$ipaddr);</pre>
+<br />
+<pre>			set($stsp."/child/ipaddr", $ipaddr);</pre>
+<pre>			set($stsp."/child/prefix", $cpfxlen);</pre>
+<pre>			set($stsp."/child/pdnetwork", $NEW_PD_PREFIX);</pre>
+<pre>			set($stsp."/child/pdprefix", $NEW_PD_PLEN);</pre>
+<pre>			set($stsp."/child/pdplft", $NEW_PD_PLFT);</pre>
+<pre>			set($stsp."/child/pdvlft", $NEW_PD_VLFT);</pre>
+<pre>		}</pre>
+<pre>		if ($childgz!="")</pre>
+<pre>		{</pre>
+<pre>			$mac	= PHYINF_getphymac($childgz);</pre>
+<pre>			$hostid	= ipv6eui64($mac);</pre>
+<pre>			if($NEW_PD_PLEN &lt; 64)</pre>
+<pre>			{</pre>
+<pre>				$slalen = 64-$NEW_PD_PLEN;</pre>
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 0, $slalen);</pre>
+<pre>				$cpfxlen = 64;</pre>
+<pre>			}</pre>
+<pre>			else</pre>
+<pre>			{</pre>
+<pre>				$slalen = 1;</pre>
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 2, 1);</pre>
+<pre>				$cpfxlen = $NEW_PD_PLEN+1;</pre>
+<pre>			}</pre>
+<pre>			if($childip == $ipaddr &amp;&amp; $childpfl == $NEW_PD_PLEN+1) {msg("STATEFUL - Renew but do nothing"); return;}</pre>
+<br />
+<pre>			msg("PREFIX=".$NEW_PD_PREFIX.", PLEN=".$NEW_PD_PLEN.", HOSTID=".$hostid.", SLA=1, SLALEN=".$slalen);</pre>
+<pre>			msg("IPADDR=".$ipaddr);</pre>
+<br />
+<pre>			set($stsp."/childgz/ipaddr", $ipaddr);</pre>
+<pre>			set($stsp."/childgz/prefix", $cpfxlen);</pre>
+<pre>			set($stsp."/childgz/pdnetwork", $NEW_PD_PREFIX);</pre>
+<pre>			set($stsp."/childgz/pdprefix", $NEW_PD_PLEN);</pre>
+<pre>			set($stsp."/childgz/pdplft", $NEW_PD_PLFT);</pre>
+<pre>			set($stsp."/childgz/pdvlft", $NEW_PD_VLFT);</pre>
+<pre>		}</pre>
+<pre>		$ipaddr = ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, 1, 0, 0);</pre>
+<pre>		$pfxlen = $NEW_PD_PLEN;</pre>
+<pre>		if($ip == $ipaddr &amp;&amp; $pfl == $NEW_PD_PLEN) {msg("STATEFUL - opt: ".$opt." Renew but do nothing"); return;}</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		if ($child!="" &amp;&amp; strstr($opt,"IA-PD")!="")</pre>
+<pre>		{</pre>
+<pre>			$mac	= PHYINF_getphymac($child);</pre>
+<pre>			$hostid	= ipv6eui64($mac);</pre>
+<pre>			if($NEW_PD_PLEN&lt)</pre>
+<pre>			{</pre>
+<pre>				/* handle blackhole issue */</pre>
+<pre>				//cmd("ip -6 route add blackhole ".$NEW_PD_PREFIX."/".$NEW_PD_PLEN." dev lo");</pre>
+<pre>				//set($stsp."/blackhole/prefix", $NEW_PD_PREFIX);</pre>
+<pre>				//set($stsp."/blackhole/plen", $NEW_PD_PLEN);</pre>
+<br />
+<pre>				$holecnt = query($stsp."/blackhole/count");</pre>
+<pre>				if($holecnt=="")</pre>
+<pre>				{</pre>
+<pre>					$holecnt = 1;</pre>
+<pre>					set($stsp."/blackhole/count", $holecnt);</pre>
+<pre>					set($stsp."/blackhole/entry:".$holecnt."/prefix", $NEW_PD_PREFIX);</pre>
+<pre>					set($stsp."/blackhole/entry:".$holecnt."/plen", $NEW_PD_PLEN);</pre>
+<pre>					cmd("ip -6 route add blackhole ".$NEW_PD_PREFIX."/".$NEW_PD_PLEN." dev lo");</pre>
+<pre>				}</pre>
+<br />
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 1,64-$NEW_PD_PLEN);</pre>
+<pre>				$cpfxlen = 64;</pre>
+<pre>			}</pre>
+<pre>			else</pre>
+<pre>			{</pre>
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 0,0);</pre>
+<pre>				$cpfxlen = $NEW_PD_PLEN;</pre>
+<pre>			}	</pre>
+<pre>			if($renew==1 &amp;&amp; $childip==$ipaddr &amp;&amp; $childpfl==$cpfxlen){msg("STATEFUL - opt: ".$opt." Renew but do nothing"); return;}</pre>
+<pre>			</pre>
+<pre>			if($renew==1 &amp;&amp; $NEW_PD_PREFIX!="" &amp;&amp; $NEW_PD_PLEN!="")</pre>
+<pre>			{</pre>
+<pre>				//renew and get the different prefix</pre>
+<pre>				$holecnt = $holecnt + 1;</pre>
+<pre>				set($stsp."/blackhole/entry:".$holecnt."/prefix", $NEW_PD_PREFIX);</pre>
+<pre>				set($stsp."/blackhole/entry:".$holecnt."/plen", $NEW_PD_PLEN);</pre>
+<pre>				set($stsp."/blackhole/count", $holecnt);</pre>
+<pre>				cmd("ip -6 route add blackhole ".$NEW_PD_PREFIX."/".$NEW_PD_PLEN." dev lo");</pre>
+<pre>			}</pre>
+<br />
+<pre>			if($ipaddr!="")/* check if renew IANA, $NEW_PD_PREFIX and $NEW_PD_PLEN are zero */</pre>
+<pre>			{</pre>
+<pre>				set($stsp."/child/ipaddr", $ipaddr);</pre>
+<pre>				set($stsp."/child/prefix", $cpfxlen);</pre>
+<pre>				set($stsp."/child/pdnetwork", $NEW_PD_PREFIX);</pre>
+<pre>				set($stsp."/child/pdprefix", $NEW_PD_PLEN);</pre>
+<pre>				set($stsp."/child/pdplft", $NEW_PD_PLFT);</pre>
+<pre>				set($stsp."/child/pdvlft", $NEW_PD_VLFT);</pre>
+<pre>			}</pre>
+<pre>		}</pre>
+<br />
+<pre>		if ($childgz!="" &amp;&amp; strstr($opt,"IA-PD")!="")</pre>
+<pre>		{</pre>
+<pre>			$mac	= PHYINF_getphymac($childgz);</pre>
+<pre>			$hostid	= ipv6eui64($mac);</pre>
+<pre>			if($NEW_PD_PLEN&lt)</pre>
+<pre>			{</pre>
+<pre>				$ipaddr	= ipv6ip($NEW_PD_PREFIX, $NEW_PD_PLEN, $hostid, 0,64-$NEW_PD_PLEN);</pre>
+<pre>				$cpfxlen = 64;</pre>
+<pre>			}</pre>
+<pre>			else</pre>
+<pre>			{</pre>
+<pre>				//If pd length is bigger than 63, don't set to guest zone</pre>
+<pre>				$ipaddr = "";</pre>
+<pre>				$cpfxlen = "";</pre>
+<pre>			}</pre>
+<pre>		</pre>
+<pre>			if($ipaddr!="")/* check if renew IANA, $NEW_PD_PREFIX and $NEW_PD_PLEN are zero */</pre>
+<pre>			{</pre>
+<pre>				set($stsp."/childgz/ipaddr", $ipaddr);</pre>
+<pre>				set($stsp."/childgz/prefix", $cpfxlen);</pre>
+<pre>				set($stsp."/childgz/pdnetwork", $NEW_PD_PREFIX);</pre>
+<pre>				set($stsp."/childgz/pdprefix", $NEW_PD_PLEN);</pre>
+<pre>				set($stsp."/childgz/pdplft", $NEW_PD_PLFT);</pre>
+<pre>				set($stsp."/childgz/pdvlft", $NEW_PD_VLFT);</pre>
+<pre>			}</pre>
+<pre>		}</pre>
+<br />
+<pre>		if (strstr($opt,"IA-NA")=="") {msg("no IA-NA"); return;}</pre>
+<br />
+<pre>		if($renew==1 &amp;&amp; $renewip==1 &amp;&amp; $ip==$NEW_ADDR){msg("STATEFUL - opt: ".$opt." Renew but do nothing"); return;}</pre>
+<br />
+<pre>		if ($NEW_ADDR=="" &amp;&amp; $renewip==1) {msg("no NEW_ADDR"); return;}</pre>
+<pre>		$ipaddr = $NEW_ADDR;</pre>
+<pre>		$pfxlen = 128;</pre>
+<pre>	}</pre>
+<br />
+<pre>	set($stsp."/inet/ipv6/dhcpopt", $opt);</pre>
+<br />
+<pre>	/* DS-Lite info */</pre>
+<pre>	$remote	= strip($_GLOBALS["NEW_AFTR_NAME"]);</pre>
+<pre>	if($remote!="")</pre>
+<pre>		set($stsp."/inet/ipv4/ipv4in6/remote", $remote);</pre>
+<br />
+<pre>	/* domain info */</pre>
+<pre>	if($DOMAIN!="")</pre>
+<pre>	{</pre>
+<pre>		set($stsp."/inet/ipv6/domain",$DOMAIN);</pre>
+<pre>	}</pre>
+<pre>		</pre>
+<br />
+<pre>	cmd("phpsh /etc/scripts/IPV6.INET.php ACTION=ATTACH".</pre>
+<pre>		" INF=".$_GLOBALS["INF"].</pre>
+<pre>		" MODE=".$_GLOBALS["MODE"].</pre>
+<pre>		" DEVNAM=".$devnam.</pre>
+<pre>		" IPADDR=".$ipaddr.</pre>
+<pre>		" PREFIX=".$pfxlen.</pre>
+<pre>		" GATEWAY=".$router.</pre>
+<pre>		' "DNS='.$dns.'"');</pre>
+<br />
+<pre>	return;</pre>
+<pre>}</pre>
+<br />
+<pre>function handle_stateless($inf, $prefix, $pfxlen)</pre>
+<pre>{</pre>
+<pre>	$stsp = XNODE_getpathbytarget("/runtime", "inf", "uid", $inf, 0);</pre>
+<pre>	if ($stsp=="") {msg("STATLESS - no runtime for ".$inf); return;}</pre>
+<pre>	if ($prefix=="" || $pfxlen=="")	{msg("STATELESS - no prefix"); return;}</pre>
+<br />
+<pre>	/* Prepare child. */</pre>
+<pre>	msg("STATELESS - Got prefix ".$prefix."/".$pfxlen);</pre>
+<br />
+<pre>	$child	= query($stsp."/child/uid");</pre>
+<pre>	$mac	= PHYINF_getphymac($child);</pre>
+<pre>	$hostid	= ipv6eui64($mac);</pre>
+<pre>	if($pfxlen &lt; 64)</pre>
+<pre>	{</pre>
+<pre>		/* handle blackhole issue */</pre>
+<pre>		//cmd("ip -6 route add blackhole ".$prefix."/".$pfxlen." dev lo");</pre>
+<pre>		//set($stsp."/blackhole/prefix", $prefix);</pre>
+<pre>		//set($stsp."/blackhole/plen", $pfxlen);</pre>
+<br />
+<pre>		$holecnt = query($stsp."/blackhole/count");</pre>
+<pre>		if($holecnt=="")</pre>
+<pre>		{</pre>
+<pre>			$holecnt = 1;</pre>
+<pre>			set($stsp."/blackhole/entry:".$holecnt."/prefix", $prefix);</pre>
+<pre>			set($stsp."/blackhole/entry:".$holecnt."/plen", $pfxlen);</pre>
+<pre>			set($stsp."/blackhole/count", $holecnt);</pre>
+<pre>			cmd("ip -6 route add blackhole ".$prefix."/".$pfxlen." dev lo");</pre>
+<pre>		}</pre>
+<br />
+<pre>		$slalen = 64-$pfxlen;</pre>
+<pre>		$ipaddr	= ipv6ip($prefix, $pfxlen, $hostid, 1, $slalen);</pre>
+<pre>		$pfxlen = 64;</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		$ipaddr	= ipv6ip($prefix, $pfxlen, $hostid,0,0);</pre>
+<pre>	}</pre>
+<br />
+<pre>	/* Check renew, do nothing if we got the same prefix and prefix len as previous ones */</pre>
+<pre>	$oldip = query($stsp."/child/ipaddr");</pre>
+<pre>	$oldpfl = query($stsp."/child/prefix");	</pre>
+<pre>	if($oldip == $ipaddr &amp;&amp; $oldpfl == $pfxlen) {msg("STATELESS - Renew but do nothing"); return;}</pre>
+<br />
+<pre>	set($stsp."/child/ipaddr", $ipaddr);</pre>
+<pre>	set($stsp."/child/prefix", $pfxlen);</pre>
+<pre>	set($stsp."/child/pdnetwork", strip($_GLOBALS["NEW_PD_PREFIX"]));</pre>
+<pre>	set($stsp."/child/pdprefix", strip($_GLOBALS["NEW_PD_PLEN"]));</pre>
+<pre>	set($stsp."/child/pdplft", strip($_GLOBALS["NEW_PD_PLTIME"]));</pre>
+<pre>	set($stsp."/child/pdvlft", strip($_GLOBALS["NEW_PD_VLTIME"]));</pre>
+<pre>	</pre>
+<pre>	$DOMAIN			= strip($_GLOBALS["DOMAIN"]);</pre>
+<pre>	if($DOMAIN!="")</pre>
+<pre>		XNODE_set_var($child."_DOMAIN", $DOMAIN);</pre>
+<pre>	XNODE_set_var($child."_PDPLFT", strip($_GLOBALS["NEW_PD_PLTIME"]));</pre>
+<pre>	XNODE_set_var($child."_PDVLFT", strip($_GLOBALS["NEW_PD_VLTIME"]));</pre>
+<br />
+<pre>	msg("STATELESS - Child ".$ipaddr."/".$pfxlen);</pre>
+<br />
+<pre>	$DNS			= strip($_GLOBALS["DNS"]);</pre>
+<pre>	$NAMESERVERS	= strip($_GLOBALS["NAMESERVERS"]);</pre>
+<pre>	/* Combine the user config and DHCP server setting. */</pre>
+<pre>	$dns = $DNS;</pre>
+<pre>	/*</pre>
+<pre>	if ($NAMESERVERS!="")</pre>
+<pre>	{</pre>
+<pre>		if ($dns=="")	$dns = $NAMESERVERS;</pre>
+<pre>		else			$dns = $dns." ".$NAMESERVERS;</pre>
+<pre>	}</pre>
+<pre>	*/</pre>
+<pre>	$infprev = query($stsp."/infprevious");</pre>
+<pre>	if($infprev!="")</pre>
+<pre>	{</pre>
+<pre>		$stsprevp = XNODE_getpathbytarget("/runtime", "inf", "uid", $infprev, 0);</pre>
+<pre>		$pdevnam  = query($stsprevp."/devnam");</pre>
+<pre>		$conf	= "/var/run/".$pdevnam;</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>		$conf	= "/var/run/".query($stsp."/devnam");</pre>
+<pre>	//$oflag = fread("e", $conf.".ra_oflag");</pre>
+<pre>	//if($oflag=="1")</pre>
+<pre>	//{</pre>
+<pre>		if ($NAMESERVERS!="")</pre>
+<pre>		{</pre>
+<pre>			if ($dns=="")	$dns = $NAMESERVERS;</pre>
+<pre>			else			$dns = $dns." ".$NAMESERVERS;</pre>
+<pre>		}</pre>
+<pre>	//}</pre>
+<br />
+<pre>	/* DS-Lite info */</pre>
+<pre>	$remote	= strip($_GLOBALS["NEW_AFTR_NAME"]);</pre>
+<pre>	if($remote!="")</pre>
+<pre>		set($stsp."/inet/ipv4/ipv4in6/remote", $remote);</pre>
+<br />
+<pre>	anchor($stsp);</pre>
+<pre>	cmd("phpsh /etc/scripts/IPV6.INET.php ACTION=ATTACH".</pre>
+<pre>			" MODE=STATELESS".</pre>
+<pre>			" INF=".	$inf.</pre>
+<pre>			" DEVNAM=".	query("devnam").</pre>
+<pre>			" IPADDR=".	query("stateless/ipaddr").</pre>
+<pre>			" PREFIX=".	query("stateless/prefix").</pre>
+<pre>			" GATEWAY=".query("stateless/gateway").</pre>
+<pre>			//' "DNS='.	query("stateless/dns").'"');</pre>
+<pre>			' "DNS='.$dns.'"');</pre>
+<pre>	/*del($stsp."/stateless");*/ /*renew may cause wan ip be disappered*/</pre>
+<pre>}</pre>
+<br />
+<pre>function handle_infoonly($inf)</pre>
+<pre>{</pre>
+<pre>	$stsp = XNODE_getpathbytarget("/runtime", "inf", "uid", $inf, 0);</pre>
+<pre>	if ($stsp=="") {msg("INFOONLY - no runtime for ".$inf); return;}</pre>
+<br />
+<pre>	$DNS			= strip($_GLOBALS["DNS"]);</pre>
+<pre>	$NAMESERVERS	= strip($_GLOBALS["NAMESERVERS"]);</pre>
+<pre>	/* Combine the user config and DHCP server setting. */</pre>
+<pre>	$dns = $DNS;</pre>
+<pre>	if ($NAMESERVERS!="")</pre>
+<pre>	{</pre>
+<pre>		if ($dns=="")	$dns = $NAMESERVERS;</pre>
+<pre>		else			$dns = $dns." ".$NAMESERVERS;</pre>
+<pre>	}</pre>
+<br />
+<pre>	//$NEW_AFTR_NAME	= strip($_GLOBALS["NEW_AFTR_NAME"]);</pre>
+<pre>	$remote	= strip($_GLOBALS["NEW_AFTR_NAME"]);</pre>
+<pre>	msg("INFOONLY - DNS: ".$dns.", aftr server: ".$remote);</pre>
+<br />
+<pre>	add_each($dns, $stsp."/inet/ipv6", "dns");</pre>
+<br />
+<pre>	/* DS-Lite info */</pre>
+<pre>	//$remote	= strip($_GLOBALS["NEW_AFTR_NAME"]);</pre>
+<pre>	if($remote!="")</pre>
+<pre>		set($stsp."/inet/ipv4/ipv4in6/remote", $remote);</pre>
+<pre>}</pre>
+<br />
+<pre>function handle_pppdhcp($inf, $devnam, $opt)</pre>
+<pre>{</pre>
+<pre>	$stsp = XNODE_getpathbytarget("/runtime", "inf", "uid", $inf, 0);</pre>
+<pre>	if ($stsp=="" || $devnam=="") return;</pre>
+<br />
+<pre>	$infprev = query($stsp."/infprevious");</pre>
+<pre>	$prevstsp = XNODE_getpathbytarget("/runtime", "inf", "uid", $infprev, 0);</pre>
+<pre>	$prevphyinf = query($prevstsp."/phyinf"); </pre>
+<pre>	$p = XNODE_getpathbytarget("/runtime", "phyinf", "uid", $prevphyinf, 0);</pre>
+<pre>	if ($p=="") {msg("PPPDHCP - no runtime phyinf for ".$infprev); return;}</pre>
+<pre>	$ipaddr = query($p."/ipv6/global/ipaddr");</pre>
+<br />
+<pre>	$child = query($stsp."/child/uid");</pre>
+<pre>	if($child!="")</pre>
+<pre>	{</pre>
+<pre>		/* we use global ip of ppp interface to judge stateless or stateful */</pre>
+<pre>		if($ipaddr!="")</pre>
+<pre>		{</pre>
+<pre>			msg("PPPDHCP - Stateless - PD/".$opt);</pre>
+<pre>			/* IA-PD is assigned to lan */</pre>
+<pre>			handle_stateless($_GLOBALS["INF"],strip($_GLOBALS["NEW_PD_PREFIX"]),strip($_GLOBALS["NEW_PD_PLEN"]));</pre>
+<pre>		}	</pre>
+<pre>		else</pre>
+<pre>		{</pre>
+<pre>			msg("PPPDHCP - Stateful - PD/".$opt);</pre>
+<pre>			/* IA-NA+IA-PD/IA-PD is assigned to wan and lan */</pre>
+<pre>			handle_stateful($_GLOBALS["INF"],$_GLOBALS["DEVNAM"], $_GLOBALS["DHCPOPT"]);</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>			msg("PPPDHCP - Stateful - IANA");</pre>
+<pre>			handle_stateful($_GLOBALS["INF"],$_GLOBALS["DEVNAM"], $_GLOBALS["DHCPOPT"]);</pre>
+<pre>	}</pre>
+<pre>	return;</pre>
+<pre>}</pre>
+<pre>/**************************************************************/</pre>
+<pre>/* dhcpv6c has tailing space character in the arguments to the callback script.</pre>
+<pre> * strip the extra space characters with strip(). */</pre>
+<br />
+<pre>/* ip release case */</pre>
+<pre>if(strip($_GLOBALS["NEW_ADDR"])=="" &amp;&amp; strip($_GLOBALS["NEW_PD_PREFIX"])=="" &amp;&amp; strip($_GLOBALS["NEW_PD_PLEN"])=="" &amp;&amp; $_GLOBALS["MODE"]!="INFOONLY") return;</pre>
+<pre> </pre>
+<pre>set("/runtime/device/ntp6/server", strip($_GLOBALS["NTPSERVER"]));</pre>
+<br />
+<pre>if ($_GLOBALS["MODE"]=="STATELESS")</pre>
+<pre>	handle_stateless($_GLOBALS["INF"],strip($_GLOBALS["NEW_PD_PREFIX"]),strip($_GLOBALS["NEW_PD_PLEN"]));</pre>
+<pre>//else if ($_GLOBALS["MODE"]=="STATEFUL" || $_GLOBALS["MODE"]=="PPPDHCP")</pre>
+<pre>else if ($_GLOBALS["MODE"]=="STATEFUL")</pre>
+<pre>	handle_stateful($_GLOBALS["INF"],$_GLOBALS["DEVNAM"], $_GLOBALS["DHCPOPT"]);</pre>
+<pre>else if ($_GLOBALS["MODE"]=="PPPDHCP")</pre>
+<pre>	handle_pppdhcp($_GLOBALS["INF"],$_GLOBALS["DEVNAM"], $_GLOBALS["DHCPOPT"]);</pre>
+<pre>else if ($_GLOBALS["MODE"]=="INFOONLY")</pre>
+<pre>	handle_infoonly($_GLOBALS["INF"]);</pre>
+<pre>else msg("Unknown mode - ".$_GLOBALS["MODE"]);</pre>
+<pre>?&gt;</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

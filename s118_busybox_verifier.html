@@ -1,0 +1,392 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#busybox_vulnerability_identification_and_verification" title="#busybox_vulnerability_identification_and_verification" >Busybox vulnerability identification and verification</a><a class="submodul" href="#busyboxversionbasedvulnerabilitydetection" title="#busyboxversionbasedvulnerabilitydetection" >BusyBox - Version based vulnerability detection</a><a class="submodul" href="#busyboxappletidentificationviaemulationresults" title="#busyboxappletidentificationviaemulationresults" >BusyBox - Applet identification via emulation results</a><a class="submodul" href="#busyboxstaticappletidentificationfrombinary" title="#busyboxstaticappletidentificationfrombinary" >BusyBox - Static applet identification from binary</a><a class="submodul" href="#busyboxvulnerabilityverificationbusyboxbusybox1141" title="#busyboxvulnerabilityverificationbusyboxbusybox1141" >BusyBox - Vulnerability verification - :busybox:busybox:1.14.1</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="busybox_vulnerability_identification_and_verification">Busybox vulnerability identification and verification</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>First, this module extracts the BusyBox vulnerabilities based on version details.</pre>
+<pre>Second, the enabled applets are extracted from the emulation results of module s115/s116.</pre>
+<pre>Finally, the already known vulnerabilities are matched against the extracted applets. Vulnerability descriptions with matching applets are rated as verified CVEs</pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="busyboxversionbasedvulnerabilitydetection">BusyBox - Version based vulnerability detection</a></span></pre>
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Vulnerability details for </span><span class="orange">busybox</span> / version </span><span class="orange">1.14.1</span> / source </span><span class="orange">bb_verified</span>:</pre>
+<a class="anc" id="anchor_cve_busybox_1.14.1"></a>
+<br />
+<pre></span><span class="green">	BIN NAME            :   BIN VERS    :   CVE ID              :  CVSS VALUE : EPSS :   SOURCE         :   EXPLOIT</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-33492           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-33336           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-33494           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-34574           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-34575           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-33493           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-34577           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-34576           :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-41054           :   5.3 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6345            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-61539           :   7.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-56490           :   9.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-41790           :   8.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6342            :   7.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-6344            :   5.5 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-61600           :   7.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   AZL-6343            :   5.3 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6346            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6347            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6348            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6349            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6352            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6351            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-64326           :   9.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-6350            :   7.2 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-77603           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-77606           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-77610           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-77613           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-92487           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-92832           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-92484           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   AZL-92835           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-9311            :   8.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   AZL-9815            :   7.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   CLEANSTART-2026-AG84:   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   CLEANSTART-2026-SU97:   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2716" title="CVE-2011-2716" target="_blank" >CVE-2011-2716</a>       :   6.8 (v2)  :  1   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   CLSA-2021-1638804058:   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   CLSA-2023-1693904973:   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   CLSA-2022-1650377131:   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-5325" title="CVE-2011-5325" target="_blank" >CVE-2011-5325</a>       :   7.5 (v3)  :  6   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2013-1813" title="CVE-2013-1813" target="_blank" >CVE-2013-1813</a>       :   7.2 (v2)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2014-9645" title="CVE-2014-9645" target="_blank" >CVE-2014-9645</a>       :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2015-9261" title="CVE-2015-9261" target="_blank" >CVE-2015-9261</a>       :   5.5 (v3)  :  2   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-2148" title="CVE-2016-2148" target="_blank" >CVE-2016-2148</a>       :   9.8 (v3)  :  27  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-2147" title="CVE-2016-2147" target="_blank" >CVE-2016-2147</a>       :   7.5 (v3)  :  7   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-6301" title="CVE-2016-6301" target="_blank" >CVE-2016-6301</a>       :   7.5 (v3)  :  8   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-1000500" title="CVE-2018-1000500" target="_blank" >CVE-2018-1000500</a>    :   8.1 (v3)  :  2   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2017-16544" title="CVE-2017-16544" target="_blank" >CVE-2017-16544</a>      :   8.8 (v3)  :  6   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-1000517" title="CVE-2018-1000517" target="_blank" >CVE-2018-1000517</a>    :   9.8 (v3)  :  32  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-20679" title="CVE-2018-20679" target="_blank" >CVE-2018-20679</a>      :   7.5 (v3)  :  7   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2019-5747" title="CVE-2019-5747" target="_blank" >CVE-2019-5747</a>       :   7.5 (v3)  :  4   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-28391" title="CVE-2022-28391" target="_blank" >CVE-2022-28391</a>      :   8.8 (v3)  :  3   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-1445-1          :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-48174" title="CVE-2022-48174" target="_blank" >CVE-2022-48174</a>      :   9.8 (v3)  :  3   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-1445-2          :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-46394" title="CVE-2025-46394" target="_blank" >CVE-2025-46394</a>      :   3.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-60876" title="CVE-2025-60876" target="_blank" >CVE-2025-60876</a>      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-1445-3          :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-2559-1          :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-2614-1          :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-337-1           :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   DLA-4019-1          :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2013-0358     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2015-0041     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2014-0351     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2016-0277     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2018-0413     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2021-0009     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2021-0310     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2021-0533     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2022-0135     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   MGASA-2022-0458     :   unknown (v:  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2021-1162      :   7.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2021-1441      :   9.1 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2021-1447      :   7.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2022-1624      :   9.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2021-1449      :   7.2 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2022-1859      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2023-1583      :   9.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-1740      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-1901      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-1900      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-1902      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-1956      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-2127      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-2128      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-2438      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-2439      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-2440      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2025-1855      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2025-1856      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2024-2441      :   5.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2025-1857      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2025-1881      :   6.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2025-1882      :   6.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2025-1883      :   6.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2025-1884      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2025-1885      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   OESA-2025-2328      :   3.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2025-1886      :   7.8 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2026-1544      :   7 (v3)    :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-1879      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-1880      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-1881      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   OESA-2026-2357      :   8.1 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-2700      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-2701      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-2702      :   6.5 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   OESA-2026-3683      :   3.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="orange">	busybox             :   1.14.1      :   OESA-2026-3312      :   5.1 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   OESA-2026-3684      :   3.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   OESA-2026-3686      :   3.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   OESA-2026-3685      :   3.3 (v3)  :  0   :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   ROOT-OS-ALPINE-315-C:   9.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="red">	busybox             :   1.14.1      :   ROOT-OS-ALPINE-317-C:   9.8 (v3)  :  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2015:1445-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2021:3531-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:3959-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:0135-2 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:0135-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:4253-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:4260-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:4309-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:4371-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2023:3820-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2023:3729-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2023:3529-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2022:4372-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2023:3819-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2025:03271-1:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2025:03205-1:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2025:03271-2:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:0235-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:0236-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:0758-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:0759-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:0872-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:0892-1 :   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:20134-1:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:20726-1:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:20905-1:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   SUSE-SU-2026:22020-1:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2021:140:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2021:353:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2022:013:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2024:117:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2024:124:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2024:125:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2024:131:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2025:153:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2025:158:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:102:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:102:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:107:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:112:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:116:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:200:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<pre></span><span class="green">	busybox             :   1.14.1      :   openSUSE-SU-2026:203:   unknown (v:  NA  :   bb_verified    :   No exploit available</span></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Identified </span><span class="orange"><span class="bold">17</span><span class="green"> CVEs in </span><span class="orange">busybox</span><span class="green"> with version </span><span class="orange">1.14.1</span><span class="green"> (source </span><span class="orange">bb_verified</span><span class="green">).</span></pre>
+<pre></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./s118_busybox_verifier/83e682f71056bc2a4d3bc6dd38439a70.html" title="./s118_busybox_verifier/83e682f71056bc2a4d3bc6dd38439a70.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Extracted </span><span class="orange">177</span><span class="green"> vulnerabilities based on BusyBox version only</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="busyboxappletidentificationviaemulationresults">BusyBox - Applet identification via emulation results</a></span></pre>
+<pre><hr class="mono" /></pre>
+<a class="reference" href="./s115_usermode_emulator/23c91c98dc8652deba97298a2271a29c.html" title="./s115_usermode_emulator/23c91c98dc8652deba97298a2271a29c.html" ><pre>[</span><span class="orange">*</span>] Extract applet data for BusyBox version </span><span class="orange">:busybox:busybox:1.14.1</span> from emulation logs</pre></a>
+
+<a class="reference" href="./s118_busybox_verifier/a41671113a64079df0e593b203b0412c.html" title="./s118_busybox_verifier/a41671113a64079df0e593b203b0412c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Extracted </span><span class="orange">66</span><span class="green"> valid BusyBox applets from usermode log files</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="busyboxstaticappletidentificationfrombinary">BusyBox - Static applet identification from binary</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] Extract applet data for BusyBox version </span><span class="orange">:busybox:busybox:1.14.1</span> from binary </span><span class="orange">/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/bin/busybox</span></pre>
+<a class="reference" href="./s118_busybox_verifier/a1e419decc304733cd754a52dc6ee0c5.html" title="./s118_busybox_verifier/a1e419decc304733cd754a52dc6ee0c5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Extracted </span><span class="orange">48</span><span class="green"> valid BusyBox applets via static analysis</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="busyboxvulnerabilityverificationbusyboxbusybox1141">BusyBox - Vulnerability verification - :busybox:busybox:1.14.1</a></span></pre>
+<pre><hr class="mono" /></pre>
+<a class="reference" href="./s118_busybox_verifier/c76cf62dff87c4529ff139dcf9ab652a.html" title="./s118_busybox_verifier/c76cf62dff87c4529ff139dcf9ab652a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Extracted </span><span class="orange">160</span><span class="green"> vulnerabilities based on BusyBox version only</pre></a>
+<pre></span></pre>
+
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Verified BusyBox vulnerability </span><span class="orange"><a href="https://nvd.nist.gov/vuln/detail/CVE-2011-5325" title="CVE-2011-5325" target="_blank" >CVE-2011-5325</a></span><span class="green"> - applet </span><span class="orange">tar</span><span class="green"></pre>
+<pre></span></pre>
+<pre>	Directory traversal vulnerability in the BusyBox implementation of <span class="orange">tar</span> before 1.22.0 v5 allows remote attackers to point to files outside the current working directory via a symlink.</pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Verified BusyBox vulnerability </span><span class="orange"><a href="https://nvd.nist.gov/vuln/detail/CVE-2022-28391" title="CVE-2022-28391" target="_blank" >CVE-2022-28391</a></span><span class="green"> - applet </span><span class="orange">netstat</span><span class="green"></pre>
+<pre></span></pre>
+<pre>	BusyBox through 1.35.0 allows remote attackers to execute arbitrary code if <span class="orange">netstat</span> is used to print a DNS PTR record's value to a VT compatible terminal. Alternatively, the attacker could choose to change the terminal's colors.</pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Verified BusyBox vulnerability </span><span class="orange"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-46394" title="CVE-2025-46394" target="_blank" >CVE-2025-46394</a></span><span class="green"> - applet </span><span class="orange">tar</span><span class="green"></pre>
+<pre></span></pre>
+<pre>	In <span class="orange">tar</span> in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through the use of terminal escape sequences.</pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./s130_binary_map_builder.html" title="./s130_binary_map_builder.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s116_qemu_version_detection.html" title="./s116_qemu_version_detection.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

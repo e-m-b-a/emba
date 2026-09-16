@@ -1,0 +1,359 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s13_weak_func_check.html" title="./../s13_weak_func_check.html" >&laquo; Back to s13_weak_func_check</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="orange">*</span>] Binary protection state of </span><span class="orange">servd</span></pre>
+<br />
+<pre>  	RELRO          CANARY            NX           PIE          RPATH        RUNPATH      SYMBOLS      </pre>
+<pre>  	<span class="red">No RELRO</span>       <span class="red">No Canary found</span>   <span class="red">NX disabled</span>  <span class="red">No PIE</span>       <span class="green">No RPATH</span>     <span class="green">No RUNPATH</span>   <span class="green">No Symbols</span></pre>
+<br />
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Function </span><span class="orange">printf</span> tear down of </span><span class="orange">servd</span></pre>
+<br />
+<pre>  401858:	24a5a0a0 	addiu	a1,a1,-24416</pre>
+<pre>  40185c:	0320f809 	jalr	t9</pre>
+<pre>  401860:	02002021 	move	a0,s0</pre>
+<pre>  401864:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  401868:	14400004 	bnez	v0,40187c &lt</span>ain&commat;&commat;Base+0xcc&gt;</pre>
+<pre>  40186c:	3c050041 	lui	a1,0x41</pre>
+<pre>  401870:	8f998124 	lw	t9,-32476(gp)</pre>
+<pre>  401874:	1000000a 	b	4018a0 &lt</span>ain&commat;&commat;Base+0xf0&gt;</pre>
+<pre>  401878:	02402021 	move	a0,s2</pre>
+<pre>  40187c:	8f99808c 	lw	t9,-32628(gp)</pre>
+<pre>  401880:	24a5a0a8 	addiu	a1,a1,-24408</pre>
+<pre>  401884:	0320f809 	jalr	t9</pre>
+<pre>  401888:	02002021 	move	a0,s0</pre>
+<pre>  40188c:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  401890:	1440000a 	bnez	v0,4018bc &lt</span>ain&commat;&commat;Base+0x10c&gt;</pre>
+<pre>  401894:	02002821 	move	a1,s0</pre>
+<pre>  401898:	8f998154 	lw	t9,-32428(gp)</pre>
+<pre>  40189c:	02402021 	move	a0,s2</pre>
+<pre>  4018a0:	02202821 	move	a1,s1</pre>
+<pre>  4018a4:	8fbf0024 	lw	ra,36(sp)</pre>
+<pre>  4018a8:	8fb20020 	lw	s2,32(sp)</pre>
+<pre>  4018ac:	8fb1001c 	lw	s1,28(sp)</pre>
+<pre>  4018b0:	8fb00018 	lw	s0,24(sp)</pre>
+<pre>  4018b4:	03200008 	jr	t9</pre>
+<pre>  4018b8:	27bd0028 	addiu	sp,sp,40</pre>
+<pre><span class="red">  4018bc:	8f998048 	lw	t9,printf</span></pre>
+<pre>  4018c0:	3c040041 	lui	a0,0x41</pre>
+<pre>  4018c4:	0320f809 	jalr	t9</pre>
+<pre>--</pre>
+<pre>  401c58:	279c3110 	addiu	gp,gp,12560</pre>
+<pre>  401c5c:	afbf001c 	sw	ra,28(sp)</pre>
+<pre>  401c60:	afb00018 	sw	s0,24(sp)</pre>
+<pre>  401c64:	afbc0010 	sw	gp,16(sp)</pre>
+<pre>  401c68:	8f9981c0 	lw	t9,-32320(gp)</pre>
+<pre>  401c6c:	00a02021 	move	a0,a1</pre>
+<pre>  401c70:	0320f809 	jalr	t9</pre>
+<pre>  401c74:	00a08021 	move	s0,a1</pre>
+<pre>  401c78:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  401c7c:	3c050040 	lui	a1,0x40</pre>
+<pre>  401c80:	8f9980d4 	lw	t9,-32556(gp)</pre>
+<pre>  401c84:	02003021 	move	a2,s0</pre>
+<pre>  401c88:	8fbf001c 	lw	ra,28(sp)</pre>
+<pre>  401c8c:	8fb00018 	lw	s0,24(sp)</pre>
+<pre>  401c90:	00402021 	move	a0,v0</pre>
+<pre>  401c94:	24a5219c 	addiu	a1,a1,8604</pre>
+<pre>  401c98:	03200008 	jr	t9</pre>
+<pre>  401c9c:	27bd0020 	addiu	sp,sp,32</pre>
+<pre>  401ca0:	3c1c0042 	lui	gp,0x42</pre>
+<pre>  401ca4:	27bdffd8 	addiu	sp,sp,-40</pre>
+<pre>  401ca8:	279c3110 	addiu	gp,gp,12560</pre>
+<pre>  401cac:	afbf0024 	sw	ra,36(sp)</pre>
+<pre>  401cb0:	afb10020 	sw	s1,32(sp)</pre>
+<pre>  401cb4:	afb0001c 	sw	s0,28(sp)</pre>
+<pre>  401cb8:	afbc0010 	sw	gp,16(sp)</pre>
+<pre><span class="red">  401cbc:	8f998048 	lw	t9,printf</span></pre>
+<pre>  401cc0:	3c100041 	lui	s0,0x41</pre>
+<pre>  401cc4:	00808821 	move	s1,a0</pre>
+<pre>  401cc8:	3c060041 	lui	a2,0x41</pre>
+<pre>  401ccc:	3c040041 	lui	a0,0x41</pre>
+<pre>  401cd0:	24c6a0f0 	addiu	a2,a2,-24336</pre>
+<pre>  401cd4:	2484a0e0 	addiu	a0,a0,-24352</pre>
+<pre>  401cd8:	0320f809 	jalr	t9</pre>
+<pre>  401cdc:	2605a090 	addiu	a1,s0,-24432</pre>
+<pre>  401ce0:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  401ce4:	3c040041 	lui	a0,0x41</pre>
+<pre><span class="red">  401ce8:	8f998048 	lw	t9,printf</span></pre>
+<pre>  401cec:	2605a090 	addiu	a1,s0,-24432</pre>
+<pre>  401cf0:	0320f809 	jalr	t9</pre>
+<pre>--</pre>
+<pre>  406094:	afbc0018 	sw	gp,24(sp)</pre>
+<pre>  406098:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  40609c:	3c040041 	lui	a0,0x41</pre>
+<pre>  4060a0:	0320f809 	jalr	t9</pre>
+<pre>  4060a4:	2484ad5c 	addiu	a0,a0,-21156</pre>
+<pre>  4060a8:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  4060ac:	3c040041 	lui	a0,0x41</pre>
+<pre>  4060b0:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  4060b4:	00000000 	nop</pre>
+<pre>  4060b8:	0320f809 	jalr	t9</pre>
+<pre>  4060bc:	2484ad80 	addiu	a0,a0,-21120</pre>
+<pre>  4060c0:	3c020042 	lui	v0,0x42</pre>
+<pre>  4060c4:	8c50cf28 	lw	s0,-12504(v0)</pre>
+<pre>  4060c8:	2452cf28 	addiu	s2,v0,-12504</pre>
+<pre>  4060cc:	3c020041 	lui	v0,0x41</pre>
+<pre>  4060d0:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  4060d4:	10000008 	b	4060f8 &lt;sloop_terminate&commat;&commat;Base+0x90&gt;</pre>
+<pre>  4060d8:	2451ad90 	addiu	s1,v0,-21104</pre>
+<pre>  4060dc:	8e020014 	lw	v0,20(s0)</pre>
+<pre>  4060e0:	8e06000c 	lw	a2,12(s0)</pre>
+<pre>  4060e4:	8e070010 	lw	a3,16(s0)</pre>
+<pre>  4060e8:	0320f809 	jalr	t9</pre>
+<pre>  4060ec:	afa20010 	sw	v0,16(sp)</pre>
+<pre>  4060f0:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  4060f4:	8e100000 	lw	s0,0(s0)</pre>
+<pre><span class="red">  4060f8:	8f998048 	lw	t9,printf</span></pre>
+<pre>  4060fc:	02002821 	move	a1,s0</pre>
+<pre>  406100:	1612fff6 	bne	s0,s2,4060dc &lt;sloop_terminate&commat;&commat;Base+0x74&gt;</pre>
+<pre>--</pre>
+<pre>  406150:	3c040041 	lui	a0,0x41</pre>
+<pre>  406154:	0320f809 	jalr	t9</pre>
+<pre>  406158:	2484ad5c 	addiu	a0,a0,-21156</pre>
+<pre>  40615c:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  406160:	3c040041 	lui	a0,0x41</pre>
+<pre>  406164:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  406168:	00000000 	nop</pre>
+<pre>  40616c:	0320f809 	jalr	t9</pre>
+<pre>  406170:	2484ade8 	addiu	a0,a0,-21016</pre>
+<pre>  406174:	3c020042 	lui	v0,0x42</pre>
+<pre>  406178:	8c50cf30 	lw	s0,-12496(v0)</pre>
+<pre>  40617c:	2452cf30 	addiu	s2,v0,-12496</pre>
+<pre>  406180:	3c020041 	lui	v0,0x41</pre>
+<pre>  406184:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  406188:	1000000a 	b	4061b4 &lt;sloop_terminate&commat;&commat;Base+0x14c&gt;</pre>
+<pre>  40618c:	2451adf8 	addiu	s1,v0,-21000</pre>
+<pre>  406190:	8e020014 	lw	v0,20(s0)</pre>
+<pre>  406194:	8e06000c 	lw	a2,12(s0)</pre>
+<pre>  406198:	8e070010 	lw	a3,16(s0)</pre>
+<pre>  40619c:	afa20010 	sw	v0,16(sp)</pre>
+<pre>  4061a0:	8e020018 	lw	v0,24(s0)</pre>
+<pre>  4061a4:	0320f809 	jalr	t9</pre>
+<pre>  4061a8:	afa20014 	sw	v0,20(sp)</pre>
+<pre>  4061ac:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  4061b0:	8e100000 	lw	s0,0(s0)</pre>
+<pre><span class="red">  4061b4:	8f998048 	lw	t9,printf</span></pre>
+<pre>  4061b8:	02002821 	move	a1,s0</pre>
+<pre>  4061bc:	1612fff4 	bne	s0,s2,406190 &lt;sloop_terminate&commat;&commat;Base+0x128&gt;</pre>
+<pre>--</pre>
+<pre>  406204:	afbc0018 	sw	gp,24(sp)</pre>
+<pre>  406208:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  40620c:	3c040041 	lui	a0,0x41</pre>
+<pre>  406210:	0320f809 	jalr	t9</pre>
+<pre>  406214:	2484ad5c 	addiu	a0,a0,-21156</pre>
+<pre>  406218:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  40621c:	3c040041 	lui	a0,0x41</pre>
+<pre>  406220:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  406224:	00000000 	nop</pre>
+<pre>  406228:	0320f809 	jalr	t9</pre>
+<pre>  40622c:	2484ae30 	addiu	a0,a0,-20944</pre>
+<pre>  406230:	3c020042 	lui	v0,0x42</pre>
+<pre>  406234:	8c50cf20 	lw	s0,-12512(v0)</pre>
+<pre>  406238:	2452cf20 	addiu	s2,v0,-12512</pre>
+<pre>  40623c:	3c020041 	lui	v0,0x41</pre>
+<pre>  406240:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  406244:	10000008 	b	406268 &lt;sloop_terminate&commat;&commat;Base+0x200&gt;</pre>
+<pre>  406248:	2451ae40 	addiu	s1,v0,-20928</pre>
+<pre>  40624c:	8e020014 	lw	v0,20(s0)</pre>
+<pre>  406250:	8e06000c 	lw	a2,12(s0)</pre>
+<pre>  406254:	8e070010 	lw	a3,16(s0)</pre>
+<pre>  406258:	0320f809 	jalr	t9</pre>
+<pre>  40625c:	afa20010 	sw	v0,16(sp)</pre>
+<pre>  406260:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  406264:	8e100000 	lw	s0,0(s0)</pre>
+<pre><span class="red">  406268:	8f998048 	lw	t9,printf</span></pre>
+<pre>  40626c:	02002821 	move	a1,s0</pre>
+<pre>  406270:	1612fff6 	bne	s0,s2,40624c &lt;sloop_terminate&commat;&commat;Base+0x1e4&gt;</pre>
+<pre>--</pre>
+<pre>  4062b8:	afbc0018 	sw	gp,24(sp)</pre>
+<pre>  4062bc:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  4062c0:	3c040041 	lui	a0,0x41</pre>
+<pre>  4062c4:	0320f809 	jalr	t9</pre>
+<pre>  4062c8:	2484ad5c 	addiu	a0,a0,-21156</pre>
+<pre>  4062cc:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  4062d0:	3c040041 	lui	a0,0x41</pre>
+<pre>  4062d4:	8f998040 	lw	t9,-32704(gp)</pre>
+<pre>  4062d8:	00000000 	nop</pre>
+<pre>  4062dc:	0320f809 	jalr	t9</pre>
+<pre>  4062e0:	2484ae74 	addiu	a0,a0,-20876</pre>
+<pre>  4062e4:	3c020042 	lui	v0,0x42</pre>
+<pre>  4062e8:	8c50cf18 	lw	s0,-12520(v0)</pre>
+<pre>  4062ec:	2452cf18 	addiu	s2,v0,-12520</pre>
+<pre>  4062f0:	3c020041 	lui	v0,0x41</pre>
+<pre>  4062f4:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  4062f8:	10000008 	b	40631c &lt;sloop_terminate&commat;&commat;Base+0x2b4&gt;</pre>
+<pre>  4062fc:	2451ae40 	addiu	s1,v0,-20928</pre>
+<pre>  406300:	8e020014 	lw	v0,20(s0)</pre>
+<pre>  406304:	8e06000c 	lw	a2,12(s0)</pre>
+<pre>  406308:	8e070010 	lw	a3,16(s0)</pre>
+<pre>  40630c:	0320f809 	jalr	t9</pre>
+<pre>  406310:	afa20010 	sw	v0,16(sp)</pre>
+<pre>  406314:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  406318:	8e100000 	lw	s0,0(s0)</pre>
+<pre><span class="red">  40631c:	8f998048 	lw	t9,printf</span></pre>
+<pre>  406320:	02002821 	move	a1,s0</pre>
+<pre>  406324:	1612fff6 	bne	s0,s2,406300 &lt;sloop_terminate&commat;&commat;Base+0x298&gt;</pre>
+<br />
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Function </span><span class="orange">printf</span> used </span><span class="orange">7</span> times </span><span class="orange">servd</span></pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

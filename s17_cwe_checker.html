@@ -1,0 +1,554 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#check_binaries_for_vulnerabilities_with_cwe-checker" title="#check_binaries_for_vulnerabilities_with_cwe-checker" >Check binaries for vulnerabilities with cwe-checker</a><a class="submodul" href="#resultscwecheckerbinaryanalysis" title="#resultscwecheckerbinaryanalysis" >Results - CWE-checker binary analysis</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="check_binaries_for_vulnerabilities_with_cwe-checker">Check binaries for vulnerabilities with cwe-checker</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>The CWE checker module checks binaries for security weaknesses using cwe-checker.</pre>
+<br />
+<br />
+<a class="reference" href="./s17_cwe_checker/cc576755b6b85f8e9c4334a3f1e7fcdf.html" title="./s17_cwe_checker/cc576755b6b85f8e9c4334a3f1e7fcdf.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">138</span><span class="green"> and </span><span class="orange">8</span><span class="green"> different security issues in </span><span class="orange">updatewifistats</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">8 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">113 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">6 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/94693d7fadc74208be81a5db0f438548.html" title="./s17_cwe_checker/94693d7fadc74208be81a5db0f438548.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">190</span><span class="green"> and </span><span class="orange">7</span><span class="green"> different security issues in </span><span class="orange">igmpproxy</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">18 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">8 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">48 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">101 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">8 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/9fa5a40e50a4e47fc75d31d4fb62deeb.html" title="./s17_cwe_checker/9fa5a40e50a4e47fc75d31d4fb62deeb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">76</span><span class="green"> and </span><span class="orange">7</span><span class="green"> different security issues in </span><span class="orange">libip6tc.so.0.0.0</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">18 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">46 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">3 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/10a182178cb2f1d0d9f21083b59e26a5.html" title="./s17_cwe_checker/10a182178cb2f1d0d9f21083b59e26a5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">67</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">libip4tc.so.0.0.0</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">17 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">42 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">3 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/90e9a53afac99ade29bfe153672a23a7.html" title="./s17_cwe_checker/90e9a53afac99ade29bfe153672a23a7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">235</span><span class="green"> and </span><span class="orange">8</span><span class="green"> different security issues in </span><span class="orange">servd</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">177 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">35 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">5 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/9b07c7188d08b590bfe7e2589266d7ea.html" title="./s17_cwe_checker/9b07c7188d08b590bfe7e2589266d7ea.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">518</span><span class="green"> and </span><span class="orange">10</span><span class="green"> different security issues in </span><span class="orange">cgibin</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/125.html" title="125" target="_blank" >CWE125</a></span><span class="green"> - Out-of-bounds Read - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">8 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">70 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">14 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">38 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">6 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">161 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">202 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">16 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/8a9d57bbd3c29663aa0289ad84946088.html" title="./s17_cwe_checker/8a9d57bbd3c29663aa0289ad84946088.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">107</span><span class="green"> and </span><span class="orange">7</span><span class="green"> different security issues in </span><span class="orange">ddnsd</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">12 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">31 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">47 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">5 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/7b66b568439d8ced4c119e360cbf04e9.html" title="./s17_cwe_checker/7b66b568439d8ced4c119e360cbf04e9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">212</span><span class="green"> and </span><span class="orange">10</span><span class="green"> different security issues in </span><span class="orange">rgbin</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">27 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">14 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">21 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">116 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">21 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/06b5e8cd842233cc03bbda3c354d777b.html" title="./s17_cwe_checker/06b5e8cd842233cc03bbda3c354d777b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">81</span><span class="green"> and </span><span class="orange">7</span><span class="green"> different security issues in </span><span class="orange">libxtables.so.4.0.0</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">11 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">50 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">6 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/4e06a0781403639ad5c93f3bc061807f.html" title="./s17_cwe_checker/4e06a0781403639ad5c93f3bc061807f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">197</span><span class="green"> and </span><span class="orange">10</span><span class="green"> different security issues in </span><span class="orange">udhcpd</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">32 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/337.html" title="337" target="_blank" >CWE337</a></span><span class="green"> - RNG seed function srand at 4223428 is seeded with predictable seed source. - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">77 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">73 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">3 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/53377f1baf7cfd5133a10649ddeb5228.html" title="./s17_cwe_checker/53377f1baf7cfd5133a10649ddeb5228.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">248</span><span class="green"> and </span><span class="orange">9</span><span class="green"> different security issues in </span><span class="orange">xmldb</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/125.html" title="125" target="_blank" >CWE125</a></span><span class="green"> - Out-of-bounds Read - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">22 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">19 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">106 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">81 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">12 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/0f31c4a0fb7f45bb24ef7b0b4f9c9c45.html" title="./s17_cwe_checker/0f31c4a0fb7f45bb24ef7b0b4f9c9c45.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">144</span><span class="green"> and </span><span class="orange">7</span><span class="green"> different security issues in </span><span class="orange">nsbbox</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">46 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">9 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">58 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">23 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">6 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/9f6769eca4e7039aec575b14ea2a6c7d.html" title="./s17_cwe_checker/9f6769eca4e7039aec575b14ea2a6c7d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">55</span><span class="green"> and </span><span class="orange">5</span><span class="green"> different security issues in </span><span class="orange">gpiod</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">6 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">13 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">29 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">4 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/3898e7a30d033105812c3b5d0fa7ed2d.html" title="./s17_cwe_checker/3898e7a30d033105812c3b5d0fa7ed2d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">154</span><span class="green"> and </span><span class="orange">7</span><span class="green"> different security issues in </span><span class="orange">lld2d</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">15 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/332.html" title="332" target="_blank" >CWE332</a></span><span class="green"> - Insufficient Entropy in PRNG - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">8 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">107 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">13 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">5 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/9e6d5f9be224d23a9a262fb5c4908c4d.html" title="./s17_cwe_checker/9e6d5f9be224d23a9a262fb5c4908c4d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">57</span><span class="green"> and </span><span class="orange">5</span><span class="green"> different security issues in </span><span class="orange">updateleases</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">10 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">40 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">3 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/585d78a5b969a1c5ca8ad8e7c529b3b4.html" title="./s17_cwe_checker/585d78a5b969a1c5ca8ad8e7c529b3b4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">83</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">neaps</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">12 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">57 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">7 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">5 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/80a0cf03d54d5c74e10108745b2329b8.html" title="./s17_cwe_checker/80a0cf03d54d5c74e10108745b2329b8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">74</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">logd</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">21 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">37 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">6 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/10fa0d999fe62b33d1fb3da945516ec5.html" title="./s17_cwe_checker/10fa0d999fe62b33d1fb3da945516ec5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">200</span><span class="green"> and </span><span class="orange">9</span><span class="green"> different security issues in </span><span class="orange">dhcp6s</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/119.html" title="119" target="_blank" >CWE119</a></span><span class="green"> - Buffer Overflow - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">15 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">14 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">52 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">100 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">11 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/c968b2c8fa11e5a6810bfdc3c1784c03.html" title="./s17_cwe_checker/c968b2c8fa11e5a6810bfdc3c1784c03.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">18</span><span class="green"> and </span><span class="orange">3</span><span class="green"> different security issues in </span><span class="orange">ated</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">12 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">5 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/4ca9f7f0a87bf73cfd012d18dc152891.html" title="./s17_cwe_checker/4ca9f7f0a87bf73cfd012d18dc152891.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">332</span><span class="green"> and </span><span class="orange">11</span><span class="green"> different security issues in </span><span class="orange">dhcp6c</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/119.html" title="119" target="_blank" >CWE119</a></span><span class="green"> - Buffer Overflow - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">11 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">6 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">17 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">21 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">120 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">137 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">13 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">3 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/6c050484af2bd37d4f5ba5d9039ff024.html" title="./s17_cwe_checker/6c050484af2bd37d4f5ba5d9039ff024.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">37</span><span class="green"> and </span><span class="orange">4</span><span class="green"> different security issues in </span><span class="orange">ubcom</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">20 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">12 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/996fc473726c0798d55b9061e214552e.html" title="./s17_cwe_checker/996fc473726c0798d55b9061e214552e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">31</span><span class="green"> and </span><span class="orange">5</span><span class="green"> different security issues in </span><span class="orange">portt</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">10 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">14 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">3 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/0b140a6da9915d1c868f865158e1b4db.html" title="./s17_cwe_checker/0b140a6da9915d1c868f865158e1b4db.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">10</span><span class="green"> and </span><span class="orange">5</span><span class="green"> different security issues in </span><span class="orange">netbios</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/71c63d55f231f8bb55d022f350221af9.html" title="./s17_cwe_checker/71c63d55f231f8bb55d022f350221af9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">42</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">llmnresp</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">34 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">4 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/4a1c8f5534d30927938e780a416b6006.html" title="./s17_cwe_checker/4a1c8f5534d30927938e780a416b6006.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">13</span><span class="green"> and </span><span class="orange">3</span><span class="green"> different security issues in </span><span class="orange">libutil-0.9.30.1.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">10 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">2 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/7369c59e1d1d31f96ecf2f02cc30bf91.html" title="./s17_cwe_checker/7369c59e1d1d31f96ecf2f02cc30bf91.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">24</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">ubcfg</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">8 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">11 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/c70c8dff65f16315df92c3f7ca5f524a.html" title="./s17_cwe_checker/c70c8dff65f16315df92c3f7ca5f524a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">54</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">libpthread-0.9.30.1.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">35 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">7 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">7 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/a98152805ddee2219dc13447dc72699b.html" title="./s17_cwe_checker/a98152805ddee2219dc13447dc72699b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">120</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">rndimage</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">95 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">4 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">14 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">4 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/2bd682a3928eda572f2a8b6c32646110.html" title="./s17_cwe_checker/2bd682a3928eda572f2a8b6c32646110.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">91</span><span class="green"> and </span><span class="orange">6</span><span class="green"> different security issues in </span><span class="orange">ecmh</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">17 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">19 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">42 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">5 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">7 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/566241784f64f26aab76b9882265a406.html" title="./s17_cwe_checker/566241784f64f26aab76b9882265a406.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">11</span><span class="green"> and </span><span class="orange">3</span><span class="green"> different security issues in </span><span class="orange">widget</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">9 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/147aec735e99d9de21eacfa673b33b54.html" title="./s17_cwe_checker/147aec735e99d9de21eacfa673b33b54.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">52</span><span class="green"> and </span><span class="orange">3</span><span class="green"> different security issues in </span><span class="orange">libm-0.9.30.1.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">46 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">4 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/015e139772bf15fb901a98badb8feb5c.html" title="./s17_cwe_checker/015e139772bf15fb901a98badb8feb5c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">1</span><span class="green"> and </span><span class="orange">1</span><span class="green"> different security issues in </span><span class="orange">librt-0.9.30.1.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/378e9df290c2e9bd0a2d9953fc0f4c7f.html" title="./s17_cwe_checker/378e9df290c2e9bd0a2d9953fc0f4c7f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">337</span><span class="green"> and </span><span class="orange">4</span><span class="green"> different security issues in </span><span class="orange">wps</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/125.html" title="125" target="_blank" >CWE125</a></span><span class="green"> - Out-of-bounds Read - </span><span class="orange">3 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">290 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">43 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/318cb4afd93dca09170fd51b0f781ef3.html" title="./s17_cwe_checker/318cb4afd93dca09170fd51b0f781ef3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">4</span><span class="green"> and </span><span class="orange">3</span><span class="green"> different security issues in </span><span class="orange">rt3052esw</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/863c1b2846f60428fd1450854ec61423.html" title="./s17_cwe_checker/863c1b2846f60428fd1450854ec61423.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">2</span><span class="green"> and </span><span class="orange">1</span><span class="green"> different security issues in </span><span class="orange">libipt_HIJACK.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">2 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/5ed92021dd92d4f9338d9f28e18acf4e.html" title="./s17_cwe_checker/5ed92021dd92d4f9338d9f28e18acf4e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">32</span><span class="green"> and </span><span class="orange">3</span><span class="green"> different security issues in </span><span class="orange">libdl-0.9.30.1.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">30 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">1 times.</span></pre>
+<br />
+<a class="reference" href="./s17_cwe_checker/78d49da42c1c17abf3f5ef4a43206bc3.html" title="./s17_cwe_checker/78d49da42c1c17abf3f5ef4a43206bc3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">15</span><span class="green"> and </span><span class="orange">2</span><span class="green"> different security issues in </span><span class="orange">libxt_mport.so</span><span class="green"> (</span><span class="red">common linux file: no</span><span class="green">):</span></pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">12 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">3 times.</span></pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="resultscwecheckerbinaryanalysis">Results - CWE-checker binary analysis</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">4062</span><span class="green"> of the following security issues in </span><span class="orange">37</span><span class="green"> tested binaries:</pre>
+<pre></span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/119.html" title="119" target="_blank" >CWE119</a></span><span class="green"> - Buffer Overflow - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/125.html" title="125" target="_blank" >CWE125</a></span><span class="green"> - Out-of-bounds Read - </span><span class="orange">6 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">71 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">36 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">413 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/332.html" title="332" target="_blank" >CWE332</a></span><span class="green"> - Insufficient Entropy in PRNG - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/337.html" title="337" target="_blank" >CWE337</a></span><span class="green"> - RNG seed function srand at 4223428 is seeded with predictable seed source. - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">65 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">134 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">55 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">1317 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">1655 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">75 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">225 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">6 times.</span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./s20_shell_check.html" title="./s20_shell_check.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s16_ghidra_decompile_checks.html" title="./s16_ghidra_decompile_checks.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

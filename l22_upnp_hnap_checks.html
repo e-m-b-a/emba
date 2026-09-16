@@ -1,0 +1,309 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#live_upnp/hnap_tests_of_emulated_device." title="#live_upnp/hnap_tests_of_emulated_device." >Live UPnP/HNAP tests of emulated device.</a><a class="submodul" href="#upnpenumerationforemulatedsystemwithip19216801" title="#upnpenumerationforemulatedsystemwithip19216801" >UPnP enumeration for emulated system with IP 192.168.0.1</a><a class="submodul" href="#hnapjnapenumerationforemulatedsystemwithip19216801" title="#hnapjnapenumerationforemulatedsystemwithip19216801" >HNAP/JNAP enumeration for emulated system with IP 192.168.0.1</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="live_upnp/hnap_tests_of_emulated_device.">Live UPnP/HNAP tests of emulated device.</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">UPnP enumeration for emulated system with IP </span><span class="orange">192.168.0.1</span></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">137/udp netbios-ns - 137/udp - 192.168.0.1</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">1900/udp upnp - 1900/udp - 192.168.0.1</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">23/tcp telnet - 23/tcp - 192.168.0.1</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">49152/tcp upnp - 49152/tcp - 192.168.0.1</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP scan with upnpc on local network interface </span><span class="orange">tap213_0</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP scan with upnpc on local network interface </span><span class="orange">tap213_0.0</span></pre>
+<br />
+<pre>ioctl(...SIOCGIFADDR...): Cannot assign requested address</pre>
+<pre>No IGD UPnP Device found on the network !</pre>
+<pre>upnpc: miniupnpc library test client, version 2.3.3.</pre>
+<pre> (c) 2005-2025 Thomas Bernard.</pre>
+<pre>More information at <a href="https://miniupnp.tuxfamily.org/" title="https://miniupnp.tuxfamily.org/" target="_blank" >https://miniupnp.tuxfamily.org/</a> or <a href="http://miniupnp.free.fr/" title="http://miniupnp.free.fr/" target="_blank" >http://miniupnp.free.fr/</a></pre>
+<br />
+<pre>No valid UPNP Internet Gateway Device found.</pre>
+<pre>upnpc: miniupnpc library test client, version 2.3.3.</pre>
+<pre> (c) 2005-2025 Thomas Bernard.</pre>
+<pre>More information at <a href="https://miniupnp.tuxfamily.org/" title="https://miniupnp.tuxfamily.org/" target="_blank" >https://miniupnp.tuxfamily.org/</a> or <a href="http://miniupnp.free.fr/" title="http://miniupnp.free.fr/" target="_blank" >http://miniupnp.free.fr/</a></pre>
+<br />
+<pre>List of UPNP devices found on the network :</pre>
+<pre> desc: <a href="http://192.168.0.1:49152/InternetGatewayDevice.xml" title="http://192.168.0.1:49152/InternetGatewayDevice.xml" target="_blank" >http://192.168.0.1:49152/InternetGatewayDevice.xml</a></pre>
+<pre> st: urn:schemas-upnp-org:device:InternetGatewayDevice:1</pre>
+<br />
+<pre> desc: <a href="http://192.168.0.1:49152/InternetGatewayDevice.xml" title="http://192.168.0.1:49152/InternetGatewayDevice.xml" target="_blank" >http://192.168.0.1:49152/InternetGatewayDevice.xml</a></pre>
+<pre> st: uuid:A2942BDE-9276-FE98-C80C-000000000000</pre>
+<br />
+<pre>Found a (not connected?) IGD : <a href="http://192.168.0.1:49152/soap.cgi?service=WANIPConn1" title="http://192.168.0.1:49152/soap.cgi?service=WANIPConn1" target="_blank" >http://192.168.0.1:49152/soap.cgi?service=WANIPConn1</a></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> UPnP service successfully identified</pre>
+<pre></span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] UPnP basic enumeration finished</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">HNAP/JNAP enumeration for emulated system with IP </span><span class="orange">192.168.0.1</span></span></pre>
+<pre><hr class="mono" /></pre>
+<br />
+<pre>Note: Unnecessary use of -X or --request, GET is already inferred.</pre>
+<pre>*   Trying 192.168.0.1:80...</pre>
+<pre>* Established connection to 192.168.0.1 (192.168.0.1 port 80) from 192.168.0.2 port 56902 </pre>
+<pre>* using HTTP/1.x</pre>
+<pre>&gt; GET /HNAP/ HTTP/1.1</pre>
+<pre>&gt; Host: 192.168.0.1</pre>
+<pre>&gt; User-Agent: curl/8.21.0</pre>
+<pre>&gt; Accept: */*</pre>
+<pre>&gt; </pre>
+<pre>* Request completely sent off</pre>
+<pre>&lt; HTTP/1.1 404 Not Found</pre>
+<pre>&lt; Server: Linux, HTTP/1.1, DIR-600 Ver 2.14</pre>
+<pre>&lt; Date: Sat, 01 Jan 2000 13:18:34 GMT</pre>
+<pre>&lt; Content-Type: text/html</pre>
+<pre>&lt; Content-Length:   110</pre>
+<pre>* The requested URL returned error: 404</pre>
+<pre>&lt; </pre>
+<pre>* closing connection #0</pre>
+<pre>Note: Unnecessary use of -X or --request, GET is already inferred.</pre>
+<pre>*   Trying 192.168.0.1:80...</pre>
+<pre>* Established connection to 192.168.0.1 (192.168.0.1 port 80) from 192.168.0.2 port 56914 </pre>
+<pre>* using HTTP/1.x</pre>
+<pre>&gt; GET /HNAP1/ HTTP/1.1</pre>
+<pre>&gt; Host: 192.168.0.1</pre>
+<pre>&gt; User-Agent: curl/8.21.0</pre>
+<pre>&gt; Accept: */*</pre>
+<pre>&gt; </pre>
+<pre>* Request completely sent off</pre>
+<pre>&lt; HTTP/1.1 200 OK</pre>
+<pre>&lt; Server: Linux, HTTP/1.1, DIR-600 Ver 2.14</pre>
+<pre>&lt; Date: Sat, 01 Jan 2000 13:18:34 GMT</pre>
+<pre>&lt; Transfer-Encoding: chunked</pre>
+<pre>&lt; Content-Type: text/xml; charset=utf-8</pre>
+<pre>&lt; </pre>
+<pre>{ [1282 bytes data]</pre>
+<pre>* Connection #0 to host 192.168.0.1:80 left intact</pre>
+<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;</pre>
+<pre>&lt;soap:Envelope xmlns:xsi="<a href="<a href="http://www.w3.org/2001/XMLSchema" title="http://www.w3.org/2001/XMLSchema" target="_blank" >http://www.w3.org/2001/XMLSchema</a>-instance" title="http://www.w3.org/2001/XMLSchema-instance" target="_blank" >http://www.w3.org/2001/XMLSchema-instance</a>" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="<a href="http://schemas.xmlsoap.org/soap/envelope/" title="http://schemas.xmlsoap.org/soap/envelope/" target="_blank" >http://schemas.xmlsoap.org/soap/envelope/</a>"&gt;</pre>
+<pre>  &lt;soap:Body&gt;</pre>
+<pre>    &lt;GetDeviceSettingsResponse xmlns="<a href="http://purenetworks.com/HNAP1/" title="http://purenetworks.com/HNAP1/" target="_blank" >http://purenetworks.com/HNAP1/</a>"&gt;</pre>
+<pre>      &lt;GetDeviceSettingsResult&gt;OK&lt;/GetDeviceSettingsResult&gt;</pre>
+<pre>      &lt;Type&gt;GatewayWithWiFi&lt;/Type&gt;</pre>
+<pre>      &lt;DeviceName&gt;</pre>
+<pre>&lt;/DeviceName&gt;</pre>
+<pre>      &lt;VendorName&gt;D-Link&lt;/VendorName&gt;</pre>
+<pre>      &lt;ModelDescription&gt;Wireless Broadband Router&lt;/ModelDescription&gt;</pre>
+<pre>      &lt;ModelName&gt;DIR-600&lt;/ModelName&gt;</pre>
+<pre>      &lt;FirmwareVersion&gt;2.14, Tue 22 Jan 2013&lt;/FirmwareVersion&gt;</pre>
+<pre>      &lt;PresentationURL&gt;/&lt;/PresentationURL&gt;</pre>
+<pre>      &lt;CAPTCHA&gt;false&lt;/CAPTCHA&gt;</pre>
+<pre>      &lt;SOAPActions&gt;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetDeviceSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetDeviceSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetDeviceSettingshttp://purenetworks.com/HNAP1/GetDeviceSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetDeviceSettings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetDeviceSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetDeviceSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetDeviceSettingshttp://purenetworks.com/HNAP1/SetDeviceSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetDeviceSettings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetRouterLanSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetRouterLanSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetRouterLanSettingshttp://purenetworks.com/HNAP1/GetRouterLanSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetRouterLanSettings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetRouterLanSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetRouterLanSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetRouterLanSettingshttp://purenetworks.com/HNAP1/SetRouterLanSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetRouterLanSettings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetMACFiltersLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetMACFiltersLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetMACFiltershttp://purenetworks.com/HNAP1/GetMACFilters&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetMACFilters&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetMACFiltersLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetMACFiltersLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetMACFiltershttp://purenetworks.com/HNAP1/SetMACFilters&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetMACFilters&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetMACFilters2LINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetMACFilters2LINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetMACFilters2http://purenetworks.com/HNAP1/GetMACFilters2&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetMACFilters2&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetMACFilters2LINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetMACFilters2LINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetMACFilters2http://purenetworks.com/HNAP1/SetMACFilters2&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetMACFilters2&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWanSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWanSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWanSettingshttp://purenetworks.com/HNAP1/GetWanSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWanSettings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetWanSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetWanSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetWanSettingshttp://purenetworks.com/HNAP1/SetWanSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetWanSettings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWLanSettings24LINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWLanSettings24LINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWLanSettings24http://purenetworks.com/HNAP1/GetWLanSettings24&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWLanSettings24&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetWLanSettings24LINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetWLanSettings24LINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetWLanSettings24http://purenetworks.com/HNAP1/SetWLanSettings24&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetWLanSettings24&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWLanSecurityLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWLanSecurityLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWLanSecurityhttp://purenetworks.com/HNAP1/GetWLanSecurity&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWLanSecurity&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetWLanSecurityLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetWLanSecurityLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetWLanSecurityhttp://purenetworks.com/HNAP1/SetWLanSecurity&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetWLanSecurity&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetForwardedPortsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetForwardedPortsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetForwardedPortshttp://purenetworks.com/HNAP1/GetForwardedPorts&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetForwardedPorts&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetForwardedPortsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetForwardedPortsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetForwardedPortshttp://purenetworks.com/HNAP1/SetForwardedPorts&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetForwardedPorts&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetPortMappingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetPortMappingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetPortMappingshttp://purenetworks.com/HNAP1/GetPortMappings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetPortMappings&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/AddPortMappingLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/AddPortMappingLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/AddPortMappinghttp://purenetworks.com/HNAP1/AddPortMapping&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/AddPortMapping&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/DeletePortMappingLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/DeletePortMappingLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/DeletePortMappinghttp://purenetworks.com/HNAP1/DeletePortMapping&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/DeletePortMapping&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/RebootLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/RebootLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/Reboothttp://purenetworks.com/HNAP1/Reboot&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/Reboot&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetConnectedDevicesLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetConnectedDevicesLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetConnectedDeviceshttp://purenetworks.com/HNAP1/GetConnectedDevices&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetConnectedDevices&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/RenewWanConnectionLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/RenewWanConnectionLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/RenewWanConnectionhttp://purenetworks.com/HNAP1/RenewWanConnection&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/RenewWanConnection&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetNetworkStatsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetNetworkStatsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetNetworkStatshttp://purenetworks.com/HNAP1/GetNetworkStats&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetNetworkStats&lt;/string&gtgt</a>;</pre>
+<pre>        &lt;string&gt;<a href="http://purenetworks.com/HNAP1/IsDeviceReadyLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/IsDeviceReadyLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/IsDeviceReadyhttp://purenetworks.com/HNAP1/IsDeviceReady&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/IsDeviceReady&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetAccessPointModeLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetAccessPointModeLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetAccessPointModehttp://purenetworks.com/HNAP1/SetAccessPointMode&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetAccessPointMode&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetDeviceSettings2LINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetDeviceSettings2LINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetDeviceSettings2http://purenetworks.com/HNAP1/GetDeviceSettings2&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetDeviceSettings2&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetDeviceSettings2LINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetDeviceSettings2LINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetDeviceSettings2http://purenetworks.com/HNAP1/SetDeviceSettings2&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetDeviceSettings2&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWLanRadiosLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWLanRadiosLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWLanRadioshttp://purenetworks.com/HNAP1/GetWLanRadios&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWLanRadios&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWLanRadioSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWLanRadioSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWLanRadioSettingshttp://purenetworks.com/HNAP1/GetWLanRadioSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWLanRadioSettings&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetWLanRadioSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetWLanRadioSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetWLanRadioSettingshttp://purenetworks.com/HNAP1/SetWLanRadioSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetWLanRadioSettings&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWLanRadioSecurityLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWLanRadioSecurityLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWLanRadioSecurityhttp://purenetworks.com/HNAP1/GetWLanRadioSecurity&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWLanRadioSecurity&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetWLanRadioSecurityLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetWLanRadioSecurityLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetWLanRadioSecurityhttp://purenetworks.com/HNAP1/SetWLanRadioSecurity&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetWLanRadioSecurity&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetWanStatusLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetWanStatusLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetWanStatushttp://purenetworks.com/HNAP1/GetWanStatus&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetWanStatus&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetClientStatsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetClientStatsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetClientStatshttp://purenetworks.com/HNAP1/GetClientStats&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetClientStats&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetRouterSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetRouterSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetRouterSettingshttp://purenetworks.com/HNAP1/GetRouterSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetRouterSettings&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetRouterSettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetRouterSettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetRouterSettingshttp://purenetworks.com/HNAP1/SetRouterSettings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetRouterSettings&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetIPv6SettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetIPv6SettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetIPv6Settingshttp://purenetworks.com/HNAP1/GetIPv6Settings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetIPv6Settings&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/SetIPv6SettingsLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/SetIPv6SettingsLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/SetIPv6Settingshttp://purenetworks.com/HNAP1/SetIPv6Settings&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/SetIPv6Settings&lt;/string&gtgt</a>;</pre>
+<pre>		&lt;string&gt;<a href="http://purenetworks.com/HNAP1/GetOpenDNSLINKlt;/stringLINKgt" title="http://purenetworks.com/HNAP1/GetOpenDNSLINKlt;/stringLINKgt" target="_blank" >http://purenetworks.com/HNAP1/GetOpenDNShttp://purenetworks.com/HNAP1/GetOpenDNS&lt;/string&gtlt;/stringhttp://purenetworks.com/HNAP1/GetOpenDNS&lt;/string&gtgt</a>;			</pre>
+<pre>      &lt;/SOAPActions&gt;</pre>
+<pre>      &lt;SubDeviceURLs&gt;</pre>
+<pre>      &lt;/SubDeviceURLs&gt;</pre>
+<pre>      &lt;Tasks&gt;</pre>
+<pre>      &lt;/Tasks&gt;</pre>
+<pre>    &lt;/GetDeviceSettingsResponse&gt;</pre>
+<pre>  &lt;/soap:Body&gt;</pre>
+<pre>&lt;/soap:Envelope&gt;</pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> HNAP service successfully identified</pre>
+<pre></span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] HNAP/JNAP basic enumeration finished</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./l25_web_checks.html" title="./l25_web_checks.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./l15_emulated_checks_nmap.html" title="./l15_emulated_checks_nmap.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

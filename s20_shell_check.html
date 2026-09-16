@@ -1,0 +1,467 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#check_scripts_with_shellcheck_and_semgrep" title="#check_scripts_with_shellcheck_and_semgrep" >Check scripts with shellcheck and semgrep</a><a class="submodul" href="#checkscriptswithshellcheck" title="#checkscriptswithshellcheck" >Check scripts with shellcheck</a><a class="submodul" href="#summaryofshellissuesshellcheck" title="#summaryofshellissuesshellcheck" >Summary of shell issues (shellcheck)</a><a class="submodul" href="#checkshellscriptswithsemgrep" title="#checkshellscriptswithsemgrep" >Check shell scripts with semgrep</a><a class="submodul" href="#summaryofshellevalusages" title="#summaryofshellevalusages" >Summary of shell eval usages</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="check_scripts_with_shellcheck_and_semgrep"><a id="checkscriptswithshellcheck">Check scripts with shellcheck</a> and semgrep</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>This module tries to identify shell scripts and analyses them with shellcheck - <a href="https://www.shellcheck.net/" title="https://www.shellcheck.net/" target="_blank" >https://www.shellcheck.net/</a>.</pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="checkscriptswithshellcheck">Check scripts with shellcheck</a></span></pre>
+<pre><hr class="mono" /></pre>
+<a class="reference" href="./s20_shell_check/5b9a085e88cb719f4acaddfa3875bce7.html" title="./s20_shell_check/5b9a085e88cb719f4acaddfa3875bce7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/DHCPS-REDETECT.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/33e528967a588e24a321fd991e6df3d9.html" title="./s20_shell_check/33e528967a588e24a321fd991e6df3d9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/DHCPS-REDETECT.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/bce48943fb7878841ba6e64d36f41071.html" title="./s20_shell_check/bce48943fb7878841ba6e64d36f41071.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/AUTOCONFIG.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/063c412f84cffc1189d066b509d986cf.html" title="./s20_shell_check/063c412f84cffc1189d066b509d986cf.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/INF-RESTART.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/80be9c66f59e88ad3c92c2b7c33a2cec.html" title="./s20_shell_check/80be9c66f59e88ad3c92c2b7c33a2cec.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/SEALPAC-CLEAR.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/4edceb5c6943325d875841edb0a67162.html" title="./s20_shell_check/4edceb5c6943325d875841edb0a67162.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/SEALPAC-SAVE.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/e623de481d962a857bc2da19e9df8c9b.html" title="./s20_shell_check/e623de481d962a857bc2da19e9df8c9b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/SEALPAC-LOAD.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/8dab6f6305b9773298eb4ddeda72d496.html" title="./s20_shell_check/8dab6f6305b9773298eb4ddeda72d496.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/UPDATELEASES.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/66c368de9f8bc45e99b59e870de86d23.html" title="./s20_shell_check/66c368de9f8bc45e99b59e870de86d23.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/UPDATELEASES.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/4d6167bd59d482a1916f28e8b9b2e0ad.html" title="./s20_shell_check/4d6167bd59d482a1916f28e8b9b2e0ad.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WAN-DETECT.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/0cba85d860bbb1c62b4fd44e17b1458a.html" title="./s20_shell_check/0cba85d860bbb1c62b4fd44e17b1458a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WAN-1_dhcp_cb.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/33e981dfa8acb38fe5a2f841c0a2a4d0.html" title="./s20_shell_check/33e981dfa8acb38fe5a2f841c0a2a4d0.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WANV6_AUTOCONF_DETECT.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/867b61dbed1f2ce9f6317326c38a8908.html" title="./s20_shell_check/867b61dbed1f2ce9f6317326c38a8908.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WANV6_ppp_dis.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/651658002aa9057eb79bf50081e1b7d2.html" title="./s20_shell_check/651658002aa9057eb79bf50081e1b7d2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WANV6-DETECT.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/b361aa746b619672e61095d88f53b6d2.html" title="./s20_shell_check/b361aa746b619672e61095d88f53b6d2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WANV6_ppp_chk.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/628f68ce0b96ac17321ae27a98556687.html" title="./s20_shell_check/628f68ce0b96ac17321ae27a98556687.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WAN_dhcp_chk.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/aadafe18f2b40e22639bea317a0bbdcd.html" title="./s20_shell_check/aadafe18f2b40e22639bea317a0bbdcd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WAN_dhcp_pri.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/f2aad5a66d9ae1c312e691544c4b6d49.html" title="./s20_shell_check/f2aad5a66d9ae1c312e691544c4b6d49.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/WAN_ppp_dis.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/ea29501ecc11805fed272690ee455247.html" title="./s20_shell_check/ea29501ecc11805fed272690ee455247.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/dhcp_pri_chk.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/c7c5d9c7833ee19d87e3acdd0cd06317.html" title="./s20_shell_check/c7c5d9c7833ee19d87e3acdd0cd06317.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/freset.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/5247da845ec91657c954e15b7122cb21.html" title="./s20_shell_check/5247da845ec91657c954e15b7122cb21.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/checkfw.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/d7e37757e29adcc3327e171f5a9ee7bb.html" title="./s20_shell_check/d7e37757e29adcc3327e171f5a9ee7bb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/events/reboot.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/c32f41e9b2c4dd89f2542553bb9cc9bb.html" title="./s20_shell_check/c32f41e9b2c4dd89f2542553bb9cc9bb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init.d/S19init.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/eb90099d8eafe219dce016ba16cba141.html" title="./s20_shell_check/eb90099d8eafe219dce016ba16cba141.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S21wlan.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/7b4d9b0f83379ffaf3f45b0d55dabb0e.html" title="./s20_shell_check/7b4d9b0f83379ffaf3f45b0d55dabb0e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S21layout.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/0afc4a6c1be8297ee1ddf76b0ec36e58.html" title="./s20_shell_check/0afc4a6c1be8297ee1ddf76b0ec36e58.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S40event.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/37828b0033075398834bc440108ab779.html" title="./s20_shell_check/37828b0033075398834bc440108ab779.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S41autowan.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/2a9f76f90ebc2501ece325684752d312.html" title="./s20_shell_check/2a9f76f90ebc2501ece325684752d312.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S41autowanv6.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/0da5f2688e91bfb3870ac017f9a75c54.html" title="./s20_shell_check/0da5f2688e91bfb3870ac017f9a75c54.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S42pthrough.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/474389d230b919d27864a7bd7b90b4b3.html" title="./s20_shell_check/474389d230b919d27864a7bd7b90b4b3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S40gpioevent.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/272a8bd92d3e393813d0cee8dbc65317.html" title="./s20_shell_check/272a8bd92d3e393813d0cee8dbc65317.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S41inf.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/3a2e40ea5830f23564c0f4b0c496b884.html" title="./s20_shell_check/3a2e40ea5830f23564c0f4b0c496b884.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S65ddnsd.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/788595ec4584e02e93f8c21373d613c4.html" title="./s20_shell_check/788595ec4584e02e93f8c21373d613c4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/init0.d/S80telnetd.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/0526c9c77e2826bf3a4db83ec46c3b33.html" title="./s20_shell_check/0526c9c77e2826bf3a4db83ec46c3b33.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/IP-WAIT.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/28b40fd9ad1c3d467ab7441637f28b6c.html" title="./s20_shell_check/28b40fd9ad1c3d467ab7441637f28b6c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/IPV4.DSLITE.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/faa3ed0c5ae5f0b3fb9fc2c05a492034.html" title="./s20_shell_check/faa3ed0c5ae5f0b3fb9fc2c05a492034.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/RA-WAIT.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/d522bc5e414e4b10102154149172d8ae.html" title="./s20_shell_check/d522bc5e414e4b10102154149172d8ae.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/IPV6.CHILD.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/4ec83560569c19de73672fc301ff11c5.html" title="./s20_shell_check/4ec83560569c19de73672fc301ff11c5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/IPV4.INET.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/f0e498bbe9103118fe475c8c29c19deb.html" title="./s20_shell_check/f0e498bbe9103118fe475c8c29c19deb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/IPV6.INET.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/2692bc63afc53f547a27879594f052c1.html" title="./s20_shell_check/2692bc63afc53f547a27879594f052c1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/V6IN4-TUNNEL.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/c44d28cc8ec6bd907d76847bbd4cac50.html" title="./s20_shell_check/c44d28cc8ec6bd907d76847bbd4cac50.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">3 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/conntrack_flush.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/f53e3aad451dcf05271aaaa287e70e4a.html" title="./s20_shell_check/f53e3aad451dcf05271aaaa287e70e4a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">3 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/dbload.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/05ad4dd9d3d92655fb3e8017988cc443.html" title="./s20_shell_check/05ad4dd9d3d92655fb3e8017988cc443.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/ddnsd_helper.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/3e1f515d4b2326b3d317e2c4dba01109.html" title="./s20_shell_check/3e1f515d4b2326b3d317e2c4dba01109.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/dhcp6s_helper.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/6b346e032816b493281ffe4c6e9360a3.html" title="./s20_shell_check/6b346e032816b493281ffe4c6e9360a3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">11 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/delpathbytarget.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/dd2d1081b136a742ccbe72b2967c7708.html" title="./s20_shell_check/dd2d1081b136a742ccbe72b2967c7708.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/dlcfg_hlper.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/40c991ddb05aa0b1969fdc25eac087de.html" title="./s20_shell_check/40c991ddb05aa0b1969fdc25eac087de.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">3 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/dns-helper.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/39e496cff8fe33ecc8e0f55d3a2077bd.html" title="./s20_shell_check/39e496cff8fe33ecc8e0f55d3a2077bd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">8 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/getmodem.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/3cb07605b50cec416fe1cc96e4b640fb.html" title="./s20_shell_check/3cb07605b50cec416fe1cc96e4b640fb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">11 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/igmpproxy_helper.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/adebe8a57328e5aec1739fafdc0b67bf.html" title="./s20_shell_check/adebe8a57328e5aec1739fafdc0b67bf.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">15 issues</span><span class="green"> in script (</span><span class="cyan">common linux file: yes</span><span class="green">):</span> /etc/scripts/ip-down (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/ac10a9c956b9e413f1e555433bfce0fd.html" title="./s20_shell_check/ac10a9c956b9e413f1e555433bfce0fd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">15 issues</span><span class="green"> in script (</span><span class="cyan">common linux file: yes</span><span class="green">):</span> /etc/scripts/ip-up (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/2c8f0841d2e77718bc0be2ca05ffb9a7.html" title="./s20_shell_check/2c8f0841d2e77718bc0be2ca05ffb9a7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">15 issues</span><span class="green"> in script (</span><span class="cyan">common linux file: yes</span><span class="green">):</span> /etc/scripts/ipv6-down (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/5934c144ce46ae8b06c9ea43555a50dc.html" title="./s20_shell_check/5934c144ce46ae8b06c9ea43555a50dc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">15 issues</span><span class="green"> in script (</span><span class="cyan">common linux file: yes</span><span class="green">):</span> /etc/scripts/ipv6-up (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/9ae626ea8391e181d2e6d21028f5345b.html" title="./s20_shell_check/9ae626ea8391e181d2e6d21028f5345b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/killpid.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/c129a0f8e8d8b5052c617ea4b665b321.html" title="./s20_shell_check/c129a0f8e8d8b5052c617ea4b665b321.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/libs/dns-helper.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/30e1bfd145946902efec54d3a3bca508.html" title="./s20_shell_check/30e1bfd145946902efec54d3a3bca508.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">5 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/libs/igmpproxy_helper.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/9ba2bbc975e5c0b024bd961f5dffd4b4.html" title="./s20_shell_check/9ba2bbc975e5c0b024bd961f5dffd4b4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">11 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/mldproxy_helper.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/2e2369fbfad9beb495670d9487eaf0b4.html" title="./s20_shell_check/2e2369fbfad9beb495670d9487eaf0b4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/ping.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/6660a743d4700aacfedc5bfc07465bac.html" title="./s20_shell_check/6660a743d4700aacfedc5bfc07465bac.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/ppp-status (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/47518b48a5bbaa9505f92e11a904a1c3.html" title="./s20_shell_check/47518b48a5bbaa9505f92e11a904a1c3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">3 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/resetstats.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/3e731e45bec2785f2004b343e515bfff.html" title="./s20_shell_check/3e731e45bec2785f2004b343e515bfff.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/setdate.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/bbc87e172a1d1bc34113977c525ec3f4.html" title="./s20_shell_check/bbc87e172a1d1bc34113977c525ec3f4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">9 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/stopchild.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/7a6c9c03265ef07bec3667526322a79f.html" title="./s20_shell_check/7a6c9c03265ef07bec3667526322a79f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">4 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/settime.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/98d7f31c24c0e4653aadf3c3df23bf03.html" title="./s20_shell_check/98d7f31c24c0e4653aadf3c3df23bf03.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">3 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/ubcom-monitor.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/cc8d4cc4f9bfe16f23806c89a83423cd.html" title="./s20_shell_check/cc8d4cc4f9bfe16f23806c89a83423cd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">3 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/ubcom-run.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/e7fdd7e5891c336eda3da3a1ab2677ee.html" title="./s20_shell_check/e7fdd7e5891c336eda3da3a1ab2677ee.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">8 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upnp/M-SEARCH.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/c9298009d3565e7a4ef41f6d3601a1bb.html" title="./s20_shell_check/c9298009d3565e7a4ef41f6d3601a1bb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">8 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upnp/M-SEARCH.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/8cfc12db8a09299e82f7d3701bc5b8bc.html" title="./s20_shell_check/8cfc12db8a09299e82f7d3701bc5b8bc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">4 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upnp/NOTIFYAB.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/22d20c6132400d748566e2ccfc198a3d.html" title="./s20_shell_check/22d20c6132400d748566e2ccfc198a3d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upnp/run.NOTIFY-PROPCHANGE.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/bcf7be7650df9f6c72bfe14ddbcc0cef.html" title="./s20_shell_check/bcf7be7650df9f6c72bfe14ddbcc0cef.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upnp/run.NOTIFY-WFADEV.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/eefec48ea49017093c12c80f3017780b.html" title="./s20_shell_check/eefec48ea49017093c12c80f3017780b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">12 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upnp/NOTIFYAB.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/1cbdcf28bfeb0c90823b1750a700ad98.html" title="./s20_shell_check/1cbdcf28bfeb0c90823b1750a700ad98.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/upwifistatshlper.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/c3c38a2a4c4bd5a79a4b1894082bba7f.html" title="./s20_shell_check/c3c38a2a4c4bd5a79a4b1894082bba7f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">2 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/scripts/wps.sh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/cd59fd452c7ae8717e3311f4eeedaa10.html" title="./s20_shell_check/cd59fd452c7ae8717e3311f4eeedaa10.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/inet4_dhcpc_helper.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/63e3ea5effb59578343ead87fa870be8.html" title="./s20_shell_check/63e3ea5effb59578343ead87fa870be8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">10 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/inet6_dhcpc_helper.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/0f9d2bb3f3c6b26c248d19bac6607271.html" title="./s20_shell_check/0f9d2bb3f3c6b26c248d19bac6607271.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">10 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/inet6_rdisc6_helper.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/5c96e7cca1effff9b48db327ceacf766.html" title="./s20_shell_check/5c96e7cca1effff9b48db327ceacf766.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/ppp4_ipdown.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/cace3f1028a44a0089ab5b42898f996f.html" title="./s20_shell_check/cace3f1028a44a0089ab5b42898f996f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/ppp4_ipup.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/a6a3c6a8ffb71b0e6b8bca1765d0f97c.html" title="./s20_shell_check/a6a3c6a8ffb71b0e6b8bca1765d0f97c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/ppp6_ipdown.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/43e460f810d8b458bb6ed3d08e40821b.html" title="./s20_shell_check/43e460f810d8b458bb6ed3d08e40821b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">8 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/ppp4_status.php (-rw-r--r-- root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/1d9c1a7b13819af00e163bc54a7aeb69.html" title="./s20_shell_check/1d9c1a7b13819af00e163bc54a7aeb69.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">7 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/INET/ppp6_ipup.php (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/a4ecf18eadbffc9d1bda14a7a406c21d.html" title="./s20_shell_check/a4ecf18eadbffc9d1bda14a7a406c21d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">11 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /etc/services/svchlper (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/732c05d01119322f41dbd44b1abf2840.html" title="./s20_shell_check/732c05d01119322f41dbd44b1abf2840.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">1 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /usr/sbin/phpsh (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s20_shell_check/4cfc0a1f837e6eaea508133c13a57734.html" title="./s20_shell_check/4cfc0a1f837e6eaea508133c13a57734.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">17 issues</span><span class="green"> in script (</span><span class="red">common linux file: no</span><span class="green">):</span> /usr/sbin/mfc (-rwxr-xr-x root root)</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">Summary of shell issues (shellcheck)</span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">509 issues</span><span class="green"> in </span><span class="orange">114</span><span class="green"> shell scripts (shellcheck mode)</span></pre>
+<br />
+<pre></span></pre>
+<br />
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1036 (error): '(' is invalid here. Did you forget to escape it?</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1050 (error): Expected 'then'.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1054 (error): You need a space after the '{'.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1056 (error): Expected a '}'. If you have one, try a ; or in front of it.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1064 (error): Expected a { to open the function definition.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1065 (error): Trying to declare parameters? Don't. Use () and refer to params as $1, $2..</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1072 (error): Missing '}'. Fix any mentioned problems and try again.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1073 (error): Couldn't parse this brace group. Fix to allow more checks.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1088 (error): Parsing stopped here. Invalid use of parentheses?</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC1127 (error): Was this intended as a comment? Use # in sh.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="red">SC2283 (error): Remove spaces around = to assign (or use [ ] to compare, or quote '=' if literal).</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="green">SC1009 (info): The mentioned syntax error was in this function.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="green">SC2006 (style): Use $(...) notation instead of legacy backticks `...`.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="green">SC2035 (info): Use ./*glob* or -- *glob* so names with dashes won't become options.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="green">SC2086 (info): Double quote to prevent globbing and word splitting.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC2050 (warning): This expression is constant. Did you forget the $ on a variable?</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC2092 (warning): Remove backticks to avoid executing output (or use eval if intentional).</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC2166 (warning): Prefer [ p ] &amp;&amp; [ q ] as [ p -a q ] is not well defined.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC2188 (warning): This redirection doesn't have a command. Move to its command (or use 'true' as no-op).</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC2211 (warning): This is a glob used as a command name. Was it supposed to be in ${..}, array, or is it missing quoting?</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC3014 (warning): In POSIX sh, == in place of = is undefined.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC3031 (warning): In POSIX sh, redirecting to/from globs is undefined.</span></span></pre>
+<pre>    </span>[</span><span class="green">+</span>]</span><span class="green"> <span class="orange">SC3037 (warning): In POSIX sh, echo flags are undefined.</span></span></pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="checkshellscriptswithsemgrep">Check shell scripts with semgrep</a></span></pre>
+<pre><hr class="mono" /></pre>
+<a class="reference" href="./s20_shell_check/9d5141f5be5de8a2efda892df941e840.html" title="./s20_shell_check/9d5141f5be5de8a2efda892df941e840.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">209 issues</span><span class="green"> in </span><span class="orange">103</span><span class="green"> shell scripts</span></pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="summaryofshellevalusages">Summary of shell eval usages</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="red">-</span>] No eval usage found in shell scripts</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./s22_php_check.html" title="./s22_php_check.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s17_cwe_checker.html" title="./s17_cwe_checker.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

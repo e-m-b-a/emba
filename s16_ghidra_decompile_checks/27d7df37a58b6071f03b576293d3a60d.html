@@ -1,0 +1,387 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./d107333bb7121ee3c45a1c76eebe0252.html" title="./d107333bb7121ee3c45a1c76eebe0252.html" >&laquo; Back to d107333bb7121ee3c45a1c76eebe0252</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>void do_listen(void)</pre>
+<br />
+<pre>{</pre>
+<pre>  bool bVar1;</pre>
+<pre>  uint uVar2;</pre>
+<pre>  size_t sVar3;</pre>
+<pre>  int iVar4;</pre>
+<pre>  int *piVar5;</pre>
+<pre>  ssize_t sVar6;</pre>
+<pre>  char *pcVar7;</pre>
+<pre>  char *pcVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  int iVar10;</pre>
+<pre>  uint uVar11;</pre>
+<pre>  char *pcVar12;</pre>
+<pre>  uint *puVar13;</pre>
+<pre>  timeval local_11a8;</pre>
+<pre>  timeval local_11a0;</pre>
+<pre>  sockaddr local_1198 [7];</pre>
+<pre>  uint auStack_1128 [4];</pre>
+<pre>  char acStack_1118 [16];</pre>
+<pre>  char acStack_1108 [32];</pre>
+<pre>  uint local_10e8 [15];</pre>
+<pre>  fd_set local_10ac;</pre>
+<pre>  char acStack_102c [4100];</pre>
+<pre>  </pre>
+<pre>  pcVar12 = o_sockname;</pre>
+<pre><span class="green">  memset(local_1198,0,0x6e)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  local_1198[0].sa_family = 1;</pre>
+<pre><span class="green">  strncpy(local_1198[0].sa_data,pcVar12,0x6c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  uVar2 = socket(1,1,0);</pre>
+<pre>  uVar11 = uVar2;</pre>
+<pre>  if ((int)uVar2 &lt; 0) {</pre>
+<pre>    verbose("Unable to open socket!\n");</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre><span class="green">    sVar3 = strlen(local_1198[0].sa_data)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">    iVar4 = bind(uVar2,local_1198,sVar3 &lt;&lt; 1)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if (iVar4 &lt; 0) {</pre>
+<pre>      verbose("Unalbe to bind socket!\n");</pre>
+<pre>      uVar11 = 0xffffffff;</pre>
+<pre>      close(uVar2);</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  sock = uVar11;</pre>
+<pre>  if ((int)uVar11 &lt; 0) {</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  uVar2 = 0;</pre>
+<pre>LAB_00400ed0:</pre>
+<pre>  for (; uVar2 &lt; 0x20; uVar2 = uVar2 + 1) {</pre>
+<pre>    local_10ac.fds_bits[uVar2] = 0;</pre>
+<pre>  }</pre>
+<pre>  local_10ac.fds_bits[sock &gt;&gt; 5] = local_10ac.fds_bits[sock &gt;&gt; 5] | 1 &lt;&lt; (sock &amp; 0x1f);</pre>
+<pre>  local_11a8.tv_sec = 1;</pre>
+<pre>  local_11a8.tv_usec = 0;</pre>
+<pre>  iVar4 = select(sock + 1,&amp;local_10ac,(fd_set *)0x0,(fd_set *)0x0,&amp;local_11a8);</pre>
+<pre>  if (iVar4 &lt; 0) goto code_r0x00400f34;</pre>
+<pre>  goto LAB_00400f6c;</pre>
+<pre>code_r0x00400f34:</pre>
+<pre>  piVar5 = __errno_location();</pre>
+<pre>  uVar2 = 0;</pre>
+<pre>  if (*piVar5 == 4) goto LAB_00400ed0;</pre>
+<pre>  verbose("select error !!!!\n");</pre>
+<pre>LAB_00400f6c:</pre>
+<pre>  pcVar12 = acStack_102c;</pre>
+<pre>  if ((local_10ac.fds_bits[sock &gt;&gt; 5] &gt;&gt; (sock &amp; 0x1f) &amp; 1U) == 0) goto LAB_00401558;</pre>
+<pre><span class="green">  memset(pcVar12,0,0x1001)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">  sVar6 = recv(sock,pcVar12,0x1000,0)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (sVar6 &lt; 0) {</pre>
+<pre>    pcVar12 = "recv error socket! %d returned!\n";</pre>
+<pre>LAB_00401548:</pre>
+<pre>    verbose(pcVar12,sVar6);</pre>
+<pre>    goto LAB_00401558;</pre>
+<pre>  }</pre>
+<pre>  verbose("recv[%s]\n",pcVar12);</pre>
+<pre>  iVar4 = strcmp(pcVar12,"flush");</pre>
+<pre>  if (iVar4 == 0) {</pre>
+<pre><span class="green">    memset(&amp;trigger,0,0xf80)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    goto LAB_00401558;</pre>
+<pre>  }</pre>
+<pre><span class="green">  memset(auStack_1128,0,0x7c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  pcVar7 = strstr(pcVar12,"NAT");</pre>
+<pre>  if (pcVar7 == (char *)0x0) {</pre>
+<pre><span class="green">    strcpy(acStack_1108,o_chain)</span></span>   //possible issue identified - semgrep</pre>
+<pre>LAB_004010b0:</pre>
+<pre>    pcVar7 = strchr(pcVar12,0x2c);</pre>
+<pre>    if (pcVar7 != (char *)0x0) {</pre>
+<pre>      *pcVar7 = '\0';</pre>
+<pre>      sVar6 = atoi(pcVar12);</pre>
+<pre>      if ((pcVar7[1] != '\0') &amp;&amp; (pcVar12 = strchr(pcVar7 + 1,0x2c), pcVar12 != (char *)0x0)) {</pre>
+<pre>        *pcVar12 = '\0';</pre>
+<pre><span class="green">        strncpy(acStack_1118,pcVar7 + 1,0xf)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        pcVar7 = pcVar12 + 1;</pre>
+<pre>        if ((pcVar12[1] != '\0') &amp;&amp; (pcVar12 = strchr(pcVar7,0x2c), pcVar12 != (char *)0x0)) {</pre>
+<pre>          *pcVar12 = '\0';</pre>
+<pre>          iVar4 = strcmp(pcVar7,"udp");</pre>
+<pre>          if (iVar4 == 0) {</pre>
+<pre>            auStack_1128[3] = auStack_1128[3] | 1;</pre>
+<pre>LAB_004011e0:</pre>
+<pre>            do {</pre>
+<pre>              pcVar7 = pcVar12 + 1;</pre>
+<pre>              pcVar12 = strchr(pcVar7,0x2c);</pre>
+<pre>              if (pcVar12 != (char *)0x0) {</pre>
+<pre>                *pcVar12 = '\0';</pre>
+<pre>              }</pre>
+<pre>              pcVar8 = strchr(pcVar7,0x2d);</pre>
+<pre>              if (pcVar8 != (char *)0x0) {</pre>
+<pre>                *pcVar8 = '\0';</pre>
+<pre>              }</pre>
+<pre>              uVar2 = atoi(pcVar7);</pre>
+<pre>              uVar11 = auStack_1128[2];</pre>
+<pre>              if (pcVar8 == (char *)0x0) {</pre>
+<pre>                auStack_1128[auStack_1128[2] + 0x10] = uVar2 &amp; 0xffff;</pre>
+<pre>                auStack_1128[2] = auStack_1128[2] + 1;</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                uVar9 = atoi(pcVar8 + 1);</pre>
+<pre>                if (0xd &lt; (int)uVar11) goto LAB_004012e8;</pre>
+<pre>                auStack_1128[uVar11 + 0x10] = uVar2 &amp; 0xffff | 0x80000000;</pre>
+<pre>                auStack_1128[2] = uVar11 + 2;</pre>
+<pre>                auStack_1128[uVar11 + 0x11] = uVar9;</pre>
+<pre>              }</pre>
+<pre>              if (((pcVar12 == (char *)0x0) || (pcVar12[1] == '\0')) || (0xe &lt; (int)auStack_1128[2])</pre>
+<pre>                 ) goto LAB_004012e8;</pre>
+<pre>            } while( true );</pre>
+<pre>          }</pre>
+<pre>          iVar4 = strcmp(pcVar7,"tcp");</pre>
+<pre>          if (iVar4 == 0) {</pre>
+<pre>            auStack_1128[3] = auStack_1128[3] | 2;</pre>
+<pre>            goto LAB_004011e0;</pre>
+<pre>          }</pre>
+<pre>          iVar4 = strcmp(pcVar7,"both");</pre>
+<pre>          if (iVar4 == 0) {</pre>
+<pre>            auStack_1128[3] = auStack_1128[3] | 3;</pre>
+<pre>            goto LAB_004011e0;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>LAB_004012dc:</pre>
+<pre>    sVar6 = -1;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    pcVar7 = strchr(pcVar12,0x2c);</pre>
+<pre>    if (pcVar7 == (char *)0x0) goto LAB_004012dc;</pre>
+<pre>    *pcVar7 = '\0';</pre>
+<pre><span class="green">    sprintf(acStack_1108,"%s.%s",o_chain,pcVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    pcVar12 = pcVar7 + 1;</pre>
+<pre>    if (pcVar7[1] != '\0') goto LAB_004010b0;</pre>
+<pre>    sVar6 = -1;</pre>
+<pre>  }</pre>
+<pre>LAB_004012e8:</pre>
+<pre>  if (0x1f &lt; sVar6 - 1U) {</pre>
+<pre>    pcVar12 = "id = %d\n";</pre>
+<pre>    goto LAB_00401548;</pre>
+<pre>  }</pre>
+<pre>  verbose("id = %d (count=%d)\n",sVar6,auStack_1128[2]);</pre>
+<pre>  verbose("chain = %s\n",acStack_1108);</pre>
+<pre>  verbose("ip = %s\n",acStack_1118);</pre>
+<pre>  verbose("flags = %08x\n",auStack_1128[3]);</pre>
+<pre>  puVar13 = local_10e8;</pre>
+<pre>  iVar4 = 0;</pre>
+<pre>  while (iVar4 &lt; (int)auStack_1128[2]) {</pre>
+<pre>    uVar11 = *puVar13;</pre>
+<pre>    puVar13 = puVar13 + 1;</pre>
+<pre>    verbose("ports[%d] = (0x%08x) %d\n",iVar4,uVar11,uVar11 &amp; 0xffff);</pre>
+<pre>    iVar4 = iVar4 + 1;</pre>
+<pre>  }</pre>
+<pre>  gettimeofday(&amp;local_11a0,(__timezone_ptr_t)0x0);</pre>
+<pre>  iVar4 = sVar6 + -1;</pre>
+<pre>  piVar5 = &amp;trigger + iVar4 * 0x1f;</pre>
+<pre>  if ((*piVar5 == 0) &amp;&amp; ((&amp;DAT_00412328)[iVar4 * 0x1f] == 0)) {</pre>
+<pre>    verbose("add: id=%d, chain=%s, ip=%s &commat; %lu.%06lu sec.\n",iVar4,acStack_1108,acStack_1118,</pre>
+<pre>            local_11a0.tv_sec,local_11a0.tv_usec);</pre>
+<pre>    build_iptable_cmd(1,auStack_1128);</pre>
+<pre>LAB_004014b4:</pre>
+<pre><span class="green">    memcpy(piVar5,auStack_1128,0x7c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    iVar10 = strcmp(acStack_1118,&amp;DAT_00412334 + iVar4 * 0x7c);</pre>
+<pre>    if (iVar10 != 0) {</pre>
+<pre>      piVar5 = &amp;trigger + iVar4 * 0x1f;</pre>
+<pre>      verbose("remove: id=%d, chain=%s, ip=%s &commat; %lu.%06lu sec.\n",iVar4,acStack_1108 + iVar4 * 0x7c,</pre>
+<pre>              &amp;DAT_00412334 + iVar4 * 0x7c,local_11a0.tv_sec,local_11a0.tv_usec);</pre>
+<pre>      build_iptable_cmd(0,piVar5);</pre>
+<pre>      verbose("add:    id=%d, chain=%s, ip=%s &commat; %lu.%06lu sec.\n",iVar4,acStack_1108,acStack_1118,</pre>
+<pre>              local_11a0.tv_sec,local_11a0.tv_usec);</pre>
+<pre>      build_iptable_cmd(1,auStack_1128);</pre>
+<pre>      goto LAB_004014b4;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  verbose("touch: id=%d, chain=%s, ip=%s &commat; %lu.%06lu sec.\n",iVar4,acStack_1108,acStack_1118,</pre>
+<pre>          local_11a0.tv_sec,local_11a0.tv_usec);</pre>
+<pre>  iVar10 = o_timeout + local_11a0.tv_sec;</pre>
+<pre>  (&amp;DAT_00412328)[iVar4 * 0x1f] = local_11a0.tv_usec;</pre>
+<pre>  (&amp;trigger)[iVar4 * 0x1f] = iVar10;</pre>
+<pre>LAB_00401558:</pre>
+<pre>  gettimeofday(&amp;local_11a0,(__timezone_ptr_t)0x0);</pre>
+<pre>  iVar4 = 0;</pre>
+<pre>  piVar5 = &amp;trigger;</pre>
+<pre>  do {</pre>
+<pre>    iVar10 = *piVar5;</pre>
+<pre>    if ((iVar10 != 0) || (piVar5[1] != 0)) {</pre>
+<pre>      bVar1 = local_11a0.tv_sec &lt; iVar10;</pre>
+<pre>      if (local_11a0.tv_sec == iVar10) {</pre>
+<pre>        bVar1 = local_11a0.tv_usec &lt; piVar5[1];</pre>
+<pre>      }</pre>
+<pre>      if (!bVar1) {</pre>
+<pre>        verbose("timeout: id=%d, chain=%s, ip=%s &commat; %lu.%06lu sec.\n",iVar4,</pre>
+<pre>                &amp;DAT_00412344 + iVar4 * 0x7c,&amp;DAT_00412334 + iVar4 * 0x7c,local_11a0.tv_sec,</pre>
+<pre>                local_11a0.tv_usec);</pre>
+<pre>        build_iptable_cmd(0,piVar5);</pre>
+<pre><span class="green">        memset(piVar5,0,0x7c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    iVar4 = iVar4 + 1;</pre>
+<pre>    piVar5 = piVar5 + 0x1f;</pre>
+<pre>  } while (iVar4 != 0x20);</pre>
+<pre>  uVar2 = 0;</pre>
+<pre>  goto LAB_00400ed0;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

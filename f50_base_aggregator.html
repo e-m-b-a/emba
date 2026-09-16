@@ -1,0 +1,397 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#final_aggregator" title="#final_aggregator" >Final aggregator</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="final_aggregator">Final aggregator</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>The main aggregator module compiles and summarizes results from various analysis modules into a comprehensive overview by processing and logging detailed information from each identified element.</pre>
+<br />
+<a class="refmodul" href="./p02_firmware_bin_file_check.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Tested firmware:</span><span class="orange"> /home/runner/work/emba/emba/DIR-600_fw_revb5_214b01_ALL_de_20130122.zip</span></pre></a>
+<pre></span></pre>
+
+<pre>[</span><span class="green">+</span>]</span><span class="green"> EMBA start command:</span><span class="orange"> ./emba -f ./DIR-600_fw_revb5_214b01_ALL_de_20130122.zip -l ./logs_emba -p ./scan-profiles/default-scan.emba -y -Q</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> EMBA version: </span><span class="orange">2.0.3 / branch master / commit 5079ae8f7749b2712871223e752467a5135f0400</span></pre>
+<pre></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="refmodul" href="./p99_prepare_analyzer.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Detected architecture and endianness (</span><span class="orange">verified</span><span class="green">):</span><span class="orange"> MIPS / EL</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s24_kernel_bin_identifier.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Operating system detected (</span><span class="orange">verified</span><span class="green">): </span><span class="orange">Linux / v2.6.33.2</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s06_distribution_identification.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Operating system detected: </span><span class="orange"></span><span class="orange">D-Link dir-600 v2.14B01</span><span class="green"></span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s05_firmware_details.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> </span><span class="orange">1097</span><span class="green"> files and </span><span class="orange">94 </span><span class="green">directories detected.</pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./p02_firmware_bin_file_check.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Entropy analysis of binary firmware is: </span><span class="orange">7.999944 bits per byte.</span></pre></a>
+<pre></span></pre>
+
+<img class="image" src="./style/firmware_entropy.png">
+<a class="refmodul" href="./s130_binary_map_builder.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Neato map with overlap prevention is available</pre></a>
+<pre></span></pre>
+
+<img class="image" src="./style/EMBA-dependency-map.svg">
+<a class="refmodul" href="./s20_shell_check.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">509 issues</span><span class="green"> in </span><span class="orange">114</span><span class="green"> shell scripts.</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s22_php_check.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">6 vulnerabilities</span><span class="green"> via semgrep in </span><span class="orange">344</span><span class="green"> php files.</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s116_qemu_version_detection.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">11</span><span class="green"> successful emulated processes </span><span class="orange">(</span><span class="green">user mode emulation</span><span class="orange">)</span><span class="green">.</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./l10_system_emulation.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> System emulation was successful </span><span class="orange">(</span><span class="green">booted</span><span class="orange"> / </span><span class="green">IP address detected (mode: </span><span class="orange">bridge</span><span class="green">)</span><span class="orange"> / </span><span class="green">ICMP</span><span class="orange"> / </span><span class="green">NMAP</span><span class="orange"> / </span><span class="green">WEB</span><span class="orange"> / </span><span class="green">Exploited</span><span class="orange">)</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s26_kernel_vuln_verifier.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Verified </span><span class="orange">136</span><span class="green"> kernel vulnerabilities (</span><span class="orange">kernel symbols</span><span class="green">).</pre></a>
+<pre></span></pre>
+
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Found the following configuration issues:</pre>
+<pre></span></pre>
+<a class="refmodul" href="./s25_kernel_check.html#anchor_kernel_modules" title="LINK" ><pre>    </span><span class="green">Found </span><span class="orange">3</span><span class="green"> kernel modules with </span><span class="orange">0</span><span class="green"> licensing issues.</span></pre></a>
+
+<a class="refmodul" href="./s95_interesting_files_check.html" title="LINK" ><pre>    </span><span class="green">Found </span><span class="orange">0</span><span class="green"> interesting files and </span><span class="orange">1</span><span class="green"> files that could be useful for post-exploitation.</span></pre></a>
+
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Identified the following binary details:</pre>
+<a class="refmodul" href="./s12_binary_protection.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">95 (100%)</span><span class="green"> binaries without enabled stack canaries in </span><span class="orange">95</span><span class="green"> binaries.</pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s12_binary_protection.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">91 (96%)</span><span class="green"> binaries without enabled RELRO in </span><span class="orange">95</span><span class="green"> binaries.</pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s12_binary_protection.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">95 (100%)</span><span class="green"> binaries without enabled NX in </span><span class="orange">95</span><span class="green"> binaries.</pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s12_binary_protection.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">45 (47%)</span><span class="green"> binaries without enabled PIE in </span><span class="orange">95</span><span class="green"> binaries.</pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s12_binary_protection.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">51 (54%)</span><span class="green"> stripped binaries without symbols in </span><span class="orange">95</span><span class="green"> binaries.</pre></a>
+<pre></span></pre>
+
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="refmodul" href="./s17_cwe_checker.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> cwe-checker found a total of </span><span class="orange">4062</span><span class="green"> security issues in </span><span class="orange">37</span><span class="green"> tested binaries:</pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/119.html" title="119" target="_blank" >CWE119</a></span><span class="green"> - Buffer Overflow - </span><span class="orange">2 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/125.html" title="125" target="_blank" >CWE125</a></span><span class="green"> - Out-of-bounds Read - </span><span class="orange">6 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a></span><span class="green"> - Externally Controlled Format String - </span><span class="orange">71 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a></span><span class="green"> - Integer Overflow or Wraparound - </span><span class="orange">36 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a></span><span class="green"> - Unchecked Return Value - </span><span class="orange">413 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/332.html" title="332" target="_blank" >CWE332</a></span><span class="green"> - Insufficient Entropy in PRNG - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/337.html" title="337" target="_blank" >CWE337</a></span><span class="green"> - RNG seed function srand at 4223428 is seeded with predictable seed source. - </span><span class="orange">1 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a></span><span class="green"> - Double Free - </span><span class="orange">65 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a></span><span class="green"> - Use After Free - </span><span class="orange">134 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a></span><span class="green"> - Use of sizeof on a Pointer Type - </span><span class="orange">55 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a></span><span class="green"> - NULL Pointer Dereference - </span><span class="orange">1317 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a></span><span class="green"> - Use of Potentially Dangerous Function - </span><span class="orange">1655 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/782.html" title="782" target="_blank" >CWE782</a></span><span class="green"> - Exposed IOCTL with Insufficient Access Control - </span><span class="orange">75 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">225 times.</span></pre>
+<pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">6 times.</span></pre>
+<br />
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">13415</span><span class="green"> possible vulnerabilities (</span><span class="orange">via semgrep in Ghidra decompiled code</span><span class="green">) in </span><span class="orange">43</span><span class="green"> tested binaries.</span></pre></a>
+<pre></span></pre>
+
+<a class="refmodul" href="./s14_weak_func_radare_check.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">562</span><span class="green"> usages of strcpy in </span><span class="orange">95</span><span class="green"> binaries.</span></pre></a>
+<pre></span></pre>
+
+<br />
+<a class="refmodul" href="./s13_weak_func_check.html#anchor_strcpysummary" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> STRCPY - top 10 results:</pre></a>
+<pre></span></pre>
+
+<pre><span class="green">	COUNT| BINARY NAME     | common linux file: y/n | CWE CNT  / SEMGREP | RELRO    | CANARY CN | NX state    | SYMBOLS    | NETWORKING    |</span></pre>
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	37   | igmpproxy       | common linux file: no  | Vulns: 190  / 219  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/fa8c581f615d22b750313a1461f37ac6.html" title="./s14_weak_func_radare_check/fa8c581f615d22b750313a1461f37ac6.html" ><pre><span class="orange">	29   | libuClibc-0.9.3 | common linux file: no  | Vulns: NA   / NA   | <span class="green">RELRO    | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="green">No Networking |</span></pre></a>
+
+<a class="reference" href="./s13_weak_func_check/84fe1e13deb5d7861bcf05dfd1646096.html" title="./s13_weak_func_check/84fe1e13deb5d7861bcf05dfd1646096.html" ><pre><span class="green">	28   | dnsmasq         | common linux file: yes | Vulns: NA   / NA   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	21   | updatewifistats | common linux file: no  | Vulns: 138  / 191  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="green">No Networking |</span></pre></a>
+
+<a class="reference" href="./s13_weak_func_check/790e04da3115ff34c6e025e7691702a7.html" title="./s13_weak_func_check/790e04da3115ff34c6e025e7691702a7.html" ><pre><span class="green">	21   | iwconfig        | common linux file: yes | Vulns: NA   / NA   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="green">No Networking |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	16   | cgibin          | common linux file: no  | Vulns: 518  / 646  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="reference" href="./s13_weak_func_check/176bd22b2ef8b646ed1cdbcf46007153.html" title="./s13_weak_func_check/176bd22b2ef8b646ed1cdbcf46007153.html" ><pre><span class="green">	13   | httpd           | common linux file: yes | Vulns: NA   / NA   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	12   | libip6tc.so.0.0 | common linux file: no  | Vulns: 76   / 104  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="red">Symbols    | <span class="green">No Networking |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	12   | libip4tc.so.0.0 | common linux file: no  | Vulns: 67   / 99   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="red">Symbols    | <span class="green">No Networking |</span></pre></a>
+
+<a class="reference" href="./s13_weak_func_check/38f6154b75f8492f0c6de8066da445d2.html" title="./s13_weak_func_check/38f6154b75f8492f0c6de8066da445d2.html" ><pre><span class="green">	9    | pppd            | common linux file: yes | Vulns: NA   / NA   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<pre></span></pre>
+<br />
+<a class="refmodul" href="./s13_weak_func_check.html#anchor_systemsummary" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> SYSTEM - top 10 results:</pre></a>
+<pre></span></pre>
+
+<pre><span class="green">	COUNT| BINARY NAME     | common linux file: y/n | CWE CNT  / SEMGREP | RELRO    | CANARY CN | NX state    | SYMBOLS    | NETWORKING    |</span></pre>
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	17   | cgibin          | common linux file: no  | Vulns: 518  / 646  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	7    | igmpproxy       | common linux file: no  | Vulns: 190  / 219  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	4    | xmldb           | common linux file: no  | Vulns: 248  / 272  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="reference" href="./s13_weak_func_check/1e102e6613bd106c8ba1437ad0c31d1e.html" title="./s13_weak_func_check/1e102e6613bd106c8ba1437ad0c31d1e.html" ><pre><span class="green">	4    | rdisc6          | common linux file: yes | Vulns: NA   / NA   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="green">No Networking |</span></pre></a>
+
+<a class="reference" href="./s13_weak_func_check/27bd468e7cd4310ebe5b119452944591.html" title="./s13_weak_func_check/27bd468e7cd4310ebe5b119452944591.html" ><pre><span class="green">	4    | pppd            | common linux file: yes | Vulns: NA   / NA   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	3    | rgbin           | common linux file: no  | Vulns: 212  / 346  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	3    | gpiod           | common linux file: no  | Vulns: 55   / 71   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="red">Symbols    | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	2    | updatewifistats | common linux file: no  | Vulns: 138  / 191  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="green">No Networking |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	2    | udhcpd          | common linux file: no  | Vulns: 197  / 232  | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre><span class="orange">	2    | logd            | common linux file: no  | Vulns: 74   / 88   | <span class="red">No RELRO | <span class="red">No Canary | <span class="red">NX disabled | <span class="green">No Symbols | <span class="red">Networking    |</span></pre></a>
+
+<pre></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_softwareinventoryinitialoverview" title="LINK" ><pre>[</span><span class="orange">*</span>] Identified the following software inventory, vulnerabilities and exploits:</pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_busybox_1.14.1" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	busybox             :   1.14.1         :   CVEs: 17 (3)    :   Exploits: 0    :   Source: bb_verified         </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_linux_kernel_2.6.33.2" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	linux_kernel        :   2.6.33.2       :   CVEs: 3837 (136):   Exploits: 132  :   Source: kernel_verification </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_servd_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	servd               :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ecmh_2005.02.09" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ecmh                :   2005.02.09     :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_rndimgae_0.0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	rndimgae            :   0.0.1          :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_portt_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	portt               :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ndisc6_0.9.9" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ndisc6              :   0.9.9          :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_seama_0.20" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	seama               :   0.20           :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_llmnresp_1.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	llmnresp            :   1.0            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_igmpproxy_3.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	igmpproxy           :   3.0            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_wireless_tools_26" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	wireless_tools      :   26             :   CVEs: 2         :   Exploits: 2    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_logger_0.01" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	logger              :   0.01           :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_iptables_1.4.7" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	iptables            :   1.4.7          :   CVEs: 1         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_trigger_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	trigger             :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_point-to-point_proto_2.4.2b3" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	point-to-point_proto:   2.4.2b3        :   CVEs: 5         :   Exploits: 1    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_logd_0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	logd                :   0.1            :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_iproute2_100224" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	iproute2            :   100224         :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_xmldb_3" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	xmldb               :   3              :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_hostapd_0.4.8" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	hostapd             :   0.4.8          :   CVEs: 27        :   Exploits: 1    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ddnsd_0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ddnsd               :   0.1            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_sysklogd_0.01" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	sysklogd            :   0.01           :   CVEs: 2         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_sed_4.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	sed                 :   4.0            :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_radvd_1.8" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	radvd               :   1.8            :   CVEs: 1         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_dir-600_firmware_2.14b01" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	dir-600_firmware    :   2.14b01        :   CVEs: 6         :   Exploits: 3    :   Source: static_distri_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_dnsmasq_2.45" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	dnsmasq             :   2.45           :   CVEs: 29        :   Exploits: 9    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_openssl_0.9.8a" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	openssl             :   0.9.8a         :   CVEs: 94        :   Exploits: 10   :   Source: static_bin_analysis </span></pre></a>
+
+<br />
+<a class="refmodul" href="./f15_cyclonedx_sbom.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified a SBOM including </span><span class="orange">26</span><span class="green"> software components with version details.</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_collectcveandexploitdetails" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified </span><span class="orange">4069</span><span class="green"> CVE entries.</pre></a>
+<pre></span></pre>
+
+<pre>    </span><span class="green">Identified </span><span class="red"><span class="bold">109</span></span><span class="green"> Critical rated CVE entries / Exploits: </span><span class="orange">7</span></span></pre>
+<pre>    </span><span class="green">Identified </span><span class="red"><span class="bold">1042</span></span><span class="green"> High rated CVE entries / Exploits: </span><span class="orange">57</span></span></pre>
+<pre>    </span><span class="green">Identified </span><span class="orange"><span class="bold">1245</span></span><span class="green"> Medium rated CVE entries / Exploits: </span><span class="orange">40</span></span></pre>
+<pre>    </span><span class="green">Identified </span><span class="green"><span class="bold">49</span></span><span class="green"> Low rated CVE entries /Exploits: </span><span class="orange">3</span></span></pre>
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_minimalreportofexploitsandcves" title="LINK" ><pre>    </span><span class="green"></span><span class="magenta"><span class="bold">158</span></span><span class="green"> possible exploits available (</span><span class="magenta">20</span><span class="green"> Metasploit modules).</span></pre></a>
+
+<a class="refmodul" href="./l35_metasploit_check.html" title="LINK" ><pre>    </span><span class="green"></span><span class="magenta"><span class="bold">1</span></span><span class="green"> exploits in system mode emulation verified.</span></pre></a>
+
+<pre>    </span><span class="green">Remote exploits: </span><span class="magenta"><span class="bold">22</span></span><span class="green"> / Local exploits: </span><span class="magenta"><span class="bold">96</span></span><span class="green"> / DoS exploits: </span><span class="magenta"><span class="bold">60</span></span><span class="green"> / Known exploited vulnerabilities: </span><span class="magenta"><span class="bold">2</span><span class="green"> / Verified Exploits: </span><span class="magenta"><span class="bold">1</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<a href="./f17_cve_bin_tool.html" title="./f17_cve_bin_tool.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

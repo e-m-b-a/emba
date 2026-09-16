@@ -1,0 +1,448 @@
+/*
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #222;
+  font-family: monospace;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+a.etc {
+  background-color: #2c354a;
+}
+
+a.etc:hover {
+  background-color: #3c4864;
+}
+
+a.modul {
+  background-color: #333;
+}
+
+a.modul:hover {
+  background-color: #4e4e4e;
+}
+
+a.submodul {
+  background-color: #555;
+}
+
+a.submodul:hover {
+  background-color: #6e6e6e;
+}
+
+a.d {
+  background: linear-gradient(270deg, #088b83 10px, rgb(0 0 0 / 0%) 0);
+  padding-right: 18px !important;
+}
+
+a.p {
+  background: linear-gradient(270deg, #088a83 10px, rgb(0 0 0 / 0%) 0);
+  padding-right: 18px !important;
+}
+
+a.s {
+  background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
+  padding-right: 18px !important;
+}
+
+a.q {
+  background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
+  padding-right: 18px !important;
+}
+
+a.l {
+  background: linear-gradient(270deg, #99079e 10px, rgb(0 0 0 / 0%) 0);
+  padding-right: 18px !important;
+}
+
+a.f {
+  background: linear-gradient(270deg, #cc410b 10px, rgb(0 0 0 / 0%) 0);
+  padding-right: 18px !important;
+}
+
+.double {
+  border: 0;
+  border-top: 5px double #9f9f9f;
+}
+
+hr.double {
+  border: 0;
+  border-top: 5px double #9f9f9f;
+}
+
+hr.mono {
+  border: 0;
+  border-top: 2px solid #9f9f9f;
+}
+
+pre {
+  font-size: 16px;
+  margin: 0 0 0 40px;
+  text-indent: -40px;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+pre a {
+  font-weight: bold;
+}
+
+pre a:hover {
+  background-color: rgb(104 104 104);
+}
+
+a pre:hover {
+  background-color: rgb(104 104 104);
+}
+
+pre hr {
+  margin-left: -40px;
+}
+
+.anc {
+  position: relative;
+  top: -50px;
+  visibility: hidden;
+}
+
+#embark {
+  background-color: #4d4197;
+}
+
+#embark:hover {
+  background-color: #6a5ebe;
+}
+
+.backButton {
+  background-color: #2d6029 !important;
+}
+
+.backButton:hover {
+  background-color: #377732 !important;
+}
+
+.expand {
+  background-color: #133d5f !important;
+}
+
+.expand:hover {
+  background-color: #3d4781 !important;
+}
+
+.expand_area {
+  overflow: hidden;
+}
+
+.expand[value="+ Show more results"]+.expand_area {
+  max-height: 0;
+}
+
+.expand_njs {
+  background-color: #133d5f !important;
+}
+
+.hidden {
+  height: 0;
+  padding: 0 !important;
+  visibility: hidden;
+}
+
+.inherit {
+  width: inherit;
+}
+
+.local {
+  color: #beec18;
+}
+
+.reference {
+  padding-right: 20px;
+  display: inline-block;
+  background-color: #333;
+  width: 100%;
+  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-position: top right;
+  background-size: 15px 35px;
+  background-repeat: no-repeat;
+  text-decoration: none;
+}
+
+.reference:hover {
+  background: linear-gradient(45deg, transparent 75%, #beec18 75%);
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: 15px 35px;
+}
+
+.refmodul {
+  background-color: #333;
+  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: 15px 35px;
+  display: inline-block;
+  padding-right: 20px;
+  text-decoration: none;
+  width: 100%;
+}
+
+.refmodul:hover {
+  background: linear-gradient(45deg, transparent 75%, #eca218 75%);
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: 15px 35px;
+}
+
+.refmodulext {
+  background-color: #333;
+  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: 15px 35px;
+  display: inline-block;
+  padding-right: 20px;
+  text-decoration: none;
+  width: 100%;
+}
+
+.refmodulext:hover {
+  background: linear-gradient(45deg, transparent 75%, #ec1894 75%);
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: 15px 35px;
+}
+
+#logo {
+  background-color: #fff;
+  padding: 5%;
+  width: 100%;
+}
+
+.main {
+  -ms-overflow-style: none;
+  color: #fff;
+  margin-bottom: 100px;
+  margin-left: 250px;
+  overflow: scroll;
+  padding: 20px;
+  scrollbar-width: none;
+  transition: margin-left 0.5s;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.blue {
+  color: #00f;
+}
+
+.cyan {
+  color: #09f;
+}
+
+.green {
+  color: #0f0;
+}
+
+.magenta {
+  color: #f9f;
+}
+
+.orange {
+  color: #f90;
+}
+
+.red {
+  color: red;
+}
+
+.side {
+  -ms-overflow-style: none;
+  background-color: #2d2d2d;
+  height: 100%;
+  left: 0;
+  overflow-y: scroll;
+  position: fixed;
+  scrollbar-width: none;
+  top: 0;
+  transition: 0.5s;
+  width: 250px;
+  z-index: 1;
+}
+
+.side::-webkit-scrollbar,.main::-webkit-scrollbar {
+  display: none;
+}
+
+.rectButton {
+  bottom: 0;
+  cursor: pointer;
+  height: 50px;
+  line-height: 50px;
+  padding: 5px;
+  position: fixed;
+  text-align: center;
+  visibility: hidden;
+  width: 50px;
+}
+
+.rectButtonVisible {
+  bottom: 0;
+  cursor: pointer;
+  height: 50px;
+  line-height: 50px;
+  padding: 5px;
+  position: fixed;
+  text-align: center;
+  width: 50px;
+}
+
+#buttonSizer {
+  bottom: 0;
+  left: 0;
+}
+
+.buttonClose {
+  background-color: #821c1c;
+}
+
+.buttonClose:hover {
+  background-color: #a52323;
+}
+
+.buttonOpen {
+  background-color: #096b09;
+}
+
+.buttonOpen:hover {
+  background-color: #0b860b;
+}
+
+#buttonTime {
+  background-color: #044209;
+  bottom: 0;
+  left: 0;
+}
+
+#buttonTimeInvisible {
+  background-color: #044209;
+  bottom: 0;
+  left: 0;
+  visibility: hidden !important;
+}
+
+#buttonTime:hover {
+  background-color: #05500b;
+}
+
+#buttonInfo {
+  background-color: #093a41;
+  bottom: 0;
+  right: 0;
+}
+
+#buttonInfo:hover {
+  background-color: #0b4a53;
+}
+
+#buttonDown {
+  background-color: #614406;
+  bottom: 0;
+  right: 150px;
+}
+
+#buttonDown:hover {
+  background-color: #795509;
+}
+
+#buttonUp {
+  background-color: #614406;
+  bottom: 0;
+  right: 200px;
+}
+
+#buttonUp:hover {
+  background-color: #795509;
+}
+
+#buttonBack {
+  background-color: #614406;
+  bottom: 0;
+  right: 50px;
+}
+
+#buttonBack:hover {
+  background-color: #795509;
+}
+
+#buttonForward {
+  background-color: #614406;
+  bottom: 0;
+  right: 100px;
+}
+
+#buttonForward:hover {
+  background-color: #795509;
+}
+
+.nonClickable {
+  background-color: #333 !important;
+  cursor: default;
+}
+
+.image {
+  margin: 15px 0;
+  max-width: 640px;
+  width: 100%;
+}
+
+#nav {
+  overflow: hidden;
+  padding-bottom: 100px;
+  visibility: visible;
+}
+
+#nav a {
+  color: #f2f2f2;
+  display: block;
+  padding: 14px 8px;
+  text-align: center;
+  text-decoration: none;
+}
+
+#nav input {
+  border: none;
+  color: #f2f2f2;
+  display: block;
+  font-family: monospace;
+  padding: 14px 8px;
+  text-align: center;
+  text-decoration: none;
+  width: 100%;
+}

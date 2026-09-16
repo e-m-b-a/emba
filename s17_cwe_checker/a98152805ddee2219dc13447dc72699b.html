@@ -1,0 +1,293 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s17_cwe_checker.html" title="./../s17_cwe_checker.html" >&laquo; Back to s17_cwe_checker</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="orange">*</span>] Binary protection state of </span><span class="orange">rndimage</span></pre>
+<br />
+<pre>  	RELRO          CANARY            NX           PIE          RPATH        RUNPATH      SYMBOLS      </pre>
+<pre>  	<span class="red">No RELRO</span>       <span class="red">No Canary found</span>   <span class="red">NX disabled</span>  <span class="red">No PIE</span>       <span class="green">No RPATH</span>     <span class="green">No RUNPATH</span>   <span class="green">No Symbols</span></pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">CWE-Checker results for rndimage</span></pre>
+<pre><hr class="mono" /></pre>
+<pre><span class="green">	CWE id    | address         | tids            | symbols         | description</span></pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4198868         | instr_0x004011d | NA              | Out-of-bounds Write Memory write at 4198868 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4202700         | instr_0x004020c | NA              | Out-of-bounds Write Memory write at 4202700 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4209096         | instr_0x004039c | NA              | Out-of-bounds Write Memory write at 4209096 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4210620         | instr_0x00403fb | NA              | Out-of-bounds Write Memory write at 4210620 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a>    | 4210448         | instr_0x00403f1 | malloc          | Integer Overflow or Wraparound Potential overflow due to multiplication before call to malloc at 4210448</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a>    | 4210940         | instr_0x004040f | realloc         | Integer Overflow or Wraparound Potential overflow due to multiplication before call to realloc at 4210940</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208936,4208948 | instr_0x0040392 | fputc           | Unchecked Return Value There is no check of the return value of 4208936 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208912,4208936 | instr_0x0040391 | fputc           | Unchecked Return Value There is no check of the return value of 4208912 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208244,4208844 | instr_0x0040367 | fputc           | Unchecked Return Value There is no check of the return value of 4208244 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208244,4208332 | instr_0x0040367 | fputc           | Unchecked Return Value There is no check of the return value of 4208244 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208220,4208244 | instr_0x0040365 | fputc           | Unchecked Return Value There is no check of the return value of 4208220 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208196,4208220 | instr_0x0040364 | fputc           | Unchecked Return Value There is no check of the return value of 4208196 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208172,4208196 | instr_0x0040362 | fputc           | Unchecked Return Value There is no check of the return value of 4208172 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208148,4208172 | instr_0x0040361 | fputc           | Unchecked Return Value There is no check of the return value of 4208148 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208124,4208148 | instr_0x004035f | fputc           | Unchecked Return Value There is no check of the return value of 4208124 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208100,4208124 | instr_0x004035e | fputc           | Unchecked Return Value There is no check of the return value of 4208100 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208076,4208100 | instr_0x004035c | fputc           | Unchecked Return Value There is no check of the return value of 4208076 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208052,4208076 | instr_0x004035b | fputc           | Unchecked Return Value There is no check of the return value of 4208052 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208028,4208052 | instr_0x0040359 | fputc           | Unchecked Return Value There is no check of the return value of 4208028 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208004,4208028 | instr_0x0040358 | fputc           | Unchecked Return Value There is no check of the return value of 4208004 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207980,4208004 | instr_0x0040356 | fputc           | Unchecked Return Value There is no check of the return value of 4207980 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207956,4207980 | instr_0x0040355 | fputc           | Unchecked Return Value There is no check of the return value of 4207956 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207932,4207956 | instr_0x0040353 | fputc           | Unchecked Return Value There is no check of the return value of 4207932 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207896,4207932 | instr_0x0040351 | fputc           | Unchecked Return Value There is no check of the return value of 4207896 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207896,4207896 | instr_0x0040351 | fputc           | Unchecked Return Value There is no check of the return value of 4207896 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207852,4207872 | instr_0x004034e | fputc           | Unchecked Return Value There is no check of the return value of 4207852 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207852,4207852 | instr_0x004034e | fputc           | Unchecked Return Value There is no check of the return value of 4207852 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207824,4207852 | instr_0x004034d | fputc           | Unchecked Return Value There is no check of the return value of 4207824 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207776,4207792 | instr_0x004034a | fputc           | Unchecked Return Value There is no check of the return value of 4207776 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207732,4207752 | instr_0x0040347 | fputc           | Unchecked Return Value There is no check of the return value of 4207732 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207732,4207732 | instr_0x0040347 | fputc           | Unchecked Return Value There is no check of the return value of 4207732 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207704,4207732 | instr_0x0040345 | fputc           | Unchecked Return Value There is no check of the return value of 4207704 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207656,4207672 | instr_0x0040342 | fputc           | Unchecked Return Value There is no check of the return value of 4207656 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207612,4207632 | instr_0x004033f | fputc           | Unchecked Return Value There is no check of the return value of 4207612 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207612,4207612 | instr_0x004033f | fputc           | Unchecked Return Value There is no check of the return value of 4207612 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207584,4207612 | instr_0x004033e | fputc           | Unchecked Return Value There is no check of the return value of 4207584 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207536,4207552 | instr_0x004033b | fputc           | Unchecked Return Value There is no check of the return value of 4207536 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207488,4207508 | instr_0x0040338 | fputc           | Unchecked Return Value There is no check of the return value of 4207488 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207488,4207488 | instr_0x0040338 | fputc           | Unchecked Return Value There is no check of the return value of 4207488 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207460,4207488 | instr_0x0040336 | fputc           | Unchecked Return Value There is no check of the return value of 4207460 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207436,4207460 | instr_0x0040334 | fputc           | Unchecked Return Value There is no check of the return value of 4207436 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207412,4207436 | instr_0x0040333 | fputc           | Unchecked Return Value There is no check of the return value of 4207412 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207388,4207412 | instr_0x0040331 | fputc           | Unchecked Return Value There is no check of the return value of 4207388 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207364,4207388 | instr_0x0040330 | fputc           | Unchecked Return Value There is no check of the return value of 4207364 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207340,4207364 | instr_0x004032e | fputc           | Unchecked Return Value There is no check of the return value of 4207340 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207316,4207340 | instr_0x004032d | fputc           | Unchecked Return Value There is no check of the return value of 4207316 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207292,4207316 | instr_0x004032b | fputc           | Unchecked Return Value There is no check of the return value of 4207292 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207268,4207292 | instr_0x004032a | fputc           | Unchecked Return Value There is no check of the return value of 4207268 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207244,4207268 | instr_0x0040328 | fputc           | Unchecked Return Value There is no check of the return value of 4207244 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207220,4207244 | instr_0x0040327 | fputc           | Unchecked Return Value There is no check of the return value of 4207220 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207196,4207220 | instr_0x0040325 | fputc           | Unchecked Return Value There is no check of the return value of 4207196 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207172,4207196 | instr_0x0040324 | fputc           | Unchecked Return Value There is no check of the return value of 4207172 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207148,4207172 | instr_0x0040322 | fputc           | Unchecked Return Value There is no check of the return value of 4207148 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207124,4207148 | instr_0x0040321 | fputc           | Unchecked Return Value There is no check of the return value of 4207124 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207100,4207124 | instr_0x004031f | fputc           | Unchecked Return Value There is no check of the return value of 4207100 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207076,4207100 | instr_0x004031e | fputc           | Unchecked Return Value There is no check of the return value of 4207076 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207052,4207076 | instr_0x004031c | fputc           | Unchecked Return Value There is no check of the return value of 4207052 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207028,4207052 | instr_0x004031b | fputc           | Unchecked Return Value There is no check of the return value of 4207028 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207004,4207028 | instr_0x0040319 | fputc           | Unchecked Return Value There is no check of the return value of 4207004 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206980,4207004 | instr_0x0040318 | fputc           | Unchecked Return Value There is no check of the return value of 4206980 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206952,4206980 | instr_0x0040316 | fputc           | Unchecked Return Value There is no check of the return value of 4206952 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206928,4206952 | instr_0x0040315 | fputc           | Unchecked Return Value There is no check of the return value of 4206928 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206904,4206928 | instr_0x0040313 | fputc           | Unchecked Return Value There is no check of the return value of 4206904 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206868,4206904 | instr_0x0040311 | fputc           | Unchecked Return Value There is no check of the return value of 4206868 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206868,4206868 | instr_0x0040311 | fputc           | Unchecked Return Value There is no check of the return value of 4206868 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206840,4206868 | instr_0x004030f | fputc           | Unchecked Return Value There is no check of the return value of 4206840 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206792,4206808 | instr_0x004030c | fputc           | Unchecked Return Value There is no check of the return value of 4206792 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206764,4206792 | instr_0x004030a | fputc           | Unchecked Return Value There is no check of the return value of 4206764 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206740,4206764 | instr_0x0040309 | fputc           | Unchecked Return Value There is no check of the return value of 4206740 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206716,4206740 | instr_0x0040307 | fputc           | Unchecked Return Value There is no check of the return value of 4206716 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206692,4206716 | instr_0x0040306 | fputc           | Unchecked Return Value There is no check of the return value of 4206692 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206668,4206692 | instr_0x0040304 | fputc           | Unchecked Return Value There is no check of the return value of 4206668 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206612,4206632 | instr_0x0040301 | fputc           | Unchecked Return Value There is no check of the return value of 4206612 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206584,4206632 | instr_0x00402ff | fputc           | Unchecked Return Value There is no check of the return value of 4206584 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206560,4206584 | instr_0x00402fe | fputc           | Unchecked Return Value There is no check of the return value of 4206560 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206508,4206532 | instr_0x00402fa | fputc           | Unchecked Return Value There is no check of the return value of 4206508 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206484,4206508 | instr_0x00402f9 | fputc           | Unchecked Return Value There is no check of the return value of 4206484 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206456,4206484 | instr_0x00402f7 | fputc           | Unchecked Return Value There is no check of the return value of 4206456 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206456,4206668 | instr_0x00402f7 | fputc           | Unchecked Return Value There is no check of the return value of 4206456 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206432,4206456 | instr_0x00402f6 | fputc           | Unchecked Return Value There is no check of the return value of 4206432 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206408,4206432 | instr_0x00402f4 | fputc           | Unchecked Return Value There is no check of the return value of 4206408 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206384,4206408 | instr_0x00402f3 | fputc           | Unchecked Return Value There is no check of the return value of 4206384 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206360,4206384 | instr_0x00402f1 | fputc           | Unchecked Return Value There is no check of the return value of 4206360 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206336,4206360 | instr_0x00402f0 | fputc           | Unchecked Return Value There is no check of the return value of 4206336 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206312,4206336 | instr_0x00402ee | fputc           | Unchecked Return Value There is no check of the return value of 4206312 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206288,4206312 | instr_0x00402ed | fputc           | Unchecked Return Value There is no check of the return value of 4206288 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206264,4206288 | instr_0x00402eb | fputc           | Unchecked Return Value There is no check of the return value of 4206264 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206240,4206264 | instr_0x00402ea | fputc           | Unchecked Return Value There is no check of the return value of 4206240 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206216,4206240 | instr_0x00402e8 | fputc           | Unchecked Return Value There is no check of the return value of 4206216 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206192,4206216 | instr_0x00402e7 | fputc           | Unchecked Return Value There is no check of the return value of 4206192 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206168,4206192 | instr_0x00402e5 | fputc           | Unchecked Return Value There is no check of the return value of 4206168 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206144,4206168 | instr_0x00402e4 | fputc           | Unchecked Return Value There is no check of the return value of 4206144 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206120,4206144 | instr_0x00402e2 | fputc           | Unchecked Return Value There is no check of the return value of 4206120 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206096,4206120 | instr_0x00402e1 | fputc           | Unchecked Return Value There is no check of the return value of 4206096 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206072,4206096 | instr_0x00402df | fputc           | Unchecked Return Value There is no check of the return value of 4206072 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206048,4206072 | instr_0x00402de | fputc           | Unchecked Return Value There is no check of the return value of 4206048 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206020,4206048 | instr_0x00402dc | fputc           | Unchecked Return Value There is no check of the return value of 4206020 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4205996,4206020 | instr_0x00402da | fputc           | Unchecked Return Value There is no check of the return value of 4205996 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202860,4202880 | instr_0x0040216 | fputc           | Unchecked Return Value There is no check of the return value of 4202860 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202828,4202860 | instr_0x0040214 | fputc           | Unchecked Return Value There is no check of the return value of 4202828 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4198216,4198228 | instr_0x00400f4 | fscanf          | Unchecked Return Value There is no check of the return value of 4198216 fscanf.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 4211856         | instr_0x0040449 | NA              | Double Free Object may have been freed before at 4211856</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4198180,4198304 | instr_0x00400f2 | fopen           | NULL Pointer Dereference There is no check if the return value is NULL at 4198180 fopen.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4198688,4198740 | instr_0x0040112 | fopen           | NULL Pointer Dereference There is no check if the return value is NULL at 4198688 fopen.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4203820,4205996 | instr_0x0040252 | fopen           | NULL Pointer Dereference There is no check if the return value is NULL at 4203820 fopen.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4210448,4210476 | instr_0x00403f1 | malloc          | NULL Pointer Dereference There is no check if the return value is NULL at 4210448 malloc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198072         | instr_0x00400eb | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198072 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198280         | instr_0x00400f8 | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198280 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198328         | instr_0x00400fb | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198328 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198408         | instr_0x0040100 | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198408 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198496         | instr_0x0040106 | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198496 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198584         | instr_0x004010b | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198584 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198664         | instr_0x0040110 | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198664 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4198712         | instr_0x0040113 | FUN_00400e78    | Use of Potentially Dangerous Function FUN_00400e78 4198712 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4199704         | instr_0x0040151 | main            | Use of Potentially Dangerous Function main 4199704 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4200056         | instr_0x0040167 | main            | Use of Potentially Dangerous Function main 4200056 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4201180         | instr_0x00401ad | main            | Use of Potentially Dangerous Function main 4201180 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4205736         | instr_0x00402ca | write_jpeg      | Use of Potentially Dangerous Function write_jpeg 4205736 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206532         | instr_0x00402fc | write_jpeg      | Use of Potentially Dangerous Function write_jpeg 4206532 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210476         | instr_0x00403f2 | alloc_image     | Use of Potentially Dangerous Function alloc_image 4210476 -&gt; memset</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./a58dd77502f8a7dfaa1eb53f94f4e3bd.html" title="./a58dd77502f8a7dfaa1eb53f94f4e3bd.html" >&laquo; Back to a58dd77502f8a7dfaa1eb53f94f4e3bd</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Removing unreachable block (ram,0x004016e8) */</pre>
+<pre>/* WARNING: Removing unreachable block (ram,0x00401724) */</pre>
+<pre>/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */</pre>
+<br />
+<pre>undefined4 main(int param_1,char **param_2)</pre>
+<br />
+<pre>{</pre>
+<pre>  undefined *puVar1;</pre>
+<pre>  char *pcVar2;</pre>
+<pre>  DIR *__dirp;</pre>
+<pre>  dirent *pdVar3;</pre>
+<pre>  long lVar4;</pre>
+<pre>  long lVar5;</pre>
+<pre>  long lVar6;</pre>
+<pre>  long lVar7;</pre>
+<pre>  undefined4 *puVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  int iVar10;</pre>
+<pre>  int iVar11;</pre>
+<pre>  uint uVar12;</pre>
+<pre>  int iVar13;</pre>
+<pre>  uint uVar14;</pre>
+<pre>  int iVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  uint uVar17;</pre>
+<pre>  uint local_f8;</pre>
+<pre>  undefined2 local_f4;</pre>
+<pre>  undefined1 local_f2;</pre>
+<pre>  uint local_f0;</pre>
+<pre>  undefined4 local_ec;</pre>
+<pre>  void *local_e8;</pre>
+<pre>  timeval local_e4;</pre>
+<pre>  undefined4 local_dc;</pre>
+<pre>  undefined4 local_d8;</pre>
+<pre>  char acStack_d4 [132];</pre>
+<pre>  int local_50;</pre>
+<pre>  undefined4 *local_4c;</pre>
+<pre>  uint local_48;</pre>
+<pre>  size_t local_44;</pre>
+<pre>  uint local_40;</pre>
+<pre>  uint *local_3c;</pre>
+<pre>  char *local_38;</pre>
+<pre>  undefined4 *local_34;</pre>
+<pre>  uint *local_30;</pre>
+<pre>  </pre>
+<pre>  pcVar2 = strrchr(*param_2,0x2f);</pre>
+<pre>  if (pcVar2 == (char *)0x0) {</pre>
+<pre>    DAT_00415430 = *param_2;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    DAT_00415430 = pcVar2 + 1;</pre>
+<pre>  }</pre>
+<pre>  if (param_1 &lt; 2) {</pre>
+<pre>    printf("RNDIMGAE v0.0.1\nUsage: %s [OPTION] message\n    -h\tshow this help message.\n    -f\tset ouput file name (default is \"/var/rndimg.jpeg\").\n    -p\tset ouput file name (default is \"fonts\").\n    -c\tset ouput file comment (default is \"Alphanetworks\").\n    -w\tset ouput file width (default is %d).\n    -t\tset ouput file height (default is %d).\n    -D\tUse default message and save file.\n"</pre>
+<pre>           ,DAT_00415430,500,200);</pre>
+<pre>    iVar10 = -1;</pre>
+<pre>LAB_0040141c:</pre>
+<pre>                    /* WARNING: Subroutine does not return */</pre>
+<pre>    exit(iVar10);</pre>
+<pre>  }</pre>
+<pre>  g_default_auth = 0;</pre>
+<pre>LAB_00401430:</pre>
+<pre>  while( true ) {</pre>
+<pre><span class="green">    iVar10 = getopt(param_1,param_2,"hc:f:p:w:t:D")</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if (iVar10 == -1) {</pre>
+<pre>      DAT_00415434 = param_2[param_1 + -1];</pre>
+<pre>      gettimeofday(&amp;local_e4,(__timezone_ptr_t)0x0);</pre>
+<pre>      srandom(local_e4.tv_usec + local_e4.tv_sec);</pre>
+<pre>      if (g_default_auth != 0) {</pre>
+<a class="reference" href="./df5b636b0661d05c45bffa319703ae53.html" title="./df5b636b0661d05c45bffa319703ae53.html" ><pre>        FUN_00400e78();</pre></a>
+
+<pre>      }</pre>
+<pre>      local_ec = 0;</pre>
+<pre>      local_e8 = (void *)0x0;</pre>
+<pre>      iVar10 = alloc_image(&amp;local_ec,DAT_00415030 &amp; 0xffff,DAT_00415034 &amp; 0xffff);</pre>
+<pre>      if (iVar10 != 0) {</pre>
+<pre>        error_exit("failed to alloc background image");</pre>
+<pre>      }</pre>
+<pre>      local_44 = strlen(DAT_00415434);</pre>
+<pre>      local_f4 = 0;</pre>
+<pre>      local_f2 = 0;</pre>
+<pre>      random();</pre>
+<pre>      __dirp = opendir(PTR_s_fonts_00415044);</pre>
+<pre>      if (__dirp == (DIR *)0x0) {</pre>
+<pre>        error_exit("could not open font files at %s.\n",PTR_s_fonts_00415044);</pre>
+<pre>      }</pre>
+<pre>      puVar8 = &amp;g_font_file;</pre>
+<pre>      iVar10 = 0;</pre>
+<pre>      local_4c = puVar8;</pre>
+<pre>      while ((pdVar3 = readdir(__dirp), pdVar3 != (dirent *)0x0 &amp;&amp; (iVar10 &lt; DAT_00415038))) {</pre>
+<pre>        pcVar2 = strrchr(pdVar3-&gt;d_name,0x2e);</pre>
+<pre>        if ((pcVar2 != (char *)0x0) &amp;&amp; (iVar13 = strcmp(pcVar2,".dat"), iVar13 == 0)) {</pre>
+<pre><span class="green">          pcVar2 = strdup(pdVar3-&gt;d_name)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          *puVar8 = pcVar2;</pre>
+<pre>          iVar10 = iVar10 + 1;</pre>
+<pre>          puVar8 = puVar8 + 1;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      local_30 = &amp;local_f0;</pre>
+<pre>      local_f0 = CONCAT13(local_f0._3_1_,0xf0a000);</pre>
+<pre>      local_f0 = CONCAT31(local_f0._1_3_,0xf0);</pre>
+<pre>      local_dc = 0;</pre>
+<pre>      local_d8 = 0;</pre>
+<pre>      iVar13 = 0;</pre>
+<pre>      memset(local_e8,0xff,(local_ec &gt;&gt; 0x10) * (local_ec &amp; 0xffff) * 3);</pre>
+<pre>      do {</pre>
+<a class="reference" href="./59fbb495acec32df6d77fd8c489774b5.html" title="./59fbb495acec32df6d77fd8c489774b5.html" ><pre>        FUN_00400d30(local_30,0x70,0xff);</pre></a>
+
+<pre>        lVar4 = random();</pre>
+<pre>        uVar14 = local_ec &amp; 0xffff;</pre>
+<pre>        lVar5 = random();</pre>
+<pre>        uVar9 = local_ec &gt;&gt; 0x10;</pre>
+<pre>        lVar6 = random();</pre>
+<pre>        uVar16 = (local_ec &amp; 0xffff) / 5;</pre>
+<pre>        uVar17 = lVar6 % (int)uVar16;</pre>
+<pre>        if (uVar16 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        lVar6 = random();</pre>
+<pre>        uVar16 = lVar6 % (int)(local_ec / 0x50000);</pre>
+<pre>        if (local_ec / 0x50000 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        uVar12 = uVar16;</pre>
+<pre>        if ((int)uVar17 &lt; (int)uVar16) {</pre>
+<pre>          uVar12 = uVar17;</pre>
+<pre>          uVar17 = uVar16;</pre>
+<pre>        }</pre>
+<pre>        if (uVar14 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        iVar13 = iVar13 + 1;</pre>
+<pre>        if (uVar9 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        box(&amp;local_ec,lVar4 % (int)uVar14 &amp; 0xffff,lVar5 % (int)uVar9 &amp; 0xffff,uVar17 &amp; 0xffff,</pre>
+<pre>            uVar12 &amp; 0xffff,local_f0 &amp; 0xffffff);</pre>
+<pre>        iVar15 = 0;</pre>
+<pre>      } while (iVar13 != 10);</pre>
+<pre>      do {</pre>
+<a class="reference" href="./59fbb495acec32df6d77fd8c489774b5.html" title="./59fbb495acec32df6d77fd8c489774b5.html" ><pre>        FUN_00400d30(&amp;local_f0,0x70,0xff);</pre></a>
+
+<pre>        iVar15 = iVar15 + 1;</pre>
+<pre>        lVar4 = random();</pre>
+<pre>        uVar9 = local_ec &amp; 0xffff;</pre>
+<pre>        if (uVar9 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        lVar5 = random();</pre>
+<pre>        uVar17 = local_ec &amp; 0xffff;</pre>
+<pre>        if (uVar17 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        lVar6 = random();</pre>
+<pre>        uVar14 = local_ec &gt;&gt; 0x10;</pre>
+<pre>        if (uVar14 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        lVar7 = random();</pre>
+<pre>        if (local_ec &gt;&gt; 0x10 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        line(&amp;local_ec,lVar4 % (int)uVar9 &amp; 0xffff,lVar6 % (int)uVar14 &amp; 0xffff,</pre>
+<pre>             lVar5 % (int)uVar17 &amp; 0xffff,lVar7 % (int)(local_ec &gt;&gt; 0x10) &amp; 0xffff,</pre>
+<pre>             local_f0 &amp; 0xffffff);</pre>
+<pre>      } while (iVar15 != 5);</pre>
+<pre>      iVar13 = 0;</pre>
+<pre>      do {</pre>
+<a class="reference" href="./59fbb495acec32df6d77fd8c489774b5.html" title="./59fbb495acec32df6d77fd8c489774b5.html" ><pre>        FUN_00400d30(&amp;local_f0,0,0xff);</pre></a>
+
+<pre>        iVar13 = iVar13 + 1;</pre>
+<pre>        lVar4 = random();</pre>
+<pre>        uVar9 = local_ec &amp; 0xffff;</pre>
+<pre>        if (uVar9 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        lVar5 = random();</pre>
+<pre>        if (local_ec &gt;&gt; 0x10 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        dot(&amp;local_ec,lVar4 % (int)uVar9 &amp; 0xffff,lVar5 % (int)(local_ec &gt;&gt; 0x10) &amp; 0xffff,</pre>
+<pre>            local_f0 &amp; 0xffffff);</pre>
+<pre>      } while (iVar13 != 0x32);</pre>
+<pre>      local_40 = (int)DAT_00415030 / (int)local_44;</pre>
+<pre>      if (local_44 == 0) {</pre>
+<pre>        trap(0x1c00);</pre>
+<pre>      }</pre>
+<pre>      local_f8 = CONCAT13(local_f8._3_1_,0xf0a000);</pre>
+<pre>      local_f8 = CONCAT31(local_f8._1_3_,0xf0);</pre>
+<pre>      local_3c = &amp;local_f8;</pre>
+<pre>      local_38 = acStack_d4;</pre>
+<pre>      iVar13 = 0;</pre>
+<pre>      iVar15 = 0;</pre>
+<pre>      local_48 = local_40 &gt;&gt; 1;</pre>
+<pre>      local_34 = &amp;local_ec;</pre>
+<pre>      while (iVar13 &lt; (int)local_44) {</pre>
+<a class="reference" href="./59fbb495acec32df6d77fd8c489774b5.html" title="./59fbb495acec32df6d77fd8c489774b5.html" ><pre>        FUN_00400d30(local_3c,0,0x80);</pre></a>
+
+<pre>        local_50 = iVar13 + 1;</pre>
+<pre>        uVar9 = random();</pre>
+<pre>        if (local_48 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        uVar14 = uVar9 % local_48 + iVar15;</pre>
+<pre>        iVar15 = iVar15 + local_40;</pre>
+<pre>        uVar9 = random();</pre>
+<pre>        uVar17 = iVar15 - uVar14;</pre>
+<pre>        uVar9 = uVar9 % uVar17;</pre>
+<pre>        if (uVar17 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        if (uVar9 &lt; 0x1e) {</pre>
+<pre>          uVar9 = uVar9 + 0x14;</pre>
+<pre>        }</pre>
+<pre>        lVar4 = random();</pre>
+<pre>        uVar17 = lVar4 % ((int)DAT_00415034 / 2);</pre>
+<pre>        if ((int)DAT_00415034 / 2 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        iVar11 = DAT_00415034 - 1;</pre>
+<pre>        uVar16 = random();</pre>
+<pre>        puVar1 = PTR_s_fonts_00415044;</pre>
+<pre>        uVar12 = iVar11 - uVar17;</pre>
+<pre>        uVar16 = uVar16 % uVar12;</pre>
+<pre>        if (uVar12 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        if (uVar16 &lt; 0x32) {</pre>
+<pre>          uVar16 = uVar16 + 0x1e;</pre>
+<pre>        }</pre>
+<pre>        lVar4 = random();</pre>
+<pre>        if (iVar10 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre><span class="green">        sprintf(local_38,"%s/%s",puVar1,(&amp;g_font_file)[lVar4 % iVar10])</span></span>   //possible issue identified - semgrep</pre>
+<pre>        iVar11 = get_chr_from_file(local_38,(int)DAT_00415434[iVar13],&amp;local_dc,local_f8 &amp; 0xffffff)</pre>
+<pre>        ;</pre>
+<pre>        if (iVar11 != 0) {</pre>
+<pre>          if (iVar10 == 0) {</pre>
+<pre>            trap(0x1c00);</pre>
+<pre>          }</pre>
+<pre>          error_exit("failed to get word image: %d(%s)\n",iVar13 % iVar10,local_38);</pre>
+<pre>        }</pre>
+<pre>        bitblt(local_34,&amp;local_dc,uVar14 &amp; 0xffff,uVar17 &amp; 0xffff,uVar9 &amp; 0xffff,uVar16 &amp; 0xffff,</pre>
+<pre>               local_f4);</pre>
+<pre>        iVar13 = local_50;</pre>
+<pre>        free_image(&amp;local_dc);</pre>
+<pre>      }</pre>
+<pre>      iVar10 = 0;</pre>
+<pre>      do {</pre>
+<a class="reference" href="./59fbb495acec32df6d77fd8c489774b5.html" title="./59fbb495acec32df6d77fd8c489774b5.html" ><pre>        FUN_00400d30(&amp;local_f8,0,0xff);</pre></a>
+
+<pre>        iVar10 = iVar10 + 1;</pre>
+<pre>        lVar4 = random();</pre>
+<pre>        uVar9 = local_ec &amp; 0xffff;</pre>
+<pre>        if (uVar9 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        lVar5 = random();</pre>
+<pre>        if (local_ec &gt;&gt; 0x10 == 0) {</pre>
+<pre>          trap(0x1c00);</pre>
+<pre>        }</pre>
+<pre>        dot(&amp;local_ec,lVar4 % (int)uVar9 &amp; 0xffff,lVar5 % (int)(local_ec &gt;&gt; 0x10) &amp; 0xffff,</pre>
+<pre>            local_f8 &amp; 0xffffff);</pre>
+<pre>      } while (iVar10 != 0x32);</pre>
+<pre>      iVar10 = 0;</pre>
+<pre>      for (; (iVar10 &lt; DAT_00415038 &amp;&amp; ((void *)*local_4c != (void *)0x0)); local_4c = local_4c + 1)</pre>
+<pre>      {</pre>
+<pre>        iVar10 = iVar10 + 1;</pre>
+<pre>        free((void *)*local_4c);</pre>
+<pre>        *local_4c = 0;</pre>
+<pre>      }</pre>
+<pre>      iVar10 = write_jpeg(PTR_s__var_rndimg_jpeg_00415040,local_e8,local_ec &amp; 0xffff,local_ec._2_2_,</pre>
+<pre>                          PTR_s_Alphanetworks_00415048);</pre>
+<pre>      if (iVar10 != 0) {</pre>
+<pre>        error_exit("failed to encode image");</pre>
+<pre>      }</pre>
+<pre>      fprintf(_stderr,"output %s(%dX%d)\n",PTR_s__var_rndimg_jpeg_00415040,local_ec &amp; 0xffff,</pre>
+<pre>              local_ec &gt;&gt; 0x10);</pre>
+<pre>      free_image(&amp;local_ec);</pre>
+<pre>      return 0;</pre>
+<pre>    }</pre>
+<pre>    if (iVar10 == 0x68) break;</pre>
+<pre>    if (iVar10 &lt; 0x69) {</pre>
+<pre>      if (iVar10 == 99) {</pre>
+<pre>        PTR_s_Alphanetworks_00415048 = _optarg;</pre>
+<pre>      }</pre>
+<pre>      else if (iVar10 == 0x66) {</pre>
+<pre>        PTR_s__var_rndimg_jpeg_00415040 = _optarg;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        if (iVar10 != 0x44) {</pre>
+<pre>LAB_004013e8:</pre>
+<pre>          iVar10 = -1;</pre>
+<pre>          goto LAB_004013ec;</pre>
+<pre>        }</pre>
+<pre>        g_default_auth = 1;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      if (iVar10 == 0x74) goto LAB_004013ac;</pre>
+<pre>      if (iVar10 == 0x77) {</pre>
+<pre>        DAT_00415030 = atoi(_optarg);</pre>
+<pre>        if (DAT_00415030 == 0) {</pre>
+<pre>          pcVar2 = "invalid picture width.\n";</pre>
+<pre>          goto LAB_004013d4;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        if (iVar10 != 0x70) goto LAB_004013e8;</pre>
+<pre>        PTR_s_fonts_00415044 = _optarg;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  iVar10 = 0;</pre>
+<pre>LAB_004013ec:</pre>
+<pre>  printf("RNDIMGAE v0.0.1\nUsage: %s [OPTION] message\n    -h\tshow this help message.\n    -f\tset ouput file name (default is \"/var/rndimg.jpeg\").\n    -p\tset ouput file name (default is \"fonts\").\n    -c\tset ouput file comment (default is \"Alphanetworks\").\n    -w\tset ouput file width (default is %d).\n    -t\tset ouput file height (default is %d).\n    -D\tUse default message and save file.\n"</pre>
+<pre>         ,DAT_00415430,500,200);</pre>
+<pre>  goto LAB_0040141c;</pre>
+<pre>LAB_004013ac:</pre>
+<pre>  DAT_00415034 = atoi(_optarg);</pre>
+<pre>  if (DAT_00415034 == 0) {</pre>
+<pre>    pcVar2 = "invalid picture height.\n";</pre>
+<pre>LAB_004013d4:</pre>
+<pre>    error_exit(pcVar2);</pre>
+<pre>  }</pre>
+<pre>  goto LAB_00401430;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

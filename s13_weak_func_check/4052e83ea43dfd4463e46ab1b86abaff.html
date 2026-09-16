@@ -1,0 +1,583 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s13_weak_func_check.html" title="./../s13_weak_func_check.html" >&laquo; Back to s13_weak_func_check</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="orange">*</span>] Binary protection state of </span><span class="orange">pppd</span></pre>
+<br />
+<pre>  	RELRO          CANARY            NX           PIE          RPATH        RUNPATH      SYMBOLS      </pre>
+<pre>  	<span class="red">No RELRO</span>       <span class="red">No Canary found</span>   <span class="red">NX disabled</span>  <span class="red">No PIE</span>       <span class="green">No RPATH</span>     <span class="green">No RUNPATH</span>   <span class="green">No Symbols</span></pre>
+<br />
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Function </span><span class="orange">sprintf</span> tear down of </span><span class="orange">pppd</span></pre>
+<br />
+<pre>  40743c:	8f9984b8 	lw	t9,-31560(gp)</pre>
+<pre>  407440:	3c050044 	lui	a1,0x44</pre>
+<pre>  407444:	2604f138 	addiu	a0,s0,-3784</pre>
+<pre>  407448:	0320f809 	jalr	t9</pre>
+<pre>  40744c:	24a52b54 	addiu	a1,a1,11092</pre>
+<pre>  407450:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  407454:	10400022 	beqz	v0,4074e0 &lt;update_statusfile&commat;&commat;Base+0xf4&gt;</pre>
+<pre>  407458:	00408021 	move	s0,v0</pre>
+<pre>  40745c:	8f9982cc 	lw	t9,-32052(gp)</pre>
+<pre>  407460:	3c050044 	lui	a1,0x44</pre>
+<pre>  407464:	24a56c3c 	addiu	a1,a1,27708</pre>
+<pre>  407468:	02203021 	move	a2,s1</pre>
+<pre>  40746c:	0320f809 	jalr	t9</pre>
+<pre>  407470:	00402021 	move	a0,v0</pre>
+<pre>  407474:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  407478:	02002021 	move	a0,s0</pre>
+<pre>  40747c:	8f9984e4 	lw	t9,-31516(gp)</pre>
+<pre>  407480:	00000000 	nop</pre>
+<pre>  407484:	0320f809 	jalr	t9</pre>
+<pre>  407488:	27b00020 	addiu	s0,sp,32</pre>
+<pre>  40748c:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  407490:	3c030046 	lui	v1,0x46</pre>
+<pre>  407494:	3c020046 	lui	v0,0x46</pre>
+<pre>  407498:	9444f128 	lhu	a0,-3800(v0)</pre>
+<pre>  40749c:	8c62f12c 	lw	v0,-3796(v1)</pre>
+<pre><span class="red">  4074a0:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  4074a4:	8f86849c 	lw	a2,-31588(gp)</pre>
+<pre>  4074a8:	3c050044 	lui	a1,0x44</pre>
+<pre>--</pre>
+<pre>  410ff4:	1000ff6e 	b	410db0 &lt;lcp_open&commat;&commat;Base+0x32b4&gt;</pre>
+<pre>  410ff8:	3c020046 	lui	v0,0x46</pre>
+<pre>  410ffc:	8f998238 	lw	t9,-32200(gp)</pre>
+<pre>  411000:	3c020044 	lui	v0,0x44</pre>
+<pre>  411004:	246428a0 	addiu	a0,v1,10400</pre>
+<pre>  411008:	24050040 	li	a1,64</pre>
+<pre>  41100c:	0320f809 	jalr	t9</pre>
+<pre>  411010:	2446432c 	addiu	a2,v0,17196</pre>
+<pre>  411014:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  411018:	3c030046 	lui	v1,0x46</pre>
+<pre>  41101c:	8f998440 	lw	t9,-31680(gp)</pre>
+<pre>  411020:	3c040044 	lui	a0,0x44</pre>
+<pre>  411024:	24844204 	addiu	a0,a0,16900</pre>
+<pre>  411028:	246528a0 	addiu	a1,v1,10400</pre>
+<pre>  41102c:	0320f809 	jalr	t9</pre>
+<pre>  411030:	00003021 	move	a2,zero</pre>
+<pre>  411034:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  411038:	8e35002c 	lw	s5,44(s1)</pre>
+<pre>  41103c:	8e360030 	lw	s6,48(s1)</pre>
+<pre>  411040:	8f82853c 	lw	v0,-31428(gp)</pre>
+<pre>  411044:	8e340024 	lw	s4,36(s1)</pre>
+<pre>  411048:	8c460000 	lw	a2,0(v0)</pre>
+<pre>  41104c:	8e3e0028 	lw	s8,40(s1)</pre>
+<pre>  411050:	10c0ff7a 	beqz	a2,410e3c &lt;lcp_open&commat;&commat;Base+0x3340&gt;</pre>
+<pre>  411054:	3c030044 	lui	v1,0x44</pre>
+<pre><span class="red">  411058:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  41105c:	27b30018 	addiu	s3,sp,24</pre>
+<pre>  411060:	3c050044 	lui	a1,0x44</pre>
+<pre>--</pre>
+<pre>  4149e0:	02802021 	move	a0,s4</pre>
+<pre>  4149e4:	8f998238 	lw	t9,-32200(gp)</pre>
+<pre>  4149e8:	8f878720 	lw	a3,-30944(gp)</pre>
+<pre>  4149ec:	3c060044 	lui	a2,0x44</pre>
+<pre>  4149f0:	02e42823 	subu	a1,s7,a0</pre>
+<pre>  4149f4:	0320f809 	jalr	t9</pre>
+<pre>  4149f8:	24c64edc 	addiu	a2,a2,20188</pre>
+<pre>  4149fc:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  414a00:	1000ffc6 	b	41491c &lt;ChapAuthPeer&commat;&commat;Base+0x610&gt;</pre>
+<pre>  414a04:	00000000 	nop</pre>
+<pre>  414a08:	8f998238 	lw	t9,-32200(gp)</pre>
+<pre>  414a0c:	3c060044 	lui	a2,0x44</pre>
+<pre>  414a10:	24c64eec 	addiu	a2,a2,20204</pre>
+<pre>  414a14:	02802021 	move	a0,s4</pre>
+<pre>  414a18:	0320f809 	jalr	t9</pre>
+<pre>  414a1c:	24050100 	li	a1,256</pre>
+<pre>  414a20:	92620024 	lbu	v0,36(s3)</pre>
+<pre>  414a24:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  414a28:	1040003f 	beqz	v0,414b28 &lt;ChapAuthPeer&commat;&commat;Base+0x81c&gt;</pre>
+<pre>  414a2c:	3c020044 	lui	v0,0x44</pre>
+<pre>  414a30:	27b60024 	addiu	s6,sp,36</pre>
+<pre>  414a34:	24554efc 	addiu	s5,v0,20220</pre>
+<pre>  414a38:	02c09021 	move	s2,s6</pre>
+<pre>  414a3c:	00008821 	move	s1,zero</pre>
+<pre>  414a40:	02711021 	addu	v0,s3,s1</pre>
+<pre><span class="red">  414a44:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  414a48:	9046000c 	lbu	a2,12(v0)</pre>
+<pre>  414a4c:	02402021 	move	a0,s2</pre>
+<pre>--</pre>
+<pre>  42e044:	a7a20028 	sh	v0,40(sp)</pre>
+<pre>  42e048:	aba0002d 	swl	zero,45(sp)</pre>
+<pre>  42e04c:	bba0002a 	swr	zero,42(sp)</pre>
+<pre>  42e050:	95240018 	lhu	a0,24(t1)</pre>
+<pre>  42e054:	27a30036 	addiu	v1,sp,54</pre>
+<pre>  42e058:	a7a4002e 	sh	a0,46(sp)</pre>
+<pre>  42e05c:	8d22001c 	lw	v0,28(t1)</pre>
+<pre>  42e060:	25280012 	addiu	t0,t1,18</pre>
+<pre>  42e064:	88440003 	lwl	a0,3(v0)</pre>
+<pre>  42e068:	88450007 	lwl	a1,7(v0)</pre>
+<pre>  42e06c:	8847000b 	lwl	a3,11(v0)</pre>
+<pre>  42e070:	8846000f 	lwl	a2,15(v0)</pre>
+<pre>  42e074:	98440000 	lwr	a0,0(v0)</pre>
+<pre>  42e078:	98450004 	lwr	a1,4(v0)</pre>
+<pre>  42e07c:	9846000c 	lwr	a2,12(v0)</pre>
+<pre>  42e080:	98470008 	lwr	a3,8(v0)</pre>
+<pre>  42e084:	a8640003 	swl	a0,3(v1)</pre>
+<pre>  42e088:	a8650007 	swl	a1,7(v1)</pre>
+<pre>  42e08c:	b8640000 	swr	a0,0(v1)</pre>
+<pre>  42e090:	b8650004 	swr	a1,4(v1)</pre>
+<pre>  42e094:	a867000b 	swl	a3,11(v1)</pre>
+<pre>  42e098:	a866000f 	swl	a2,15(v1)</pre>
+<pre>  42e09c:	b866000c 	swr	a2,12(v1)</pre>
+<pre>  42e0a0:	b8670008 	swr	a3,8(v1)</pre>
+<pre>  42e0a4:	89020003 	lwl	v0,3(t0)</pre>
+<pre><span class="red">  42e0a8:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  42e0ac:	99020000 	lwr	v0,0(t0)</pre>
+<pre>  42e0b0:	8f848104 	lw	a0,-32508(gp)</pre>
+<pre>--</pre>
+<pre>  43297c:	00603021 	move	a2,v1</pre>
+<pre>  432980:	8c820004 	lw	v0,4(a0)</pre>
+<pre>  432984:	aca32c24 	sw	v1,11300(a1)</pre>
+<pre>  432988:	8fa30020 	lw	v1,32(sp)</pre>
+<pre>  43298c:	8fa4001c 	lw	a0,28(sp)</pre>
+<pre>  432990:	00621823 	subu	v1,v1,v0</pre>
+<pre>  432994:	0461ffdb 	bgez	v1,432904 &lt;pptp_module_connect&commat;&commat;Base+0x424&gt;</pre>
+<pre>  432998:	00863023 	subu	a2,a0,a2</pre>
+<pre>  43299c:	3c02000f 	lui	v0,0xf</pre>
+<pre>  4329a0:	34424240 	ori	v0,v0,0x4240</pre>
+<pre>  4329a4:	00621821 	addu	v1,v1,v0</pre>
+<pre>  4329a8:	1000ffd6 	b	432904 &lt;pptp_module_connect&commat;&commat;Base+0x424&gt;</pre>
+<pre>  4329ac:	24c6ffff 	addiu	a2,a2,-1</pre>
+<pre>  4329b0:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  4329b4:	27bdffd8 	addiu	sp,sp,-40</pre>
+<pre>  4329b8:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  4329bc:	afbf0024 	sw	ra,36(sp)</pre>
+<pre>  4329c0:	afb00020 	sw	s0,32(sp)</pre>
+<pre>  4329c4:	afbc0018 	sw	gp,24(sp)</pre>
+<pre>  4329c8:	8c820000 	lw	v0,0(a0)</pre>
+<pre>  4329cc:	94850006 	lhu	a1,6(a0)</pre>
+<pre>  4329d0:	94830004 	lhu	v1,4(a0)</pre>
+<pre>  4329d4:	94470002 	lhu	a3,2(v0)</pre>
+<pre>  4329d8:	94460000 	lhu	a2,0(v0)</pre>
+<pre>  4329dc:	3c100047 	lui	s0,0x47</pre>
+<pre><span class="red">  4329e0:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  4329e4:	afa50014 	sw	a1,20(sp)</pre>
+<pre>  4329e8:	3c050045 	lui	a1,0x45</pre>
+<pre>  4329ec:	afa30010 	sw	v1,16(sp)</pre>
+<pre>  4329f0:	26042c2c 	addiu	a0,s0,11308</pre>
+<pre>  4329f4:	0320f809 	jalr	t9</pre>
+<pre>  4329f8:	24a59c0c 	addiu	a1,a1,-25588</pre>
+<pre>  4329fc:	8fbf0024 	lw	ra,36(sp)</pre>
+<pre>  432a00:	26022c2c 	addiu	v0,s0,11308</pre>
+<pre>  432a04:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  432a08:	8fb00020 	lw	s0,32(sp)</pre>
+<pre>  432a0c:	03e00008 	jr	ra</pre>
+<pre>  432a10:	27bd0028 	addiu	sp,sp,40</pre>
+<pre>  432a14:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  432a18:	27bdffe0 	addiu	sp,sp,-32</pre>
+<pre>  432a1c:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  432a20:	afbf001c 	sw	ra,28(sp)</pre>
+<pre>  432a24:	afb00018 	sw	s0,24(sp)</pre>
+<pre>  432a28:	afbc0010 	sw	gp,16(sp)</pre>
+<pre><span class="red">  432a2c:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  432a30:	3c100047 	lui	s0,0x47</pre>
+<pre>  432a34:	94870002 	lhu	a3,2(a0)</pre>
+<pre>--</pre>
+<pre>  432b70:	3c020045 	lui	v0,0x45</pre>
+<pre>  432b74:	1000ffe7 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432b78:	24429c2c 	addiu	v0,v0,-25556</pre>
+<pre>  432b7c:	1000ffe5 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432b80:	24429c80 	addiu	v0,v0,-25472</pre>
+<pre>  432b84:	1000ffe3 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432b88:	24429c64 	addiu	v0,v0,-25500</pre>
+<pre>  432b8c:	1000ffe1 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432b90:	24429c34 	addiu	v0,v0,-25548</pre>
+<pre>  432b94:	1000ffdf 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432b98:	24429c24 	addiu	v0,v0,-25564</pre>
+<pre>  432b9c:	1000ffdd 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432ba0:	24429c84 	addiu	v0,v0,-25468</pre>
+<pre>  432ba4:	1000ffdb 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432ba8:	24429c6c 	addiu	v0,v0,-25492</pre>
+<pre>  432bac:	1000ffd9 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432bb0:	24429c4c 	addiu	v0,v0,-25524</pre>
+<pre>  432bb4:	1000ffd7 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432bb8:	24429c7c 	addiu	v0,v0,-25476</pre>
+<pre>  432bbc:	1000ffd5 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432bc0:	24429c3c 	addiu	v0,v0,-25540</pre>
+<pre>  432bc4:	1000ffd3 	b	432b14 &lt;pptp_module_connect&commat;&commat;Base+0x634&gt;</pre>
+<pre>  432bc8:	24429c5c 	addiu	v0,v0,-25508</pre>
+<pre>  432bcc:	10c2000a 	beq	a2,v0,432bf8 &lt;pptp_module_connect&commat;&commat;Base+0x718&gt;</pre>
+<pre>  432bd0:	00000000 	nop</pre>
+<pre><span class="red">  432bd4:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  432bd8:	3c100047 	lui	s0,0x47</pre>
+<pre>  432bdc:	3c050045 	lui	a1,0x45</pre>
+<pre>--</pre>
+<pre>  432cb0:	afa30010 	sw	v1,16(sp)</pre>
+<pre>  432cb4:	26242b20 	addiu	a0,s1,11040</pre>
+<pre>  432cb8:	24c69ca0 	addiu	a2,a2,-25440</pre>
+<pre>  432cbc:	00403821 	move	a3,v0</pre>
+<pre>  432cc0:	0320f809 	jalr	t9</pre>
+<pre>  432cc4:	24050100 	li	a1,256</pre>
+<pre>  432cc8:	8fbf0034 	lw	ra,52(sp)</pre>
+<pre>  432ccc:	26222b20 	addiu	v0,s1,11040</pre>
+<pre>  432cd0:	8fbc0020 	lw	gp,32(sp)</pre>
+<pre>  432cd4:	8fb10030 	lw	s1,48(sp)</pre>
+<pre>  432cd8:	8fb0002c 	lw	s0,44(sp)</pre>
+<pre>  432cdc:	03e00008 	jr	ra</pre>
+<pre>  432ce0:	27bd0038 	addiu	sp,sp,56</pre>
+<br />
+<pre>00432ce4 &lt;l2tp_debug_avp_type_to_str&commat;&commat;Base&gt;:</pre>
+<pre>  432ce4:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  432ce8:	27bdffe0 	addiu	sp,sp,-32</pre>
+<pre>  432cec:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  432cf0:	afbf001c 	sw	ra,28(sp)</pre>
+<pre>  432cf4:	afb00018 	sw	s0,24(sp)</pre>
+<pre>  432cf8:	afbc0010 	sw	gp,16(sp)</pre>
+<pre>  432cfc:	3086ffff 	andi	a2,a0,0xffff</pre>
+<pre>  432d00:	2cc20028 	sltiu	v0,a2,40</pre>
+<pre>  432d04:	1440000d 	bnez	v0,432d3c &lt;l2tp_debug_avp_type_to_str&commat;&commat;Base+0x58&gt;</pre>
+<pre>  432d08:	3c030045 	lui	v1,0x45</pre>
+<pre><span class="red">  432d0c:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  432d10:	3c100047 	lui	s0,0x47</pre>
+<pre>  432d14:	3c050045 	lui	a1,0x45</pre>
+<pre>--</pre>
+<pre>  438ddc:	8f828470 	lw	v0,-31632(gp)</pre>
+<pre>  438de0:	8fbf0024 	lw	ra,36(sp)</pre>
+<pre>  438de4:	8c430000 	lw	v1,0(v0)</pre>
+<pre>  438de8:	8fb10020 	lw	s1,32(sp)</pre>
+<pre>  438dec:	ae037360 	sw	v1,29536(s0)</pre>
+<pre>  438df0:	8fb0001c 	lw	s0,28(sp)</pre>
+<pre>  438df4:	03e00008 	jr	ra</pre>
+<pre>  438df8:	27bd0028 	addiu	sp,sp,40</pre>
+<pre>  438dfc:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  438e00:	27bdffe0 	addiu	sp,sp,-32</pre>
+<pre>  438e04:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  438e08:	afbf001c 	sw	ra,28(sp)</pre>
+<pre>  438e0c:	afb00018 	sw	s0,24(sp)</pre>
+<pre>  438e10:	afbc0010 	sw	gp,16(sp)</pre>
+<pre>  438e14:	30820080 	andi	v0,a0,0x80</pre>
+<pre>  438e18:	14400014 	bnez	v0,438e6c &lt</span>odule_ppp3g_init&commat;&commat;Base+0xd7c&gt;</pre>
+<pre>  438e1c:	3c020045 	lui	v0,0x45</pre>
+<pre>  438e20:	3c020045 	lui	v0,0x45</pre>
+<pre>  438e24:	3087007f 	andi	a3,a0,0x7f</pre>
+<pre>  438e28:	2446a980 	addiu	a2,v0,-22144</pre>
+<pre>  438e2c:	28e20020 	slti	v0,a3,32</pre>
+<pre>  438e30:	14400013 	bnez	v0,438e80 &lt</span>odule_ppp3g_init&commat;&commat;Base+0xd90&gt;</pre>
+<pre>  438e34:	2402007f 	li	v0,127</pre>
+<pre>  438e38:	10e2001e 	beq	a3,v0,438eb4 &lt</span>odule_ppp3g_init&commat;&commat;Base+0xdc4&gt;</pre>
+<pre>  438e3c:	3c100047 	lui	s0,0x47</pre>
+<pre><span class="red">  438e40:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  438e44:	3c050045 	lui	a1,0x45</pre>
+<pre>  438e48:	260473ac 	addiu	a0,s0,29612</pre>
+<pre>  438e4c:	0320f809 	jalr	t9</pre>
+<pre>  438e50:	24a5a998 	addiu	a1,a1,-22120</pre>
+<pre>  438e54:	8fbf001c 	lw	ra,28(sp)</pre>
+<pre>  438e58:	260273ac 	addiu	v0,s0,29612</pre>
+<pre>  438e5c:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  438e60:	8fb00018 	lw	s0,24(sp)</pre>
+<pre>  438e64:	03e00008 	jr	ra</pre>
+<pre>  438e68:	27bd0020 	addiu	sp,sp,32</pre>
+<pre>  438e6c:	3087007f 	andi	a3,a0,0x7f</pre>
+<pre>  438e70:	2446a984 	addiu	a2,v0,-22140</pre>
+<pre>  438e74:	28e20020 	slti	v0,a3,32</pre>
+<pre>  438e78:	1040ffef 	beqz	v0,438e38 &lt</span>odule_ppp3g_init&commat;&commat;Base+0xd48&gt;</pre>
+<pre>  438e7c:	2402007f 	li	v0,127</pre>
+<pre><span class="red">  438e80:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  438e84:	3c100047 	lui	s0,0x47</pre>
+<pre>  438e88:	3c050045 	lui	a1,0x45</pre>
+<pre>  438e8c:	260473ac 	addiu	a0,s0,29612</pre>
+<pre>  438e90:	24a5a988 	addiu	a1,a1,-22136</pre>
+<pre>  438e94:	0320f809 	jalr	t9</pre>
+<pre>  438e98:	24e70040 	addiu	a3,a3,64</pre>
+<pre>  438e9c:	8fbf001c 	lw	ra,28(sp)</pre>
+<pre>  438ea0:	260273ac 	addiu	v0,s0,29612</pre>
+<pre>  438ea4:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  438ea8:	8fb00018 	lw	s0,24(sp)</pre>
+<pre>  438eac:	03e00008 	jr	ra</pre>
+<pre>  438eb0:	27bd0020 	addiu	sp,sp,32</pre>
+<pre><span class="red">  438eb4:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  438eb8:	3c050045 	lui	a1,0x45</pre>
+<pre>  438ebc:	260473ac 	addiu	a0,s0,29612</pre>
+<pre>--</pre>
+<pre>  43d3a8:	02202821 	move	a1,s1</pre>
+<pre>  43d3ac:	0320f809 	jalr	t9</pre>
+<pre>  43d3b0:	24060014 	li	a2,20</pre>
+<pre>  43d3b4:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  43d3b8:	02402821 	move	a1,s2</pre>
+<pre>  43d3bc:	8f998684 	lw	t9,-31100(gp)</pre>
+<pre>  43d3c0:	02002021 	move	a0,s0</pre>
+<pre>  43d3c4:	0320f809 	jalr	t9</pre>
+<pre>  43d3c8:	24060008 	li	a2,8</pre>
+<pre>  43d3cc:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  43d3d0:	02002021 	move	a0,s0</pre>
+<pre>  43d3d4:	8f998684 	lw	t9,-31100(gp)</pre>
+<pre>  43d3d8:	02c02821 	move	a1,s6</pre>
+<pre>  43d3dc:	0320f809 	jalr	t9</pre>
+<pre>  43d3e0:	24060029 	li	a2,41</pre>
+<pre>  43d3e4:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  43d3e8:	02002821 	move	a1,s0</pre>
+<pre>  43d3ec:	8f998194 	lw	t9,-32364(gp)</pre>
+<pre>  43d3f0:	00000000 	nop</pre>
+<pre>  43d3f4:	0320f809 	jalr	t9</pre>
+<pre>  43d3f8:	02202021 	move	a0,s1</pre>
+<pre>  43d3fc:	3c020044 	lui	v0,0x44</pre>
+<pre>  43d400:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  43d404:	8fb00340 	lw	s0,832(sp)</pre>
+<pre>  43d408:	24524efc 	addiu	s2,v0,20220</pre>
+<pre><span class="red">  43d40c:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  43d410:	92260000 	lbu	a2,0(s1)</pre>
+<pre>  43d414:	02002021 	move	a0,s0</pre>
+<pre>--</pre>
+<pre>  44104c:	1000ff34 	b	440d20 &lt;DesSetkey&commat;&commat;Base+0x1438&gt;</pre>
+<pre>  441050:	afa00088 	sw	zero,136(sp)</pre>
+<pre>  441054:	1240ff69 	beqz	s2,440dfc &lt;DesSetkey&commat;&commat;Base+0x1514&gt;</pre>
+<pre>  441058:	02802821 	move	a1,s4</pre>
+<pre>  44105c:	1000ffb0 	b	440f20 &lt;DesSetkey&commat;&commat;Base+0x1638&gt;</pre>
+<pre>  441060:	00001821 	move	v1,zero</pre>
+<pre>  441064:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  441068:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  44106c:	8c840000 	lw	a0,0(a0)</pre>
+<pre>  441070:	8f998438 	lw	t9,-31688(gp)</pre>
+<pre>  441074:	00000000 	nop</pre>
+<pre>  441078:	03200008 	jr	t9</pre>
+<pre>  44107c:	24050057 	li	a1,87</pre>
+<pre>  441080:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  441084:	27bdffe0 	addiu	sp,sp,-32</pre>
+<pre>  441088:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  44108c:	afbf001c 	sw	ra,28(sp)</pre>
+<pre>  441090:	afb00018 	sw	s0,24(sp)</pre>
+<pre>  441094:	afbc0010 	sw	gp,16(sp)</pre>
+<pre>  441098:	8f998550 	lw	t9,-31408(gp)</pre>
+<pre>  44109c:	afa40020 	sw	a0,32(sp)</pre>
+<pre>  4410a0:	0320f809 	jalr	t9</pre>
+<pre>  4410a4:	afa50024 	sw	a1,36(sp)</pre>
+<pre>  4410a8:	8fbc0010 	lw	gp,16(sp)</pre>
+<pre>  4410ac:	3c100047 	lui	s0,0x47</pre>
+<pre><span class="red">  4410b0:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  4410b4:	3c050045 	lui	a1,0x45</pre>
+<pre>  4410b8:	260473dc 	addiu	a0,s0,29660</pre>
+<pre>--</pre>
+<pre>  441640:	3c050044 	lui	a1,0x44</pre>
+<pre>  441644:	02e02021 	move	a0,s7</pre>
+<pre>  441648:	24a54040 	addiu	a1,a1,16448</pre>
+<pre>  44164c:	02c0c821 	move	t9,s6</pre>
+<pre>  441650:	00108200 	sll	s0,s0,0x8</pre>
+<pre>  441654:	0320f809 	jalr	t9</pre>
+<pre>  441658:	02028025 	or	s0,s0,v0</pre>
+<pre>  44165c:	3c050044 	lui	a1,0x44</pre>
+<pre>  441660:	02003021 	move	a2,s0</pre>
+<pre>  441664:	02e02021 	move	a0,s7</pre>
+<pre>  441668:	02c0c821 	move	t9,s6</pre>
+<pre>  44166c:	0320f809 	jalr	t9</pre>
+<pre>  441670:	24a53748 	addiu	a1,a1,14152</pre>
+<pre>  441674:	1000ff9d 	b	4414ec &lt;DesSetkey&commat;&commat;Base+0x1c04&gt;</pre>
+<pre>  441678:	27d40002 	addiu	s4,s8,2</pre>
+<pre>  44167c:	3c1c0046 	lui	gp,0x46</pre>
+<pre>  441680:	27bdff48 	addiu	sp,sp,-184</pre>
+<pre>  441684:	279c6730 	addiu	gp,gp,26416</pre>
+<pre>  441688:	afbf00b4 	sw	ra,180(sp)</pre>
+<pre>  44168c:	afb300b0 	sw	s3,176(sp)</pre>
+<pre>  441690:	afb200ac 	sw	s2,172(sp)</pre>
+<pre>  441694:	afb100a8 	sw	s1,168(sp)</pre>
+<pre>  441698:	afb000a4 	sw	s0,164(sp)</pre>
+<pre>  44169c:	afbc0018 	sw	gp,24(sp)</pre>
+<pre>  4416a0:	8f8280d0 	lw	v0,-32560(gp)</pre>
+<pre><span class="red">  4416a4:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  4416a8:	8c460000 	lw	a2,0(v0)</pre>
+<pre>  4416ac:	27b20020 	addiu	s2,sp,32</pre>
+<pre>--</pre>
+<pre>  441a64:	8e440024 	lw	a0,36(s2)</pre>
+<pre>  441a68:	8e450028 	lw	a1,40(s2)</pre>
+<pre>  441a6c:	0c110420 	jal	441080 &lt;DesSetkey&commat;&commat;Base+0x1798&gt;</pre>
+<pre>  441a70:	27b00030 	addiu	s0,sp,48</pre>
+<pre>  441a74:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  441a78:	3c040045 	lui	a0,0x45</pre>
+<pre>  441a7c:	8f998440 	lw	t9,-31680(gp)</pre>
+<pre>  441a80:	00402821 	move	a1,v0</pre>
+<pre>  441a84:	00003021 	move	a2,zero</pre>
+<pre>  441a88:	0320f809 	jalr	t9</pre>
+<pre>  441a8c:	2484b260 	addiu	a0,a0,-19872</pre>
+<pre>  441a90:	8e24002c 	lw	a0,44(s1)</pre>
+<pre>  441a94:	8e250030 	lw	a1,48(s1)</pre>
+<pre>  441a98:	0c110420 	jal	441080 &lt;DesSetkey&commat;&commat;Base+0x1798&gt;</pre>
+<pre>  441a9c:	00000000 	nop</pre>
+<pre>  441aa0:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  441aa4:	3c040045 	lui	a0,0x45</pre>
+<pre>  441aa8:	8f998440 	lw	t9,-31680(gp)</pre>
+<pre>  441aac:	00402821 	move	a1,v0</pre>
+<pre>  441ab0:	2484b268 	addiu	a0,a0,-19864</pre>
+<pre>  441ab4:	0320f809 	jalr	t9</pre>
+<pre>  441ab8:	00003021 	move	a2,zero</pre>
+<pre>  441abc:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  441ac0:	3c050045 	lui	a1,0x45</pre>
+<pre>  441ac4:	8f868400 	lw	a2,-31744(gp)</pre>
+<pre><span class="red">  441ac8:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  441acc:	24a5b274 	addiu	a1,a1,-19852</pre>
+<pre>  441ad0:	0320f809 	jalr	t9</pre>
+<pre>  441ad4:	02002021 	move	a0,s0</pre>
+<pre>  441ad8:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  441adc:	00000000 	nop</pre>
+<pre>  441ae0:	8f9987d4 	lw	t9,-30764(gp)</pre>
+<pre>  441ae4:	00000000 	nop</pre>
+<pre>  441ae8:	0320f809 	jalr	t9</pre>
+<pre>  441aec:	02002021 	move	a0,s0</pre>
+<pre>  441af0:	8fbc0018 	lw	gp,24(sp)</pre>
+<pre>  441af4:	3c050045 	lui	a1,0x45</pre>
+<pre>  441af8:	8f868400 	lw	a2,-31744(gp)</pre>
+<pre><span class="red">  441afc:	8f99827c 	lw	t9,sprintf</span></pre>
+<pre>  441b00:	24a5b2a8 	addiu	a1,a1,-19800</pre>
+<pre>  441b04:	0320f809 	jalr	t9</pre>
+<br />
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Function </span><span class="orange">sprintf</span> used </span><span class="orange">16</span> times </span><span class="orange">pppd</span></pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

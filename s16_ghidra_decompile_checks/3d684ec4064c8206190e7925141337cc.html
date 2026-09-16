@@ -1,0 +1,1305 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s16_ghidra_decompile_checks.html" title="./../s16_ghidra_decompile_checks.html" >&laquo; Back to s16_ghidra_decompile_checks</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<br />
+<pre>[</span><span class="orange">*</span>] Binary protection state of </span><span class="orange">sw_tcpip.ko</span></pre>
+<br />
+<pre>  	RELRO          CANARY            NX           PIE          RPATH        RUNPATH      SYMBOLS      </pre>
+<pre>  	<span class="red">No RELRO</span>       <span class="red">No Canary found</span>   <span class="red">NX disabled</span>  <span class="orange">REL</span>          <span class="green">No RPATH</span>     <span class="green">No RUNPATH</span>   <span class="red">Symbols</span></pre>
+<br />
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./064f7a62777ec4599dc31ea954c5d6f0.html" title="./064f7a62777ec4599dc31ea954c5d6f0.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/printsrdsentry_from123_00010710.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">18</span> - </span><span class="orange">printk(&amp;_LC9)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./0f89ac499e6164222f09e7cbee96c57e.html" title="./0f89ac499e6164222f09e7cbee96c57e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/fastnathash_proc_read_00010a58.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">16</span> - </span><span class="orange">printk(&amp;_LC15)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./0f89ac499e6164222f09e7cbee96c57e.html" title="./0f89ac499e6164222f09e7cbee96c57e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/fastnathash_proc_read_00010a58.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">27</span> - </span><span class="orange">printk(puVar2)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./0f89ac499e6164222f09e7cbee96c57e.html" title="./0f89ac499e6164222f09e7cbee96c57e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/fastnathash_proc_read_00010a58.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">33</span> - </span><span class="orange">printk(&amp;_LC9)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./520693df8990aac96f31f18b34f0f81e.html" title="./520693df8990aac96f31f18b34f0f81e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_alloc_entry_00011360.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">7</span> - </span><span class="orange">__s = (void *)kmem_cache_alloc(sw_turbo_net_cache,0x20)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./520693df8990aac96f31f18b34f0f81e.html" title="./520693df8990aac96f31f18b34f0f81e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_alloc_entry_00011360.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">12</span> - </span><span class="orange">memset(__s,0,4)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./70255fedaf0ee641933511c79221cb39.html" title="./70255fedaf0ee641933511c79221cb39.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/init_module_00011cbc.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">19</span> - </span><span class="orange">proc_mkdir("fastnat",0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./9e2523bf861c319c105b94377d2bc10e.html" title="./9e2523bf861c319c105b94377d2bc10e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_forskip_000119c8.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">__s = (void *)kmem_cache_alloc(0x1d324,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./9e2523bf861c319c105b94377d2bc10e.html" title="./9e2523bf861c319c105b94377d2bc10e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_forskip_000119c8.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">memset(__s,0,0x34)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7fc8254b10cbdbd61439c5c944dcc272.html" title="./7fc8254b10cbdbd61439c5c944dcc272.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_autoqos_00011a84.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">__s = (undefined4 *)kmem_cache_alloc(0x1d324,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7fc8254b10cbdbd61439c5c944dcc272.html" title="./7fc8254b10cbdbd61439c5c944dcc272.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_autoqos_00011a84.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">memset(__s,0,0x10)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./73064f830fc4cc234d0983dd7b60bbf9.html" title="./73064f830fc4cc234d0983dd7b60bbf9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_conntrack_setup_000113d4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">25</span> - </span><span class="orange">cVar8 = *(char *)(param_1 + 0x32)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./73064f830fc4cc234d0983dd7b60bbf9.html" title="./73064f830fc4cc234d0983dd7b60bbf9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_conntrack_setup_000113d4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">150</span> - </span><span class="orange">sVar3 = *(short *)((int)piVar15 + 0x3e)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./73064f830fc4cc234d0983dd7b60bbf9.html" title="./73064f830fc4cc234d0983dd7b60bbf9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_conntrack_setup_000113d4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">206</span> - </span><span class="orange">cVar8 = *(char *)((int)piVar15 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./76d7a1b661f82533ec750d6681d549f7.html" title="./76d7a1b661f82533ec750d6681d549f7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_formqos_00011c00.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">__s = (void *)kmem_cache_alloc(0x1d3e4,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./76d7a1b661f82533ec750d6681d549f7.html" title="./76d7a1b661f82533ec750d6681d549f7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_formqos_00011c00.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">memset(__s,0,0x11c)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./4d395b2d7b4b788ac3cf152634ddd5f2.html" title="./4d395b2d7b4b788ac3cf152634ddd5f2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_add_NAT_entry_0001191c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">37</span> - </span><span class="orange">cVar10 = *(char *)(param_1 + 0x32)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./4d395b2d7b4b788ac3cf152634ddd5f2.html" title="./4d395b2d7b4b788ac3cf152634ddd5f2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_add_NAT_entry_0001191c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">128</span> - </span><span class="orange">sVar3 = *(short *)((int)piVar6 + 0x3e)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./4d395b2d7b4b788ac3cf152634ddd5f2.html" title="./4d395b2d7b4b788ac3cf152634ddd5f2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_add_NAT_entry_0001191c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">184</span> - </span><span class="orange">cVar10 = *(char *)((int)piVar6 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a49c9f9f457e5e2230be95abb5db0d72.html" title="./a49c9f9f457e5e2230be95abb5db0d72.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_write_forskip_00011ed4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">20</span> - </span><span class="orange">iVar1 = sscanf(param_2,"%d-%d")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./2cd1982d9740d514f68c1efa20a19758.html" title="./2cd1982d9740d514f68c1efa20a19758.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/write_proc_mingone_00011e3c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">5</span> - </span><span class="orange">sscanf(param_2,"%d")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./2cd1982d9740d514f68c1efa20a19758.html" title="./2cd1982d9740d514f68c1efa20a19758.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/write_proc_mingone_00011e3c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-unchecked-ret-scanf</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software does not check the return value from a method or function, which can prevent it from detecting unexpected states and conditions.</pre>
+<br />
+<pre>        </span><span class="green">5</span> - </span><span class="orange">sscanf(param_2,"%d");   //possible issue identified - semgrep</span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./c8705bba53a1ea657b5e7adb258f8de6.html" title="./c8705bba53a1ea657b5e7adb258f8de6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_write_autoqos_00011fd4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">20</span> - </span><span class="orange">iVar1 = sscanf(param_2,"%d %d %d",&amp;local_20,&amp;local_1c,local_18)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./94f077c0b687b5e792341d73bf60a34f.html" title="./94f077c0b687b5e792341d73bf60a34f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/read_proc_mingone_0001221c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">iVar1 = sprintf(param_1,"%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./f1bb9232a19efb1111035f4190d3fd6b.html" title="./f1bb9232a19efb1111035f4190d3fd6b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_write_formqos_00012098.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">29</span> - </span><span class="orange">&amp;local_20,&amp;local_1c,local_18), iVar1 == 7)) &amp;&amp; (-1 &lt; local_30)) &amp;&amp</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./8125a4f5fdce0d319982cd0a79180f20.html" title="./8125a4f5fdce0d319982cd0a79180f20.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_forskip_0001226c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">15</span> - </span><span class="orange">iVar2 = sprintf(__s,"%d-%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./8125a4f5fdce0d319982cd0a79180f20.html" title="./8125a4f5fdce0d319982cd0a79180f20.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_forskip_0001226c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-pointer-subtraction</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software subtracts one pointer from another in order to determine size, but this calculation can be incorrect if the pointers do not exist in the same memory chunk.</pre>
+<br />
+<pre>        </span><span class="green">19</span> - </span><span class="orange">return (int)__s - (int)param_1</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" title="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_formqos_000123b4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">27</span> - </span><span class="orange">(uint)*(ushort *)(iVar5 + 0xd4),(uint)*(ushort *)(iVar5 + 0x98))</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" title="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_formqos_000123b4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-pointer-subtraction</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software subtracts one pointer from another in order to determine size, but this calculation can be incorrect if the pointers do not exist in the same memory chunk.</pre>
+<br />
+<pre>        </span><span class="green">33</span> - </span><span class="orange">return (int)__s - (int)param_1</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./e1b480f489a58e1107f17eaaecaf35a2.html" title="./e1b480f489a58e1107f17eaaecaf35a2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/cleanup_module_000125b8.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">29</span> - </span><span class="orange">proc_cleanup_system()</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./1f0c52cc980981a14adbc29ef3f90f37.html" title="./1f0c52cc980981a14adbc29ef3f90f37.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_autoqos_0001231c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">iVar1 = sprintf(param_1,"%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./1f0c52cc980981a14adbc29ef3f90f37.html" title="./1f0c52cc980981a14adbc29ef3f90f37.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_autoqos_0001231c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">12</span> - </span><span class="orange">iVar1 = sprintf(__s,"upbwK=%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./1f0c52cc980981a14adbc29ef3f90f37.html" title="./1f0c52cc980981a14adbc29ef3f90f37.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_autoqos_0001231c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">13</span> - </span><span class="orange">iVar2 = sprintf(__s + iVar1,"downbwK=%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" title="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/blacklist_init_000126f0.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">piVar1 = (int *)kmem_cache_alloc(0x1d324,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" title="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/blacklist_init_000126f0.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">17</span> - </span><span class="orange">iVar2 = __kmalloc(param_1 * 0x14,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" title="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/blacklist_init_000126f0.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">31</span> - </span><span class="orange">memset((void *)*piVar1,0,param_1 * 0x14)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">104</span> - </span><span class="orange">sVar4 = *(short *)(iVar9 + 0x16)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">105</span> - </span><span class="orange">sVar3 = *(short *)(iVar9 + 0x14)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">114</span> - </span><span class="orange">sVar3 = *(short *)(*(int *)(param_1 + 0x9c) + 0x14)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">115</span> - </span><span class="orange">sVar4 = *(short *)(*(int *)(param_1 + 0x9c) + 0x16)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">212</span> - </span><span class="orange">printk(&amp;_LC47)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">228</span> - </span><span class="orange">printk(&amp;_LC48)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">391</span> - </span><span class="orange">printk(&amp;_LC51)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">403</span> - </span><span class="orange">printk(&amp;_LC52)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">528</span> - </span><span class="orange">memcpy(puVar23 + 0xb,(void *)(iVar20 + 0x24),(uint)*(byte *)(*(int *)(iVar20 + 0xc) + 0xfc))</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">533</span> - </span><span class="orange">memcpy(puVar23 + 0xb,(void *)(iVar21 + 0x14),0x10)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">676</span> - </span><span class="orange">sVar4 = *(short *)((int)puVar23 + 0x46)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">679</span> - </span><span class="orange">sVar4 = *(short *)((int)puVar23 + 0x46)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">706</span> - </span><span class="orange">memcpy((void *)(*(int *)(param_1 + 0x9c) + -0x10),puVar23 + 0xb,0x10)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">713</span> - </span><span class="orange">cVar13 = *(char *)((int)puVar23 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">718</span> - </span><span class="orange">cVar13 = *(char *)((int)puVar23 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" title="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/blacklist_init_000126f0.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">piVar1 = (int *)kmem_cache_alloc(0x1d324,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" title="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/blacklist_init_000126f0.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">17</span> - </span><span class="orange">iVar2 = __kmalloc(param_1 * 0x14,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" title="./45db2909e0c36f1a0bfa40d1b4c99a1d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/blacklist_init_000126f0.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">31</span> - </span><span class="orange">memset((void *)*piVar1,0,param_1 * 0x14)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./e1b480f489a58e1107f17eaaecaf35a2.html" title="./e1b480f489a58e1107f17eaaecaf35a2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/cleanup_module_000125b8.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">29</span> - </span><span class="orange">proc_cleanup_system()</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./0f89ac499e6164222f09e7cbee96c57e.html" title="./0f89ac499e6164222f09e7cbee96c57e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/fastnathash_proc_read_00010a58.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">16</span> - </span><span class="orange">printk(&amp;_LC15)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./0f89ac499e6164222f09e7cbee96c57e.html" title="./0f89ac499e6164222f09e7cbee96c57e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/fastnathash_proc_read_00010a58.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">27</span> - </span><span class="orange">printk(puVar2)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./0f89ac499e6164222f09e7cbee96c57e.html" title="./0f89ac499e6164222f09e7cbee96c57e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/fastnathash_proc_read_00010a58.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">33</span> - </span><span class="orange">printk(&amp;_LC9)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./70255fedaf0ee641933511c79221cb39.html" title="./70255fedaf0ee641933511c79221cb39.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/init_module_00011cbc.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">19</span> - </span><span class="orange">proc_mkdir("fastnat",0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./064f7a62777ec4599dc31ea954c5d6f0.html" title="./064f7a62777ec4599dc31ea954c5d6f0.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/printsrdsentry_from123_00010710.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">18</span> - </span><span class="orange">printk(&amp;_LC9)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7fc8254b10cbdbd61439c5c944dcc272.html" title="./7fc8254b10cbdbd61439c5c944dcc272.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_autoqos_00011a84.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">__s = (undefined4 *)kmem_cache_alloc(0x1d324,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7fc8254b10cbdbd61439c5c944dcc272.html" title="./7fc8254b10cbdbd61439c5c944dcc272.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_autoqos_00011a84.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">memset(__s,0,0x10)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./76d7a1b661f82533ec750d6681d549f7.html" title="./76d7a1b661f82533ec750d6681d549f7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_formqos_00011c00.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">__s = (void *)kmem_cache_alloc(0x1d3e4,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./76d7a1b661f82533ec750d6681d549f7.html" title="./76d7a1b661f82533ec750d6681d549f7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_formqos_00011c00.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">memset(__s,0,0x11c)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./9e2523bf861c319c105b94377d2bc10e.html" title="./9e2523bf861c319c105b94377d2bc10e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_forskip_000119c8.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">__s = (void *)kmem_cache_alloc(0x1d324,0xd0)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./9e2523bf861c319c105b94377d2bc10e.html" title="./9e2523bf861c319c105b94377d2bc10e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_init_forskip_000119c8.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">memset(__s,0,0x34)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./1f0c52cc980981a14adbc29ef3f90f37.html" title="./1f0c52cc980981a14adbc29ef3f90f37.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_autoqos_0001231c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">10</span> - </span><span class="orange">iVar1 = sprintf(param_1,"%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./1f0c52cc980981a14adbc29ef3f90f37.html" title="./1f0c52cc980981a14adbc29ef3f90f37.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_autoqos_0001231c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">12</span> - </span><span class="orange">iVar1 = sprintf(__s,"upbwK=%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./1f0c52cc980981a14adbc29ef3f90f37.html" title="./1f0c52cc980981a14adbc29ef3f90f37.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_autoqos_0001231c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">13</span> - </span><span class="orange">iVar2 = sprintf(__s + iVar1,"downbwK=%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" title="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_formqos_000123b4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">27</span> - </span><span class="orange">(uint)*(ushort *)(iVar5 + 0xd4),(uint)*(ushort *)(iVar5 + 0x98))</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" title="./7b3d4ef3046f71ac59df408bbc2a8bdc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_formqos_000123b4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-pointer-subtraction</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software subtracts one pointer from another in order to determine size, but this calculation can be incorrect if the pointers do not exist in the same memory chunk.</pre>
+<br />
+<pre>        </span><span class="green">33</span> - </span><span class="orange">return (int)__s - (int)param_1</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./8125a4f5fdce0d319982cd0a79180f20.html" title="./8125a4f5fdce0d319982cd0a79180f20.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_forskip_0001226c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">15</span> - </span><span class="orange">iVar2 = sprintf(__s,"%d-%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./8125a4f5fdce0d319982cd0a79180f20.html" title="./8125a4f5fdce0d319982cd0a79180f20.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_read_forskip_0001226c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-pointer-subtraction</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software subtracts one pointer from another in order to determine size, but this calculation can be incorrect if the pointers do not exist in the same memory chunk.</pre>
+<br />
+<pre>        </span><span class="green">19</span> - </span><span class="orange">return (int)__s - (int)param_1</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./c8705bba53a1ea657b5e7adb258f8de6.html" title="./c8705bba53a1ea657b5e7adb258f8de6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_write_autoqos_00011fd4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">20</span> - </span><span class="orange">iVar1 = sscanf(param_2,"%d %d %d",&amp;local_20,&amp;local_1c,local_18)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./f1bb9232a19efb1111035f4190d3fd6b.html" title="./f1bb9232a19efb1111035f4190d3fd6b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_write_formqos_00012098.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">29</span> - </span><span class="orange">&amp;local_20,&amp;local_1c,local_18), iVar1 == 7)) &amp;&amp; (-1 &lt; local_30)) &amp;&amp</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a49c9f9f457e5e2230be95abb5db0d72.html" title="./a49c9f9f457e5e2230be95abb5db0d72.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/proc_write_forskip_00011ed4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">20</span> - </span><span class="orange">iVar1 = sscanf(param_2,"%d-%d")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./94f077c0b687b5e792341d73bf60a34f.html" title="./94f077c0b687b5e792341d73bf60a34f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/read_proc_mingone_0001221c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">8</span> - </span><span class="orange">iVar1 = sprintf(param_1,"%d</pre>
+<pre>    ")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./4d395b2d7b4b788ac3cf152634ddd5f2.html" title="./4d395b2d7b4b788ac3cf152634ddd5f2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_add_NAT_entry_0001191c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">37</span> - </span><span class="orange">cVar10 = *(char *)(param_1 + 0x32)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./4d395b2d7b4b788ac3cf152634ddd5f2.html" title="./4d395b2d7b4b788ac3cf152634ddd5f2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_add_NAT_entry_0001191c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">128</span> - </span><span class="orange">sVar3 = *(short *)((int)piVar6 + 0x3e)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./4d395b2d7b4b788ac3cf152634ddd5f2.html" title="./4d395b2d7b4b788ac3cf152634ddd5f2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_add_NAT_entry_0001191c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">184</span> - </span><span class="orange">cVar10 = *(char *)((int)piVar6 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./520693df8990aac96f31f18b34f0f81e.html" title="./520693df8990aac96f31f18b34f0f81e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_alloc_entry_00011360.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">7</span> - </span><span class="orange">__s = (void *)kmem_cache_alloc(sw_turbo_net_cache,0x20)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./520693df8990aac96f31f18b34f0f81e.html" title="./520693df8990aac96f31f18b34f0f81e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_alloc_entry_00011360.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">12</span> - </span><span class="orange">memset(__s,0,4)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./73064f830fc4cc234d0983dd7b60bbf9.html" title="./73064f830fc4cc234d0983dd7b60bbf9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_conntrack_setup_000113d4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">25</span> - </span><span class="orange">cVar8 = *(char *)(param_1 + 0x32)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./73064f830fc4cc234d0983dd7b60bbf9.html" title="./73064f830fc4cc234d0983dd7b60bbf9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_conntrack_setup_000113d4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">150</span> - </span><span class="orange">sVar3 = *(short *)((int)piVar15 + 0x3e)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./73064f830fc4cc234d0983dd7b60bbf9.html" title="./73064f830fc4cc234d0983dd7b60bbf9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_conntrack_setup_000113d4.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">206</span> - </span><span class="orange">cVar8 = *(char *)((int)piVar15 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">104</span> - </span><span class="orange">sVar4 = *(short *)(iVar9 + 0x16)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">105</span> - </span><span class="orange">sVar3 = *(short *)(iVar9 + 0x14)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">114</span> - </span><span class="orange">sVar3 = *(short *)(*(int *)(param_1 + 0x9c) + 0x14)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">115</span> - </span><span class="orange">sVar4 = *(short *)(*(int *)(param_1 + 0x9c) + 0x16)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">212</span> - </span><span class="orange">printk(&amp;_LC47)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">228</span> - </span><span class="orange">printk(&amp;_LC48)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">391</span> - </span><span class="orange">printk(&amp;_LC51)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-format-string-bugs</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a function that accepts a format string as an argument, but the format string originates from an external source. This can lead  to buffer overflows, denial of service, or data representation problems.</pre>
+<br />
+<pre>        </span><span class="green">403</span> - </span><span class="orange">printk(&amp;_LC52)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">528</span> - </span><span class="orange">memcpy(puVar23 + 0xb,(void *)(iVar20 + 0x24),(uint)*(byte *)(*(int *)(iVar20 + 0xc) + 0xfc))</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">533</span> - </span><span class="orange">memcpy(puVar23 + 0xb,(void *)(iVar21 + 0x14),0x10)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">676</span> - </span><span class="orange">sVar4 = *(short *)((int)puVar23 + 0x46)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">679</span> - </span><span class="orange">sVar4 = *(short *)((int)puVar23 + 0x46)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-signed-unsigned-conversion</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software uses a signed primitive and performs a cast to an unsigned primitive, or uses an unsigned primitive and performs a cast to a signed primitive, which can produce an unexpected value. When the result of a function is to be used as a size parameter, using negative return values can have unexpected results. Although less frequent an issue, unsigned-to-signed conversion can be  the precursor to buffer underwrite conditions. Buffer underwrites  occur frequently when large unsigned values are cast to signed values,  and then used as indexes into a buffer or for pointer arithmetic.</pre>
+<br />
+<pre>        </span><span class="green">706</span> - </span><span class="orange">memcpy((void *)(*(int *)(param_1 + 0x9c) + -0x10),puVar23 + 0xb,0x10)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">713</span> - </span><span class="orange">cVar13 = *(char *)((int)puVar23 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./a843049177dd801454f657b1c189fb74.html" title="./a843049177dd801454f657b1c189fb74.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/sw_net_rx_action_00012810.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-integer-truncation</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Truncation errors occur when a primitive is cast to a primitive of a  smaller size and data is lost in the conversion. The value cannot be  trusted and the application will be in an undefined state.</pre>
+<br />
+<pre>        </span><span class="green">718</span> - </span><span class="orange">cVar13 = *(char *)((int)puVar23 + 0x49)</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./2cd1982d9740d514f68c1efa20a19758.html" title="./2cd1982d9740d514f68c1efa20a19758.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/write_proc_mingone_00011e3c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-interesting-api-calls</span></pre>
+<pre>        Issue description:</pre>
+<pre>    Locate all calls to interesting and potentially insecure API functions (candidate points). The auditor can backtrace from these candidate points to find pathways allowing access from untrusted input.</pre>
+<br />
+<pre>        </span><span class="green">5</span> - </span><span class="orange">sscanf(param_2,"%d")</span></span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<a class="reference" href="./2cd1982d9740d514f68c1efa20a19758.html" title="./2cd1982d9740d514f68c1efa20a19758.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Identified source function: </span><span class="orange">/logs/s16_ghidra_decompile_checks/haruspex_sw_tcpip.ko/write_proc_mingone_00011e3c.c</span></pre></a>
+<pre></span></pre>
+
+<pre>        Semgrep rule: </span><span class="orange">external.semgrep-rules-0xdea.rules.c.raptor-unchecked-ret-scanf</span></pre>
+<pre>        Issue description:</pre>
+<pre>    The software does not check the return value from a method or function, which can prevent it from detecting unexpected states and conditions.</pre>
+<br />
+<pre>        </span><span class="green">5</span> - </span><span class="orange">sscanf(param_2,"%d");   //possible issue identified - semgrep</span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

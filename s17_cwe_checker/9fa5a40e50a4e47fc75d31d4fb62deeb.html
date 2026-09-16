@@ -1,0 +1,249 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s17_cwe_checker.html" title="./../s17_cwe_checker.html" >&laquo; Back to s17_cwe_checker</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="orange">*</span>] Binary protection state of </span><span class="orange">libip6tc.so.0.0.0</span></pre>
+<br />
+<pre>  	RELRO          CANARY            NX           PIE          RPATH        RUNPATH      SYMBOLS      </pre>
+<pre>  	<span class="red">No RELRO</span>       <span class="red">No Canary found</span>   <span class="red">NX disabled</span>  <span class="orange">DSO</span>          <span class="green">No RPATH</span>     <span class="green">No RUNPATH</span>   <span class="red">Symbols</span></pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">CWE-Checker results for libip6tc.so.0.0.0</span></pre>
+<pre><hr class="mono" /></pre>
+<pre><span class="green">	CWE id    | address         | tids            | symbols         | description</span></pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 71344           | instr_0x000116b | NA              | Out-of-bounds Write Memory write at 71344 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 81692           | instr_0x00013f1 | NA              | Out-of-bounds Write Memory write at 81692 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 84948           | instr_0x00014bd | NA              | Out-of-bounds Write Memory write at 84948 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84488           | instr_0x00014a0 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84488</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84312           | instr_0x0001495 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84312</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84252           | instr_0x0001491 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84252</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84220           | instr_0x000148f | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84220</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84192           | instr_0x000148e | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84192</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84148           | instr_0x000148b | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84148</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84120           | instr_0x0001489 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84120</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84092           | instr_0x0001487 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84092</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 84052           | instr_0x0001485 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 84052</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83968           | instr_0x0001480 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83968</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83892           | instr_0x000147b | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83892</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83784           | instr_0x0001474 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83784</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83544           | instr_0x0001465 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83544</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83376           | instr_0x000145b | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83376</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83216           | instr_0x0001451 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83216</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83168           | instr_0x000144e | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83168</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83120           | instr_0x000144b | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83120</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 83092           | instr_0x0001449 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 83092</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a>    | 70604           | instr_0x000113c | malloc          | Integer Overflow or Wraparound Potential overflow due to multiplication before call to malloc at 70604</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a>    | 71600           | instr_0x000117b | malloc          | Integer Overflow or Wraparound Potential overflow due to multiplication before call to malloc at 71600</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a>    | 71668           | instr_0x000117f | malloc          | Integer Overflow or Wraparound Potential overflow due to multiplication before call to malloc at 71668</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 83864,83892     | instr_0x0001479 | fputc           | Unchecked Return Value There is no check of the return value of 83864 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 83724,83748     | instr_0x0001470 | fputc           | Unchecked Return Value There is no check of the return value of 83724 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 83624,83648     | instr_0x000146a | fputc           | Unchecked Return Value There is no check of the return value of 83624 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 83484,83508     | instr_0x0001461 | fputc           | Unchecked Return Value There is no check of the return value of 83484 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 84724           | instr_0x00014af | NA              | Double Free Object may have been freed before at 84724</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 84712           | instr_0x00014ae | NA              | Use After Free Access through a dangling pointer at 84712</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 70368           | instr_0x000112e | ip6tc_strerror  | Use of Potentially Dangerous Function ip6tc_strerror 70368 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 70656           | instr_0x0001140 | iptcc_chain_ind | Use of Potentially Dangerous Function iptcc_chain_index_alloc 70656 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 70780           | instr_0x0001147 | iptcc_alloc_rul | Use of Potentially Dangerous Function iptcc_alloc_rule 70780 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 70952           | instr_0x0001152 | iptcc_standard_ | Use of Potentially Dangerous Function iptcc_standard_map 70952 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 70980           | instr_0x0001154 | iptcc_standard_ | Use of Potentially Dangerous Function iptcc_standard_map 70980 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 71572           | instr_0x0001179 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 71572 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 71732           | instr_0x0001183 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 71732 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 71764           | instr_0x0001185 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 71764 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 71864           | instr_0x000118b | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 71864 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 71892           | instr_0x000118d | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 71892 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72012           | instr_0x0001194 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72012 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72040           | instr_0x0001196 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72040 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72128           | instr_0x000119c | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72128 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72196           | instr_0x00011a0 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72196 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72260           | instr_0x00011a4 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72260 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72336           | instr_0x00011a9 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72336 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72360           | instr_0x00011aa | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72360 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72432           | instr_0x00011af | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72432 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 72752           | instr_0x00011c3 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 72752 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 73040           | instr_0x00011d5 | ip6tc_commit    | Use of Potentially Dangerous Function ip6tc_commit 73040 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 73428           | instr_0x00011ed | __iptcc_p_del_p | Use of Potentially Dangerous Function __iptcc_p_del_policy 73428 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 74652           | instr_0x0001239 | ip6tc_set_polic | Use of Potentially Dangerous Function ip6tc_set_policy 74652 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 75076           | instr_0x0001254 | ip6tc_set_count | Use of Potentially Dangerous Function ip6tc_set_counter 75076 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 78344           | instr_0x0001320 | ip6tc_get_polic | Use of Potentially Dangerous Function ip6tc_get_policy 78344 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 78988           | instr_0x0001348 | iptcc_map_targe | Use of Potentially Dangerous Function iptcc_map_target 78988 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 79020           | instr_0x000134a | iptcc_map_targe | Use of Potentially Dangerous Function iptcc_map_target 79020 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 79268           | instr_0x000135a | ip6tc_append_en | Use of Potentially Dangerous Function ip6tc_append_entry 79268 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 79768           | instr_0x0001379 | ip6tc_replace_e | Use of Potentially Dangerous Function ip6tc_replace_entry 79768 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 80296           | instr_0x000139a | ip6tc_insert_en | Use of Potentially Dangerous Function ip6tc_insert_entry 80296 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 80800           | instr_0x00013ba | ip6tc_rename_ch | Use of Potentially Dangerous Function ip6tc_rename_chain 80800 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 80892           | instr_0x00013bf | ip6tc_rename_ch | Use of Potentially Dangerous Function ip6tc_rename_chain 80892 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 81048           | instr_0x00013c9 | iptcc_alloc_cha | Use of Potentially Dangerous Function iptcc_alloc_chain_head 81048 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 81072           | instr_0x00013cb | iptcc_alloc_cha | Use of Potentially Dangerous Function iptcc_alloc_chain_head 81072 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 81368           | instr_0x00013dd | ip6tc_create_ch | Use of Potentially Dangerous Function ip6tc_create_chain 81368 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 81812           | instr_0x00013f9 | ip6tc_delete_en | Use of Potentially Dangerous Function ip6tc_delete_entry 81812 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 82016           | instr_0x0001406 | ip6tc_delete_en | Use of Potentially Dangerous Function ip6tc_delete_entry 82016 -&gt; memcmp</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 82044           | instr_0x0001407 | ip6tc_delete_en | Use of Potentially Dangerous Function ip6tc_delete_entry 82044 -&gt; memcmp</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 82072           | instr_0x0001409 | ip6tc_delete_en | Use of Potentially Dangerous Function ip6tc_delete_entry 82072 -&gt; memcmp</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 82100           | instr_0x000140b | ip6tc_delete_en | Use of Potentially Dangerous Function ip6tc_delete_entry 82100 -&gt; memcmp</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 84948           | instr_0x00014bd | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 84948 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 85052           | instr_0x00014c3 | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 85052 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 85184           | instr_0x00014cc | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 85184 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 85220           | instr_0x00014ce | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 85220 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 85272           | instr_0x00014d1 | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 85272 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 85308           | instr_0x00014d3 | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 85308 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 85948           | instr_0x00014fb | ip6tc_init      | Use of Potentially Dangerous Function ip6tc_init 85948 -&gt; memcpy</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

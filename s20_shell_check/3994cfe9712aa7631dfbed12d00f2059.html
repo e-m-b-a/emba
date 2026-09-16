@@ -1,0 +1,497 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./f0e498bbe9103118fe475c8c29c19deb.html" title="./f0e498bbe9103118fe475c8c29c19deb.html" >&laquo; Back to f0e498bbe9103118fe475c8c29c19deb</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>#!/bin/sh</pre>
+<pre>&lt;?</pre>
+<pre>include "/htdocs/phplib/trace.php";</pre>
+<pre>include "/htdocs/phplib/xnode.php";</pre>
+<br />
+<pre>function cmd($cmd) {echo $cmd."\n";}</pre>
+<pre>function msg($msg) {cmd("echo ".$msg." &gt; /dev/console");}</pre>
+<br />
+<pre>/*****************************************/</pre>
+<pre>function add_each($list, $path, $node)</pre>
+<pre>{</pre>
+<pre>	//echo "# add_each(".$list.",".$path.",".$node.")\n";</pre>
+<pre>	$i = 0;</pre>
+<pre>	$cnt = scut_count($list, "");</pre>
+<pre>	while ($i &lt; $cnt)</pre>
+<pre>	{</pre>
+<pre>		$val = scut($list, $i, "");</pre>
+<pre>		if ($val!="") add($path."/".$node, $val);</pre>
+<pre>		$i++;</pre>
+<pre>	}</pre>
+<pre>	return $cnt;</pre>
+<pre>}</pre>
+<br />
+<pre>/*****************************************/</pre>
+<pre>function add_route($ipaddr,$prefix,$gw,$metric,$inf)</pre>
+<pre>{</pre>
+<pre>	$base = "/runtime/dynamic/route6";</pre>
+<pre>	$cnt = query($base."/entry#");</pre>
+<pre>	if($cnt=="") $cnt=0;</pre>
+<pre>	$cnt++;</pre>
+<pre>	</pre>
+<pre>	$ip = query($base."/entry:".$cnt."/ipaddr");</pre>
+<pre>	if($ip == "")</pre>
+<pre>	{</pre>
+<pre>		set($base."/entry:".$cnt."/ipaddr", $ipaddr);</pre>
+<pre>		set($base."/entry:".$cnt."/prefix", $prefix);</pre>
+<pre>		set($base."/entry:".$cnt."/gateway", $gw);</pre>
+<pre>		set($base."/entry:".$cnt."/metric", $metric);</pre>
+<pre>		set($base."/entry:".$cnt."/inf", $inf);</pre>
+<pre>	}</pre>
+<pre>}</pre>
+<br />
+<pre>/*****************************************/</pre>
+<pre>function remove_route($ipaddr,$prefix,$gw)</pre>
+<pre>{</pre>
+<pre>	$base = "/runtime/dynamic/route6";</pre>
+<pre>	$cnt = query($base."/entry#");</pre>
+<pre>	//msg('remove route: ip:'.$ipaddr.',prefix:'.$prefix.',gw:'.$gw);	</pre>
+<pre>	$i=1;</pre>
+<pre>	while($i&lt;=$cnt)</pre>
+<pre>	{</pre>
+<pre>		$dest = query($base."/entry:".$i."/ipaddr");</pre>
+<pre>		$pfx = query($base."/entry:".$i."/prefix");</pre>
+<pre>		$via = query($base."/entry:".$i."/gateway");</pre>
+<pre>		//msg('route entry:'.$i.', dest:'.$dest.',pfx:'.$pfx.',via:'.$via);	</pre>
+<pre>		if($ipaddr==$dest &amp;&amp; $prefix==$pfx &amp;&amp; $gw==$via)</pre>
+<pre>		{</pre>
+<pre>			del($base."/entry:".$i);</pre>
+<pre>		}</pre>
+<pre>		$i++;</pre>
+<pre>	}</pre>
+<pre>}</pre>
+<br />
+<pre>/*****************************************/</pre>
+<br />
+<pre>function dev_detach($hasevent)</pre>
+<pre>{</pre>
+<pre>	$sts = XNODE_getpathbytarget("/runtime", "inf", "uid", $_GLOBALS["INF"], 0);</pre>
+<pre>	if ($sts=="") return $_GLOBALS["INF"]." has no runtime nodes.";</pre>
+<pre>	if (query($sts."/inet/addrtype")!="ipv6") return $_GLOBALS["INF"]." is not ipv6.";</pre>
+<pre>	if (query($sts."/inet/ipv6/valid")!=1) return $_GLOBALS["INF"]." is not active.";</pre>
+<pre>	$devnam = query($sts."/devnam");</pre>
+<pre>	if ($devnam=="") return $_GLOBALS["INF"]." has no device name.";</pre>
+<br />
+<pre>	anchor($sts."/inet/ipv6");</pre>
+<pre>	$mode	= query("mode");</pre>
+<pre>	$ipaddr	= query("ipaddr");</pre>
+<pre>	$prefix	= query("prefix");</pre>
+<pre>	$gw	= query("gateway");</pre>
+<pre>	$dhcpopt= query("dhcpopt");</pre>
+<pre>	$defrt	= query($sts."/defaultroute");</pre>
+<pre>	//$blackholepfx = query($sts."/blackhole/prefix"); //IOL test</pre>
+<pre>	$blackholecnt = query($sts."/blackhole/count"); //IOL test</pre>
+<br />
+<br />
+<pre>	/* default route */</pre>
+<pre>	if ($defrt!="" &amp;&amp; $defrt&gt;0)</pre>
+<pre>	{</pre>
+<pre>		if ($gw!="")</pre>
+<pre>		{</pre>
+<pre>			cmd("ip -6 route del ::/0 via ".$gw." dev ".$devnam);</pre>
+<pre>			remove_route("::","0",$gw);</pre>
+<pre>		}</pre>
+<pre>		else if ($mode!="TSP")</pre>
+<pre>		{</pre>
+<pre>			cmd("ip -6 route del ::/0 dev ".$devnam);</pre>
+<pre>			remove_route("::","0","");</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<pre>	else cmd("ip -6 route flush table ".$_GLOBALS["INF"]);</pre>
+<br />
+<pre>	/* TSPC will destroy the tunnel, so we don't need to detach. */</pre>
+<pre>	if ($mode != "TSP")</pre>
+<pre>	{</pre>
+<pre>		/* peer-to-peer */</pre>
+<pre>		if ($prefix==128 &amp;&amp; $gw!="") cmd("ip -6 route del ".$gw."/128 dev ".$devnam);</pre>
+<br />
+<pre>		/* detach */</pre>
+<pre>		if ($mode=="LL") msg($_GLOBALS["INF"].' a is link local interface.');</pre>
+<pre>		else if	($mode=="STATEFUL" &amp;&amp; $dhcpopt!="IA-PD") </pre>
+<pre>		{</pre>
+<pre>			msg($_GLOBALS["INF"].' is a stateful-IANA interface.');</pre>
+<pre>			$netid = ipv6networkid($ipaddr, $prefix);</pre>
+<pre>			remove_route($netid, $prefix, "::");</pre>
+<pre>		}</pre>
+<pre>		else if	($mode=="STATELESS")</pre>
+<pre>		{</pre>
+<pre>			msg($_GLOBALS["INF"].' is a stateless interface.');</pre>
+<pre>			$netid = ipv6networkid($ipaddr, $prefix);</pre>
+<pre>			remove_route($netid, $prefix, "::");</pre>
+<pre>		}</pre>
+<pre>		else</pre>
+<pre>		{</pre>
+<pre>			/* check if the $ipaddr is our link-local address */</pre>
+<pre>			$phyinf = query($sts."/phyinf");</pre>
+<pre>			$path = XNODE_getpathbytarget("/runtime", "phyinf", "uid", $phyinf, 0);</pre>
+<pre>			$llipaddr = query($path."/ipv6/link/ipaddr");</pre>
+<pre>			$netid = ipv6networkid($ipaddr, $prefix);</pre>
+<pre>			//cmd("ip -6 addr del ".$ipaddr."/".$prefix." dev ".$devnam);</pre>
+<pre>			if($ipaddr!=$llipaddr)</pre>
+<pre>			{</pre>
+<pre>				cmd("ip -6 route del ".$netid."/".$prefix." dev ".$devnam);</pre>
+<pre>				remove_route($netid, $prefix, "::");</pre>
+<pre>				cmd("ip -6 addr del ".$ipaddr."/".$prefix." dev ".$devnam);</pre>
+<pre>			}</pre>
+<pre>			else	msg($ipaddr.' is our link-local address.');</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<br />
+<pre>	/* remove blackhole rule if needed */</pre>
+<pre>	//if ($blackholepfx != "")</pre>
+<pre>	//{</pre>
+<pre>	//	$blackholeplen = query($sts."/blackhole/plen");</pre>
+<pre>	//	cmd("ip -6 route del blackhole ".$blackholepfx."/".$blackholeplen." dev lo");</pre>
+<pre>	//	del($sts."/blackhole");</pre>
+<pre>	//}</pre>
+<br />
+<pre>	if($hasevent&gt;0)</pre>
+<pre>	{</pre>
+<pre>		if ($blackholecnt != "" &amp;&amp; $blackholecnt != "0")</pre>
+<pre>		{</pre>
+<pre>			foreach($sts."/blackhole/entry")</pre>
+<pre>			{</pre>
+<pre>				if($InDeX &gt; $blackholecnt) break;</pre>
+<pre>				$blackholepfx = query($sts."/blackhole/entry:".$InDeX."/prefix");</pre>
+<pre>				$blackholeplen = query($sts."/blackhole/entry:".$InDeX."/plen");</pre>
+<pre>				cmd("ip -6 route del blackhole ".$blackholepfx."/".$blackholeplen." dev lo");</pre>
+<pre>			}</pre>
+<pre>				del($sts."/blackhole");</pre>
+<pre>		}</pre>
+<pre>		if($mode=="STATEFUL")	cmd("event WANPORT.LINKUP remove V6CONFIRM"); </pre>
+<pre>	}</pre>
+<br />
+<pre>	if ($hasevent&gt;0)</pre>
+<pre>	{</pre>
+<pre>		cmd("rm -f /var/run/".$_GLOBALS["INF"].".UP");</pre>
+<pre>		cmd("event ".$_GLOBALS["INF"].".DOWN");</pre>
+<pre>	}</pre>
+<br />
+<pre>	del($sts."/inet");</pre>
+<pre>	del($sts."/devnam");</pre>
+<pre>	del($sts."/pdhint");</pre>
+<br />
+<pre>		</pre>
+<pre>	//$childip = query($sts."/child/ipaddr");</pre>
+<pre>	//$childuid = query($sts."/child/uid");</pre>
+<pre>	//if($childip!="") del($sts."/child");</pre>
+<br />
+<pre>	if($hasevent&gt;0) </pre>
+<pre>	{</pre>
+<pre>		$childip = query($sts."/child/ipaddr");</pre>
+<pre>		$childgzip = query($sts."/childgz/ipaddr");</pre>
+<pre>		//$childuid = query($sts."/child/uid");</pre>
+<pre>		if($childip!="") del($sts."/child");</pre>
+<pre>		if($childgzip!="") del($sts."/childgz");</pre>
+<pre>	}</pre>
+<pre>}</pre>
+<br />
+<pre>function dev_attach($hasevent)</pre>
+<pre>{</pre>
+<pre>	$cfg = XNODE_getpathbytarget("", "inf", "uid", $_GLOBALS["INF"], 0);</pre>
+<pre>	if ($cfg=="") return $_GLOBALS["INF"]." does not exist!";</pre>
+<br />
+<pre>	/* The runtime node of INF should already be created when starting INET service.</pre>
+<pre>	 * Set the create flag to make sure is will always be created. */</pre>
+<pre>	$sts = XNODE_getpathbytarget("/runtime", "inf", "uid", $_GLOBALS["INF"], 1);</pre>
+<br />
+<pre>	/* Just in case the device is still alive. */</pre>
+<pre>	if (query($sts."/inet/ipv6/valid")==1) dev_detach(0);</pre>
+<br />
+<pre>	/* Set Child variables */</pre>
+<pre>	$child = query($sts."/child/uid");</pre>
+<pre>	//msg('child is '.$child);</pre>
+<pre>	if ($child!="")</pre>
+<pre>	{</pre>
+<pre>		$ipaddr = query($sts."/child/ipaddr");</pre>
+<pre>		$prefix = query($sts."/child/prefix");</pre>
+<pre>		$pdnetwork = query($sts."/child/pdnetwork");</pre>
+<pre>		$pdprefix = query($sts."/child/pdprefix");</pre>
+<pre>		if ($ipaddr!="" &amp;&amp; $prefix!="") $addrtype="ipv6";</pre>
+<pre>		XNODE_set_var($child."_ADDRTYPE", $addrtype);</pre>
+<pre>		XNODE_set_var($child."_IPADDR", $ipaddr);</pre>
+<pre>		XNODE_set_var($child."_PREFIX", $prefix);</pre>
+<pre>		XNODE_set_var($child."_PDNETWORK", $pdnetwork);</pre>
+<pre>		XNODE_set_var($child."_PDPREFIX", $pdprefix);</pre>
+<pre>	}</pre>
+<br />
+<pre>	/* Set guest zone child variables */</pre>
+<pre>	$childgz = query($sts."/childgz/uid");</pre>
+<pre>	//msg('child guest zone is '.$childgz);</pre>
+<pre>	if ($childgz!="")</pre>
+<pre>	{</pre>
+<pre>		$ipaddr = query($sts."/childgz/ipaddr");</pre>
+<pre>		$prefix = query($sts."/childgz/prefix");</pre>
+<pre>		$pdnetwork = query($sts."/childgz/pdnetwork");</pre>
+<pre>		$pdprefix = query($sts."/childgz/pdprefix");</pre>
+<pre>		if ($ipaddr!="" &amp;&amp; $prefix!="") $addrtype="ipv6";</pre>
+<pre>		XNODE_set_var($childgz."_ADDRTYPE", $addrtype);</pre>
+<pre>		XNODE_set_var($childgz."_IPADDR", $ipaddr);</pre>
+<pre>		XNODE_set_var($childgz."_PREFIX", $prefix);</pre>
+<pre>		XNODE_set_var($childgz."_PDNETWORK", $pdnetwork);</pre>
+<pre>		XNODE_set_var($childgz."_PDPREFIX", $pdprefix);</pre>
+<pre>	}</pre>
+<br />
+<pre>	/* Get the default metric from config. */</pre>
+<pre>	$defrt = query($cfg."/defaultroute");</pre>
+<pre>	</pre>
+<pre>	/***********************************************/</pre>
+<pre>	/* Update Status */</pre>
+<pre>	$M = $_GLOBALS["MODE"];</pre>
+<pre>	anchor($sts);</pre>
+<pre>	set("defaultroute", 	$defrt);</pre>
+<pre>	set("devnam",			$_GLOBALS["DEVNAM"]);</pre>
+<pre>	set("inet/uid",			query($cfg."/inet"));</pre>
+<pre>	set("inet/addrtype",	"ipv6");</pre>
+<pre>	set("inet/uptime",		query("/runtime/device/uptime"));</pre>
+<pre>	set("inet/ipv6/valid",	"1");</pre>
+<pre>	/* INET */</pre>
+<pre>	anchor($sts."/inet/ipv6");</pre>
+<pre>	set("mode",		$M);</pre>
+<pre>	set("ipaddr",	$_GLOBALS["IPADDR"]);</pre>
+<pre>	set("prefix",	$_GLOBALS["PREFIX"]);</pre>
+<pre>	set("gateway",	$_GLOBALS["GATEWAY"]);</pre>
+<pre>	set("routerlft",$_GLOBALS["ROUTERLFT"]);</pre>
+<pre>	set("preferlft",$_GLOBALS["PREFERLFT"]);</pre>
+<pre>	set("validlft",	$_GLOBALS["VALIDLFT"]);</pre>
+<pre>	/* DNS &amp; ROUTING */</pre>
+<pre>	add_each($_GLOBALS["DNS"], $sts."/inet/ipv6", "dns");</pre>
+<pre>	/***********************************************/</pre>
+<pre>	/* attach */</pre>
+<pre>	$dhcpopt = query("dhcpopt");</pre>
+<pre>	if		($M=="LL") msg($_GLOBALS["INF"].' a is link local interface.');</pre>
+<pre>	else if	($M=="STATELESS") msg($_GLOBALS["INF"].' is a self-configured interface.');</pre>
+<pre>	else if	($M=="STATEFUL" &amp;&amp; $dhcpopt!="IA-PD") msg($_GLOBALS["INF"].' is a stateful-IANA interface.');</pre>
+<pre>	else cmd("ip -6 addr add ".$_GLOBALS["IPADDR"]."/".$_GLOBALS["PREFIX"]." dev ".$_GLOBALS["DEVNAM"]);</pre>
+<br />
+<pre>	/* IOL test */</pre>
+<pre>	$pidfile = "/var/servd/".$_GLOBALS["INF"]."-dhcp6c.pid";</pre>
+<pre>	if($M=="STATEFUL")</pre>
+<pre>		cmd('event WANPORT.LINKUP insert V6CONFIRM:"kill -SIGUSR1 `cat '.$pidfile.'`"');</pre>
+<br />
+<pre>	if($M!="LL")</pre>
+<pre>	{</pre>
+<pre>		$rtnetid = ipv6networkid($_GLOBALS["IPADDR"], $_GLOBALS["PREFIX"]);</pre>
+<pre>		if($rtnetid!="fe80::")</pre>
+<pre>			add_route($rtnetid, $_GLOBALS["PREFIX"], "::", "256", $_GLOBALS["INF"]);</pre>
+<pre>	}</pre>
+<br />
+<pre>	/* Handle the peer-to-peer connection. */</pre>
+<pre>	if ($_GLOBALS["PREFIX"]==128 &amp;&amp; $_GLOBALS["GATEWAY"]!="")</pre>
+<pre>		cmd("ip -6 route add ".$_GLOBALS["GATEWAY"]."/128 dev ".$_GLOBALS["DEVNAM"]);</pre>
+<pre>	/* gateway */</pre>
+<pre>	if ($defrt!="" &amp;&amp; $defrt&gt;0)</pre>
+<pre>	{</pre>
+<pre>		if ($_GLOBALS["GATEWAY"]!="")</pre>
+<pre>		{</pre>
+<pre>			cmd("ip -6 route add ::/0 via ".$_GLOBALS["GATEWAY"]." dev ".$_GLOBALS["DEVNAM"]." metric ".$defrt);</pre>
+<pre>			add_route("::", "0", $_GLOBALS["GATEWAY"], $defrt, $_GLOBALS["INF"]);</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		$netid = ipv6networkid($_GLOBALS["IPADDR"], $_GLOBALS["PREFIX"]);</pre>
+<pre>		cmd("ip -6 route add ".$netid."/".$_GLOBALS["PREFIX"]." dev ".$_GLOBALS["DEVNAM"].</pre>
+<pre>				" src ".$_GLOBALS["IPADDR"]." table ".$_GLOBALS["INF"]);</pre>
+<pre>	}</pre>
+<pre>	/* Routing */</pre>
+<pre>	// Currently, the INF specific routing table is not used. by David.</pre>
+<pre>	//$hasroute=0;</pre>
+<pre>	//if ($hasroute&gt;0) echo "ip -6 rule add table ".$_GLOBALS["INF"]." prio 30000\n";</pre>
+<pre>	if ($hasevent&gt;0)</pre>
+<pre>	{</pre>
+<pre>		cmd("event ".$_GLOBALS["INF"].".UP");</pre>
+<pre>		cmd("echo 1 &gt; /var/run/".$_GLOBALS["INF"].".UP");</pre>
+<pre>	}</pre>
+<pre>}</pre>
+<br />
+<pre>function main_entry()</pre>
+<pre>{</pre>
+<pre>	if ($_GLOBALS["INF"]=="") return "No INF !!";</pre>
+<pre>	if		($_GLOBALS["ACTION"]=="ATTACH") return dev_attach(1);</pre>
+<pre>	else if	($_GLOBALS["ACTION"]=="DETACH") return dev_detach(1);</pre>
+<pre>	return "Unknown action - ".$_GLOBALS["ACTION"];</pre>
+<pre>}</pre>
+<br />
+<pre>/*****************************************/</pre>
+<pre>/* Required variables:</pre>
+<pre> *</pre>
+<pre> *	ACTION:		ATTACH/DETACH</pre>
+<pre> *	MODE:		IPv6 mode</pre>
+<pre> *	INF:		Interface UID</pre>
+<pre> *	DEVNAM:		device name</pre>
+<pre> *	IPADDR:		IP address</pre>
+<pre> *	PREFIX:		Prefix length</pre>
+<pre> *	GATEWAY:	Gateway</pre>
+<pre> *	ROUTERLFT:	Router lift time</pre>
+<pre> *	PREFERLFT:	Prefer lift time</pre>
+<pre> *	VALIDLFT:	Valid lift time</pre>
+<pre> *	DNS:		DNS servers</pre>
+<pre> */</pre>
+<pre>$ret = main_entry();</pre>
+<pre>if ($ret!="")	cmd("# ".$ret."\nexit 9\n");</pre>
+<pre>else			cmd("exit 0\n");</pre>
+<pre>?&gt;</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

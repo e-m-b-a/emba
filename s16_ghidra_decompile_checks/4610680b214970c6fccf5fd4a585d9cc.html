@@ -1,0 +1,578 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./a9d8001806bda310375f35b91f5b2825.html" title="./a9d8001806bda310375f35b91f5b2825.html" >&laquo; Back to a9d8001806bda310375f35b91f5b2825</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre><span class="green">short APBuildAssociation(int param_1,int param_2,uint param_3,byte param_4,void *param_5,</span>   //possible issue identified - semgrep</pre>
+<pre>                        byte *param_6,byte param_7,uint param_8,byte param_9,byte *param_10,</pre>
+<pre>                        char *param_11,short *param_12)</pre>
+<br />
+<pre>{</pre>
+<pre>  byte bVar1;</pre>
+<pre>  undefined1 uVar2;</pre>
+<pre>  short sVar3;</pre>
+<pre>  code *pcVar4;</pre>
+<pre>  int iVar5;</pre>
+<pre>  char cVar6;</pre>
+<pre>  uint uVar7;</pre>
+<pre>  byte *pbVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  uint uVar10;</pre>
+<pre>  undefined1 local_38 [4];</pre>
+<pre>  int local_34;</pre>
+<pre>  uint local_30;</pre>
+<pre>  uint local_2c;</pre>
+<pre>  </pre>
+<pre>  local_2c = (uint)param_7;</pre>
+<pre>  local_30 = param_3 &amp; 0xffff;</pre>
+<pre>  uVar10 = 6;</pre>
+<pre>  if (param_4 != 0x18) {</pre>
+<pre>    if (param_4 &lt; 0x19) {</pre>
+<pre>      uVar10 = 2;</pre>
+<pre>      if (param_4 != 0xb) {</pre>
+<pre>        if (param_4 &lt; 0xc) {</pre>
+<pre>          uVar10 = 0;</pre>
+<pre>          if (param_4 != 2) {</pre>
+<pre>            uVar10 = 1;</pre>
+<pre>            bVar1 = 4;</pre>
+<pre>LAB_0006c148:</pre>
+<pre>            if (param_4 != bVar1) {</pre>
+<pre>              uVar10 = 3;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          uVar10 = 4;</pre>
+<pre>          if (param_4 != 0xc) {</pre>
+<pre>            uVar10 = 5;</pre>
+<pre>            bVar1 = 0x12;</pre>
+<pre>            goto LAB_0006c148;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      uVar10 = 9;</pre>
+<pre>      if (param_4 != 0x48) {</pre>
+<pre>        if (param_4 &lt; 0x49) {</pre>
+<pre>          uVar10 = 7;</pre>
+<pre>          if (param_4 != 0x24) {</pre>
+<pre>            uVar10 = 8;</pre>
+<pre>            bVar1 = 0x30;</pre>
+<pre>            goto LAB_0006c148;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          uVar10 = 10;</pre>
+<pre>          if (param_4 != 0x60) {</pre>
+<pre>            uVar10 = 0xb;</pre>
+<pre>            bVar1 = 0x6c;</pre>
+<pre>            goto LAB_0006c148;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre><span class="green">  cVar6 = *(char *)(param_1 + 0x16982)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (((cVar6 == '\x04') || (cVar6 == '\a')) &amp;&amp; (uVar10 &lt; 4)) {</pre>
+<pre>    return 0x12;</pre>
+<pre>  }</pre>
+<pre>  if (((cVar6 == '\x06') || (cVar6 == '\v')) &amp;&amp; (*param_11 == '\0')) {</pre>
+<pre>    return 0x12;</pre>
+<pre>  }</pre>
+<pre>  if (param_2 == 0) {</pre>
+<pre>    return 1;</pre>
+<pre>  }</pre>
+<pre>  if (1 &lt; *(int *)(param_2 + 0x274) - 1U) {</pre>
+<pre>    return 0x11;</pre>
+<pre>  }</pre>
+<pre>  *param_12 = *(short *)(param_2 + 0x27e);</pre>
+<pre>  *(undefined4 *)(param_2 + 0x284) = 0;</pre>
+<pre>  *(undefined4 *)(param_2 + 0x29c) = 0;</pre>
+<pre><span class="green">  sVar3 = APValidateRSNIE(param_1,param_2,param_5,*param_6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (sVar3 != 0) {</pre>
+<pre>    return sVar3;</pre>
+<pre>  }</pre>
+<pre><span class="green">  memmove((void *)(param_2 + 0x33),param_5,(uint)*param_6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  bVar1 = *param_6;</pre>
+<pre>  *(byte *)(param_2 + 0x32) = bVar1;</pre>
+<pre>  if (*param_12 == 0) {</pre>
+<pre>    return 0x11;</pre>
+<pre>  }</pre>
+<pre>  if ((bVar1 == 0) &amp;&amp; (2 &lt; *(uint *)((uint)*(byte *)(param_2 + 0x31) * 0x1140 + param_1 + 0x51dc)))</pre>
+<pre>  {</pre>
+<pre>    *(undefined4 *)(param_2 + 0x274) = 2;</pre>
+<pre>    goto LAB_0006cb4c;</pre>
+<pre>  }</pre>
+<pre>  *(undefined4 *)(param_2 + 0x274) = 2;</pre>
+<pre>  if (*(byte *)(param_1 + 0x16a49) &lt; uVar10) {</pre>
+<pre>    uVar10 = (uint)*(byte *)(param_1 + 0x16a49);</pre>
+<pre>  }</pre>
+<pre>  *(char *)(param_2 + 0x34c) = (char)uVar10;</pre>
+<pre>  uVar7 = *(uint *)(param_2 + 0x418);</pre>
+<pre>  uVar9 = *(uint *)(param_2 + 0x41c);</pre>
+<pre>  if (uVar10 &lt; 4) {</pre>
+<pre>    *(uint *)(param_2 + 0x41c) = uVar9 &amp; 0xffff3f80 | uVar10 &amp; 0x7f;</pre>
+<pre>    *(uint *)(param_2 + 0x418) = uVar7 &amp; 0x3f803f80 | (uVar10 &amp; 0x7f) &lt;&lt; 0x10 | uVar10 &amp; 0x7f;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    *(uint *)(param_2 + 0x418) = uVar7 &amp; 0x3fffffff | 0x40000000;</pre>
+<pre>    pbVar8 = &amp;OfdmRateToRxwiMCS + *(byte *)(param_2 + 0x34c);</pre>
+<pre>    uVar10 = (*pbVar8 &amp; 0x7f) &lt;&lt; 0x10;</pre>
+<pre>    *(uint *)(param_2 + 0x418) = uVar7 &amp; 0x3f80ffff | 0x40000000 | uVar10;</pre>
+<pre>    *(uint *)(param_2 + 0x41c) = uVar9 &amp; 0xffff3fff | 0x4000;</pre>
+<pre>    bVar1 = *pbVar8;</pre>
+<pre>    *(uint *)(param_2 + 0x418) = uVar7 &amp; 0x3f803fff | 0x40000000 | uVar10 | 0x4000;</pre>
+<pre>    *(uint *)(param_2 + 0x41c) = uVar9 &amp; 0xffff3f80 | 0x4000 | bVar1 &amp; 0x7f;</pre>
+<pre>    *(uint *)(param_2 + 0x418) = uVar7 &amp; 0x3f803f80 | 0x40000000 | uVar10 | 0x4000 | *pbVar8 &amp; 0x7f;</pre>
+<pre>  }</pre>
+<pre>  iVar5 = *(int *)(param_2 + 0x1e4);</pre>
+<pre>  *(short *)(param_2 + 0x280) = (short)local_30;</pre>
+<pre>  if ((iVar5 == 4) || (iVar5 == 7)) {</pre>
+<pre>    *(undefined4 *)(param_2 + 500) = 1;</pre>
+<pre>    uVar2 = 7;</pre>
+<pre>LAB_0006c374:</pre>
+<pre>    *(undefined1 *)(param_2 + 0x1f0) = uVar2;</pre>
+<pre>  }</pre>
+<pre>  else if (((iVar5 == 3) || (iVar5 == 6)) ||</pre>
+<pre>          (*(char *)((uint)*(byte *)(param_2 + 0x31) * 0x1140 + param_1 + 0x52b5) == '\x01')) {</pre>
+<pre>    *(undefined4 *)(param_2 + 500) = 1;</pre>
+<pre>    uVar2 = 4;</pre>
+<pre>    goto LAB_0006c374;</pre>
+<pre>  }</pre>
+<pre>  if (param_8 == 0) {</pre>
+<pre>    uVar10 = *(uint *)(param_2 + 0x414) &amp; 0xffefffff;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    uVar10 = *(uint *)(param_2 + 0x414) | 0x100000;</pre>
+<pre>  }</pre>
+<pre>  *(uint *)(param_2 + 0x414) = uVar10;</pre>
+<pre>  uVar10 = *(uint *)(param_2 + 0x414) &amp; 0xfffffff9;</pre>
+<pre>  *(uint *)(param_2 + 0x414) = uVar10;</pre>
+<pre>  if (((*(char *)(param_1 + 0x16a7e) != '\0') &amp;&amp; ((param_8 &amp; 1) != 0)) &amp;&amp;</pre>
+<pre>     (*(uint *)(param_2 + 0x414) = uVar10 | 2, 2 &lt; RTDebugLevel)) {</pre>
+<pre>    printk("ASSOC -RaAggregate= 1\n");</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16a7f) == '\0') {</pre>
+<pre>    uVar10 = *(uint *)(param_2 + 0x1e4);</pre>
+<pre>  }</pre>
+<pre>  else if ((param_8 &amp; 2) == 0) {</pre>
+<pre>    uVar10 = *(uint *)(param_2 + 0x1e4);</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 4;</pre>
+<pre>    if (RTDebugLevel &lt; 3) {</pre>
+<pre>      uVar10 = *(uint *)(param_2 + 0x1e4);</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      printk("ASSOC -PiggyBack= 1\n");</pre>
+<pre>      uVar10 = *(uint *)(param_2 + 0x1e4);</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  if ((uVar10 &lt; 3) &amp;&amp;</pre>
+<pre>     (*(char *)((uint)*(byte *)(param_2 + 0x31) * 0x1140 + param_1 + 0x52b5) != '\x01')) {</pre>
+<pre>    *(undefined2 *)(param_2 + 0x1f2) = 1;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    *(undefined2 *)(param_2 + 0x1f2) = 2;</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16e7a) == '\0') {</pre>
+<pre>LAB_0006c4f0:</pre>
+<pre>    cVar6 = *param_11;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    if ((*(int *)(param_2 + 0x1e8) == 0) || (*(int *)(param_2 + 0x1e8) == 4)) {</pre>
+<pre>      *param_11 = '\0';</pre>
+<pre>      if (2 &lt; RTDebugLevel) {</pre>
+<pre>        printk("%s : Force the STA as legacy mode(None-HT)\n","APBuildAssociation");</pre>
+<pre>      }</pre>
+<pre>      goto LAB_0006c4f0;</pre>
+<pre>    }</pre>
+<pre>    cVar6 = *param_11;</pre>
+<pre>  }</pre>
+<pre>  if (((cVar6 == '\0') ||</pre>
+<pre>      (*(char *)((uint)*(byte *)(param_2 + 0x31) * 0x1140 + param_1 + 0x520a) == '\0')) ||</pre>
+<pre>     (*(byte *)(param_1 + 0x16982) &lt; 5)) {</pre>
+<pre>    *(undefined1 *)(param_1 + 0x71350) = 1;</pre>
+<pre>    param_10 = (byte *)0x0;</pre>
+<pre>    pcVar4 = memset;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    if ((*param_10 &amp; 0x10) == 0) {</pre>
+<pre>      uVar10 = *(uint *)(param_2 + 0x418);</pre>
+<pre>LAB_0006c560:</pre>
+<pre>      *(uint *)(param_2 + 0x418) = uVar10 &amp; 0x3fffffff | 0x80000000;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x71351) = 1;</pre>
+<pre>      *(uint *)(param_1 + 0x16b18) = *(uint *)(param_1 + 0x16b18) &amp; 0xfffbffff | 0x40000;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      if (-1 &lt; *(int *)(RTMPCheckRates + param_1) &lt;&lt; 0xc) {</pre>
+<pre>        uVar10 = *(uint *)(param_2 + 0x418);</pre>
+<pre>        goto LAB_0006c560;</pre>
+<pre>      }</pre>
+<pre>      *(uint *)(param_2 + 0x418) = *(uint *)(param_2 + 0x418) &amp; 0x3fffffff | 0xc0000000;</pre>
+<pre>    }</pre>
+<pre>    if ((param_9 &amp; 1) == 0) {</pre>
+<pre>      bVar1 = param_10[1];</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(undefined1 *)(param_2 + 0x474) = 1;</pre>
+<pre>      bVar1 = param_10[1];</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 0x40) == 0) {</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(undefined1 *)(param_2 + 0x475) = 1;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x71355) = 1;</pre>
+<pre>      if (((*(int *)(param_1 + 0x16afc) &lt;&lt; 0xe &lt; 0) &amp;&amp; (*(byte *)(param_1 + 0x169ec) &lt; 0xf)) &amp;&amp;</pre>
+<pre>         ((*(char *)(param_1 + 0x16b30) == '\x01' &amp;&amp;</pre>
+<pre>          ((uVar10 = *(uint *)(param_1 + 0x16b18), (uVar10 &amp; 0x400) != 0 &amp;&amp; ((uVar10 &amp; 0x300) != 0))</pre>
+<pre>          )))) {</pre>
+<pre>        *(byte *)(param_1 + 0x16b33) = *(byte *)(param_1 + 0x16b33) | 2;</pre>
+<pre>        *(uint *)(param_1 + 0x16b74) = *(uint *)(param_1 + 0x16b74) &amp; 0xfffffffb | 4;</pre>
+<pre>        *(uint *)(param_1 + 0x16b18) = uVar10 &amp; 0xfffff8ff;</pre>
+<pre>      }</pre>
+<pre>      if (2 &lt; RTDebugLevel) {</pre>
+<pre>        printk("pEntry set 40MHz Intolerant as 1\n");</pre>
+<pre>      }</pre>
+<pre>      Handle_BSS_Width_Trigger_Events(param_1);</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 2) == 0) {</pre>
+<pre>      uVar10 = *(uint *)(param_2 + 0x418);</pre>
+<pre>LAB_0006c6fc:</pre>
+<pre>      *(uint *)(param_2 + 0x418) = uVar10 &amp; 0xff7fffff;</pre>
+<pre>      *(uint *)(param_2 + 0x418) =</pre>
+<pre>           uVar10 &amp; 0xfe7fffff |</pre>
+<pre>           (((uint)*param_10 &lt;&lt; 0x1a &amp; *(int *)(RTMPCheckRates + param_1) &lt;&lt; 0xb) &gt;&gt; 0x1f) &lt;&lt; 0x18;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x71352) = 1;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      if ((*(uint *)(RTMPCheckRates + param_1) &amp; 0x10000) == 0) {</pre>
+<pre>        uVar10 = *(uint *)(param_2 + 0x418);</pre>
+<pre>        goto LAB_0006c6fc;</pre>
+<pre>      }</pre>
+<pre>      uVar10 = *(uint *)(param_2 + 0x418);</pre>
+<pre>      *(uint *)(param_2 + 0x418) = uVar10 &amp; 0xff7fffff | 0x800000;</pre>
+<pre>      *(uint *)(param_2 + 0x418) =</pre>
+<pre>           uVar10 &amp; 0xfe7fffff | 0x800000 |</pre>
+<pre>           (((uint)*param_10 &lt;&lt; 0x19 &amp; *(int *)(RTMPCheckRates + param_1) &lt;&lt; 10) &gt;&gt; 0x1f) &lt;&lt; 0x18;</pre>
+<pre>    }</pre>
+<pre>    iVar5 = 0x17;</pre>
+<pre>    cVar6 = '\x17';</pre>
+<pre>    do {</pre>
+<pre>      uVar9 = (uint)cVar6;</pre>
+<pre>      uVar10 = (uVar9 &lt;&lt; 0x15) &gt;&gt; 0x18;</pre>
+<pre>      uVar7 = 1 &lt;&lt; (uVar10 * -8 + iVar5 &amp; 0x1f) &amp; 0xff;</pre>
+<pre>      iVar5 = iVar5 + -1;</pre>
+<pre>      if (((uVar7 &amp; *(byte *)((uint)*(byte *)(param_2 + 0x31) * 0x1140 + param_1 + uVar10 + 0x520c))</pre>
+<pre>           != 0) &amp;&amp; ((uVar7 &amp; param_10[uVar10 + 3]) != 0)) {</pre>
+<pre>        *(uint *)(param_2 + 0x418) =</pre>
+<pre>             *(uint *)(param_2 + 0x418) &amp; 0xff80ffff | (uVar9 &amp; 0x7f) &lt;&lt; 0x10;</pre>
+<pre>        break;</pre>
+<pre>      }</pre>
+<pre>      if (uVar9 == 0) {</pre>
+<pre>        bVar1 = *(byte *)(param_2 + 0x31);</pre>
+<pre>        goto LAB_0006c7a0;</pre>
+<pre>      }</pre>
+<pre><span class="green">      cVar6 = (char)iVar5</span></span>   //possible issue identified - semgrep</pre>
+<pre>    } while (iVar5 != -1);</pre>
+<pre>    bVar1 = *(byte *)(param_2 + 0x31);</pre>
+<pre>LAB_0006c7a0:</pre>
+<pre>    if ((*(uint *)((uint)bVar1 * 0x1140 + param_1 + 0x521c) &amp; 0x7f) != 0x21) {</pre>
+<pre>      if (RTDebugLevel &lt; 3) {</pre>
+<pre>        bVar1 = *(byte *)(param_2 + 0x31);</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        printk("&commat;&commat;&commat; IF-ra%d DesiredTransmitSetting.field.MCS = %d\n");</pre>
+<pre>        bVar1 = *(byte *)(param_2 + 0x31);</pre>
+<pre>      }</pre>
+<pre>      iVar5 = (uint)bVar1 * 0x1140 + param_1;</pre>
+<pre>      uVar10 = *(uint *)(param_2 + 0x418);</pre>
+<pre>      if ((*(uint *)(iVar5 + 0x521c) &amp; 0x7f) == 0x20) {</pre>
+<pre>        uVar10 = uVar10 &amp; 0x3800ffff | 0x80a00000;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        uVar7 = *(uint *)(iVar5 + 0x5204) &amp; 0x7f;</pre>
+<pre>        if ((uVar10 &lt;&lt; 9) &gt;&gt; 0x19 &lt;= uVar7) goto LAB_0006c854;</pre>
+<pre>        uVar10 = uVar10 &amp; 0xff80ffff | uVar7 &lt;&lt; 0x10;</pre>
+<pre>      }</pre>
+<pre>      *(uint *)(param_2 + 0x418) = uVar10;</pre>
+<pre>    }</pre>
+<pre>LAB_0006c854:</pre>
+<pre>    *(uint *)(param_2 + 0x418) =</pre>
+<pre>         *(uint *)(param_2 + 0x418) &amp; 0xf9ffffff |</pre>
+<pre>         ((uint)param_10[1] &amp; (uint)(*(int *)(RTMPCheckRates + param_1) &lt;&lt; 9) &gt;&gt; 0x1f) &lt;&lt; 0x19;</pre>
+<pre>    if (((uint)param_10[2] &lt;&lt; 0x1b) &gt;&gt; 0x1d &lt; 5) {</pre>
+<pre>      *(undefined1 *)(param_2 + 0x456) = 5;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(byte *)(param_2 + 0x456) = (byte)(((uint)param_10[2] &lt;&lt; 0x1b) &gt;&gt; 0x1d);</pre>
+<pre>    }</pre>
+<pre>    *(byte *)(param_2 + 0x457) = (byte)(((uint)param_10[2] &lt;&lt; 0x1e) &gt;&gt; 0x1e);</pre>
+<pre>    *(byte *)(param_2 + 0x459) = (byte)(((uint)*param_10 &lt;&lt; 0x1c) &gt;&gt; 0x1e);</pre>
+<pre>    bVar1 = param_10[1];</pre>
+<pre>    *(undefined2 *)(param_2 + 0x418) = *(undefined2 *)(param_2 + 0x41a);</pre>
+<pre>    *(byte *)(param_2 + 0x458) = (byte)(((uint)bVar1 &lt;&lt; 0x1c) &gt;&gt; 0x1f);</pre>
+<pre>    if (*(int *)(RTMPCheckRates + param_1) &lt;&lt; 6 &lt; 0) {</pre>
+<pre>      if ((*(uint *)(param_1 + 0x16a68) &amp; 0x10000) == 0) {</pre>
+<pre>        *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 8;</pre>
+<pre>        bVar1 = *param_10;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        bVar1 = *param_10;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 0x20) == 0) {</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x10;</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 0x40) == 0) {</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x20;</pre>
+<pre>      bVar1 = *param_10;</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 0x80) == 0) {</pre>
+<pre>      bVar1 = param_10[1];</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x40;</pre>
+<pre>      bVar1 = param_10[1];</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 3) == 0) {</pre>
+<pre>      bVar1 = param_10[0x14];</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x80;</pre>
+<pre>      bVar1 = param_10[0x14];</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 4) != 0) {</pre>
+<pre>      *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x100;</pre>
+<pre>    }</pre>
+<pre>    bVar1 = param_10[0x14];</pre>
+<pre>    if (*(char *)(param_1 + 0x16a88) != '\0') {</pre>
+<pre>      if ((bVar1 &amp; 8) == 0) {</pre>
+<pre>        bVar1 = param_10[0x14];</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x200;</pre>
+<pre>        bVar1 = param_10[0x14];</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    if ((bVar1 &amp; 3) == 3) {</pre>
+<pre>      *(uint *)(param_2 + 0x414) = *(uint *)(param_2 + 0x414) | 0x400;</pre>
+<pre>    }</pre>
+<pre>    pcVar4 = memmove;</pre>
+<pre>  }</pre>
+<pre>  (*pcVar4)(param_2 + 0x45a,param_10,0x1a);</pre>
+<pre>  *(undefined1 *)(param_2 + 0x359) = 1;</pre>
+<pre>  iVar5 = (uint)*(byte *)(param_2 + 0x31) * 0x1140 + param_1;</pre>
+<pre>  *(undefined2 *)(param_2 + 0x418) = *(undefined2 *)(param_2 + 0x41a);</pre>
+<pre>  *(undefined1 *)(param_2 + 0x34d) = *(undefined1 *)(param_2 + 0x34c);</pre>
+<pre>  *(undefined1 *)(param_2 + 0x350) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x351) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x358) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x35a) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x35b) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x35c) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x35d) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x35e) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x361) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x362) = 0;</pre>
+<pre>  *(undefined1 *)(param_2 + 0x38c) = 0;</pre>
+<pre>  if (*(char *)(iVar5 + 0x521e) == '\x01') {</pre>
+<pre>    local_38[0] = 0;</pre>
+<pre>    APMlmeSelectTxRateTable(param_1,param_2,&amp;local_34,local_38,param_2 + 0x34e);</pre>
+<pre>    APMlmeSetTxRate(param_1,param_2,(*(byte *)(param_2 + 0x34e) + 1) * 5 + local_34);</pre>
+<pre>    *(undefined1 *)(param_2 + 0x476) = 1;</pre>
+<pre>    *(uint *)(param_2 + 0x418) = *(uint *)(param_2 + 0x418) &amp; 0xfffffeff;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    uVar10 = *(uint *)(iVar5 + 0x5204);</pre>
+<pre>    *(undefined1 *)(param_2 + 0x476) = 0;</pre>
+<pre>    *(uint *)(param_2 + 0x418) = *(uint *)(param_2 + 0x418) &amp; 0xffffff80 | uVar10 &amp; 0x7f;</pre>
+<pre>    RTMPUpdateLegacyTxSetting((uint)(*(int *)(iVar5 + 0x521c) &lt;&lt; 0x13) &gt;&gt; 0x1e,param_2);</pre>
+<pre>  }</pre>
+<pre>  if (*(uint *)(param_2 + 0x1e4) &lt; 3) {</pre>
+<pre>    ApLogEvent(param_1,param_2 + 600,1);</pre>
+<pre>  }</pre>
+<pre>  APUpdateCapabilityAndErpIe(param_1);</pre>
+<pre>  APUpdateOperationMode(param_1);</pre>
+<pre>  *(undefined1 *)(param_2 + 0x1ba) = 0;</pre>
+<pre>LAB_0006cb4c:</pre>
+<pre>  uVar10 = *(uint *)(param_2 + 0x414) | 1;</pre>
+<pre>  if (local_2c == 0) {</pre>
+<pre>    uVar10 = *(uint *)(param_2 + 0x414) &amp; 0xfffffffe;</pre>
+<pre>  }</pre>
+<pre>  *(uint *)(param_2 + 0x414) = uVar10;</pre>
+<pre>  return 0;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

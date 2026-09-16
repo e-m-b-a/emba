@@ -1,0 +1,385 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s17_cwe_checker.html" title="./../s17_cwe_checker.html" >&laquo; Back to s17_cwe_checker</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="orange">*</span>] Binary protection state of </span><span class="orange">rgbin</span></pre>
+<br />
+<pre>  	RELRO          CANARY            NX           PIE          RPATH        RUNPATH      SYMBOLS      </pre>
+<pre>  	<span class="red">No RELRO</span>       <span class="red">No Canary found</span>   <span class="red">NX disabled</span>  <span class="red">No PIE</span>       <span class="green">No RPATH</span>     <span class="green">No RUNPATH</span>   <span class="green">No Symbols</span></pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">CWE-Checker results for rgbin</span></pre>
+<pre><hr class="mono" /></pre>
+<pre><span class="green">	CWE id    | address         | tids            | symbols         | description</span></pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4205532         | instr_0x00402bd | NA              | Out-of-bounds Write Memory write at 4205532 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4205664         | instr_0x00402c6 | NA              | Out-of-bounds Write Memory write at 4205664 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4206144         | instr_0x00402e4 | NA              | Out-of-bounds Write Memory write at 4206144 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4206820         | instr_0x004030e | NA              | Out-of-bounds Write Memory write at 4206820 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4212396         | instr_0x004046a | NA              | Out-of-bounds Write Memory write at 4212396 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4215196         | instr_0x0040519 | NA              | Out-of-bounds Write Memory write at 4215196 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4217880         | instr_0x00405c1 | NA              | Out-of-bounds Write Memory write at 4217880 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4218172         | instr_0x00405d3 | NA              | Out-of-bounds Write Memory write at 4218172 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4220268         | instr_0x0040656 | NA              | Out-of-bounds Write Memory write at 4220268 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4221180         | instr_0x004068f | NA              | Out-of-bounds Write Memory write at 4221180 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4221472         | instr_0x00406a2 | NA              | Out-of-bounds Write Memory write at 4221472 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4223632         | instr_0x0040729 | NA              | Out-of-bounds Write Memory write at 4223632 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4227052         | instr_0x00407fe | NA              | Out-of-bounds Write Memory write at 4227052 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4227708         | instr_0x0040827 | NA              | Out-of-bounds Write Memory write at 4227708 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4230184         | instr_0x00408c2 | NA              | Out-of-bounds Write Memory write at 4230184 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4231864         | instr_0x004092b | NA              | Out-of-bounds Write Memory write at 4231864 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4232780         | instr_0x0040964 | NA              | Out-of-bounds Write Memory write at 4232780 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4234096         | instr_0x00409b7 | NA              | Out-of-bounds Write Memory write at 4234096 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4240376         | instr_0x0040b3f | NA              | Out-of-bounds Write Memory write at 4240376 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4240508         | instr_0x0040b47 | NA              | Out-of-bounds Write Memory write at 4240508 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a>    | 4251500         | instr_0x0040df6 | NA              | Out-of-bounds Write Memory write at 4251500 may be out of bounds.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 4228256         | instr_0x004084a | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 4228256</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/134.html" title="134" target="_blank" >CWE134</a>    | 4223132         | instr_0x0040709 | printf          | Externally Controlled Format String Potential externally controlled format string for call to printf at 4223132</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/190.html" title="190" target="_blank" >CWE190</a>    | 4242876         | instr_0x0040bdb | malloc          | Integer Overflow or Wraparound Potential overflow due to multiplication before call to malloc at 4242876</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4237560,4237584 | instr_0x0040a8f | read            | Unchecked Return Value There is no check of the return value of 4237560 read.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4230588,4230716 | instr_0x00408db | fread           | Unchecked Return Value There is no check of the return value of 4230588 fread.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4230552,4230564 | instr_0x00408d9 | fread           | Unchecked Return Value There is no check of the return value of 4230552 fread.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4230372,4230384 | instr_0x00408ce | fread           | Unchecked Return Value There is no check of the return value of 4230372 fread.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4226340,4226356 | instr_0x00407d2 | fputc           | Unchecked Return Value There is no check of the return value of 4226340 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4224040,4226508 | instr_0x0040742 | atoi            | Unchecked Return Value There is no check of the return value of 4224040 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4224008,4226508 | instr_0x0040740 | atoi            | Unchecked Return Value There is no check of the return value of 4224008 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4223976,4226508 | instr_0x004073e | atoi            | Unchecked Return Value There is no check of the return value of 4223976 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4223796,4226508 | instr_0x0040733 | atoi            | Unchecked Return Value There is no check of the return value of 4223796 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4222620,4222876 | instr_0x00406e9 | fread           | Unchecked Return Value There is no check of the return value of 4222620 fread.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4222620,4222500 | instr_0x00406e9 | fread           | Unchecked Return Value There is no check of the return value of 4222620 fread.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4221852,4223280 | instr_0x00406b9 | atoi            | Unchecked Return Value There is no check of the return value of 4221852 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4218520,4220228 | instr_0x00405e9 | atoi            | Unchecked Return Value There is no check of the return value of 4218520 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4214952,4214968 | instr_0x004050a | fputc           | Unchecked Return Value There is no check of the return value of 4214952 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4213380,4213412 | instr_0x00404a8 | fputc           | Unchecked Return Value There is no check of the return value of 4213380 fputc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4211960,4211972 | instr_0x004044f | system          | Unchecked Return Value There is no check of the return value of 4211960 system.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208192,4208640 | instr_0x0040364 | atoi            | Unchecked Return Value There is no check of the return value of 4208192 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4208164,4208640 | instr_0x0040362 | atoi            | Unchecked Return Value There is no check of the return value of 4208164 atoi.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207124,4207180 | instr_0x0040321 | sscanf          | Unchecked Return Value There is no check of the return value of 4207124 sscanf.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207072,4207080 | instr_0x004031e | sscanf          | Unchecked Return Value There is no check of the return value of 4207072 sscanf.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4207004,4207012 | instr_0x0040319 | sscanf          | Unchecked Return Value There is no check of the return value of 4207004 sscanf.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4206552,4206564 | instr_0x00402fd | sscanf          | Unchecked Return Value There is no check of the return value of 4206552 sscanf.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202724,4202744 | instr_0x004020e | read            | Unchecked Return Value There is no check of the return value of 4202724 read.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202520,4202540 | instr_0x0040201 | read            | Unchecked Return Value There is no check of the return value of 4202520 read.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202316,4202336 | instr_0x00401f4 | read            | Unchecked Return Value There is no check of the return value of 4202316 read.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202160,4202180 | instr_0x00401eb | read            | Unchecked Return Value There is no check of the return value of 4202160 read.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/252.html" title="252" target="_blank" >CWE252</a>    | 4202004,4202024 | instr_0x00401e1 | read            | Unchecked Return Value There is no check of the return value of 4202004 read.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 4208112         | instr_0x004035f | NA              | Double Free Object may have been freed before at 4208112</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 4215320         | instr_0x0040521 | NA              | Double Free Object may have been freed before at 4215320</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 4215348         | instr_0x0040523 | NA              | Double Free Object may have been freed before at 4215348</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 4217724         | instr_0x00405b7 | NA              | Double Free Object may have been freed before at 4217724</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/415.html" title="415" target="_blank" >CWE415</a>    | 4224308         | instr_0x0040753 | NA              | Double Free Object may have been freed before at 4224308</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4205352         | instr_0x00402b2 | NA              | Use After Free Call to FUN_00402a2c at 4205352 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4205412         | instr_0x00402b6 | NA              | Use After Free Access through a dangling pointer at 4205412</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4208292         | instr_0x004036a | NA              | Use After Free Call to fopen at 4208292 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4216992         | instr_0x004058a | NA              | Use After Free Access through a dangling pointer at 4216992</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4217012         | instr_0x004058b | NA              | Use After Free Call to strchr at 4217012 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4217696         | instr_0x00405b6 | NA              | Use After Free Access through a dangling pointer at 4217696</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4219052         | instr_0x004060a | NA              | Use After Free Access through a dangling pointer at 4219052</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4219460         | instr_0x0040624 | NA              | Use After Free Access through a dangling pointer at 4219460</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4219488         | instr_0x0040626 | NA              | Use After Free Call to strchr at 4219488 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4224380         | instr_0x0040757 | NA              | Use After Free Access through a dangling pointer at 4224380</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4251176         | instr_0x0040de2 | NA              | Use After Free Call to FUN_0040dd44 at 4251176 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4251236         | instr_0x0040de6 | NA              | Use After Free Call to strcpy at 4251236 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4251584         | instr_0x0040dfc | NA              | Use After Free Call to sobj_add_string at 4251584 may access dangling pointers through its parameters</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/416.html" title="416" target="_blank" >CWE416</a>    | 4251712         | instr_0x0040e04 | NA              | Use After Free Access through a dangling pointer at 4251712</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a>    | 4251960         | instr_0x0040e13 | NA              | Use of sizeof on a Pointer Type sizeof on pointer at 4251960 strncmp.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a>    | 4252000         | instr_0x0040e16 | NA              | Use of sizeof on a Pointer Type sizeof on pointer at 4252000 strncmp.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a>    | 4252716         | instr_0x0040e42 | NA              | Use of sizeof on a Pointer Type sizeof on pointer at 4252716 strncmp.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/467.html" title="467" target="_blank" >CWE467</a>    | 4252756         | instr_0x0040e45 | NA              | Use of sizeof on a Pointer Type sizeof on pointer at 4252756 strncmp.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4204492,4204492 | instr_0x004027c | realloc         | NULL Pointer Dereference There is no check if the return value is NULL at 4204492 realloc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4207572,4207572 | instr_0x004033d | realloc         | NULL Pointer Dereference There is no check if the return value is NULL at 4207572 realloc.</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206924         | instr_0x0040314 | main            | Use of Potentially Dangerous Function main 4206924 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206976         | instr_0x0040318 | main            | Use of Potentially Dangerous Function main 4206976 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4207004         | instr_0x0040319 | main            | Use of Potentially Dangerous Function main 4207004 -&gt; sscanf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4207072         | instr_0x004031e | main            | Use of Potentially Dangerous Function main 4207072 -&gt; sscanf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4207124         | instr_0x0040321 | main            | Use of Potentially Dangerous Function main 4207124 -&gt; sscanf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4209648         | instr_0x00403bf | main            | Use of Potentially Dangerous Function main 4209648 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210496         | instr_0x00403f4 | main            | Use of Potentially Dangerous Function main 4210496 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210524         | instr_0x00403f5 | main            | Use of Potentially Dangerous Function main 4210524 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210548         | instr_0x00403f7 | main            | Use of Potentially Dangerous Function main 4210548 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210572         | instr_0x00403f8 | main            | Use of Potentially Dangerous Function main 4210572 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210608         | instr_0x00403fb | main            | Use of Potentially Dangerous Function main 4210608 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4210632         | instr_0x00403fc | main            | Use of Potentially Dangerous Function main 4210632 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4211884         | instr_0x004044a | main            | Use of Potentially Dangerous Function main 4211884 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4213004         | instr_0x0040490 | main            | Use of Potentially Dangerous Function main 4213004 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4213184         | instr_0x004049c | main            | Use of Potentially Dangerous Function main 4213184 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4213296         | instr_0x00404a3 | main            | Use of Potentially Dangerous Function main 4213296 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4213628         | instr_0x00404b7 | main            | Use of Potentially Dangerous Function main 4213628 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4222584         | instr_0x00406e7 | main            | Use of Potentially Dangerous Function main 4222584 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4222860         | instr_0x00406f8 | main            | Use of Potentially Dangerous Function main 4222860 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4224528         | instr_0x0040761 | main            | Use of Potentially Dangerous Function main 4224528 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4224724         | instr_0x004076d | main            | Use of Potentially Dangerous Function main 4224724 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4224748         | instr_0x004076e | main            | Use of Potentially Dangerous Function main 4224748 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4224776         | instr_0x0040770 | main            | Use of Potentially Dangerous Function main 4224776 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4224820         | instr_0x0040773 | main            | Use of Potentially Dangerous Function main 4224820 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4224856         | instr_0x0040775 | main            | Use of Potentially Dangerous Function main 4224856 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4225048         | instr_0x0040781 | main            | Use of Potentially Dangerous Function main 4225048 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4225328         | instr_0x0040793 | main            | Use of Potentially Dangerous Function main 4225328 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4225624         | instr_0x00407a5 | main            | Use of Potentially Dangerous Function main 4225624 -&gt; strncpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4226540         | instr_0x00407de | main            | Use of Potentially Dangerous Function main 4226540 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4227436         | instr_0x0040816 | main            | Use of Potentially Dangerous Function main 4227436 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4233012         | instr_0x0040973 | main            | Use of Potentially Dangerous Function main 4233012 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4233036         | instr_0x0040974 | main            | Use of Potentially Dangerous Function main 4233036 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4233648         | instr_0x004099b | main            | Use of Potentially Dangerous Function main 4233648 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4234408         | instr_0x00409ca | main            | Use of Potentially Dangerous Function main 4234408 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4234432         | instr_0x00409cc | main            | Use of Potentially Dangerous Function main 4234432 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4234472         | instr_0x00409ce | main            | Use of Potentially Dangerous Function main 4234472 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4234496         | instr_0x00409d0 | main            | Use of Potentially Dangerous Function main 4234496 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4234988         | instr_0x00409ee | main            | Use of Potentially Dangerous Function main 4234988 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4235012         | instr_0x00409f0 | main            | Use of Potentially Dangerous Function main 4235012 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4236668         | instr_0x0040a57 | main            | Use of Potentially Dangerous Function main 4236668 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4201656         | instr_0x00401cb | FUN_00401c90    | Use of Potentially Dangerous Function FUN_00401c90 4201656 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4201940         | instr_0x00401dd | FUN_00401da4    | Use of Potentially Dangerous Function FUN_00401da4 4201940 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4202096         | instr_0x00401e7 | FUN_00401e40    | Use of Potentially Dangerous Function FUN_00401e40 4202096 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4202252         | instr_0x00401f0 | FUN_00401edc    | Use of Potentially Dangerous Function FUN_00401edc 4202252 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4202432         | instr_0x00401fc | FUN_00401f78    | Use of Potentially Dangerous Function FUN_00401f78 4202432 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4202456         | instr_0x00401fd | FUN_00401f78    | Use of Potentially Dangerous Function FUN_00401f78 4202456 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4202636         | instr_0x0040208 | FUN_00402044    | Use of Potentially Dangerous Function FUN_00402044 4202636 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4202660         | instr_0x004020a | FUN_00402044    | Use of Potentially Dangerous Function FUN_00402044 4202660 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4203016         | instr_0x0040220 | FUN_00402110    | Use of Potentially Dangerous Function FUN_00402110 4203016 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4203192         | instr_0x004022b | FUN_00402280    | Use of Potentially Dangerous Function FUN_00402280 4203192 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4203360         | instr_0x0040236 | FUN_00402328    | Use of Potentially Dangerous Function FUN_00402328 4203360 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4203528         | instr_0x0040240 | FUN_004023d0    | Use of Potentially Dangerous Function FUN_004023d0 4203528 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4203696         | instr_0x004024b | FUN_00402478    | Use of Potentially Dangerous Function FUN_00402478 4203696 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4203884         | instr_0x0040256 | FUN_00402520    | Use of Potentially Dangerous Function FUN_00402520 4203884 -&gt; vsnprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4204860         | instr_0x0040293 | FUN_00402874    | Use of Potentially Dangerous Function FUN_00402874 4204860 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4205216         | instr_0x00402aa | FUN_00402a2c    | Use of Potentially Dangerous Function FUN_00402a2c 4205216 -&gt; memcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4205560         | instr_0x00402bf | FUN_00402bb8    | Use of Potentially Dangerous Function FUN_00402bb8 4205560 -&gt; vsnprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4205688         | instr_0x00402c7 | FUN_00402c2c    | Use of Potentially Dangerous Function FUN_00402c2c 4205688 -&gt; vsnprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4205828         | instr_0x00402d0 | FUN_00402c2c    | Use of Potentially Dangerous Function FUN_00402c2c 4205828 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206236         | instr_0x00402e9 | FUN_00402e00    | Use of Potentially Dangerous Function FUN_00402e00 4206236 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206284         | instr_0x00402ec | FUN_00402e00    | Use of Potentially Dangerous Function FUN_00402e00 4206284 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206552         | instr_0x00402fd | FUN_00402e00    | Use of Potentially Dangerous Function FUN_00402e00 4206552 -&gt; sscanf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4206604         | instr_0x0040300 | FUN_00402e00    | Use of Potentially Dangerous Function FUN_00402e00 4206604 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216216         | instr_0x0040559 | FUN_00405430    | Use of Potentially Dangerous Function FUN_00405430 4216216 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216368         | instr_0x0040563 | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216368 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216420         | instr_0x0040566 | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216420 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216444         | instr_0x0040567 | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216444 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216488         | instr_0x004056a | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216488 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216512         | instr_0x004056c | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216512 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216548         | instr_0x004056e | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216548 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4216572         | instr_0x004056f | FUN_004055e0    | Use of Potentially Dangerous Function FUN_004055e0 4216572 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4217468         | instr_0x00405a7 | FUN_0040581c    | Use of Potentially Dangerous Function FUN_0040581c 4217468 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4220808         | instr_0x0040678 | FUN_0040674c    | Use of Potentially Dangerous Function FUN_0040674c 4220808 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4226796         | instr_0x00407ee | FUN_00407e50    | Use of Potentially Dangerous Function FUN_00407e50 4226796 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4228764         | instr_0x0040869 | FUN_00408408    | Use of Potentially Dangerous Function FUN_00408408 4228764 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4229052         | instr_0x004087b | FUN_00408408    | Use of Potentially Dangerous Function FUN_00408408 4229052 -&gt; memcmp</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4229380         | instr_0x0040890 | FUN_004088b8    | Use of Potentially Dangerous Function FUN_004088b8 4229380 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4229692         | instr_0x00408a3 | FUN_004089d0    | Use of Potentially Dangerous Function FUN_004089d0 4229692 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4229744         | instr_0x00408a7 | FUN_004089d0    | Use of Potentially Dangerous Function FUN_004089d0 4229744 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4230668         | instr_0x00408e0 | FUN_00408be4    | Use of Potentially Dangerous Function FUN_00408be4 4230668 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4231428         | instr_0x0040910 | FUN_00409034    | Use of Potentially Dangerous Function FUN_00409034 4231428 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4236936         | instr_0x0040a68 | FUN_0040a660    | Use of Potentially Dangerous Function FUN_0040a660 4236936 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4237188         | instr_0x0040a78 | FUN_0040a6fc    | Use of Potentially Dangerous Function FUN_0040a6fc 4237188 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4237680         | instr_0x0040a97 | FUN_0040a940    | Use of Potentially Dangerous Function FUN_0040a940 4237680 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4237792         | instr_0x0040a9e | FUN_0040a9b0    | Use of Potentially Dangerous Function FUN_0040a9b0 4237792 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4237904         | instr_0x0040aa5 | FUN_0040aa20    | Use of Potentially Dangerous Function FUN_0040aa20 4237904 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238016         | instr_0x0040aac | FUN_0040aa90    | Use of Potentially Dangerous Function FUN_0040aa90 4238016 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238128         | instr_0x0040ab3 | FUN_0040ab00    | Use of Potentially Dangerous Function FUN_0040ab00 4238128 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238240         | instr_0x0040aba | FUN_0040ab70    | Use of Potentially Dangerous Function FUN_0040ab70 4238240 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238376         | instr_0x0040ac2 | FUN_0040abe0    | Use of Potentially Dangerous Function FUN_0040abe0 4238376 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238400         | instr_0x0040ac4 | FUN_0040abe0    | Use of Potentially Dangerous Function FUN_0040abe0 4238400 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238536         | instr_0x0040acc | FUN_0040ac80    | Use of Potentially Dangerous Function FUN_0040ac80 4238536 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4238560         | instr_0x0040ace | FUN_0040ac80    | Use of Potentially Dangerous Function FUN_0040ac80 4238560 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4239012         | instr_0x0040aea | FUN_0040ae54    | Use of Potentially Dangerous Function FUN_0040ae54 4239012 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4239224         | instr_0x0040af7 | xmldbc_get_wb   | Use of Potentially Dangerous Function xmldbc_get_wb 4239224 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4239592         | instr_0x0040b0e | FUN_0040affc    | Use of Potentially Dangerous Function FUN_0040affc 4239592 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4240012         | instr_0x0040b28 | FUN_0040b254    | Use of Potentially Dangerous Function FUN_0040b254 4240012 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4240140         | instr_0x0040b30 | FUN_0040b2d4    | Use of Potentially Dangerous Function FUN_0040b2d4 4240140 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4240268         | instr_0x0040b38 | FUN_0040b354    | Use of Potentially Dangerous Function FUN_0040b354 4240268 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4240404         | instr_0x0040b41 | FUN_0040b3d4    | Use of Potentially Dangerous Function FUN_0040b3d4 4240404 -&gt; vsnprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4240532         | instr_0x0040b49 | FUN_0040b448    | Use of Potentially Dangerous Function FUN_0040b448 4240532 -&gt; vsnprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4240672         | instr_0x0040b52 | FUN_0040b448    | Use of Potentially Dangerous Function FUN_0040b448 4240672 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4241480         | instr_0x0040b84 | usock_open      | Use of Potentially Dangerous Function usock_open 4241480 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4241556         | instr_0x0040b89 | usock_open      | Use of Potentially Dangerous Function usock_open 4241556 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4241660         | instr_0x0040b8f | usock_open      | Use of Potentially Dangerous Function usock_open 4241660 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4242608         | instr_0x0040bcb | FUN_0040bb98    | Use of Potentially Dangerous Function FUN_0040bb98 4242608 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4243540         | instr_0x0040c05 | susock_open     | Use of Potentially Dangerous Function susock_open 4243540 -&gt; snprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4244820         | instr_0x0040c55 | FUN_0040c504    | Use of Potentially Dangerous Function FUN_0040c504 4244820 -&gt; sprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4251148         | instr_0x0040de0 | sobj_add_string | Use of Potentially Dangerous Function sobj_add_string 4251148 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4251236         | instr_0x0040de6 | sobj_add_string | Use of Potentially Dangerous Function sobj_add_string 4251236 -&gt; strcpy</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4251568         | instr_0x0040dfb | FUN_0040df48    | Use of Potentially Dangerous Function FUN_0040df48 4251568 -&gt; vsnprintf</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4255652         | instr_0x0040efa | FUN_0040ef40    | Use of Potentially Dangerous Function FUN_0040ef40 4255652 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4256552         | instr_0x0040f32 | FUN_0040f2f8    | Use of Potentially Dangerous Function FUN_0040f2f8 4256552 -&gt; strlen</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4257208         | instr_0x0040f5b | FUN_0040f55c    | Use of Potentially Dangerous Function FUN_0040f55c 4257208 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4257360         | instr_0x0040f65 | FUN_0040f5fc    | Use of Potentially Dangerous Function FUN_0040f5fc 4257360 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/676.html" title="676" target="_blank" >CWE676</a>    | 4257576         | instr_0x0040f72 | FUN_0040f6c4    | Use of Potentially Dangerous Function FUN_0040f6c4 4257576 -&gt; memset</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a>    | 4229908         | instr_0x00408b1 | NA              | Large memory allocation Potential stack memory exhaustion at 0x4229908</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4204556         | instr_0x0040280 | NA              | NULL Pointer Dereference Memory access at 4204556 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4207612         | instr_0x004033f | NA              | NULL Pointer Dereference Memory access at 4207612 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4216192         | instr_0x0040558 | NA              | NULL Pointer Dereference Memory access at 4216192 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4217036         | instr_0x004058c | NA              | NULL Pointer Dereference Memory access at 4217036 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4219096         | instr_0x004060d | NA              | NULL Pointer Dereference Memory access at 4219096 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4219504         | instr_0x0040627 | NA              | NULL Pointer Dereference Memory access at 4219504 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4219572         | instr_0x004062b | NA              | NULL Pointer Dereference Memory access at 4219572 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4223792         | instr_0x0040733 | NA              | NULL Pointer Dereference Memory access at 4223792 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4224168         | instr_0x004074a | NA              | NULL Pointer Dereference Memory access at 4224168 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4241772         | instr_0x0040b96 | NA              | NULL Pointer Dereference Memory access at 4241772 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4250776         | instr_0x0040dc9 | NA              | NULL Pointer Dereference Memory access at 4250776 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4250780         | instr_0x0040dc9 | NA              | NULL Pointer Dereference Memory access at 4250780 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4253932         | instr_0x0040e8e | NA              | NULL Pointer Dereference Memory access at 4253932 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4254756         | instr_0x0040ec2 | NA              | NULL Pointer Dereference Memory access at 4254756 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4255012         | instr_0x0040ed2 | NA              | NULL Pointer Dereference Memory access at 4255012 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4255060         | instr_0x0040ed5 | NA              | NULL Pointer Dereference Memory access at 4255060 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4255136         | instr_0x0040eda | NA              | NULL Pointer Dereference Memory access at 4255136 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4255204         | instr_0x0040ede | NA              | NULL Pointer Dereference Memory access at 4255204 may result in a NULL dereference</pre>
+<pre>	<a href="https://cwe.mitre.org/data/definitions/476.html" title="476" target="_blank" >CWE476</a>    | 4255788         | instr_0x0040f02 | NA              | NULL Pointer Dereference Memory access at 4255788 may result in a NULL dereference</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

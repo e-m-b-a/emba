@@ -1,0 +1,489 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./../s22_php_check.html" title="./../s22_php_check.html" >&laquo; Back to s22_php_check</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>&lt;?include "/htdocs/phplib/inet.php";?&gt;</pre>
+<pre>&lt;?include "/htdocs/phplib/inf.php";?&gt;</pre>
+<pre>&lt;script type="text/javascript"&gt;</pre>
+<pre>var tmpSMS;</pre>
+<pre>var sms;</pre>
+<pre>var must_wait=0;</pre>
+<br />
+<pre>function Page() {}</pre>
+<pre>Page.prototype =</pre>
+<pre>{</pre>
+<pre>	services: "SMS",</pre>
+<pre>        OnLoad: function() {},</pre>
+<pre>        OnUnload: function() {},</pre>
+<pre>	OnSubmitCallback: function (code, result) { return false; },</pre>
+<pre>	InitValue: function(xml)</pre>
+<pre>        {</pre>
+<pre><span class="green">		var get_Treturn = '&lt;?if($_GET["Treturn"]=="") echo "0"; else echo $_GET["Treturn"];?&gt;'</span></span>   //possible issue identified - semgrep</pre>
+<pre>		if(get_Treturn!="1" || must_wait == 1)</pre>
+<pre>		{	</pre>
+<pre>			self.location.href = "./bsc_sms_inbox_rlt.php";</pre>
+<pre>		}</pre>
+<br />
+<pre>		/* turn off sms led. */</pre>
+<pre>		Service("SMS.LED.OFF");</pre>
+<pre>		</pre>
+<pre>		PXML.doc = xml;</pre>
+<pre>                sms = PXML.FindModule("SMS");</pre>
+<pre>                if (sms===""){ alert("InitValue ERROR!"); return false; }</pre>
+<pre>		</pre>
+<pre>		sms += "/runtime/callmgr/voice_service/mobile/sms/sm";</pre>
+<pre>		tmpSMS = sms;</pre>
+<br />
+<pre>		var str = "&lt;table class=\"general\" id=\"Tsms\"&gt;&lt;tr&gt;";</pre>
+<pre>		str += "&lt;th width=\"20px\"&gt;&lt;input id=\"checkall\" type=\"checkbox\" onclick=\"SelectAll()\"/&gt;&lt;/th&gt;";</pre>
+<pre>		str += '&lt;th width="100px"&gt;' + "&lt;?echo i18n("From");?&gt;" + "&lt;/th&gt;";</pre>
+<pre>		str += '&lt;th width="151px"&gt;' + "&lt;?echo i18n("Timestamp");?&gt;" + "&lt;/th&gt;";</pre>
+<pre>		str += '&lt;th width="162px"&gt;' + "&lt;?echo i18n("Text");?&gt;" + "&lt;/th&gt;";</pre>
+<pre>		str += "&lt;/tr&gt;";</pre>
+<br />
+<pre>		var defaulttmp = 0;</pre>
+<pre>	</pre>
+<pre>		for (var i=1; i&lt;=&lt;?=$SMS_MAX_COUNT?&gt</span>; i+=1)</pre>
+<pre>                {</pre>
+<pre>			var smsdelete = XG(sms + ":" + i + "/delete");</pre>
+<pre>			var smsfrom = XG(sms + ":" + i + "/from");</pre>
+<pre>			var smsdate = XG(sms + ":" + i + "/date");</pre>
+<br />
+<pre>			var smsmultiple = XG(sms + ":" + i + "/multiple_type");</pre>
+<pre>                        var multiple_total = 0;</pre>
+<br />
+<pre>                        var smscontent = "";</pre>
+<pre>                        if(smsmultiple == 1)</pre>
+<pre>                        {</pre>
+<pre>                                multiple_total = XG(sms + ":" + i + "/multiple_total");</pre>
+<pre>                                for(var j=1; j&lt;=multiple_total; j+=1)</pre>
+<pre>                                {</pre>
+<pre>                                        smscontent += RUnicode(XG(sms + ":" + i + "/multiple:"+ j +"/content"));</pre>
+<pre>                                }</pre>
+<pre>                        }</pre>
+<pre>                        else</pre>
+<pre>                        {</pre>
+<pre>                                smscontent = RUnicode(XG(sms + ":" + i + "/content"));</pre>
+<pre>                        }</pre>
+<br />
+<pre>			</pre>
+<pre>			if(smsfrom != "" &amp;&amp; smsdate != "" &amp;&amp; smscontent != "")</pre>
+<pre>			{</pre>
+<pre>				str += "&lt;tr onclick='TDchange("+ i +")'&gt;";</pre>
+<pre>                        	str += "&lt;td width=\"20px\"&gt;&lt;input id='cbx"+ i +"' type=\"checkbox\" /&gt;&lt;/td&gt;";</pre>
+<pre>                        	str += "&lt;td width=\"115px\"&gt;" + smsfrom + "&lt;/td&gt;";</pre>
+<pre>				str += "&lt;td width=\"136px\"&gt;" + smsdate + "&lt;/td&gt;";</pre>
+<pre>				str += "&lt;td width=\"162px\"&gt;" + smscontent.substring(0,20)+"..." + "&lt;/td&gt;";</pre>
+<pre>				str += "&lt;/tr&gt;";</pre>
+<br />
+<pre>				defaulttmp += 1;</pre>
+<pre>				if(defaulttmp == 1)</pre>
+<pre>				{</pre>
+<pre>					OBJ("sms_number").value = smsfrom;</pre>
+<pre>					OBJ("sms_content").value = smscontent;</pre>
+<pre>				}</pre>
+<pre>			}</pre>
+<pre>		}</pre>
+<pre>		str += "&lt;/table&gt;";</pre>
+<br />
+<pre>		OBJ("sms_inbox").innerHTML = str;</pre>
+<br />
+<pre>		new TableSorter("Tsms",2);		</pre>
+<br />
+<pre>                return true;</pre>
+<pre>        },</pre>
+<pre>        PreSubmit: function() </pre>
+<pre>	{</pre>
+<pre>		must_wait="1"; </pre>
+<pre>		for (var i=1; i&lt;=&lt;?=$SMS_MAX_COUNT?&gt</span>; i+=1)</pre>
+<pre>                {</pre>
+<pre>			if(OBJ("cbx"+i) != null)</pre>
+<pre>			{</pre>
+<pre>				if(OBJ("cbx"+i).checked)</pre>
+<pre>				{</pre>
+<pre>					XS(sms + ":" + i + "/delete","1");</pre>
+<pre>				}</pre>
+<pre>				else</pre>
+<pre>				{</pre>
+<pre>					XS(sms + ":" + i + "/delete","0");</pre>
+<pre>				}</pre>
+<pre>			}</pre>
+<pre>		}	</pre>
+<br />
+<pre>		return PXML.doc;</pre>
+<pre>	},</pre>
+<pre>        IsDirty: null,</pre>
+<pre>        Synchronize: function() {}</pre>
+<pre>        // The above are MUST HAVE methods ...</pre>
+<pre>        ///////////////////////////////////////////////////////////////////////</pre>
+<pre>}</pre>
+<br />
+<pre>function Service(svc)</pre>
+<pre>{</pre>
+<pre>	var ajaxObj = GetAjaxObj("SERVICE");</pre>
+<pre>        ajaxObj.createRequest();</pre>
+<pre>        ajaxObj.onCallback = function (){}</pre>
+<pre>        ajaxObj.setHeader("Content-Type", "application/x-www-form-urlencoded");</pre>
+<pre>        ajaxObj.sendRequest("service.cgi", "EVENT="+svc);</pre>
+<pre>}</pre>
+<br />
+<pre>function RUnicode(s)</pre>
+<pre>{</pre>
+<pre>   var rs="";</pre>
+<pre>   var m = "";</pre>
+<pre>   for(i=0 ; i &lt; s.length ; i=i+4)</pre>
+<pre>   {</pre>
+<pre>      m = s.substring(i,i+4);</pre>
+<pre>      if(m=="0022")</pre>
+<pre>      {</pre>
+<pre>	rs += "\"";</pre>
+<pre>      }</pre>
+<pre>      else</pre>
+<pre>      {</pre>
+<pre>      	rs += String.fromCharCode(parseInt(m,16));</pre>
+<pre>      }</pre>
+<pre>   }</pre>
+<pre>   return rs;</pre>
+<pre>}</pre>
+<br />
+<pre>function TDchange(inx)</pre>
+<pre>{</pre>
+<pre>	var smsmultiple = XG(tmpSMS + ":" + inx + "/multiple_type");</pre>
+<pre>        var multiple_total = 0;</pre>
+<br />
+<pre>        var smscontent = "";</pre>
+<pre>        if(smsmultiple == 1)</pre>
+<pre>        {</pre>
+<pre>		multiple_total = XG(tmpSMS + ":" + inx + "/multiple_total");</pre>
+<pre>                for(var j=1; j&lt;=multiple_total; j+=1)</pre>
+<pre>                {</pre>
+<pre>			smscontent += RUnicode(XG(tmpSMS + ":" + inx + "/multiple:"+ j +"/content"));</pre>
+<pre>                }</pre>
+<pre>        }</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		smscontent = RUnicode(XG(tmpSMS + ":" + inx + "/content"));</pre>
+<pre>	}</pre>
+<pre>	</pre>
+<pre>	OBJ("sms_content").value = smscontent;</pre>
+<pre>	OBJ("sms_number").value = XG(tmpSMS + ":" + inx + "/from");</pre>
+<pre>}</pre>
+<br />
+<pre>function SelectAll()</pre>
+<pre>{</pre>
+<pre>	for (var i=0;i &lt; OBJ("mainform").elements.length;i++)</pre>
+<pre>	{</pre>
+<pre>		var e = OBJ("mainform").elements[i];</pre>
+<pre>		if (e.id != 'checkall' &amp;&amp; e.type == 'checkbox' &amp;&amp; e.disabled==false)</pre>
+<pre>			e.checked = OBJ("mainform").checkall.checked;</pre>
+<pre>	}</pre>
+<pre>}</pre>
+<br />
+<pre>function TableSorter(table)</pre>
+<pre>{</pre>
+<pre>	this.Table = this.$(table);</pre>
+<pre>	if(this.Table.rows.length &lt;= 1)</pre>
+<pre>	{</pre>
+<pre>		return;</pre>
+<pre>	}</pre>
+<pre>	this.Init(arguments);</pre>
+<pre>}</pre>
+<br />
+<pre>TableSorter.prototype.NormalCss = "NormalCss";</pre>
+<pre>TableSorter.prototype.SortAscCss = "SortAscCss";</pre>
+<pre>TableSorter.prototype.SortDescCss = "SortDescCss";</pre>
+<br />
+<pre>TableSorter.prototype.Init = function(args)</pre>
+<pre>{</pre>
+<pre>	this.ViewState = [];</pre>
+<pre>	for(var x = 0; x &lt; this.Table.rows[0].cells.length; x++)</pre>
+<pre>	{</pre>
+<pre>		this.ViewState[x] = false;</pre>
+<pre>	}</pre>
+<br />
+<pre>	if(args.length &gt; 1)</pre>
+<pre>	{</pre>
+<pre>		for(var x = 1; x &lt; args.length; x++)</pre>
+<pre>		{</pre>
+<pre>			if(args[x] &gt; this.Table.rows[0].cells.length)</pre>
+<pre>			{</pre>
+<pre>				continue;</pre>
+<pre>			}</pre>
+<pre>			else</pre>
+<pre>			{</pre>
+<pre>				this.Table.rows[0].cells[args[x]].onclick = this.GetFunction(this,"Sort",args[x]);</pre>
+<pre>				this.Table.rows[0].cells[args[x]].style.cursor = "pointer";</pre>
+<pre>			}</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		for(var x = 0; x &lt; this.Table.rows[0].cells.length; x++)</pre>
+<pre>		{</pre>
+<pre>			this.Table.rows[0].cells[x].onclick = this.GetFunction(this,"Sort",x);</pre>
+<pre>			this.Table.rows[0].cells[x].style.cursor = "pointer";</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<pre>}	</pre>
+<br />
+<pre>TableSorter.prototype.$ = function(element)</pre>
+<pre>{</pre>
+<pre>	return document.getElementById(element);</pre>
+<pre>}</pre>
+<br />
+<pre>TableSorter.prototype.GetFunction = function(variable,method,param)</pre>
+<pre>{</pre>
+<pre>	return function()</pre>
+<pre>	{</pre>
+<pre>		variable[method](param);</pre>
+<pre>	}</pre>
+<pre>}</pre>
+<br />
+<pre>TableSorter.prototype.Sort = function(col)</pre>
+<pre>{</pre>
+<pre>	var SortAsNumber = true;</pre>
+<pre>	for(var x = 0; x &lt; this.Table.rows[0].cells.length; x++)</pre>
+<pre>	{</pre>
+<pre>		this.Table.rows[0].cells[x].className = this.NormalCss;</pre>
+<pre>	}</pre>
+<pre>	</pre>
+<pre>	var Sorter = [];</pre>
+<pre>	for(var x = 1; x &lt; this.Table.rows.length; x++)</pre>
+<pre>	{</pre>
+<pre>		Sorter[x-1] = [this.Table.rows[x].cells[col].innerHTML, x];</pre>
+<pre>		SortAsNumber = SortAsNumber &amp;&amp; this.IsNumeric(Sorter[x-1][0]);</pre>
+<pre>	}</pre>
+<pre>	</pre>
+<pre>	if(SortAsNumber)</pre>
+<pre>	{</pre>
+<pre>		for(var x = 0; x &lt; Sorter.length; x++)</pre>
+<pre>		{</pre>
+<pre>			for(var y = x + 1; y &lt; Sorter.length; y++)</pre>
+<pre>			{</pre>
+<pre>				if(parseFloat(Sorter[y][0]) &lt; parseFloat(Sorter[x][0]))</pre>
+<pre>				{</pre>
+<pre>					var tmp = Sorter[x];</pre>
+<pre>					Sorter[x] = Sorter[y];</pre>
+<pre>					Sorter[y] = tmp;</pre>
+<pre>				}</pre>
+<pre>			}</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		Sorter.sort();</pre>
+<pre>	}</pre>
+<br />
+<pre>	if(this.ViewState[col])</pre>
+<pre>	{</pre>
+<pre>		Sorter.reverse();</pre>
+<pre>		this.ViewState[col] = false;</pre>
+<pre>		this.Table.rows[0].cells[col].className = this.SortDescCss;</pre>
+<pre>	}</pre>
+<pre>	else</pre>
+<pre>	{</pre>
+<pre>		this.ViewState[col] = true;</pre>
+<pre>		this.Table.rows[0].cells[col].className = this.SortAscCss;</pre>
+<pre>	}</pre>
+<pre>	</pre>
+<pre>	var Rank = [];</pre>
+<pre>	for(var x = 0; x &lt; Sorter.length; x++)</pre>
+<pre>	{</pre>
+<pre>		Rank[x] = this.GetRowHtml(this.Table.rows[Sorter[x][1]]);</pre>
+<pre>	}</pre>
+<pre>	for(var x = 1; x &lt; this.Table.rows.length; x++)</pre>
+<pre>	{</pre>
+<pre>		for(var y = 0; y &lt; this.Table.rows[x].cells.length; y++)</pre>
+<pre>		{</pre>
+<pre>			this.Table.rows[x].cells[y].innerHTML = Rank[x-1][y];</pre>
+<pre>		}</pre>
+<pre>	}</pre>
+<br />
+<pre>	this.OnSorted(this.Table.rows[0].cells[col], this.ViewState[col]);</pre>
+<pre>}</pre>
+<br />
+<pre>TableSorter.prototype.GetRowHtml = function(row)</pre>
+<pre>{</pre>
+<pre>	var result = [];</pre>
+<pre>	for(var x = 0; x &lt; row.cells.length; x++)</pre>
+<pre>	{</pre>
+<pre>		result[x] = row.cells[x].innerHTML;</pre>
+<pre>	}</pre>
+<pre>	return result;</pre>
+<pre>}</pre>
+<br />
+<pre>TableSorter.prototype.IsNumeric = function(num)</pre>
+<pre>{</pre>
+<pre>	return /^\d+(\.\d+)?$/.test(num);</pre>
+<pre>}</pre>
+<br />
+<pre>TableSorter.prototype.OnSorted = function(cell, IsAsc)</pre>
+<pre>{</pre>
+<pre>	return;</pre>
+<pre>}</pre>
+<br />
+<pre>function ReplyMessage()</pre>
+<pre>{</pre>
+<pre>	self.location="bsc_sms_send.php?receiver=" + OBJ("sms_number").value;</pre>
+<pre>}</pre>
+<br />
+<pre>&lt;/script&gt;</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

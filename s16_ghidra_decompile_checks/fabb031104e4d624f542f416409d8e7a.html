@@ -1,0 +1,584 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./778ab49b01eee981ddc880cac73a381b.html" title="./778ab49b01eee981ddc880cac73a381b.html" >&laquo; Back to 778ab49b01eee981ddc880cac73a381b</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */</pre>
+<br />
+<pre>void main(int param_1,char **param_2)</pre>
+<br />
+<pre>{</pre>
+<pre>  undefined4 *puVar1;</pre>
+<pre>  undefined4 *puVar2;</pre>
+<pre>  char *pcVar3;</pre>
+<pre>  uint uVar4;</pre>
+<pre>  uint uVar5;</pre>
+<pre>  int iVar6;</pre>
+<pre>  __pid_t _Var7;</pre>
+<pre>  FILE *__stream;</pre>
+<pre>  __sighandler_t p_Var8;</pre>
+<pre>  timeval *__timeout;</pre>
+<pre>  __fd_mask *p_Var9;</pre>
+<pre>  undefined4 *puVar10;</pre>
+<pre>  int *piVar11;</pre>
+<pre>  sockaddr *psVar12;</pre>
+<pre>  char *__s;</pre>
+<pre>  addrinfo *local_100;</pre>
+<pre>  addrinfo *local_fc;</pre>
+<pre>  uint local_f8;</pre>
+<pre>  undefined4 local_f4;</pre>
+<pre>  undefined4 local_f0;</pre>
+<pre>  undefined4 local_ec;</pre>
+<pre>  undefined4 local_e8;</pre>
+<pre>  undefined4 local_e4;</pre>
+<pre>  undefined4 local_e0;</pre>
+<pre>  undefined4 local_dc;</pre>
+<pre>  undefined4 local_d8;</pre>
+<pre>  uint local_d4;</pre>
+<pre>  addrinfo local_d0;</pre>
+<pre>  uint local_b0 [32];</pre>
+<pre>  uint *local_30;</pre>
+<pre>  undefined4 *local_2c;</pre>
+<pre>  </pre>
+<pre>  __s = *param_2;</pre>
+<pre>  pcVar3 = strrchr(__s,0x2f);</pre>
+<pre>  if (pcVar3 != (char *)0x0) {</pre>
+<pre>    __s = pcVar3 + 1;</pre>
+<pre>  }</pre>
+<pre>  DAT_00438d08 = &amp;siplist;</pre>
+<pre>  DAT_00438cdc = &amp;nisnamelist;</pre>
+<pre>  DAT_00438d2c = &amp;nisplist;</pre>
+<pre>  DAT_00438cf8 = &amp;nispnamelist;</pre>
+<pre>  DAT_00438cf0 = &amp;bcmcslist;</pre>
+<pre>  DAT_00438cd4 = &amp;bcmcsnamelist;</pre>
+<pre>  siplist = 0;</pre>
+<pre>  nisnamelist = 0;</pre>
+<pre>  nisplist = 0;</pre>
+<pre>  nispnamelist = 0;</pre>
+<pre>  bcmcslist = 0;</pre>
+<pre>  bcmcsnamelist = 0;</pre>
+<pre>  DAT_00438cc4 = &amp;sipnamelist;</pre>
+<pre>  DAT_00438ccc = &amp;ntplist;</pre>
+<pre>  DAT_00438ce4 = &amp;nislist;</pre>
+<pre>  sipnamelist = 0;</pre>
+<pre>  ntplist = 0;</pre>
+<pre>  nislist = 0;</pre>
+<pre>  DAT_00438d1c = &amp;dnsnamelist;</pre>
+<pre>  DAT_0043a63c = 0;</pre>
+<pre>  DAT_0043a640 = &amp;DAT_0043a63c;</pre>
+<pre>  dnslist = 0;</pre>
+<pre>  DAT_00438d00 = &amp;dnslist;</pre>
+<pre>  dnsnamelist = 0;</pre>
+<pre><span class="green">  memset(&amp;DAT_0043a648,0,0x80)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">  memset(inf_uid,0,0x20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  uVar4 = time((time_t *)0x0);</pre>
+<pre>  uVar5 = getpid();</pre>
+<pre>  srandom(uVar5 &amp; uVar4);</pre>
+<pre>  local_2c = &amp;local_f4;</pre>
+<pre>LAB_0040960c:</pre>
+<pre><span class="green">  iVar6 = getopt(param_1,param_2,"c:dDfk:n:p:P:s:u:")</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (iVar6 != -1) {</pre>
+<pre>    do {</pre>
+<pre>      switch(iVar6) {</pre>
+<pre>      case 0x44:</pre>
+<pre>        goto switchD_0040968c_caseD_44;</pre>
+<pre>      default:</pre>
+<pre>        goto switchD_0040968c_caseD_45;</pre>
+<pre>      case 0x50:</pre>
+<pre>        PTR_s__var_run_dhcp6s_pid_004388a0 = _optarg;</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 99:</pre>
+<pre>        PTR_s__var_etc_dhcp6s_conf_00438898 = _optarg;</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 100:</pre>
+<pre>        DAT_00438db4 = 1;</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 0x66:</pre>
+<pre>        foreground = foreground + 1;</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 0x6b:</pre>
+<pre>        PTR_s__var_etc_dhcp6sctlkey_0043889c = _optarg;</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 0x6e:</pre>
+<pre>        warnx("-n dnsserv option was obsoleted.  use configuration file.");</pre>
+<pre><span class="green">        iVar6 = inet_pton(10,_optarg,local_2c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar6 == 1) {</pre>
+<pre><span class="green">          puVar10 = (undefined4 *)malloc(0x30)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          puVar1 = DAT_0043a640;</pre>
+<pre>          if (puVar10 != (undefined4 *)0x0) {</pre>
+<pre>            puVar10[3] = local_f4;</pre>
+<pre>            puVar10[4] = local_f0;</pre>
+<pre>            puVar10[5] = local_ec;</pre>
+<pre>            *puVar10 = 0;</pre>
+<pre>            puVar10[6] = local_e8;</pre>
+<pre>            puVar2 = puVar10;</pre>
+<pre>            *DAT_0043a640 = puVar10;</pre>
+<pre>            DAT_0043a640 = puVar2;</pre>
+<pre>            puVar10[1] = puVar1;</pre>
+<pre>            goto LAB_0040960c;</pre>
+<pre>          }</pre>
+<pre>          errx(1,"malloc failed for a DNS server");</pre>
+<pre>        }</pre>
+<pre>        pcVar3 = "invalid DNS server %s";</pre>
+<pre>        errx(1,"invalid DNS server %s",_optarg);</pre>
+<pre>        goto LAB_0040a3f0;</pre>
+<pre>      case 0x70:</pre>
+<pre>        PTR_DAT_00438894 = _optarg;</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 0x73:</pre>
+<pre><span class="green">        strcpy(&amp;DAT_0043a648,_optarg)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        goto LAB_0040960c;</pre>
+<pre>      case 0x75:</pre>
+<pre><span class="green">        strcpy(inf_uid,_optarg)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">        iVar6 = getopt(param_1,param_2,"c:dDfk:n:p:P:s:u:")</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar6 == -1) goto LAB_004096d0;</pre>
+<pre>      }</pre>
+<pre>    } while( true );</pre>
+<pre>  }</pre>
+<pre>LAB_004096d0:</pre>
+<pre>  if (_optind != param_1 + -1) {</pre>
+<pre>switchD_0040968c_caseD_45:</pre>
+<pre>    fwrite("usage: dhcp6s [-c configfile] [-dDf] [-k ctlkeyfile] [-p ctlport] [-P pidfile] [-s hlpfile] [-u infuid] intface\n"</pre>
+<pre>           ,1,0x70,_stderr);</pre>
+<pre>LAB_0040965c:</pre>
+<pre>                    /* WARNING: Subroutine does not return */</pre>
+<pre>    exit(0);</pre>
+<pre>  }</pre>
+<pre>  param_2 = param_2 + _optind;</pre>
+<pre>  DAT_00438db0 = *param_2;</pre>
+<pre>  if (foreground == 0) {</pre>
+<pre>    openlog(__s,9,0x18);</pre>
+<pre>  }</pre>
+<pre>  setloglevel(DAT_00438db4);</pre>
+<pre>  iVar6 = ifinit(DAT_00438db0);</pre>
+<pre>  if (iVar6 == 0) goto LAB_0040a144;</pre>
+<pre>  iVar6 = cfparse(PTR_s__var_etc_dhcp6s_conf_00438898);</pre>
+<pre>  if (iVar6 != 0) {</pre>
+<pre>    dprintf(3,"main","failed to parse configuration file");</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  if ((foreground == 0) &amp;&amp; (iVar6 = daemon(0,0), iVar6 &lt; 0)) {</pre>
+<pre>    err(1,"daemon");</pre>
+<pre>LAB_0040a4b0:</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(4,"server6_init","failed to set signal: %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  _Var7 = getpid();</pre>
+<pre><span class="green">  __stream = fopen(PTR_s__var_run_dhcp6s_pid_004388a0,"w")</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (__stream != (FILE *)0x0) {</pre>
+<pre>    fprintf(__stream,"%d\n",_Var7);</pre>
+<pre>    fclose(__stream);</pre>
+<pre>  }</pre>
+<pre>  if (DAT_0043a63c != 0) {</pre>
+<pre>    if (dnslist != 0) {</pre>
+<pre>      dprintf(6,"main","do not specify DNS servers both by command line and by configuration file.")</pre>
+<pre>      ;</pre>
+<pre>      goto LAB_0040a144;</pre>
+<pre>    }</pre>
+<pre>    dhcp6_move_list(&amp;dnslist,&amp;DAT_0043a63c);</pre>
+<pre>    DAT_0043a63c = 0;</pre>
+<pre>    DAT_0043a640 = &amp;DAT_0043a63c;</pre>
+<pre>  }</pre>
+<pre>  argv_ifname = *param_2;</pre>
+<pre>  local_f8 = 1;</pre>
+<pre>  DAT_00439604 = &amp;DAT_00439600;</pre>
+<pre>  DAT_00439600 = 0;</pre>
+<pre>  iVar6 = lease_init();</pre>
+<pre>  pcVar3 = "! ";</pre>
+<pre>  if (iVar6 != 0) {</pre>
+<pre>LAB_0040a3f0:</pre>
+<pre><span class="green">    dprintf(3,pcVar3 + 0x283c,"failed to initialize the lease table")</span></span>   //possible issue identified - semgrep</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  ifidx = if_nametoindex(DAT_00438db0);</pre>
+<pre>  if (ifidx == 0) {</pre>
+<pre>    dprintf(3,"server6_init","invalid interface %s",DAT_00438db0);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  duid_type = 3;</pre>
+<pre>  iVar6 = get_duid("/var/run/dhcp6s_duid",&amp;DAT_0043a634);</pre>
+<pre>  if (iVar6 != 0) {</pre>
+<pre>    dprintf(3,"server6_init","failed to get a DUID");</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  iVar6 = dhcp6_ctl_authinit(PTR_s__var_etc_dhcp6sctlkey_0043889c,&amp;DAT_00438db8,&amp;DAT_0043a644);</pre>
+<pre>  if (iVar6 != 0) {</pre>
+<pre>    dprintf(5,"server6_init","failed to initialize control message authentication");</pre>
+<pre>  }</pre>
+<pre>  DAT_0043a62c = 0x20;</pre>
+<pre>  DAT_00438df8 = 0x1000;</pre>
+<pre>  DAT_00438df4 = &amp;DAT_0043962c;</pre>
+<pre>  DAT_00439618 = &amp;DAT_00438df4;</pre>
+<pre>  DAT_0043961c = 1;</pre>
+<pre><span class="green">  DAT_0043a630 = (int)malloc(0x20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if ((void *)DAT_0043a630 == (void *)0x0) {</pre>
+<pre>    dprintf(3,"server6_init","memory allocation failed");</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  local_d0.ai_family = 10;</pre>
+<pre>  local_d0.ai_protocol = 0x11;</pre>
+<pre>  local_d0.ai_flags = 1;</pre>
+<pre>  local_d0.ai_addrlen = 0;</pre>
+<pre>  local_d0.ai_addr = (sockaddr *)0x0;</pre>
+<pre>  local_d0.ai_canonname = (char *)0x0;</pre>
+<pre>  local_d0.ai_next = (addrinfo *)0x0;</pre>
+<pre>  local_d0.ai_socktype = 1;</pre>
+<pre>  iVar6 = getaddrinfo((char *)0x0,"547",&amp;local_d0,&amp;local_100);</pre>
+<pre>  if (iVar6 != 0) goto LAB_0040a234;</pre>
+<pre>  insock = socket(local_100-&gt;ai_family,local_100-&gt;ai_socktype,local_100-&gt;ai_protocol);</pre>
+<pre>  if ((int)insock &lt; 0) {</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(3,"server6_init","socket(insock): %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  local_30 = &amp;local_f8;</pre>
+<pre>  iVar6 = setsockopt(insock,0xffff,4,local_30,4);</pre>
+<pre>  if (iVar6 &lt; 0) {</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(3,"server6_init","setsockopt(insock, SO_REUSEPORT): %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  iVar6 = setsockopt(insock,0xffff,4,local_30,4);</pre>
+<pre>  if (iVar6 &lt; 0) {</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(3,"server6_init","setsockopt(insock, SO_REUSEADDR): %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  iVar6 = setsockopt(insock,0x29,0x31,local_30,4);</pre>
+<pre>  if (iVar6 &lt; 0) {</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(3,"server6_init","setsockopt(inbound, IPV6_RECVPKTINFO): %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  iVar6 = setsockopt(insock,0x29,0x1a,local_30,4);</pre>
+<pre>  if (iVar6 &lt; 0) {</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(3,"server6_init","setsockopt(inbound, IPV6_V6ONLY): %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  iVar6 = bind(insock,local_100-&gt;ai_addr,local_100-&gt;ai_addrlen);</pre>
+<pre>  if (iVar6 &lt; 0) {</pre>
+<pre>    piVar11 = __errno_location();</pre>
+<pre>    pcVar3 = strerror(*piVar11);</pre>
+<pre>    dprintf(3,"server6_init","bind(insock): %s",pcVar3);</pre>
+<pre>    goto LAB_0040a144;</pre>
+<pre>  }</pre>
+<pre>  freeaddrinfo(local_100);</pre>
+<pre>  local_d0.ai_flags = 0;</pre>
+<pre>  iVar6 = getaddrinfo("ff02::1:2","547",&amp;local_d0,&amp;local_fc);</pre>
+<pre>  if (iVar6 == 0) {</pre>
+<pre>    psVar12 = local_fc-&gt;ai_addr;</pre>
+<pre>    local_d4 = ifidx;</pre>
+<pre>    local_e4 = *(undefined4 *)(psVar12-&gt;sa_data + 6);</pre>
+<pre>    local_d8 = *(undefined4 *)(psVar12[1].sa_data + 2);</pre>
+<pre>    local_dc._0_2_ = psVar12[1].sa_family;</pre>
+<pre>    local_dc._2_1_ = psVar12[1].sa_data[0];</pre>
+<pre>    local_dc._3_1_ = psVar12[1].sa_data[1];</pre>
+<pre>    local_e0 = *(undefined4 *)(psVar12-&gt;sa_data + 10);</pre>
+<pre>    iVar6 = setsockopt(insock,0x29,0x14,&amp;local_e4,0x14);</pre>
+<pre>    if (iVar6 != 0) {</pre>
+<pre>LAB_0040a5f4:</pre>
+<pre>      piVar11 = __errno_location();</pre>
+<pre>      pcVar3 = strerror(*piVar11);</pre>
+<pre>      dprintf(3,"server6_init","setsockopt(insock, IPV6_JOIN_GROUP): %s",pcVar3);</pre>
+<pre>      goto LAB_0040a144;</pre>
+<pre>    }</pre>
+<pre>    freeaddrinfo(local_fc);</pre>
+<pre>    local_d0.ai_flags = 0;</pre>
+<pre>    iVar6 = getaddrinfo("ff05::1:3","547",&amp;local_d0,&amp;local_fc);</pre>
+<pre>    if (iVar6 == 0) {</pre>
+<pre>      psVar12 = local_fc-&gt;ai_addr;</pre>
+<pre>      local_d4 = ifidx;</pre>
+<pre>      local_e4 = *(undefined4 *)(psVar12-&gt;sa_data + 6);</pre>
+<pre>      local_d8 = *(undefined4 *)(psVar12[1].sa_data + 2);</pre>
+<pre>      local_dc._0_2_ = psVar12[1].sa_family;</pre>
+<pre>      local_dc._2_1_ = psVar12[1].sa_data[0];</pre>
+<pre>      local_dc._3_1_ = psVar12[1].sa_data[1];</pre>
+<pre>      local_e0 = *(undefined4 *)(psVar12-&gt;sa_data + 10);</pre>
+<pre>      iVar6 = setsockopt(insock,0x29,0x14,&amp;local_e4,0x14);</pre>
+<pre>      if (iVar6 != 0) goto LAB_0040a5f4;</pre>
+<pre>      freeaddrinfo(local_fc);</pre>
+<pre>      local_d0.ai_flags = 0;</pre>
+<pre>      iVar6 = getaddrinfo((char *)0x0,"546",&amp;local_d0,&amp;local_100);</pre>
+<pre>      if (iVar6 == 0) {</pre>
+<pre>        outsock = socket(local_100-&gt;ai_family,local_100-&gt;ai_socktype,local_100-&gt;ai_protocol);</pre>
+<pre>        if (outsock &lt; 0) {</pre>
+<pre>          piVar11 = __errno_location();</pre>
+<pre>          pcVar3 = strerror(*piVar11);</pre>
+<pre>          dprintf(3,"server6_init","socket(outsock): %s",pcVar3);</pre>
+<pre>          goto LAB_0040a144;</pre>
+<pre>        }</pre>
+<pre>        iVar6 = setsockopt(outsock,0x29,0x11,&amp;ifidx,4);</pre>
+<pre>        if (iVar6 &lt; 0) {</pre>
+<pre>          piVar11 = __errno_location();</pre>
+<pre>          pcVar3 = strerror(*piVar11);</pre>
+<pre>          dprintf(3,"server6_init","setsockopt(outsock, IPV6_MULTICAST_IF): %s",pcVar3);</pre>
+<pre>          goto LAB_0040a144;</pre>
+<pre>        }</pre>
+<pre>        freeaddrinfo(local_100);</pre>
+<pre>        local_d0.ai_flags = 0;</pre>
+<pre>        local_d0.ai_addrlen = 0;</pre>
+<pre>        local_d0.ai_addr = (sockaddr *)0x0;</pre>
+<pre>        local_d0.ai_canonname = (char *)0x0;</pre>
+<pre>        local_d0.ai_next = (addrinfo *)0x0;</pre>
+<pre>        local_d0.ai_family = 10;</pre>
+<pre>        local_d0.ai_socktype = 1;</pre>
+<pre>        local_d0.ai_protocol = 0x11;</pre>
+<pre>        iVar6 = getaddrinfo("::","546",&amp;local_d0,&amp;local_100);</pre>
+<pre>        if (iVar6 == 0) {</pre>
+<pre><span class="green">          memcpy(&amp;DAT_00438dd8,local_100-&gt;ai_addr,local_100-&gt;ai_addrlen)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          DAT_00439608 = &amp;DAT_00438dd8;</pre>
+<pre>          freeaddrinfo(local_100);</pre>
+<pre>          local_d0.ai_family = 10;</pre>
+<pre>          local_d0.ai_socktype = 1;</pre>
+<pre>          local_d0.ai_protocol = 0x11;</pre>
+<pre>          local_d0.ai_flags = 0;</pre>
+<pre>          local_d0.ai_addrlen = 0;</pre>
+<pre>          local_d0.ai_addr = (sockaddr *)0x0;</pre>
+<pre>          local_d0.ai_canonname = (char *)0x0;</pre>
+<pre>          local_d0.ai_next = (addrinfo *)0x0;</pre>
+<pre>          iVar6 = getaddrinfo("::","547",&amp;local_d0,&amp;local_100);</pre>
+<pre>          if (iVar6 == 0) {</pre>
+<pre><span class="green">            memcpy(&amp;DAT_00438dbc,local_100-&gt;ai_addr,local_100-&gt;ai_addrlen)</span></span>   //possible issue identified - semgrep</pre>
+<pre>            DAT_0043960c = &amp;DAT_00438dbc;</pre>
+<pre>            freeaddrinfo(local_100);</pre>
+<pre>            if (DAT_00438db8 == 0) {</pre>
+<pre>              dprintf(5,"server6_init","skip opening control port");</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              iVar6 = dhcp6_ctl_init(PTR_DAT_00438890,PTR_DAT_00438894,5,&amp;DAT_00438880);</pre>
+<pre>              if (iVar6 != 0) {</pre>
+<pre>                dprintf(3,"server6_init","failed to initialize control channel");</pre>
+<pre>                goto LAB_0040a144;</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<a class="reference" href="./ca9ef1fd82aa4cc8addd5923389feda3.html" title="./ca9ef1fd82aa4cc8addd5923389feda3.html" ><pre><span class="green">            p_Var8 = signal(0xf,FUN_004032a0)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre>            if (p_Var8 != (__sighandler_t)0xffffffff) {</pre>
+<pre>              while ((DAT_00438dfc == 0 || ((DAT_00438dfc &amp; 1) == 0))) {</pre>
+<pre>                __timeout = (timeval *)dhcp6_check_timer();</pre>
+<pre>                p_Var9 = (__fd_mask *)local_b0;</pre>
+<pre>                do {</pre>
+<pre>                  *p_Var9 = 0;</pre>
+<pre>                  p_Var9 = p_Var9 + 1;</pre>
+<pre>                } while (&amp;local_30 != (uint **)p_Var9);</pre>
+<pre>                local_f8 = insock;</pre>
+<pre>                local_b0[insock &gt;&gt; 5] = local_b0[insock &gt;&gt; 5] | 1 &lt;&lt; (insock &amp; 0x1f);</pre>
+<pre>                if (-1 &lt; (int)DAT_00438880) {</pre>
+<pre>                  local_b0[DAT_00438880 &gt;&gt; 5] =</pre>
+<pre>                       local_b0[DAT_00438880 &gt;&gt; 5] | 1 &lt;&lt; (DAT_00438880 &amp; 0x1f);</pre>
+<pre>                  if ((int)insock &lt; (int)DAT_00438880) {</pre>
+<pre>                    local_f8 = DAT_00438880;</pre>
+<pre>                  }</pre>
+<pre>                  dhcp6_ctl_setreadfds(local_b0,local_30);</pre>
+<pre>                }</pre>
+<pre>                iVar6 = select(local_f8 + 1,(fd_set *)local_b0,(fd_set *)0x0,(fd_set *)0x0,__timeout</pre>
+<pre>                              );</pre>
+<pre>                if (iVar6 == -1) {</pre>
+<pre>                  piVar11 = __errno_location();</pre>
+<pre>                  if (*piVar11 != 4) {</pre>
+<pre>                    pcVar3 = strerror(*piVar11);</pre>
+<pre>                    dprintf(3,"server6_mainloop","select: %s",pcVar3);</pre>
+<pre>                    goto LAB_0040a144;</pre>
+<pre>                  }</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  if (((int)local_b0[insock &gt;&gt; 5] &gt;&gt; (insock &amp; 0x1f) &amp; 1U) != 0) {</pre>
+<a class="reference" href="./8b3a8ae6ea38da114f7c9d3aa188fada.html" title="./8b3a8ae6ea38da114f7c9d3aa188fada.html" ><pre>                    FUN_0040793c();</pre></a>
+
+<pre>                  }</pre>
+<pre>                  if (-1 &lt; (int)DAT_00438880) {</pre>
+<pre>                    if (((int)local_b0[DAT_00438880 &gt;&gt; 5] &gt;&gt; (DAT_00438880 &amp; 0x1f) &amp; 1U) != 0) {</pre>
+<pre>                      dhcp6_ctl_acceptcommand(DAT_00438880,&amp;LAB_00405bbc);</pre>
+<pre>                    }</pre>
+<pre>                    dhcp6_ctl_readcommand(local_b0);</pre>
+<pre>                  }</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              remove_all_gateway_rules();</pre>
+<pre><span class="green">              unlink(PTR_s__var_run_dhcp6s_pid_004388a0)</span></span>   //possible issue identified - semgrep</pre>
+<pre>              goto LAB_0040965c;</pre>
+<pre>            }</pre>
+<pre>            goto LAB_0040a4b0;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>LAB_0040a234:</pre>
+<pre>  pcVar3 = gai_strerror(iVar6);</pre>
+<pre>  dprintf(3,"server6_init","getaddrinfo: %s",pcVar3);</pre>
+<pre>LAB_0040a144:</pre>
+<pre>                    /* WARNING: Subroutine does not return */</pre>
+<pre>  exit(1);</pre>
+<pre>switchD_0040968c_caseD_44:</pre>
+<pre>  DAT_00438db4 = 2;</pre>
+<pre>  goto LAB_0040960c;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

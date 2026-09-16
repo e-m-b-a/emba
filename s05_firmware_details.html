@@ -1,0 +1,1679 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#firmware_and_testing_details" title="#firmware_and_testing_details" >Firmware and testing details</a><a class="submodul" href="#releaseversioninformation" title="#releaseversioninformation" >Release/Version information</a><a class="submodul" href="#filesysteminformation" title="#filesysteminformation" >Filesystem information</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="firmware_and_testing_details">Firmware and testing details</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>The firmware details module is responsible for providing details about the firmware and testing information. It detects the number of files and directories present in the firmware, offers insights into release/version information and generates a filesystem tree to visualize the directory structure.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] </span><span class="orange">1097</span> files and </span><span class="orange">94</span> directories detected.</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="releaseversioninformation">Release/Version information</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Specific release/version information of target:</pre>
+<pre></span></pre>
+<br />
+<pre>/etc/config/image_sign (-rw-r--r-- root root)</pre>
+<br />
+<pre>    </span><span class="magenta">wrgn49_dlob_dir600b</span></pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="filesysteminformation">Filesystem information</a></span></pre>
+<pre><hr class="mono" /></pre>
+<a class="anc" id="anchor_file_dirs"></a>
+<pre>[drwxr-xr-x        4096]  /logs/firmware</pre>
+<pre>└── [drwxr-xr-x        4096]  unblob_extracted</pre>
+<pre>    └── [drwxrwxr-x        4096]  firmware_extract</pre>
+<pre>        └── [drwxrwxr-x        4096]  DIR-600_fw_revb5_214b01_ALL_de_20130122</pre>
+<pre>            ├── [-rw-r--r--        2066]  Bitte_zuerst_lesen_!!!_DIR-600_Update.txt</pre>
+<pre>            ├── [-rw-r--r--      158681]  DIR600_DE-Langpack_210DE.lng</pre>
+<pre>            ├── [-rw-r--r--         308]  changes.txt</pre>
+<pre>            ├── [-rw-r--r--     3612812]  dir600b_v2.14_d1mg.bin</pre>
+<pre>            └── [drwxr-xr-x        4096]  dir600b_v2.14_d1mg.bin_extract</pre>
+<pre>                ├── [-rw-r--r--         108]  0-108.unknown</pre>
+<pre>                ├── [-rw-r--r--     1146654]  108-1146762.lzma</pre>
+<pre>                ├── [drwxrwxr-x        4096]  108-1146762.lzma_extract</pre>
+<pre>                │   ├── [-rw-r--r--     3479564]  lzma.uncompressed</pre>
+<pre>                │   └── [-rw-r--r--     3848184]  lzma.uncompressed.elf</pre>
+<pre>                ├── [-rw-r--r--       33026]  1146762-1179788.unknown</pre>
+<pre>                ├── [-rw-r--r--     2433024]  1179788-3612812.squashfs_v4_le</pre>
+<pre>                └── [drwxrwxr-x        4096]  1179788-3612812.squashfs_v4_le_extract</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  bin</pre>
+<pre>                    │   ├── [-rwxr-xr-x      493696]  busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  cat -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  chmod -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  cp -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  date -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  echo -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  egrep -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  false -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  fgrep -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  grep -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  gunzip -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  gzip -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  hostname -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ip -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ipaddr -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  iplink -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  iproute -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  iprule -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  iptunnel -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  kill -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ln -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ls -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  mkdir -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  mknod -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  mount -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  msh -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  mv -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  netstat -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ping -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ping6 -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  ps -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  pwd -&gt; busybox</pre>
+<pre>                    │   ├── [-rwxr-xr-x          38]  reboot</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  rm -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  sed -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  sh -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  sleep -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  tar -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  touch -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  true -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  umount -&gt; busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx           7]  uname -&gt; busybox</pre>
+<pre>                    │   └── [lrwxrwxrwx           7]  zcat -&gt; busybox</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  dev</pre>
+<pre>                    │   ├── [crw-r--r--           0]  console</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  cua</pre>
+<pre>                    │   │   └── [crw-r--r--           0]  0</pre>
+<pre>                    │   ├── [crw-r--r--           0]  full</pre>
+<pre>                    │   ├── [crw-r--r--           0]  gpio</pre>
+<pre>                    │   ├── [crw-r--r--           0]  kmem</pre>
+<pre>                    │   ├── [lrwxrwxrwx          11]  log -&gt; ../var/logs</pre>
+<pre>                    │   ├── [crw-r--r--           0]  mem</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  misc</pre>
+<pre>                    │   │   └── [crw-r--r--           0]  rtc</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  mtd</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  0</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  0ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  1</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  1ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  2</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  2ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  3</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  3ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  4</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  4ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  5</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  5ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  6</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  6ro</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  7</pre>
+<pre>                    │   │   └── [crw-r--r--           0]  7ro</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  mtdblock</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  0</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  1</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  2</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  3</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  4</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  5</pre>
+<pre>                    │   │   ├── [brw-r--r--           0]  6</pre>
+<pre>                    │   │   └── [brw-r--r--           0]  7</pre>
+<pre>                    │   ├── [crw-r--r--           0]  null</pre>
+<pre>                    │   ├── [crw-r--r--           0]  port</pre>
+<pre>                    │   ├── [crw-r--r--           0]  ppp</pre>
+<pre>                    │   ├── [crw-r--r--           0]  ptmx</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  pts</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  0</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  1</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  2</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  3</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  4</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  5</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  6</pre>
+<pre>                    │   │   └── [crw-r--r--           0]  7</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  pty</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m0</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m1</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m10</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m11</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m12</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m13</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m14</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m15</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m2</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m3</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m4</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m5</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m6</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m7</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  m8</pre>
+<pre>                    │   │   └── [crw-r--r--           0]  m9</pre>
+<pre>                    │   ├── [crw-r--r--           0]  random</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  tts</pre>
+<pre>                    │   │   ├── [crw-r--r--           0]  0</pre>
+<pre>                    │   │   └── [crw-r--r--           0]  1</pre>
+<pre>                    │   ├── [crw-r--r--           0]  tty</pre>
+<pre>                    │   ├── [crw-r--r--           0]  urandom</pre>
+<pre>                    │   └── [crw-r--r--           0]  zero</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  etc</pre>
+<pre>                    │   ├── [-rw-r--r--         512]  RT5350_AP_1T1R_V1_0.bin</pre>
+<pre>                    │   ├── [lrwxrwxrwx           9]  TZ -&gt; ../var/TZ</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  config</pre>
+<pre>                    │   │   ├── [-rw-r--r--          16]  builddate</pre>
+<pre>                    │   │   ├── [-rw-r--r--          17]  builddaytime</pre>
+<pre>                    │   │   ├── [-rw-r--r--           5]  buildno</pre>
+<pre>                    │   │   ├── [-rw-r--r--           4]  buildrev</pre>
+<pre>                    │   │   ├── [-rw-r--r--           5]  buildver</pre>
+<pre>                    │   │   ├── [-rw-r--r--          16]  devconf</pre>
+<pre>                    │   │   ├── [-rw-r--r--          16]  devdata</pre>
+<pre>                    │   │   ├── [-rw-r--r--          20]  fw_sign</pre>
+<pre>                    │   │   ├── [-rw-r--r--          20]  image_sign</pre>
+<pre>                    │   │   ├── [-rw-r--r--          16]  langpack</pre>
+<pre>                    │   │   ├── [-rw-r--r--           1]  langs</pre>
+<pre>                    │   │   └── [-rw-r--r--          13]  nat</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  defnodes</pre>
+<pre>                    │   │   ├── [-rw-r--r--         277]  S10phyinf.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         518]  S11devdata.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--         290]  S12flashspeed.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         739]  S20device.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--       10034]  S22timezone.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          45]  S30device.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         239]  S30device.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--         200]  S31diagnostic.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--          40]  S31locale.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         399]  S32layout.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         372]  S33wifi.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         310]  S40device.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1024]  S90sessions.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        6194]  S90upnpigd.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2516]  S90upnpwfa.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        6261]  S91upnpigd2.php</pre>
+<pre>                    │   │   └── [-rw-r--r--       10306]  defaultvalue.xml</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  events</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        3576]  AUTOCONFIG.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         818]  AUTOCONFIG.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         609]  DELETECFG.WIFI.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         144]  DHCP4-RELEASE.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         144]  DHCP4-RENEW.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         244]  DHCPS-REDETECT.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         120]  DHCPS-REDETECT.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         275]  DHCPS-RESTART.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         107]  DHCPS-RESTART.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         400]  DISABLE.3G.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         125]  DISABLE.3G.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          53]  DNSCACHE-FLUSH.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          59]  DNSCACHE-FLUSH.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         399]  ENABLE.3G.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          97]  ENABLE.3G.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         377]  FWUPDATER.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         840]  INF-RESTART.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         233]  SEALPAC-CLEAR.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         556]  SEALPAC-LOAD.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         317]  SEALPAC-SAVE.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         112]  SEALPAC.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1986]  SENDMAIL.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         235]  UPDATELEASES.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          67]  UPDATELEASES.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        3145]  UPDATERESOLV.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         249]  UPDATERESOLV.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         568]  WAN-1_dhcp_cb.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1221]  WAN-DETECT.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         140]  WAN-DETECT.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1991]  WANV6-DETECT.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         182]  WANV6-DETECT.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        2130]  WANV6_AUTOCONF_DETECT.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         184]  WANV6_AUTOCONF_DETECT.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         716]  WANV6_ppp_chk.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         145]  WANV6_ppp_chk.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1395]  WANV6_ppp_dis.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         166]  WANV6_ppp_dis.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1514]  WAN_dhcp_chk.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         146]  WAN_dhcp_chk.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         721]  WAN_dhcp_pri.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         146]  WAN_dhcp_pri.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1344]  WAN_ppp_dis.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         164]  WAN_ppp_dis.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1310]  checkfw.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         990]  dhcp_pri_chk.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         188]  dhcp_pri_chk.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         370]  freset.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         734]  option.discover.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         375]  reboot.sh</pre>
+<pre>                    │   │   └── [-rwxr-xr-x         291]  resetcfg-wifi.sh</pre>
+<pre>                    │   ├── [lrwxrwxrwx          12]  hosts -&gt; ../var/hosts</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  init.d</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         119]  S10init.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          60]  S15pts.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         164]  S16ipv6.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         225]  S19init.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         246]  S20init.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         318]  S20interfaces.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          18]  S45gpiod.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         706]  S50config.sh</pre>
+<pre>                    │   │   └── [-rwxr-xr-x         181]  rcS</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  init0.d</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         160]  S21layout.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         201]  S21wlan.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        2220]  S40event.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1198]  S40gpioevent.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         196]  S41autowan.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         231]  S41autowanv6.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         410]  S41inf.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         146]  S42pthrough.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         103]  S65ddnsd.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         262]  S80telnetd.sh</pre>
+<pre>                    │   │   └── [-rwxr-xr-x        1033]  rcS</pre>
+<pre>                    │   ├── [lrwxrwxrwx          19]  iproute2 -&gt; ../var/etc/iproute2</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  ppp -&gt; ../var/etc/ppp</pre>
+<pre>                    │   ├── [lrwxrwxrwx          22]  resolv.conf -&gt; ../var/etc/resolv.conf</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  scripts</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        6189]  IP-WAIT.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        5018]  IPV4.DSLITE.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        6144]  IPV4.INET.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         964]  IPV6.CHILD.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x       10210]  IPV6.INET.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x       11797]  RA-WAIT.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        4603]  V6IN4-TUNNEL.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         627]  adapter_cmd.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         133]  adapter_cmd.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         298]  conntrack_flush.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        1071]  dbload.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         147]  dbsave.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         164]  ddnsd_helper.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         196]  delpathbytarget.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         179]  delpathbytarget.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x        3074]  dhcp6s_helper.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         352]  dlcfg_hlper.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         515]  dlcfg_hlper.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         179]  dns-helper.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         159]  getmodem.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         269]  igmpproxy_helper.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         272]  ip-down</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         449]  ip-up</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         298]  iptables_insmod.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x          42]  iptables_rmmod.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         272]  ipv6-down</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         449]  ipv6-up</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         115]  killpid.sh</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  libs</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2403]  dns-helper.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1164]  igmpproxy_helper.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         522]  lld2d-helper.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  mfc</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         793]  RT2860_MFC.dat</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         266]  mldproxy_helper.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         167]  ping.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         270]  ppp-status</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         159]  prefwupdate.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         154]  resetstats.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         262]  setdate.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         196]  settime.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         670]  stopchild.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         874]  ubcom-monitor.sh</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         459]  ubcom-run.sh</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  upnp</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        5567]  M-SEARCH.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         492]  M-SEARCH.sh</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1436]  NOTIFYAB.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         558]  NOTIFYAB.sh</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         293]  __M-SEARCH.resp.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         315]  __NOTIFY.req.ab.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         902]  run.NOTIFY-PROPCHANGE.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1333]  run.NOTIFY-WFADEV.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        4947]  ssdp.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         244]  upwifistatshlper.sh</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  wifi</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6085]  wps2cfg.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4146]  wpscfg.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3065]  wpsset.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         239]  wpsupstate.php</pre>
+<pre>                    │   │   └── [-rwxr-xr-x        2111]  wps.sh</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  services</pre>
+<pre>                    │   │   ├── [-rw-r--r--         152]  ACL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         153]  ACL6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         720]  BRIDGE.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  DDNS</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        3794]  ddnsserver.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         285]  DDNS4.INF.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DDNS4.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DDNS4.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DDNS4.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1086]  DEVICE.ACCOUNT.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1183]  DEVICE.HOSTNAME.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         732]  DEVICE.LAYOUT.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1351]  DEVICE.PASSTHROUGH.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        6923]  DEVICE.TIME.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  DHCPC</pre>
+<pre>                    │   │   │   └── [-rwxr-xr-x        3066]  dhcpc6.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         140]  DHCPC6.WAN-4.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  DHCPS</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       13478]  dhcps6.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        9766]  dhcpserver.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         144]  DHCPS4.BRIDGE-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         271]  DHCPS4.INF.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         142]  DHCPS4.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         144]  DHCPS4.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         142]  DHCPS4.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         142]  DHCPS4.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         271]  DHCPS6.INF.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DHCPS6.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DHCPS6.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DHCPS6.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  DHCPS6.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         140]  DHCPS6.LAN-5.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         543]  DMZ.NAT-1.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  DNS</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3281]  dnscfg.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         170]  dnsrestart.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1436]  DNS.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS4.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS4.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS4.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS4.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS6.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS6.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS6.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          50]  DNS6.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         668]  ENLAN.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  FIREWALL</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         891]  firewall.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          53]  FIREWALL-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          53]  FIREWALL-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          53]  FIREWALL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         897]  FIREWALL6.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  HTTP</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         171]  hnapasswd.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4524]  httpcfg.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        9000]  httpsvcs.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  HTTP.BRIDGE-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  HTTP.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  HTTP.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  HTTP.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  HTTP.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         187]  HTTP.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         187]  HTTP.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         187]  HTTP.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         187]  HTTP.WAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1139]  HTTP.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         153]  ICMP.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         153]  ICMP.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         153]  ICMP.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          90]  INACTIVE.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  INET</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7277]  inet4_dhcpc_helper.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       15408]  inet6_dhcpc_helper.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        1362]  inet6_rdisc6_helper.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2760]  inet_child.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10980]  inet_ipv4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       24786]  inet_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       13347]  inet_ppp4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7128]  inet_ppp4_combo.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6438]  inet_ppp6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7711]  interface.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3242]  options_ppp4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1588]  ppp4_ipdown.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3838]  ppp4_ipup.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1666]  ppp4_status.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        1309]  ppp6_ipdown.php</pre>
+<pre>                    │   │   │   └── [-rwxr-xr-x        4417]  ppp6_ipup.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         141]  INET.BRIDGE-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2560]  INET.COMBO.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         138]  INET.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         138]  INET.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         138]  INET.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         138]  INET.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         138]  INET.LAN-5.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         138]  INET.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         136]  INET.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         136]  INET.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         138]  INET.WAN-4.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         138]  INET.WAN-5.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  INFSVCS</pre>
+<pre>                    │   │   │   └── [-rw-r--r--       12260]  infservices.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         289]  INFSVCS.BRIDGE-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         143]  INFSVCS.LAN-5.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         143]  INFSVCS.WAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         120]  IP6T.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         121]  IP6T.WAN-4.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  IP6TABLES</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         886]  ip6tlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1824]  ip6tlib.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         627]  ip6twan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        3673]  IP6TABLES.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        3204]  IP6TDEFCHAIN.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        3578]  IP6TFIREWALL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         258]  IPT.BRIDGE-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         118]  IPT.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         117]  IPT.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         118]  IPT.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         118]  IPT.WAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         118]  IPT.WAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         118]  IPT.WAN-4.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  IPTABLES</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3663]  iptlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1946]  iptlib.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        5937]  iptwan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        7552]  IPTABLES.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        9171]  IPTDEFCHAIN.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1311]  IPTDMZ.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        6263]  IPTFIREWALL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2207]  IPTMACCTRL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2512]  IPTMASQ.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        3108]  IPTPFWD.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2782]  IPTPORTT.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2952]  IPTURLCTRL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          64]  IPTVSVR.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1107]  LAN.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        7824]  LAYOUT.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1299]  LLD2.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  LOG</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        1648]  logd_helper.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         706]  LOGD.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         553]  MACCTRL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2313]  MULTICAST.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  NAMERESOLV</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        1198]  nameresolv.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         128]  NAMERESOLV.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         127]  NAMERESOLV.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         126]  NAMERESOLV.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         126]  NAMERESOLV.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         564]  NAT.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  NEAP</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1442]  neapscfg.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         587]  neapserver.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         118]  NEAP.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         117]  NEAP.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         116]  NEAP.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         117]  NEAP.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         545]  PFWD.NAT-1.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  PHYINF</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        4064]  phyinf.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         208]  PHYINF.ETH-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         208]  PHYINF.ETH-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         208]  PHYINF.ETH-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         885]  PORTT.NAT-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        9258]  QOS.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1062]  ROUTE.DESTNET.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1243]  ROUTE.DOMAIN.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         747]  ROUTE.IPUNNUMBERED.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1520]  ROUTE.STATIC.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2171]  ROUTE6.DYNAMIC.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1260]  ROUTE6.STATIC.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1437]  RUNTIME.DDNS4.WAN-1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         276]  SMS.SEND.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         276]  SMS.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  UPNP.BRIDGE-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  UPNP.LAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  UPNP.LAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  UPNP.LAN-3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         137]  UPNP.LAN-4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         553]  URLCTRL.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         545]  VSVR.NAT-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1395]  WAN.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  WIFI</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3715]  hostapdcfg.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       13508]  rtcfg.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        2246]  wifi.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1277]  WIFI.PHYINF.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         371]  WIFI.WLAN-1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         371]  WIFI.WLAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        3114]  WIFI.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         717]  WPS.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         777]  _add_chains_to_pfwd.php</pre>
+<pre>                    │   │   └── [-rwxr-xr-x         644]  svchlper</pre>
+<pre>                    │   └── [drwxrwxr-x        4096]  templates</pre>
+<pre>                    │       └── [drwxrwxr-x        4096]  hnap</pre>
+<pre>                    │           ├── [-rw-r--r--          70]  .shell_action</pre>
+<pre>                    │           ├── [-rw-r--r--        2617]  AddPortMapping.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1548]  DeletePortMapping.php</pre>
+<pre>                    │           ├── [-rw-r--r--        2480]  GetClientStats.php</pre>
+<pre>                    │           ├── [-rw-r--r--        4193]  GetConnectedDevices.php</pre>
+<pre>                    │           ├── [-rw-r--r--        4101]  GetDeviceSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1058]  GetDeviceSettings2.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1474]  GetForwardedPorts.php</pre>
+<pre>                    │           ├── [-rw-r--r--         853]  GetMACFilters.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1039]  GetMACFilters2.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1811]  GetNetworkStats.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1235]  GetOpenDNS.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1412]  GetPortMappings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1108]  GetRouterLanSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1506]  GetRouterSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        4380]  GetWLanRadioSecurity.php</pre>
+<pre>                    │           ├── [-rw-r--r--        3819]  GetWLanRadioSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        6366]  GetWLanRadios.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1798]  GetWLanSecurity.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1416]  GetWLanSettings24.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1056]  GetWLanSettings54.php</pre>
+<pre>                    │           ├── [-rw-r--r--        5560]  GetWanSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--         933]  GetWanStatus.php</pre>
+<pre>                    │           ├── [-rw-r--r--         571]  IsDeviceReady.php</pre>
+<pre>                    │           ├── [-rw-r--r--         777]  Reboot.php</pre>
+<pre>                    │           ├── [-rw-r--r--         678]  RenewWanConnection.php</pre>
+<pre>                    │           ├── [-rw-r--r--         737]  RestoreFactoryDefaults.php</pre>
+<pre>                    │           ├── [-rw-r--r--        3162]  SetAccessPointMode.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1463]  SetDeviceSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        3912]  SetDeviceSettings2.php</pre>
+<pre>                    │           ├── [-rw-r--r--        3279]  SetForwardedPorts.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1981]  SetMACFilters.php</pre>
+<pre>                    │           ├── [-rw-r--r--        2187]  SetMACFilters2.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1841]  SetRouterLanSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        2402]  SetRouterSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        5422]  SetWLanRadioSecurity.php</pre>
+<pre>                    │           ├── [-rw-r--r--        3851]  SetWLanRadioSettings.php</pre>
+<pre>                    │           ├── [-rw-r--r--        2064]  SetWLanSecurity.php</pre>
+<pre>                    │           ├── [-rw-r--r--        2609]  SetWLanSettings24.php</pre>
+<pre>                    │           ├── [-rw-r--r--        1700]  SetWLanSettings54.php</pre>
+<pre>                    │           └── [-rw-r--r--        8233]  SetWanSettings.php</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  home</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  htdocs</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  HNAP1</pre>
+<pre>                    │   │   └── [-rw-r--r--           0]  index.hnap</pre>
+<pre>                    │   ├── [-rwxr-xr-x      148516]  cgibin</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  neap</pre>
+<pre>                    │   │   ├── [-rw-r--r--         602]  NEAP.10.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         328]  NEAP.10.3.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1230]  NEAP.11.0.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2214]  NEAP.11.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         772]  NEAP.11.2.11.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         245]  NEAP.11.2.12.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         238]  NEAP.11.2.13.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2556]  NEAP.11.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2132]  NEAP.12.1.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1470]  NEAP.12.1.2.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1174]  NEAP.12.1.2.3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         977]  NEAP.12.1.2.4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         515]  NEAP.12.1.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2206]  NEAP.12.2.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1484]  NEAP.12.2.2.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1174]  NEAP.12.2.2.3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         979]  NEAP.12.2.2.4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         515]  NEAP.12.2.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2383]  NEAP.12.3.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1462]  NEAP.12.3.2.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1174]  NEAP.12.3.2.3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         977]  NEAP.12.3.2.4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         515]  NEAP.12.3.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2081]  NEAP.12.4.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1482]  NEAP.12.4.2.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1174]  NEAP.12.4.2.3.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         987]  NEAP.12.4.2.4.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         515]  NEAP.12.4.2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         564]  NEAP.13.1.1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1118]  NEAP.13.1.2.1.php</pre>
+<pre>                    │   │   └── [-rw-r--r--        7587]  NEAP_LIB.php</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  phplib</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1419]  dumplog.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  fatlady</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         977]  ACL.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  BWC</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--        6605]  bwc.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         261]  BWC.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        7283]  CALLMGR.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2610]  DDNS4.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          54]  DDNS4.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          54]  DDNS4.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1472]  DEVICE.ACCOUNT.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         911]  DEVICE.DIAGNOSTIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         388]  DEVICE.DLOB.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         804]  DEVICE.HOSTNAME.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         788]  DEVICE.LAYOUT.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         830]  DEVICE.LOG.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         686]  DEVICE.PASSTHROUGH.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         769]  DEVICE.RDNSS.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1785]  DEVICE.TIME.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  DHCPS</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--        6255]  dhcps4.php</pre>
+<pre>                    │   │   │   │   ├── [-rwxr-xr-x        5373]  dhcps6.php</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--         783]  dhcpserver.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         291]  DHCPS4.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        5351]  DHCPS4.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         288]  DHCPS4.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         288]  DHCPS4.LAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         291]  DHCPS6.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4816]  DHCPS6.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         288]  DHCPS6.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         288]  DHCPS6.LAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         288]  DHCPS6.LAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         288]  DHCPS6.LAN-4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1739]  DMZ.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  DNS</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--        4641]  dns4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         277]  DNS4.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         272]  DNS4.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         185]  DNS6.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         513]  FDISK.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  FIREWALL</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--        6165]  firewall.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         422]  FIREWALL-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         422]  FIREWALL-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         421]  FIREWALL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6764]  FIREWALL6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2107]  HTTP.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          55]  HTTP.WAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          55]  HTTP.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         507]  ICMP.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         507]  ICMP.WAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         507]  ICMP.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  INET</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--        8959]  inet.php</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--        5603]  inet_ipv4.php</pre>
+<pre>                    │   │   │   │   ├── [-rwxr-xr-x       11800]  inet_ipv6.php</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--        5434]  inet_ppp4.php</pre>
+<pre>                    │   │   │   │   └── [-rwxr-xr-x        3188]  inet_ppp6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         281]  INET.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         437]  INET.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.LAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.LAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.LAN-4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.WAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         278]  INET.WAN-4.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         278]  INET.WAN-5.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         575]  IUM.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2634]  MACCTRL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         983]  MULTICAST.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10563]  NAT.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         387]  NETSNIPER.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  PFWD</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--        7479]  pfwd.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         281]  PFWD.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  PHYINF</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--        1480]  phyinf.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         338]  PHYINF.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4611]  PORTT.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1693]  QOS.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2405]  ROUTE.DESTNET.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2480]  ROUTE.IPUNNUMBERED.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3633]  ROUTE.STATIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         884]  ROUTE6.DYNAMIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3012]  ROUTE6.STATIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1306]  RUNTIME.DDNS4.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         387]  RUNTIME.DEVICE.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2433]  RUNTIME.TIME.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         341]  RUNTIME.WPS.WLAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2570]  SCHEDULE.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         387]  SIM.CHK.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         387]  SIM.LOCK.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         575]  SMS.SEND.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         575]  SMS.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         754]  UPNP.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         387]  UPNP.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2694]  URLCTRL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         281]  VSVR.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         387]  WAN.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  WIFI</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--       17057]  wifi.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         680]  WIFI.PHYINF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         334]  WIFI.WLAN-1.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         334]  WIFI.WLAN-2.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         218]  html.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2102]  inet.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         412]  inet6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2752]  inf.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        6514]  phyinf.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  setcfg</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         597]  ACL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         318]  BWC.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        2686]  CALLMGR.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         582]  DDNS4.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         547]  DDNS4.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          55]  DDNS4.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         977]  DEVICE.ACCOUNT.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         418]  DEVICE.DIAGNOSTIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         260]  DEVICE.DLOB.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         370]  DEVICE.HOSTNAME.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1032]  DEVICE.LAYOUT.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         732]  DEVICE.LOG.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DEVICE.PASSTHROUGH.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         379]  DEVICE.RDNSS.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         929]  DEVICE.TIME.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         274]  DHCPS4.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         414]  DHCPS4.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DHCPS4.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DHCPS4.LAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         274]  DHCPS6.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         414]  DHCPS6.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DHCPS6.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DHCPS6.LAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DHCPS6.LAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  DHCPS6.LAN-4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         260]  DMZ.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         407]  DNS4.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         378]  DNS4.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         293]  FDISK.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         234]  FIREWALL-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         234]  FIREWALL-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         232]  FIREWALL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         234]  FIREWALL6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         424]  HTTP.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         424]  HTTP.WAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         424]  HTTP.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         339]  ICMP.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         339]  ICMP.WAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         339]  ICMP.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  INET.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         551]  INET.INF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  INET.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  INET.LAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  INET.LAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         271]  INET.LAN-4.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         399]  INET.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         399]  INET.WAN-2.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         399]  INET.WAN-3.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         399]  INET.WAN-4.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         399]  INET.WAN-5.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         543]  IUM.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         225]  MACCTRL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         539]  MULTICAST.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         209]  NAT.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         267]  NETSNIPER.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         265]  PFWD.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         252]  PHYINF.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         259]  PORTT.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         844]  QOS.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         236]  ROUTE.DESTNET.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         239]  ROUTE.IPUNNUMBERED.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         227]  ROUTE.STATIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         267]  ROUTE6.DYNAMIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         306]  ROUTE6.STATIC.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         437]  RUNTIME.DDNS4.WAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         656]  RUNTIME.TIME.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1064]  RUNTIME.WPS.WLAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1284]  SCHEDULE.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         861]  SMS.SEND.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         383]  SMS.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         621]  UPNP.BRIDGE-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         333]  UPNP.LAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         225]  URLCTRL.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         265]  VSVR.NAT-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         360]  WIFI.PHYINF.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         284]  WIFI.WLAN-1.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         248]  WIFI.WLAN-2.php</pre>
+<pre>                    │   │   │   └── [drwxrwxr-x        4096]  libs</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        4683]  bwc.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        1199]  dhcps6.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        1770]  dhcpserver.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         535]  dmz.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         584]  dns.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--       11999]  inet.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         351]  netsniper.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        1932]  pfwd.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         735]  phyinf.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        1430]  portt.php</pre>
+<pre>                    │   │   │       └── [-rw-r--r--        8451]  wifi.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         233]  slp.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        8453]  time.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         525]  trace.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         692]  upnp.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2901]  wifi.php</pre>
+<pre>                    │   │   └── [-rw-r--r--        2547]  xnode.php</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  upnp</pre>
+<pre>                    │   │   ├── [-rw-r--r--         840]  ACTION.L3Forwarding1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         682]  ACTION.OSInfo1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         915]  ACTION.WANCommonIFC1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         760]  ACTION.WANEthLinkC1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2833]  ACTION.WANIPConn1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         526]  ACTION.WFAWLANConfig1.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         534]  NOTIFY.Layer3Forwarding.1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         356]  NOTIFY.Layer3Forwarding.1.sh</pre>
+<pre>                    │   │   ├── [-rw-r--r--         400]  NOTIFY.OSInfo.1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         340]  NOTIFY.OSInfo.1.sh</pre>
+<pre>                    │   │   ├── [-rw-r--r--         738]  NOTIFY.WANCommonInterfaceConfig.1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         365]  NOTIFY.WANCommonInterfaceConfig.1.sh</pre>
+<pre>                    │   │   ├── [-rw-r--r--         738]  NOTIFY.WANEthernetLinkConfig.1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         360]  NOTIFY.WANEthernetLinkConfig.1.sh</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2220]  NOTIFY.WANIPConnection.1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         352]  NOTIFY.WANIPConnection.1.sh</pre>
+<pre>                    │   │   ├── [-rw-r--r--         491]  NOTIFY.WFAWLANConfig.1.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         483]  NOTIFY.WFAWLANConfig.1.sh</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          21]  docs -&gt; ../../var/htdocs/upnp</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1066]  run.NOTIFY.php</pre>
+<pre>                    │   │   └── [lrwxrwxrwx           9]  ssdpcgi -&gt; ../cgibin</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  upnpdevdesc</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1077]  InternetGatewayDevice.xml.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         938]  Layer3Forwarding.xml.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         237]  OSInfo.xml.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        5361]  WANCommonInterfaceConfig.xml.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         791]  WANEthernetLinkConfig.xml.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--       12096]  WANIPConnection.xml.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         616]  WFADevice.xml.php</pre>
+<pre>                    │   │   └── [-rw-r--r--        7233]  WFAWLANConfig.xml.php</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  upnpinc</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2821]  ACTION.DO.AddPortMapping.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1532]  ACTION.DO.DeletePortMapping.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         547]  ACTION.DO.ForceTermination.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          93]  ACTION.DO.GetConnectionTypeInfo.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          92]  ACTION.DO.GetExternalIPAddress.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         383]  ACTION.DO.GetGenericPortMappingEntry.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          88]  ACTION.DO.GetNATRSIPStatus.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1114]  ACTION.DO.GetSpecificPortMappingEntry.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          89]  ACTION.DO.GetStatusInfo.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         384]  ACTION.DO.RequestConnection.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          34]  ACTION.DO.SetConnectionType.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         492]  ACTION.GetCommonLinkProperties.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         228]  ACTION.GetConnectionTypeInfo.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         348]  ACTION.GetDefaultConnectionService.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         305]  ACTION.GetEthernetLinkStatus.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         553]  ACTION.GetExternalIPAddress.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         786]  ACTION.GetGenericPortMappingEntry.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         148]  ACTION.GetNATRSIPStatus.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         501]  ACTION.GetSpecificPortMappingEntry.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         625]  ACTION.GetStatusInfo.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         354]  ACTION.GetTotalBytesReceived.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         346]  ACTION.GetTotalBytesSent.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         360]  ACTION.GetTotalPacketsReceived.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         352]  ACTION.GetTotalPacketsSent.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         940]  ACTION.X_GetICSStatistics.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        4487]  gena.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         240]  gvar.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  igd</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  L3Forwarding1</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--         348]  ACTION.GetDefaultConnectionService.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  WANCommonIFC1</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--         492]  ACTION.GetCommonLinkProperties.php</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--         354]  ACTION.GetTotalBytesReceived.php</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--         346]  ACTION.GetTotalBytesSent.php</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--         360]  ACTION.GetTotalPacketsReceived.php</pre>
+<pre>                    │   │   │   │   ├── [-rw-r--r--         352]  ACTION.GetTotalPacketsSent.php</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--         940]  ACTION.X_GetICSStatistics.php</pre>
+<pre>                    │   │   │   ├── [drwxrwxr-x        4096]  WANEthLinkC1</pre>
+<pre>                    │   │   │   │   └── [-rw-r--r--         305]  ACTION.GetEthernetLinkStatus.php</pre>
+<pre>                    │   │   │   └── [drwxrwxr-x        4096]  WANIPConn1</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        2821]  ACTION.DO.AddPortMapping.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        1532]  ACTION.DO.DeletePortMapping.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         547]  ACTION.DO.ForceTermination.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--          93]  ACTION.DO.GetConnectionTypeInfo.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--          92]  ACTION.DO.GetExternalIPAddress.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         383]  ACTION.DO.GetGenericPortMappingEntry.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--          88]  ACTION.DO.GetNATRSIPStatus.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--        1114]  ACTION.DO.GetSpecificPortMappingEntry.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--          89]  ACTION.DO.GetStatusInfo.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         384]  ACTION.DO.RequestConnection.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--          34]  ACTION.DO.SetConnectionType.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         228]  ACTION.GetConnectionTypeInfo.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         553]  ACTION.GetExternalIPAddress.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         786]  ACTION.GetGenericPortMappingEntry.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         148]  ACTION.GetNATRSIPStatus.php</pre>
+<pre>                    │   │   │       ├── [-rw-r--r--         501]  ACTION.GetSpecificPortMappingEntry.php</pre>
+<pre>                    │   │   │       └── [-rw-r--r--         625]  ACTION.GetStatusInfo.php</pre>
+<pre>                    │   │   └── [-rw-r--r--        1781]  soap.php</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  web</pre>
+<pre>                    │   │   ├── [-rw-r--r--         823]  DevInfo.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          41]  DevInfo.txt</pre>
+<pre>                    │   │   ├── [-rw-r--r--          58]  __login_head.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--         450]  adv_app.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         384]  adv_firewall.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         386]  adv_firewallv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         181]  adv_ipv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         376]  adv_mac_filter.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         188]  adv_network.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         440]  adv_pfwd.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         184]  adv_qos.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         364]  adv_routing.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         404]  adv_routingv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         490]  adv_vsvr.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         355]  adv_web_filter.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         149]  adv_wlan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         158]  adv_wlan_wifitest.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         148]  adv_wps.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          42]  advanced.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  bsc_easy.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         150]  bsc_internet.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         152]  bsc_internetv6.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         181]  bsc_ipv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         443]  bsc_lan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         148]  bsc_sms.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         273]  bsc_sms_inbox.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         149]  bsc_sms_inbox_rlt.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         153]  bsc_sms_send.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         149]  bsc_wan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         146]  bsc_wlan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         151]  bsc_wlan_main.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         155]  bsc_wlan_wifitest.php</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  captcha.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [-rw-r--r--         544]  check_stats.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         469]  command.php</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  conntrack.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  css</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10138]  general.css</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         974]  support.css</pre>
+<pre>                    │   │   ├── [-rw-r--r--         448]  ddns_act.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         327]  diagnostic.php</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  dlcfg.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          20]  docs -&gt; ../../var/htdocs/web</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1150]  favicon.ico</pre>
+<pre>                    │   │   ├── [-rw-r--r--         247]  firmversion.php</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  fwup.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [-rw-r--r--         880]  getcfg.php</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  hedwig.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [-rw-r--r--         388]  index.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  js</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       12883]  comm.js</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        8918]  libajax.js</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        5265]  postxml.js</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1290]  log_clear.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1620]  log_get.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  pic</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        5672]  head_01.gif</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         291]  head_02.gif</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6746]  head_03.gif</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         415]  img_delete.gif</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         125]  img_edit.gif</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        8492]  smart_head.jpg</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        5737]  smart_head_1.jpg</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         573]  tail.gif</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1284]  topmenumodel.gif</pre>
+<pre>                    │   │   │   └── [-rw-r--r--       15681]  wan_detect_process_bar.gif</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  pigwidgeon.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [-rw-r--r--         548]  post_login.xml</pre>
+<pre>                    │   │   ├── [-rw-r--r--         271]  router_info.xml</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  seama.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  service.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx           9]  session.cgi -&gt; ../cgibin</pre>
+<pre>                    │   │   ├── [-rw-r--r--          46]  setup.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1007]  spt_adv.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         147]  spt_menu.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         156]  spt_setup.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         158]  spt_status.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         192]  spt_tools.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         148]  st_device.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         145]  st_ipv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         145]  st_log.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         293]  st_missed_call.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         150]  st_routingv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         149]  st_session.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         147]  st_stats.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         146]  st_wlan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          43]  status.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          42]  support.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          45]  tools.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         197]  tools_admin.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         149]  tools_check.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         185]  tools_ddns.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         149]  tools_email.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         152]  tools_firmware.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         144]  tools_fw_rlt.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         338]  tools_sch.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         147]  tools_sys_ulcfg.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         150]  tools_system.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         148]  tools_time.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         139]  version.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--          41]  version.txt</pre>
+<pre>                    │   │   ├── [-rw-r--r--         923]  wandetect.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2267]  web_filter_info.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         139]  wiz_wan.php</pre>
+<pre>                    │   │   ├── [-rwxr-xr-x         148]  wiz_wan_fresetv6.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         140]  wiz_wlan.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         139]  wiz_wps.php</pre>
+<pre>                    │   │   └── [-rw-r--r--        1632]  wpsacts.php</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  webinc</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  body</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1553]  adv_app.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1552]  adv_app_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3585]  adv_firewall.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2268]  adv_firewall_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1700]  adv_firewallv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1992]  adv_firewallv6_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7301]  adv_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2083]  adv_mac_filter.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1298]  adv_mac_filter_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2698]  adv_network.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1561]  adv_pfwd.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1794]  adv_pfwd_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2897]  adv_qos.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1484]  adv_routing.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2866]  adv_routing_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1052]  adv_routingv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1148]  adv_routingv6_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1581]  adv_vsvr.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1823]  adv_vsvr_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1742]  adv_web_filter.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         717]  adv_web_filter_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4185]  adv_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4233]  adv_wlan_wifitest.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3118]  adv_wps.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10388]  bsc_easy.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1604]  bsc_internet.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        1557]  bsc_internetv6.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x       22060]  bsc_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7896]  bsc_lan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         774]  bsc_lan_list.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2282]  bsc_sms.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1568]  bsc_sms_inbox.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2568]  bsc_sms_send.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       25431]  bsc_wan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10348]  bsc_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3030]  bsc_wlan_main.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10185]  bsc_wlan_wifitest.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1337]  draw_elements.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       32690]  spt_adv.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3856]  spt_menu.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       35847]  spt_setup.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6320]  spt_status.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       10346]  spt_tools.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       11511]  st_device.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4794]  st_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2798]  st_log.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         421]  st_missed_call.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         914]  st_routingv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1290]  st_session.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2986]  st_stats.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         876]  st_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3215]  tools_admin.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1383]  tools_check.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2840]  tools_ddns.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2998]  tools_email.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4440]  tools_firmware.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4046]  tools_sch.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         889]  tools_sys_ulcfg.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2417]  tools_system.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4766]  tools_time.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2793]  version.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         405]  web_filter_info.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       21950]  wiz_wan.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x       14769]  wiz_wan_fresetv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4845]  wiz_wlan.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        4314]  wiz_wps.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         131]  config.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        1258]  fatlady.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--         726]  feature.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  getcfg</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         248]  ACL.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          98]  BRIDGE.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          86]  BWC.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         244]  CALL.MISSED.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        1304]  CALLMGR.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         264]  DDNS4.INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         277]  DDNS4.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          59]  DDNS4.WAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          59]  DDNS4.WAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         821]  DEVICE.ACCOUNT.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         215]  DEVICE.DIAGNOSTIC.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         139]  DEVICE.HOSTNAME.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         294]  DEVICE.LAYOUT.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         130]  DEVICE.LOG.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         154]  DEVICE.PASSTHROUGH.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         129]  DEVICE.RDNSS.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         133]  DEVICE.TIME.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          60]  DHCPS4.BRIDGE-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         214]  DHCPS4.INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         428]  DHCPS4.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          60]  DHCPS4.LAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          60]  DHCPS6.BRIDGE-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         267]  DHCPS6.INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         428]  DHCPS6.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          60]  DHCPS6.LAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          60]  DHCPS6.LAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          60]  DHCPS6.LAN-4.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  DMZ.NAT-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  DMZ.NAT-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         207]  DNS4.INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         259]  DNS4.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  DNS4.LAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         100]  FDISK.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          56]  FIREWALL-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          56]  FIREWALL-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         324]  FIREWALL.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         211]  FIREWALL6.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         312]  HTTP.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         312]  HTTP.WAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         312]  HTTP.WAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         213]  ICMP.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         213]  ICMP.WAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         213]  ICMP.WAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         273]  INET.BRIDGE-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         301]  INET.INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.LAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.LAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.LAN-4.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.WAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.WAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          61]  INET.WAN-4.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x          61]  INET.WAN-5.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         131]  INET.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         163]  INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         491]  IUM.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          95]  LAN.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          56]  MACCTRL.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         148]  MULTICAST.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          86]  NAT.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          98]  NETSNIPER.NAT-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         635]  PFWD.NAT-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  PFWD.NAT-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         311]  PHYINF.BRIDGE-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          63]  PHYINF.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          63]  PHYINF.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         103]  PHYINF.WIFI.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  PORTT.NAT-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         651]  QOS.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         150]  ROUTE.DESTNET.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         153]  ROUTE.IPUNNUMBERED.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         135]  ROUTE.STATIC.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         143]  ROUTE6.DYNAMIC.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         140]  ROUTE6.STATIC.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1402]  RUNTIME.CLIENTS.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         384]  RUNTIME.CONNSTA.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         361]  RUNTIME.DDNS4.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         262]  RUNTIME.DEVICE.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         289]  RUNTIME.DFS.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         898]  RUNTIME.INF.BRIDGE-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.LAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.LAN-4.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.WAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.WAN-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.INF.WAN-4.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         231]  RUNTIME.INF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1533]  RUNTIME.LOG.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         344]  RUNTIME.OPERATOR.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         394]  RUNTIME.PHYINF.ETH-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.PHYINF.ETH-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.PHYINF.ETH-3.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.PHYINF.WLAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          68]  RUNTIME.PHYINF.WLAN-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         379]  RUNTIME.PHYINF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         548]  RUNTIME.ROUTE.DYNAMIC.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2562]  RUNTIME.TIME.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         307]  RUNTIME.TTY.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         175]  RUNTIME.UPNP.PORTM.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         758]  RUNTIME.WPS.WLAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         141]  SCHEDULE.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         727]  SMS.SEND.xml.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         283]  SMS.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         107]  STARSPEED.WAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         233]  UPNP.BRIDGE-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         259]  UPNP.LAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          56]  URLCTRL.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  VSVR.NAT-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          58]  VSVR.NAT-2.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          76]  WAN.RESTART.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          95]  WAN.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         352]  WIFI.PHYINF.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         462]  WIFI.WLAN-1.xml.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--          59]  WIFI.WLAN-2.xml.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         107]  WIFI.xml.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  help</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         556]  adv_app.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         698]  adv_firewall.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         615]  adv_firewallv6.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         880]  adv_mac_filter.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         672]  adv_network.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1311]  adv_pfwd.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         453]  adv_qos.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        1127]  adv_routing.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         902]  adv_routingv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1296]  adv_vsvr.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         371]  adv_web_filter.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         575]  adv_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         687]  adv_wps.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         562]  bsc_internet.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         674]  bsc_internetv6.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         673]  bsc_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         488]  bsc_lan.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         132]  bsc_sms.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         132]  bsc_sms_inbox.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x         132]  bsc_sms_send.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         793]  bsc_wan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1645]  bsc_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         822]  bsc_wlan_main.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        2721]  callmgr.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         202]  st_device.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         178]  st_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         468]  st_log.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         151]  st_missed_call.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         279]  st_routingv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         260]  st_session.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         255]  st_stats.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         208]  st_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         755]  tools_admin.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         284]  tools_check.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         227]  tools_ddns.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         202]  tools_email.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         451]  tools_firmware.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         420]  tools_sch.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         414]  tools_system.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--         354]  tools_time.php</pre>
+<pre>                    │   │   ├── [drwxrwxr-x        4096]  js</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7801]  adv_app.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       14864]  adv_firewall.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       11124]  adv_firewallv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       12630]  adv_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3362]  adv_mac_filter.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2989]  adv_network.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7442]  adv_pfwd.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3332]  adv_qos.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3913]  adv_routing.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4795]  adv_routingv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6942]  adv_vsvr.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2835]  adv_web_filter.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3891]  adv_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3502]  adv_wlan_wifitest.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3416]  adv_wps.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       17832]  bsc_easy.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x       88114]  bsc_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       16498]  bsc_lan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         624]  bsc_sms.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        7813]  bsc_sms_inbox.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         868]  bsc_sms_inbox_rlt.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3714]  bsc_sms_send.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x       45633]  bsc_wan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       14856]  bsc_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--         920]  bsc_wlan_main.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       14891]  bsc_wlan_wifitest.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       20467]  st_device.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x       14548]  st_ipv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        5492]  st_log.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4828]  st_missed_call.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        3652]  st_routingv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2066]  st_session.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2056]  st_wlan.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x        3846]  tools_admin.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3383]  tools_check.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        6012]  tools_ddns.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        5641]  tools_email.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1891]  tools_firmware.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4346]  tools_fw_rlt.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       15146]  tools_sch.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        1207]  tools_sys_ulcfg.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        2156]  tools_system.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        9593]  tools_time.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        3240]  version.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--       23125]  wiz_wan.php</pre>
+<pre>                    │   │   │   ├── [-rwxr-xr-x       28201]  wiz_wan_fresetv6.php</pre>
+<pre>                    │   │   │   ├── [-rw-r--r--        4686]  wiz_wlan.php</pre>
+<pre>                    │   │   │   └── [-rw-r--r--        8789]  wiz_wps.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--        2646]  menu.php</pre>
+<pre>                    │   │   ├── [-rw-r--r--       22020]  templates.php</pre>
+<pre>                    │   │   └── [-rw-r--r--        2527]  wand.php</pre>
+<pre>                    │   └── [drwxrwxr-x        4096]  widget</pre>
+<pre>                    │       ├── [-rw-r--r--        1302]  dhcp_server.xml</pre>
+<pre>                    │       ├── [-rw-r--r--        1835]  lan_stats.xml</pre>
+<pre>                    │       ├── [-rw-r--r--        2023]  misc_config.xml</pre>
+<pre>                    │       ├── [-rw-r--r--         900]  qos.xml</pre>
+<pre>                    │       ├── [-rw-r--r--        5407]  system_info.xml</pre>
+<pre>                    │       ├── [-rw-r--r--       13096]  wan_stats.xml</pre>
+<pre>                    │       ├── [-rw-r--r--        9726]  wlan_stats.xml</pre>
+<pre>                    │       └── [-rw-r--r--         610]  wps.xml</pre>
+<pre>                    ├── [drwxrwsr-x        4096]  lib</pre>
+<pre>                    │   ├── [-rwxr-xr-x       22500]  ld-uClibc-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          21]  ld-uClibc.so.0 -&gt; ld-uClibc-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          21]  libc.so.0 -&gt; libuClibc-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--       11480]  libcrypt-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          20]  libcrypt.so.0 -&gt; libcrypt-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--        9496]  libdl-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          17]  libdl.so.0 -&gt; libdl-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          13]  libgcc_s.so -&gt; libgcc_s.so.1</pre>
+<pre>                    │   ├── [-rw-r--r--      241744]  libgcc_s.so.1</pre>
+<pre>                    │   ├── [lrwxrwxrwx          17]  libip4tc.so -&gt; libip4tc.so.0.0.0</pre>
+<pre>                    │   ├── [lrwxrwxrwx          17]  libip4tc.so.0 -&gt; libip4tc.so.0.0.0</pre>
+<pre>                    │   ├── [-rwxr-xr-x       29290]  libip4tc.so.0.0.0</pre>
+<pre>                    │   ├── [lrwxrwxrwx          17]  libip6tc.so -&gt; libip6tc.so.0.0.0</pre>
+<pre>                    │   ├── [lrwxrwxrwx          17]  libip6tc.so.0 -&gt; libip6tc.so.0.0.0</pre>
+<pre>                    │   ├── [-rwxr-xr-x       30356]  libip6tc.so.0.0.0</pre>
+<pre>                    │   ├── [lrwxrwxrwx          16]  libiptc.so -&gt; libiptc.so.0.0.0</pre>
+<pre>                    │   ├── [lrwxrwxrwx          16]  libiptc.so.0 -&gt; libiptc.so.0.0.0</pre>
+<pre>                    │   ├── [-rwxr-xr-x        4948]  libiptc.so.0.0.0</pre>
+<pre>                    │   ├── [-rw-r--r--       61476]  libm-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          16]  libm.so.0 -&gt; libm-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--        1680]  libnsl-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          18]  libnsl.so.0 -&gt; libnsl-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--       79468]  libpthread-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          22]  libpthread.so.0 -&gt; libpthread-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--        1684]  libresolv-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          21]  libresolv.so.0 -&gt; libresolv-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--        4604]  librt-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          17]  librt.so.0 -&gt; librt-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--      433000]  libuClibc-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rw-r--r--        4868]  libutil-0.9.30.1.so</pre>
+<pre>                    │   ├── [lrwxrwxrwx          19]  libutil.so.0 -&gt; libutil-0.9.30.1.so</pre>
+<pre>                    │   ├── [-rwxr-xr-x         999]  libxtables.la</pre>
+<pre>                    │   ├── [lrwxrwxrwx          19]  libxtables.so -&gt; libxtables.so.4.0.0</pre>
+<pre>                    │   ├── [lrwxrwxrwx          19]  libxtables.so.4 -&gt; libxtables.so.4.0.0</pre>
+<pre>                    │   ├── [-rwxr-xr-x       33801]  libxtables.so.4.0.0</pre>
+<pre>                    │   ├── [drwxrwsr-x        4096]  modules</pre>
+<pre>                    │   │   ├── [-rw-r--r--        3880]  ifresetcnt.ko</pre>
+<pre>                    │   │   ├── [-rw-r--r--     1436432]  rt2860v2_ap.ko</pre>
+<pre>                    │   │   └── [-rw-r--r--       42728]  sw_tcpip.ko</pre>
+<pre>                    │   └── [drwxrwxr-x        4096]  xtables</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10270]  libip6t_LOG.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8281]  libip6t_REJECT.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10381]  libip6t_icmp6.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       11088]  libipt_DNAT.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7555]  libipt_HIJACK.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10402]  libipt_LOG.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8214]  libipt_MASQUERADE.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8432]  libipt_REDIRECT.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        9019]  libipt_REJECT.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10231]  libipt_SNAT.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8124]  libipt_TTL.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10641]  libipt_icmp.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7178]  libxt_CLASSIFY.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       11059]  libxt_MARK.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7851]  libxt_TCPMSS.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       25439]  libxt_conntrack.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7374]  libxt_helper.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       13398]  libxt_iprange.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8806]  libxt_limit.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7819]  libxt_mac.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8906]  libxt_mark.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       14576]  libxt_mport.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       14644]  libxt_multiport.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        9371]  libxt_physdev.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8332]  libxt_pkttype.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        5800]  libxt_standard.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8573]  libxt_state.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       12869]  libxt_string.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       12464]  libxt_tcp.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8288]  libxt_tcpmss.so</pre>
+<pre>                    │       ├── [-rwxr-xr-x       14206]  libxt_time.so</pre>
+<pre>                    │       └── [-rwxr-xr-x        9401]  libxt_udp.so</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  mnt</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  proc</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  sbin</pre>
+<pre>                    │   ├── [-rwxr-xr-x       84580]  httpd</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  ifconfig -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  init -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  insmod -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  lsmod -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  modprobe -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  rmmod -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  route -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  sysctl -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [lrwxrwxrwx          14]  tunctl -&gt; ../bin/busybox</pre>
+<pre>                    │   ├── [-rwxr-xr-x       20640]  ubcom</pre>
+<pre>                    │   └── [lrwxrwxrwx          14]  vconfig -&gt; ../bin/busybox</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  sys</pre>
+<pre>                    ├── [lrwxrwxrwx           7]  tmp -&gt; var/tmp</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  usr</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  bin</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  [ -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  [[ -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  basename -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  bunzip2 -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  bzcat -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  bzip2 -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  cut -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  expr -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  free -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  killall -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  killall5 -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  test -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  top -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  tr -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  uptime -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   ├── [lrwxrwxrwx          17]  wc -&gt; ../../bin/busybox</pre>
+<pre>                    │   │   └── [lrwxrwxrwx          17]  yes -&gt; ../../bin/busybox</pre>
+<pre>                    │   ├── [drwxrwxr-x        4096]  lib</pre>
+<pre>                    │   │   └── [drwxrwxr-x        4096]  tc</pre>
+<pre>                    │   └── [drwxrwxr-x        4096]  sbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10048]  ated</pre>
+<pre>                    │       ├── [lrwxrwxrwx           6]  brctl -&gt; nsbbox</pre>
+<pre>                    │       ├── [lrwxrwxrwx           9]  ctest -&gt; rt3052esw</pre>
+<pre>                    │       ├── [-rwxr-xr-x       49972]  ddnsd</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  devconf -&gt; rgbin</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  devdata -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x      200736]  dhcp6c</pre>
+<pre>                    │       ├── [-rwxr-xr-x      175572]  dhcp6s</pre>
+<pre>                    │       ├── [-rwxr-xr-x      162288]  dnsmasq</pre>
+<pre>                    │       ├── [-rwxr-xr-x       45716]  ecmh</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  event -&gt; servd</pre>
+<pre>                    │       ├── [drwxrwxr-x        4096]  fonts</pre>
+<pre>                    │       │   ├── [-rw-r--r--        8692]  Bookman_Old_Style.dat</pre>
+<pre>                    │       │   ├── [-rw-r--r--       10049]  Comic_Sans_MS.dat</pre>
+<pre>                    │       │   ├── [-rw-r--r--        7272]  Gulim.dat</pre>
+<pre>                    │       │   └── [-rw-r--r--        7467]  MS_Sans_Serif.dat</pre>
+<pre>                    │       ├── [lrwxrwxrwx          19]  fwupdater -&gt; ../../htdocs/cgibin</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  genuuid -&gt; rgbin</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  gethostip -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       34473]  gpiod</pre>
+<pre>                    │       ├── [lrwxrwxrwx          19]  hnap -&gt; ../../htdocs/cgibin</pre>
+<pre>                    │       ├── [-rwxr-xr-x      199044]  hostapd</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  httpc -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       53076]  igmpproxy</pre>
+<pre>                    │       ├── [-rwxr-xr-x      251876]  ip</pre>
+<pre>                    │       ├── [lrwxrwxrwx          15]  ip6tables -&gt; ip6tables-multi</pre>
+<pre>                    │       ├── [-rwxr-xr-x       44936]  ip6tables-multi</pre>
+<pre>                    │       ├── [lrwxrwxrwx          15]  ip6tables-restore -&gt; ip6tables-multi</pre>
+<pre>                    │       ├── [lrwxrwxrwx          15]  ip6tables-save -&gt; ip6tables-multi</pre>
+<pre>                    │       ├── [lrwxrwxrwx          14]  iptables -&gt; iptables-multi</pre>
+<pre>                    │       ├── [-rwxr-xr-x       54616]  iptables-multi</pre>
+<pre>                    │       ├── [lrwxrwxrwx          14]  iptables-restore -&gt; iptables-multi</pre>
+<pre>                    │       ├── [lrwxrwxrwx          14]  iptables-save -&gt; iptables-multi</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  ipv6ip -&gt; rgbin</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  ipv6pdip -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       50024]  iwconfig</pre>
+<pre>                    │       ├── [lrwxrwxrwx           8]  iwpriv -&gt; iwconfig</pre>
+<pre>                    │       ├── [-rwxr-xr-x       14940]  klogd</pre>
+<pre>                    │       ├── [-rwxr-xr-x       67776]  lld2d</pre>
+<pre>                    │       ├── [-rwxr-xr-x       21412]  llmnresp</pre>
+<pre>                    │       ├── [-rwxr-xr-x       34508]  logd</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7856]  logger</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  login -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x        5927]  mfc</pre>
+<pre>                    │       ├── [-rwxr-xr-x       31416]  neaps</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7932]  netbios</pre>
+<pre>                    │       ├── [-rwxr-xr-x       58240]  nsbbox</pre>
+<pre>                    │       ├── [lrwxrwxrwx           6]  ntpclient -&gt; nsbbox</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  pfile -&gt; rgbin</pre>
+<pre>                    │       ├── [lrwxrwxrwx          19]  phpcgi -&gt; ../../htdocs/cgibin</pre>
+<pre>                    │       ├── [-rwxr-xr-x         338]  phpsh</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  pidmon -&gt; servd</pre>
+<pre>                    │       ├── [-rwxr-xr-x       13604]  portt</pre>
+<pre>                    │       ├── [-rwxr-xr-x      345248]  pppd</pre>
+<pre>                    │       ├── [lrwxrwxrwx           9]  psts -&gt; rt3052esw</pre>
+<pre>                    │       ├── [-rwxr-xr-x       84556]  radvd</pre>
+<pre>                    │       ├── [-rwxr-xr-x       19300]  radvdump</pre>
+<pre>                    │       ├── [-rwxr-xr-x       27652]  rdisc6</pre>
+<pre>                    │       ├── [-rwxr-xr-x       82852]  rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       23660]  rndimage</pre>
+<pre>                    │       ├── [-rwxr-xr-x        7644]  rt3052esw</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  scut -&gt; rgbin</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  seama -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x      137136]  sendmail</pre>
+<pre>                    │       ├── [-rwxr-xr-x       52048]  servd</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  service -&gt; servd</pre>
+<pre>                    │       ├── [lrwxrwxrwx           9]  slinktype -&gt; rt3052esw</pre>
+<pre>                    │       ├── [lrwxrwxrwx           6]  smtpclient -&gt; nsbbox</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  susockc -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x      313056]  tc</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  tcprequest -&gt; rgbin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10496]  telnetd</pre>
+<pre>                    │       ├── [-rwxr-xr-x        8528]  trigger</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10016]  ubcfg</pre>
+<pre>                    │       ├── [lrwxrwxrwx           6]  udhcpc -&gt; udhcpd</pre>
+<pre>                    │       ├── [-rwxr-xr-x       52056]  udhcpd</pre>
+<pre>                    │       ├── [-rwxr-xr-x       13716]  updateleases</pre>
+<pre>                    │       ├── [-rwxr-xr-x       34528]  updatewifistats</pre>
+<pre>                    │       ├── [lrwxrwxrwx           5]  usockc -&gt; rgbin</pre>
+<pre>                    │       ├── [lrwxrwxrwx           6]  vconfig -&gt; nsbbox</pre>
+<pre>                    │       ├── [lrwxrwxrwx          19]  wfanotify -&gt; ../../htdocs/cgibin</pre>
+<pre>                    │       ├── [-rwxr-xr-x       10612]  widget</pre>
+<pre>                    │       ├── [-rwxr-xr-x      748248]  wps</pre>
+<pre>                    │       ├── [-rwxr-xr-x      157152]  xmldb</pre>
+<pre>                    │       └── [lrwxrwxrwx           5]  xmldbc -&gt; xmldb</pre>
+<pre>                    ├── [drwxrwxr-x        4096]  var</pre>
+<pre>                    └── [drwxrwxr-x        4096]  www</pre>
+<pre>                        ├── [lrwxrwxrwx          18]  syslog.rg -&gt; ../var/log/message</pre>
+<pre>                        └── [lrwxrwxrwx          19]  tsyslog.rg -&gt; ../var/log/tlogsmsg</pre>
+<br />
+<pre>94 directories, 1400 files</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./s06_distribution_identification.html" title="./s06_distribution_identification.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s03_firmware_bin_base_analyzer.html" title="./s03_firmware_bin_base_analyzer.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

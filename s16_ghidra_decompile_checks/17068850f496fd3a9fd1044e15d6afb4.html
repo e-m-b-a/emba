@@ -1,0 +1,408 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./a9d8001806bda310375f35b91f5b2825.html" title="./a9d8001806bda310375f35b91f5b2825.html" >&laquo; Back to a9d8001806bda310375f35b91f5b2825</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Type propagation algorithm not settling */</pre>
+<br />
+<pre>void APUpdateBeaconFrame(int param_1,int param_2)</pre>
+<br />
+<pre>{</pre>
+<pre>  byte bVar1;</pre>
+<pre>  char cVar2;</pre>
+<pre>  undefined1 uVar3;</pre>
+<pre>  undefined2 uVar4;</pre>
+<pre>  bool bVar5;</pre>
+<pre>  byte bVar6;</pre>
+<pre>  int iVar7;</pre>
+<pre>  undefined1 *puVar8;</pre>
+<pre>  int iVar9;</pre>
+<pre>  undefined1 *puVar10;</pre>
+<pre>  undefined1 *puVar11;</pre>
+<pre>  char *pcVar12;</pre>
+<pre>  int iVar13;</pre>
+<pre>  byte *pbVar14;</pre>
+<pre>  uint uVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  char *pcVar17;</pre>
+<pre>  uint uVar18;</pre>
+<pre>  undefined2 *puVar19;</pre>
+<pre>  int iVar20;</pre>
+<pre>  undefined1 local_60;</pre>
+<pre>  undefined1 local_5f;</pre>
+<pre>  undefined1 local_5e;</pre>
+<pre>  byte local_5d;</pre>
+<pre>  undefined2 local_5c [2];</pre>
+<pre>  uint local_58 [4];</pre>
+<pre>  uint local_48;</pre>
+<pre>  char acStack_46 [2];</pre>
+<pre>  undefined4 local_44;</pre>
+<pre>  undefined4 local_40;</pre>
+<pre>  undefined4 local_3c;</pre>
+<pre>  undefined2 local_38;</pre>
+<pre>  uint local_30;</pre>
+<pre>  </pre>
+<pre>  local_60 = 0xdd;</pre>
+<pre>  iVar7 = param_2 * 0x1140 + param_1;</pre>
+<pre>  local_5f = 0x30;</pre>
+<pre>  local_30 = (uint)*(byte *)(iVar7 + 0x551a);</pre>
+<pre>  bVar1 = *(byte *)(iVar7 + 0x62ea);</pre>
+<pre>  if (param_2 == 0) {</pre>
+<pre><span class="green">    cVar2 = *(char *)(param_1 + 0x62e8)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre><span class="green">    cVar2 = *(char *)(iVar7 + 0x62e8)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  if (cVar2 != '\x01') {</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  uVar16 = 0;</pre>
+<pre>  iVar7 = param_1 + param_2 * 0x1140;</pre>
+<pre>  iVar20 = iVar7 + 0x5720;</pre>
+<pre>  puVar10 = (undefined1 *)(iVar20 + (uint)*(byte *)(iVar7 + 0x551b));</pre>
+<pre>  *puVar10 = (char)*(undefined2 *)(iVar7 + 0x51d4);</pre>
+<pre>  pbVar14 = (byte *)(iVar7 + 0x5250);</pre>
+<pre>  puVar10[1] = (char)((ushort)*(undefined2 *)(iVar7 + 0x51d4) &gt;&gt; 8);</pre>
+<pre>  puVar10 = (undefined1 *)(iVar20 + (uint)*(byte *)(iVar7 + 0x551a));</pre>
+<pre>  *puVar10 = 5;</pre>
+<pre>  uVar15 = 0;</pre>
+<pre>  puVar10[2] = *(undefined1 *)(param_1 + 0x16631);</pre>
+<pre>  uVar18 = 0;</pre>
+<pre>  puVar10[3] = *(undefined1 *)(param_1 + 0x16632);</pre>
+<pre>  bVar6 = *pbVar14;</pre>
+<pre>  while( true ) {</pre>
+<pre>    if (uVar15 == 0) {</pre>
+<pre>      bVar6 = bVar6 &amp; 0xfe;</pre>
+<pre>    }</pre>
+<pre>    pbVar14 = pbVar14 + 1;</pre>
+<pre>    if ((bVar6 != 0) &amp;&amp; (uVar18 = uVar15, uVar16 == 0)) {</pre>
+<pre>      uVar16 = uVar15;</pre>
+<pre>    }</pre>
+<pre>    uVar15 = uVar15 + 1 &amp; 0xff;</pre>
+<pre>    if (uVar15 == 5) break;</pre>
+<pre>    bVar6 = *pbVar14;</pre>
+<pre>  }</pre>
+<pre>  if ((uVar16 &amp; 1) != 0) {</pre>
+<pre>    uVar16 = uVar16 - 1 &amp; 0xff;</pre>
+<pre>  }</pre>
+<pre>  puVar10[1] = ((char)uVar18 + '\x04') - (char)uVar16;</pre>
+<pre>  puVar10[4] = (char)uVar16;</pre>
+<pre>  puVar8 = (undefined1 *)(param_1 + param_2 * 0x1140 + uVar16 + 0x5250);</pre>
+<pre>  puVar11 = puVar10;</pre>
+<pre>  while( true ) {</pre>
+<pre>    bVar5 = uVar18 &lt; uVar16;</pre>
+<pre>    uVar16 = uVar16 + 1;</pre>
+<pre>    if (bVar5) break;</pre>
+<pre>    uVar3 = *puVar8;</pre>
+<pre>    puVar8 = puVar8 + 1;</pre>
+<pre>    puVar11[5] = uVar3;</pre>
+<pre>    puVar11 = puVar11 + 1;</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16631) == '\0') {</pre>
+<pre>    puVar10[4] = puVar10[4] | *(byte *)(param_2 * 0x1140 + param_1 + 0x5250) &amp; 1;</pre>
+<pre>  }</pre>
+<pre>  iVar7 = local_30 + 2 + (uint)(byte)puVar10[1];</pre>
+<pre>  if (*(char *)(param_1 + 0x16a07) == '\0') {</pre>
+<pre>LAB_00070094:</pre>
+<pre>    if (4 &lt; bVar1) {</pre>
+<pre>      if (*(char *)(param_2 * 0x1140 + param_1 + 0x520a) != '\0') {</pre>
+<pre>        local_5d = 0x1a;</pre>
+<pre>        local_5e = 0x16;</pre>
+<pre>        MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;HtCapIe,1,&amp;local_5d,0x1a,param_1 + 0x16afe,</pre>
+<pre>                          1,&amp;AddHtInfoIe,1,&amp;local_5e,0x16,param_1 + 0x16b18,0xffffffff);</pre>
+<pre>        iVar7 = iVar7 + local_58[1];</pre>
+<pre>      }</pre>
+<pre>      if (((*(byte *)(param_1 + 0x169ec) &lt; 0xf) &amp;&amp;</pre>
+<pre>          (*(char *)(param_2 * 0x1140 + param_1 + 0x520a) != '\0')) &amp;&amp;</pre>
+<pre>         (*(int *)(param_1 + 0x16afc) &lt;&lt; 0xe &lt; 0)) {</pre>
+<pre>        local_58[2] = *(undefined4 *)(param_1 + 0x16b5e);</pre>
+<pre>        local_58[3] = *(undefined4 *)(param_1 + 0x16b62);</pre>
+<pre>        local_48 = *(uint *)(param_1 + 0x16b66);</pre>
+<pre>        local_5e = 0x4a;</pre>
+<pre>        local_5d = 0xe;</pre>
+<pre>        local_44 = CONCAT22(local_44._2_2_,*(undefined2 *)(param_1 + 0x16b6a));</pre>
+<pre>        MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;local_5e,1,&amp;local_5d,0xe,local_58 + 2,</pre>
+<pre>                          0xffffffff);</pre>
+<pre>        iVar7 = iVar7 + local_58[1];</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    puVar10 = (undefined1 *)(iVar20 + iVar7);</pre>
+<pre>    if (bVar1 != 1) {</pre>
+<pre>      *puVar10 = 0x2a;</pre>
+<pre>      puVar10[1] = 1;</pre>
+<pre>      iVar7 = iVar7 + 3;</pre>
+<pre>      puVar10[2] = *(undefined1 *)(param_1 + 0x16633);</pre>
+<pre>      goto LAB_00070094;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  local_5d = 1;</pre>
+<pre><span class="green">  memset(local_58,0,1)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (((4 &lt; bVar1) &amp;&amp; (*(byte *)(param_1 + 0x169ec) &lt; 0xf)) &amp;&amp;</pre>
+<pre>     ((*(char *)(param_2 * 0x1140 + param_1 + 0x520a) != '\0' &amp;&amp;</pre>
+<pre>      (*(char *)(param_1 + 0x16b30) == '\x01')))) {</pre>
+<pre>    local_58[0] = local_58[0] &amp; 0xfffffffe | 1;</pre>
+<pre>  }</pre>
+<pre>  uVar16 = 0;</pre>
+<pre>  do {</pre>
+<pre>    bVar5 = local_5d &lt;= uVar16;</pre>
+<pre>    pcVar12 = (char *)((int)local_58 + uVar16);</pre>
+<pre>    uVar16 = uVar16 + 1;</pre>
+<pre>    if (bVar5) goto LAB_000702fc;</pre>
+<pre>  } while (*pcVar12 == '\0');</pre>
+<pre>  MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;ExtCapIe,1,&amp;local_5d,(uint)local_5d,local_58,</pre>
+<pre>                    0xffffffff);</pre>
+<pre>  iVar7 = iVar7 + local_58[1];</pre>
+<pre>LAB_000702fc:</pre>
+<pre>  iVar9 = *(int *)(param_2 * 0x1140 + param_1 + 0x51dc);</pre>
+<pre>  if (iVar9 - 3U &lt; 2) {</pre>
+<pre>    local_60 = 0xdd;</pre>
+<pre>  }</pre>
+<pre>  else if (iVar9 - 6U &lt; 2) {</pre>
+<pre>    local_60 = 0x30;</pre>
+<pre>  }</pre>
+<pre>  iVar9 = param_2 * 0x1140;</pre>
+<pre>  iVar13 = param_1 + iVar9;</pre>
+<pre>  if (*(uint *)(iVar13 + 0x51dc) - 8 &lt; 2) {</pre>
+<pre>    iVar9 = param_1 + iVar9 + 0x52e0;</pre>
+<pre>    MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;local_60,1,iVar9 + 4,</pre>
+<pre>                      *(undefined1 *)(iVar13 + 0x52e4),iVar9 + 6,1,&amp;local_5f,1,iVar13 + 0x52e5,</pre>
+<pre>                      *(undefined1 *)(iVar13 + 0x52e5),iVar13 + 0x53e5,0xffffffff);</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    if (*(uint *)(iVar13 + 0x51dc) &lt; 3) goto LAB_00070430;</pre>
+<pre>    iVar9 = param_1 + iVar9 + 0x52e0;</pre>
+<pre>    MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;local_60,1,iVar9 + 4,</pre>
+<pre>                      *(undefined1 *)(iVar13 + 0x52e4),iVar9 + 6,0xffffffff);</pre>
+<pre>  }</pre>
+<pre>  iVar7 = iVar7 + local_58[1];</pre>
+<pre>LAB_00070430:</pre>
+<pre>  if (*(char *)(param_2 * 0x1140 + param_1 + 0x5b30) != '\0') {</pre>
+<pre>    bVar6 = 0x80;</pre>
+<pre>    if (*(char *)(param_1 + 0x16a2c) == '\0') {</pre>
+<pre>      bVar6 = 0;</pre>
+<pre>    }</pre>
+<pre>    local_58[2] = 0x500018dd;</pre>
+<pre>    local_48 = (uint)(bVar6 | *(byte *)(param_1 + 0x1687a) &amp; 0xf);</pre>
+<pre>    local_44 = 0;</pre>
+<pre>    local_40 = 0;</pre>
+<pre>    local_3c = 0;</pre>
+<pre>    local_38 = 0;</pre>
+<pre>    local_58[3] = 0x10102f2;</pre>
+<pre><span class="green">    memmove(local_58,(void *)(param_1 + 0x1687b),4)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    pcVar17 = (char *)(param_1 + 0x16883);</pre>
+<pre>    puVar19 = (undefined2 *)(param_1 + 0x16888);</pre>
+<pre>    pcVar12 = acStack_46;</pre>
+<pre>    iVar9 = 0;</pre>
+<pre>    do {</pre>
+<pre>      *pcVar12 = (*(byte *)((int)local_58 + iVar9) &amp; 0xf) + pcVar17[0xd] * '\x10' +</pre>
+<pre>                 (char)iVar9 * ' ';</pre>
+<pre>      uVar4 = *puVar19;</pre>
+<pre>      iVar9 = iVar9 + 1;</pre>
+<pre>      pcVar12[1] = (pcVar17[-4] &amp; 0xfU) + *pcVar17 * '\x10';</pre>
+<pre>      pcVar12[2] = (char)uVar4;</pre>
+<pre>      pcVar12[3] = (char)((ushort)uVar4 &gt;&gt; 8);</pre>
+<pre>      pcVar17 = pcVar17 + 1;</pre>
+<pre>      pcVar12 = pcVar12 + 4;</pre>
+<pre>      puVar19 = puVar19 + 1;</pre>
+<pre>    } while (iVar9 != 4);</pre>
+<pre>    MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,0x1a,local_58 + 2,0xffffffff);</pre>
+<pre>    iVar7 = iVar7 + local_58[1];</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x76b44) != '\0') {</pre>
+<pre>    iVar9 = QBSS_LoadElementAppend(param_1,iVar20 + iVar7);</pre>
+<pre>    iVar7 = iVar7 + iVar9;</pre>
+<pre>  }</pre>
+<pre>  if (((4 &lt; bVar1) &amp;&amp; (*(char *)(param_2 * 0x1140 + param_1 + 0x520a) != '\0')) &amp;&amp;</pre>
+<pre>     (*(char *)(param_1 + 0x769e8) == '\x01')) {</pre>
+<pre>    local_58[0] = 0x334c9000;</pre>
+<pre>    local_58[2] = 0x344c9000;</pre>
+<pre>    local_5d = 0x1e;</pre>
+<pre>    MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;WpaIe,1,&amp;local_5d,4,local_58,0x1a,</pre>
+<pre>                      param_1 + 0x16afe,0xffffffff);</pre>
+<pre>    iVar7 = iVar7 + local_58[1];</pre>
+<pre>    local_5d = 0x1a;</pre>
+<pre>    MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,1,&amp;WpaIe,1,&amp;local_5d,4,local_58 + 2,0x16,</pre>
+<pre>                      param_1 + 0x16b18,0xffffffff);</pre>
+<pre>    iVar7 = iVar7 + local_58[1];</pre>
+<pre>  }</pre>
+<pre>  local_58[2] = 0xc0007dd;</pre>
+<pre>  local_58[3] = 0x43;</pre>
+<pre>  local_48 = local_48 &amp; 0xffffff00;</pre>
+<pre>  if (*(char *)(param_1 + 0x16a7e) != '\0') {</pre>
+<pre>    local_58[3] = 0x143;</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16a7f) != '\0') {</pre>
+<pre>    local_58[3] = local_58[3] | 0x200;</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16a88) != '\0') {</pre>
+<pre>    local_58[3] = local_58[3] | 0x400;</pre>
+<pre>  }</pre>
+<pre>  MakeOutgoingFrame(iVar20 + iVar7,local_58 + 1,9,local_58 + 2,0xffffffff);</pre>
+<pre>  local_5c[0] = 0;</pre>
+<pre>  RTMPWriteTxWI(param_1,param_1 + 0x5155,0,0,1,0,0,1,0,0xff,iVar7 + local_58[1],5,0xd,0,0,0,local_5c</pre>
+<pre>               );</pre>
+<pre>  RT28xx_UpdateBeaconToAsic(param_1,param_2,iVar7 + local_58[1],local_30);</pre>
+<pre>  return;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

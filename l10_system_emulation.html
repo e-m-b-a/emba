@@ -1,0 +1,705 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#system_emulation_of_linux_based_embedded_devices." title="#system_emulation_of_linux_based_embedded_devices." >System emulation of Linux based embedded devices.</a><a class="submodul" href="#createqemufilesystemforfullsystememulation" title="#createqemufilesystemforfullsystememulation" >Create Qemu filesystem for full system emulation</a><a class="submodul" href="#processinginitfileetcinitdrcs16" title="#processinginitfileetcinitdrcs16" >[*] Processing init file /etc/init.d/rcS (1/6)</a><a class="submodul" href="#networkidentificationetcinitdrcsinitetcinitdrcsmipsel11797883612812squashfsv4leextractmipsel19717" title="#networkidentificationetcinitdrcsinitetcinitdrcsmipsel11797883612812squashfsv4leextractmipsel19717" >Network identification /etc/init.d/rcS - init=/etc/init.d/rcS - mipsel - 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</a><a class="submodul" href="#networkidentification11797883612812squashfsv4leextractmipsel19717" title="#networkidentification11797883612812squashfsv4leextractmipsel19717" >Network identification - 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</a><a class="submodul" href="#setupnetworking619216801br0eth20bridge" title="#setupnetworking619216801br0eth20bridge" >Setup networking - 6-192.168.0.1-br0-eth2-0-bridge</a><a class="submodul" href="#finalsystememulationfor19216801etcinitdrcsinitetcinitdrcsmipsel11797883612812squashfsv4leextractmipsel19717" title="#finalsystememulationfor19216801etcinitdrcsinitetcinitdrcsmipsel11797883612812squashfsv4leextractmipsel19717" >Final system emulation for 192.168.0.1 - /etc/init.d/rcS - init=/etc/init.d/rcS - mipsel - 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</a><a class="submodul" href="#archivetorerunemulatedenvironment" title="#archivetorerunemulatedenvironment" >Archive to re-run emulated environment</a><a class="submodul" href="#systememulationresults" title="#systememulationresults" >System emulation results</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold"><a id="system_emulation_of_linux_based_embedded_devices.">System emulation of Linux based embedded devices.</a></span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>This module builds and emulates Linux firmware - this module is based on the great work of firmadyne</pre>
+<pre>Check out the original firmadyne project at <a href="https://github.com/firmadyne" title="https://github.com/firmadyne" target="_blank" >https://github.com/firmadyne</a></pre>
+<br />
+<a class="refmodul" href="./p55_unblob_extractor.html" title="LINK" ><pre>[</span><span class="orange">*</span>] Testing root path (</span><span class="orange">1</span>/</span><span class="orange">1</span>): </span><span class="orange">/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract</span></pre></a>
+
+<a class="refmodul" href="./p99_prepare_analyzer.html" title="LINK" ><pre>[</span><span class="orange">*</span>] Found supported architecture </span><span class="orange">mipsel</span></pre></a>
+
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="createqemufilesystemforfullsystememulation">Create Qemu filesystem for full system emulation</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] Create Qemu filesystem for emulation - /logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Size of filesystem for emulation - </span><span class="orange">428807424</span>.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Name of filesystem for emulation - </span><span class="orange">1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span>.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Creating Partition Table</pre>
+<pre>[</span><span class="orange">*</span>] Identify Qemu Image device for </span><span class="orange">/logs/l10_system_emulation/1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span></pre>
+<pre>[</span><span class="orange">*</span>] Qemu Image device: </span><span class="orange">/dev/loop0p1</span></pre>
+<pre>[</span><span class="orange">*</span>] Device mapper created at </span><span class="orange">/dev/loop0p1</span></pre>
+<pre>[</span><span class="orange">*</span>] Creating Filesystem</pre>
+<pre>[</span><span class="orange">*</span>] Mounting QEMU Image Partition 1 to </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA</span></pre>
+<pre>[</span><span class="orange">*</span>] Copy extracted root filesystem to new QEMU image</pre>
+<pre>[</span><span class="orange">*</span>] Binwalk v3+ creates raw files on extraction. We remove these files from our emulation root directory</pre>
+<pre>[</span><span class="orange">*</span>] Multiple firmwares have broken links and script and ELF permissions - We fix them now</pre>
+<pre>[</span><span class="orange">*</span>] Creating EMBA emulation helper directories within the firmware environment</pre>
+<pre>[</span><span class="orange">*</span>] Patching filesystem (chroot)</pre>
+<pre>[</span><span class="orange">*</span>] fixImage.sh (chroot)</pre>
+<pre>[</span><span class="orange">*</span>] inferFile.sh (chroot)</pre>
+<pre>[*] EMBA inferFile script starting ...</pre>
+<pre>[*] Found boot file /etc/init.d/rcS</pre>
+<pre>[*] Found boot file /etc/init0.d/rcS</pre>
+<pre>[*] Found boot file /firmadyne/init</pre>
+<pre>[*] Found boot file /sbin/init</pre>
+<pre>[*] Writing firmadyne init /etc/init.d/rcS</pre>
+<pre>[*] Writing firmadyne init /etc/init0.d/rcS</pre>
+<pre>[*] Writing firmadyne init /sbin/init</pre>
+<pre>[*] Re-creating firmadyne/init:</pre>
+<pre>[*] Re-creating BusyBox applet link for /bin/linuxrc</pre>
+<pre>[*] Re-creating BusyBox applet link for /bin/init</pre>
+<pre>/etc/init.d/rcS</pre>
+<pre>/etc/init0.d/rcS</pre>
+<pre>/sbin/init</pre>
+<pre>/bin/linuxrc</pre>
+<pre>/bin/init</pre>
+<pre>/firmadyne/preInit.sh</pre>
+<pre>[*] EMBA inferFile script finished ...</pre>
+<pre>[</span><span class="orange">*</span>] inferService.sh (chroot)</pre>
+<pre>[*] EMBA inferService script starting ...</pre>
+<pre>[*] Service detection running ...</pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S16ipv6.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S19init.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S50config.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S10init.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S20interfaces.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S20init.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S15pts.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/rcS service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init.d/S45gpiod.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S65ddnsd.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S40event.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S41autowan.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S41autowanv6.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S21wlan.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S41inf.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S42pthrough.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/rcS service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S40gpioevent.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S80telnetd.sh service</span></pre>
+<pre>[*] Writing EMBA service starter for </span><span class="orange">/etc/init0.d/S21layout.sh service</span></pre>
+<pre>[*] Writing EMBA process starter for </span><span class="orange">/usr/sbin/pppd</span></pre>
+<pre>[*] Writing EMBA process starter for </span><span class="orange">/usr/sbin/telnetd</span></pre>
+<pre>[*] Writing EMBA process starter for </span><span class="orange">/sbin/httpd</span></pre>
+<pre>[*] Writing EMBA debugging service for the </span><span class="orange">EMBA netcat listener</span></pre>
+<pre>[*] Writing EMBA debugging service for the </span><span class="orange">EMBA telnet listener</span></pre>
+<pre>[*] EMBA inferService script finished ...</pre>
+<pre>[</span><span class="orange">*</span>] Generated injection scripts with marker </span><span class="orange">7976</span>.</pre>
+<pre>[</span><span class="orange">*</span>] Setting up system mode emulation environment on target filesystem</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">busybox</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/busybox-v1.36.1/busybox.mipsel</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">console</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/console/console.mipsel</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">libnvram_dbg.so</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/libnvram/libnvram_dbg.so.mipsel_musl_1.1.24</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">libnvram_nondbg.so</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/libnvram/libnvram_nondbg.so.mipsel_musl_1.1.24</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">libnvram_ioctl_dbg.so</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_dbg.so.mipsel_musl_1.1.24</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">libnvram_ioctl_nondbg.so</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_nondbg.so.mipsel_musl_1.1.24</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">strace</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/strace/strace.mipsel</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">netcat</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/netcat/netcat.mipsel</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">gdb</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/gdb/gdb.mipsel</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up </span><span class="orange">gdbserver</span> - </span><span class="orange">mipsel</span> (</span><span class="orange">/external/EMBA_Live_bins/gdbserver/gdbserver.mipsel</span>)</pre>
+<pre>[</span><span class="orange">*</span>] Setting up emulation scripts</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Processing init files:</pre>
+<pre>/etc/init.d/rcS</pre>
+<pre>/etc/init0.d/rcS</pre>
+<pre>/sbin/init</pre>
+<pre>/bin/linuxrc</pre>
+<pre>/bin/init</pre>
+<pre>/firmadyne/preInit.sh</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">[*] Processing init file </span><span class="orange">/etc/init.d/rcS (1/6)</span></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] Linking to dbg libnvram.so</pre>
+<pre>[</span><span class="orange">*</span>] Linking to dbg libnvram_ioctl.so</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Firmware Init file details:</pre>
+<pre>    </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA/etc/init.d/rcS: POSIX shell script, ASCII text executable</span></pre>
+<pre>[</span><span class="orange">*</span>] EMBA Init starter file details:</pre>
+<pre>    </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/preInit.sh: a /firmadyne/sh script, ASCII text executable</span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Backup original init file </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA/etc/init.d/rcS</span></pre>
+<pre>[</span><span class="orange">*</span>] inferService.sh (chroot)</pre>
+<pre>[*] EMBA inferService script starting ...</pre>
+<pre>[*] Service detection running ...</pre>
+<pre>[*] Writing EMBA debugging service for the </span><span class="orange">EMBA netcat listener</span></pre>
+<pre>[*] Writing EMBA debugging service for the </span><span class="orange">EMBA telnet listener</span></pre>
+<pre>[*] EMBA inferService script finished ...</pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S10init.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S15pts.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S16ipv6.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S19init.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S20init.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S20interfaces.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S45gpiod.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/S50config.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init.d/rcS start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S21layout.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S21wlan.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S40event.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S40gpioevent.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S41autowan.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S41autowanv6.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S41inf.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S42pthrough.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S65ddnsd.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/S80telnetd.sh start</span></pre>
+<pre>[</span><span class="orange">*</span>] Created init service entry for starting service </span><span class="orange">/etc/init0.d/rcS start</span></pre>
+<pre>[</span><span class="orange">*</span>] Add network.sh entry to </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA/etc/init.d/rcS</span></pre>
+<pre>[</span><span class="orange">*</span>] Created service entry for starting service </span><span class="orange">/firmadyne/busybox telnetd -p 9877 -l /firmadyne/sh</span></pre>
+<pre>[</span><span class="orange">*</span>] Created service entry for starting service </span><span class="orange">/firmadyne/netcat -nvlp 9876 -e /firmadyne/sh</span></pre>
+<pre>[</span><span class="orange">*</span>] Created service entry for starting service </span><span class="orange">/sbin/httpd</span></pre>
+<pre>[</span><span class="orange">*</span>] Created service entry for starting service </span><span class="orange">/usr/sbin/pppd</span></pre>
+<pre>[</span><span class="orange">*</span>] Created service entry for starting service </span><span class="orange">/usr/sbin/telnetd</span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] EMBA init starter file: </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA/etc/init.d/rcS</span></pre>
+<pre>#!/bin/sh</pre>
+<pre>for i in /etc/init.d/S??* ;do</pre>
+<pre>	# Ignore dangling symlinks (if any).</pre>
+<pre>	[ ! -f "$i" ] &amp;&amp; continue</pre>
+<pre>	# Run the script.</pre>
+<pre>	echo "[$i]"</pre>
+<pre>	$i</pre>
+<pre>done</pre>
+<pre>echo "[$0] done!"</pre>
+<pre>/etc/init0.d/rcS</pre>
+<pre>/firmadyne/preInit.sh &amp;</pre>
+<pre>/firmadyne/init_service.sh &amp;</pre>
+<br />
+<pre>/firmadyne/network.sh &amp;</pre>
+<pre>/firmadyne/run_service.sh &amp;</pre>
+<pre>/firmadyne/busybox sleep 36000</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Firmware Init file details: </span><span class="orange">/etc/init.d/rcS</span></pre>
+<pre>#!/bin/sh</pre>
+<pre>for i in /etc/init.d/S??* ;do</pre>
+<pre>	# Ignore dangling symlinks (if any).</pre>
+<pre>	[ ! -f "$i" ] &amp;&amp; continue</pre>
+<pre>	# Run the script.</pre>
+<pre>	echo "[$i]"</pre>
+<pre>	$i</pre>
+<pre>done</pre>
+<pre>echo "[$0] done!"</pre>
+<pre>/etc/init0.d/rcS</pre>
+<pre>/firmadyne/preInit.sh &amp;</pre>
+<pre>/firmadyne/init_service.sh &amp;</pre>
+<br />
+<pre>/firmadyne/network.sh &amp;</pre>
+<pre>/firmadyne/run_service.sh &amp;</pre>
+<pre>/firmadyne/busybox sleep 36000</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] EMBA Target filesytem:</pre>
+<pre>        2      1 drwxr-xr-x  17 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA</pre>
+<pre>       11     12 drwx------   2 root     root        12288 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/lost+found</pre>
+<pre>    61441      1 drwxrwxr-x   2 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/sys</pre>
+<pre>    59393      1 drwxrwxr-x   2 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/home</pre>
+<pre>    43009      1 drwxrwxr-x   2 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/proc</pre>
+<pre>    34817      1 drwxrwxr-x   2 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/bin</pre>
+<pre>    88065      1 drwxrwxr-x  11 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/htdocs</pre>
+<pre>    57345      1 drwxrwxr-x  10 root     root         1024 Sep 16 18:22 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/etc</pre>
+<pre>     8193      1 drwxrwxr-x   5 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/usr</pre>
+<pre>    69633      1 drwxrwsr-x   4 root     root         1024 Sep 16 18:22 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/lib</pre>
+<pre>    36865      1 drwxr-xr-x   4 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne</pre>
+<pre>    71681      1 drwxrwxr-x   2 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/var</pre>
+<pre>    38913      1 drwxrwxr-x   2 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/sbin</pre>
+<pre>    12289      1 drwxrwxr-x   9 root     root         1024 Sep 16 18:22 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/dev</pre>
+<pre>       12      0 lrwxrwxrwx   1 root     root            7 Sep 16 18:22 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/tmp -&gt; var/tmp</pre>
+<pre>    40961      1 drwxrwxr-x   2 root     root         1024 Sep 16 18:22 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/www</pre>
+<pre>    98305      1 drwxrwxr-x   2 root     root         1024 Jan 22  2013 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/mnt</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] EMBA emulation helpers directory:</pre>
+<pre>    36865      1 drwxr-xr-x   4 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne</pre>
+<pre>    36871      1 -rwxr-xr-x   1 root     root           89 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/init</pre>
+<pre>    36885      0 crw-rw-rw-   1 root     root       4,  65 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/ttyAMA1</pre>
+<pre>    36867      1 drwxr-xr-x   2 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram.override</pre>
+<pre>    36881    126 -rwxr-xr-x   1 root     root       127740 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/netcat</pre>
+<pre>    36875     36 -rwxr-xr-x   1 root     root        35592 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/console</pre>
+<pre>    36876     38 -rwxr-xr-x   1 root     root        37628 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram_dbg.so</pre>
+<pre>    36884      0 crw-rw-rw-   1 root     root       4,  65 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/ttyS1</pre>
+<pre>    36882   8661 -rwxr-xr-x   1 root     root      8832436 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/gdb</pre>
+<pre>    36886      3 -rwxr-xr-x   1 root     root         2796 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/preInit.sh</pre>
+<pre>    36868      0 lrwxrwxrwx   1 root     root           18 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/sh -&gt; /firmadyne/busybox</pre>
+<pre>    36889      7 -rwxr-xr-x   1 root     root         7063 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/run_service.sh</pre>
+<pre>    36883    898 -rwxr-xr-x   1 root     root       914404 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/gdbserver</pre>
+<pre>    36891      0 lrwxrwxrwx   1 root     root           21 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram_ioctl.so -&gt; libnvram_ioctl_dbg.so</pre>
+<pre>    36877     28 -rwxr-xr-x   1 root     root        27320 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram_nondbg.so</pre>
+<pre>    36874   1643 -rwxr-xr-x   1 root     root      1674172 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/busybox</pre>
+<pre>    36887      9 -rwxr-xr-x   1 root     root         8373 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/network.sh</pre>
+<pre>    36866      1 drwxr-xr-x   2 root     root         1024 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram</pre>
+<pre>    36880   1494 -rwxr-xr-x   1 root     root      1522440 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/strace</pre>
+<pre>    36878     39 -rwxr-xr-x   1 root     root        38512 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram_ioctl_dbg.so</pre>
+<pre>    36873      1 -rw-r--r--   1 root     root          143 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/service</pre>
+<pre>    36872      1 -rw-r--r--   1 root     root           44 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/init_tmp_sorted</pre>
+<pre>    36888      3 -rwxr-xr-x   1 root     root         2492 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/init_service.sh</pre>
+<pre>    36870      1 -rw-r--r--   1 root     root          608 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/startup_service</pre>
+<pre>    36869      1 -rw-r--r--   1 root     root           28 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/dir_log</pre>
+<pre>    36879     29 -rwxr-xr-x   1 root     root        27688 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram_ioctl_nondbg.so</pre>
+<pre>    36890      0 lrwxrwxrwx   1 root     root           15 Sep 16 20:58 /logs/l10_system_emulation/emulation_tmp_fs_EMBA/firmadyne/libnvram.so -&gt; libnvram_dbg.so</pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="networkidentificationetcinitdrcsinitetcinitdrcsmipsel11797883612812squashfsv4leextractmipsel19717">Network identification /etc/init.d/rcS - init=/etc/init.d/rcS - mipsel - 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] Test basic emulation and identify network settings.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Running firmware </span><span class="orange">1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span>: Terminating after 660 secs...</pre>
+<pre>[</span><span class="orange">*</span>] Qemu network identification run for </span><span class="orange">mipsel</span> - </span><span class="orange">1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span></pre>
+<pre>[</span><span class="orange">*</span>] Kernel 2.x detected -&gt; Using Kernel v4.x</pre>
+<pre>[</span><span class="orange">*</span>] Qemu parameters used in network detection mode:</pre>
+<pre>    MACHINE: </span><span class="orange">malta</span></pre>
+<pre>    KERNEL: </span><span class="orange">/external/EMBA_Live_bins/Linux-Kernel-v4.14.336/vmlinux.mipsel.4</span></pre>
+<pre>    DRIVE: </span><span class="orange">-drive if=ide,format=raw,file=/logs/l10_system_emulation/1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span></pre>
+<pre>    KINIT: </span><span class="orange">init=/etc/init.d/rcS</span></pre>
+<pre>    ROOT_DEV: </span><span class="orange">/dev/sda1</span></pre>
+<pre>    QEMU binary: </span><span class="orange">qemu-system-mipsel</span></pre>
+<pre>    NETWORK: </span><span class="orange">-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3</span></pre>
+<pre>    Init file: </span><span class="orange">/etc/init.d/rcS</span></pre>
+<pre>    Console interface: </span><span class="orange">ttyS0</span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Starting firmware emulation for network identification - </span><span class="orange">qemu-system-mipsel / mipsel / 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span> ... use Ctrl-a + x to exit</pre>
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="networkidentification11797883612812squashfsv4leextractmipsel19717">Network identification - 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Booted system detected.</pre>
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Detected UDP service startup: </span><span class="orange">dnsmasq</span> / </span><span class="orange">53</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected TCP service startup: </span><span class="orange">dnsmasq</span> / </span><span class="orange">53</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected UDP service startup: </span><span class="orange">httpd</span> / </span><span class="orange">1900</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected TCP service startup: </span><span class="orange">httpd</span> / </span><span class="orange">49152</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected TCP service startup: </span><span class="orange">httpd</span> / </span><span class="orange">80</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected UDP service startup: </span><span class="orange">llmnresp</span> / </span><span class="orange">5355</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected UDP service startup: </span><span class="orange">neaps</span> / </span><span class="orange">64512</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected UDP service startup: </span><span class="orange">netbios</span> / </span><span class="orange">137</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected TCP service startup: </span><span class="orange">telnetd</span> / </span><span class="orange">23</span></pre>
+<pre>[</span><span class="orange">*</span>] Detected UDP service startup: </span><span class="orange">udhcpd</span> / </span><span class="orange">67</span></pre>
+<pre>[</span><span class="orange">*</span>] Possible VLAN details detected: </span><span class="orange"> register_vlan_dev[PID: 339 (vconfig)]: dev:eth2.0 vlan_id:0</span></pre>
+<pre>[</span><span class="orange">*</span>] Possible VLAN details detected: </span><span class="orange"> register_vlan_dev[PID: 345 (vconfig)]: dev:eth2.2 vlan_id:2</span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Possible interface candidate detected: </span><span class="orange">(ip)]: device:br0 ifa:0x0100a8c0</span></pre>
+<pre>[</span><span class="orange">*</span>] Identified IP address: </span><span class="orange">192.168.0.1</span> / </span><span class="orange">(ip)]: device:br0 ifa:0x0100a8c0</span></pre>
+<pre>[</span><span class="orange">*</span>] Possible br interface detected: </span><span class="orange">br0</span> / IP: </span><span class="orange">192.168.0.1</span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Processing matching bridge interface: </span><span class="orange"> br:br0 dev:eth2.0</span><span class="green"> / network device: </span><span class="orange">br0</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Analyzing VLAN details </span><span class="orange"> register_vlan_dev[PID: 339 (vconfig)]: dev:eth2.0 vlan_id:0</span></pre>
+<pre>[</span><span class="orange">*</span>] VLAN details: </span><span class="orange"> register_vlan_dev[PID: 339 (vconfig)]: dev:eth2.0 vlan_id:0</span></pre>
+<pre>[</span><span class="orange">*</span>] Interface details: </span><span class="orange">eth2</span></pre>
+<pre>[</span><span class="orange">*</span>] Possible matching VLAN details detected: </span><span class="orange"> register_vlan_dev[PID: 339 (vconfig)]: dev:eth2.0 vlan_id:0</span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">6</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">5</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="orange">*</span>] Analyzing VLAN details </span><span class="orange"> register_vlan_dev[PID: 345 (vconfig)]: dev:eth2.2 vlan_id:2</span></pre>
+<pre>[</span><span class="orange">*</span>] VLAN details: </span><span class="orange"> register_vlan_dev[PID: 345 (vconfig)]: dev:eth2.2 vlan_id:2</span></pre>
+<pre>[</span><span class="orange">*</span>] Interface details: </span><span class="orange">eth2</span></pre>
+<pre>[</span><span class="orange">*</span>] Possible matching VLAN details detected: </span><span class="orange"> register_vlan_dev[PID: 345 (vconfig)]: dev:eth2.2 vlan_id:2</span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">2</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">6</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">2</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">5</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">4</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">6</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">NONE</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">6</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">6</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">bridge</span><span class="green"> / priority: </span><span class="orange">5</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">default</span><span class="green"> / priority: </span><span class="orange">3</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">eth2</span><span class="green"> / network device: </span><span class="orange">eth2</span><span class="green"> / vlan id: </span><span class="orange">0</span><span class="green"> / network mode: </span><span class="orange">interface</span><span class="green"> / priority: </span><span class="orange">2</span></pre>
+<pre></span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Interface details detected: IP address: </span><span class="orange">192.168.0.1</span><span class="green"> / bridge dev: </span><span class="orange">br0</span><span class="green"> / network device: </span><span class="orange">eth0</span><span class="green"> / vlan id: </span><span class="orange">NONE</span><span class="green"> / network mode: </span><span class="orange">normal</span><span class="green"> / priority: </span><span class="orange">1</span></pre>
+<pre></span></pre>
+<br />
+<a class="reference" href="./l10_system_emulation/fdd5a1015511361e04e04821a0065a07.html" title="./l10_system_emulation/fdd5a1015511361e04e04821a0065a07.html" ><pre>[</span><span class="orange">*</span>] Firmware </span><span class="orange">1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span> finished for identification of the network configuration</pre></a>
+
+<br />
+<pre>[</span><span class="orange">*</span>] Identify Qemu Image device for </span><span class="orange">/logs/l10_system_emulation/1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span></pre>
+<pre>[</span><span class="orange">*</span>] Device mapper created at </span><span class="orange">/dev/loop0p1</span></pre>
+<pre>[</span><span class="orange">*</span>] Mounting QEMU Image Partition 1 to </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA</span></pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Identified the following network configuration options:</pre>
+<pre>[</span><span class="orange">*</span>] Unsorted configuration</pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 5</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 2 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 2 - bridge - 5</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 4</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - NONE - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 5</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - default - 3</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - eth2 - eth2 - 0 - interface - 2</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth0 - NONE - normal - 1</span></pre>
+<pre>[</span><span class="orange">*</span>] Sorted and unique configuration</pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - NONE - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 2 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 5</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 2 - bridge - 5</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 4</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - default - 3</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - eth2 - eth2 - 0 - interface - 2</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth0 - NONE - normal - 1</span></pre>
+<pre>[</span><span class="orange">*</span>] Final configuration</pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - NONE - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 2 - bridge - 6</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth2 - 0 - default - 3</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - eth2 - eth2 - 0 - interface - 2</span></pre>
+<pre>    </span><span class="orange">192.168.0.1 - br0 - eth0 - NONE - normal - 1</span></pre>
+<br />
+<br />
+<pre>[</span><span class="orange">*</span>] Testing system emulation with configuration: </span><span class="orange">6-192.168.0.1-br0-eth2-0-bridge</span>.</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="setupnetworking619216801br0eth20bridge">Setup networking - 6-192.168.0.1-br0-eth2-0-bridge</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] Creating TAP device </span><span class="orange">tap213_0</span> ...</pre>
+<pre>[</span><span class="orange">*</span>] Bringing up HOSTNETDEV </span><span class="orange">tap213_0.0</span> / VLAN ID </span><span class="orange">0</span> / TAPDEV </span><span class="orange">tap213_0</span>.</pre>
+<pre>[</span><span class="orange">*</span>] Bringing up HOSTIP </span><span class="orange">192.168.0.2</span> / IP address </span><span class="orange">192.168.0.1</span> / TAPDEV </span><span class="orange">tap213_0</span>.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Identify Qemu Image device for </span><span class="orange">/logs/l10_system_emulation/1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span></pre>
+<pre>[</span><span class="orange">*</span>] Device mapper created at </span><span class="orange">/dev/loop0p1</span></pre>
+<pre>[</span><span class="orange">*</span>] Mounting QEMU Image Partition 1 to </span><span class="orange">/logs/l10_system_emulation/emulation_tmp_fs_EMBA</span></pre>
+<pre>[</span><span class="orange">*</span>] Setting network configuration in target filesystem:</pre>
+<pre>    Network interface: </span><span class="orange">eth2</span></pre>
+<pre>    Network mode: </span><span class="orange">bridge</span></pre>
+<pre>    Bridge interface: </span><span class="orange">br0</span></pre>
+<pre>    IP address: </span><span class="orange">192.168.0.1</span></pre>
+<pre>[</span><span class="orange">*</span>] Checking for missing area </span><span class="orange">/etc/init.d/S50config.sh</span> in filesystem ...</pre>
+<pre>[</span><span class="orange">*</span>] Found missing area </span><span class="orange">/etc/init.d/S50config.sh</span> in filesystem ... trying to fix this now</pre>
+<pre>[</span><span class="orange">*</span>] Linking to dbg libnvram.so</pre>
+<pre>[</span><span class="orange">*</span>] Linking to dbg libnvram_ioctl.so</pre>
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="finalsystememulationfor19216801etcinitdrcsinitetcinitdrcsmipsel11797883612812squashfsv4leextractmipsel19717">Final system emulation for 192.168.0.1 - /etc/init.d/rcS - init=/etc/init.d/rcS - mipsel - 1179788-3612812.squashfs_v4_le_extract_mipsel-19717</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] Kernel 2.x detected -&gt; Using Kernel v4.x</pre>
+<pre>[</span><span class="orange">*</span>] Network ID 0 connector / lNET_NUM: 2</pre>
+<pre>[</span><span class="orange">*</span>] Create socket placeholder interface: </span><span class="orange">0</span></pre>
+<pre>[</span><span class="orange">*</span>] Network ID 1 connector / lNET_NUM: 2</pre>
+<pre>[</span><span class="orange">*</span>] Create socket placeholder interface: </span><span class="orange">1</span></pre>
+<pre>[</span><span class="orange">*</span>] Network ID 2 connector / lNET_NUM: 2</pre>
+<pre>[</span><span class="orange">*</span>] Connect interface: </span><span class="orange">2</span> to host</pre>
+<pre>[</span><span class="orange">*</span>] Network ID 3 connector / lNET_NUM: 2</pre>
+<pre>[</span><span class="orange">*</span>] Create socket placeholder interface: </span><span class="orange">3</span></pre>
+<pre>[</span><span class="orange">*</span>] Network ID 4 connector / lNET_NUM: 2</pre>
+<pre>[</span><span class="orange">*</span>] Network ID 4 bypass</pre>
+<pre>[</span><span class="orange">*</span>] Network ID 5 connector / lNET_NUM: 2</pre>
+<pre>[</span><span class="orange">*</span>] Network ID 5 bypass</pre>
+<pre>[</span><span class="orange">*</span>] Qemu parameters used in run mode:</pre>
+<pre>    MACHINE: </span><span class="orange">malta</span></pre>
+<pre>    KERNEL: </span><span class="orange">/external/EMBA_Live_bins/Linux-Kernel-v4.14.336/vmlinux.mipsel.4</span></pre>
+<pre>    DISK: </span><span class="orange">-drive if=ide,format=raw,file=/logs/l10_system_emulation/1179788-3612812.squashfs_v4_le_extract_mipsel-19717</span></pre>
+<pre>    KINIT: </span><span class="orange">init=/etc/init.d/rcS</span></pre>
+<pre>    ROOT_DEV: </span><span class="orange">/dev/sda1</span></pre>
+<pre>    QEMU: </span><span class="orange">qemu-system-mipsel</span></pre>
+<pre>    NETWORK: </span><span class="orange"> -device e1000,netdev=net0 -netdev socket,id=net0,listen=:2000 -device e1000,netdev=net1 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net2 -netdev tap,id=net2,ifname=tap213_0,script=no -device e1000,netdev=net3 -netdev socket,id=net3,listen=:2003</span></pre>
+<pre>    Init file: </span><span class="orange">/etc/init.d/rcS</span></pre>
+<pre>    Console interface: </span><span class="orange">ttyS0</span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Starting firmware emulation </span><span class="orange">qemu-system-mipsel / mipsel / 1179788-3612812.squashfs_v4_le_extract_mipsel-19717 / 192.168.0.1</span> ... use Ctrl-a + x to exit</pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Host with </span><span class="orange">192.168.0.1</span><span class="green"> is reachable via ICMP.</pre>
+<pre></span></pre>
+<pre>PING 192.168.0.1 (192.168.0.1) 56(84) bytes of data.</pre>
+<pre>64 bytes from 192.168.0.1: icmp_seq=1 ttl=64 time=0.680 ms</pre>
+<br />
+<pre>--- 192.168.0.1 ping statistics ---</pre>
+<pre>1 packets transmitted, 1 received, 0% packet loss, time 0ms</pre>
+<pre>rtt min/avg/max/mdev = 0.680/0.680/0.680/0.000 ms</pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Host with </span><span class="orange">192.168.0.1</span><span class="green"> is reachable on TCP port 0 via hping.</pre>
+<pre></span></pre>
+<pre>HPING 192.168.0.1 (tap213_0.0 192.168.0.1): NO FLAGS are set, 40 headers + 0 data bytes</pre>
+<pre>len=46 ip=192.168.0.1 ttl=64 DF id=0 sport=0 flags=RA seq=0 win=0 rtt=1.9 ms</pre>
+<br />
+<br />
+<pre>[</span><span class="orange">*</span>] Default Nmap portscan for </span><span class="orange">192.168.0.1</span></pre>
+<br />
+<pre>PING 192.168.0.1 (192.168.0.1) 56(84) bytes of data.</pre>
+<pre>64 bytes from 192.168.0.1: icmp_seq=1 ttl=64 time=10.4 ms</pre>
+<br />
+<pre>--- 192.168.0.1 ping statistics ---</pre>
+<pre>1 packets transmitted, 1 received, 0% packet loss, time 0ms</pre>
+<pre>rtt min/avg/max/mdev = 10.443/10.443/10.443/0.000 ms</pre>
+<br />
+<pre>Starting Nmap 7.99 ( <a href="https://nmap.org" title="https://nmap.org" target="_blank" >https://nmap.org</a> ) at 2026-09-16 21:11 +0000</pre>
+<pre>Nmap scan report for 192.168.0.1</pre>
+<pre>Host is up (0.00066s latency).</pre>
+<pre>Not shown: 999 closed tcp ports (reset)</pre>
+<pre>PORT   STATE SERVICE VERSION</pre>
+<pre>23/tcp open  telnet  D-Link 524, DIR-300, or WBR-1310 WAP telnetd</pre>
+<pre>MAC Address: 00:DE:FA:1A:01:00 (Unknown)</pre>
+<pre>Device type: general purpose</pre>
+<pre>Running: Linux 3.X|4.X</pre>
+<pre>OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4</pre>
+<pre>OS details: Linux 3.2 - 4.14</pre>
+<pre>Network Distance: 1 hop</pre>
+<pre>Service Info: Device: WAP</pre>
+<br />
+<pre>TRACEROUTE</pre>
+<pre>HOP RTT     ADDRESS</pre>
+<pre>1   0.66 ms 192.168.0.1</pre>
+<br />
+<pre>OS and Service detection performed. Please report any incorrect results at <a href="https://nmap.org/submit/" title="https://nmap.org/submit/" target="_blank" >https://nmap.org/submit/</a> .</pre>
+<pre>Nmap done: 1 IP address (1 host up) scanned in 1.78 seconds</pre>
+<pre>Starting Nmap 7.99 ( <a href="https://nmap.org" title="https://nmap.org" target="_blank" >https://nmap.org</a> ) at 2026-09-16 21:11 +0000</pre>
+<pre>Nmap scan report for 192.168.0.1</pre>
+<pre>Host is up (0.00054s latency).</pre>
+<br />
+<pre>PORT     STATE         SERVICE    VERSION</pre>
+<pre>111/udp  closed        rpcbind</pre>
+<pre>123/udp  closed        ntp</pre>
+<pre>137/udp  open|filtered netbios-ns</pre>
+<pre>161/udp  closed        snmp</pre>
+<pre>1434/udp closed        ms-sql-m</pre>
+<pre>MAC Address: 00:DE:FA:1A:01:00 (Unknown)</pre>
+<br />
+<pre>Service detection performed. Please report any incorrect results at <a href="https://nmap.org/submit/" title="https://nmap.org/submit/" target="_blank" >https://nmap.org/submit/</a> .</pre>
+<pre>Nmap done: 1 IP address (1 host up) scanned in 22.60 seconds</pre>
+<br />
+<a class="reference" href="./l10_system_emulation/565c3014c38e8670d18b0729c58654e4.html" title="./l10_system_emulation/565c3014c38e8670d18b0729c58654e4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Already detected running network services via Nmap ... further detection active - CNT: 1</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<pre>[</span><span class="orange">*</span>] TCP Services detected via startup: </span><span class="orange">23,49152,53,80,</span></pre>
+<pre>[</span><span class="orange">*</span>] UDP Services detected via startup: </span><span class="orange">137,1900,53,5355,64512,67,</span></pre>
+<pre>[</span><span class="orange">*</span>] TCP Services detected via netstat: </span><span class="orange">23,49152,53,80,</span></pre>
+<pre>[</span><span class="orange">*</span>] UDP Services detected via netstat: </span><span class="orange">137,1900,53,5355,64512,67,</span></pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Checking TCP services </span><span class="orange">T:0,21,22,23,443,49152,53,80,8080</span></pre>
+<pre>[</span><span class="orange">*</span>] Checking UDP services </span><span class="orange">U:0,137,1900,53,5355,64512,67</span></pre>
+<br />
+<a class="reference" href="./l10_system_emulation/06946c0b506e5ce7df32d30cff1c05e7.html" title="./l10_system_emulation/06946c0b506e5ce7df32d30cff1c05e7.html" ><pre>[</span><span class="orange">*</span>] Nmap portscan for network services (</span><span class="orange">T:0,21,22,23,443,49152,53,80,8080,U:0,137,1900,53,5355,64512,67</span>) started during system init on </span><span class="orange">192.168.0.1</span></pre></a>
+
+<br />
+<pre>Starting Nmap 7.99 ( <a href="https://nmap.org" title="https://nmap.org" target="_blank" >https://nmap.org</a> ) at 2026-09-16 21:14 +0000</pre>
+<pre>Nmap scan report for 192.168.0.1</pre>
+<pre>Host is up (0.0013s latency).</pre>
+<br />
+<pre>PORT      STATE         SERVICE    VERSION</pre>
+<pre>0/tcp     closed        unknown</pre>
+<pre>21/tcp    closed        ftp</pre>
+<pre>22/tcp    closed        ssh</pre>
+<pre>23/tcp    open          telnet     D-Link 524, DIR-300, or WBR-1310 WAP telnetd</pre>
+<pre>53/tcp    open          domain     dnsmasq 2.45</pre>
+<pre>80/tcp    open          http       D-Link DIR-600 WAP http config 2.14</pre>
+<pre>443/tcp   closed        https</pre>
+<pre>8080/tcp  closed        http-proxy</pre>
+<pre>49152/tcp open          upnp       D-Link DIR-600 WAP UPnP 2.14 (UPnP 1.0)</pre>
+<pre>0/udp     closed        unknown</pre>
+<pre>53/udp    open          domain     dnsmasq 2.45</pre>
+<pre>67/udp    open|filtered dhcps</pre>
+<pre>137/udp   open|filtered netbios-ns</pre>
+<pre>1900/udp  open|filtered upnp</pre>
+<pre>5355/udp  open|filtered llmnr</pre>
+<pre>64512/udp open|filtered unknown</pre>
+<pre>MAC Address: 00:DE:FA:1A:01:00 (Unknown)</pre>
+<pre>Service Info: OS: Linux; Device: WAP; CPE: cpe:/h:dlink:dir-600:2.14, cpe:/o:linux:linux_kernel, cpe:/h:d-link:dir-600</pre>
+<br />
+<pre>Service detection performed. Please report any incorrect results at <a href="https://nmap.org/submit/" title="https://nmap.org/submit/" target="_blank" >https://nmap.org/submit/</a> .</pre>
+<pre>Nmap done: 1 IP address (1 host up) scanned in 110.21 seconds</pre>
+<br />
+<pre><hr class="mono" /></pre>
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> System emulation was successful.</pre>
+<pre></span></pre>
+<a class="reference" href="./l10_system_emulation/dcca790b160a6de32fecfd78a7d67413.html" title="./l10_system_emulation/dcca790b160a6de32fecfd78a7d67413.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> System should be available via IP </span><span class="orange">192.168.0.1</span><span class="green">.</pre></a>
+<pre></span></pre>
+
+<br />
+<a class="reference" href="./l10_system_emulation/06946c0b506e5ce7df32d30cff1c05e7.html" title="./l10_system_emulation/06946c0b506e5ce7df32d30cff1c05e7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> More than 2 TCP based Network services are available - no further emulation runs are needed</pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="archivetorerunemulatedenvironment">Archive to re-run emulated environment</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>With the following archive it is possible to rebuild the created emulation environment fully automated.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] <a class="local" href="./l10_system_emulation/6b1ab7685921ad270fe1b6bbed94847b/res/archive-1179788-3612812.squashfs_v4_le_extract_mipsel-19717-5530.tar.gz" title="./l10_system_emulation/6b1ab7685921ad270fe1b6bbed94847b/res/archive-1179788-3612812.squashfs_v4_le_extract_mipsel-19717-5530.tar.gz" >Download Qemu emulation archive.</a></pre>
+
+<br />
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="systememulationresults">System emulation results</a></span></pre>
+<pre><hr class="mono" /></pre>
+<pre>EMBA was able to identify the following system emulation results:</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services cnt;available network services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|VLAN_ID|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH;</pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> EMBA;Booted yes;ICMP ok;TCP-0 ok;TCP ok/tcp,49152/tcp,53/tcp,53/udp,80/tcp;IP address: 192.168.0.1;Network mode: bridge (br0|eth2|0|/etc/init.d/rcS|init);archive-1179788-3612812.squashfs_v4_le_extract_mipsel-19717-5530;/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract;</pre>
+<pre></span></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> Identified the following system emulation results (with running network services):</pre>
+<pre></span></pre>
+<pre>    </span><span class="orange">/home/runner/work/emba/emba/DIR-600_fw_revb5_214b01_ALL_de_20130122.zip;EMBA;Booted yes;ICMP ok;TCP-0 ok;TCP ok/tcp,49152/tcp,53/tcp,53/udp,80/tcp;IP address: 192.168.0.1;Network mode: bridge (br0|eth2|0|/etc/init.d/rcS|init);archive-1179788-3612812.squashfs_v4_le_extract_mipsel-19717-5530;/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract</span></span></pre>
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> System recovery was successful. Further live analysis possible for IP 192.168.0.1.</pre>
+<pre></span></pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./l15_emulated_checks_nmap.html" title="./l15_emulated_checks_nmap.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s130_binary_map_builder.html" title="./s130_binary_map_builder.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

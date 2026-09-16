@@ -1,0 +1,1125 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
+      <!-- navigation start --><a class="modul" href="#check_binaries_for_weak_functions_(radare_mode)" title="#check_binaries_for_weak_functions_(radare_mode)" >Check binaries for weak functions (radare mode)</a><a class="submodul" href="#top10legacycfunctionsradare2disasmmode" title="#top10legacycfunctionsradare2disasmmode" >Top 10 legacy C functions - Radare2 disasm mode</a>
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>[</span><span class="blue">+</span>] </span><span class="cyan"><span class="bold">Check binaries for weak functions (radare mode)</span></pre>
+<pre><span class="bold"><hr class="double" /></span></pre>
+<pre>This module identifies the usage of critical binary functions in firmware via </span><span class="orange">radare2</span>.</pre>
+<pre>Examples of binary functions are system, strcpy, printf and strcat. These functions are configured in the configuration</pre>
+<pre>file config/functions.cfg. The module counts the usages per binary. For strcpy functions it also counts strlen functions</pre>
+<pre>right before the strcpy function. Additionally it checks if the binary is a known Linux binary or unknown and probably</pre>
+<pre>a vendor binary.</pre>
+<br />
+<pre>[</span><span class="orange">*</span>] Vulnerable functions: fprintf mmap popen printf sprintf strcat strcpy system</pre>
+<br />
+<a class="reference" href="./s14_weak_func_radare_check/d601d8bc4e69eb9d2eb4f38220850b3d.html" title="./s14_weak_func_radare_check/d601d8bc4e69eb9d2eb4f38220850b3d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libip4tc.so.0.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d7855703d46092f14dafc8b0d00eab49.html" title="./s14_weak_func_radare_check/d7855703d46092f14dafc8b0d00eab49.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip6tables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 23 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5eae6d7f45277e9382a0c96daf2b172d.html" title="./s14_weak_func_radare_check/5eae6d7f45277e9382a0c96daf2b172d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/udhcpd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9019d21b48d6b9a13fb0c97bec33dc14.html" title="./s14_weak_func_radare_check/9019d21b48d6b9a13fb0c97bec33dc14.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/gpiod (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ad759f98ef28aae1b7d0db705c886f05.html" title="./s14_weak_func_radare_check/ad759f98ef28aae1b7d0db705c886f05.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libip6t_LOG.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 16 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/09fd717008d8b7940ecc5e9285b4cfb1.html" title="./s14_weak_func_radare_check/09fd717008d8b7940ecc5e9285b4cfb1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updateleases (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0511ff0740ecf22cb5d3b0b2d844b0c3.html" title="./s14_weak_func_radare_check/0511ff0740ecf22cb5d3b0b2d844b0c3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_TTL.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 9 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5f0667b4dbd0f5023f6d1d303bce37fd.html" title="./s14_weak_func_radare_check/5f0667b4dbd0f5023f6d1d303bce37fd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_REJECT.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/6a94cde73e29fb44477d69a71c78835d.html" title="./s14_weak_func_radare_check/6a94cde73e29fb44477d69a71c78835d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libip4tc.so.0.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 23 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/1b196b2de1a897224dcdd324f963def2.html" title="./s14_weak_func_radare_check/1b196b2de1a897224dcdd324f963def2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/gpiod (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/1fa490000ea6841ee14df036aa385a2d.html" title="./s14_weak_func_radare_check/1fa490000ea6841ee14df036aa385a2d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip6tables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 77 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/05ebe9cb6c957babefd3da692f18de3f.html" title="./s14_weak_func_radare_check/05ebe9cb6c957babefd3da692f18de3f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/ubcom (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 22 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/beaad593df158e1fbaff598e8edeaa8b.html" title="./s14_weak_func_radare_check/beaad593df158e1fbaff598e8edeaa8b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updateleases (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 16 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/59d6f83dc130d5c90534405bb62daca6.html" title="./s14_weak_func_radare_check/59d6f83dc130d5c90534405bb62daca6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/udhcpd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 32 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a80a452a7265f26b19c62da93b209d4e.html" title="./s14_weak_func_radare_check/a80a452a7265f26b19c62da93b209d4e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/gpiod (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 18 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/44d5fffb4fd27735c40b16b8e25a0829.html" title="./s14_weak_func_radare_check/44d5fffb4fd27735c40b16b8e25a0829.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/ubcom (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d710ffa8dda96032d9401060e24ba473.html" title="./s14_weak_func_radare_check/d710ffa8dda96032d9401060e24ba473.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updateleases (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 11 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/290c72fe2c0beba0dfeb88eaae05a121.html" title="./s14_weak_func_radare_check/290c72fe2c0beba0dfeb88eaae05a121.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/udhcpd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 26 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/cb398411217b5f4e04bca8ef6e2d09a7.html" title="./s14_weak_func_radare_check/cb398411217b5f4e04bca8ef6e2d09a7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libip6t_LOG.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4ee089678d17c3536c57d0ce8d20c640.html" title="./s14_weak_func_radare_check/4ee089678d17c3536c57d0ce8d20c640.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip6tables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c80c94de55226419bb36b585c099d7eb.html" title="./s14_weak_func_radare_check/c80c94de55226419bb36b585c099d7eb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libip4tc.so.0.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 12 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/dba5635cd4d0903da99fbe66ee2ce1a5.html" title="./s14_weak_func_radare_check/dba5635cd4d0903da99fbe66ee2ce1a5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/ubcom (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">strlen: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7e2ed43efb7aa37a5a160a001d79fe6e.html" title="./s14_weak_func_radare_check/7e2ed43efb7aa37a5a160a001d79fe6e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip6tables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/19a85f7aa33810bff86d8c30c7b7bebe.html" title="./s14_weak_func_radare_check/19a85f7aa33810bff86d8c30c7b7bebe.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updateleases (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/65688e8bb6c495879ae4c4f38c25a95d.html" title="./s14_weak_func_radare_check/65688e8bb6c495879ae4c4f38c25a95d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/udhcpd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fb51696cf7043666fa4b1161b4bdf440.html" title="./s14_weak_func_radare_check/fb51696cf7043666fa4b1161b4bdf440.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/ubcom (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7286238a2141f252b96e957fb3baf088.html" title="./s14_weak_func_radare_check/7286238a2141f252b96e957fb3baf088.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/gpiod (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0c7a975fb5252c1267aaee2c75474499.html" title="./s14_weak_func_radare_check/0c7a975fb5252c1267aaee2c75474499.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updateleases (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c736cb7385193a91ce2ec987d623c072.html" title="./s14_weak_func_radare_check/c736cb7385193a91ce2ec987d623c072.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/udhcpd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/1d95e8820a3511b6c6665eaab9fd80d3.html" title="./s14_weak_func_radare_check/1d95e8820a3511b6c6665eaab9fd80d3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_DNAT.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 11 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e08acb11c18c36005fb6d2c560f16042.html" title="./s14_weak_func_radare_check/e08acb11c18c36005fb6d2c560f16042.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/httpd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 19 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c4aa20b33e339fd7076395f4f108edeb.html" title="./s14_weak_func_radare_check/c4aa20b33e339fd7076395f4f108edeb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libxtables.so.4.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 22 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/6235fff328b63cbed3ea00576e15b5ab.html" title="./s14_weak_func_radare_check/6235fff328b63cbed3ea00576e15b5ab.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_time.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 20 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/21db1413adb58b1ec7cdf2ec50ec1e2f.html" title="./s14_weak_func_radare_check/21db1413adb58b1ec7cdf2ec50ec1e2f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_state.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3b8443ed884fe29d7e8e50fd9c2e99de.html" title="./s14_weak_func_radare_check/3b8443ed884fe29d7e8e50fd9c2e99de.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ubcfg (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 8 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a01358adbd57a7a3346f15b8eefbbf15.html" title="./s14_weak_func_radare_check/a01358adbd57a7a3346f15b8eefbbf15.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libutil-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b90936834f9c86ce763f41f19da13d7d.html" title="./s14_weak_func_radare_check/b90936834f9c86ce763f41f19da13d7d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libxtables.so.4.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 29 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c3c2460e2d86055ad6c23237c94849b2.html" title="./s14_weak_func_radare_check/c3c2460e2d86055ad6c23237c94849b2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/httpd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 52 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/00e86b9dc1e8cdcc9a30d3923168886c.html" title="./s14_weak_func_radare_check/00e86b9dc1e8cdcc9a30d3923168886c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ubcfg (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/772ccae09bb29c43ba0b3a52d07a9196.html" title="./s14_weak_func_radare_check/772ccae09bb29c43ba0b3a52d07a9196.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/84131afb95cee581cf9154ccbd3eeabf.html" title="./s14_weak_func_radare_check/84131afb95cee581cf9154ccbd3eeabf.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libxtables.so.4.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/aa976912e7b2e4803e47a355e377c0cb.html" title="./s14_weak_func_radare_check/aa976912e7b2e4803e47a355e377c0cb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/httpd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 26 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f8c98cd9d575506696b36e8fb1f6ec90.html" title="./s14_weak_func_radare_check/f8c98cd9d575506696b36e8fb1f6ec90.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/trigger (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/6c56637b2331fead18faa769327a8368.html" title="./s14_weak_func_radare_check/6c56637b2331fead18faa769327a8368.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libxtables.so.4.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/977a95cf89f93efea0adb32b7ae80ed6.html" title="./s14_weak_func_radare_check/977a95cf89f93efea0adb32b7ae80ed6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/servd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 43 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e004f5df565ce9a60b0fb18dcdc1f3b2.html" title="./s14_weak_func_radare_check/e004f5df565ce9a60b0fb18dcdc1f3b2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e307d2cdfd42964bf68b03a701062ecc.html" title="./s14_weak_func_radare_check/e307d2cdfd42964bf68b03a701062ecc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /sbin/httpd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 13 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/963208e13fc7d06e2ff912a7155c6635.html" title="./s14_weak_func_radare_check/963208e13fc7d06e2ff912a7155c6635.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libxtables.so.4.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f1d2cc2c16b9aa334a7db2ea97c646e7.html" title="./s14_weak_func_radare_check/f1d2cc2c16b9aa334a7db2ea97c646e7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_tcpmss.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c760b00b2166eb079f84e6c319188aea.html" title="./s14_weak_func_radare_check/c760b00b2166eb079f84e6c319188aea.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/trigger (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/bc98ebc1346d230ae8c626dccc94fc4b.html" title="./s14_weak_func_radare_check/bc98ebc1346d230ae8c626dccc94fc4b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 17 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/06331787299db98b6d9d0579358e5c6b.html" title="./s14_weak_func_radare_check/06331787299db98b6d9d0579358e5c6b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_TCPMSS.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/623365ce281827a1888193a971f853bc.html" title="./s14_weak_func_radare_check/623365ce281827a1888193a971f853bc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_MARK.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 17 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9a5ecf1c1c8603d4a37bb03c11a92d86.html" title="./s14_weak_func_radare_check/9a5ecf1c1c8603d4a37bb03c11a92d86.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5ebd78d71893de41316cf74c6969f0a8.html" title="./s14_weak_func_radare_check/5ebd78d71893de41316cf74c6969f0a8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/servd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 59 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/16508d62248b488acd2e1011e2640ca5.html" title="./s14_weak_func_radare_check/16508d62248b488acd2e1011e2640ca5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iwconfig (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 86 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/26850e67ce1cbdb33d5c9b0b5756eb87.html" title="./s14_weak_func_radare_check/26850e67ce1cbdb33d5c9b0b5756eb87.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/servd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/315f5cb4d2aab19bfc2771d41228d317.html" title="./s14_weak_func_radare_check/315f5cb4d2aab19bfc2771d41228d317.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/57ad6f7935bf2e1ed27ed41af739c16e.html" title="./s14_weak_func_radare_check/57ad6f7935bf2e1ed27ed41af739c16e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_icmp.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/24aa8174e4c3556078e7a1862a3be4fe.html" title="./s14_weak_func_radare_check/24aa8174e4c3556078e7a1862a3be4fe.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iwconfig (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/35364afd03bb0462dea00e30955b1449.html" title="./s14_weak_func_radare_check/35364afd03bb0462dea00e30955b1449.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fce4544f3792036497b552eae3c8b819.html" title="./s14_weak_func_radare_check/fce4544f3792036497b552eae3c8b819.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/servd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">strlen: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/6013a2ebe384c95dc92564fcd82dca3c.html" title="./s14_weak_func_radare_check/6013a2ebe384c95dc92564fcd82dca3c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/288dce500a22600fd1a053bc2a84c59c.html" title="./s14_weak_func_radare_check/288dce500a22600fd1a053bc2a84c59c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iwconfig (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 186 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/dc9faf433f09f11de5cc37e3484c1c16.html" title="./s14_weak_func_radare_check/dc9faf433f09f11de5cc37e3484c1c16.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/servd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/39420caa36f3d799a77bb8cb6e8a70b2.html" title="./s14_weak_func_radare_check/39420caa36f3d799a77bb8cb6e8a70b2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_MASQUERADE.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/cfb11c7d451a7ff9bf99255bb7765883.html" title="./s14_weak_func_radare_check/cfb11c7d451a7ff9bf99255bb7765883.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_icmp.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0f73b941e4269a862a2078f3d1541c96.html" title="./s14_weak_func_radare_check/0f73b941e4269a862a2078f3d1541c96.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libip6t_icmp6.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/38a5e139a1c22d6aba51ad5e78b345b6.html" title="./s14_weak_func_radare_check/38a5e139a1c22d6aba51ad5e78b345b6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">mmap </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">Correct error handling: NA </span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c811c077018c46333bdceae12f109945.html" title="./s14_weak_func_radare_check/c811c077018c46333bdceae12f109945.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rndimage (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ee04baeebf2b1a88ce3234f2c2a743f4.html" title="./s14_weak_func_radare_check/ee04baeebf2b1a88ce3234f2c2a743f4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iwconfig (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 20 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5498dddbcc37e8d08c1f5f7669f588ba.html" title="./s14_weak_func_radare_check/5498dddbcc37e8d08c1f5f7669f588ba.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/netbios (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/12949dfe7bd6d35e66d2df27037532e7.html" title="./s14_weak_func_radare_check/12949dfe7bd6d35e66d2df27037532e7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/79fa141c03c4696b31dd374e369f0106.html" title="./s14_weak_func_radare_check/79fa141c03c4696b31dd374e369f0106.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libip6t_icmp6.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c3147bdf0ae7880cc26b68d0eb9b8293.html" title="./s14_weak_func_radare_check/c3147bdf0ae7880cc26b68d0eb9b8293.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 38 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/6cdab06c0ec9dcc1d6d2727b072e6f70.html" title="./s14_weak_func_radare_check/6cdab06c0ec9dcc1d6d2727b072e6f70.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iwconfig (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 21 </span>/ </span><span class="orange">strlen: 2 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/37bbdda7613d912d2f3aedd96a8a2a02.html" title="./s14_weak_func_radare_check/37bbdda7613d912d2f3aedd96a8a2a02.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rndimage (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/69f36fc6a592e3ee2e405724dca9b691.html" title="./s14_weak_func_radare_check/69f36fc6a592e3ee2e405724dca9b691.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/netbios (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/cadf306c654727af243f735feb975a71.html" title="./s14_weak_func_radare_check/cadf306c654727af243f735feb975a71.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/db1cc2cb1e4fb6e99cc8c3f354631f34.html" title="./s14_weak_func_radare_check/db1cc2cb1e4fb6e99cc8c3f354631f34.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iwconfig (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/dacafeaa566f8f976a6e4e5b1300fce2.html" title="./s14_weak_func_radare_check/dacafeaa566f8f976a6e4e5b1300fce2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rndimage (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3e43b254c114503f360f5d5a88a7cd2e.html" title="./s14_weak_func_radare_check/3e43b254c114503f360f5d5a88a7cd2e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_multiport.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 22 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/05e926e5f40ceb241abbff6be4ee5cb7.html" title="./s14_weak_func_radare_check/05e926e5f40ceb241abbff6be4ee5cb7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/telnetd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/83bf727de29a4755e950e67147d03eaa.html" title="./s14_weak_func_radare_check/83bf727de29a4755e950e67147d03eaa.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libcrypt-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/779ffdb91272294b0d7c9a9d7326edd9.html" title="./s14_weak_func_radare_check/779ffdb91272294b0d7c9a9d7326edd9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/neaps (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/560e6d251fc28d9e82fe430df9f467ed.html" title="./s14_weak_func_radare_check/560e6d251fc28d9e82fe430df9f467ed.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/llmnresp (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/81d0c4ce10516d9781c5c566f50a56e2.html" title="./s14_weak_func_radare_check/81d0c4ce10516d9781c5c566f50a56e2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 37 </span>/ </span><span class="orange">strlen: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7317fbdadd5447b150193d10d361cf60.html" title="./s14_weak_func_radare_check/7317fbdadd5447b150193d10d361cf60.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libcrypt-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8a8a3fcef532c1ecdd7b3207c14e6aec.html" title="./s14_weak_func_radare_check/8a8a3fcef532c1ecdd7b3207c14e6aec.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/portt (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e591aca10c3ade6edcb5447c098c815d.html" title="./s14_weak_func_radare_check/e591aca10c3ade6edcb5447c098c815d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/neaps (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fc6c0cc657a0d54312e5e38f4d3e134e.html" title="./s14_weak_func_radare_check/fc6c0cc657a0d54312e5e38f4d3e134e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/telnetd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/13cbbcdfe5da6a5e34b46e574ad0c35b.html" title="./s14_weak_func_radare_check/13cbbcdfe5da6a5e34b46e574ad0c35b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/igmpproxy (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3b4fe671b9138bedbd3c8139c4ce0a56.html" title="./s14_weak_func_radare_check/3b4fe671b9138bedbd3c8139c4ce0a56.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/neaps (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 14 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7cc1338b2d917e15348c9d7984a84458.html" title="./s14_weak_func_radare_check/7cc1338b2d917e15348c9d7984a84458.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ecmh (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 40 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/974f92a18343cb312fbc2b37a639fa22.html" title="./s14_weak_func_radare_check/974f92a18343cb312fbc2b37a639fa22.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/llmnresp (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e1070699e37c76ef8588440d43f6b4ab.html" title="./s14_weak_func_radare_check/e1070699e37c76ef8588440d43f6b4ab.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/portt (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8b05f599b3d0db15c98aa9ba557c1bca.html" title="./s14_weak_func_radare_check/8b05f599b3d0db15c98aa9ba557c1bca.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/neaps (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0540dea2503fb3312fb7596f8a2e2e91.html" title="./s14_weak_func_radare_check/0540dea2503fb3312fb7596f8a2e2e91.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/telnetd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d22869560880c8edd2304d25bd8a69a8.html" title="./s14_weak_func_radare_check/d22869560880c8edd2304d25bd8a69a8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/tc (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 479 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8e3be6a8c1a83e75bb5710e2fcbfdcb1.html" title="./s14_weak_func_radare_check/8e3be6a8c1a83e75bb5710e2fcbfdcb1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/portt (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c179f9b211842673bd1aa14e1a839b0f.html" title="./s14_weak_func_radare_check/c179f9b211842673bd1aa14e1a839b0f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/llmnresp (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d92e881b55f7f0c32fbb95fc7e1f4d38.html" title="./s14_weak_func_radare_check/d92e881b55f7f0c32fbb95fc7e1f4d38.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libuClibc-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 44 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e6bad7962d1a5536aa2e290268967801.html" title="./s14_weak_func_radare_check/e6bad7962d1a5536aa2e290268967801.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_pkttype.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d34b7beffbc2fb0e083f6fa32e216e0c.html" title="./s14_weak_func_radare_check/d34b7beffbc2fb0e083f6fa32e216e0c.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ecmh (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 43 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7aa5b749ed76df420a5ef8c8a4f7cf09.html" title="./s14_weak_func_radare_check/7aa5b749ed76df420a5ef8c8a4f7cf09.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/neaps (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ef538bcc7f1d6201080418fe95196141.html" title="./s14_weak_func_radare_check/ef538bcc7f1d6201080418fe95196141.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/llmnresp (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/02a6e304dc9c328b79f8dceafea29a04.html" title="./s14_weak_func_radare_check/02a6e304dc9c328b79f8dceafea29a04.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/portt (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e4ecf011ede8d174bdad2012cadd7826.html" title="./s14_weak_func_radare_check/e4ecf011ede8d174bdad2012cadd7826.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/neaps (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/50a09d89938c9b51732bc47b428f0752.html" title="./s14_weak_func_radare_check/50a09d89938c9b51732bc47b428f0752.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ddnsd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 9 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a087b3b17e57bf9c9b01ad57290c3f72.html" title="./s14_weak_func_radare_check/a087b3b17e57bf9c9b01ad57290c3f72.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libuClibc-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">mmap </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">Correct error handling: NA </span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/6c266cbc036ec981a1aed9b41f08d37f.html" title="./s14_weak_func_radare_check/6c266cbc036ec981a1aed9b41f08d37f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/portt (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e4a597021a87c7b7486dedb37b1faa15.html" title="./s14_weak_func_radare_check/e4a597021a87c7b7486dedb37b1faa15.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libip6tc.so.0.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/cb71e25f5d6bc7765240ed5fdc86d104.html" title="./s14_weak_func_radare_check/cb71e25f5d6bc7765240ed5fdc86d104.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 18 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3eb003f9a86170d38dcb5b7669b8fc30.html" title="./s14_weak_func_radare_check/3eb003f9a86170d38dcb5b7669b8fc30.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ddnsd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 29 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/63910420992c56d971886b1ae55a6ab1.html" title="./s14_weak_func_radare_check/63910420992c56d971886b1ae55a6ab1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/tc (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 555 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7b27f19160012dc13b1133422b71653b.html" title="./s14_weak_func_radare_check/7b27f19160012dc13b1133422b71653b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_mac.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d9b39badbddaa2d88cff3a6c97c5cc9d.html" title="./s14_weak_func_radare_check/d9b39badbddaa2d88cff3a6c97c5cc9d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ddnsd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f8ca72aecd299154813da7049b64f5e4.html" title="./s14_weak_func_radare_check/f8ca72aecd299154813da7049b64f5e4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9c9bbbd28d561e2682ae8ab1f081a860.html" title="./s14_weak_func_radare_check/9c9bbbd28d561e2682ae8ab1f081a860.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/tc (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4582581e4d9b86325b62515d5ba469cb.html" title="./s14_weak_func_radare_check/4582581e4d9b86325b62515d5ba469cb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libuClibc-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 79 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8cce51a5f5ed6c6406b759eedc836742.html" title="./s14_weak_func_radare_check/8cce51a5f5ed6c6406b759eedc836742.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libip6tc.so.0.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 24 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fd7af7385de479cec5b3cc7a9fdb23fa.html" title="./s14_weak_func_radare_check/fd7af7385de479cec5b3cc7a9fdb23fa.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ddnsd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fe783e09cc23bc1816f823eeefd3bd16.html" title="./s14_weak_func_radare_check/fe783e09cc23bc1816f823eeefd3bd16.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 21 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b5573b61f40911c5ce17e26c2e48b92a.html" title="./s14_weak_func_radare_check/b5573b61f40911c5ce17e26c2e48b92a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ddnsd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0c833c8fab52a8c6d181c63796c0957e.html" title="./s14_weak_func_radare_check/0c833c8fab52a8c6d181c63796c0957e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/tc (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ad4252cabb433ceb086429cd602d25a7.html" title="./s14_weak_func_radare_check/ad4252cabb433ceb086429cd602d25a7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7681a410767da395c8eb6a3a29abfab7.html" title="./s14_weak_func_radare_check/7681a410767da395c8eb6a3a29abfab7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libuClibc-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 21 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d433bbd787d3890732a18bbc3f29bc97.html" title="./s14_weak_func_radare_check/d433bbd787d3890732a18bbc3f29bc97.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvdump (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 11 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ef286ecee6345f55ecbe656e816ba284.html" title="./s14_weak_func_radare_check/ef286ecee6345f55ecbe656e816ba284.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ddnsd (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/cbd80915477e6ebb19e04d4c09412a02.html" title="./s14_weak_func_radare_check/cbd80915477e6ebb19e04d4c09412a02.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libip6tc.so.0.0.0 (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 12 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/383a37aefd542f14fd42c8b3d765610f.html" title="./s14_weak_func_radare_check/383a37aefd542f14fd42c8b3d765610f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/eea5d0a1bb146cba5ecabe739e05771d.html" title="./s14_weak_func_radare_check/eea5d0a1bb146cba5ecabe739e05771d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 734 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4677fc387e80a99d33486d1591ae964d.html" title="./s14_weak_func_radare_check/4677fc387e80a99d33486d1591ae964d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/tc (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">strlen: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/86e0d61ebedf254724321bc965e572ed.html" title="./s14_weak_func_radare_check/86e0d61ebedf254724321bc965e572ed.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/522afefe598bfa6c063539444205c9a6.html" title="./s14_weak_func_radare_check/522afefe598bfa6c063539444205c9a6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libuClibc-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f0b3e979be10cea121ba238bc6c3006b.html" title="./s14_weak_func_radare_check/f0b3e979be10cea121ba238bc6c3006b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_conntrack.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 61 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/351f64b4c840d049acafe99fbc45bbe9.html" title="./s14_weak_func_radare_check/351f64b4c840d049acafe99fbc45bbe9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvdump (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 48 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4006bb8913b071a0af2b7d88d20b167b.html" title="./s14_weak_func_radare_check/4006bb8913b071a0af2b7d88d20b167b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 23 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/790a06c96045792e500cc607f0a8e080.html" title="./s14_weak_func_radare_check/790a06c96045792e500cc607f0a8e080.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_mark.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/cd807cb72678eef5cb37e7f319f2be45.html" title="./s14_weak_func_radare_check/cd807cb72678eef5cb37e7f319f2be45.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_conntrack.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/88adb45a6146c57b073379c7e173f514.html" title="./s14_weak_func_radare_check/88adb45a6146c57b073379c7e173f514.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rdisc6 (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c5c179822fcd9319d9b2afaddbcd989d.html" title="./s14_weak_func_radare_check/c5c179822fcd9319d9b2afaddbcd989d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d0ecd9e8b289d46310b6198123971df3.html" title="./s14_weak_func_radare_check/d0ecd9e8b289d46310b6198123971df3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvdump (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fa8c581f615d22b750313a1461f37ac6.html" title="./s14_weak_func_radare_check/fa8c581f615d22b750313a1461f37ac6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libuClibc-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 29 </span>/ </span><span class="orange">strlen: 17 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/26d24c39cff24817426baee8376a69d6.html" title="./s14_weak_func_radare_check/26d24c39cff24817426baee8376a69d6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/59446eb81ab8dff4b07a9274383c9dda.html" title="./s14_weak_func_radare_check/59446eb81ab8dff4b07a9274383c9dda.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_string.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 16 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9819550ceb6e0f2d18a51609ecf77b57.html" title="./s14_weak_func_radare_check/9819550ceb6e0f2d18a51609ecf77b57.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_conntrack.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/56bb69c6450b079f69d227677b3d8e7f.html" title="./s14_weak_func_radare_check/56bb69c6450b079f69d227677b3d8e7f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/radvdump (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4eea22d9436624dcff471188d6456fb5.html" title="./s14_weak_func_radare_check/4eea22d9436624dcff471188d6456fb5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="orange">strlen: 4 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/34d3366ccedf2e4622a0f07b51e58dd6.html" title="./s14_weak_func_radare_check/34d3366ccedf2e4622a0f07b51e58dd6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rdisc6 (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 58 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a4f4844ea7e59003cf4d24c0424ae0c8.html" title="./s14_weak_func_radare_check/a4f4844ea7e59003cf4d24c0424ae0c8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/495a1a38ae9f1d2b04522a0ee6392e8f.html" title="./s14_weak_func_radare_check/495a1a38ae9f1d2b04522a0ee6392e8f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/xmldb (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/990c73d6425067791668aefaeca3150e.html" title="./s14_weak_func_radare_check/990c73d6425067791668aefaeca3150e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rdisc6 (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5f0677472d926ad4622b275faf8e4569.html" title="./s14_weak_func_radare_check/5f0677472d926ad4622b275faf8e4569.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 20 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e703c79d2bd400e6153157446e3aca95.html" title="./s14_weak_func_radare_check/e703c79d2bd400e6153157446e3aca95.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a6b9e862f8556cc16be11027d7969be8.html" title="./s14_weak_func_radare_check/a6b9e862f8556cc16be11027d7969be8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rdisc6 (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ed2d76d8852f763c985790b6a9eb8edc.html" title="./s14_weak_func_radare_check/ed2d76d8852f763c985790b6a9eb8edc.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0d37a879b356a583d005c2b904e35417.html" title="./s14_weak_func_radare_check/0d37a879b356a583d005c2b904e35417.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/widget (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2b35ca787cbfc160b55125d9266d20ad.html" title="./s14_weak_func_radare_check/2b35ca787cbfc160b55125d9266d20ad.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_LOG.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 16 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ac158d8eb8e48a205f8bfb754784c170.html" title="./s14_weak_func_radare_check/ac158d8eb8e48a205f8bfb754784c170.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rdisc6 (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/15bce872f054406ecf43411506a45ea4.html" title="./s14_weak_func_radare_check/15bce872f054406ecf43411506a45ea4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e24b4268201a5ba606b34b13a51a13b9.html" title="./s14_weak_func_radare_check/e24b4268201a5ba606b34b13a51a13b9.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/widget (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b622a1fe9933670c975d19e2dd4fa455.html" title="./s14_weak_func_radare_check/b622a1fe9933670c975d19e2dd4fa455.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_physdev.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 11 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/36e955317a3513b5c9a903cbb9e431c3.html" title="./s14_weak_func_radare_check/36e955317a3513b5c9a903cbb9e431c3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_REDIRECT.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 8 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2b063017ae0c3b1a167f653c3455b256.html" title="./s14_weak_func_radare_check/2b063017ae0c3b1a167f653c3455b256.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rdisc6 (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e8b7d77d6f88f62fc505851ea57c79bd.html" title="./s14_weak_func_radare_check/e8b7d77d6f88f62fc505851ea57c79bd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/54d613a8125632e8e4bd6ee2e1583780.html" title="./s14_weak_func_radare_check/54d613a8125632e8e4bd6ee2e1583780.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">strlen: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/eebbf87b71181c01468ef1e943f12041.html" title="./s14_weak_func_radare_check/eebbf87b71181c01468ef1e943f12041.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_LOG.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2e753921fb8fc1aeafe69a25c01c883a.html" title="./s14_weak_func_radare_check/2e753921fb8fc1aeafe69a25c01c883a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 113 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d58d0dd62c4a255607a3402eb18e1b38.html" title="./s14_weak_func_radare_check/d58d0dd62c4a255607a3402eb18e1b38.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/lld2d (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/95b56c53da50b04090e9af3c78f50353.html" title="./s14_weak_func_radare_check/95b56c53da50b04090e9af3c78f50353.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 41 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4f8c7bce489e0bcfed20280acc8773a0.html" title="./s14_weak_func_radare_check/4f8c7bce489e0bcfed20280acc8773a0.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/911ede2398f5fa37b76fdb271f10128e.html" title="./s14_weak_func_radare_check/911ede2398f5fa37b76fdb271f10128e.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iptables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 26 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/dd79dfbdd0abe0991f16f29a360663bd.html" title="./s14_weak_func_radare_check/dd79dfbdd0abe0991f16f29a360663bd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libpthread-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">mmap </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">Correct error handling: NA </span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/0c9a1f2fef4d560c39a1fe7798c084d8.html" title="./s14_weak_func_radare_check/0c9a1f2fef4d560c39a1fe7798c084d8.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/477d7e8597673f17a096d659b8aadba6.html" title="./s14_weak_func_radare_check/477d7e8597673f17a096d659b8aadba6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/ld-uClibc-0.9.30.1.so (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 21 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9ceb85f1b1a72595c0875a0b24460324.html" title="./s14_weak_func_radare_check/9ceb85f1b1a72595c0875a0b24460324.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 499 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b2c4f4de5fb80d9d5217ecce3019ec51.html" title="./s14_weak_func_radare_check/b2c4f4de5fb80d9d5217ecce3019ec51.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 16 </span>/ </span><span class="orange">strlen: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/bb86f5baad4b33dab5a7241d90d17c55.html" title="./s14_weak_func_radare_check/bb86f5baad4b33dab5a7241d90d17c55.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_helper.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d70859fa35e63dee40ec3501893b17dd.html" title="./s14_weak_func_radare_check/d70859fa35e63dee40ec3501893b17dd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9d20b15db96fa84dbdde551471979d8b.html" title="./s14_weak_func_radare_check/9d20b15db96fa84dbdde551471979d8b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iptables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 117 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5629aca5e40c6cda3a55f57314fdc1d1.html" title="./s14_weak_func_radare_check/5629aca5e40c6cda3a55f57314fdc1d1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /htdocs/cgibin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 17 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/991d5def5fb48aaf68f0ca12b18095c7.html" title="./s14_weak_func_radare_check/991d5def5fb48aaf68f0ca12b18095c7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libm-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9e12f20af0291bd870174a9ee104f4e3.html" title="./s14_weak_func_radare_check/9e12f20af0291bd870174a9ee104f4e3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6c (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 26 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2feacc2030b3ecd61b4f5471e1dc7388.html" title="./s14_weak_func_radare_check/2feacc2030b3ecd61b4f5471e1dc7388.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 34 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2a6240668466cb7d71458c9e9b441d1a.html" title="./s14_weak_func_radare_check/2a6240668466cb7d71458c9e9b441d1a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iptables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/61c1e987f165ea997929efeb2a45145b.html" title="./s14_weak_func_radare_check/61c1e987f165ea997929efeb2a45145b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libm-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/eac4f81c393ea4db2949e1913bda192f.html" title="./s14_weak_func_radare_check/eac4f81c393ea4db2949e1913bda192f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updatewifistats (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 21 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a348a585659a9fba0ee51f0db9fa1b28.html" title="./s14_weak_func_radare_check/a348a585659a9fba0ee51f0db9fa1b28.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 23 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a511befc8961749d2da30e4a26c3d056.html" title="./s14_weak_func_radare_check/a511befc8961749d2da30e4a26c3d056.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/iptables-multi (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3b2b6ba1f50d441e7fe443ff2b124a43.html" title="./s14_weak_func_radare_check/3b2b6ba1f50d441e7fe443ff2b124a43.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libpthread-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f69cfc9cb6289604d83926ca81f1ca50.html" title="./s14_weak_func_radare_check/f69cfc9cb6289604d83926ca81f1ca50.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 588 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/08e02e94125828d63cf30062a4e8faf3.html" title="./s14_weak_func_radare_check/08e02e94125828d63cf30062a4e8faf3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 12 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2bbd913a64fceb062c2646c5c38365c3.html" title="./s14_weak_func_radare_check/2bbd913a64fceb062c2646c5c38365c3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updatewifistats (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3271f23eb6f0f5935acfec84a9ce44ab.html" title="./s14_weak_func_radare_check/3271f23eb6f0f5935acfec84a9ce44ab.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logger (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c2730b9ec87c7b6dddd99c45ed82440a.html" title="./s14_weak_func_radare_check/c2730b9ec87c7b6dddd99c45ed82440a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libip6t_REJECT.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b78bfa1610a34aa808abb26e37cf40d5.html" title="./s14_weak_func_radare_check/b78bfa1610a34aa808abb26e37cf40d5.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6c (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 509 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4db294060ecad9ba787cdfeb418b06d0.html" title="./s14_weak_func_radare_check/4db294060ecad9ba787cdfeb418b06d0.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updatewifistats (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 79 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8227645b8d49ed776c0bc31cc6fcc5f6.html" title="./s14_weak_func_radare_check/8227645b8d49ed776c0bc31cc6fcc5f6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_CLASSIFY.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/020d8010bd7dff6edbadded6dab28240.html" title="./s14_weak_func_radare_check/020d8010bd7dff6edbadded6dab28240.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 28 </span>/ </span><span class="orange">strlen: 12 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/620b416d77ac4db8bf47b217aa215364.html" title="./s14_weak_func_radare_check/620b416d77ac4db8bf47b217aa215364.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 15 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3d0ffda36cd518db8fb5c5ea04d91b02.html" title="./s14_weak_func_radare_check/3d0ffda36cd518db8fb5c5ea04d91b02.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6c (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 9 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/70d0698b56f05c769ee234a771b364f1.html" title="./s14_weak_func_radare_check/70d0698b56f05c769ee234a771b364f1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updatewifistats (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 37 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/620e1beaba99d5f554013a20aec663fd.html" title="./s14_weak_func_radare_check/620e1beaba99d5f554013a20aec663fd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/logger (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fe56e259bbb98f5f0422cf7a57ed0581.html" title="./s14_weak_func_radare_check/fe56e259bbb98f5f0422cf7a57ed0581.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dnsmasq (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9b9a0d6b444ee4be8a783f51adff881d.html" title="./s14_weak_func_radare_check/9b9a0d6b444ee4be8a783f51adff881d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_udp.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c074d0631be4c9938f5c6fc3fd5ab3c0.html" title="./s14_weak_func_radare_check/c074d0631be4c9938f5c6fc3fd5ab3c0.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fbd8c89dd524486a09e69efcc68f1726.html" title="./s14_weak_func_radare_check/fbd8c89dd524486a09e69efcc68f1726.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updatewifistats (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 21 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/9a298455b841b427e9608e75347c8dec.html" title="./s14_weak_func_radare_check/9a298455b841b427e9608e75347c8dec.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6c (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d5d4f0bb5359f88144b0542c447a16e4.html" title="./s14_weak_func_radare_check/d5d4f0bb5359f88144b0542c447a16e4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ip (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f357b380c9165b25c8a571b9f7fd9ff6.html" title="./s14_weak_func_radare_check/f357b380c9165b25c8a571b9f7fd9ff6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/updatewifistats (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4cf80d78b435620a331c73e14cc97b89.html" title="./s14_weak_func_radare_check/4cf80d78b435620a331c73e14cc97b89.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6c (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c7ea922d5fa65e20bdd3041b9f678f94.html" title="./s14_weak_func_radare_check/c7ea922d5fa65e20bdd3041b9f678f94.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rt3052esw (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/56a6722c6aedd584b898f14eb4722953.html" title="./s14_weak_func_radare_check/56a6722c6aedd584b898f14eb4722953.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rgbin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 45 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7c82e74b3e391241718573a621506412.html" title="./s14_weak_func_radare_check/7c82e74b3e391241718573a621506412.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/ated (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e5348f949ff78a7366c60c19fc32df52.html" title="./s14_weak_func_radare_check/e5348f949ff78a7366c60c19fc32df52.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/pppd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 37 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f2b8b8686eb456811ccb93e31de3fb07.html" title="./s14_weak_func_radare_check/f2b8b8686eb456811ccb93e31de3fb07.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rt3052esw (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c4e2b2e640b6c71bfd26b1a04716de14.html" title="./s14_weak_func_radare_check/c4e2b2e640b6c71bfd26b1a04716de14.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_HIJACK.so (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c438b407649089656a0367fa62b00ecd.html" title="./s14_weak_func_radare_check/c438b407649089656a0367fa62b00ecd.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rgbin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/36bcbb689c728d3ea8f94519908126ee.html" title="./s14_weak_func_radare_check/36bcbb689c728d3ea8f94519908126ee.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rgbin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 131 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a0f768e9fd60235c2c04e3767116044b.html" title="./s14_weak_func_radare_check/a0f768e9fd60235c2c04e3767116044b.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libdl-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a418a57d6e4189c07e7e75a3f4d61668.html" title="./s14_weak_func_radare_check/a418a57d6e4189c07e7e75a3f4d61668.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/hostapd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/7377838e9e58abb072cb50e22a10c1c2.html" title="./s14_weak_func_radare_check/7377838e9e58abb072cb50e22a10c1c2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rgbin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 8 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/bf0ad52558735c6632ef50b23b978995.html" title="./s14_weak_func_radare_check/bf0ad52558735c6632ef50b23b978995.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_tcp.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 19 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/d85cc6d329b27bb298402a83f12c00fb.html" title="./s14_weak_func_radare_check/d85cc6d329b27bb298402a83f12c00fb.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_iprange.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/692b50b9512726536edb41247071cc28.html" title="./s14_weak_func_radare_check/692b50b9512726536edb41247071cc28.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/libdl-0.9.30.1.so (-rw-r--r-- root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/17639f79febd54dcdd909cfad848f183.html" title="./s14_weak_func_radare_check/17639f79febd54dcdd909cfad848f183.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/nsbbox (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 46 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/3767b7b7279b738a702ccd7e81bcdd57.html" title="./s14_weak_func_radare_check/3767b7b7279b738a702ccd7e81bcdd57.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/hostapd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/ea4307b54111dc89eeb000ec87baf0b2.html" title="./s14_weak_func_radare_check/ea4307b54111dc89eeb000ec87baf0b2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libipt_SNAT.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/848306e40991fc9f314d6af4709711f3.html" title="./s14_weak_func_radare_check/848306e40991fc9f314d6af4709711f3.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rgbin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 7 </span>/ </span><span class="orange">strlen: 7 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/debcb899243858fcb45b06d756d6623f.html" title="./s14_weak_func_radare_check/debcb899243858fcb45b06d756d6623f.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/pppd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 149 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/76b07f6f69a232a6160b719c753ec423.html" title="./s14_weak_func_radare_check/76b07f6f69a232a6160b719c753ec423.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/rgbin (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/58acb0fcbeab5e43abf7b958acaaf3a2.html" title="./s14_weak_func_radare_check/58acb0fcbeab5e43abf7b958acaaf3a2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_iprange.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 38 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8e0e218d9be20339bbf2f00c36b3500a.html" title="./s14_weak_func_radare_check/8e0e218d9be20339bbf2f00c36b3500a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/hostapd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 204 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/c8ebb00b100153166a2c84325dc167d2.html" title="./s14_weak_func_radare_check/c8ebb00b100153166a2c84325dc167d2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/nsbbox (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e824f6cf9977094984300049faa2fc2a.html" title="./s14_weak_func_radare_check/e824f6cf9977094984300049faa2fc2a.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/pppd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 16 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/a563c333577b16973a4e79f633dd7953.html" title="./s14_weak_func_radare_check/a563c333577b16973a4e79f633dd7953.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/nsbbox (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 137 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f43625c5837777461835d9af0e4a3731.html" title="./s14_weak_func_radare_check/f43625c5837777461835d9af0e4a3731.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/klogd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b0ec9f4d2383afd5a38955020c659ee6.html" title="./s14_weak_func_radare_check/b0ec9f4d2383afd5a38955020c659ee6.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/hostapd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/399d474e2d666d7736f87869faf02649.html" title="./s14_weak_func_radare_check/399d474e2d666d7736f87869faf02649.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/nsbbox (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/1c3adfbaf6ffa824781d8f7c7eb2bd70.html" title="./s14_weak_func_radare_check/1c3adfbaf6ffa824781d8f7c7eb2bd70.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_limit.so (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 6 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/f6b4a29aa12628c9f7687788fffefca4.html" title="./s14_weak_func_radare_check/f6b4a29aa12628c9f7687788fffefca4.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/pppd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcat </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/de1bb1d0f6ae9ec3dd7fd48a22bd5fc7.html" title="./s14_weak_func_radare_check/de1bb1d0f6ae9ec3dd7fd48a22bd5fc7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/klogd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">popen </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8e4bbf61457bddd94758664ab195a981.html" title="./s14_weak_func_radare_check/8e4bbf61457bddd94758664ab195a981.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6s (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">fprintf </span>/ </span><span class="red">Function count: 5 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/2d5ba01f4b6b40fe90d432fb9da9dcc1.html" title="./s14_weak_func_radare_check/2d5ba01f4b6b40fe90d432fb9da9dcc1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /lib/xtables/libxt_mport.so (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 22 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/94ed47275cc42e644fae3aa6e3303e61.html" title="./s14_weak_func_radare_check/94ed47275cc42e644fae3aa6e3303e61.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/klogd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 10 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/5ae881e00e53647dffea159485effb02.html" title="./s14_weak_func_radare_check/5ae881e00e53647dffea159485effb02.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/hostapd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/4136b8ed8a2f5525d8fcd67a08f40352.html" title="./s14_weak_func_radare_check/4136b8ed8a2f5525d8fcd67a08f40352.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/nsbbox (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="orange">strlen: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/223f765b7b2ee33279fbe72b55c9182d.html" title="./s14_weak_func_radare_check/223f765b7b2ee33279fbe72b55c9182d.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/pppd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 9 </span>/ </span><span class="orange">strlen: 4 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/fa6c4f2cd0fa754e4fbd43dd6c859e11.html" title="./s14_weak_func_radare_check/fa6c4f2cd0fa754e4fbd43dd6c859e11.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/klogd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 3 </span>/ </span><span class="green">networking: no</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/13b5b6a0d91fdd0315c839caee2a1105.html" title="./s14_weak_func_radare_check/13b5b6a0d91fdd0315c839caee2a1105.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/nsbbox (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/77fa34517ec379726127ef80d32da7f1.html" title="./s14_weak_func_radare_check/77fa34517ec379726127ef80d32da7f1.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/hostapd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 1 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/8b63be7470faa63451fb20aba13d7730.html" title="./s14_weak_func_radare_check/8b63be7470faa63451fb20aba13d7730.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6s (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">printf </span>/ </span><span class="red">Function count: 441 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/aa807506e91a94490531fca0662c3391.html" title="./s14_weak_func_radare_check/aa807506e91a94490531fca0662c3391.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/pppd (-rwxr-xr-x root root)</span><span class="cyan"> - common linux file: yes - </span> Vulnerable function: </span><span class="cyan">system </span>/ </span><span class="red">Function count: 4 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/e5f6cf692c5a3cca65bd3f9a8ac9b6e7.html" title="./s14_weak_func_radare_check/e5f6cf692c5a3cca65bd3f9a8ac9b6e7.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6s (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">sprintf </span>/ </span><span class="red">Function count: 13 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<a class="reference" href="./s14_weak_func_radare_check/b4ac02ff629b0e60c68c097d6a8dc8c2.html" title="./s14_weak_func_radare_check/b4ac02ff629b0e60c68c097d6a8dc8c2.html" ><pre>[</span><span class="green">+</span>]</span><span class="green"> /usr/sbin/dhcp6s (-rwxr-xr-x root root)</span><span class="red"> - common linux file: no -</span> Vulnerable function: </span><span class="cyan">strcpy </span>/ </span><span class="red">Function count: 2 </span>/ </span><span class="orange">strlen: 0 </span>/ </span><span class="orange">networking: yes</span></span></pre></a>
+<pre></span></pre>
+
+<br />
+<br />
+<pre></span><span class="blue">==&gt</span></span> </span><span class="cyan"><a id="top10legacycfunctionsradare2disasmmode">Top 10 legacy C functions - Radare2 disasm mode</a></span></pre>
+<pre><hr class="mono" /></pre>
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> fprintf - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/9ceb85f1b1a72595c0875a0b24460324.html" title="./s14_weak_func_radare_check/9ceb85f1b1a72595c0875a0b24460324.html" ><pre></span><span class="green">	499   : ip              : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/d22869560880c8edd2304d25bd8a69a8.html" title="./s14_weak_func_radare_check/d22869560880c8edd2304d25bd8a69a8.html" ><pre></span><span class="green">	479   : tc              : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/16508d62248b488acd2e1011e2640ca5.html" title="./s14_weak_func_radare_check/16508d62248b488acd2e1011e2640ca5.html" ><pre></span><span class="green">	86    : iwconfig        : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/17639f79febd54dcdd909cfad848f183.html" title="./s14_weak_func_radare_check/17639f79febd54dcdd909cfad848f183.html" ><pre></span><span class="orange">	46    : nsbbox          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/56a6722c6aedd584b898f14eb4722953.html" title="./s14_weak_func_radare_check/56a6722c6aedd584b898f14eb4722953.html" ><pre></span><span class="orange">	45    : rgbin           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/d92e881b55f7f0c32fbb95fc7e1f4d38.html" title="./s14_weak_func_radare_check/d92e881b55f7f0c32fbb95fc7e1f4d38.html" ><pre></span><span class="orange">	44    : libuClibc-0.9.3 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/977a95cf89f93efea0adb32b7ae80ed6.html" title="./s14_weak_func_radare_check/977a95cf89f93efea0adb32b7ae80ed6.html" ><pre></span><span class="orange">	43    : servd           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/7cc1338b2d917e15348c9d7984a84458.html" title="./s14_weak_func_radare_check/7cc1338b2d917e15348c9d7984a84458.html" ><pre></span><span class="orange">	40    : ecmh            : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/e5348f949ff78a7366c60c19fc32df52.html" title="./s14_weak_func_radare_check/e5348f949ff78a7366c60c19fc32df52.html" ><pre></span><span class="green">	37    : pppd            : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/911ede2398f5fa37b76fdb271f10128e.html" title="./s14_weak_func_radare_check/911ede2398f5fa37b76fdb271f10128e.html" ><pre></span><span class="green">	26    : iptables-multi  : common linux file: yes</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> mmap - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/a087b3b17e57bf9c9b01ad57290c3f72.html" title="./s14_weak_func_radare_check/a087b3b17e57bf9c9b01ad57290c3f72.html" ><pre></span><span class="orange">	2     : libuClibc-0.9.3 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/dd79dfbdd0abe0991f16f29a360663bd.html" title="./s14_weak_func_radare_check/dd79dfbdd0abe0991f16f29a360663bd.html" ><pre></span><span class="orange">	2     : libpthread-0.9. : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/38a5e139a1c22d6aba51ad5e78b345b6.html" title="./s14_weak_func_radare_check/38a5e139a1c22d6aba51ad5e78b345b6.html" ><pre></span><span class="orange">	1     : igmpproxy       : common linux file: no</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> popen - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/ad4252cabb433ceb086429cd602d25a7.html" title="./s14_weak_func_radare_check/ad4252cabb433ceb086429cd602d25a7.html" ><pre></span><span class="orange">	2     : xmldb           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/c438b407649089656a0367fa62b00ecd.html" title="./s14_weak_func_radare_check/c438b407649089656a0367fa62b00ecd.html" ><pre></span><span class="orange">	2     : rgbin           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/2bbd913a64fceb062c2646c5c38365c3.html" title="./s14_weak_func_radare_check/2bbd913a64fceb062c2646c5c38365c3.html" ><pre></span><span class="orange">	1     : updatewifistats : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/09fd717008d8b7940ecc5e9285b4cfb1.html" title="./s14_weak_func_radare_check/09fd717008d8b7940ecc5e9285b4cfb1.html" ><pre></span><span class="orange">	1     : updateleases    : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/c8ebb00b100153166a2c84325dc167d2.html" title="./s14_weak_func_radare_check/c8ebb00b100153166a2c84325dc167d2.html" ><pre></span><span class="orange">	1     : nsbbox          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/e591aca10c3ade6edcb5447c098c815d.html" title="./s14_weak_func_radare_check/e591aca10c3ade6edcb5447c098c815d.html" ><pre></span><span class="orange">	1     : neaps           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/e004f5df565ce9a60b0fb18dcdc1f3b2.html" title="./s14_weak_func_radare_check/e004f5df565ce9a60b0fb18dcdc1f3b2.html" ><pre></span><span class="orange">	1     : logd            : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/a4f4844ea7e59003cf4d24c0424ae0c8.html" title="./s14_weak_func_radare_check/a4f4844ea7e59003cf4d24c0424ae0c8.html" ><pre></span><span class="orange">	1     : lld2d           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/de1bb1d0f6ae9ec3dd7fd48a22bd5fc7.html" title="./s14_weak_func_radare_check/de1bb1d0f6ae9ec3dd7fd48a22bd5fc7.html" ><pre></span><span class="green">	1     : klogd           : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/24aa8174e4c3556078e7a1862a3be4fe.html" title="./s14_weak_func_radare_check/24aa8174e4c3556078e7a1862a3be4fe.html" ><pre></span><span class="green">	1     : iwconfig        : common linux file: yes</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> printf - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/eea5d0a1bb146cba5ecabe739e05771d.html" title="./s14_weak_func_radare_check/eea5d0a1bb146cba5ecabe739e05771d.html" ><pre></span><span class="orange">	734   : xmldb           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/f69cfc9cb6289604d83926ca81f1ca50.html" title="./s14_weak_func_radare_check/f69cfc9cb6289604d83926ca81f1ca50.html" ><pre></span><span class="green">	588   : ip              : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/63910420992c56d971886b1ae55a6ab1.html" title="./s14_weak_func_radare_check/63910420992c56d971886b1ae55a6ab1.html" ><pre></span><span class="green">	555   : tc              : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/b78bfa1610a34aa808abb26e37cf40d5.html" title="./s14_weak_func_radare_check/b78bfa1610a34aa808abb26e37cf40d5.html" ><pre></span><span class="orange">	509   : dhcp6c          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/8b63be7470faa63451fb20aba13d7730.html" title="./s14_weak_func_radare_check/8b63be7470faa63451fb20aba13d7730.html" ><pre></span><span class="orange">	441   : dhcp6s          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/8e0e218d9be20339bbf2f00c36b3500a.html" title="./s14_weak_func_radare_check/8e0e218d9be20339bbf2f00c36b3500a.html" ><pre></span><span class="green">	204   : hostapd         : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/288dce500a22600fd1a053bc2a84c59c.html" title="./s14_weak_func_radare_check/288dce500a22600fd1a053bc2a84c59c.html" ><pre></span><span class="green">	186   : iwconfig        : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/debcb899243858fcb45b06d756d6623f.html" title="./s14_weak_func_radare_check/debcb899243858fcb45b06d756d6623f.html" ><pre></span><span class="green">	149   : pppd            : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/a563c333577b16973a4e79f633dd7953.html" title="./s14_weak_func_radare_check/a563c333577b16973a4e79f633dd7953.html" ><pre></span><span class="orange">	137   : nsbbox          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/36bcbb689c728d3ea8f94519908126ee.html" title="./s14_weak_func_radare_check/36bcbb689c728d3ea8f94519908126ee.html" ><pre></span><span class="orange">	131   : rgbin           : common linux file: no</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> sprintf - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/95b56c53da50b04090e9af3c78f50353.html" title="./s14_weak_func_radare_check/95b56c53da50b04090e9af3c78f50353.html" ><pre></span><span class="orange">	41    : cgibin          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/70d0698b56f05c769ee234a771b364f1.html" title="./s14_weak_func_radare_check/70d0698b56f05c769ee234a771b364f1.html" ><pre></span><span class="orange">	37    : updatewifistats : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/290c72fe2c0beba0dfeb88eaae05a121.html" title="./s14_weak_func_radare_check/290c72fe2c0beba0dfeb88eaae05a121.html" ><pre></span><span class="orange">	26    : udhcpd          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/aa976912e7b2e4803e47a355e377c0cb.html" title="./s14_weak_func_radare_check/aa976912e7b2e4803e47a355e377c0cb.html" ><pre></span><span class="green">	26    : httpd           : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/4006bb8913b071a0af2b7d88d20b167b.html" title="./s14_weak_func_radare_check/4006bb8913b071a0af2b7d88d20b167b.html" ><pre></span><span class="orange">	23    : xmldb           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/a348a585659a9fba0ee51f0db9fa1b28.html" title="./s14_weak_func_radare_check/a348a585659a9fba0ee51f0db9fa1b28.html" ><pre></span><span class="green">	23    : dnsmasq         : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/7681a410767da395c8eb6a3a29abfab7.html" title="./s14_weak_func_radare_check/7681a410767da395c8eb6a3a29abfab7.html" ><pre></span><span class="orange">	21    : libuClibc-0.9.3 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/ee04baeebf2b1a88ce3234f2c2a743f4.html" title="./s14_weak_func_radare_check/ee04baeebf2b1a88ce3234f2c2a743f4.html" ><pre></span><span class="green">	20    : iwconfig        : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/e824f6cf9977094984300049faa2fc2a.html" title="./s14_weak_func_radare_check/e824f6cf9977094984300049faa2fc2a.html" ><pre></span><span class="green">	16    : pppd            : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/620b416d77ac4db8bf47b217aa215364.html" title="./s14_weak_func_radare_check/620b416d77ac4db8bf47b217aa215364.html" ><pre></span><span class="green">	15    : ip              : common linux file: yes</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> strcat - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/08e02e94125828d63cf30062a4e8faf3.html" title="./s14_weak_func_radare_check/08e02e94125828d63cf30062a4e8faf3.html" ><pre></span><span class="green">	12    : dnsmasq         : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/2a6240668466cb7d71458c9e9b441d1a.html" title="./s14_weak_func_radare_check/2a6240668466cb7d71458c9e9b441d1a.html" ><pre></span><span class="green">	6     : iptables-multi  : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/4ee089678d17c3536c57d0ce8d20c640.html" title="./s14_weak_func_radare_check/4ee089678d17c3536c57d0ce8d20c640.html" ><pre></span><span class="green">	6     : ip6tables-multi : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/0c9a1f2fef4d560c39a1fe7798c084d8.html" title="./s14_weak_func_radare_check/0c9a1f2fef4d560c39a1fe7798c084d8.html" ><pre></span><span class="orange">	6     : cgibin          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/a6b9e862f8556cc16be11027d7969be8.html" title="./s14_weak_func_radare_check/a6b9e862f8556cc16be11027d7969be8.html" ><pre></span><span class="green">	4     : rdisc6          : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/522afefe598bfa6c063539444205c9a6.html" title="./s14_weak_func_radare_check/522afefe598bfa6c063539444205c9a6.html" ><pre></span><span class="orange">	4     : libuClibc-0.9.3 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/c5c179822fcd9319d9b2afaddbcd989d.html" title="./s14_weak_func_radare_check/c5c179822fcd9319d9b2afaddbcd989d.html" ><pre></span><span class="orange">	3     : xmldb           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/fd7af7385de479cec5b3cc7a9fdb23fa.html" title="./s14_weak_func_radare_check/fd7af7385de479cec5b3cc7a9fdb23fa.html" ><pre></span><span class="orange">	2     : ddnsd           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/00e86b9dc1e8cdcc9a30d3923168886c.html" title="./s14_weak_func_radare_check/00e86b9dc1e8cdcc9a30d3923168886c.html" ><pre></span><span class="orange">	1     : ubcfg           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/0c833c8fab52a8c6d181c63796c0957e.html" title="./s14_weak_func_radare_check/0c833c8fab52a8c6d181c63796c0957e.html" ><pre></span><span class="green">	1     : tc              : common linux file: yes</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> strcpy - top 10 results:</pre>
+<pre></span></pre>
+<a class="anc" id="anchor_strcpysummary"></a>
+<a class="reference" href="./s14_weak_func_radare_check/81d0c4ce10516d9781c5c566f50a56e2.html" title="./s14_weak_func_radare_check/81d0c4ce10516d9781c5c566f50a56e2.html" ><pre></span><span class="orange">	37    : igmpproxy       : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/fa8c581f615d22b750313a1461f37ac6.html" title="./s14_weak_func_radare_check/fa8c581f615d22b750313a1461f37ac6.html" ><pre></span><span class="orange">	29    : libuClibc-0.9.3 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/020d8010bd7dff6edbadded6dab28240.html" title="./s14_weak_func_radare_check/020d8010bd7dff6edbadded6dab28240.html" ><pre></span><span class="green">	28    : dnsmasq         : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/fbd8c89dd524486a09e69efcc68f1726.html" title="./s14_weak_func_radare_check/fbd8c89dd524486a09e69efcc68f1726.html" ><pre></span><span class="orange">	21    : updatewifistats : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/6cdab06c0ec9dcc1d6d2727b072e6f70.html" title="./s14_weak_func_radare_check/6cdab06c0ec9dcc1d6d2727b072e6f70.html" ><pre></span><span class="green">	21    : iwconfig        : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/b2c4f4de5fb80d9d5217ecce3019ec51.html" title="./s14_weak_func_radare_check/b2c4f4de5fb80d9d5217ecce3019ec51.html" ><pre></span><span class="orange">	16    : cgibin          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/e307d2cdfd42964bf68b03a701062ecc.html" title="./s14_weak_func_radare_check/e307d2cdfd42964bf68b03a701062ecc.html" ><pre></span><span class="green">	13    : httpd           : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/cbd80915477e6ebb19e04d4c09412a02.html" title="./s14_weak_func_radare_check/cbd80915477e6ebb19e04d4c09412a02.html" ><pre></span><span class="orange">	12    : libip6tc.so.0.0 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/c80c94de55226419bb36b585c099d7eb.html" title="./s14_weak_func_radare_check/c80c94de55226419bb36b585c099d7eb.html" ><pre></span><span class="orange">	12    : libip4tc.so.0.0 : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/223f765b7b2ee33279fbe72b55c9182d.html" title="./s14_weak_func_radare_check/223f765b7b2ee33279fbe72b55c9182d.html" ><pre></span><span class="green">	9     : pppd            : common linux file: yes</span></pre></a>
+
+<br />
+<br />
+<pre>[</span><span class="green">+</span>]</span><span class="green"> system - top 10 results:</pre>
+<pre></span></pre>
+<a class="reference" href="./s14_weak_func_radare_check/5629aca5e40c6cda3a55f57314fdc1d1.html" title="./s14_weak_func_radare_check/5629aca5e40c6cda3a55f57314fdc1d1.html" ><pre></span><span class="orange">	17    : cgibin          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/13cbbcdfe5da6a5e34b46e574ad0c35b.html" title="./s14_weak_func_radare_check/13cbbcdfe5da6a5e34b46e574ad0c35b.html" ><pre></span><span class="orange">	7     : igmpproxy       : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/495a1a38ae9f1d2b04522a0ee6392e8f.html" title="./s14_weak_func_radare_check/495a1a38ae9f1d2b04522a0ee6392e8f.html" ><pre></span><span class="orange">	4     : xmldb           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/2b063017ae0c3b1a167f653c3455b256.html" title="./s14_weak_func_radare_check/2b063017ae0c3b1a167f653c3455b256.html" ><pre></span><span class="green">	4     : rdisc6          : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/aa807506e91a94490531fca0662c3391.html" title="./s14_weak_func_radare_check/aa807506e91a94490531fca0662c3391.html" ><pre></span><span class="green">	4     : pppd            : common linux file: yes</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/76b07f6f69a232a6160b719c753ec423.html" title="./s14_weak_func_radare_check/76b07f6f69a232a6160b719c753ec423.html" ><pre></span><span class="orange">	3     : rgbin           : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/f357b380c9165b25c8a571b9f7fd9ff6.html" title="./s14_weak_func_radare_check/f357b380c9165b25c8a571b9f7fd9ff6.html" ><pre></span><span class="orange">	2     : updatewifistats : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/c736cb7385193a91ce2ec987d623c072.html" title="./s14_weak_func_radare_check/c736cb7385193a91ce2ec987d623c072.html" ><pre></span><span class="orange">	2     : udhcpd          : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/35364afd03bb0462dea00e30955b1449.html" title="./s14_weak_func_radare_check/35364afd03bb0462dea00e30955b1449.html" ><pre></span><span class="orange">	2     : logd            : common linux file: no</span></pre></a>
+
+<a class="reference" href="./s14_weak_func_radare_check/7286238a2141f252b96e957fb3baf088.html" title="./s14_weak_func_radare_check/7286238a2141f252b96e957fb3baf088.html" ><pre></span><span class="orange">	2     : gpiod           : common linux file: no</span></pre></a>
+
+<br />
+<br />
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<a href="./s16_ghidra_decompile_checks.html" title="./s16_ghidra_decompile_checks.html" ><div id="buttonBack" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a>
+<a href="./s13_weak_func_check.html" title="./s13_weak_func_check.html" ><div id="buttonForward" class="rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg></div> </a>
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

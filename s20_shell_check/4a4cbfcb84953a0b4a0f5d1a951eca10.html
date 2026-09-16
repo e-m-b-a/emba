@@ -1,0 +1,317 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./2692bc63afc53f547a27879594f052c1.html" title="./2692bc63afc53f547a27879594f052c1.html" >&laquo; Back to 2692bc63afc53f547a27879594f052c1</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<pre>#!/bin/sh</pre>
+<pre>&lt;?</pre>
+<pre>include "/htdocs/phplib/trace.php";</pre>
+<pre>include "/htdocs/phplib/xnode.php";</pre>
+<pre>include "/htdocs/phplib/phyinf.php";</pre>
+<br />
+<pre>/**********************************************************/</pre>
+<br />
+<pre>function add_tunnel($mode, $type, $devnam, $inf, $remote, $local, $mtu)</pre>
+<pre>{</pre>
+<pre>	/* Prepare the remote/local commands. */</pre>
+<pre>	if ($remote!="") $rcmd = " remote ".$remote;</pre>
+<pre>	if ($local!="")  $lcmd = " local ".$local;</pre>
+<br />
+<pre>	/* add the tunnel. */</pre>
+<pre>	if ($mode=="6IN4" || $mode=="6TO4" || $mode=="6RD")</pre>
+<pre>	{</pre>
+<pre>		echo "ip tunnel add ".$devnam." mode sit ttl 128".$rcmd.$lcmd."\n";</pre>
+<pre>	}</pre>
+<pre>	else if ($mode=="TSP")</pre>
+<pre>	{</pre>
+<pre>		if ($type=="v6v4")</pre>
+<pre>			 echo "ip tunnel add ".$devnam." mode sit ttl 64".$rcmd.$lcmd."\n";</pre>
+<pre>		else echo "ip tuntap add ".$devnam." mode tun\n";</pre>
+<pre>	}</pre>
+<pre>	else return "";</pre>
+<br />
+<pre>	if($mode=="6RD")</pre>
+<pre>	{</pre>
+<pre>		$p = XNODE_getpathbytarget("/runtime", "inf", "uid", $inf, 0);</pre>
+<pre>		$ipaddr = query($p."/inet/ipv6/ipv6in4/rd/ipaddr");	</pre>
+<pre>		$prefix = query($p."/inet/ipv6/ipv6in4/rd/prefix");</pre>
+<pre>		$v4mask = query($p."/inet/ipv6/ipv6in4/rd/v4mask");</pre>
+<pre>		$networkid = ipv4networkid($local,$v4mask);</pre>
+<pre>		if($v4mask!="0") $rpcmd = " 6rd-relay_prefix ".$networkid."/".$v4mask;</pre>
+<pre>		else $rpcmd = "";</pre>
+<pre>		echo "ip tunnel 6rd dev ".$devnam." 6rd-prefix ".$ipaddr."/".$prefix.$rpcmd."\n";</pre>
+<pre>	}</pre>
+<br />
+<br />
+<pre>	/* Enable IPv6 on the tunnel device. */</pre>
+<pre>	if ($mtu!="") echo "ip link set ".$devnam." mtu ".$mtu."\n";</pre>
+<pre>	echo "ip link set ".$devnam." up\n";</pre>
+<pre>	echo "echo 0 &gt; /proc/sys/net/ipv6/conf/".$devnam."/disable_ipv6\n";</pre>
+<br />
+<pre>	$uid = "TUN.".$inf;</pre>
+<pre>	$p = PHYINF_setup($uid, "tunnel", $devnam);</pre>
+<pre>	set($p."/tunnel/mode",	$mode);</pre>
+<pre>	set($p."/tunnel/type",	$type);</pre>
+<pre>	set($p."/tunnel/remote",$remote);</pre>
+<pre>	set($p."/tunnel/local",	$local);</pre>
+<pre>	return $uid;</pre>
+<pre>}</pre>
+<br />
+<pre>function del_tunnel($uid)</pre>
+<pre>{</pre>
+<pre>	$p = XNODE_getpathbytarget("/runtime", "phyinf", "uid", $uid, 0);</pre>
+<pre>	if ($p=="")</pre>
+<pre>	{</pre>
+<pre>		TRACE_debug("Woops !!!!!!! ".$uid." is not exist!");</pre>
+<pre>		return;</pre>
+<pre>	}</pre>
+<pre>	anchor($p);</pre>
+<br />
+<pre>	$mode = query("tunnel/mode");</pre>
+<pre>	$type = query("tunnel/type");</pre>
+<pre>	$name = query("name");</pre>
+<br />
+<pre>	if		($mode=="6IN4")	$tunnel = "tunnel";</pre>
+<pre>	else if	($mode=="6TO4")	$tunnel = "tunnel";</pre>
+<pre>	else if	($mode=="6RD")	$tunnel = "tunnel";</pre>
+<pre>	else if	($mode=="TSP")</pre>
+<pre>	{</pre>
+<pre>		if ($type=="v6v4")	$tunnel = "tunnel";</pre>
+<pre>		else				$tunnel = "tuntap";</pre>
+<pre>	}</pre>
+<pre>	else return;</pre>
+<br />
+<pre>	/* The TSPC will destroy the tunnel device, so we don't need to del the tunnel. */</pre>
+<pre>	if ($mode!="TSP")</pre>
+<pre>	{</pre>
+<pre>		echo "ip link set ".$name." down\n";</pre>
+<pre>		if		($tunnel=="tunnel") echo "ip tunnel del ".$name."\n";</pre>
+<pre>		else if ($tunnel=="tuntap")	echo "ip tuntap del ".$name." mode tun\n";</pre>
+<pre>	}</pre>
+<pre>	echo "/etc/scripts/delpathbytarget.sh /runtime phyinf uid ".$uid."\n";</pre>
+<pre>}</pre>
+<br />
+<pre>/**********************************************************/</pre>
+<br />
+<pre>function prepare_tsp_child($stsp, $child)</pre>
+<pre>{</pre>
+<pre>	$mac = PHYINF_getphymac($child);</pre>
+<pre>	$hostid = ipv6eui64($mac);</pre>
+<br />
+<pre>	/* If the prefix is less than 64, the child can use 64 bits prefix length. */</pre>
+<pre>	$prefix	= $_GLOBALS["TSP_PREFIX"]."::";</pre>
+<pre>	$plen	= $_GLOBALS["TSP_PREFIXLEN"];</pre>
+<pre>	if ($plen&lt) $plen = 64;</pre>
+<br />
+<pre>	$ipaddr = ipv6ip($prefix, $plen, $hostid, 0, 0);</pre>
+<br />
+<pre>	TRACE_debug("INET: TSP Child [".$child."] use ".$ipaddr."/".$plen);</pre>
+<pre>	set($stsp."/child/uid", $child);</pre>
+<pre>	set($stsp."/child/ipaddr", $ipaddr);</pre>
+<pre>	set($stsp."/child/prefix", $plen);</pre>
+<pre>}</pre>
+<br />
+<pre>function tunnel_create($p)</pre>
+<pre>{</pre>
+<pre>	/* Create the tunnel */</pre>
+<pre>	$phy = add_tunnel($_GLOBALS["MODE"], "", $_GLOBALS["DEVNAM"], $_GLOBALS["INF"],</pre>
+<pre>					$_GLOBALS["REMOTE"], $_GLOBALS["LOCAL"], $_GLOBALS["MTU"]);</pre>
+<pre>	if ($phy=="") return;</pre>
+<br />
+<pre>	/* Convert the IPv6 address to simplified format. */</pre>
+<pre>	$ipaddr = ipv6ip($_GLOBALS["IPADDR"], 128, 0, 0, 0);</pre>
+<pre>	$gateway= ipv6ip($_GLOBALS["GATEWAY"], 128, 0, 0, 0);</pre>
+<pre>	/* TODO: DNS may also need to convert... */</pre>
+<br />
+<pre>	/* update the phyiscal interface the tunnel device. */</pre>
+<pre>	set($p."/phyinf", $phy);</pre>
+<br />
+<pre>	/* Attach IP address. */</pre>
+<pre>	echo "phpsh /etc/scripts/IPV6.INET.php ACTION=ATTACH".</pre>
+<pre>			" MODE=".$_GLOBALS["MODE"].</pre>
+<pre>			" INF=".$_GLOBALS["INF"].</pre>
+<pre>			" DEVNAM=".$_GLOBALS["DEVNAM"].</pre>
+<pre>			" MTU=".$_GLOBALS["MTU"].</pre>
+<pre>			" IPADDR=".$ipaddr.</pre>
+<pre>			" PREFIX=".$_GLOBALS["PREFIX"].</pre>
+<pre>			" GATEWAY=".$gateway.</pre>
+<pre>			' "DNS='.$_GLOBALS["DNS"].'"'.</pre>
+<pre>			"\n";</pre>
+<br />
+<pre>	/* Prepare the configuration for TSP child. */</pre>
+<pre>	$child = query($p."/child/uid");</pre>
+<pre>	if ($_GLOBALS["MODE"]=="TSP" &amp;&amp; $child!="") prepare_tsp_child($p, $child);</pre>
+<pre>}</pre>
+<br />
+<pre>function tunnel_destroy($p)</pre>
+<pre>{</pre>
+<pre>	$phy = query($p."/phyinf");</pre>
+<pre>	echo "phpsh /etc/scripts/IPV6.INET.php ACTION=DETACH INF=".$_GLOBALS["INF"]."\n";</pre>
+<pre>	del_tunnel($phy);</pre>
+<pre>}</pre>
+<br />
+<pre>/* Main Entry *******************************************************/</pre>
+<pre>$p = XNODE_getpathbytarget("/runtime", "inf", "uid", $INF, 0);</pre>
+<pre>if ($p=="") echo "# Woops!!!, No runtime nodes for ".$INF."\n";</pre>
+<pre>else if ($ACTION=="CREATE")  tunnel_create($p);</pre>
+<pre>else if ($ACTION=="DESTROY") tunnel_destroy($p);</pre>
+<pre>else tunnel_create($p);</pre>
+<pre>?&gt;</pre>
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>
