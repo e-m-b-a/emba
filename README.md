@@ -42,6 +42,7 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 
 ## Latest news
 
+* [*EMBA demo report available*](https://www.securefirmware.de/emba/index.html)
 * *Happy 6th birthday EMBA*
 * [*Check the ko-fi support possibility for EMBA*](https://ko-fi.com/embafirmwareanalyzer)
 * [*EMBA v2.0.3 - No more legacy*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.3-legacy-time)
