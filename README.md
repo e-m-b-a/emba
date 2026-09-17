@@ -66,6 +66,7 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 ## Links to the wiki for more detailed information
 
 - [Home](https://github.com/e-m-b-a/emba/wiki)
+- [Interactive EMBA demo report](https://www.securefirmware.de/emba/index.html)
 - [Feature overview](https://github.com/e-m-b-a/emba/wiki/Feature-overview)
 - [Installation](https://github.com/e-m-b-a/emba/wiki/Installation)
 - [Usage](https://github.com/e-m-b-a/emba/wiki/Usage)
