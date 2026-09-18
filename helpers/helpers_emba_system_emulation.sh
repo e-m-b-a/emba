@@ -224,7 +224,7 @@ service_online_check() {
       for lSERVICE in "${lNMAP_SERV_TCP_ARR[@]}"; do
         if [[ "${lNW_SERVICE}" == "NA" ]] || [[ "${lSERVICE}" == "${lNW_SERVICE}" ]]; then
           if netcat -z -v -w1 "${lIP_ADDRESS}" "${lSERVICE}" >/dev/null; then
-            [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} available via the network" "no_log"
+            [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Network service ${ORANGE}${lSERVICE}${NC} on ${ORANGE}${lIP_ADDRESS}${NC} available via the network" "no_log"
             # we exit for our relevant service is reachable
             # or we have no service that is relevant. This means we can
             # return as soon as some service is up and running
@@ -246,6 +246,8 @@ system_online_check() {
   local lIP_ADDRESS="${1:-}"
   # lNW_SERVICE -> if set we check the availability of this service
   local lNW_SERVICE="${2:-NA}"
+  # print details or do it silent
+  local lPRINT_OUTPUT="${3:-1}"
 
   # STATE_CHECK_MECHANISM is exported by l10
 
@@ -257,13 +259,13 @@ system_online_check() {
   # shellcheck disable=SC2153
   if [[ "${STATE_CHECK_MECHANISM:-PING}" == "PING" ]]; then
     if ping_check "${lIP_ADDRESS}" 0; then
-      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0 "${lNW_SERVICE}"; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" "${lPRINT_OUTPUT}" "${lNW_SERVICE}"; then
         return 0
       fi
     fi
   elif [[ "${STATE_CHECK_MECHANISM:-PING}" == "HPING" ]]; then
     if hping_check "${lIP_ADDRESS}" 0; then
-      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" 0 "${lNW_SERVICE}"; then
+      if service_online_check "${ARCHIVE_PATH}" "${lIP_ADDRESS}" "${lPRINT_OUTPUT}" "${lNW_SERVICE}"; then
         return 0
       fi
     fi
