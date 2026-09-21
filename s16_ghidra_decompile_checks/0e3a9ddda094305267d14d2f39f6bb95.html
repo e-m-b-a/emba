@@ -1,0 +1,492 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./3065f866b7bfbf7d835bb7c17877aaa2.html" title="./3065f866b7bfbf7d835bb7c17877aaa2.html" >&laquo; Back to 3065f866b7bfbf7d835bb7c17877aaa2</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>int dhcp6_set_options(int param_1,void *param_2,int param_3,uint *param_4)</pre>
+<br />
+<pre>{</pre>
+<pre>  int iVar1;</pre>
+<pre>  uint uVar2;</pre>
+<pre>  void *pvVar3;</pre>
+<pre>  uint uVar4;</pre>
+<pre>  undefined4 uVar5;</pre>
+<pre>  void *__dest;</pre>
+<pre>  uint uVar6;</pre>
+<pre>  char *pcVar7;</pre>
+<pre>  uint uVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  uint *puVar10;</pre>
+<pre>  int *piVar11;</pre>
+<pre>  size_t sVar12;</pre>
+<pre>  ushort local_40 [2];</pre>
+<pre>  void *local_3c;</pre>
+<pre>  int local_38;</pre>
+<pre>  uint local_34;</pre>
+<pre>  int local_30;</pre>
+<pre>  </pre>
+<pre>  local_38 = 0;</pre>
+<pre>  local_3c = param_2;</pre>
+<pre>  if ((*param_4 == 0) ||</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>     (iVar1 = FUN_0040874c(1,*param_4 &amp; 0xffff,param_4[1],&amp;local_3c,param_3,&amp;local_38), iVar1 == 0))</pre></a>
+
+<pre>  {</pre>
+<pre>    if ((param_4[2] != 0) &amp;&amp;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>       (iVar1 = FUN_0040874c(2,param_4[2] &amp; 0xffff,param_4[3],&amp;local_3c,param_3,&amp;local_38),</pre></a>
+
+<pre>       iVar1 != 0)) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    for (piVar11 = (int *)param_4[0xc]; piVar11 != (int *)0x0; piVar11 = (int *)*piVar11) {</pre>
+<a class="reference" href="./ecb0bc9f148ec5601e457d6e19f193a1.html" title="./ecb0bc9f148ec5601e457d6e19f193a1.html" ><pre><span class="green">      sVar12 = FUN_004082c0(0,0,piVar11)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre><span class="green">      if ((int)sVar12 &lt; 0) goto LAB_0040a73c</span></span>   //possible issue identified - semgrep</pre>
+<pre>      if (param_3 - (int)local_3c &lt; (int)sVar12) goto LAB_0040a8d4;</pre>
+<pre><span class="green">      pvVar3 = malloc(sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      if (pvVar3 == (void *)0x0) {</pre>
+<pre>        pcVar7 = "memory allocation failed for IA_NA options";</pre>
+<pre>        goto LAB_0040a8f4;</pre>
+<pre>      }</pre>
+<a class="reference" href="./ecb0bc9f148ec5601e457d6e19f193a1.html" title="./ecb0bc9f148ec5601e457d6e19f193a1.html" ><pre><span class="green">      iVar1 = FUN_004082c0(pvVar3,(int)pvVar3 + sVar12,piVar11)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre>      if (iVar1 &lt; 0) {</pre>
+<pre>        dprintf(3,"dhcp6_set_options","failed to construct an IA_NA option");</pre>
+<pre>        goto LAB_0040a928;</pre>
+<pre>      }</pre>
+<pre><span class="green">      memcpy(local_3c,pvVar3,sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      free(pvVar3);</pre>
+<pre><span class="green">      local_38 = local_38 + sVar12</span></span>   //possible issue identified - semgrep</pre>
+<pre>      local_3c = (void *)((int)local_3c + sVar12);</pre>
+<pre>    }</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>    if ((param_4[4] != 0) &amp;&amp; (iVar1 = FUN_0040874c(0xe,0,0,&amp;local_3c,param_3,&amp;local_38), iVar1 != 0)</pre></a>
+
+<pre>       ) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    local_30 = 1;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>    iVar1 = FUN_0040874c(0x14,0,0,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    if (param_4[5] != 0xffffffff) {</pre>
+<pre>      local_40[0] = CONCAT11(local_40[0]._1_1_,(char)param_4[5]);</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>      iVar1 = FUN_0040874c(7,1,local_40,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>      if (iVar1 != 0) {</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    uVar2 = param_4[7] &amp; 0xffff;</pre>
+<pre>    if (param_4[7] != 0xffffffff) {</pre>
+<pre>      local_40[0] = (ushort)(uVar2 &lt;&lt; 8) | (ushort)(uVar2 &gt;&gt; 8);</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>      iVar1 = FUN_0040874c(8,2,local_40,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>      if (iVar1 != 0) {</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    puVar10 = (uint *)param_4[0x10];</pre>
+<pre>    if (puVar10 != (uint *)0x0) {</pre>
+<pre>      do {</pre>
+<pre>        local_40[0] = (ushort)puVar10[3] &lt;&lt; 8 | (ushort)puVar10[3] &gt;&gt; 8;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>        iVar1 = FUN_0040874c(0xd,2,local_40,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>        if (iVar1 != 0) {</pre>
+<pre>          return -1;</pre>
+<pre>        }</pre>
+<pre>        puVar10 = (uint *)*puVar10;</pre>
+<pre>      } while (puVar10 != (uint *)0x0);</pre>
+<pre>    }</pre>
+<pre>    puVar10 = (uint *)param_4[0xe];</pre>
+<pre>    iVar1 = 0;</pre>
+<pre>    if (puVar10 != (uint *)0x0) {</pre>
+<pre>      do {</pre>
+<pre>        puVar10 = (uint *)*puVar10;</pre>
+<pre>        iVar1 = iVar1 + 1;</pre>
+<pre>      } while (puVar10 != (uint *)0x0);</pre>
+<pre><span class="green">      sVar12 = iVar1 * 2</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">      pvVar3 = malloc(sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      if (pvVar3 == (void *)0x0) {</pre>
+<pre>        pcVar7 = "memory allocation failed for options";</pre>
+<pre>        goto LAB_0040af28;</pre>
+<pre>      }</pre>
+<pre>      puVar10 = (uint *)param_4[0xe];</pre>
+<pre>      if (puVar10 == (uint *)0x0) {</pre>
+<pre>        uVar2 = 0;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        uVar2 = 0;</pre>
+<pre>        do {</pre>
+<pre>          uVar4 = puVar10[3];</pre>
+<pre>          if ((uVar4 == 0x20) &amp;&amp; (param_1 != 0xb)) {</pre>
+<pre>            uVar5 = dhcp6msgstr(param_1);</pre>
+<pre>            dprintf(7,"dhcp6_set_options","refresh time option is not requested for %s",uVar5);</pre>
+<pre>            uVar4 = puVar10[3];</pre>
+<pre>          }</pre>
+<pre>          puVar10 = (uint *)*puVar10;</pre>
+<pre>          *(ushort *)((int)pvVar3 + uVar2) =</pre>
+<pre>               (ushort)((uVar4 &amp; 0xffff) &lt;&lt; 8) | (ushort)((uVar4 &amp; 0xffff) &gt;&gt; 8);</pre>
+<pre>          uVar2 = uVar2 + 2;</pre>
+<pre>        } while (puVar10 != (uint *)0x0);</pre>
+<pre>      }</pre>
+<pre>      if (local_30 != 0) {</pre>
+<pre><span class="green">        __dest = malloc(sVar12 + 2)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (__dest == (void *)0x0) {</pre>
+<pre>          dprintf(3,"dhcp6_set_options","memory allocation failed for options");</pre>
+<pre>          goto LAB_0040a928;</pre>
+<pre>        }</pre>
+<pre><span class="green">        memcpy(__dest,pvVar3,sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        puVar10 = (uint *)param_4[0xe];</pre>
+<pre>        iVar1 = 0;</pre>
+<pre>        if (puVar10 != (uint *)0x0) {</pre>
+<pre>          do {</pre>
+<pre>            puVar10 = (uint *)*puVar10;</pre>
+<pre>            iVar1 = iVar1 + 1;</pre>
+<pre>          } while (puVar10 != (uint *)0x0);</pre>
+<pre>          puVar10 = (uint *)(iVar1 * 2);</pre>
+<pre>        }</pre>
+<pre>        *(undefined2 *)((int)__dest + (int)puVar10) = 0x1400;</pre>
+<pre>        uVar2 = uVar2 + 2;</pre>
+<pre>        pvVar3 = __dest;</pre>
+<pre>      }</pre>
+<pre>      if ((0 &lt; (int)uVar2) &amp;&amp;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>         (iVar1 = FUN_0040874c(6,uVar2 &amp; 0xffff,pvVar3,&amp;local_3c,param_3,&amp;local_38), iVar1 != 0)) {</pre></a>
+
+<pre>LAB_0040a928:</pre>
+<pre>        free(pvVar3);</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<pre>      free(pvVar3);</pre>
+<pre>    }</pre>
+<a class="reference" href="./944120aa04c18a5d5a7437308b94678b.html" title="./944120aa04c18a5d5a7437308b94678b.html" ><pre>    iVar1 = FUN_0040a210(0x15,param_4 + 0x14,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x16,param_4 + 0x12,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./944120aa04c18a5d5a7437308b94678b.html" title="./944120aa04c18a5d5a7437308b94678b.html" ><pre>    iVar1 = FUN_0040a210(0x40,param_4 + 0x18,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x62,param_4 + 0x16,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x17,param_4 + 0x1a,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./944120aa04c18a5d5a7437308b94678b.html" title="./944120aa04c18a5d5a7437308b94678b.html" ><pre>    iVar1 = FUN_0040a210(0x18,param_4 + 0x1c,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x1b,param_4 + 0x22,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x1c,param_4 + 0x26,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./944120aa04c18a5d5a7437308b94678b.html" title="./944120aa04c18a5d5a7437308b94678b.html" ><pre>    iVar1 = FUN_0040a210(0x1d,param_4 + 0x24,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./944120aa04c18a5d5a7437308b94678b.html" title="./944120aa04c18a5d5a7437308b94678b.html" ><pre>    iVar1 = FUN_0040a210(0x1e,param_4 + 0x28,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x1f,param_4 + 0x1e,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./944120aa04c18a5d5a7437308b94678b.html" title="./944120aa04c18a5d5a7437308b94678b.html" ><pre>    iVar1 = FUN_0040a210(0x21,param_4 + 0x2c,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<a class="reference" href="./05694b0dd05ca63afb1956826fdbc005.html" title="./05694b0dd05ca63afb1956826fdbc005.html" ><pre>    iVar1 = FUN_00409488(0x22,param_4 + 0x2a,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>    if (iVar1 != 0) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    for (piVar11 = (int *)param_4[10]; piVar11 != (int *)0x0; piVar11 = (int *)*piVar11) {</pre>
+<a class="reference" href="./ecb0bc9f148ec5601e457d6e19f193a1.html" title="./ecb0bc9f148ec5601e457d6e19f193a1.html" ><pre><span class="green">      sVar12 = FUN_004082c0(0,0,piVar11)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre><span class="green">      if ((int)sVar12 &lt; 0) goto LAB_0040a73c</span></span>   //possible issue identified - semgrep</pre>
+<pre>      if (param_3 - (int)local_3c &lt; (int)sVar12) goto LAB_0040a8d4;</pre>
+<pre><span class="green">      pvVar3 = malloc(sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      if (pvVar3 == (void *)0x0) {</pre>
+<pre>        pcVar7 = "memory allocation failed for IA_PD options";</pre>
+<pre>LAB_0040a8f4:</pre>
+<pre>        dprintf(5,"dhcp6_set_options",pcVar7);</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<a class="reference" href="./ecb0bc9f148ec5601e457d6e19f193a1.html" title="./ecb0bc9f148ec5601e457d6e19f193a1.html" ><pre><span class="green">      iVar1 = FUN_004082c0(pvVar3,(int)pvVar3 + sVar12,piVar11)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre>      if (iVar1 &lt; 0) {</pre>
+<pre>        dprintf(3,"dhcp6_set_options","failed to construct an IA_PD option");</pre>
+<pre>        goto LAB_0040a928;</pre>
+<pre>      }</pre>
+<pre><span class="green">      memcpy(local_3c,pvVar3,sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      free(pvVar3);</pre>
+<pre><span class="green">      local_38 = local_38 + sVar12</span></span>   //possible issue identified - semgrep</pre>
+<pre>      local_3c = (void *)((int)local_3c + sVar12);</pre>
+<pre>    }</pre>
+<pre>    if ((param_4[0x2e] != 0) &amp;&amp;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>       (iVar1 = FUN_0040874c(9,param_4[0x2e] &amp; 0xffff,param_4[0x2f],&amp;local_3c,param_3,&amp;local_38),</pre></a>
+
+<pre>       iVar1 != 0)) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    if ((param_4[0x31] != 0) &amp;&amp;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>       (iVar1 = FUN_0040874c(0x12,(short)param_4[0x30],param_4[0x31],&amp;local_3c,param_3,&amp;local_38),</pre></a>
+
+<pre>       iVar1 != 0)) {</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    uVar2 = param_4[8];</pre>
+<pre>    if ((uVar2 != 0xffffffff) || (param_4[9] != 0xffffffff)) {</pre>
+<pre>      local_34 = uVar2 &lt;&lt; 0x18 | uVar2 &gt;&gt; 0x18 | uVar2 &gt;&gt; 8 &amp; 0xff00 | (uVar2 &amp; 0xff00) &lt;&lt; 8;</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre>      iVar1 = FUN_0040874c(0x20,4,&amp;local_34,&amp;local_3c,param_3,&amp;local_38);</pre></a>
+
+<pre>      if (iVar1 != 0) {</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    if (param_4[0x33] == 0xffffffff) {</pre>
+<pre>      return local_38;</pre>
+<pre>    }</pre>
+<pre>    if ((param_4[0x32] &amp; 1) == 0) {</pre>
+<pre>      if (param_4[0x33] != 2) {</pre>
+<pre>        pcVar7 = "unexpected authentication protocol";</pre>
+<pre>LAB_0040af28:</pre>
+<pre>        dprintf(3,"dhcp6_set_options",pcVar7);</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<pre><span class="green">      sVar12 = param_4[0x39] + 0x23</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre><span class="green">      sVar12 = 0xf</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre><span class="green">    pvVar3 = malloc(sVar12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if (pvVar3 == (void *)0x0) {</pre>
+<pre>      dprintf(4,"dhcp6_set_options","failed to allocate memory for authentication information");</pre>
+<pre>      return -1;</pre>
+<pre>    }</pre>
+<pre>    memset(pvVar3,0,sVar12);</pre>
+<pre>    uVar4 = param_4[0x32];</pre>
+<pre>    uVar8 = param_4[0x37];</pre>
+<pre>    *(uint *)((int)pvVar3 + 7) = param_4[0x36];</pre>
+<pre>    uVar9 = param_4[0x33];</pre>
+<pre>    uVar2 = param_4[0x34];</pre>
+<pre>    uVar6 = param_4[0x35];</pre>
+<pre>    *(uint *)((int)pvVar3 + 0xb) = uVar8;</pre>
+<pre>    *(char *)((int)pvVar3 + 5) = (char)uVar2;</pre>
+<pre>    *(char *)((int)pvVar3 + 6) = (char)uVar6;</pre>
+<pre>    *(char *)((int)pvVar3 + 4) = (char)uVar9;</pre>
+<pre>    if ((uVar4 &amp; 1) == 0) {</pre>
+<pre>      if (uVar9 != 2) {</pre>
+<pre>        dprintf(3,"dhcp6_set_options","unexpected authentication protocol");</pre>
+<pre>        free(pvVar3);</pre>
+<pre>        return -1;</pre>
+<pre>      }</pre>
+<pre><span class="green">      memcpy((void *)((int)pvVar3 + 0xf),(void *)param_4[0x3a],param_4[0x39])</span></span>   //possible issue identified - semgrep</pre>
+<pre>      uVar4 = param_4[0x38];</pre>
+<pre>      local_34 = uVar4 &lt;&lt; 0x18 | uVar4 &gt;&gt; 0x18 | uVar4 &gt;&gt; 8 &amp; 0xff00 | (uVar4 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>      uVar2 = (int)local_3c + sVar12 + (-0x10 - (int)param_2);</pre>
+<pre>      param_4[0x3b] = uVar2;</pre>
+<pre>      *(uint *)((int)pvVar3 + 0xf + param_4[0x39]) = local_34;</pre>
+<pre>      dprintf(7,"dhcp6_set_options","key ID %x, offset %d",uVar4,uVar2);</pre>
+<pre>    }</pre>
+<a class="reference" href="./85e609704a173a40abf93985e81e0240.html" title="./85e609704a173a40abf93985e81e0240.html" ><pre><span class="green">    iVar1 = FUN_0040874c(0xb,sVar12 - 4 &amp; 0xffff,(int)pvVar3 + 4,&amp;local_3c,param_3,&amp;local_38)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre>    if (iVar1 == 0) {</pre>
+<pre>      free(pvVar3);</pre>
+<pre>      return local_38;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  return -1;</pre>
+<pre>LAB_0040a73c:</pre>
+<pre>  pcVar7 = "failed to count option length";</pre>
+<pre>  goto LAB_0040a74c;</pre>
+<pre>LAB_0040a8d4:</pre>
+<pre>  pcVar7 = "short buffer";</pre>
+<pre>LAB_0040a74c:</pre>
+<pre>  dprintf(6,"dhcp6_set_options",pcVar7);</pre>
+<pre>  return -1;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

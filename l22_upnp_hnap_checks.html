@@ -56,12 +56,14 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <br />
 <pre></span><span class="blue">==&gt</span></span> </span><span class="cyan">UPnP enumeration for emulated system with IP </span><span class="orange">192.168.0.1</span></span></pre>
 <pre><hr class="mono" /></pre>
+<pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">111/udp rpcbind - 111/udp - 192.168.0.1</span></pre>
 <pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">137/udp netbios-ns - 137/udp - 192.168.0.1</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">161/udp snmp - 161/udp - 192.168.0.1</span></pre>
 <pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">1900/udp upnp - 1900/udp - 192.168.0.1</span></pre>
 <pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">23/tcp telnet - 23/tcp - 192.168.0.1</span></pre>
 <pre>[</span><span class="orange">*</span>] UPnP reachability check for </span><span class="orange">49152/tcp upnp - 49152/tcp - 192.168.0.1</span></pre>
-<pre>[</span><span class="orange">*</span>] UPnP scan with upnpc on local network interface </span><span class="orange">tap213_0</span></pre>
-<pre>[</span><span class="orange">*</span>] UPnP scan with upnpc on local network interface </span><span class="orange">tap213_0.0</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP scan with upnpc on local network interface </span><span class="orange">tap345_0</span></pre>
+<pre>[</span><span class="orange">*</span>] UPnP scan with upnpc on local network interface </span><span class="orange">tap345_0.0</span></pre>
 <br />
 <pre>ioctl(...SIOCGIFADDR...): Cannot assign requested address</pre>
 <pre>No IGD UPnP Device found on the network !</pre>
@@ -94,25 +96,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <br />
 <pre>Note: Unnecessary use of -X or --request, GET is already inferred.</pre>
 <pre>*   Trying 192.168.0.1:80...</pre>
-<pre>* Established connection to 192.168.0.1 (192.168.0.1 port 80) from 192.168.0.2 port 56902 </pre>
-<pre>* using HTTP/1.x</pre>
-<pre>&gt; GET /HNAP/ HTTP/1.1</pre>
-<pre>&gt; Host: 192.168.0.1</pre>
-<pre>&gt; User-Agent: curl/8.21.0</pre>
-<pre>&gt; Accept: */*</pre>
-<pre>&gt; </pre>
-<pre>* Request completely sent off</pre>
-<pre>&lt; HTTP/1.1 404 Not Found</pre>
-<pre>&lt; Server: Linux, HTTP/1.1, DIR-600 Ver 2.14</pre>
-<pre>&lt; Date: Sat, 01 Jan 2000 13:18:34 GMT</pre>
-<pre>&lt; Content-Type: text/html</pre>
-<pre>&lt; Content-Length:   110</pre>
-<pre>* The requested URL returned error: 404</pre>
-<pre>&lt; </pre>
-<pre>* closing connection #0</pre>
-<pre>Note: Unnecessary use of -X or --request, GET is already inferred.</pre>
-<pre>*   Trying 192.168.0.1:80...</pre>
-<pre>* Established connection to 192.168.0.1 (192.168.0.1 port 80) from 192.168.0.2 port 56914 </pre>
+<pre>* Established connection to 192.168.0.1 (192.168.0.1 port 80) from 192.168.0.2 port 57344 </pre>
 <pre>* using HTTP/1.x</pre>
 <pre>&gt; GET /HNAP1/ HTTP/1.1</pre>
 <pre>&gt; Host: 192.168.0.1</pre>
@@ -122,7 +106,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <pre>* Request completely sent off</pre>
 <pre>&lt; HTTP/1.1 200 OK</pre>
 <pre>&lt; Server: Linux, HTTP/1.1, DIR-600 Ver 2.14</pre>
-<pre>&lt; Date: Sat, 01 Jan 2000 13:18:34 GMT</pre>
+<pre>&lt; Date: Fri, 31 Dec 1999 19:39:28 GMT</pre>
 <pre>&lt; Transfer-Encoding: chunked</pre>
 <pre>&lt; Content-Type: text/xml; charset=utf-8</pre>
 <pre>&lt; </pre>
@@ -190,6 +174,24 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <pre>    &lt;/GetDeviceSettingsResponse&gt;</pre>
 <pre>  &lt;/soap:Body&gt;</pre>
 <pre>&lt;/soap:Envelope&gt;</pre>
+<pre>Note: Unnecessary use of -X or --request, GET is already inferred.</pre>
+<pre>*   Trying 192.168.0.1:80...</pre>
+<pre>* Established connection to 192.168.0.1 (192.168.0.1 port 80) from 192.168.0.2 port 57324 </pre>
+<pre>* using HTTP/1.x</pre>
+<pre>&gt; GET /HNAP/ HTTP/1.1</pre>
+<pre>&gt; Host: 192.168.0.1</pre>
+<pre>&gt; User-Agent: curl/8.21.0</pre>
+<pre>&gt; Accept: */*</pre>
+<pre>&gt; </pre>
+<pre>* Request completely sent off</pre>
+<pre>&lt; HTTP/1.1 404 Not Found</pre>
+<pre>&lt; Server: Linux, HTTP/1.1, DIR-600 Ver 2.14</pre>
+<pre>&lt; Date: Fri, 31 Dec 1999 19:39:28 GMT</pre>
+<pre>&lt; Content-Type: text/html</pre>
+<pre>&lt; Content-Length:   110</pre>
+<pre>* The requested URL returned error: 404</pre>
+<pre>&lt; </pre>
+<pre>* closing connection #0</pre>
 <br />
 <pre>[</span><span class="green">+</span>]</span><span class="green"> HNAP service successfully identified</pre>
 <pre></span></pre>

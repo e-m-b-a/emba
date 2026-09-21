@@ -1,0 +1,748 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./7215f6d1a01e366e4780e5e979d72b83.html" title="./7215f6d1a01e366e4780e5e979d72b83.html" >&laquo; Back to 7215f6d1a01e366e4780e5e979d72b83</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>void FUN_00404a1c(void)</pre>
+<br />
+<pre>{</pre>
+<pre>  uint uVar1;</pre>
+<pre>  cmsghdr *__cmsg;</pre>
+<pre>  int iVar2;</pre>
+<pre>  undefined4 uVar3;</pre>
+<pre>  undefined4 uVar4;</pre>
+<pre>  undefined4 uVar5;</pre>
+<pre>  int iVar6;</pre>
+<pre>  undefined4 *puVar7;</pre>
+<pre>  undefined4 *puVar8;</pre>
+<pre>  int iVar9;</pre>
+<pre>  int *piVar10;</pre>
+<pre>  uint uVar11;</pre>
+<pre>  char *pcVar12;</pre>
+<pre>  short sVar13;</pre>
+<pre>  int *piVar14;</pre>
+<pre>  int *piVar15;</pre>
+<pre>  cmsghdr *pcVar16;</pre>
+<pre>  int *piVar17;</pre>
+<pre>  undefined2 local_2218 [2];</pre>
+<pre>  iovec local_2214;</pre>
+<pre>  int local_220c;</pre>
+<pre>  int local_2208;</pre>
+<pre>  int local_2204;</pre>
+<pre>  int local_2200;</pre>
+<pre>  int local_21fc;</pre>
+<pre>  int local_21f8;</pre>
+<pre>  int local_21f4;</pre>
+<pre>  undefined4 local_21f0;</pre>
+<pre>  msghdr local_21ec;</pre>
+<pre>  undefined4 local_21d0;</pre>
+<pre>  undefined4 local_21cc;</pre>
+<pre>  undefined4 local_21c8;</pre>
+<pre>  undefined4 local_21c4;</pre>
+<pre>  undefined4 local_21c0;</pre>
+<pre>  undefined4 local_21bc;</pre>
+<pre>  undefined4 local_21b8;</pre>
+<pre>  undefined4 local_21b4;</pre>
+<pre>  undefined1 auStack_21b0 [128];</pre>
+<pre>  int local_2130 [2];</pre>
+<pre>  int local_2128 [2];</pre>
+<pre>  int local_2120;</pre>
+<pre>  int local_211c;</pre>
+<pre>  int local_2118;</pre>
+<pre>  int local_2110;</pre>
+<pre>  int local_210c;</pre>
+<pre>  undefined1 auStack_2108 [8];</pre>
+<pre>  undefined1 auStack_2100 [16];</pre>
+<pre>  int *local_20f0 [2];</pre>
+<pre>  int *local_20e8;</pre>
+<pre>  int *local_20e0;</pre>
+<pre>  int *local_20c8;</pre>
+<pre>  int *local_20c0;</pre>
+<pre>  int *local_20b8;</pre>
+<pre>  undefined4 local_2064;</pre>
+<pre>  undefined4 local_2060;</pre>
+<pre>  uint local_2038;</pre>
+<pre>  undefined1 auStack_2034 [4092];</pre>
+<pre>  cmsghdr local_1038 [341];</pre>
+<pre>  int local_38;</pre>
+<pre>  int *local_34;</pre>
+<pre>  int *local_30;</pre>
+<pre>  </pre>
+<pre>  local_21ec.msg_iov = &amp;local_2214;</pre>
+<pre>  local_21ec.msg_namelen = 0x80;</pre>
+<pre>  local_21ec.msg_control = local_1038;</pre>
+<pre>  local_21ec.msg_controllen = 0x1000;</pre>
+<pre>  local_2214.iov_len = 0x1000;</pre>
+<pre>  local_21ec.msg_iovlen = 1;</pre>
+<pre>  local_21ec.msg_flags = 0;</pre>
+<pre>  local_2214.iov_base = &amp;local_2038;</pre>
+<pre>  local_21ec.msg_name = auStack_21b0;</pre>
+<pre>  uVar1 = recvmsg(sock,&amp;local_21ec,0);</pre>
+<pre>  if ((int)uVar1 &lt; 0) {</pre>
+<pre>    piVar17 = __errno_location();</pre>
+<pre>    pcVar12 = strerror(*piVar17);</pre>
+<pre>    dprintf(3,"client6_recv","recvmsg: %s",pcVar12);</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  if ((local_21ec.msg_controllen &lt; 0xc) ||</pre>
+<pre>     (pcVar16 = (cmsghdr *)0x0, __cmsg = (cmsghdr *)local_21ec.msg_control,</pre>
+<pre>     (cmsghdr *)local_21ec.msg_control == (cmsghdr *)0x0)) {</pre>
+<pre>LAB_00404cec:</pre>
+<pre>    dprintf(5,"client6_recv","failed to get packet info");</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  do {</pre>
+<pre>    while ((__cmsg-&gt;cmsg_level == 0x29 &amp;&amp;</pre>
+<pre>           ((__cmsg-&gt;cmsg_type == 0x32 &amp;&amp; (__cmsg-&gt;cmsg_len == 0x20))))) {</pre>
+<pre>      pcVar16 = __cmsg + 1;</pre>
+<pre>      __cmsg = __cmsg_nxthdr(&amp;local_21ec,__cmsg);</pre>
+<pre>      if (__cmsg == (cmsghdr *)0x0) goto LAB_00404b4c;</pre>
+<pre>    }</pre>
+<pre>    __cmsg = __cmsg_nxthdr(&amp;local_21ec,__cmsg);</pre>
+<pre>  } while (__cmsg != (cmsghdr *)0x0);</pre>
+<pre>LAB_00404b4c:</pre>
+<pre>  if (pcVar16 == (cmsghdr *)0x0) goto LAB_00404cec;</pre>
+<pre>  iVar2 = find_ifconfbyid(pcVar16[1].cmsg_level);</pre>
+<pre>  if (iVar2 == 0) {</pre>
+<pre>    dprintf(6,"client6_recv","unexpected interface (%d)",pcVar16[1].cmsg_level);</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  if (uVar1 &lt; 4) {</pre>
+<pre>    dprintf(6,"client6_recv","short packet (%d bytes)",uVar1);</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  uVar3 = dhcp6msgstr(local_2038 &amp; 0xff);</pre>
+<pre>  uVar4 = addr2str(auStack_21b0);</pre>
+<pre>  uVar5 = *(undefined4 *)(iVar2 + 0x10);</pre>
+<pre>  dprintf(7,"client6_recv","receive %s from %s on %s",uVar3,uVar4,uVar5);</pre>
+<pre>  local_34 = local_2130;</pre>
+<pre>  dhcp6_init_options(local_34);</pre>
+<pre>  iVar6 = dhcp6_get_options(auStack_2034,(int)&amp;local_2038 + uVar1,local_34);</pre>
+<pre>  if (iVar6 &lt; 0) {</pre>
+<pre>    dprintf(6,"client6_recv","failed to parse options");</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  uVar11 = local_2038 &amp; 0xff;</pre>
+<pre>  if (uVar11 == 7) {</pre>
+<pre>    piVar17 = *(int **)(iVar2 + 8);</pre>
+<pre>    if (piVar17 == (int *)0x0) {</pre>
+<pre>LAB_00404f30:</pre>
+<pre>      pcVar12 = "client6_recvreply";</pre>
+<pre>LAB_00404fc0:</pre>
+<pre>      dprintf(6,pcVar12,"XID mismatch");</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    uVar11 = piVar17[0xe];</pre>
+<pre>    while ((local_2038 &gt;&gt; 0x18 | (local_2038 &amp; 0xff0000) &gt;&gt; 8 | (local_2038 &amp; 0xff00) &lt;&lt; 8) !=</pre>
+<pre>           uVar11) {</pre>
+<pre>      piVar17 = (int *)*piVar17;</pre>
+<pre>      if (piVar17 == (int *)0x0) goto LAB_00404f30;</pre>
+<pre>      uVar11 = piVar17[0xe];</pre>
+<pre>    }</pre>
+<pre>    local_38 = piVar17[0xf];</pre>
+<pre>    if ((((4 &lt; local_38 - 2U) &amp;&amp; (local_38 != 8)) &amp;&amp; (local_38 != 9)) &amp;&amp;</pre>
+<pre>       ((local_38 != 1 || ((*(uint *)(iVar2 + 0x2c) &amp; 2) == 0)))) {</pre>
+<pre>      dprintf(6,"client6_recvreply","unexpected reply");</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    if (local_2128[0] == 0) {</pre>
+<pre>      pcVar12 = "client6_recvreply";</pre>
+<pre>      goto LAB_00405d04;</pre>
+<pre>    }</pre>
+<pre>    if (local_2130[0] == 0) {</pre>
+<pre>      pcVar12 = "client6_recvreply";</pre>
+<pre>      goto LAB_00405d3c;</pre>
+<pre>    }</pre>
+<pre>    iVar6 = duidcmp(local_34,&amp;DAT_0043e9f4);</pre>
+<pre>    if (iVar6 == 0) {</pre>
+<a class="reference" href="./dc34e3e1faf2703f1e622be604dd2400.html" title="./dc34e3e1faf2703f1e622be604dd2400.html" ><pre>      iVar6 = FUN_0040448c(piVar17[0x12],&amp;local_2038,uVar1,local_34);</pre></a>
+
+<pre>      if (iVar6 == 0) {</pre>
+<pre>        if (((local_38 == 1) &amp;&amp; ((*(uint *)(iVar2 + 0x2c) &amp; 2) != 0)) &amp;&amp; (local_2120 == 0)) {</pre>
+<pre>          dprintf(6,"client6_recvreply","no rapid commit");</pre>
+<pre>        }</pre>
+<pre>        else if (local_20f0[0] == (int *)0x0) {</pre>
+<pre>LAB_00405758:</pre>
+<pre>          if (local_20c8 != (int *)0x0) {</pre>
+<pre>            iVar6 = 0;</pre>
+<pre>            piVar14 = local_20c8;</pre>
+<pre>            do {</pre>
+<pre>              uVar3 = in6addr2str(piVar14 + 3,0);</pre>
+<a class="reference" href="./a587f7b1a549a09352dbdc5ba681b2a4.html" title="./a587f7b1a549a09352dbdc5ba681b2a4.html" ><pre>              FUN_00404978("nameserver[%d] %s",iVar6,uVar3);</pre></a>
+
+<pre>              piVar14 = (int *)*piVar14;</pre>
+<pre>              iVar6 = iVar6 + 1;</pre>
+<pre>            } while (piVar14 != (int *)0x0);</pre>
+<pre>          }</pre>
+<pre>          if (local_20c0 != (int *)0x0) {</pre>
+<pre>            iVar6 = 0;</pre>
+<pre>            piVar14 = local_20c0;</pre>
+<pre>            do {</pre>
+<a class="reference" href="./a587f7b1a549a09352dbdc5ba681b2a4.html" title="./a587f7b1a549a09352dbdc5ba681b2a4.html" ><pre>              FUN_00404978("Domain search list[%d] %s",iVar6,piVar14[4]);</pre></a>
+
+<pre>              piVar14 = (int *)*piVar14;</pre>
+<pre>              iVar6 = iVar6 + 1;</pre>
+<pre>            } while (piVar14 != (int *)0x0);</pre>
+<pre>          }</pre>
+<pre>          if (local_20b8 != (int *)0x0) {</pre>
+<pre>            iVar6 = 0;</pre>
+<pre>            piVar14 = local_20b8;</pre>
+<pre>            do {</pre>
+<pre>              uVar3 = in6addr2str(piVar14 + 3,0);</pre>
+<a class="reference" href="./a587f7b1a549a09352dbdc5ba681b2a4.html" title="./a587f7b1a549a09352dbdc5ba681b2a4.html" ><pre>              FUN_00404978("NTP server[%d] %s",iVar6,uVar3);</pre></a>
+
+<pre>              piVar14 = (int *)*piVar14;</pre>
+<pre>              iVar6 = iVar6 + 1;</pre>
+<pre>            } while (piVar14 != (int *)0x0);</pre>
+<pre>          }</pre>
+<pre>          if (local_20e8 != (int *)0x0) {</pre>
+<pre>            iVar6 = 0;</pre>
+<pre>            piVar14 = local_20e8;</pre>
+<pre>            do {</pre>
+<pre>              uVar3 = in6addr2str(piVar14 + 3,0);</pre>
+<a class="reference" href="./a587f7b1a549a09352dbdc5ba681b2a4.html" title="./a587f7b1a549a09352dbdc5ba681b2a4.html" ><pre>              FUN_00404978("SIP server address[%d] %s",iVar6,uVar3);</pre></a>
+
+<pre>              piVar14 = (int *)*piVar14;</pre>
+<pre>              iVar6 = iVar6 + 1;</pre>
+<pre>            } while (piVar14 != (int *)0x0);</pre>
+<pre>          }</pre>
+<pre>          if (local_20e0 != (int *)0x0) {</pre>
+<pre>            iVar6 = 0;</pre>
+<pre>            piVar14 = local_20e0;</pre>
+<pre>            do {</pre>
+<a class="reference" href="./a587f7b1a549a09352dbdc5ba681b2a4.html" title="./a587f7b1a549a09352dbdc5ba681b2a4.html" ><pre>              FUN_00404978("SIP domain name[%d] %s",iVar6,piVar14[4]);</pre></a>
+
+<pre>              piVar14 = (int *)*piVar14;</pre>
+<pre>              iVar6 = iVar6 + 1;</pre>
+<pre>            } while (piVar14 != (int *)0x0);</pre>
+<pre>          }</pre>
+<pre>          if (local_38 == 2) {</pre>
+<pre>            iVar6 = local_2110;</pre>
+<pre>            if ((local_2110 == -1) &amp;&amp; (local_210c == -1)) {</pre>
+<pre>              iVar6 = 0x15180;</pre>
+<pre>            }</pre>
+<pre>            iVar9 = dhcp6_add_timer(&amp;LAB_00404090,iVar2);</pre>
+<pre>            *(int *)(iVar2 + 4) = iVar9;</pre>
+<pre>            if (iVar9 == 0) {</pre>
+<pre>              dprintf(4,"client6_recvreply","failed to add timer for refresh time");</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              local_21f0 = 0;</pre>
+<pre>              local_21f4 = iVar6;</pre>
+<pre>              if (iVar6 &lt; 0) {</pre>
+<pre>                dprintf(4,"client6_recvreply","refresh time is too large: %lu",iVar6);</pre>
+<pre>                local_21f4 = 0x7fffffff;</pre>
+<pre>              }</pre>
+<pre>              dhcp6_set_timer(&amp;local_21f4,*(undefined4 *)(iVar2 + 4));</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          else if ((local_2110 != -1) || (local_210c != -1)) {</pre>
+<pre>            dprintf(6,"client6_recvreply","unexpected information refresh time option (ignored)");</pre>
+<pre>          }</pre>
+<pre>          if (((local_38 - 4U &lt; 2) || (local_38 == 8)) &amp;&amp;</pre>
+<pre>             (piVar14 = (int *)piVar17[0x13], piVar14 != (int *)0x0)) {</pre>
+<pre>            do {</pre>
+<pre>              if (piVar14[3] == 1) {</pre>
+<pre>                for (piVar15 = *(int **)piVar14[4]; piVar15 != (int *)0x0; piVar15 = (int *)*piVar15</pre>
+<pre>                    ) {</pre>
+<pre>                  iVar6 = dhcp6_find_listval(auStack_2100,6,piVar15 + 3,0);</pre>
+<pre>                  if (iVar6 == 0) goto LAB_00405a6c;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              piVar14 = (int *)*piVar14;</pre>
+<pre>            } while (piVar14 != (int *)0x0);</pre>
+<pre>LAB_00405a6c:</pre>
+<pre>            piVar14 = (int *)piVar17[0x13];</pre>
+<pre>            if (piVar14 != (int *)0x0) {</pre>
+<pre>              do {</pre>
+<pre>                if (piVar14[3] == 0) {</pre>
+<pre>                  for (piVar15 = *(int **)piVar14[4]; piVar15 != (int *)0x0;</pre>
+<pre>                      piVar15 = (int *)*piVar15) {</pre>
+<pre>                    iVar6 = dhcp6_find_listval(auStack_2108,4,piVar15 + 3,0);</pre>
+<pre>                    if (iVar6 == 0) {</pre>
+<pre>                      reset_ia_timer(piVar15,0,iVar2,local_2128);</pre>
+<pre>                    }</pre>
+<pre>                  }</pre>
+<pre>                }</pre>
+<pre>                piVar14 = (int *)*piVar14;</pre>
+<pre>              } while (piVar14 != (int *)0x0);</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          if (local_38 == 6) {</pre>
+<pre>            dhcp6_remove_event(piVar17);</pre>
+<a class="reference" href="./387c6fc00ebc0b9653802c1591adcc60.html" title="./387c6fc00ebc0b9653802c1591adcc60.html" ><pre>            FUN_00402a70();</pre></a>
+
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            iVar6 = update_ia(0,auStack_2108,iVar2,local_2128,piVar17[0x12]);</pre>
+<pre>            if (iVar6 &lt; 0) goto LAB_00404c80;</pre>
+<pre>            update_ia(1,auStack_2100,iVar2,local_2128,piVar17[0x12]);</pre>
+<pre>            dhcp6_remove_event(piVar17);</pre>
+<pre>          }</pre>
+<pre>          dprintf(7,"client6_recvreply","got an expected reply, sleeping.");</pre>
+<pre>          if (DAT_0043e9c0 != 0) {</pre>
+<pre>            DAT_0043e9c4 = 1;</pre>
+<a class="reference" href="./af9de47961f22970d861e8a251332bfc.html" title="./af9de47961f22970d861e8a251332bfc.html" ><pre>            FUN_004041e4(0);</pre></a>
+
+<pre><span class="green">            unlink(PTR_s__var_run_dhcp6c_pid_0043e300)</span></span>   //possible issue identified - semgrep</pre>
+<a class="reference" href="./387c6fc00ebc0b9653802c1591adcc60.html" title="./387c6fc00ebc0b9653802c1591adcc60.html" ><pre>            FUN_00402a70();</pre></a>
+
+<pre>          }</pre>
+<pre>          if ((*(char **)(iVar2 + 0x44) != (char *)0x0) &amp;&amp; (**(char **)(iVar2 + 0x44) != '\0')) {</pre>
+<pre>            dprintf(7,"client6_recvreply","executes %s");</pre>
+<pre>            client6_script(*(undefined4 *)(iVar2 + 0x44),local_38,local_34);</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre><span class="green">          sVar13 = (short)local_20f0[0][3]</span></span>   //possible issue identified - semgrep</pre>
+<pre>          if ((sVar13 != 1) &amp;&amp; (piVar14 = local_20f0[0], sVar13 != 5)) {</pre>
+<pre>LAB_004051b4:</pre>
+<pre>            if (sVar13 == 4) {</pre>
+<pre>              if (piVar17[0xf] == 8) {</pre>
+<pre>                release_choose_ia(1,auStack_2100,iVar2,local_2128);</pre>
+<pre>                goto LAB_004051ec;</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>            else if ((sVar13 == 0) &amp;&amp; (piVar17[0xf] == 9)) {</pre>
+<pre>              piVar14 = (int *)piVar17[0x13];</pre>
+<pre>              if (piVar14 != (int *)0x0) {</pre>
+<pre>                do {</pre>
+<pre>                  if (piVar14[3] == 1) {</pre>
+<pre>                    release_choose_ia(1,piVar14[4],iVar2,local_2128);</pre>
+<pre>                  }</pre>
+<pre>                  piVar14 = (int *)*piVar14;</pre>
+<pre>                } while (piVar14 != (int *)0x0);</pre>
+<pre>              }</pre>
+<pre>LAB_004051ec:</pre>
+<pre>              dhcp6_remove_event(piVar17);</pre>
+<pre>              goto LAB_00404c80;</pre>
+<pre>            }</pre>
+<pre>            uVar3 = dhcp6_stcodestr(sVar13);</pre>
+<pre>            dprintf(6,"client6_recvreply","status code: %s",uVar3);</pre>
+<pre>            piVar14 = (int *)*piVar14;</pre>
+<pre>            if (piVar14 == (int *)0x0) goto LAB_00405758;</pre>
+<pre><span class="green">            sVar13 = *(short *)(piVar14 + 3)</span></span>   //possible issue identified - semgrep</pre>
+<pre>            if ((sVar13 == 1) || (sVar13 == 5)) goto LAB_00404c80;</pre>
+<pre>            goto LAB_004051b4;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        goto LAB_00404c80;</pre>
+<pre>      }</pre>
+<pre>      pcVar12 = "client6_recvreply";</pre>
+<pre>LAB_00405ebc:</pre>
+<pre>      dprintf(6,pcVar12,"failed to process authentication");</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    pcVar12 = "client6_recvreply";</pre>
+<pre>  }</pre>
+<pre>  else if (uVar11 == 10) {</pre>
+<pre>    if (local_2128[0] == 0) {</pre>
+<pre>      pcVar12 = "client6_recvreconf";</pre>
+<pre>LAB_00405d04:</pre>
+<pre>      dprintf(6,pcVar12,"no server ID option");</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    if (local_2130[0] == 0) {</pre>
+<pre>      pcVar12 = "client6_recvreconf";</pre>
+<pre>LAB_00405d3c:</pre>
+<pre>      dprintf(6,pcVar12,"no client ID option");</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    iVar6 = duidcmp(local_34,&amp;DAT_0043e9f4);</pre>
+<pre>    if (iVar6 == 0) {</pre>
+<pre><span class="green">      puVar7 = (undefined4 *)malloc(0x20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      if (puVar7 != (undefined4 *)0x0) {</pre>
+<pre>        *puVar7 = local_2064;</pre>
+<pre>        puVar7[1] = local_2060;</pre>
+<pre>        puVar7[2] = 0;</pre>
+<pre>        puVar7[3] = 0;</pre>
+<pre>        puVar7[4] = 0;</pre>
+<pre>        puVar7[5] = 0;</pre>
+<pre>        puVar7[6] = 0;</pre>
+<pre>        puVar7[7] = 0;</pre>
+<pre><span class="green">        puVar8 = (undefined4 *)malloc(0x20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        puVar7[3] = puVar8;</pre>
+<pre>        uVar3 = DAT_0043ea04;</pre>
+<pre>        if (puVar8 == (undefined4 *)0x0) {</pre>
+<pre>          free(puVar7);</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          puVar7[6] = g_prevrd;</pre>
+<pre>          puVar7[7] = uVar3;</pre>
+<pre>          puVar8[5] = &amp;reconfig_key;</pre>
+<pre>          puVar8[6] = 0x10;</pre>
+<pre>          *puVar8 = 0;</pre>
+<pre>          puVar8[1] = 0;</pre>
+<pre>          puVar8[2] = 0;</pre>
+<pre>          puVar8[3] = 0;</pre>
+<pre>          puVar8[4] = 0;</pre>
+<pre>          puVar8[7] = 0;</pre>
+<a class="reference" href="./dc34e3e1faf2703f1e622be604dd2400.html" title="./dc34e3e1faf2703f1e622be604dd2400.html" ><pre>          iVar6 = FUN_0040448c(puVar7,&amp;local_2038,uVar1,local_34);</pre></a>
+
+<pre>          if (iVar6 == 0) {</pre>
+<pre>            if (local_2118 == 5) {</pre>
+<pre>              renew_all_ia(iVar2);</pre>
+<pre>            }</pre>
+<pre>            else if (local_2118 == 6) {</pre>
+<pre>              rebind_all_ia(iVar2);</pre>
+<pre>            }</pre>
+<pre>            else if (local_2118 == 0xb) {</pre>
+<a class="reference" href="./78ac85f5f683ef164e9cdb888c1081c6.html" title="./78ac85f5f683ef164e9cdb888c1081c6.html" ><pre>              FUN_004034b0(iVar2);</pre></a>
+
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          free(puVar7);</pre>
+<pre><span class="green">          free((void *)puVar7[3])</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    pcVar12 = "client6_recvreconf";</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    if (uVar11 != 2) {</pre>
+<pre>      uVar3 = dhcp6msgstr();</pre>
+<pre>      uVar4 = addr2str(auStack_21b0);</pre>
+<pre>      dprintf(6,"client6_recv","received an unexpected message (%s) from %s",uVar3,uVar4);</pre>
+<pre>      goto LAB_00404c80;</pre>
+<pre>    }</pre>
+<pre>    piVar17 = *(int **)(iVar2 + 8);</pre>
+<pre>    if (piVar17 == (int *)0x0) {</pre>
+<pre>LAB_00404fb4:</pre>
+<pre>      pcVar12 = "client6_recvadvert";</pre>
+<pre>      goto LAB_00404fc0;</pre>
+<pre>    }</pre>
+<pre>    uVar11 = piVar17[0xe];</pre>
+<pre>    while ((local_2038 &gt;&gt; 0x18 | (local_2038 &amp; 0xff0000) &gt;&gt; 8 | (local_2038 &amp; 0xff00) &lt;&lt; 8) !=</pre>
+<pre>           uVar11) {</pre>
+<pre>      piVar17 = (int *)*piVar17;</pre>
+<pre>      if (piVar17 == (int *)0x0) goto LAB_00404fb4;</pre>
+<pre>      uVar11 = piVar17[0xe];</pre>
+<pre>    }</pre>
+<pre>    if (local_2128[0] == 0) {</pre>
+<pre>      pcVar12 = "client6_recvadvert";</pre>
+<pre>      goto LAB_00405d04;</pre>
+<pre>    }</pre>
+<pre>    local_30 = local_2128;</pre>
+<pre>    uVar3 = duidstr(local_2128);</pre>
+<pre>    dprintf(7,"client6_recvadvert","server ID: %s, pref=%d",uVar3,local_211c,uVar5);</pre>
+<pre>    if (local_2130[0] == 0) {</pre>
+<pre>      pcVar12 = "client6_recvadvert";</pre>
+<pre>      goto LAB_00405d3c;</pre>
+<pre>    }</pre>
+<pre>    iVar6 = duidcmp(local_34,&amp;DAT_0043e9f4);</pre>
+<pre>    if (iVar6 == 0) {</pre>
+<pre>      puVar7 = (undefined4 *)piVar17[0x12];</pre>
+<pre>      local_21b4 = puVar7[7];</pre>
+<pre>      local_21d0 = *puVar7;</pre>
+<pre>      local_21cc = puVar7[1];</pre>
+<pre>      local_21c8 = puVar7[2];</pre>
+<pre>      local_21c4 = puVar7[3];</pre>
+<pre>      local_21c0 = puVar7[4];</pre>
+<pre>      local_21bc = puVar7[5];</pre>
+<pre>      local_21b8 = puVar7[6];</pre>
+<a class="reference" href="./dc34e3e1faf2703f1e622be604dd2400.html" title="./dc34e3e1faf2703f1e622be604dd2400.html" ><pre>      iVar6 = FUN_0040448c(&amp;local_21d0,&amp;local_2038,uVar1,local_34);</pre></a>
+
+<pre>      if (iVar6 == 0) {</pre>
+<pre>        piVar14 = (int *)piVar17[0x13];</pre>
+<pre>        if (piVar14 != (int *)0x0) {</pre>
+<pre>          do {</pre>
+<pre>            if (piVar14[3] == 0) {</pre>
+<pre>              local_2218[0] = 6;</pre>
+<pre>              pcVar12 = "NoPrefixAvail";</pre>
+<pre>LAB_00405310:</pre>
+<pre>              iVar6 = dhcp6_find_listval(local_20f0,2,local_2218,0);</pre>
+<pre>              if (iVar6 != 0) {</pre>
+<pre>                dprintf(6,"client6_recvadvert","advertise contains %s status",pcVar12);</pre>
+<pre>                goto LAB_00404c80;</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>            else if (piVar14[3] == 1) {</pre>
+<pre>              local_2218[0] = 2;</pre>
+<pre>              pcVar12 = "NoAddrsAvail";</pre>
+<pre>              goto LAB_00405310;</pre>
+<pre>            }</pre>
+<pre>            piVar14 = (int *)*piVar14;</pre>
+<pre>          } while (piVar14 != (int *)0x0);</pre>
+<pre>        }</pre>
+<pre>        if (((piVar17[0xf] != 1) || ((*(uint *)(iVar2 + 0x2c) &amp; 2) != 0)) || (DAT_0043e9c0 != 0)) {</pre>
+<pre>          dprintf(6,"client6_recvadvert","unexpected advertise");</pre>
+<pre>        }</pre>
+<pre>        for (piVar14 = (int *)piVar17[0x11]; piVar14 != (int *)0x0; piVar14 = (int *)*piVar14) {</pre>
+<pre>          iVar6 = duidcmp(piVar14 + 4,local_30);</pre>
+<pre>          if (iVar6 == 0) {</pre>
+<pre>            uVar3 = duidstr(local_30);</pre>
+<pre>            dprintf(6,"client6_recvadvert","duplicated server (ID: %s)",uVar3);</pre>
+<pre>            goto LAB_00404c80;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre><span class="green">        puVar7 = (undefined4 *)malloc(0x110)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (puVar7 == (undefined4 *)0x0) {</pre>
+<pre>          dprintf(4,"client6_recvadvert","memory allocation failed for server");</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre><span class="green">          memset(puVar7,0,0x110)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          iVar6 = piVar17[0x12];</pre>
+<pre>          puVar7[0x42] = iVar6;</pre>
+<pre>          puVar8 = (undefined4 *)piVar17[0x12];</pre>
+<pre>          uVar5 = puVar8[2];</pre>
+<pre>          uVar3 = *puVar8;</pre>
+<pre>          uVar4 = puVar8[1];</pre>
+<pre>          *(undefined4 *)(iVar6 + 0xc) = local_21c4;</pre>
+<pre>          *(undefined4 *)(iVar6 + 0x10) = local_21c0;</pre>
+<pre>          *(undefined4 *)(iVar6 + 0x18) = local_21b8;</pre>
+<pre>          *(undefined4 *)(iVar6 + 0x1c) = local_21b4;</pre>
+<pre>          iVar6 = new_authparam(uVar3,uVar4,uVar5);</pre>
+<pre>          if (iVar6 == 0) {</pre>
+<pre>            dprintf(4,"client6_recvadvert","memory allocation failed for authentication parameters")</pre>
+<pre>            ;</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            piVar17[0x12] = iVar6;</pre>
+<pre>            dhcp6_init_options(puVar7 + 2);</pre>
+<pre>            iVar6 = dhcp6_copy_options(puVar7 + 2,local_34);</pre>
+<pre>            if (iVar6 == 0) {</pre>
+<pre>              if (local_211c != -1) {</pre>
+<pre>                puVar7[0x40] = local_211c;</pre>
+<pre>              }</pre>
+<pre>              piVar14 = (int *)piVar17[0x11];</pre>
+<pre>              puVar7[0x41] = 1;</pre>
+<pre>              piVar15 = piVar17 + 0x11;</pre>
+<pre>              if (piVar14 == (int *)0x0) {</pre>
+<pre>                iVar6 = puVar7[0x40];</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                iVar6 = puVar7[0x40];</pre>
+<pre>                do {</pre>
+<pre>                  piVar10 = piVar14;</pre>
+<pre>                  if ((piVar10[0x40] != 0xff) &amp;&amp; (piVar14 = piVar10, piVar10[0x40] &lt; iVar6)) break;</pre>
+<pre>                  piVar14 = (int *)*piVar10;</pre>
+<pre>                  piVar15 = piVar10;</pre>
+<pre>                } while (piVar14 != (int *)0x0);</pre>
+<pre>              }</pre>
+<pre>              *puVar7 = piVar14;</pre>
+<pre>              *piVar15 = (int)puVar7;</pre>
+<pre>              if (iVar6 == 0xff) {</pre>
+<pre>                piVar17[0x10] = (int)puVar7;</pre>
+<pre>                iVar6 = duidcpy(piVar17 + 4,puVar7 + 4);</pre>
+<pre>                if (iVar6 == 0) {</pre>
+<a class="reference" href="./3a3b801cc2b1de4e08008c7bbdedd3ed.html" title="./3a3b801cc2b1de4e08008c7bbdedd3ed.html" ><pre>                  iVar2 = FUN_004035c0(iVar2,piVar17[0x10] + 8,piVar17);</pre></a>
+
+<pre>                  if (iVar2 == 0) {</pre>
+<pre>                    piVar17[0xf] = 3;</pre>
+<pre>                    piVar17[0xd] = 0;</pre>
+<pre>                    free((void *)piVar17[0x12]);</pre>
+<pre>                    piVar17[0x12] = puVar7[0x42];</pre>
+<pre>                    puVar7[0x42] = 0;</pre>
+<pre>                    client6_send(piVar17);</pre>
+<pre>                    dhcp6_set_timeoparam(piVar17);</pre>
+<pre>                    dhcp6_reset_timer(piVar17);</pre>
+<pre>                  }</pre>
+<pre>                  else {</pre>
+<pre>                    dprintf(5,"client6_recvadvert","failed to construct request data");</pre>
+<pre>                  }</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  dprintf(5,"client6_recvadvert","can\'t copy server ID");</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              else if (*(int *)piVar17[0x11] == 0) {</pre>
+<pre>                uVar3 = dhcp6_timer_rest(piVar17[3]);</pre>
+<pre>                local_2204 = piVar17[8] / 1000;</pre>
+<pre>                local_2200 = (piVar17[8] * 1000) % 1000000;</pre>
+<pre>                local_21fc = piVar17[9] / 1000;</pre>
+<pre>                local_21f8 = (piVar17[9] * 1000) % 1000000;</pre>
+<pre>                timeval_sub(&amp;local_2204,uVar3,&amp;local_220c);</pre>
+<pre>                if ((local_220c &lt; local_21fc) ||</pre>
+<pre>                   ((local_220c == local_21fc &amp;&amp; (local_2208 &lt;= local_21f8)))) {</pre>
+<pre>                  timeval_sub(&amp;local_21fc,&amp;local_220c,&amp;local_21f4);</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  local_21f0 = 0;</pre>
+<pre>                  local_21f4 = 0;</pre>
+<pre>                }</pre>
+<pre>                dprintf(7,"client6_recvadvert","reset timer for %s to %d.%06d",</pre>
+<pre>                        *(undefined4 *)(iVar2 + 0x10),local_21f4,local_21f0);</pre>
+<pre>                dhcp6_set_timer(&amp;local_21f4,piVar17[3]);</pre>
+<pre>              }</pre>
+<pre>              goto LAB_00404c80;</pre>
+<pre>            }</pre>
+<pre>            dprintf(3,"client6_recvadvert","failed to copy options");</pre>
+<pre>            if ((void *)puVar7[0x42] != (void *)0x0) {</pre>
+<pre>              free((void *)puVar7[0x42]);</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          free(puVar7);</pre>
+<pre>        }</pre>
+<pre>        goto LAB_00404c80;</pre>
+<pre>      }</pre>
+<pre>      pcVar12 = "client6_recvadvert";</pre>
+<pre>      goto LAB_00405ebc;</pre>
+<pre>    }</pre>
+<pre>    pcVar12 = "client6_recvadvert";</pre>
+<pre>  }</pre>
+<pre>  dprintf(6,pcVar12,"client DUID mismatch");</pre>
+<pre>LAB_00404c80:</pre>
+<pre>  dhcp6_clear_options(local_34);</pre>
+<pre>  return;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

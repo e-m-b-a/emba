@@ -1,0 +1,796 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./1b83cbfadb30d7c659a7f0957380cbc9.html" title="./1b83cbfadb30d7c659a7f0957380cbc9.html" >&laquo; Back to 1b83cbfadb30d7c659a7f0957380cbc9</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */</pre>
+<br />
+<pre>void udhcpc_main(undefined4 param_1,undefined4 param_2)</pre>
+<br />
+<pre>{</pre>
+<pre>  uint uVar1;</pre>
+<pre>  int iVar2;</pre>
+<pre>  undefined1 uVar3;</pre>
+<pre>  long lVar4;</pre>
+<pre>  in_addr __in;</pre>
+<pre>  undefined4 uVar5;</pre>
+<pre>  undefined2 uVar6;</pre>
+<pre>  int iVar7;</pre>
+<pre>  undefined4 uVar8;</pre>
+<pre>  __fd_mask *p_Var9;</pre>
+<pre>  int iVar10;</pre>
+<pre>  char *pcVar11;</pre>
+<pre>  ssize_t sVar12;</pre>
+<pre>  int *piVar13;</pre>
+<pre>  int iVar14;</pre>
+<pre>  in_addr_t *piVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  char *pcVar17;</pre>
+<pre>  size_t __n;</pre>
+<pre>  undefined1 *puVar18;</pre>
+<pre>  uint uVar19;</pre>
+<pre>  byte *pbVar20;</pre>
+<pre>  size_t sVar21;</pre>
+<pre>  undefined1 uVar22;</pre>
+<pre>  uint uVar23;</pre>
+<pre>  uint local_398;</pre>
+<pre>  int local_394;</pre>
+<pre>  in_addr local_390;</pre>
+<pre>  in_addr local_38c;</pre>
+<pre>  uint local_388;</pre>
+<pre>  timeval local_384;</pre>
+<pre>  char acStack_37c [16];</pre>
+<pre>  char acStack_36c [16];</pre>
+<pre>  undefined4 local_35c;</pre>
+<pre>  undefined4 local_358;</pre>
+<pre>  undefined2 local_354;</pre>
+<pre>  undefined2 local_352;</pre>
+<pre>  undefined2 local_350;</pre>
+<pre>  undefined2 local_34e;</pre>
+<pre>  sysinfo local_34c;</pre>
+<pre>  __fd_mask local_30c [32];</pre>
+<pre>  __fd_mask _Stack_28c;</pre>
+<pre>  int local_288;</pre>
+<pre>  in_addr local_27c;</pre>
+<pre>  byte local_197 [303];</pre>
+<pre>  int local_68;</pre>
+<pre>  int local_64;</pre>
+<pre>  uint local_60;</pre>
+<pre>  uint local_5c;</pre>
+<pre>  byte *local_58;</pre>
+<pre>  uint *local_54;</pre>
+<pre>  int *local_50;</pre>
+<pre>  in_addr *local_4c;</pre>
+<pre>  in_addr *local_48;</pre>
+<pre>  uint *local_44;</pre>
+<pre>  timeval *local_40;</pre>
+<pre>  char *local_3c;</pre>
+<pre>  char *local_38;</pre>
+<pre>  char *local_34;</pre>
+<pre>  sysinfo *local_30;</pre>
+<pre>  __fd_mask *local_2c;</pre>
+<pre>  </pre>
+<pre>  DAT_0041b524 = 4;</pre>
+<pre>  DAT_0041b52c = 0x3c;</pre>
+<pre>  DAT_0041b528 = 5;</pre>
+<pre>  local_44 = &amp;local_388;</pre>
+<pre>  local_64 = 0;</pre>
+<pre>  local_68 = 0;</pre>
+<pre>LAB_0040533c:</pre>
+<pre>  local_388 = 0;</pre>
+<pre>  iVar7 = getopt_long(param_1,param_2,"c:fbH:h:i:np:qr:s:vdD:R:S:ut",&amp;PTR_s_clientid_0041b530,</pre>
+<pre><span class="green">                      local_44)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (iVar7 != -1) {</pre>
+<pre>    switch(iVar7) {</pre>
+<pre>    case 0x44:</pre>
+<pre>      DAT_0041b524 = atoi(_optarg);</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    default:</pre>
+<pre>      puts(</pre>
+<pre>          "Usage: udhcpc [OPTIONS]\n\n  -c, --clientid=CLIENTID         Client identifier\n  -H, --hostname=HOSTNAME         Client hostname\n  -h                              Alias for -H\n  -f, --foreground                Do not fork after getting lease\n  -b, --background                Fork to background if lease cannot be\n                                  immediately negotiated.\n  -i, --interface=INTERFACE       Interface to use (default: eth0)\n  -n, --now                       Exit with failure if lease cannot be\n                                  immediately negotiated.\n  -p, --pidfile=file              Store process ID of daemon in file\n  -q, --quit                      Quit after obtaining lease\n  -r, --request=IP                IP address to request (default: none)\n  -s, --script=file               Run file at dhcp events (default:\n                                  /usr/share/udhcpc/default.script)\n  -v, --version                   Display version"</pre>
+<pre>          );</pre>
+<pre>                    /* WARNING: Subroutine does not return */</pre>
+<pre>      exit(0);</pre>
+<pre>    case 0x48:</pre>
+<pre>    case 0x68:</pre>
+<pre>      __n = strlen(_optarg);</pre>
+<pre>      if (__n &lt; 0x100) {</pre>
+<pre><span class="green">        sVar21 = __n + 2</span></span>   //possible issue identified - semgrep</pre>
+<pre>        uVar22 = (undefined1)__n;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre><span class="green">        sVar21 = 0x101</span></span>   //possible issue identified - semgrep</pre>
+<pre>        uVar22 = 0xff;</pre>
+<pre><span class="green">        __n = 0xff</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      if (DAT_0041b514 != (undefined1 *)0x0) {</pre>
+<pre>        free(DAT_0041b514);</pre>
+<pre>      }</pre>
+<pre><span class="green">      puVar18 = (undefined1 *)malloc(sVar21)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      pcVar11 = _optarg;</pre>
+<pre>      puVar18[1] = uVar22;</pre>
+<pre>      DAT_0041b514 = puVar18;</pre>
+<pre>      *puVar18 = 0xc;</pre>
+<pre>      break;</pre>
+<pre>    case 0x52:</pre>
+<pre>      DAT_0041b528 = atoi(_optarg);</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x53:</pre>
+<pre>      DAT_0041b52c = atoi(_optarg);</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x62:</pre>
+<pre>      DAT_0041b503 = '\x01';</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 99:</pre>
+<pre>      __n = strlen(_optarg);</pre>
+<pre>      if (__n &lt; 0x100) {</pre>
+<pre><span class="green">        sVar21 = __n + 2</span></span>   //possible issue identified - semgrep</pre>
+<pre>        uVar22 = (undefined1)__n;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre><span class="green">        sVar21 = 0x101</span></span>   //possible issue identified - semgrep</pre>
+<pre>        uVar22 = 0xff;</pre>
+<pre><span class="green">        __n = 0xff</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      if (DAT_0041b510 != (undefined1 *)0x0) {</pre>
+<pre>        free(DAT_0041b510);</pre>
+<pre>      }</pre>
+<pre><span class="green">      puVar18 = (undefined1 *)malloc(sVar21)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      pcVar11 = _optarg;</pre>
+<pre>      puVar18[1] = uVar22;</pre>
+<pre>      DAT_0041b510 = puVar18;</pre>
+<pre>      *puVar18 = 0x3d;</pre>
+<pre>      puVar18[2] = 0;</pre>
+<pre>      break;</pre>
+<pre>    case 100:</pre>
+<pre>      local_64 = local_64 + 1;</pre>
+<pre>      DAT_0041b524 = 2;</pre>
+<pre>      DAT_0041b528 = 2;</pre>
+<pre>      DAT_0041b52c = 0;</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x66:</pre>
+<pre>      client_config = '\x01';</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x69:</pre>
+<pre>      PTR_DAT_0041b504 = _optarg;</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x6e:</pre>
+<pre>      DAT_0041b502 = '\x01';</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x70:</pre>
+<pre>      DAT_0041b508 = _optarg;</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x71:</pre>
+<pre>      DAT_0041b501 = '\x01';</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x72:</pre>
+<pre>      DAT_0041bc04.s_addr = inet_addr(_optarg);</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x73:</pre>
+<pre>      PTR_s__usr_share_udhcpc_default_script_0041b50c = _optarg;</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x74:</pre>
+<pre>      local_68 = local_68 + 1;</pre>
+<pre>      DAT_0041b524 = 2;</pre>
+<pre>      DAT_0041b528 = 2;</pre>
+<pre>      DAT_0041b52c = 0;</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x75:</pre>
+<pre>      DAT_0041bc00 = 1;</pre>
+<pre>      goto LAB_0040533c;</pre>
+<pre>    case 0x76:</pre>
+<pre>      goto switchD_004053b8_caseD_76;</pre>
+<pre>    }</pre>
+<pre><span class="green">    strncpy(puVar18 + 2,pcVar11,__n)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    goto LAB_0040533c;</pre>
+<pre>  }</pre>
+<pre>  uVar8 = pidfile_acquire(DAT_0041b508);</pre>
+<pre>  pidfile_write_release(uVar8);</pre>
+<pre>  iVar7 = read_interface(PTR_DAT_0041b504,&amp;DAT_0041b518,0,&amp;DAT_0041b51c);</pre>
+<pre>  if (iVar7 &lt; 0) {</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>    FUN_004051c0(1);</pre></a>
+
+<pre>  }</pre>
+<pre>  if (DAT_0041b510 == (undefined1 *)0x0) {</pre>
+<pre><span class="green">    DAT_0041b510 = (undefined1 *)malloc(9)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    uVar8 = DAT_0041b51c;</pre>
+<pre>    *DAT_0041b510 = 0x3d;</pre>
+<pre>    DAT_0041b510[2] = 1;</pre>
+<pre>    DAT_0041b510[1] = 7;</pre>
+<pre>    uVar3 = DAT_0041b521;</pre>
+<pre>    uVar22 = DAT_0041b520;</pre>
+<pre>    *(undefined4 *)(DAT_0041b510 + 3) = uVar8;</pre>
+<pre>    DAT_0041b510[7] = uVar22;</pre>
+<pre>    DAT_0041b510[8] = uVar3;</pre>
+<pre>  }</pre>
+<pre>  iVar7 = fcntl(0,3);</pre>
+<pre>  if (iVar7 == -1) {</pre>
+<pre><span class="green">    open("/dev/null",0)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  iVar7 = fcntl(1,3);</pre>
+<pre>  if (iVar7 == -1) {</pre>
+<pre><span class="green">    open("/dev/null",1)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  iVar7 = fcntl(2,3);</pre>
+<pre>  if (iVar7 == -1) {</pre>
+<pre><span class="green">    open("/dev/null",1)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre><span class="green">  pipe((int *)&amp;DAT_0041bc20)</span></span>   //possible issue identified - semgrep</pre>
+<a class="reference" href="./0affa2eb7a49438f09a86e8bb551b518.html" title="./0affa2eb7a49438f09a86e8bb551b518.html" ><pre><span class="green">  signal(0x10,FUN_00405234)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<a class="reference" href="./0affa2eb7a49438f09a86e8bb551b518.html" title="./0affa2eb7a49438f09a86e8bb551b518.html" ><pre><span class="green">  signal(0x11,FUN_00405234)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<a class="reference" href="./0affa2eb7a49438f09a86e8bb551b518.html" title="./0affa2eb7a49438f09a86e8bb551b518.html" ><pre><span class="green">  signal(0xf,FUN_00405234)</span></span>   //possible issue identified - semgrep</pre></a>
+
+<pre>  DAT_0041bc10 = 0;</pre>
+<a class="reference" href="./e8f0594269b838b7bdf47a3d5d3f7d01.html" title="./e8f0594269b838b7bdf47a3d5d3f7d01.html" ><pre>  FUN_00404f6c(2);</pre></a>
+
+<pre>  local_30 = &amp;local_34c;</pre>
+<pre>  DAT_0041bc08 = 0;</pre>
+<pre>  sysinfo(local_30);</pre>
+<pre>  DAT_0041bc18 = local_34c.uptime;</pre>
+<pre>  local_2c = local_30c;</pre>
+<pre>  local_54 = &amp;local_398;</pre>
+<pre>  local_40 = &amp;local_384;</pre>
+<pre>  local_58 = local_197;</pre>
+<pre>  local_38 = acStack_36c;</pre>
+<pre>  local_4c = &amp;local_390;</pre>
+<pre>  local_48 = &amp;local_38c;</pre>
+<pre>  local_34 = (char *)&amp;local_35c;</pre>
+<pre>  local_3c = acStack_37c;</pre>
+<pre>  local_50 = &amp;local_394;</pre>
+<pre>  local_5c = 0;</pre>
+<pre>  local_60 = 0;</pre>
+<pre>  iVar7 = 0;</pre>
+<pre>  uVar16 = 0;</pre>
+<pre>switchD_00405920_default:</pre>
+<pre>  iVar14 = iVar7;</pre>
+<pre>  sysinfo(local_30);</pre>
+<pre>  local_384.tv_sec = DAT_0041bc18 - local_34c.uptime;</pre>
+<pre>  local_384.tv_usec = 0;</pre>
+<pre>  p_Var9 = local_2c;</pre>
+<pre>  do {</pre>
+<pre>    *p_Var9 = 0;</pre>
+<pre>    p_Var9 = p_Var9 + 1;</pre>
+<pre>  } while (&amp;_Stack_28c != p_Var9);</pre>
+<pre>  if (DAT_0041bc28 == 0) {</pre>
+<pre>LAB_00405848:</pre>
+<pre>    if (-1 &lt; (int)DAT_0041bc1c) goto LAB_004056ac;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    if ((int)DAT_0041bc1c &lt; 0) {</pre>
+<pre>      if (DAT_0041bc28 == 1) {</pre>
+<pre>        DAT_0041bc1c = listen_socket(0,0x44,PTR_DAT_0041b504);</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        DAT_0041bc1c = raw_socket(DAT_0041b518);</pre>
+<pre>      }</pre>
+<pre>      if ((int)DAT_0041bc1c &lt; 0) {</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>        FUN_004051c0(0);</pre></a>
+
+<pre>        goto LAB_00405848;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>LAB_004056ac:</pre>
+<pre>    local_54[(DAT_0041bc1c &gt;&gt; 5) + 0x23] =</pre>
+<pre>         local_54[(DAT_0041bc1c &gt;&gt; 5) + 0x23] | 1 &lt;&lt; (DAT_0041bc1c &amp; 0x1f);</pre>
+<pre>  }</pre>
+<pre>  local_54[(DAT_0041bc20 &gt;&gt; 5) + 0x23] =</pre>
+<pre>       local_54[(DAT_0041bc20 &gt;&gt; 5) + 0x23] | 1 &lt;&lt; (DAT_0041bc20 &amp; 0x1f);</pre>
+<pre>  iVar7 = iVar14;</pre>
+<pre>  if (local_384.tv_sec &lt; 1) {</pre>
+<pre>    sysinfo(local_30);</pre>
+<pre>    goto LAB_004058ec;</pre>
+<pre>  }</pre>
+<pre>  uVar23 = DAT_0041bc1c;</pre>
+<pre>  if ((int)DAT_0041bc1c &lt; (int)DAT_0041bc20) {</pre>
+<pre>    uVar23 = DAT_0041bc20;</pre>
+<pre>  }</pre>
+<pre>  iVar10 = select(uVar23 + 1,(fd_set *)local_2c,(fd_set *)0x0,(fd_set *)0x0,local_40);</pre>
+<pre>  sysinfo(local_30);</pre>
+<pre>  lVar4 = local_34c.uptime;</pre>
+<pre>  uVar23 = local_34c.uptime;</pre>
+<pre>  if (iVar10 == 0) goto LAB_004058ec;</pre>
+<pre>  if (iVar10 &lt; 1) {</pre>
+<pre>LAB_00405c9c:</pre>
+<pre>    if ((iVar10 != -1) || (piVar13 = __errno_location(), *piVar13 != 4))</pre>
+<pre>    goto switchD_00405920_default;</pre>
+<pre>LAB_00405cd8:</pre>
+<pre><span class="green">    sVar12 = read(DAT_0041bc20,local_50,4)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if (-1 &lt; sVar12) {</pre>
+<pre>      if (local_394 == 0x10) {</pre>
+<a class="reference" href="./ec7cc3faef30644d4cd97d752f69c8d6.html" title="./ec7cc3faef30644d4cd97d752f69c8d6.html" ><pre>        FUN_00404fd4();</pre></a>
+
+<pre>        goto switchD_00405920_default;</pre>
+<pre>      }</pre>
+<pre>      if (local_394 == 0x11) {</pre>
+<a class="reference" href="./f4d7121874e073ffd215e5048f3b4b71.html" title="./f4d7121874e073ffd215e5048f3b4b71.html" ><pre>        FUN_004050b0();</pre></a>
+
+<pre>        goto switchD_00405920_default;</pre>
+<pre>      }</pre>
+<pre>      if (local_394 == 0xf) {</pre>
+<a class="reference" href="./f4d7121874e073ffd215e5048f3b4b71.html" title="./f4d7121874e073ffd215e5048f3b4b71.html" ><pre>        FUN_004050b0();</pre></a>
+
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>        FUN_004051c0(0);</pre></a>
+
+<pre>        goto switchD_00405920_default;</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    if ((DAT_0041bc28 == 0) ||</pre>
+<pre>       ((local_54[(DAT_0041bc1c &gt;&gt; 5) + 0x23] &gt;&gt; (DAT_0041bc1c &amp; 0x1f) &amp; 1) == 0)) {</pre>
+<pre>      if ((local_54[(DAT_0041bc20 &gt;&gt; 5) + 0x23] &gt;&gt; (DAT_0041bc20 &amp; 0x1f) &amp; 1) == 0)</pre>
+<pre>      goto LAB_00405c9c;</pre>
+<pre>      goto LAB_00405cd8;</pre>
+<pre>    }</pre>
+<pre>    if (DAT_0041bc28 == 1) {</pre>
+<pre>      iVar10 = get_packet(&amp;_Stack_28c);</pre>
+<pre>      iVar2 = local_288;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      iVar10 = get_raw_packet(&amp;_Stack_28c);</pre>
+<pre>      iVar2 = local_288;</pre>
+<pre>    }</pre>
+<pre>    local_288 = iVar2;</pre>
+<pre>    if (iVar10 == -1) {</pre>
+<pre>      piVar13 = __errno_location();</pre>
+<pre>      if (*piVar13 == 4) goto switchD_00405920_caseD_5;</pre>
+<a class="reference" href="./e8f0594269b838b7bdf47a3d5d3f7d01.html" title="./e8f0594269b838b7bdf47a3d5d3f7d01.html" ><pre>      FUN_00404f6c(DAT_0041bc28);</pre></a>
+
+<pre>      goto switchD_00405920_default;</pre>
+<pre>    }</pre>
+<pre>    if (iVar10 &lt; 0) goto switchD_00405920_default;</pre>
+<pre>    if (iVar2 == iVar14) {</pre>
+<pre>      pcVar11 = (char *)get_option(&amp;_Stack_28c,0x35);</pre>
+<pre>      __in.s_addr = local_27c.s_addr;</pre>
+<pre>      iVar7 = iVar2;</pre>
+<pre>      if ((pcVar11 != (char *)0x0) &amp;&amp; (DAT_0041bc10 &lt; 7)) {</pre>
+<pre>        uVar19 = 1 &lt;&lt; (DAT_0041bc10 &amp; 0x1f);</pre>
+<pre>        if ((uVar19 &amp; 0x5a) != 0) {</pre>
+<pre>          if (*pcVar11 == '\x05') {</pre>
+<pre>            if ((DAT_0041bc10 != 1) ||</pre>
+<pre>               (iVar10 = arpping(local_27c.s_addr,local_27c.s_addr,&amp;DAT_0041b51c,PTR_DAT_0041b504),</pre>
+<pre>               iVar10 != 0)) {</pre>
+<pre>              uVar16 = get_option(&amp;_Stack_28c,0x33);</pre>
+<pre>              if (uVar16 == 0) {</pre>
+<pre>                local_398 = 0xe10;</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                uVar23 = uVar16 + 3 &amp; 3;</pre>
+<pre>                uVar19 = uVar16 &amp; 3;</pre>
+<pre>                uVar16 = (*(int *)((uVar16 + 3) - uVar23) &lt;&lt; (3 - uVar23) * 8 |</pre>
+<pre>                         uVar16 &amp; 0xffffffffU &gt;&gt; (uVar23 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar19) * 8 |</pre>
+<pre>                         *(uint *)(uVar16 - uVar19) &gt;&gt; uVar19 * 8;</pre>
+<pre>                local_398 = uVar16 &lt;&lt; 0x18 | uVar16 &gt;&gt; 0x18 | uVar16 &gt;&gt; 8 &amp; 0xff00 |</pre>
+<pre>                            (uVar16 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>              }</pre>
+<pre>              local_5c = local_398 &gt;&gt; 1;</pre>
+<pre>              local_60 = local_398 * 7 &gt;&gt; 3;</pre>
+<pre>              pcVar11 = inet_ntoa(DAT_0041bc14);</pre>
+<pre><span class="green">              pcVar11 = strdup(pcVar11)</span></span>   //possible issue identified - semgrep</pre>
+<pre>              pcVar17 = inet_ntoa(local_27c);</pre>
+<pre><span class="green">              pcVar17 = strdup(pcVar17)</span></span>   //possible issue identified - semgrep</pre>
+<pre>              syslog(0xe5,"DHCP: Client receive ACK from %s, IP=%s, Lease time=%d.",pcVar11,pcVar17,</pre>
+<pre>                     local_398);</pre>
+<pre>              free(pcVar11);</pre>
+<pre>              free(pcVar17);</pre>
+<pre>              DAT_0041bc18 = lVar4 + local_5c;</pre>
+<pre>              DAT_0041bc04.s_addr = local_27c.s_addr;</pre>
+<pre>              if (DAT_0041bc10 - 3 &lt; 2) {</pre>
+<pre>                pcVar11 = "renew";</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                pcVar11 = "bound";</pre>
+<pre>              }</pre>
+<pre>              run_script(&amp;_Stack_28c,pcVar11);</pre>
+<pre>              DAT_0041bc10 = 2;</pre>
+<a class="reference" href="./e8f0594269b838b7bdf47a3d5d3f7d01.html" title="./e8f0594269b838b7bdf47a3d5d3f7d01.html" ><pre>              FUN_00404f6c(0);</pre></a>
+
+<pre>              if (DAT_0041b501 != '\0') {</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>                FUN_004051c0(0);</pre></a>
+
+<pre>              }</pre>
+<pre>              uVar16 = lVar4;</pre>
+<pre>              if (client_config == '\0') {</pre>
+<a class="reference" href="./f5ad6d9bf52b25405d1f757930da9a12.html" title="./f5ad6d9bf52b25405d1f757930da9a12.html" ><pre>                FUN_00404f00();</pre></a>
+
+<pre>              }</pre>
+<pre>              goto switchD_00405920_default;</pre>
+<pre>            }</pre>
+<pre>            pcVar11 = inet_ntoa(__in);</pre>
+<pre>            syslog(0xe5,"DHCP: Client receive ACK, but the address (%s) is used by another host.",</pre>
+<pre>                   pcVar11);</pre>
+<pre>            send_decline(iVar14,DAT_0041bc14.s_addr,__in.s_addr);</pre>
+<pre>            DAT_0041bc18 = lVar4;</pre>
+<pre>            DAT_0041bc10 = 0;</pre>
+<pre>            DAT_0041bc04.s_addr = 0;</pre>
+<pre>            DAT_0041bc08 = 0;</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            if ((*pcVar11 != '\x06') || (uVar23 = get_option(&amp;_Stack_28c,0x36), uVar23 == 0))</pre>
+<pre>            goto switchD_00405920_default;</pre>
+<pre>            uVar19 = uVar23 + 3 &amp; 3;</pre>
+<pre>            uVar1 = uVar23 &amp; 3;</pre>
+<pre>            uVar23 = (*(int *)((uVar23 + 3) - uVar19) &lt;&lt; (3 - uVar19) * 8 |</pre>
+<pre>                     uVar23 &amp; 0xffffffffU &gt;&gt; (uVar19 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar1) * 8 |</pre>
+<pre>                     *(uint *)(uVar23 - uVar1) &gt;&gt; uVar1 * 8;</pre>
+<pre>            *local_44 = uVar23;</pre>
+<pre>            if (uVar23 != DAT_0041bc14.s_addr) goto switchD_00405920_default;</pre>
+<pre>            syslog(0xe5,"DHCP: Client receive NAK.");</pre>
+<pre>            run_script(&amp;_Stack_28c,&amp;DAT_0040a510);</pre>
+<pre>            if (DAT_0041bc10 != 1) {</pre>
+<pre>              run_script(0,"deconfig");</pre>
+<pre>            }</pre>
+<pre>            DAT_0041bc18 = lVar4;</pre>
+<pre>            DAT_0041bc10 = 0;</pre>
+<pre>            DAT_0041bc04.s_addr = 0;</pre>
+<pre>            DAT_0041bc08 = 0;</pre>
+<a class="reference" href="./e8f0594269b838b7bdf47a3d5d3f7d01.html" title="./e8f0594269b838b7bdf47a3d5d3f7d01.html" ><pre>            FUN_00404f6c(2);</pre></a>
+
+<pre>          }</pre>
+<pre>          sleep(3);</pre>
+<pre>          goto switchD_00405920_default;</pre>
+<pre>        }</pre>
+<pre>        if ((((uVar19 &amp; 1) != 0) &amp;&amp; (*pcVar11 == '\x02')) &amp;&amp;</pre>
+<pre>           (piVar15 = (in_addr_t *)get_option(&amp;_Stack_28c,0x36), piVar15 != (in_addr_t *)0x0)) {</pre>
+<pre>          if (local_64 != 0) {</pre>
+<pre>            puts("yes");</pre>
+<pre>            uVar8 = local_35c;</pre>
+<pre>            uVar5 = local_358;</pre>
+<pre>            uVar6 = local_354;</pre>
+<pre>            if (local_68 != 0) {</pre>
+<pre>              local_35c = 0x2e302e30;</pre>
+<pre>              local_354 = 0x30;</pre>
+<pre>              local_358 = 0x35322e30;</pre>
+<pre>              local_352 = 0;</pre>
+<pre>              local_350 = 0;</pre>
+<pre>              local_34e = 0;</pre>
+<pre>              DAT_0041bc14.s_addr = *piVar15;</pre>
+<pre>              uVar8 = 0x2e302e30;</pre>
+<pre>              uVar5 = 0x35322e30;</pre>
+<pre>              uVar6 = 0x30;</pre>
+<pre>              if (DAT_0041b675 != '\0') {</pre>
+<pre>                iVar7 = 1;</pre>
+<pre>                pbVar20 = local_58;</pre>
+<pre>                do {</pre>
+<pre>                  if ((pbVar20[-5] == 1) &amp;&amp; (pbVar20[-4] == 4)) {</pre>
+<pre>                    sprintf(local_38,"%d.%d.%d.%d",(uint)pbVar20[-3],(uint)pbVar20[-2],</pre>
+<pre><span class="green">                            (uint)pbVar20[-1],(uint)*pbVar20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                    if (pbVar20[-3] != 0) {</pre>
+<pre>                      if (pbVar20[-2] == 0) {</pre>
+<pre>                        if ((pbVar20[-1] == 0) &amp;&amp; (*pbVar20 == 0)) {</pre>
+<pre>                          printf("%d\n",8);</pre>
+<pre>                        }</pre>
+<pre>                      }</pre>
+<pre>                      else if (pbVar20[-1] == 0) {</pre>
+<pre>                        if (*pbVar20 == 0) {</pre>
+<pre>                          printf("%d\n",0x10);</pre>
+<pre>                        }</pre>
+<pre>                      }</pre>
+<pre>                      else if (*pbVar20 == 0) {</pre>
+<pre>                        printf("%d\n",0x18);</pre>
+<pre>                      }</pre>
+<pre>                      else {</pre>
+<pre>                        printf("%d\n",0x20);</pre>
+<pre>                      }</pre>
+<pre>                    }</pre>
+<pre>                    local_4c-&gt;s_addr = 0;</pre>
+<pre>                    inet_aton(local_38,local_4c);</pre>
+<pre>                    local_48-&gt;s_addr = 0;</pre>
+<pre>                    inet_aton(local_34,local_48);</pre>
+<pre>                    DAT_0041bc0c = local_27c.s_addr;</pre>
+<pre>                    pcVar11 = inet_ntoa((in_addr)(local_27c.s_addr &amp; local_390.s_addr |</pre>
+<pre>                                                 local_38c.s_addr));</pre>
+<pre><span class="green">                    strcpy(local_3c,pcVar11)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                    puts(local_3c);</pre>
+<pre>                  }</pre>
+<pre>                  iVar14 = iVar7 * 0x16;</pre>
+<pre>                  iVar7 = iVar7 + 1;</pre>
+<pre>                  pbVar20 = pbVar20 + 1;</pre>
+<pre>                  uVar8 = local_35c;</pre>
+<pre>                  uVar5 = local_358;</pre>
+<pre>                  uVar6 = local_354;</pre>
+<pre>                } while ((&amp;DAT_0041b675)[iVar14] != '\0');</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>            local_354 = uVar6;</pre>
+<pre>            local_358 = uVar5;</pre>
+<pre>            local_35c = uVar8;</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>            FUN_004051c0(0);</pre></a>
+
+<pre>          }</pre>
+<pre>          iVar7 = local_288;</pre>
+<pre>          DAT_0041bc14.s_addr = *piVar15;</pre>
+<pre>          DAT_0041bc04.s_addr = local_27c.s_addr;</pre>
+<pre>          pcVar11 = inet_ntoa(DAT_0041bc14);</pre>
+<pre>          syslog(0xe5,"DHCP: Client receive OFFER from %s.",pcVar11);</pre>
+<pre>          DAT_0041bc10 = 1;</pre>
+<pre>          DAT_0041bc08 = 0;</pre>
+<pre>          DAT_0041bc18 = uVar23;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      goto switchD_00405920_default;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  goto switchD_00405920_caseD_5;</pre>
+<pre>switchD_004053b8_caseD_76:</pre>
+<pre>  printf("udhcpcd, version %s\n\n","0.9.8");</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>  FUN_004051c0(0);</pre></a>
+
+<pre>  goto LAB_0040533c;</pre>
+<pre>LAB_004058ec:</pre>
+<pre>  lVar4 = local_34c.uptime;</pre>
+<pre>  switch(DAT_0041bc10) {</pre>
+<pre>  case 0:</pre>
+<pre>    if ((int)DAT_0041bc08 &lt; DAT_0041b528) {</pre>
+<pre>      if (DAT_0041bc08 == 0) {</pre>
+<pre>        iVar14 = random_xid();</pre>
+<pre>      }</pre>
+<pre>      send_discover(iVar14,DAT_0041bc04.s_addr);</pre>
+<pre>      syslog(0xe5,"DHCP: Client send DISCOVER.");</pre>
+<pre>      DAT_0041bc18 = DAT_0041b524 &lt;&lt; (DAT_0041bc08 &amp; 0x1f);</pre>
+<pre>      if (0x40 &lt; DAT_0041bc18) {</pre>
+<pre>        DAT_0041bc18 = 0x40;</pre>
+<pre>      }</pre>
+<pre>      DAT_0041bc18 = lVar4 + DAT_0041bc18;</pre>
+<pre>      DAT_0041bc08 = DAT_0041bc08 + 1;</pre>
+<pre>      iVar7 = iVar14;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      if (local_64 != 0) {</pre>
+<pre>        puts("no");</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>        FUN_004051c0(1);</pre></a>
+
+<pre>      }</pre>
+<pre>      if (DAT_0041b503 == '\0') {</pre>
+<pre>        if (DAT_0041b502 != '\0') {</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>          FUN_004051c0(1);</pre></a>
+
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<a class="reference" href="./f5ad6d9bf52b25405d1f757930da9a12.html" title="./f5ad6d9bf52b25405d1f757930da9a12.html" ><pre>        FUN_00404f00();</pre></a>
+
+<pre>      }</pre>
+<pre>      DAT_0041bc08 = 0;</pre>
+<pre>      if (DAT_0041b52c == 0) {</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>        FUN_004051c0(1);</pre></a>
+
+<pre>      }</pre>
+<pre>      DAT_0041bc18 = DAT_0041b52c + lVar4;</pre>
+<pre>    }</pre>
+<pre>    goto switchD_00405920_default;</pre>
+<pre>  case 1:</pre>
+<pre>  case 6:</pre>
+<pre>    if ((int)DAT_0041bc08 &lt; DAT_0041b528) {</pre>
+<pre>      if (DAT_0041bc10 == 6) {</pre>
+<pre>        send_renew(iVar14,DAT_0041bc14.s_addr,DAT_0041bc04.s_addr);</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        send_selecting(iVar14,DAT_0041bc14.s_addr,DAT_0041bc04.s_addr);</pre>
+<pre>      }</pre>
+<pre>      pcVar11 = inet_ntoa(DAT_0041bc04);</pre>
+<pre><span class="green">      pcVar11 = strdup(pcVar11)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      pcVar17 = inet_ntoa(DAT_0041bc14);</pre>
+<pre><span class="green">      pcVar17 = strdup(pcVar17)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      syslog(0xe5,"DHCP: Client send REQUEST, Request IP %s from %s.",pcVar11,pcVar17);</pre>
+<pre>      free(pcVar11);</pre>
+<pre>      free(pcVar17);</pre>
+<pre>      DAT_0041bc18 = DAT_0041b524 &lt;&lt; (DAT_0041bc08 &amp; 0x1f);</pre>
+<pre>      if (0x40 &lt; DAT_0041bc18) {</pre>
+<pre>        DAT_0041bc18 = 0x40;</pre>
+<pre>      }</pre>
+<pre>      DAT_0041bc08 = DAT_0041bc08 + 1;</pre>
+<pre>      DAT_0041bc18 = lVar4 + DAT_0041bc18;</pre>
+<pre>      goto switchD_00405920_default;</pre>
+<pre>    }</pre>
+<pre>    if (DAT_0041bc10 == 6) {</pre>
+<pre>      run_script(0,"deconfig");</pre>
+<pre>    }</pre>
+<pre>    if (DAT_0041b52c == 0) {</pre>
+<a class="reference" href="./685fdfa6d2eaa75b0db522526f479005.html" title="./685fdfa6d2eaa75b0db522526f479005.html" ><pre>      FUN_004051c0(1);</pre></a>
+
+<pre>    }</pre>
+<pre>    DAT_0041bc10 = 0;</pre>
+<pre>    break;</pre>
+<pre>  case 2:</pre>
+<pre>    DAT_0041bc10 = 3;</pre>
+<a class="reference" href="./e8f0594269b838b7bdf47a3d5d3f7d01.html" title="./e8f0594269b838b7bdf47a3d5d3f7d01.html" ><pre>    FUN_00404f6c(1);</pre></a>
+
+<pre>  case 3:</pre>
+<pre>    uVar23 = local_60 - local_5c;</pre>
+<pre>    if (local_398 / 0x3840 + 1 &lt; uVar23) {</pre>
+<pre>      send_renew(iVar14,DAT_0041bc14.s_addr,DAT_0041bc04.s_addr);</pre>
+<pre>      local_5c = local_5c + (uVar23 &gt;&gt; 1);</pre>
+<pre>      DAT_0041bc18 = local_5c + uVar16;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      DAT_0041bc10 = 4;</pre>
+<pre>      DAT_0041bc18 = lVar4 + uVar23;</pre>
+<pre>    }</pre>
+<pre>    goto switchD_00405920_default;</pre>
+<pre>  case 4:</pre>
+<pre>    if (local_398 / 0x3840 + 1 &lt; local_398 - local_60) {</pre>
+<pre>      send_renew(iVar14,0,DAT_0041bc04.s_addr);</pre>
+<pre>      local_60 = local_60 + (local_398 - local_60 &gt;&gt; 1);</pre>
+<pre>      DAT_0041bc18 = local_60 + uVar16;</pre>
+<pre>      goto switchD_00405920_default;</pre>
+<pre>    }</pre>
+<pre>    DAT_0041bc10 = 0;</pre>
+<pre>    run_script(0,"deconfig");</pre>
+<pre>    break;</pre>
+<pre>  case 5:</pre>
+<pre>switchD_00405920_caseD_5:</pre>
+<pre>    goto switchD_00405920_default;</pre>
+<pre>  case 7:</pre>
+<pre>    DAT_0041bc18 = 0x7fffffff;</pre>
+<pre>  default:</pre>
+<pre>    goto switchD_00405920_default;</pre>
+<pre>  }</pre>
+<pre>  DAT_0041bc18 = lVar4;</pre>
+<pre>  DAT_0041bc08 = 0;</pre>
+<a class="reference" href="./e8f0594269b838b7bdf47a3d5d3f7d01.html" title="./e8f0594269b838b7bdf47a3d5d3f7d01.html" ><pre>  FUN_00404f6c(2);</pre></a>
+
+<pre>  goto switchD_00405920_default;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

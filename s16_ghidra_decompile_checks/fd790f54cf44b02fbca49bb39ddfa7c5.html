@@ -1,0 +1,820 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./426bdae583e9ce465943ab0b319f7fb4.html" title="./426bdae583e9ce465943ab0b319f7fb4.html" >&laquo; Back to 426bdae583e9ce465943ab0b319f7fb4</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>int Parser_LoadDocument(int *param_1,char *param_2,int param_3)</pre>
+<br />
+<pre>{</pre>
+<pre>  undefined4 *puVar1;</pre>
+<pre>  undefined *__s2;</pre>
+<pre>  int *__s;</pre>
+<pre>  FILE *__stream;</pre>
+<pre>  size_t sVar2;</pre>
+<pre>  char *pcVar3;</pre>
+<pre>  void *pvVar4;</pre>
+<pre>  undefined4 *puVar5;</pre>
+<pre>  int iVar6;</pre>
+<pre>  undefined4 uVar7;</pre>
+<pre>  size_t sVar8;</pre>
+<pre>  char cVar9;</pre>
+<pre>  int iVar10;</pre>
+<pre>  void *pvVar11;</pre>
+<pre>  undefined4 *puVar12;</pre>
+<pre>  char *pcVar13;</pre>
+<pre>  int iVar14;</pre>
+<pre>  char *pcVar15;</pre>
+<pre>  int *piVar16;</pre>
+<pre>  int local_a8;</pre>
+<pre>  undefined4 local_a4;</pre>
+<pre>  undefined4 local_a0;</pre>
+<pre>  undefined4 local_9c;</pre>
+<pre>  char *local_98;</pre>
+<pre>  undefined4 local_94;</pre>
+<pre>  undefined4 *local_90;</pre>
+<pre>  char *local_8c;</pre>
+<pre>  char *local_88;</pre>
+<pre>  uint local_84;</pre>
+<pre>  char *local_7c;</pre>
+<pre>  char *local_78;</pre>
+<pre>  char *local_58;</pre>
+<pre>  char *local_54;</pre>
+<pre>  char *local_50;</pre>
+<pre>  char *local_4c;</pre>
+<pre>  char *local_48;</pre>
+<pre>  char *local_44;</pre>
+<pre>  char *local_40;</pre>
+<pre>  char *local_3c;</pre>
+<pre>  char *local_38;</pre>
+<pre>  undefined4 *local_34;</pre>
+<pre>  undefined4 *local_30;</pre>
+<pre>  </pre>
+<pre><span class="green">  __s = (int *)malloc(0x40)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (__s == (int *)0x0) {</pre>
+<pre>    return 0x66;</pre>
+<pre>  }</pre>
+<pre><span class="green">  memset(__s,0,0x40)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  piVar16 = __s + 7;</pre>
+<pre>  ixml_membuf_init(piVar16);</pre>
+<pre>  ixml_membuf_init(__s + 3);</pre>
+<pre>  if (param_3 == 0) {</pre>
+<pre>    pcVar3 = strdup(param_2);</pre>
+<pre>    *__s = (int)pcVar3;</pre>
+<pre>    if (pcVar3 == (char *)0x0) {</pre>
+<pre>      iVar14 = 0x66;</pre>
+<pre>      goto LAB_004194bc;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre><span class="green">    __stream = fopen(param_2,"rb")</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if (__stream == (FILE *)0x0) {</pre>
+<pre>      iVar14 = 0x65;</pre>
+<pre>      goto LAB_004194bc;</pre>
+<pre>    }</pre>
+<pre>    fseek(__stream,0,2);</pre>
+<pre>    sVar2 = ftell(__stream);</pre>
+<pre>    if (sVar2 == 0) {</pre>
+<pre>      fclose(__stream);</pre>
+<pre>      iVar14 = 0xc;</pre>
+<pre>      goto LAB_004194bc;</pre>
+<pre>    }</pre>
+<pre><span class="green">    pvVar4 = malloc(sVar2 + 1)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    *__s = (int)pvVar4;</pre>
+<pre>    if (pvVar4 == (void *)0x0) {</pre>
+<pre>      fclose(__stream);</pre>
+<pre>      iVar14 = 0x66;</pre>
+<pre>      goto LAB_004194bc;</pre>
+<pre>    }</pre>
+<pre>    fseek(__stream,0,0);</pre>
+<pre><span class="green">    sVar2 = fread((void *)*__s,1,sVar2,__stream)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    *(undefined1 *)(*__s + sVar2) = 0;</pre>
+<pre>    fclose(__stream);</pre>
+<pre>  }</pre>
+<pre>  __s[1] = *__s;</pre>
+<pre>  local_a8 = 0;</pre>
+<pre>  local_a4 = 0;</pre>
+<pre>  local_a0 = 0;</pre>
+<pre>  ixmlNode_init(&amp;local_8c);</pre>
+<pre>  iVar14 = ixmlDocument_createDocumentEx(&amp;local_a8);</pre>
+<pre>  if (iVar14 == 0) {</pre>
+<pre>    __s[0xd] = local_a8;</pre>
+<a class="reference" href="./3aa6a7580628bda96fafbf98a8d18ace.html" title="./3aa6a7580628bda96fafbf98a8d18ace.html" ><pre>    FUN_004181e0(__s);</pre></a>
+
+<pre>    local_58 = PTR_s_&lt;_xml_004303c0;</pre>
+<pre>    sVar2 = strlen(PTR_s_&lt;_xml_004303c0);</pre>
+<pre><span class="green">    iVar14 = strncmp((char *)__s[1],local_58,sVar2)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if (iVar14 == 0) {</pre>
+<a class="reference" href="./5f9b5d6cef4a91a3fd6f5fc74875d21c.html" title="./5f9b5d6cef4a91a3fd6f5fc74875d21c.html" ><pre>      iVar14 = FUN_0041879c(__s + 1,PTR_s__&gt;_004303cc);</pre></a>
+
+<a class="reference" href="./3aa6a7580628bda96fafbf98a8d18ace.html" title="./3aa6a7580628bda96fafbf98a8d18ace.html" ><pre>      FUN_004181e0(__s);</pre></a>
+
+<pre>      if (iVar14 != 0) goto LAB_0041949c;</pre>
+<pre>    }</pre>
+<a class="reference" href="./cf03ee7f0252e5920d7fa000f9f0e7d2.html" title="./cf03ee7f0252e5920d7fa000f9f0e7d2.html" ><pre>    iVar14 = FUN_00418998(__s);</pre></a>
+
+<pre>    __s2 = PTR_s_&lt;_DOCTYPE_004303c4;</pre>
+<pre>    if (iVar14 == 0) {</pre>
+<pre>      pcVar13 = (char *)__s[1];</pre>
+<pre>      sVar2 = strlen(PTR_s_&lt;_DOCTYPE_004303c4);</pre>
+<pre><span class="green">      iVar14 = strncmp(pcVar13,__s2,sVar2)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      pcVar3 = pcVar13 + 1;</pre>
+<pre>      if (iVar14 == 0) {</pre>
+<pre>        __s[1] = (int)pcVar3;</pre>
+<pre>        if (pcVar3 != (char *)0x0) {</pre>
+<pre>          iVar10 = 1;</pre>
+<pre><span class="green">          cVar9 = pcVar13[1]</span></span>   //possible issue identified - semgrep</pre>
+<pre>          while (cVar9 != '\0') {</pre>
+<pre>            if (cVar9 == '&lt;') {</pre>
+<pre>              iVar10 = iVar10 + 1;</pre>
+<pre>            }</pre>
+<pre>            else if (cVar9 == '&gt;') {</pre>
+<pre>              iVar10 = iVar10 + -1;</pre>
+<pre>            }</pre>
+<pre>            else if ((cVar9 == '\"') &amp;&amp; (pcVar3 = strchr(pcVar3 + 1,0x22), pcVar3 == (char *)0x0)) {</pre>
+<pre>              iVar14 = 0xc;</pre>
+<pre>              goto LAB_0041949c;</pre>
+<pre>            }</pre>
+<pre>            pcVar3 = pcVar3 + 1;</pre>
+<pre>            if (pcVar3 == (char *)0x0) {</pre>
+<pre>              iVar14 = 0xc;</pre>
+<pre>              if (iVar10 != 0) goto LAB_0041949c;</pre>
+<pre>LAB_004196dc:</pre>
+<pre>              __s[1] = (int)pcVar3;</pre>
+<pre>              goto LAB_004196e0;</pre>
+<pre>            }</pre>
+<pre>            if (iVar10 == 0) goto LAB_004196dc;</pre>
+<pre>            cVar9 = *pcVar3;</pre>
+<pre>          }</pre>
+<pre>          goto LAB_00419618;</pre>
+<pre>        }</pre>
+<pre>LAB_0041986c:</pre>
+<pre>        iVar14 = 0x6a;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>LAB_004196e0:</pre>
+<a class="reference" href="./cf03ee7f0252e5920d7fa000f9f0e7d2.html" title="./cf03ee7f0252e5920d7fa000f9f0e7d2.html" ><pre>        iVar14 = FUN_00418998(__s);</pre></a>
+
+<pre>        if (iVar14 == 0) {</pre>
+<pre>          local_48 = PTR_s_&lt;_[CDATA[_004303e8;</pre>
+<pre>          local_4c = PTR_DAT_004303ec;</pre>
+<pre>          local_44 = PTR_DAT_004303d0;</pre>
+<pre>          local_40 = PTR_DAT_004303d8;</pre>
+<pre>          local_54 = PTR_s_&lt;_xml__004303d4;</pre>
+<pre>          local_50 = PTR_s__&gt;_004303cc;</pre>
+<pre>          local_3c = PTR_DAT_004303e0;</pre>
+<pre>          local_38 = PTR_s__&gt;_004303e4;</pre>
+<pre>          local_34 = &amp;local_9c;</pre>
+<pre>          local_30 = &amp;local_a4;</pre>
+<pre>          iVar14 = 0;</pre>
+<pre>LAB_00419764:</pre>
+<pre>          ixmlNode_init(&amp;local_8c);</pre>
+<pre>          if (*(char *)__s[1] == '\0') goto code_r0x0041978c;</pre>
+<pre>          if (__s[0xe] == 2) {</pre>
+<pre>            __s[2] = __s[1];</pre>
+<a class="reference" href="./3aa6a7580628bda96fafbf98a8d18ace.html" title="./3aa6a7580628bda96fafbf98a8d18ace.html" ><pre>            FUN_004181e0(__s);</pre></a>
+
+<pre>            pcVar3 = (char *)__s[1];</pre>
+<pre>            if (*pcVar3 != '\0') {</pre>
+<pre>              if (*pcVar3 == '&lt;') {</pre>
+<pre>                local_98 = pcVar3;</pre>
+<pre>                sVar2 = strlen(local_48);</pre>
+<pre>                iVar10 = strncmp(pcVar3,local_48,sVar2);</pre>
+<pre>                pcVar15 = pcVar3 + sVar2;</pre>
+<pre>                pcVar13 = pcVar15;</pre>
+<pre>                if (iVar10 == 0) {</pre>
+<pre>                  while( true ) {</pre>
+<pre>                    iVar10 = (int)*pcVar13;</pre>
+<pre>                    if (((((1 &lt; iVar10 - 9U) &amp;&amp; (iVar10 != 0xd)) &amp;&amp; (0xd7df &lt; iVar10 - 0x20U)) &amp;&amp;</pre>
+<pre>                        ((0x1ffd &lt; iVar10 - 0xe000U &amp;&amp; (0xfffff &lt; iVar10 - 0x10000U)))) ||</pre>
+<pre>                       (iVar10 == 0x30)) break;</pre>
+<pre>                    sVar2 = strlen(local_4c);</pre>
+<pre>                    iVar6 = strncmp(pcVar13,local_4c,sVar2);</pre>
+<pre>                    if (iVar6 == 0) break;</pre>
+<pre>                    pcVar13 = pcVar13 + 1;</pre>
+<pre>                  }</pre>
+<pre>                  sVar2 = (int)pcVar13 - (int)pcVar15;</pre>
+<pre>                  if ((((int)sVar2 &lt; 1) || (iVar10 == 0x30)) ||</pre>
+<pre>                     (local_88 = (char *)malloc(sVar2 + 1), local_88 == (char *)0x0))</pre>
+<pre>                  goto LAB_0041986c;</pre>
+<pre>                  strncpy(local_88,pcVar15,sVar2);</pre>
+<pre>                  local_88[sVar2] = '\0';</pre>
+<pre>                  local_8c = strdup("#cdata-section");</pre>
+<pre>                  if (local_8c == (char *)0x0) goto LAB_0041986c;</pre>
+<pre>                  local_84 = 4;</pre>
+<pre>                  sVar2 = strlen(local_4c);</pre>
+<pre>                  local_98 = pcVar13 + sVar2;</pre>
+<pre>                  __s[1] = (int)local_98;</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  sVar2 = strlen(local_44);</pre>
+<pre>                  iVar10 = strncmp(pcVar3,local_44,sVar2);</pre>
+<pre>                  if (iVar10 == 0) {</pre>
+<a class="reference" href="./e05d6d69233fe6a103a2516c2f4e7cb0.html" title="./e05d6d69233fe6a103a2516c2f4e7cb0.html" ><pre>                    iVar10 = FUN_004188ac(&amp;local_98);</pre></a>
+
+<pre>                    pcVar13 = local_98;</pre>
+<pre>                    if (iVar10 != 0) goto LAB_0041986c;</pre>
+<pre>                  }</pre>
+<pre>                  else {</pre>
+<pre>                    sVar2 = strlen(local_40);</pre>
+<pre>                    iVar10 = strncmp(pcVar3,local_40,sVar2);</pre>
+<pre>                    if (iVar10 != 0) {</pre>
+<pre>                      __s[0xe] = 0;</pre>
+<pre>                      goto LAB_00419a34;</pre>
+<pre>                    }</pre>
+<pre>                    sVar8 = strlen(local_58);</pre>
+<pre>                    iVar10 = strncasecmp(pcVar3,local_58,sVar8);</pre>
+<pre>                    if (iVar10 == 0) goto LAB_0041986c;</pre>
+<pre>                    sVar8 = strlen(local_54);</pre>
+<pre>                    iVar10 = strncasecmp(pcVar3,local_54,sVar8);</pre>
+<pre>                    if ((iVar10 == 0) ||</pre>
+<pre>                       ((iVar10 = strncasecmp(pcVar3,local_40,sVar2), pcVar13 = local_98,</pre>
+<pre>                        iVar10 == 0 &amp;&amp;</pre>
+<pre>                        ((pcVar15 = strstr(pcVar3,local_50), pcVar15 == (char *)0x0 ||</pre>
+<pre>                         (pcVar13 = pcVar15 + sVar2, pcVar3 == pcVar15)))))) goto LAB_0041986c;</pre>
+<pre>                  }</pre>
+<pre>                  local_98 = pcVar13;</pre>
+<pre>                  __s[1] = (int)local_98;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                pcVar3 = (char *)__s[2];</pre>
+<pre>                __s[1] = (int)pcVar3;</pre>
+<pre>                cVar9 = *pcVar3;</pre>
+<pre>                while (local_98 = pcVar3, cVar9 != '&lt;') {</pre>
+<pre>                  iVar10 = strncmp(pcVar3,"]]&gt;",3);</pre>
+<pre>                  if (iVar10 == 0) goto LAB_0041986c;</pre>
+<pre>                  if (cVar9 == '\0') goto LAB_00419f74;</pre>
+<pre>                  pcVar3 = pcVar3 + 1;</pre>
+<pre>                  cVar9 = *pcVar3;</pre>
+<pre>                }</pre>
+<pre>                iVar10 = strncmp(pcVar3,"]]&gt;",3);</pre>
+<pre>                if (iVar10 == 0) goto LAB_0041986c;</pre>
+<pre>LAB_00419f74:</pre>
+<pre>                iVar10 = __s[1];</pre>
+<pre>                ixml_membuf_destroy(piVar16);</pre>
+<a class="reference" href="./89f1d87e5e7912643ea1af56d2c8b8fa.html" title="./89f1d87e5e7912643ea1af56d2c8b8fa.html" ><pre>                iVar6 = FUN_00418b58(__s,__s[1],(int)pcVar3 - iVar10);</pre></a>
+
+<pre>                if (((iVar6 != 0) || ((char *)__s[7] == (char *)0x0)) ||</pre>
+<pre>                   ((local_88 = strdup((char *)__s[7]), local_88 == (char *)0x0 ||</pre>
+<pre>                    (local_8c = strdup("#text"), local_8c == (char *)0x0)))) goto LAB_0041986c;</pre>
+<pre>                local_84 = 3;</pre>
+<pre>                __s[1] = __s[1] + ((int)pcVar3 - iVar10);</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<a class="reference" href="./3aa6a7580628bda96fafbf98a8d18ace.html" title="./3aa6a7580628bda96fafbf98a8d18ace.html" ><pre>            FUN_004181e0(__s);</pre></a>
+
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>            iVar10 = FUN_00419158(__s);</pre></a>
+
+<pre>            if (((iVar10 == 0) &amp;&amp; (__s[0xc] == 0)) &amp;&amp; (*(char *)__s[1] == '\0')) goto LAB_00419a34;</pre>
+<pre>            if (__s[8] == 0) goto LAB_0041986c;</pre>
+<pre>            pcVar3 = (char *)__s[7];</pre>
+<pre>            cVar9 = *pcVar3;</pre>
+<pre>            if (cVar9 == '&gt;') goto LAB_00419a34;</pre>
+<pre>            iVar10 = strcmp(pcVar3,local_3c);</pre>
+<pre>            if (iVar10 == 0) {</pre>
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>              iVar10 = FUN_00419158(__s);</pre></a>
+
+<pre>              iVar14 = 0x6a;</pre>
+<pre>              if (((iVar10 == 0) || ((char *)__s[7] == (char *)0x0)) ||</pre>
+<pre>                 (local_8c = strdup((char *)__s[7]), local_8c == (char *)0x0)) goto LAB_0041949c;</pre>
+<pre>              local_88 = (char *)0x0;</pre>
+<pre>              local_84 = 1;</pre>
+<a class="reference" href="./3aa6a7580628bda96fafbf98a8d18ace.html" title="./3aa6a7580628bda96fafbf98a8d18ace.html" ><pre>              FUN_004181e0(__s);</pre></a>
+
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>              iVar14 = FUN_00419158(__s);</pre></a>
+
+<pre>              if (((iVar14 == 0) || ((char *)__s[7] == (char *)0x0)) ||</pre>
+<pre>                 (iVar14 = strcmp((char *)__s[7],"&gt;"), iVar14 != 0)) goto LAB_0041986c;</pre>
+<pre>              if (local_84 == 1) {</pre>
+<pre>LAB_00419b78:</pre>
+<pre>                puVar12 = (undefined4 *)__s[0xc];</pre>
+<pre>                iVar14 = strcmp((char *)*puVar12,local_8c);</pre>
+<pre>                if (iVar14 != 0) goto LAB_00419618;</pre>
+<pre>                __s[0xc] = puVar12[4];</pre>
+<a class="reference" href="./ed792b9eeb51d5fd4dbc993f82a8f4fc.html" title="./ed792b9eeb51d5fd4dbc993f82a8f4fc.html" ><pre>                FUN_004184ac(puVar12);</pre></a>
+
+<pre>                pvVar4 = (void *)puVar12[3];</pre>
+<pre>                while (pvVar4 != (void *)0x0) {</pre>
+<pre>                  pvVar11 = *(void **)((int)pvVar4 + 8);</pre>
+<a class="reference" href="./23249c1237afd9ceb7afe8d91094ab9f.html" title="./23249c1237afd9ceb7afe8d91094ab9f.html" ><pre>                  FUN_00418550(pvVar4);</pre></a>
+
+<pre>                  free(pvVar4);</pre>
+<pre>                  pvVar4 = pvVar11;</pre>
+<pre>                }</pre>
+<pre>                free(puVar12);</pre>
+<pre>              }</pre>
+<pre>              puVar12 = (undefined4 *)__s[0xd];</pre>
+<pre>              iVar14 = strcmp(local_8c,(char *)*puVar12);</pre>
+<pre>              if (iVar14 != 0) goto LAB_00419618;</pre>
+<pre>              __s[0xd] = puVar12[7];</pre>
+<pre>              __s[0xe] = 2;</pre>
+<pre>              iVar14 = 0;</pre>
+<pre>              goto LAB_00419a58;</pre>
+<pre>            }</pre>
+<pre>            if (cVar9 == '&lt;') {</pre>
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>              iVar10 = FUN_00419158(__s);</pre></a>
+
+<pre>              if ((((iVar10 != 0) &amp;&amp; ((char *)__s[7] != (char *)0x0)) &amp;&amp;</pre>
+<pre>                  (local_8c = strdup((char *)__s[7]), local_8c != (char *)0x0)) &amp;&amp;</pre>
+<pre>                 ((iVar10 = ixml_membuf_assign_str(__s + 3,local_8c), iVar10 == 0 &amp;&amp;</pre>
+<pre>                  (iVar10 = Parser_setNodePrefixAndLocalName(&amp;local_8c), iVar10 == 0)))) {</pre>
+<pre>                local_84 = 1;</pre>
+<pre>                __s[2] = __s[1];</pre>
+<pre>                local_88 = (char *)0x0;</pre>
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>                iVar10 = FUN_00419158(__s);</pre></a>
+
+<pre>                if (iVar10 != 0) {</pre>
+<pre>                  pcVar3 = (char *)__s[7];</pre>
+<pre>                  iVar10 = strcmp(pcVar3,"/&gt;");</pre>
+<pre>                  if (iVar10 == 0) {</pre>
+<pre>                    __s[0xe] = 0;</pre>
+<pre>                    __s[1] = __s[2];</pre>
+<pre>                  }</pre>
+<pre>                  else {</pre>
+<pre>                    iVar10 = strcmp(pcVar3,"&gt;");</pre>
+<pre>                    if (iVar10 == 0) goto LAB_0041a694;</pre>
+<pre>                    __s[0xe] = 1;</pre>
+<pre>                    __s[1] = __s[2];</pre>
+<pre>                  }</pre>
+<pre>                  goto LAB_00419a34;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              goto LAB_0041986c;</pre>
+<pre>            }</pre>
+<pre>            iVar10 = strcmp(pcVar3,local_38);</pre>
+<pre>            if (iVar10 == 0) {</pre>
+<pre>              if (((char *)__s[3] != (char *)0x0) &amp;&amp;</pre>
+<pre>                 (local_8c = strdup((char *)__s[3]), local_8c != (char *)0x0)) {</pre>
+<pre>                local_84 = 1;</pre>
+<pre>                goto LAB_00419b78;</pre>
+<pre>              }</pre>
+<pre>              goto LAB_0041986c;</pre>
+<pre>            }</pre>
+<pre>            if ((__s[0xe] != 1) || (local_94 = 0, pcVar3 == (char *)0x0)) goto LAB_0041986c;</pre>
+<a class="reference" href="./6f9579d0984b9b07031385ab62d402d0.html" title="./6f9579d0984b9b07031385ab62d402d0.html" ><pre>            uVar7 = FUN_00417ef8(pcVar3,&amp;local_94);</pre></a>
+
+<a class="reference" href="./5be2696faaff3ceadfe41944e6cf2fdc.html" title="./5be2696faaff3ceadfe41944e6cf2fdc.html" ><pre>            iVar10 = FUN_00417e20(uVar7,0);</pre></a>
+
+<pre>            if ((iVar10 == 0) ||</pre>
+<pre>               ((((local_8c = strdup(pcVar3), local_8c == (char *)0x0 ||</pre>
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>                  (iVar10 = FUN_00419158(__s), iVar10 == 0)) || (*(char *)__s[7] != '=')) ||</pre></a>
+
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>                (iVar10 = FUN_00419158(__s), iVar10 == 0)))) goto LAB_0041986c;</pre></a>
+
+<pre>            cVar9 = *(char *)__s[7];</pre>
+<pre>            if ((cVar9 != '\"') &amp;&amp; (cVar9 != '\'')) goto LAB_0041986c;</pre>
+<pre>            pcVar13 = (char *)__s[1];</pre>
+<pre>            pcVar3 = strstr(pcVar13,(char *)__s[7]);</pre>
+<pre>            if (pcVar3 == (char *)0x0) goto LAB_0041986c;</pre>
+<pre>            if (pcVar13 &lt; pcVar3) {</pre>
+<pre>              cVar9 = *pcVar13;</pre>
+<pre>              if (cVar9 == '&lt;') goto LAB_0041986c;</pre>
+<pre>              while( true ) {</pre>
+<pre>                if (cVar9 == '&amp;') {</pre>
+<pre>                  pcVar13 = pcVar13 + 1;</pre>
+<pre>                }</pre>
+<pre>                pcVar13 = pcVar13 + 1;</pre>
+<pre>                if (pcVar3 &lt;= pcVar13) break;</pre>
+<pre>                cVar9 = *pcVar13;</pre>
+<pre>                if (cVar9 == '&lt;') {</pre>
+<pre>                  iVar14 = 0x6a;</pre>
+<pre>                  goto LAB_0041949c;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>            ixml_membuf_destroy(piVar16);</pre>
+<pre>            pcVar13 = (char *)__s[1];</pre>
+<pre>            if ((pcVar3 != pcVar13) &amp;&amp;</pre>
+<a class="reference" href="./89f1d87e5e7912643ea1af56d2c8b8fa.html" title="./89f1d87e5e7912643ea1af56d2c8b8fa.html" ><pre>               (iVar10 = FUN_00418b58(__s,pcVar13,(int)pcVar3 - (int)pcVar13), iVar10 != 0))</pre></a>
+
+<pre>            goto LAB_0041986c;</pre>
+<pre>            __s[1] = (int)(pcVar3 + 1);</pre>
+<pre>            if (((char *)__s[7] != (char *)0x0) &amp;&amp;</pre>
+<pre><span class="green">               (local_88 = strdup((char *)__s[7]), local_88 == (char *)0x0)) goto LAB_0041986c</span></span>   //possible issue identified - semgrep</pre>
+<pre>            pcVar3 = local_8c;</pre>
+<pre>            local_84 = 2;</pre>
+<pre>            iVar10 = strcmp(local_8c,"xmlns");</pre>
+<pre>            iVar6 = __s[0xc];</pre>
+<pre>            if (iVar10 == 0) {</pre>
+<pre>              if (*(void **)(iVar6 + 8) != (void *)0x0) {</pre>
+<pre>                free(*(void **)(iVar6 + 8));</pre>
+<pre>              }</pre>
+<pre>LAB_0041992c:</pre>
+<pre><span class="green">              pcVar3 = strdup(local_88)</span></span>   //possible issue identified - semgrep</pre>
+<pre>              *(char **)(iVar6 + 8) = pcVar3;</pre>
+<pre>              if (pcVar3 == (char *)0x0) goto LAB_0041986c;</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              iVar10 = strncmp(pcVar3,"xmlns:",6);</pre>
+<pre>              if (iVar10 == 0) {</pre>
+<pre>                iVar10 = Parser_setNodePrefixAndLocalName(&amp;local_8c);</pre>
+<pre>                if ((iVar10 != 0) || (iVar6 == 0)) goto LAB_0041986c;</pre>
+<pre>                if ((*(char **)(iVar6 + 4) != (char *)0x0) &amp;&amp;</pre>
+<pre>                   (iVar10 = strcmp(*(char **)(iVar6 + 4),local_78), iVar10 == 0))</pre>
+<pre>                goto LAB_0041992c;</pre>
+<pre>                pcVar3 = local_78;</pre>
+<pre>                puVar5 = *(undefined4 **)(iVar6 + 0xc);</pre>
+<pre>                puVar12 = *(undefined4 **)(iVar6 + 0xc);</pre>
+<pre>                while (puVar1 = puVar5, puVar1 != (undefined4 *)0x0) {</pre>
+<pre>                  if (((char *)puVar1[1] != (char *)0x0) &amp;&amp;</pre>
+<pre>                     (iVar10 = strcmp((char *)puVar1[1],pcVar3), iVar10 == 0)) {</pre>
+<pre>                    if ((void *)*puVar1 != (void *)0x0) {</pre>
+<pre>                      free((void *)*puVar1);</pre>
+<pre>                    }</pre>
+<pre>                    pcVar3 = strdup(local_88);</pre>
+<pre>                    *puVar1 = pcVar3;</pre>
+<pre>                    if (pcVar3 != (char *)0x0) goto LAB_00419948;</pre>
+<pre>                    iVar14 = 0x6a;</pre>
+<pre>                    goto LAB_0041949c;</pre>
+<pre>                  }</pre>
+<pre>                  puVar12 = puVar1;</pre>
+<pre>                  puVar5 = (undefined4 *)puVar1[2];</pre>
+<pre>                }</pre>
+<pre><span class="green">                puVar5 = (undefined4 *)malloc(0xc)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                if (puVar5 == (undefined4 *)0x0) goto LAB_0041986c;</pre>
+<pre>                *puVar5 = 0;</pre>
+<pre>                puVar5[1] = 0;</pre>
+<pre>                puVar5[2] = 0;</pre>
+<pre>                pcVar3 = strdup(local_78);</pre>
+<pre>                puVar5[1] = pcVar3;</pre>
+<pre>                if (pcVar3 != (char *)0x0) {</pre>
+<pre>                  pcVar3 = strdup(local_88);</pre>
+<pre>                  *puVar5 = pcVar3;</pre>
+<pre>                  if (pcVar3 != (char *)0x0) {</pre>
+<pre>                    if (*(int *)(iVar6 + 0xc) == 0) {</pre>
+<pre>                      *(undefined4 **)(iVar6 + 0xc) = puVar5;</pre>
+<pre>                    }</pre>
+<pre>                    else {</pre>
+<pre>                      puVar12[2] = puVar5;</pre>
+<pre>                    }</pre>
+<pre>                    goto LAB_00419948;</pre>
+<pre>                  }</pre>
+<a class="reference" href="./23249c1237afd9ceb7afe8d91094ab9f.html" title="./23249c1237afd9ceb7afe8d91094ab9f.html" ><pre>                  FUN_00418550(puVar5);</pre></a>
+
+<pre>                }</pre>
+<pre>                free(puVar5);</pre>
+<pre>                iVar14 = 0x6a;</pre>
+<pre>                goto LAB_0041949c;</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>LAB_00419948:</pre>
+<pre>            puVar12 = (undefined4 *)__s[0xb];</pre>
+<pre>            if (puVar12 != (undefined4 *)0x0) {</pre>
+<pre>              pcVar3 = (char *)puVar12[4];</pre>
+<pre>              puVar5 = (undefined4 *)__s[0xc];</pre>
+<pre>              if (pcVar3 == (char *)0x0) {</pre>
+<pre>                iVar10 = strcmp((char *)*puVar12,(char *)*puVar5);</pre>
+<pre>                if (iVar10 != 0) goto LAB_0041986c;</pre>
+<pre>                pcVar3 = (char *)puVar5[2];</pre>
+<pre>                if (pcVar3 != (char *)0x0) goto LAB_004199b4;</pre>
+<pre>                __s[0xb] = 0;</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                iVar10 = strcmp((char *)*puVar12,(char *)*puVar5);</pre>
+<pre>                if ((iVar10 != 0) &amp;&amp; (iVar10 = strcmp(pcVar3,(char *)puVar5[1]), iVar10 != 0))</pre>
+<pre>                goto LAB_0041986c;</pre>
+<pre>                pcVar3 = (char *)puVar5[2];</pre>
+<pre>                if (pcVar3 != (char *)0x0) {</pre>
+<pre>LAB_004199b4:</pre>
+<pre><span class="green">                  pcVar3 = strdup(pcVar3)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                  puVar12[3] = pcVar3;</pre>
+<pre>                  if (pcVar3 == (char *)0x0) goto LAB_0041986c;</pre>
+<pre>                  __s[0xb] = 0;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>            __s[2] = __s[1];</pre>
+<a class="reference" href="./0a227f77a78ab92ca8f6977c3e6a772d.html" title="./0a227f77a78ab92ca8f6977c3e6a772d.html" ><pre>            iVar10 = FUN_00419158(__s);</pre></a>
+
+<pre>            if (iVar10 == 0) goto LAB_0041986c;</pre>
+<pre>            pcVar3 = (char *)__s[7];</pre>
+<pre>            iVar10 = strcmp(pcVar3,"&lt;");</pre>
+<pre>            if (iVar10 == 0) goto LAB_0041986c;</pre>
+<pre>            iVar10 = strcmp(pcVar3,"&gt;");</pre>
+<pre>            if (iVar10 == 0) {</pre>
+<pre>LAB_0041a694:</pre>
+<pre>              __s[0xe] = 2;</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              __s[1] = __s[2];</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>LAB_00419a34:</pre>
+<pre>          pcVar3 = local_8c;</pre>
+<pre>          iVar10 = local_a8;</pre>
+<pre>          if (local_84 == 2) {</pre>
+<pre>            local_9c = 0;</pre>
+<pre>            for (puVar12 = *(undefined4 **)(__s[0xd] + 0x2c); puVar12 != (undefined4 *)0x0;</pre>
+<pre>                puVar12 = (undefined4 *)puVar12[10]) {</pre>
+<pre>              iVar6 = strcmp((char *)*puVar12,pcVar3);</pre>
+<pre>              iVar14 = 0xc;</pre>
+<pre>              if (iVar6 == 0) goto LAB_0041949c;</pre>
+<pre>            }</pre>
+<pre>            iVar14 = ixmlDocument_createAttributeEx(iVar10,pcVar3,local_34);</pre>
+<pre>            if ((iVar14 != 0) ||</pre>
+<pre>               (iVar14 = ixmlNode_setNodeProperties(local_9c,&amp;local_8c), iVar14 != 0))</pre>
+<pre>            goto LAB_0041949c;</pre>
+<pre>            iVar14 = ixmlElement_setAttributeNode(__s[0xd],local_9c,0);</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            if (local_84 &lt; 3) {</pre>
+<pre>              if (local_84 != 1) goto LAB_00419a58;</pre>
+<pre>              local_90 = (undefined4 *)0x0;</pre>
+<pre>              if (__s[0xf] == 1) {</pre>
+<pre>                if (__s[0xc] == 0) goto LAB_00419618;</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                __s[0xf] = 1;</pre>
+<pre>              }</pre>
+<pre>              __s[2] = __s[1];</pre>
+<pre>              iVar14 = ixmlDocument_createElementEx(local_a8,local_8c,&amp;local_90);</pre>
+<pre>              if (iVar14 != 0) goto LAB_0041949c;</pre>
+<pre>              iVar14 = ixmlNode_setNodeProperties(local_90,&amp;local_8c);</pre>
+<pre>              pcVar3 = local_7c;</pre>
+<pre>              if (iVar14 == 0) {</pre>
+<pre>                if (local_7c == (char *)0x0) {</pre>
+<pre>                  for (iVar14 = __s[0xc]; iVar14 != 0; iVar14 = *(int *)(iVar14 + 0x10)) {</pre>
+<pre>                    if ((*(int *)(iVar14 + 4) == 0) &amp;&amp;</pre>
+<pre>                       (pcVar3 = *(char **)(iVar14 + 8), pcVar3 != (char *)0x0)) goto LAB_00419d84;</pre>
+<pre>                  }</pre>
+<pre>                  if (__s[0xe] == 1) goto LAB_0041a02c;</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  iVar14 = __s[0xc];</pre>
+<pre>                  if (iVar14 != 0) {</pre>
+<pre>LAB_00419d10:</pre>
+<pre>                    if ((*(char **)(iVar14 + 4) == (char *)0x0) ||</pre>
+<pre>                       (iVar10 = strcmp(*(char **)(iVar14 + 4),pcVar3), iVar10 != 0))</pre>
+<pre>                    goto LAB_00419d3c;</pre>
+<pre>                    pcVar3 = *(char **)(iVar14 + 8);</pre>
+<pre>LAB_00419d84:</pre>
+<pre>                    puVar12 = local_90;</pre>
+<pre>                    if ((local_90 != (undefined4 *)0x0) &amp;&amp; (local_90[3] == 0)) {</pre>
+<pre><span class="green">                      pcVar3 = strdup(pcVar3)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                      puVar12[3] = pcVar3;</pre>
+<pre>                    }</pre>
+<pre>                    goto LAB_00419da4;</pre>
+<pre>                  }</pre>
+<pre>LAB_0041a02c:</pre>
+<pre>                  __s[0xb] = (int)local_90;</pre>
+<pre>                }</pre>
+<pre>LAB_00419da4:</pre>
+<pre>                iVar14 = ixmlNode_appendChild(__s[0xd],local_90);</pre>
+<pre>                puVar12 = local_90;</pre>
+<pre>                if (iVar14 == 0) {</pre>
+<pre>                  __s[0xd] = (int)local_90;</pre>
+<pre>                  iVar14 = 0;</pre>
+<pre>                  if (local_90 == (undefined4 *)0x0) goto LAB_00419a58;</pre>
+<pre><span class="green">                  puVar5 = (undefined4 *)malloc(0x14)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                  if (puVar5 != (undefined4 *)0x0) {</pre>
+<pre>                    *puVar5 = 0;</pre>
+<pre>                    puVar5[1] = 0;</pre>
+<pre>                    puVar5[2] = 0;</pre>
+<pre>                    puVar5[3] = 0;</pre>
+<pre>                    puVar5[4] = 0;</pre>
+<pre>                    pcVar3 = strdup((char *)*puVar12);</pre>
+<pre>                    *puVar5 = pcVar3;</pre>
+<pre>                    if (pcVar3 != (char *)0x0) {</pre>
+<pre>                      if ((char *)puVar12[4] == (char *)0x0) {</pre>
+<pre>LAB_00419e48:</pre>
+<pre>                        if ((char *)puVar12[3] != (char *)0x0) {</pre>
+<pre>                          pcVar3 = strdup((char *)puVar12[3]);</pre>
+<pre>                          puVar5[2] = pcVar3;</pre>
+<pre>                          if (pcVar3 == (char *)0x0) goto LAB_0041a450;</pre>
+<pre>                        }</pre>
+<pre>                        iVar10 = __s[0xc];</pre>
+<pre>                        __s[0xc] = (int)puVar5;</pre>
+<pre>                        puVar5[4] = iVar10;</pre>
+<pre>                        goto LAB_00419a58;</pre>
+<pre>                      }</pre>
+<pre>                      pcVar3 = strdup((char *)puVar12[4]);</pre>
+<pre>                      puVar5[1] = pcVar3;</pre>
+<pre>                      if (pcVar3 != (char *)0x0) goto LAB_00419e48;</pre>
+<pre>LAB_0041a450:</pre>
+<a class="reference" href="./ed792b9eeb51d5fd4dbc993f82a8f4fc.html" title="./ed792b9eeb51d5fd4dbc993f82a8f4fc.html" ><pre>                      FUN_004184ac(puVar5);</pre></a>
+
+<pre>                    }</pre>
+<pre>                    free(puVar5);</pre>
+<pre>                  }</pre>
+<pre>                  iVar14 = 0x66;</pre>
+<pre>                  goto LAB_0041949c;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              ixmlElement_free(local_90);</pre>
+<pre>              goto LAB_0041949c;</pre>
+<pre>            }</pre>
+<pre>            if (local_84 == 3) {</pre>
+<pre>              iVar14 = ixmlDocument_createTextNodeEx(local_a8,local_88,local_30);</pre>
+<pre>              if (iVar14 != 0) goto LAB_0041949c;</pre>
+<pre>              iVar14 = __s[0xd];</pre>
+<pre>              uVar7 = local_a4;</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              if (local_84 != 4) goto LAB_00419a58;</pre>
+<pre>              iVar14 = ixmlDocument_createCDATASectionEx(local_a8,local_88,&amp;local_a0);</pre>
+<pre>              if (iVar14 != 0) goto LAB_0041949c;</pre>
+<pre>              iVar14 = __s[0xd];</pre>
+<pre>              uVar7 = local_a0;</pre>
+<pre>            }</pre>
+<pre>            iVar14 = ixmlNode_appendChild(iVar14,uVar7);</pre>
+<pre>          }</pre>
+<pre>          if (iVar14 != 0) goto LAB_0041949c;</pre>
+<pre>LAB_00419a58:</pre>
+<pre>          Parser_freeNodeContent(&amp;local_8c);</pre>
+<pre>          goto LAB_00419764;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  goto LAB_0041949c;</pre>
+<pre>LAB_00419d3c:</pre>
+<pre>  for (puVar12 = *(undefined4 **)(iVar14 + 0xc); puVar12 != (undefined4 *)0x0;</pre>
+<pre>      puVar12 = (undefined4 *)puVar12[2]) {</pre>
+<pre>    iVar10 = strcmp((char *)puVar12[1],pcVar3);</pre>
+<pre>    if (iVar10 == 0) {</pre>
+<pre>      pcVar3 = (char *)*puVar12;</pre>
+<pre>      goto LAB_00419d84;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  iVar14 = *(int *)(iVar14 + 0x10);</pre>
+<pre>  if (iVar14 == 0) goto LAB_0041a02c;</pre>
+<pre>  goto LAB_00419d10;</pre>
+<pre>code_r0x0041978c:</pre>
+<pre>  if (__s[0xc] == 0) {</pre>
+<pre>    *param_1 = local_a8;</pre>
+<a class="reference" href="./829b20b606027301be615e7150db25f8.html" title="./829b20b606027301be615e7150db25f8.html" ><pre>    FUN_004185c4(__s);</pre></a>
+
+<pre>    return iVar14;</pre>
+<pre>  }</pre>
+<pre>LAB_00419618:</pre>
+<pre>  iVar14 = 0xc;</pre>
+<pre>LAB_0041949c:</pre>
+<pre>  Parser_freeNodeContent(&amp;local_8c);</pre>
+<pre>  ixmlDocument_free(local_a8);</pre>
+<pre>LAB_004194bc:</pre>
+<a class="reference" href="./829b20b606027301be615e7150db25f8.html" title="./829b20b606027301be615e7150db25f8.html" ><pre>  FUN_004185c4(__s);</pre></a>
+
+<pre>  return iVar14;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

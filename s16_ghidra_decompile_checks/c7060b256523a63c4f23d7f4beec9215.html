@@ -1,0 +1,528 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./ccafa47d05eeab4ec70e8643372d7c13.html" title="./ccafa47d05eeab4ec70e8643372d7c13.html" >&laquo; Back to ccafa47d05eeab4ec70e8643372d7c13</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>void APMlmeDynamicTxRateSwitching(int param_1)</pre>
+<br />
+<pre>{</pre>
+<pre>  byte bVar1;</pre>
+<pre>  short sVar2;</pre>
+<pre>  bool bVar3;</pre>
+<pre>  char cVar4;</pre>
+<pre>  int iVar5;</pre>
+<pre>  uint uVar6;</pre>
+<pre>  uint uVar7;</pre>
+<pre>  int iVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  uint uVar10;</pre>
+<pre>  uint uVar11;</pre>
+<pre>  uint uVar12;</pre>
+<pre>  uint uVar13;</pre>
+<pre>  uint uVar14;</pre>
+<pre>  uint uVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  uint uVar17;</pre>
+<pre>  uint uVar18;</pre>
+<pre>  int *piVar19;</pre>
+<pre>  int iVar20;</pre>
+<pre>  int iVar21;</pre>
+<pre>  uint uVar22;</pre>
+<pre>  uint uVar23;</pre>
+<pre>  byte local_40;</pre>
+<pre>  undefined1 auStack_3f [3];</pre>
+<pre>  byte *local_3c;</pre>
+<pre>  int local_38;</pre>
+<pre>  uint local_30;</pre>
+<pre>  </pre>
+<pre>  local_40 = 0;</pre>
+<pre>  if (*(char *)(param_1 + 0x76a0c) == -0x80) {</pre>
+<pre>    local_38 = param_1 + 0x16894;</pre>
+<pre>    piVar19 = (int *)(param_1 + 0x5dd2c);</pre>
+<pre>    iVar20 = 1;</pre>
+<pre>    uVar23 = 0;</pre>
+<pre>    uVar22 = 0;</pre>
+<pre>    do {</pre>
+<pre>      if ((piVar19[-0xf5] != 0) &amp;&amp; ((piVar19[-0xf5] != 1 || (piVar19[-0x58] == 2)))) {</pre>
+<pre>        iVar21 = param_1 + iVar20 * 0xa20 + 0x5cf38;</pre>
+<pre>        iVar5 = RTMPCheckEntryEnableAutoRateSwitch(param_1,iVar21);</pre>
+<pre>        if (iVar5 != 0) {</pre>
+<pre>          MlmeSelectTxRateTable(param_1,iVar21,&amp;local_3c,&amp;local_40,auStack_3f);</pre>
+<pre>          if (*(short *)(param_1 + 0x71338) == 1) {</pre>
+<pre>            if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>              uVar6 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x170c);</pre>
+<pre>              uVar22 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x1710);</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              uVar6 = 0;</pre>
+<pre>              uVar22 = 0;</pre>
+<pre>            }</pre>
+<pre>            uVar11 = uVar22 &gt;&gt; 0x10;</pre>
+<pre>            uVar10 = uVar6 &amp; 0xffff;</pre>
+<pre>            uVar22 = uVar22 &amp; 0xffff;</pre>
+<pre>            *(uint *)(param_1 + 0x766a0) = uVar10 + *(int *)(param_1 + 0x766a0);</pre>
+<pre>            uVar12 = uVar22 + uVar11 + uVar10;</pre>
+<pre>            *(undefined1 *)(param_1 + 0x769d9) = 1;</pre>
+<pre>            *(uint *)(param_1 + 0x766f4) = (uVar6 &gt;&gt; 0x10) + *(int *)(param_1 + 0x766f4);</pre>
+<pre>            *(uint *)(param_1 + 0x7670c) = uVar11 + *(int *)(param_1 + 0x7670c);</pre>
+<pre>            *(uint *)(param_1 + 0x76708) = uVar22 + *(int *)(param_1 + 0x76708);</pre>
+<pre>            *(uint *)(param_1 + 0x76704) = uVar10 + *(int *)(param_1 + 0x76704);</pre>
+<pre>            *(uint *)(param_1 + 0x76690) = uVar22 + *(int *)(param_1 + 0x76690);</pre>
+<pre>            *(uint *)(param_1 + 0x766a8) = uVar11 + *(int *)(param_1 + 0x766a8);</pre>
+<pre>            iVar5 = uVar10 + uVar11;</pre>
+<pre>            if (uVar12 != 0) goto LAB_00072d50;</pre>
+<pre>            uVar6 = *(uint *)(param_1 + 0x4bf4);</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            uVar12 = *piVar19 + piVar19[-1] + piVar19[1];</pre>
+<pre>            if (uVar12 == 0) {</pre>
+<pre>              uVar6 = *(uint *)(param_1 + 0x4bf4);</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              iVar5 = piVar19[1] + *piVar19;</pre>
+<pre>LAB_00072d50:</pre>
+<pre>              uVar23 = (uint)(iVar5 * 100) / uVar12;</pre>
+<pre>              uVar6 = *(uint *)(param_1 + 0x4bf4);</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          uVar10 = (uint)*(byte *)((int)piVar19 + -0x86);</pre>
+<pre>          if ((uVar6 &amp; 0xf) == 3) {</pre>
+<pre>            iVar5 = (int)(char)(((int)*(char *)((int)piVar19 + 0xbe) +</pre>
+<pre>                                 (int)*(char *)((int)piVar19 + 0xbd) +</pre>
+<pre>                                (int)*(char *)((int)piVar19 + 0xbf)) / 3);</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            iVar5 = (int)*(char *)((int)piVar19 + 0xbd);</pre>
+<pre>            if ((uVar6 &amp; 0xf) == 2) {</pre>
+<pre>              iVar5 = *(char *)((int)piVar19 + 0xbe) + iVar5 &gt;&gt; 1;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          if (uVar10 == 0) {</pre>
+<pre>            uVar6 = 1;</pre>
+<pre>            uVar11 = 0;</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            uVar7 = local_40 - 1;</pre>
+<pre>            if ((int)uVar10 &lt; (int)uVar7) {</pre>
+<pre>              uVar6 = uVar10 + 1 &amp; 0xff;</pre>
+<pre>              uVar11 = uVar10 - 1 &amp; 0xff;</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              uVar6 = uVar10;</pre>
+<pre>              uVar11 = uVar10;</pre>
+<pre>              if (uVar10 == uVar7) {</pre>
+<pre>                uVar11 = local_40 - 2 &amp; 0xff;</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          uVar9 = (uint)local_3c[(uVar10 + 1) * 5 + 4];</pre>
+<pre>          uVar7 = (uint)local_3c[(uVar10 + 1) * 5 + 3];</pre>
+<pre>          if (-0x41 &lt; iVar5) {</pre>
+<pre>            uVar7 = uVar7 + (local_3c[(uVar10 + 1) * 5 + 3] &gt;&gt; 1) &amp; 0xff;</pre>
+<pre>            uVar9 = uVar9 + (local_3c[(uVar10 + 1) * 5 + 4] &gt;&gt; 1) &amp; 0xff;</pre>
+<pre>          }</pre>
+<pre>          *(undefined1 *)((int)piVar19 + 0x1a) = *(undefined1 *)((int)piVar19 + 0x19);</pre>
+<pre>          if (uVar12 &lt; 0x10) {</pre>
+<pre>            local_30 = (uint)*local_3c;</pre>
+<pre>            uVar18 = 0;</pre>
+<pre>            uVar17 = 0;</pre>
+<pre>            uVar16 = 0;</pre>
+<pre>            uVar14 = 0;</pre>
+<pre>            uVar9 = 0;</pre>
+<pre>            uVar11 = 0;</pre>
+<pre>            uVar10 = 0;</pre>
+<pre>            uVar15 = 0;</pre>
+<pre>            uVar13 = 0;</pre>
+<pre>            uVar7 = 0;</pre>
+<pre>            uVar6 = 0;</pre>
+<pre>            uVar12 = 0;</pre>
+<pre>            while ((int)uVar12 &lt; (int)local_30) {</pre>
+<pre>              bVar1 = local_3c[(uVar12 + 1) * 5 + 2];</pre>
+<pre>              if (bVar1 == 0) {</pre>
+<pre>                if (uVar12 != 0) {</pre>
+<pre>LAB_00072ef4:</pre>
+<pre>                  if (bVar1 == 4) {</pre>
+<pre>                    uVar14 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else if (bVar1 == 5) {</pre>
+<pre>                    uVar9 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else if (bVar1 == 6) {</pre>
+<pre>                    uVar11 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else if (bVar1 == 7) {</pre>
+<pre>                    uVar10 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else if (bVar1 == 0xc) {</pre>
+<pre>                    uVar15 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else if (bVar1 == 0xd) {</pre>
+<pre>                    uVar13 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else if (bVar1 == 0xe) {</pre>
+<pre>                    uVar7 = uVar12 &amp; 0xff;</pre>
+<pre>                  }</pre>
+<pre>                  else {</pre>
+<pre>                    cVar4 = (char)uVar12 + '\x01';</pre>
+<pre>                    if (bVar1 != 0xf) goto LAB_00072f80;</pre>
+<pre>                    if ((local_3c[(uVar12 + 1) * 5 + 1] &amp; 2) == 0) {</pre>
+<pre>                      uVar6 = uVar12 &amp; 0xff;</pre>
+<pre>                    }</pre>
+<pre>                  }</pre>
+<pre>                  goto LAB_00072f7c;</pre>
+<pre>                }</pre>
+<pre>                cVar4 = '\x01';</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                if (bVar1 == 1) {</pre>
+<pre>                  uVar18 = uVar12 &amp; 0xff;</pre>
+<pre>                }</pre>
+<pre>                else if (bVar1 == 2) {</pre>
+<pre>                  uVar17 = uVar12 &amp; 0xff;</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  if (bVar1 != 3) goto LAB_00072ef4;</pre>
+<pre>                  uVar16 = uVar12 &amp; 0xff;</pre>
+<pre>                }</pre>
+<pre>LAB_00072f7c:</pre>
+<pre>                cVar4 = (char)uVar12 + '\x01';</pre>
+<pre>              }</pre>
+<pre>LAB_00072f80:</pre>
+<pre>              uVar12 = (uint)cVar4;</pre>
+<pre>            }</pre>
+<pre>            iVar8 = 5;</pre>
+<pre>            if ((*(uint *)(param_1 + 0x4bf4) &amp; 0x40000) != 0) {</pre>
+<pre>              iVar8 = 2;</pre>
+<pre>            }</pre>
+<pre>            if ((((local_3c == &amp;RateSwitchTable11BGN2S) ||</pre>
+<pre>                 (local_3c == &amp;RateSwitchTable11BGN2SForABand)) ||</pre>
+<pre>                (local_3c == &amp;RateSwitchTable11N2S)) ||</pre>
+<pre>               ((local_3c == &amp;RateSwitchTable11N2SForABand || (local_3c == &amp;RateSwitchTable)))) {</pre>
+<pre>              if (((((uVar6 != 0) &amp;&amp; (iVar8 + -0x46 &lt;= iVar5)) ||</pre>
+<pre>                   ((uVar7 != 0 &amp;&amp; (uVar6 = uVar7, iVar8 + -0x48 &lt;= iVar5)))) ||</pre>
+<pre>                  (((uVar13 != 0 &amp;&amp; (uVar6 = uVar13, iVar8 + -0x4c &lt;= iVar5)) ||</pre>
+<pre>                   ((((uVar15 != 0 &amp;&amp; (uVar6 = uVar15, iVar8 + -0x4e &lt;= iVar5)) ||</pre>
+<pre>                     ((uVar14 != 0 &amp;&amp; (uVar6 = uVar14, iVar8 + -0x52 &lt;= iVar5)))) ||</pre>
+<pre>                    ((uVar16 != 0 &amp;&amp; (uVar6 = uVar16, iVar8 + -0x54 &lt;= iVar5)))))))) ||</pre>
+<pre>                 (((uVar17 != 0 &amp;&amp; (uVar6 = uVar17, iVar8 + -0x56 &lt;= iVar5)) ||</pre>
+<pre>                  (uVar6 = 0, uVar18 == 0)))) goto LAB_000731bc;</pre>
+<pre>              bVar3 = iVar5 &lt; iVar8 + -0x58;</pre>
+<pre>LAB_000731a8:</pre>
+<pre>              if (bVar3) {</pre>
+<pre>                uVar6 = 0;</pre>
+<pre>                goto LAB_000731bc;</pre>
+<pre>              }</pre>
+<pre>              uVar10 = (uint)*(byte *)((int)piVar19 + -0x86);</pre>
+<pre>              uVar12 = uVar18;</pre>
+<pre>            }</pre>
+<pre>            else {</pre>
+<pre>              uVar6 = uVar10;</pre>
+<pre>              if ((local_3c == &amp;RateSwitchTable11BGN1S) || (local_3c == &amp;RateSwitchTable11N1S)) {</pre>
+<pre>                if ((((uVar10 == 0) || (iVar5 &lt;= iVar8 + -0x48)) &amp;&amp;</pre>
+<pre>                    (((uVar11 == 0 || (uVar6 = uVar11, iVar5 &lt;= iVar8 + -0x4a)) &amp;&amp;</pre>
+<pre>                     ((uVar9 == 0 || (uVar6 = uVar9, iVar5 &lt;= iVar8 + -0x4d)))))) &amp;&amp;</pre>
+<pre>                   (((((uVar14 == 0 || (uVar6 = uVar14, iVar5 &lt;= iVar8 + -0x4f)) &amp;&amp;</pre>
+<pre>                      ((uVar16 == 0 || (uVar6 = uVar16, iVar5 &lt;= iVar8 + -0x51)))) &amp;&amp;</pre>
+<pre>                     (((uVar17 == 0 || (uVar6 = uVar17, iVar5 &lt;= iVar8 + -0x53)) &amp;&amp;</pre>
+<pre>                      (uVar12 = 0, uVar6 = uVar12, uVar18 != 0)))) &amp;&amp;</pre>
+<pre>                    (uVar6 = uVar18, iVar5 &lt;= iVar8 + -0x56)))) {</pre>
+<pre>                  uVar10 = (uint)*(byte *)((int)piVar19 + -0x86);</pre>
+<pre>                  goto LAB_000731c0;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              else if (((((uVar10 == 0) || (iVar5 &lt; -0x45)) &amp;&amp;</pre>
+<pre>                        ((uVar11 == 0 || (uVar6 = uVar11, iVar5 &lt; -0x49)))) &amp;&amp;</pre>
+<pre>                       (((uVar9 == 0 || (uVar6 = uVar9, iVar5 &lt; -0x4d)) &amp;&amp;</pre>
+<pre>                        ((uVar14 == 0 || (uVar6 = uVar14, iVar5 &lt; -0x51)))))) &amp;&amp;</pre>
+<pre>                      ((((uVar16 == 0 || (uVar6 = uVar16, iVar5 &lt; -0x54)) &amp;&amp;</pre>
+<pre>                        ((uVar17 == 0 || (uVar6 = uVar17, iVar5 &lt; -0x56)))) &amp;&amp;</pre>
+<pre>                       (uVar6 = 0, uVar18 != 0)))) {</pre>
+<pre>                bVar3 = iVar5 &lt; -0x59;</pre>
+<pre>                goto LAB_000731a8;</pre>
+<pre>              }</pre>
+<pre>LAB_000731bc:</pre>
+<pre>              uVar10 = (uint)*(byte *)((int)piVar19 + -0x86);</pre>
+<pre>              uVar12 = uVar6;</pre>
+<pre>            }</pre>
+<pre>LAB_000731c0:</pre>
+<pre>            if (uVar10 != uVar12) {</pre>
+<pre>              *(char *)((int)piVar19 + -0x86) = (char)uVar12;</pre>
+<pre>              APMlmeSetTxRate(param_1,iVar21,local_3c + (uVar12 + 1) * 5);</pre>
+<pre>            }</pre>
+<pre><span class="green">            memset((void *)(param_1 + iVar20 * 0xa20 + 0x5d2c6),0,0x40)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">            memset((void *)(param_1 + iVar20 * 0xa20 + 0x5d32c),0,0x20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>            *(undefined1 *)(piVar19 + 6) = 1;</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            if ((char)piVar19[6] != '\x01') {</pre>
+<pre>              piVar19[3] = piVar19[3] + 1;</pre>
+<pre>              if (uVar23 &lt; uVar9) {</pre>
+<pre>                bVar3 = false;</pre>
+<pre>                if (uVar23 &lt;= uVar7) {</pre>
+<pre>                  iVar5 = param_1 + (iVar20 * 0x510 + uVar10 + 0x2e960) * 2;</pre>
+<pre><span class="green">                  sVar2 = *(short *)(iVar5 + 6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                  if (sVar2 == 0) {</pre>
+<pre><span class="green">                    cVar4 = (char)piVar19[4]</span></span>   //possible issue identified - semgrep</pre>
+<pre>                  }</pre>
+<pre>                  else {</pre>
+<pre>                    *(short *)(iVar5 + 6) = sVar2 + -1;</pre>
+<pre><span class="green">                    cVar4 = (char)piVar19[4]</span></span>   //possible issue identified - semgrep</pre>
+<pre>                  }</pre>
+<pre>                  if (cVar4 == '\0') {</pre>
+<pre>                    iVar5 = param_1 + (iVar20 * 0x510 + uVar6 + 0x2e960) * 2;</pre>
+<pre><span class="green">                    sVar2 = *(short *)(iVar5 + 6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                    bVar3 = true;</pre>
+<pre>                    if (sVar2 == 0) goto LAB_0007334c;</pre>
+<pre>                    *(short *)(iVar5 + 6) = sVar2 + -1;</pre>
+<pre>                  }</pre>
+<pre>                  else {</pre>
+<pre>                    *(char *)(piVar19 + 4) = cVar4 + -1;</pre>
+<pre>                  }</pre>
+<pre>                  goto LAB_00073348;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                *(undefined2 *)(param_1 + (iVar20 * 0x510 + uVar10 + 0x2e960) * 2 + 6) = 8;</pre>
+<pre>LAB_00073348:</pre>
+<pre>                bVar3 = true;</pre>
+<pre>              }</pre>
+<pre>LAB_0007334c:</pre>
+<pre>              *(char *)(iVar20 * 0xa20 + param_1 + uVar10 + 0x5d32c) = (char)uVar23;</pre>
+<pre>              if (bVar3) {</pre>
+<pre>                if ((uVar10 == uVar11) ||</pre>
+<pre>                   (*(ushort *)(param_1 + (iVar20 * 0x510 + uVar10 + 0x2e960) * 2 + 6) &lt; 8)) {</pre>
+<pre>                  if ((uVar10 != uVar6) &amp;&amp;</pre>
+<pre>                     (*(short *)(param_1 + (iVar20 * 0x510 + uVar6 + 0x2e960) * 2 + 6) == 0)) {</pre>
+<pre>                    *(char *)((int)piVar19 + -0x86) = (char)uVar6;</pre>
+<pre>                  }</pre>
+<pre>                }</pre>
+<pre>                else {</pre>
+<pre>                  *(char *)((int)piVar19 + -0x86) = (char)uVar11;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              uVar6 = (uint)*(byte *)((int)piVar19 + -0x86);</pre>
+<pre>              if (uVar10 &lt; uVar6) {</pre>
+<pre>                piVar19[3] = 0;</pre>
+<pre>                *(undefined1 *)(piVar19 + 4) = 0;</pre>
+<pre>                *(undefined1 *)((int)piVar19 + 0x19) = 1;</pre>
+<pre><span class="green">                memset((void *)(param_1 + iVar20 * 0xa20 + 0x5d2c6),0,0x40)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">                memset((void *)(param_1 + iVar20 * 0xa20 + 0x5d32c),0,0x20)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                bVar3 = true;</pre>
+<pre>                if (*(char *)(param_1 + 0x168bc) == '\0') {</pre>
+<pre>                  RTMPSetTimer(local_38,100);</pre>
+<pre>                  *(undefined1 *)(param_1 + 0x168bc) = 1;</pre>
+<pre>LAB_00073510:</pre>
+<pre>                  bVar3 = true;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              else if (uVar6 &lt; uVar10) {</pre>
+<pre>                piVar19[3] = 0;</pre>
+<pre>                *(undefined1 *)((int)piVar19 + 0x19) = 2;</pre>
+<pre>                *(undefined2 *)(param_1 + (iVar20 * 0x510 + uVar6 + 0x2e960) * 2 + 6) = 0;</pre>
+<pre>                *(undefined1 *)(iVar20 * 0xa20 + param_1 + uVar6 + 0x5d32c) = 0;</pre>
+<pre>                *(undefined1 *)(piVar19 + 4) = 0;</pre>
+<pre>                bVar3 = true;</pre>
+<pre>                if (*(char *)(param_1 + 0x168bc) == '\0') {</pre>
+<pre>                  RTMPSetTimer(local_38,100);</pre>
+<pre>                  *(undefined1 *)(param_1 + 0x168bc) = 1;</pre>
+<pre>                  goto LAB_00073510;</pre>
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                *(undefined1 *)((int)piVar19 + 0x19) = 0;</pre>
+<pre>                bVar3 = false;</pre>
+<pre>              }</pre>
+<pre>              if (*(short *)(param_1 + 0x71338) == 1) {</pre>
+<pre>                piVar19[7] = uVar22;</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                piVar19[7] = piVar19[-1];</pre>
+<pre>              }</pre>
+<pre>              if (iVar21 != 0) {</pre>
+<pre>                *piVar19 = 0;</pre>
+<pre>                piVar19[1] = 0;</pre>
+<pre>                piVar19[-1] = 0;</pre>
+<pre>              }</pre>
+<pre>              if ((bVar3) &amp;&amp; (local_3c + (*(byte *)((int)piVar19 + -0x86) + 1) * 5 != (byte *)0x0))</pre>
+<pre>              {</pre>
+<pre>                APMlmeSetTxRate(param_1,iVar21);</pre>
+<pre>              }</pre>
+<pre>              goto LAB_00073580;</pre>
+<pre>            }</pre>
+<pre>            *(undefined1 *)(piVar19 + 6) = 0;</pre>
+<pre>            *(undefined1 *)((int)piVar19 + 0x19) = 0;</pre>
+<pre>          }</pre>
+<pre>          if (iVar21 != 0) {</pre>
+<pre>            *piVar19 = 0;</pre>
+<pre>            piVar19[1] = 0;</pre>
+<pre>            piVar19[-1] = 0;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>LAB_00073580:</pre>
+<pre>      iVar20 = iVar20 + 1;</pre>
+<pre>      piVar19 = piVar19 + 0x288;</pre>
+<pre>    } while (iVar20 != 0x20);</pre>
+<pre>  }</pre>
+<pre>  return;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

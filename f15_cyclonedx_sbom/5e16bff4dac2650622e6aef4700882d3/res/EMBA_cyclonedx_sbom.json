@@ -1,0 +1,4627 @@
+{
+   "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+   "bomFormat": "CycloneDX",
+   "specVersion": "1.5",
+   "serialNumber": "urn:uuid:6b54d239-7269-4a0f-a957-1d0562f04382",
+   "version": 1,
+   "metadata": {
+      "timestamp": "2026-09-21T04:16:37+00:00",
+      "tools": {
+         "components": [
+            {
+               "type": "application",
+               "author": "EMBA community",
+               "name": "EMBA binary analysis environment",
+               "version": "2.0.3-95e1aace90d871f7410649f82616e9bc08df29d0",
+               "description": "EMBA firmware analyzer - https://github.com/e-m-b-a/emba"
+            }
+         ]
+      },
+      "component": {
+         "name": "/home/runner/work/emba/emba/DIR-600_fw_revb5_214b01_ALL_de_20130122.zip",
+         "type": "data",
+         "bom-ref": "c2a66279-10cd-48fd-a050-99e259866ec7",
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "2ca50d377ceb06b66e21a9fd6a3c08c6"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "90d03cb25a13dc6206ba53cae32646e3d0c072573ec3cc18f235ebc661afb8c1"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "daeebe3f2eccaf9ac5bcf3eecf7547b6fa7e0496f20227066df92aedbe482157d7a568df0e3a63e2bf1ddabbb1ab1b10244e4575fced10b9f7e784f0bf7514bd"
+            }
+         ]
+      },
+      "supplier": {
+         "name": "EMBA binary analyzer",
+         "url": [
+            "https://github.com/e-m-b-a/emba"
+         ]
+      },
+      "lifecycles": [
+         {
+            "phase": "operations"
+         }
+      ]
+   },
+   "components": [
+      {
+         "type": "library",
+         "name": "linux_kernel",
+         "version": "2.6.33.2",
+         "supplier": {
+            "name": "kernel.org"
+         },
+         "group": "linux_kernel",
+         "bom-ref": "5103ff03-3498-425b-aafb-1a784bad1e98",
+         "scope": "required",
+         "cpe": "cpe:2.3:o:linux:linux_kernel:2.6.33.2:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/linux_kernel@2.6.33.2?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/108-1146762.lzma_extract/lzma.uncompressed.elf'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS-I version 1 (SYSV), statically linked, not stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'Linux version 2.6.33.2 '"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:linux:linux_kernel:2.6.33.2'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'linux_kernel'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'linux'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'high'"
+            },
+            {
+               "name": "EMBA:sbom:source_location:9:additional_source_path",
+               "value": "/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/modules/ifresetcnt.ko"
+            },
+            {
+               "name": "EMBA:sbom:source_location:10:additional_source_path",
+               "value": "/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/modules/rt2860v2_ap.ko"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "35c5e8bd7c993630cd3c66d51cf73141"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5050d48eaa09780059cde2cbfc31b3e000857ba1143613165076265cc6109538"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "e51af57a37c9a17ebb64e6f1531dd5266b120b1190865865e1f8827b166d4bf279a953edc0b767641d334fd1acb9a3e41eafe86ef7a6a44c339e4a4b6ea1037b"
+            }
+         ],
+         "description": "EMBA SBOM-group: linux_kernel - name: linux_kernel - version: 2.6.33.2"
+      },
+      {
+         "type": "library",
+         "name": "busybox",
+         "version": "1.14.1",
+         "supplier": {
+            "name": "BusyBox"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "56089e27-5522-4240-adb0-1eed2df4388d",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/busybox@1.14.1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/bin/busybox'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'BusyBox v1.14.1 '"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:busybox:busybox:1.14.1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'busybox'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'busybox'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "13e1c1539e54b92ad497a68cc4438723"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5a35fba1274c0653262179e31fe53edce74f35f56f7e5e5893cd8904dc9090ba"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4dc1f7662f60fd63e00ce51f4e4016aff17aa7470aedde3f3e5473833601cded88451e6eeae7ce71af8f5865ce14a40bae5de33466fa3c33918c5d3831980622"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: busybox - version: 1.14.1"
+      },
+      {
+         "type": "library",
+         "name": "busybox",
+         "version": "1.14.1",
+         "supplier": {
+            "name": "BusyBox"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "f27e3923-ea79-4fa2-99e8-14d0bce7c601",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:busybox:busybox:1.14.1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/busybox@1.14.1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/bin/busybox'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'BusyBox v1.14.1 (2012-10-10 10:09:46 CST)'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:busybox:busybox:1.14.1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'busybox'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'busybox'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "13e1c1539e54b92ad497a68cc4438723"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5a35fba1274c0653262179e31fe53edce74f35f56f7e5e5893cd8904dc9090ba"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4dc1f7662f60fd63e00ce51f4e4016aff17aa7470aedde3f3e5473833601cded88451e6eeae7ce71af8f5865ce14a40bae5de33466fa3c33918c5d3831980622"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: busybox - version: 1.14.1"
+      },
+      {
+         "type": "library",
+         "name": "dnsmasq",
+         "version": "2.45",
+         "supplier": {
+            "name": "dnsmasq"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "f3d34ead-2cc5-443c-9228-90f692b1df12",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:dnsmasq:dnsmasq:2.45:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/dnsmasq@2.45?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/dnsmasq'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'dnsmasq-2.45'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::dnsmasq:2.45'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'dnsmasq'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'dnsmasq'"
+            },
+            {
+               "name": "EMBA:sbom:8:vendor_name",
+               "value": "'thekelleys'"
+            },
+            {
+               "name": "EMBA:sbom:9:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "9d449b75d6947d205935ce0dbac75df1"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "27c42331064329d47e2aaa068e919e291c27363bc3f37ede0e16e7b4ec7d642a"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "5921c7fc8dd3e5808ff18e8b84b12ec16d4b77e1a424a8fa9e6d190cb296361217fb3a4699402bb89b88ac0a8cb7dc3b3d819b1173ccff90df1b53fba8d07718"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: dnsmasq - version: 2.45"
+      },
+      {
+         "type": "library",
+         "name": "hostapd",
+         "version": "0.4.8",
+         "supplier": {
+            "name": "w1.fi"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "2679d43e-8cba-401f-813f-40476ba8c75c",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:w1.fi:hostapd:0.4.8:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/hostapd@0.4.8?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/hostapd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'hostapd v0.4.8'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:w1.fi:hostapd:0.4.8'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'hostapd'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'w1.fi'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "d7d6cb3ce216d6066cce04d7cd30b3a2"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "966e166e7bfe452be49d029b2a51b1e611213eeab6ecce4aef9fb27cd380e786"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b3b12ff7131293104f23d86fbcf77100893b15fb0adf8acbd64484e783ca31b5cfb0e4e34e94d55d02f06b09d2d7dffb2566d96d75652adc460b8fb8f48a0075"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: hostapd - version: 0.4.8"
+      },
+      {
+         "type": "library",
+         "name": "hostapd",
+         "version": "0.4.8",
+         "supplier": {
+            "name": "w1.fi"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "f065dcce-7a0d-4921-9da8-6614a0bf9afd",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:w1.fi:hostapd:0.4.8:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/hostapd@0.4.8?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/hostapd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'hostapd v0.4.8'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:w1.fi:hostapd:0.4.8'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'hostapd'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'w1.fi'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "d7d6cb3ce216d6066cce04d7cd30b3a2"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "966e166e7bfe452be49d029b2a51b1e611213eeab6ecce4aef9fb27cd380e786"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b3b12ff7131293104f23d86fbcf77100893b15fb0adf8acbd64484e783ca31b5cfb0e4e34e94d55d02f06b09d2d7dffb2566d96d75652adc460b8fb8f48a0075"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: hostapd - version: 0.4.8"
+      },
+      {
+         "type": "library",
+         "name": "iptables",
+         "version": "1.4.7",
+         "supplier": {
+            "name": "netfilter"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "6ea7ca78-3bf4-4cb5-a09b-d6852853fe4b",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:netfilter:iptables:1.4.7:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/iptables@1.4.7?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/iptables-multi'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'1.4.7'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:netfilter:iptables:1.4.7'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'iptables'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'netfilter'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "9f36c2e9bd4fb569ff4762f9a82d8944"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "8278cdf1af4b1ea6b575aa92e58e9527f260ec245b55de3bf8a0d6dbdabdbc52"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b07a8c4ebf51bd7edcd92fa1eea2dd32792122e1ad92c62187f92427b2b575485691a2f56a205d65c7c32c996ca95bee144a8f34ee26532dd89cfaded570fcf3"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: iptables - version: 1.4.7"
+      },
+      {
+         "type": "library",
+         "name": "logd",
+         "version": "0.1",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "544bcb6f-45f6-481d-9daf-4992ab1c4aa3",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:logd:logd:0.1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/logd@0.1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/logd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'logd version 0.1'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::logd:0.1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'logd'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "25d1158a32d10857f8bca7be7a018cd9"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "9329f2c8689f79f46065261769b45f2c59ad8bcbb868f3383b52ba6420c4556e"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b9b43af391c95b0e0ca8b432f191a367093825166c06a1c1177cd52c7ba2f211ef637d70eb66877fc84e9959f1784939fe0004cd84744e285bfd5e67386451c0"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: logd - version: 0.1"
+      },
+      {
+         "type": "library",
+         "name": "logger",
+         "version": "0.01",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "de1cd582-5779-42a1-9453-845c07955ec0",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:logger:logger:0.01:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/logger@0.01?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/logger'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'logger version 0.01'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::logger:0.01'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'logger'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "b4f8b7e39af2dd2c87b0490572d6e67a"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "0fdb0a98d57aee908674a83c8a3f4bf657fa898f10bbda9dc4bf5ff9996535b0"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "f61c882746b236a9c2fab963fc83e1b27f111b1b04ba74aad13159316f17ff59fca99f6249778110fbc4fd9f16dd3fd630ff9848b13a68adbfbb76ec7fc6d464"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: logger - version: 0.01"
+      },
+      {
+         "type": "library",
+         "name": "openssl",
+         "version": "0.9.8a",
+         "supplier": {
+            "name": "openssl"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "f73e0d12-c950-4e18-8fe9-8219f6ebe95f",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:openssl:openssl:0.9.8a:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/openssl@0.9.8a?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/wps'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'part of OpenSSL 0.9.8a '"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:openssl:openssl:0.9.8a'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'openssl'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'openssl'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "3fb9dae288170aff1ecf11cb474f03fb"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "d3df40cc208112b24def98cd80baa44879316c4fec265bdbb70c63571501e946"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "5a8f357389bc08b389d9a39e6f4acda745bbabe27226d5f81b601b22f7ac2f74665146957fe60a25efd7dcca4b63d0d31610582ecd17f4a0c95a1274527c1095"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: openssl - version: 0.9.8a"
+      },
+      {
+         "type": "library",
+         "name": "point-to-point_protocol",
+         "version": "2.4.2b3",
+         "supplier": {
+            "name": "point-to-point_protocol_project"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "f61e2ec0-8b33-4cb1-b5d7-702686bff2e0",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:point-to-point_protocol_project:point-to-point_protocol:2.4.2b3:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/point-to-point_protocol@2.4.2b3?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/pppd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'2.4.2b3'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:point-to-point_protocol_project:point-to-point_protocol:2.4.2b3'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'point-to-point_protocol'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'point-to-point_protocol_project'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "d2fd2b6a4eb186bab80489fae9cc8f09"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "0e9a4f25369b46ee349f4990b1482d3f0120629dd49bbd2a11522f4b2120325c"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "a2f6178a2a8fa20e0b1f8a41e3f0b3d470dbb67bf2449cf7ce187cf7264cae4dff85257ff6da06e8199920ff2cd48464d6e619382bd568670f4ae1616150df26"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: point-to-point_protocol - version: 2.4.2b3"
+      },
+      {
+         "type": "library",
+         "name": "rndimgae",
+         "version": "0.0.1",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "6efd1964-e355-4fa2-82cb-0ce6dec5fe59",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:rndimgae:rndimgae:0.0.1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/rndimgae@0.0.1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/rndimage'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'RNDIMGAE v0.0.1'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::rndimgae:0.0.1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'rndimgae'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "40e7374e288809c7bb5ce7d2befd8959"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "bd109d34cd57e1f0807c429b040c251d1484130d0e9de02202f3f6df2e29d43d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "61e60eaa6e1563280e99606fa141fc1f51ac0790c2aeb7ca10c3e97b46c5df13f83555570739b08da513fb06b287a4e13797a9262f6e6363bf5bc957ce004b7c"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: rndimgae - version: 0.0.1"
+      },
+      {
+         "type": "library",
+         "name": "seama",
+         "version": "0.20",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "1333043c-0a89-4f7d-af1a-a29bf0627d0b",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:seama:seama:0.20:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/seama@0.20?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/rgbin'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'seama version 0.20'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::seama:0.20'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'seama'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "c83a3a74cad96c0b0c1e0e6bbcd9b14b"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "6afed736e1defc91c5fd32d05b664786d63b2eac6c0c2258fad21ae3b574fd2e"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "727101b3d12c48285b20adc72587affebfca7b0045190981ad76785ddea1ba046590826b01ee13cd13ba6666819cccad1473d2c9c0272719f3f36db00d87c052"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: seama - version: 0.20"
+      },
+      {
+         "type": "library",
+         "name": "sed",
+         "version": "4.0",
+         "supplier": {
+            "name": "gnu"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "42bfbdba-cdf8-4e98-b85b-a73d910e1e38",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:gnu:sed:4.0:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/sed@4.0?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/bin/busybox'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'GNU sed version 4.0'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:gnu:sed:4.0'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'sed'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'gnu'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "13e1c1539e54b92ad497a68cc4438723"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5a35fba1274c0653262179e31fe53edce74f35f56f7e5e5893cd8904dc9090ba"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4dc1f7662f60fd63e00ce51f4e4016aff17aa7470aedde3f3e5473833601cded88451e6eeae7ce71af8f5865ce14a40bae5de33466fa3c33918c5d3831980622"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: sed - version: 4.0"
+      },
+      {
+         "type": "library",
+         "name": "sysklogd",
+         "version": "0.01",
+         "supplier": {
+            "name": "sysklogd_project"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "b0c11800-0310-454f-b178-8f9fad67fecf",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:sysklogd_project:sysklogd:0.01:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/sysklogd@0.01?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/klogd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, not stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'klogd version 0.01'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:sysklogd_project:sysklogd:0.01'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'sysklogd'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'sysklogd_project'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "ee997f14c7724bc0ecbf4da4c253de5d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "9b8de87d955693a71a043d47a4e988722e14aa40c9810edda3c2a76316f4a751"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "8a106074e8d1befbf5cd5906eccae9ea36668bd62ad4590ffeec037cc79e52cddfc22a2ab4b336896f4549e0c8fa181dff89454c5e2124211a3db4e217cd12ba"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: sysklogd - version: 0.01"
+      },
+      {
+         "type": "library",
+         "name": "xmldb",
+         "version": "3",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "static_bin_analysis",
+         "bom-ref": "cb99c403-98c1-48e5-b3a5-e0aa239ca89b",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:xmldb:xmldb:3:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/xmldb@3?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/xmldb'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'xmldbc version 3'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::xmldb:3'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'xmldb'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "690be1a07746fc2fa0ca5bb30f8a9d36"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f3e8b59d47e208b42f6f1bf8e4c4263b02a481aff3c979401dbb14cae4dee1d5"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "8aa2a5aaa7f006c5848b29fdc30b36e7c11af80731ff1287981298c543dfb632affd8fbb7d0f738b42582b61762438dcce076dc34e38e8d5b4ad657ff4ab34a2"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_bin_analysis - name: xmldb - version: 3"
+      },
+      {
+         "type": "operating-system",
+         "name": "dir-600_firmware",
+         "version": "2.14b01",
+         "supplier": {
+            "name": "D'Link"
+         },
+         "group": "static_distri_analysis",
+         "bom-ref": "e414c970-b5c9-4090-b0c7-4abd070b2b12",
+         "scope": "required",
+         "cpe": "cpe:2.3:o:dlink:dir-600_firmware:2.14b01:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/dir-600_firmware@2.14b01?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/config/image_sign'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:identifer_detected",
+               "value": "'D-Link dir-600 v2.14B01'"
+            },
+            {
+               "name": "EMBA:sbom:4:minimal_identifier",
+               "value": "'\\:dlink:dir-600_firmware:2.14b01'"
+            },
+            {
+               "name": "EMBA:sbom:5:vendor_name",
+               "value": "'dlink'"
+            },
+            {
+               "name": "EMBA:sbom:6:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "039cd22355e06cbcdc48f864f011e9e5"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "a8334926f8c301453e8aed3bb2e4580e445f9f8b6536fdf45c60fa2b402f7bbe"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "448618298c4b6bf85b60aa136c6a43853aa1cd341876e3a68a0e9ab21051ee898cd05a1b8ac32a6ceb4ef802629cfed62978bdaa9eb980fc2bf41375052fa138"
+            }
+         ],
+         "description": "EMBA SBOM-group: static_distri_analysis - name: dir-600_firmware - version: 2.14b01"
+      },
+      {
+         "type": "library",
+         "name": "ddnsd",
+         "version": "0.1",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "7803be97-588a-47d0-8cab-94f376fadc03",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:ddnsd:ddnsd:0.1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/ddnsd@0.1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/ddnsd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'ddnsd version 0.1'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::ddnsd:0.1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'ddnsd'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "634911efc3b9a7c00d8ab05dcd784e06"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "c15bc0e56a4f1ab567f369c2dca5452b6d87e7cbb1b73bbc145f7eb476f8895d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b4aa6791580e0e16d1b2070f1e3a10a71ddad47cf7b34d495fe4e8dce905e85e792c1c6646b5d7d9c06f9ddd702390bf709730317918b23b45bedb137eb4d41b"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: ddnsd - version: 0.1"
+      },
+      {
+         "type": "library",
+         "name": "ecmh",
+         "version": "2005.02.09",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "31afedd1-5177-472f-bb8a-8686a320af84",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:ecmh:ecmh:2005.02.09:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/ecmh@2005.02.09?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/ecmh'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'Easy Cast du Multi Hub (ecmh) 2005.02.09 by Jeroen Massar <jeroen@unfix.org>'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::ecmh:2005.02.09'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'ecmh'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "5755767fe4b5c9ce70b07d01fe7d9007"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "253e26a878baa735451f9621916483495b6b14a79f1e951db572372cc16d3884"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "0837e756df3c6378ce58068185b9a6a69ac1aa1db2bf278ea345d622553fd0508cc520d4f5d3efe40e242aacd4d80542b8e660ebecc22bbe1646efa0dbb2cebf"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: ecmh - version: 2005.02.09"
+      },
+      {
+         "type": "library",
+         "name": "igmpproxy",
+         "version": "3.0",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "3bf6d275-4db1-4182-b35d-268e5037c9a6",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:igmpproxy:igmpproxy:3.0:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/igmpproxy@3.0?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/igmpproxy'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'igmpproxy versoin 3.0 beta'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::igmpproxy:3.0'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'igmpproxy'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "3b717c9b2bf3ae90c64dea40fee36d21"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "c5b3b833abf63c93e0c1d9589f3918220cf429a059c9cdb318f03892b3f19ae3"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4b8628162264d5df682a661d8265e8b6539c88d78c003347f2f3eea4a14243bc1d9b06428d1803f6ac5c3095f6d6afc83c7ecc746498a8402471850a875a33d8"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: igmpproxy - version: 3.0"
+      },
+      {
+         "type": "library",
+         "name": "iproute2",
+         "version": "100224",
+         "supplier": {
+            "name": "iproute2_project"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "b305570a-c7ea-46b2-b88f-469094748167",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:iproute2_project:iproute2:100224:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/iproute2@100224?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/ip6tables-multi'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'iproute2-ss100224'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\:iproute2_project:iproute2:100224'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'iproute2'"
+            },
+            {
+               "name": "EMBA:sbom:7:vendor_name",
+               "value": "'iproute2_project'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            },
+            {
+               "name": "EMBA:sbom:source_location:9:additional_source_path",
+               "value": "/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/tc"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "0518b490db4f9a619d509ea4900fc38f"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "6a145837dedc7d9763992664bf79131a52c2de1999add9083ac27e442208be0d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "8b4360e93b10642be3a8855dc9a7b943d3fac1258224ddde4e4bc7af5562f4f3474287cfbff5e7721bc7f3c9ab7f0328ac8d8f61db26ffd5b53c6e4cd4eb0a77"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: iproute2 - version: 100224"
+      },
+      {
+         "type": "library",
+         "name": "llmnresp",
+         "version": "1.0",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "82113ee4-597d-4900-b39c-7454da624e66",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:llmnresp:llmnresp:1.0:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/llmnresp@1.0?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/llmnresp'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'llmnresp versoin 1.0'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::llmnresp:1.0'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'llmnresp'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "4b02dbc72e1e67884fc4d4fb29dc28d0"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "af41b127043ef8ce8fd4697bb28536774828713543ee3f9e3cd493b5da99f06a"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "2859871b2062dab3f60d0493b49b263b760fa0edb9482ee63c0cc0b6eed0f556500158f76f4c11cfd07bda39afb8ecd208d1f1de04324ea883ab4a8b82ad580e"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: llmnresp - version: 1.0"
+      },
+      {
+         "type": "library",
+         "name": "ndisc6",
+         "version": "0.9.9",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "a0051e7c-b9ea-4d4e-8169-8a346e572e79",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:ndisc6:ndisc6:0.9.9:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/ndisc6@0.9.9?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/rdisc6'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'ndisc6: IPv6 Neighbor/Router Discovery userland tool 0.9.9 '"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::ndisc6:0.9.9'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'ndisc6'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "7a5927999f89d3d7811e21c7fed64222"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "9b3c27254740549358461f86d60dc72ea96167b74324cbdc54848eee3328427b"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "9c9849975f9165cbdf4b16826e8e8af1c856e3b6f12b41c0e5fba09cff3452d8be2eb6fbd0fab7a0a6411d1a8f63ba903cb124dd3516b76f6162082efa8065d3"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: ndisc6 - version: 0.9.9"
+      },
+      {
+         "type": "library",
+         "name": "portt",
+         "version": "1",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "635c2f2b-5d6d-4092-a5cd-bd17485ed30b",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:portt:portt:1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/portt@1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/portt'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, not stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'portt version 1'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::portt:1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'portt'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "4d4d1785613fec45a7529359824fa357"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "2050ca569f8c12c616a048e98d1ec397c2710141274b464fb8cb8e1e8f179c94"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "86ba0e6e4afa001ba625ff8cb7cbacd5cb9a556516ac265e18cb5dc16451a48346403b52e3131dde4ae7e17e21de78de62a559cdcea874795a49fa636b514d95"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: portt - version: 1"
+      },
+      {
+         "type": "library",
+         "name": "radvd",
+         "version": "1.8",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "ad55df57-856f-48a0-b419-08936dec1f79",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:radvd:radvd:1.8:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/radvd@1.8?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/radvd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'Version: 1.8'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::radvd:1.8'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'radvd'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            },
+            {
+               "name": "EMBA:sbom:source_location:8:additional_source_path",
+               "value": "/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/radvdump"
+            },
+            {
+               "name": "EMBA:sbom:source_location:9:additional_source_path",
+               "value": "/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/radvdump"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "67d219fdaae0229fc299e26301e0f4cb"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "91db33f8d93aa6813b3361282773df54b6c5e530237c14afcc0977106e6464c1"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "2f312fbc800a6f9d643c286ce6f85b8c9e79f1c19d9b4b2275056f014b2d4703bcb91daf126ab16501cadc3288e882bb7c8cc5e2fe1f2ed2a33e9f1c1327ee7b"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: radvd - version: 1.8"
+      },
+      {
+         "type": "library",
+         "name": "servd",
+         "version": "1",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "637837a0-b076-4fd1-ae91-30a257e4ba3d",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:servd:servd:1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/servd@1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/servd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'servd version 1'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::servd:1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'servd'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "2d065ac660b0b105af2f07e94d9c3577"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "610b9a90d27c1d9a203ffab3e2e8df80b73c339383cd63013682181a3352c8eb"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4739616521c555a9e9fd1213f9220911f0ea8bbaf0b95b857db15a4433ccbba00c33b9fd77912ed05840a84a23abaabf170e32cdf10ede1daeb721be29338ee3"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: servd - version: 1"
+      },
+      {
+         "type": "library",
+         "name": "trigger",
+         "version": "1",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "940cc1cb-15bb-40d6-ad48-d99df30409fd",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:trigger:trigger:1:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/trigger@1?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/trigger'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, not stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'trigger version 1'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::trigger:1'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'trigger'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "286446713b39bb2cb7fd2eadbce9069e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "7a9dbaf2a04fc839de46826d56f3fbae551f36817dbc93c18c5a8f390eabd775"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "e9cf5fe29215111c197b23ee697bdb815ac5932434440c7b0ec5b07aa0cd5dea22181e73efd682eadeb84a635cb7a2a970e1e92312e7d94578b5b9bf5a53fdad"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: trigger - version: 1"
+      },
+      {
+         "type": "library",
+         "name": "wireless_tools",
+         "version": "26",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "user_mode_bin_analysis",
+         "bom-ref": "e4806649-9ffd-4a26-9adb-8f091d4009fc",
+         "scope": "required",
+         "cpe": "cpe:2.3:a:wireless_tools:wireless_tools:26:*:*:*:*:*:*:*",
+         "purl": "pkg:binary/generic/wireless_tools@26?arch=MIPS",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/iwconfig'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            },
+            {
+               "name": "EMBA:sbom:4:identifer_detected",
+               "value": "'iwconfig  Version 26'"
+            },
+            {
+               "name": "EMBA:sbom:5:minimal_identifier",
+               "value": "'\\::wireless_tools:26'"
+            },
+            {
+               "name": "EMBA:sbom:6:product_name",
+               "value": "'wireless_tools'"
+            },
+            {
+               "name": "EMBA:sbom:8:confidence",
+               "value": "'medium'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "35fa296101c1ed9c6db91fa383b7645a"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f1cd536aba7ae0bd07256b6a0d93cf65a22779365f206755a633d97dc7c91470"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "9bcb7fa33b3986854ea484b60a329288c494ad22e3293bd3817a6f100bd96d07abf1890b26cb64694323add0f0424adb02cdea3d9ca1931a1ae398df0746f522"
+            }
+         ],
+         "description": "EMBA SBOM-group: user_mode_bin_analysis - name: wireless_tools - version: 26"
+      },
+      {
+         "type": "library",
+         "name": "ated",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "b1238b8a-69d0-459d-80c7-a7204ea1d6a6",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/ated'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "b88d07e9023289c8faacf014ec6ab7c1"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "90c9314163acc6ea2db4932ddbe3aa1ef216ae0013b59136a5bf0bb9e5aa27bb"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "035196c7bee0cb0e522f066378cdac1ca1dbfd337b0db0f9887b4dee5a1e3009e98c6287f274932efdb761543c157be42020e247cbfe70b31a57f40682d005c7"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: ated - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "cgibin",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "0cf89f12-c376-453f-b4b1-d7716a8e7e31",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/cgibin'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "889e6b0718e6137cf46826ca2383fa63"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "c1fee9528d4cf2e3dbfc4ed8fd83f4b2ed0430580d7da1c74d2a361dbf3d6148"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "1d102e1900ff7c2ea1164547b6267d0119da906cadff17bf275cfd77205ffff9881b27fe06551d2db2626263debfbdebf382ff2ddfefbb5443c6c18fb5083ab8"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: cgibin - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "dhcp6c",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "6660915b-4343-4262-ae21-2c679ddb2735",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/dhcp6c'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "a7e48a80381c5c65289317d32ae6e1cb"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "8f3ec0da7f075cea96e5192b3223da504efb8334b877842eccff23d9ebcfa5ee"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "e1c78bc32656e7b2a20302a7f32cba4255cc4c91811b91eaf2ef8128d085c7359c551becb1527e3fb07574142c4a47c9528f55e3c80f3809c9b261fddc1549aa"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: dhcp6c - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "dhcp6s",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "c2e29d05-19b2-4a84-a668-19ccd0233712",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/dhcp6s'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "ff540d6275878051083b8b33f85b9480"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "03da316edcddf2b66af5869563a0da3c4785800aaa53a61408dce94b0788010c"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "f2741eea4608899e8daf1535e4da910bea3505e5a8da346907d37cf6fd95d682bd777187b921e54baa422e26b67ba97c01cd922c7af123bfcb798dc633c56174"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: dhcp6s - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "gpiod",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "c69cccdf-721d-42ff-b5bd-2bae01bcf913",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/gpiod'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "0d105563610524fc23c6381a3ca3a7b3"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "1cb914d27d1ea321e46e9b03133e89096f34ab94b5d9013387126d4dbd3ce150"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "bc54cb395da645ce1dae7ba77e70d3a409ae1f11dc917dbc5174fac6691ff4b15d78ce10e36881502255f67024959e70b318d8d6216311645e7287aabff9df24"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: gpiod - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "httpd",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "4f6e370d-c7e2-45b2-b304-d7e8028aa36e",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/sbin/httpd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "2544dfc0e8053880f570f19e86307532"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "76498e6856ba9d3504ab0fe9e17a2e47d76e0f685be64301992bd132a95e0470"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "680372c994368ba604706f5196b45868d05494e24e87e9309142fac79106bbfe1c402ea323ada728b783eda47b3bc577c02f8466f0b1bab8c9c2d758d56cae6f"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: httpd - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "ifresetcnt.ko",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "ae30d563-c97f-4deb-824e-6aabc2e51712",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/modules/ifresetcnt.ko'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB relocatable, MIPS, MIPS32 rel2 version 1 (SYSV), BuildID[sha1]=3855c434a32282b6b3fa42aa1a1aed9a9cf10a86, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "bccde048c2c6f81c617f8a62cececa78"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "98644d31539eebf9d9fa6a031940a2f88754653588210f80f3e5e3050b693c18"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "8a5e0980aef580103edbe1bf7c805e9dda821a3c707eb3625e7c29391aac79c22a4d397373b3bbf3610df1fea38dedb78956e5a2671925e48fca5b86c11a87ff"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: ifresetcnt.ko - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "ip",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "e27a3490-03e6-455a-8845-64f3610a65fe",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/ip'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "a56d23bcdbea512f486c2be04f5f2750"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "6a65ee6d4d8ed684668102a7e6e24e168f034b22ba6f3d88cba867b70aeee740"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "42dd5523518379a9c3ab4d1a871a5f3239557c15177f743d3025ac26ded4ef85794458e9e8e8ce07e098d2ac56738eda369c69b5819c6650e85143f5bf5615e0"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: ip - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "ld-uClibc-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "a35b607b-28d3-4a5b-99e0-da6400ca9fad",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/ld-uClibc-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "9802370f193400fb3529f2f1b2d834cf"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "ee3a042f42cf49c837f4d7f6ebb720fd878cbee40d3d58be12dcaca0eafbd463"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "94f81ec87de0fec38313104385ee6ab420883868b1b7c8aecd1cb55e3a8cfe9ec46d6dab31d77b3f5dfd018a18cc5ed8f6d7a6dad6dcd724caa4313393ebe395"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: ld-uClibc-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libcrypt-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "02ca5729-a0d0-43ec-8c81-1bfd3b8a3746",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libcrypt-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "44dcdefb7dafaa462c0ee408aba8746e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "63f3ab57f9cbb0a65187ac977b95d64187178c2634dcc41748bcac8bab4dcda0"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "19d64206cdbde2d7488929fd2e01dd87d0b4bfde8bd1f125411b463c80b435297268f877e38d7e0e6c9c138a509832ebdea5cba55cca2b3f01657885b4cc289b"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libcrypt-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libdl-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "e3f44613-bdf6-48a1-b359-862c0648a90b",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libdl-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "d96103d96d5420e7a83bf364ce6cebe3"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "6090ca81014dcacf9b8e9d73399f72700a83f28f43588fd13aab216b0a2a4b7e"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "a83656a69ffe6e823cbb1f1e6ff7f681141ae25c14c96d84b81b0f18e34e5dc308de03f00c38d8385981dda5ad5cff80d2f3883660465cd5292e4f48e32d0283"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libdl-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libgcc_s.so.1",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "1e2f8348-e767-4e0b-9265-a9be34f0b248",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libgcc_s.so.1'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "7a8b34e4ea61bb04c407616238920151"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "32c17dad8c3e5cf5026f69e17523463586ccacffeff6e208adeaa18107019633"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "111fcb5f9256cfb685720334f8869ae78e642d65245dfbd8f8913526c42f675c710046ca0a7d44f7c1ef7021ac828fae0ad5b13cf8526ce05be012a807609137"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libgcc_s.so.1 - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libip4tc.so.0.0.0",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "c05c5574-6d5c-4361-85ef-8cff0c0b8c04",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libip4tc.so.0.0.0'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "04ee4a730a805a493f6b4bf873c1979e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "4d594ca91f82c80aae27eb07ba21b025b735572f4a3de73d536e00fb410df234"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "df6be1370a81c7661e2adac005abee78043c2660ff732710cb4b6cd5d91406e9f71a2ecc8ebb3f6d5a72962b0369cf2717619fbcb6c56037a25a7b9deebaebb8"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libip4tc.so.0.0.0 - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libip6t_LOG.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "62e2352b-7839-401b-b945-9a6340d111ed",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libip6t_LOG.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "0400d1b98e4b4c138e3fff2525977234"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "02de44c3d0d61fe6dce2f4bc1934b8712fc7678f09dd3954281199f263fbb7ab"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "bf241f2e8580bc028b0dd047c39b09c059d2bf9f5e340cca2f2c187aeb10719329ba4fd09bc7548be0184b723593d7aa19513a946d20a1afa6b300e755b37298"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libip6t_LOG.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libip6t_REJECT.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "e186476b-7a9a-4404-85a8-b9de432c5611",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libip6t_REJECT.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "b19f5821b68fe0211983bda9614cd53c"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f9d8d1879a7d808ddce95dd499b62047e906edbce813943aabd4cc73d0caeacd"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "0363394ecc6685d4104360c4f5b0cb20ff2968615eed6342f50c616dcd533b2c5d4d505d43aef8a135fe5e5e378f10b51b07d640daf7f0325b68a480a13f9cf3"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libip6t_REJECT.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libip6t_icmp6.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "cfc1fbf9-0a59-4ffd-988f-6d41dd8a6741",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libip6t_icmp6.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "3aa7dda7037b1fc93764f984b37e1dc5"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "cddc7c4b2f5890cefcc3a0f312f9896c6d64fcce921e78d20c44c1e8db0a3ac3"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "03fbc3f020512305ec407f0f8a0a4b9f54d0cfe2e7539f9e80bde7f084030b3f95d25c30c5f356bca69d3c096d6aea93fd9333ffe8bfbf2dc605dcde2b961455"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libip6t_icmp6.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libip6tc.so.0.0.0",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "bb73bc81-e0bb-4763-a89d-b26ed169ebf7",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libip6tc.so.0.0.0'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "67c957ba13be4a6aa9b40849dc69bef1"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "ed16dbd878f0a65991a5197b48d0d82ca5df19e32f65c4b10ecb4e5d309423d2"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "d22055f74f42ea92b5b7eed3b8e1e924fddfcdf6edeb23ba543d35e94d992a4ac4618a261b38e0b28345350891b03049464b5e55be100ba6d3c51e21be8f3ee2"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libip6tc.so.0.0.0 - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_DNAT.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "c3f6b0c8-872e-4f6c-b4ae-a3eb23471059",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_DNAT.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "1a32366c55aa09ffdd9d3edf76711dd3"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5824d96574e3be6aa157e830d596197df48688badb838c406dc217e33283c141"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "fefa5c524fe194c19b48d61badc893ff834d70d1f6b0785053e742f966c989f8fb70534351bfae2577e34eb8cf6180d1200d45d64dc7ec903875bf16c5f5d67b"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_DNAT.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_HIJACK.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "49a97eb9-84e7-4aef-a1a3-d23cbd5a455a",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_HIJACK.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "cadbc45c3f6e001e82e0a0dfee01e005"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "316bd57e45c1904b4641d75144dff76b76754f97fd6f4412e3bf69ba290b3621"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "1191f5f8f829dee957a30286b51b1fcaa203171c481745c6ab1be63036b3089794ba584584a8988d0edfe1967675842b7f683d61a6d32e24781ced3d944964c9"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_HIJACK.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_LOG.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3bc0bcfa-930b-4a69-ade0-e7aac960aebe",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_LOG.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "85520e34c625fd49daa9a55fe34e3537"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "954557d3081a5c4a36fc611623814cbef8ed19bc49be0281acafec8ccab3ebc9"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "69e8adbac3fdff694e9beef825461767ce48ab13fd4918224ace192509d117f6763ed3165151b2b2446dcd138d4ca8c2138f60a03aca2dd90a3322543d9097bb"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_LOG.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_MASQUERADE.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3fc5c989-b851-4cdd-bc1a-b7a0e44edc60",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_MASQUERADE.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "38bb5ec19600dde98d87cdd0a6824c91"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "b81d7f2d8db12520f995c2dc13270a0cc510b838615fd0330cbef66ca1d948f0"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "21d7d1c582226e01852cfd398f199f1929ddb2e44d085cf11e02fc9988e0b7cdbe749f2e37118446bb6a183f54e4d025ba7f2b2d368fb6d453763e08f27a9e9e"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_MASQUERADE.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_REDIRECT.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "782bf80b-934a-4ea0-a09d-e207764d9cf9",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_REDIRECT.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "8e41e5eb0765a7535728c0aa449d15a8"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5132ba2721588e17274f16b454e134e6e4f051c775fe15a36d818bdbbe79599d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4d8e76c3f03df898df21c45b357d874d6acc0267afe37bde44d95f82b4f314b0758160ea53a6055147dea33d3b4f35db9ff2f76dca499e0926defde756e057ba"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_REDIRECT.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_REJECT.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "5227dbfe-4479-4b20-a5bf-c20cba2be2f0",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_REJECT.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "08b245698e10130ff35435345c12e371"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "74d4c7a5fccbdddf1b750a166dc5eede34ddf29b1807479adc6f0ab08af1b629"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "8bc05735dbbe6ea31211db7d36d13e344f77d408c59219a9fb45cbd40e8d09e3e79f050240279cefcec80d699ba8913b8efe26d69ee07fc83e638ba2041cf528"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_REJECT.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_SNAT.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "576ebc83-c2f0-48a7-a5ac-cd756280b46f",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_SNAT.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "dc4b7221d0fa06cdcb3dbd0640e334e6"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "64cf67aafae94f8e7ad55bb51072dc779c8bad7d19e1d1b4d3a8507cc8591944"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "507a5ea51cb76062b36570d916703850b9784e4433497dfdcc36b2111c973fc3bb09d261d4f1ac03c1a41f7352faf0cbf4057301814ef5ff73b8637d674ce6fd"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_SNAT.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_TTL.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "1a0c1c7a-532f-4d42-a1f4-9c151584e52e",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_TTL.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "05ef9b56d97db0681d2f926a5def2e06"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "9dd5c3d5fb4a01535ed9dd894ec03d4b66e7d48dd32fd766436020bb8b8d848b"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "c52b2b0ae4c2a1e7d461d6ad9bed3f9194b0eb44a11ee7c3114c1c8b46b6908e5cd4a8c0b608a1362ce073da934511cb09ad7b6dd1ea23bedf1b854af95baeca"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_TTL.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libipt_icmp.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "bf128dd9-3147-4a2a-9932-59ce8d08a08f",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libipt_icmp.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "30deabc4d55275ac1a4b6c5b29729e6d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "5cb1617fb605aced977cabe55940daa2d6b8a7c1d5117bfd112b41b3e01aa1f9"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "1d1c0b2255a6214a23c62a109df5f2a4cbe3bb737def6b6c120790d4332daa2c951f3c0b6e6d488084f1cee098b46e634fdf5b1c0552b137b8c5aa1b158e3e5a"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libipt_icmp.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libiptc.so.0.0.0",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "6d3037d7-dee0-4636-a80c-3c0096e8ab34",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libiptc.so.0.0.0'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "b6090915310bf8683a69f9f4312e962b"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "0ef8b657827ffe436d28eebf8d3640d649577f7d01089e3709fc17f366283e02"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "06384e7cc93697f0d55798c6fe06768937074409390406c2de1649ddc9e95348dc9db80347bda4f89c395c854533626323aa33815ea417d1bb29b92bf03e58a6"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libiptc.so.0.0.0 - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libm-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "b77e2011-0147-43df-8ce5-6c9eb421114d",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libm-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "a15178aa5ec68fc5d41a21d6b37fdc48"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "634053c69dc68065c720576631a71d2353ff9d690fbd611f7b690bf233a19d1f"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "f5f045955910ce28a26a65fe526c9534de49ea0967259d6dfd97944a9006ef59bf44fe15751e6edd17226f0300205ff8d8a41f336841282c25545ac335ce5e20"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libm-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libnsl-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "84d0aa98-7365-4f13-9aa2-940ebe183853",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libnsl-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "c024a32057f2f277188507dd310c898f"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "40697ae499239b8e919912e189095413dbbeed8c4c64ae54fcecb2ad66d79f4c"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "063919e46d391dd8d3391ddc363d99804e3804dbd8e355a90a48692885c496dead2b2d4fe93bb2468da7ccc991ed6effb9f8eb443067c54e3b2f5f602b7745d2"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libnsl-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libpthread-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "47a7b726-9ffa-4bdd-b66f-84cb46afbccb",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libpthread-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "9807ebdca6350c33056a3e670fd10d7d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "4bac66abf15bc9089d9abf0ced2d88117f6eb5397a6d0752e2bdaf7f60eb281d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "04e4074c86c946b95d9584d5462c4743aa82b10eb28f39a1701e08a74fd97952e1675c658518713610e6c219060a609e8912ed6d928e1a82fa41e7bb8188fb51"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libpthread-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libresolv-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "ca4f7cdd-e119-4fd6-b16c-802c4bb71495",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libresolv-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "642568853d75ba51d25c36d747872021"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f803b68d64884ee92d28ee135c2d87124806cd207fd9e6e8c5c2113fc6bcffc3"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "3fe9c18f495ce0aab7909e0eeb429c290e1f9e53d5445a836147b4707d89ae9150ba86c142d70c8b6fae4897fd4f7278482854d2951d6926aac56cbd34384c9f"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libresolv-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "librt-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3a987014-8765-408a-9468-ae654ba5c874",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/librt-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "babfc9a24847d8279286a6e78067f130"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "7f75b8fb343d205eb92a9fe5f28f118f044bc9cec8a0879133f5c64f3d80c6b5"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "7b07b385306f066b0b7f2c03d59934366edcd0ba200cd1e1f0f0d68a749b616f67eb8642cb9ae99df6a442697579ddabd6d83e7650ba7ce34cfe69fda33289c6"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: librt-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libuClibc-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "4b3ae951-73a5-4faf-9915-f8f7214f0616",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libuClibc-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "59ab4616788875883e334559093b6c98"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "9203e3d01359543faf37d2ea30b87c308f4f1cc58b8a14bbfde9dbdaf38a8cfc"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "211a9dacd8ee4a4ae489ded4848577064811188ef869ea602a7becdfd9f1db085ca3d21a71e9902be34ecfcfb8f0cbd7d9f13d9b9f8e9cfdc36f1ed737388c01"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libuClibc-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libutil-0.9.30.1.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "ad2a6be7-e0a6-4244-8bb9-3ecd6a57f970",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libutil-0.9.30.1.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "1a5538cf5442382bf532d7100b433469"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "c99644883ff97304a41b499f02193f904ed95134a12d356e3ffbb9eccb7a940d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "c1d54468c85883e24e82d37e9340d22cae74704b2ecb8bdd7f6818631cc16fcb4aa9b323dfc65af7a70bf8f42d6cccbcbce43b170bc48d697609b3553605eefc"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libutil-0.9.30.1.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_CLASSIFY.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "2ec3514a-3308-411d-bbac-16d00b0f7f72",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_CLASSIFY.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "b411a27a3eb6913279301403bc064652"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "af1bc2f99060c030355b83bc179589083b84822def6fd4b34a44bf3215e6a2d9"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "611f79dcf7b8247a80f0fee6cb631bf1a7d3beb427458cbf11e43db48530c005e7546d813f624ffbcad660b4bdf823e5232d17788d1df9579523f04381535fa4"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_CLASSIFY.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_MARK.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "fdd4c717-9289-48ed-bd11-5c95cd9c1400",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_MARK.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "2e3c0c850c994d68f40546bf1d9c5e7e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "0f7ff57c878919b12b96e235bd81c0309ba33ce47833af78129194a2a6a4fc0d"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "c8aae8ad20d6e18a5ea32469b635c67a242cb48b192bf05915c149cb8912a50065353548cc77274bad703ba1270c6cc79ffa64b508d58acbe9cc5f9b02abb8b2"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_MARK.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_TCPMSS.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "fcf41917-f744-4a3a-b089-52734d7c8ce6",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_TCPMSS.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "2dc7a4930157a9fc724b474ec6412a43"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "336784494f08607e191771fbc5fc9d526fd74df4407325a912e37178d45179dd"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "d3f04c12989c5356343f2bad9c8c9454198824372394847f458721c3b5f6112e8411e23be362c8ef2eb0339c5e88ba82db8d87c304587c84c679126ed626fc90"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_TCPMSS.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_conntrack.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "a174d41a-1a57-4d35-935a-4e813b007d7c",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_conntrack.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "70563013801580a5fd99418d831cadfb"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "3c1f92d438c517fb80fc24580134c230a0077459e312cfb9ed80613b4b703d5e"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "6816b59441a34180299742cc357cf265d415597ceed6ea23fdbc333eb1f0415175eae9f07640d4fbb57728bc00d5f240b601cc264edffc0ac653c573c30107c8"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_conntrack.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_helper.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "cfbc33e3-e5f1-423d-9dd1-716e5b0fe685",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_helper.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "a011e4cc87d739bfb54ff6a1e6d0106e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "d3f9ab5fd99a2bbf3774fda0f958204ef00ccbcc4003fc1112c8abdd6bde5f4a"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "434bc723debecfd46555e90dadced659b1e09bb49698aa56fc728de4649c4f3c72b9a9a6b4cb4eec2c8e2b9017119dc03140be6a1fb9a0f2634e22b49b182d27"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_helper.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_iprange.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "e6ac3338-0d8e-4334-8537-619b88f07f9c",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_iprange.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "e16635d7b386364c8e2dafa3c1b1756c"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f1521f08185b3122a8e957b76fc7dd665d1a0b3bf8c9c5ecd9f5cb3b30751ca2"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "25c77133525a16dac1d2902a809b2a783d9bccf7be5fea0867ce5a9dacbd1d12ca6de80630e5428e311b56c5439ada06a47df44f36feb14fdebabd8390a11130"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_iprange.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_limit.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "999ad6b2-64f8-456e-9fac-46f986fe1a46",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_limit.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "eab11adf337cdf06bdfd0af1633a224d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "11a56b0e6710ca4c46dc46b03a0fd52d267b2895df7b132fcc2f5067d307749b"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "ef3a02eed4905bbed7e538522f2f8def61718e8d760d12672e6bfdb8907d563d1769e5593dc5a4d928a5ec01e120802d3178c1ada8db9382e657ee1a8be42178"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_limit.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_mac.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "e4d4c13d-fb13-4d1f-b1c1-a8d4b9b3aafb",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_mac.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "640cce232f5f28c2ed0bc768a181ad7c"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "1fabe60e0cf2f942b18b5b0a3fb21a97938e495b7bb066205ef347fc46f7bbef"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "e9b8e6892f5e3a888b7b3070745558d0d79bb2020cb4038f13a2488727d6cc1c3fb245a5f593a08e47fe4ee18ea4e2025e06522a1a5d7f00f6af9b823e32db9a"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_mac.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_mark.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "920862c2-d2cb-4ab9-8619-adbb6d4b7c22",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_mark.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "7086106c2ae0f913b39f9ccbf73eb732"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "559a835e413430310eccbf40e249cb85ac07311e93bffd03e41c9a3c43e6d1d1"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "fd474c5cbb90213d76034fdf171215b4f22560a98a76c48e70c5d812be78aa3bc23707a847c799c76c5b4826615d7f856dcdf851df4dc01a42499f7f1db6d9d9"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_mark.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_mport.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "f592294d-81a4-4bf5-b077-45b6231f044e",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_mport.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "feecf2061d5799e8cdeb84d7a08401c2"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "7ede40e7e62ea5cc7f77e6e3854c2cb247722a9f205664b9d05e3d4924a1970c"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b7fb5c4daffdccb54fedbba6b6c870a3e3299fab7f0d86dde508fac56efbfa76b702e9fc0b0a1e98b1b9a729130d2475b74f19c05d1ed1e98effa850fab9f05a"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_mport.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_multiport.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3e593d12-3dcc-48cf-a01a-2eb891dd53f1",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_multiport.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "44fc82e8747ec6d591aadab9302b620d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "e4d9395921c9f833e394cd01210e91ef90b4fdfc82a99a9022335e82cfdda679"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "caee29ef07b469322077e919beadb65999ca57eb9a226750ca8c5138c67f01bd7910aa9d091db023c7145d671266aeccf8056c510f66355f3b83a64dfe6faf5c"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_multiport.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_physdev.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "1ec1e53a-8bea-4ee9-b057-9a3511315fb9",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_physdev.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "8dc6c93ab7da479369fc45610f6ff455"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "2a3492ea9bf16ab22cbaccfce4d38bf710012c71d41d0d592c19a5b9c159859b"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "728e23662d1086561d06b4b3b99ca87884edd42590eaed35e852e2d26c576390042ba724dae0f20b54b3c2bfb6057767982ea597b2c2f2ad2ffdecd4730e72b0"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_physdev.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_pkttype.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "cd2cb84d-46f9-43e6-b43f-f60876c54a38",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_pkttype.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "5aa1870b1f5155b6b7e3fe384b9c04b7"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "45b877d0a699caef9a05cc86f05386a6614fd6b174b6090f6b5b8d1a0e837d8c"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "406fa7ab8da17a6f612c385931579c7c5e753d28390fcb52afd2a834275a2b93abc7286d3895553f9eee303d6a391ee4ef710ad4f7d42f55f851bf9858c275d5"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_pkttype.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_standard.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "6ac75117-9802-43d3-b11b-df73313e971b",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_standard.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "8f21f3fbbb89a3e12d2556a0427f5bdb"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f077e412cf3b26f965d42b133390056a0e0f9a0562cbdc63153ea935bb81ee73"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "907f1bd44c75a25e5f2154969e2d82e9c46597e3e4dfc7b4a7131c40259de5e0e3d2c21b000cb8f2b4cf055690f6204aeb6ca21466563edc11bd958e8a25ed81"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_standard.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_state.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "5743182c-c066-4734-8bff-480cc9b5ccdc",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_state.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "1c32f065b7d645b9e7dc771d977ea863"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "7f0e4f071f0d02fcf852d68c80bf6ddc2be377e76db7ab3df80c48b97a01db9e"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "6b9331f47cf1e9a165124f33150c64eeb5b9237ee44c69e9957d1c8962955d855210f7b62395f959ac6f4a8bbeed5bb1affbcb521fb5c442d8628368362c163c"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_state.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_string.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "84b3ae45-31ac-40da-9e50-125d664f5e5f",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_string.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "78fc2fd159bb0ddbdd9dce02ed5bae35"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "905e41de1411810096df080a36adb6a9003289a1893dc1a4a3ae590ddd583ede"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "ce21b12c5dc62223b0c535a1e94577af929469db1bb68480e65eb99ffc9b26d9b659d075939811ae5f05ff5f31c54af32e7cb0a5c4a0dc24204c47b24987e303"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_string.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_tcp.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "a71731c5-4638-4871-9c16-9cadd00771ff",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_tcp.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "d658a4e6800cde2de247809eb72da685"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "aedcd741c00913ab81b69f5ed5e6cb60d8457141824b110c3a689fb087865ceb"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "9416a82b5041fa90ccb765131d8b84ea5461a262438e815a99fd2a643829a6a530adcde4aec531d2677be0916902f8b091f32329b721c837a004b1f74cc3db93"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_tcp.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_tcpmss.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "eab03fc8-7d17-43c8-ad3f-19080b7638e9",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_tcpmss.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "2b1bf0503cea03cddd62b903c9d8efd0"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "81adcde3db5af5564e0016007215ee2ff99fe6d2b634ecb21633532cc239694b"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "1f4a5469b89dee6fbd7cac39faf1ac4dd666c70fe8bef0fb8d68b12f01db14c1bd5f235942ffab3e17c6cf2fd0cd62d815ff28326555fa2c5b542851527e9836"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_tcpmss.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_time.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "cc1a6bf7-2140-4a43-92f4-2fd0702c85c7",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_time.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "1b9ea9016e31753a49d558d2a71e4df7"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "3687de4fdfd47f9fc13f2f4e5a8d6b0ede67164b4a641d7f898ca33fdb8952ea"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "a0f42f7db7f5d8abfae2edb8b702e8d4187b9950e9d26403eee75e8ccaee1bc7bb4ad0c923e74d297aa76f7a44794d291855a4fefe8f85e196a0e6ce3e089592"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_time.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxt_udp.so",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3349d98d-1a33-4082-b2dd-4834cd31ed0d",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/xtables/libxt_udp.so'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "b5a5a310811339547ed9b12a12d3007d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "33c1bcf41ad3ddce53d68662f9ede6edc070e74298e4c42db49c638c5cfaacfa"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "320575b300c9b442cd8aeb218cbd505c09443e54b28160eab9860c7bf16663014b9b0a7bea921be8bf4ae4122cfae95f2f4d9491621e3899d4ae4c54cc75b2a4"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxt_udp.so - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "libxtables.so.4.0.0",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "2b621b35-4e95-43e7-95c5-df03e0c01c37",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/libxtables.so.4.0.0'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), dynamically linked, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "25be7eb4847fa28cedd1c991ed0026b9"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "dc27a26eacd3d1c675e58de3edfbbe2c868f1c64f1d1b211a5fb2521ef19617f"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "b1d158a695badbb036b62c9167b593fba22fa2692892d720bebb1949e3c51b7c669d6a674c39f63583532712fcde5708bc21969deff5cb033571de604faf521d"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: libxtables.so.4.0.0 - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "lld2d",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "27edd42e-3ec7-49b0-9f3f-4f22bba4f82f",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/lld2d'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "7ba832b42d62474b6cbcdbcda75d6397"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "7ed37ae216ecfdc964af113decfadef318b9db6ec22c08fad1a06c07d8f9452b"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "4eb019be5f49264ae0351ff8a268cd43ea2e4c4a3e8295b0487e253050488cef41c686ca91187df70e829c8d7a9a17e8050cfbd2bd67b4e2f0b2253adfd63ec7"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: lld2d - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "neaps",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "a17f41e4-024b-427b-b9c3-a381eec80f49",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/neaps'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "4a0e0031e8a0d31f504463dc3d5b116d"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "2cbad5eb3a258ef10ed8b0a09980be7278a806c32daa067b573d49362d6ba178"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "9c194a069a5ef7991df7fc7aec147ed74b250588a17f18068ab48c77c4a1ab584b73303fd298d7c4b3522e05a5d167cf9d0e4788d8c000335f0e8b507425c61d"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: neaps - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "netbios",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "5c34f579-9b18-42ea-9784-aacaea25f02f",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/netbios'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "3e00c79c314f4b84d62dce87ed3d20ae"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "b59ecb3f1723b852f7a3827241adf1781db2c6e43698df6a8649d224455e3c5f"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "944251fee1cdceb69b20abf7643469fd407072921b00a5c813604cfa9fa9d621226b98904646e06cd48d3c80c00f763a0b6ceef53e09b6fd21439e62ea6cfefd"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: netbios - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "nsbbox",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "a4d00218-569e-4739-86b7-007172a9c141",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/nsbbox'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "e99fc7d1817e719bd79118a8eb577daa"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "644bec378e9b544f8e589895ce7e08362a02ccc9cb52ccb3f9ac4fb072a9ecdd"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "22da11f1b7edb0e803565bf76e52f5c92f0fee771bb1221bbf9d6f755f525e522d2f3324d9ed6fbe6362e5ceed355e120b1298f680f767454dd87e8015de1f42"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: nsbbox - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "radvdump",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "ae4aecd5-bdb1-4535-b243-3d321580d6a0",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/radvdump'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "6dd84731d6024e548ec115eab63c50f3"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "d796881a56e624886da52e5f37cbea74b44b77150cc21911756a215e65ec03ca"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "737742500f7d22cf774ecf7e69d147792c69c4026384aec4f26c83fa2af79025300fd04c9aa44c965d475de42f4b602de5e57dcd49a2f54ff4d291a0c889c0a8"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: radvdump - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "rt2860v2_ap.ko",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "d279bc4f-15e6-4432-9653-f155cdf32093",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/modules/rt2860v2_ap.ko'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB relocatable, MIPS, MIPS32 rel2 version 1 (SYSV), BuildID[sha1]=36ae984e31c0d1f53721e6a7b73f8b8dd0dc7607, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "d1b8c7bcfd08a2999e874f5fc5699250"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "a60e557a88a5556f46c10bcf1d81b06f8f79e07798fa71aaebcb46e253720783"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "d1b1b1f9c806dd35b66d3b2fac349687fd494ee85ee5e5ad282c25ed197112b860781ff32db36f42a273b916be8721cd2816b4fd57809179874a75b4e858c49a"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: rt2860v2_ap.ko - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "rt3052esw",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "a07ccb6a-dbb7-4297-9195-3c821fff3bc6",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/rt3052esw'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "c7078f3824e6cbd44dcd9202e10f1f97"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "53e589ec590453f0e58b3b9422afab6bac7cbffb9d87820431902a59958b3918"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "dbde0893419d0da155c2c6d6b8294426f2e3fb67bb2ac5ccdb4e1ef8f2e677d1a0e04477ddb1e4a635f7fee7b58c8eb6630241c81023bb5ed23d2aeb5d231af7"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: rt3052esw - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "sendmail",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "bb7ac87c-7322-4a84-8d7b-702414d649a3",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/sendmail'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "7c3ebf83e6b5e8a88e024e8cea9ce57c"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "fe3570c76e8c08c672d0ea17ff002e217bc6af004f2994af54cd62c3d8674736"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "fe1f2fb66260918fe0c05b42dd7166b7f8215ae4c82975cd32620ffc46c7c2aa3c7ae9d44000108ea5f537723629654bf45507e9afd56c51ccfb301b9d2ab6a7"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: sendmail - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "sw_tcpip.ko",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3d67f211-9222-463e-8690-2339f9c08698",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/lib/modules/sw_tcpip.ko'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB relocatable, MIPS, MIPS32 rel2 version 1 (SYSV), BuildID[sha1]=eeb7300a39e8e99c40ca80c2fdf3be4a63a2e402, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "18868a6ab95c960687d93b3718b05fd2"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "6179d39ce21f9609bcd98f2812641abc21cc82e0f068f023bc96a1b2c4d574b2"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "0ebd5e0fa924e8e3a7f7fa55e16d480f416abc16fdb78bc50dee2647ba8888ce2840edf5653483f775c792f1aed60a489f612a0dd30b036ee436eb8014945f70"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: sw_tcpip.ko - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "tc",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "e02d44e7-12f2-47d1-a4d4-43b5dbc414fa",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/tc'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, with debug_info, not stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "5b0fdb981b5698b3cdf319bf508a916f"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "0078ad1eaf1822c7859ff8672207807a77ebac4c058521f6aab9d2551d2400f5"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "6d6a41fc8a5b49ee4570d0ff645a1b976359f3707e6a89126f6cae7030fdb3b40b0b9ed6ecaace32cc9692e1d0d4193b26ffd673f0a4622fa181dc6e8408a585"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: tc - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "telnetd",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "d3a8a3b0-701c-4354-b9d6-60efd7f1f300",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/telnetd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "496cfe63e0a88d74140efc4a9cb34cf4"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "b0ec879054cfbea1f319525cfc6d56f2725e40d39b4a5fcdf80934feef41d1cb"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "9e1d96a80f80f830b66dccc11ba1eefa893ae58abbe9a88a7a079e4268c4fe1249e2e5e5c3463011a17898dde959f9b80afbfa13374ef30e5d3e16d96aa442ca"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: telnetd - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "ubcfg",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "1a8f81e5-a196-4442-bbd5-bea392c49d20",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/ubcfg'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "1ff01792e9426f3b9522fe4080f52597"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "a3c37e8bbd68b1746fac110a3afe9682877963a938629a023914675e067b5f29"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "9796e067ae2dd648a38b6a5ff60729b46f9f94e485a3a38144bcbc756bf4a4a239a99e4875b3e400b7d6556df463e447e439a2cffe1104f9b1a4ac93961b8fcd"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: ubcfg - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "ubcom",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "3e6dd02a-f0d9-44b5-a5f7-5b7028a79b82",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/sbin/ubcom'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "0e984adb874e55f56ffb520f6a351718"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f97359458cc7437d4030dbde693975b8b183f4c01ae9562ab94fb1948cbaa4c4"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "6ebe6eea52899c584298cb3b54183b7ff2b53b727699958afedd9458a2ee335f5c031414ef48f99104cb7bde91bf7bb6c4de4da45932b68883e16de58079f7cf"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: ubcom - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "udhcpd",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "cb4da428-6ada-4838-aa9a-5db0215149cb",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/udhcpd'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "08a38650e80b28e3dbf4db0f9161c19e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "2aed5bea889b017baa384d62666e5990acfe1ea8822e2c51f2c92e34c3ff2902"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "f1bb762e1253b04e9962f5c90e004cb822051465173d037d6b48c6b7d2ed013aa52941db89adcf749fc9b3ef7c945fd6f1acceecdeb9bce8afb19aafccca15af"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: udhcpd - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "updateleases",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "63e0c7a7-b58c-49a5-ad87-7f29280122a1",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/updateleases'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "12b0549a5c9f2c72c109f032aa835d4f"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "a15f7ac6b6c043d03d820022298a5667a30524dcb6f1201069c00e581fe67d34"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "d942e43f210eae71372d7bd8dd48e0524260d574633282e74d4850ec2762ffd5f93f3fa47729ac5fac4b42975c67f27378b47221fe3849b165b09e24e9403ce8"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: updateleases - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "updatewifistats",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "dd7d936b-a7c8-43c7-8be1-6a820ee7645d",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/updatewifistats'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "a8bf64d9040884e6ef4967607955b66f"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "ef638432edeb619c60c0e8e3fbbd24ab0e84f27c680dc07ac6591bd90f350ac5"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "6310ecd65f8acb60cb908b5fc8bc46c8fa697695e39a98b2e3673e6e5a6e11a3b7680e8afefd29533500c08d5b3ddddc8ed8a5c0e455335389bba1f1ea5c3636"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: updatewifistats - version: Unknown Version"
+      },
+      {
+         "type": "library",
+         "name": "widget",
+         "version": "Unknown Version",
+         "supplier": {
+            "name": "Unknown"
+         },
+         "group": "unhandled_file",
+         "bom-ref": "4af09f23-4e23-42d5-a3af-c0277fdef5a5",
+         "scope": "required",
+         "properties": [
+            {
+               "name": "EMBA:sbom:source_location:1:source_path",
+               "value": "'/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/widget'"
+            },
+            {
+               "name": "EMBA:sbom:2:source_arch",
+               "value": "'MIPS'"
+            },
+            {
+               "name": "EMBA:sbom:3:source_details",
+               "value": "'ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped'"
+            }
+         ],
+         "hashes": [
+            {
+               "alg": "MD5",
+               "content": "83050bb61af159bce264a20f3f66544e"
+            },
+            {
+               "alg": "SHA-256",
+               "content": "f8af915108fb75590c1a5744b445311629628f6bba2eacdfe9f7921df5b1d3bd"
+            },
+            {
+               "alg": "SHA-512",
+               "content": "0d1920829bb94f7ace532e88f666aa3a14b4601c86bf7c5562c08fc108395cef2a1b3184236bc623f1e151b1135d39339536cad2a0a6be582b5c619370ee0162"
+            }
+         ],
+         "description": "EMBA SBOM-group: unhandled_file - name: widget - version: Unknown Version"
+      }
+   ],
+   "dependencies": [],
+   "vulnerabilities": []
+}

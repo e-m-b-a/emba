@@ -1,0 +1,1042 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./ccafa47d05eeab4ec70e8643372d7c13.html" title="./ccafa47d05eeab4ec70e8643372d7c13.html" >&laquo; Back to ccafa47d05eeab4ec70e8643372d7c13</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>void APStartUp(int param_1)</pre>
+<br />
+<pre>{</pre>
+<pre>  undefined1 uVar1;</pre>
+<pre>  bool bVar2;</pre>
+<pre>  char cVar3;</pre>
+<pre>  byte bVar4;</pre>
+<pre>  undefined1 uVar5;</pre>
+<pre>  code *pcVar6;</pre>
+<pre>  undefined4 uVar7;</pre>
+<pre>  undefined4 uVar8;</pre>
+<pre>  void *__src;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  ushort uVar10;</pre>
+<pre>  int iVar11;</pre>
+<pre>  ushort uVar12;</pre>
+<pre>  int iVar13;</pre>
+<pre>  undefined4 uVar14;</pre>
+<pre>  uint uVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  undefined2 *puVar17;</pre>
+<pre>  undefined1 *puVar18;</pre>
+<pre>  void *__dest;</pre>
+<pre>  int iVar19;</pre>
+<pre>  int iVar20;</pre>
+<pre>  undefined4 uVar21;</pre>
+<pre>  int iVar22;</pre>
+<pre>  ushort uVar23;</pre>
+<pre>  </pre>
+<pre><span class="green">  cVar3 = *(char *)(param_1 + 0x16983)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (2 &lt; RTDebugLevel) {</pre>
+<pre>    printk("===&gt; APStartUp\n");</pre>
+<pre>  }</pre>
+<pre>  AsicDisableSync(param_1);</pre>
+<pre>  uVar23 = 0;</pre>
+<pre>  __src = (void *)(param_1 + 0x16973);</pre>
+<pre>  if (*(int *)(param_1 + 0x16a70) != 0) {</pre>
+<pre>    uVar23 = 0x20;</pre>
+<pre>  }</pre>
+<pre>  bVar2 = false;</pre>
+<pre>  for (uVar15 = 0; uVar15 &lt; *(byte *)(param_1 + 0x51aa); uVar15 = uVar15 + 1 &amp; 0xff) {</pre>
+<pre>    iVar11 = param_1 + uVar15 * 0x1140;</pre>
+<pre>    if (0x1f &lt; (byte)(*(char *)(iVar11 + 0x51b2) - 1U)) {</pre>
+<pre><span class="green">      memmove((void *)(iVar11 + 0x51b3),"HT_AP",5)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      *(char *)(iVar11 + 0x51b8) = (char)uVar15 + '0';</pre>
+<pre>      *(undefined1 *)(iVar11 + 0x51b2) = 6;</pre>
+<pre>    }</pre>
+<pre>    __dest = (void *)(param_1 + uVar15 * 0x1140 + 0x51ac);</pre>
+<pre>    iVar11 = param_1 + uVar15 * 0x1140;</pre>
+<pre><span class="green">    memcpy(__dest,__src,6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    *(char *)(iVar11 + 0x51b1) = (char)uVar15 + *(char *)(iVar11 + 0x51b1);</pre>
+<pre>    if (*(int *)(iVar11 + 0x51d8) != 0) {</pre>
+<pre><span class="green">      memmove(*(void **)(*(int *)(iVar11 + 0x51d8) + 0x140),__dest,6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre>    iVar11 = uVar15 * 0x1140 + param_1;</pre>
+<pre>    uVar12 = 0x11;</pre>
+<pre>    if (*(int *)(iVar11 + 0x51e0) == 1) {</pre>
+<pre>      uVar12 = 1;</pre>
+<pre>    }</pre>
+<pre>    uVar10 = 0x400;</pre>
+<pre>    if (*(char *)(param_1 + 0x16a7c) == '\0') {</pre>
+<pre>      uVar10 = 0;</pre>
+<pre>    }</pre>
+<pre>    uVar10 = uVar10 | uVar23 | uVar12;</pre>
+<pre>    *(ushort *)(iVar11 + 0x51d4) = uVar10;</pre>
+<pre>    if (*(char *)(iVar11 + 0x5b30) != '\0') {</pre>
+<pre>      bVar2 = true;</pre>
+<pre>    }</pre>
+<pre>    if (*(char *)(param_1 + 0x16a2c) == '\x01') {</pre>
+<pre>      *(ushort *)(iVar11 + 0x51d4) = uVar10 | 0x800;</pre>
+<pre>    }</pre>
+<pre>    iVar11 = uVar15 * 0x1140 + param_1;</pre>
+<pre>    if (*(int *)(iVar11 + 0x51e0) == 8) {</pre>
+<pre>      if ((*(uint *)(iVar11 + 0x51dc) &amp; 0xff) &lt; 10) {</pre>
+<pre>        uVar9 = 1 &lt;&lt; (*(uint *)(iVar11 + 0x51dc) &amp; 0x1f);</pre>
+<pre>        if ((uVar9 &amp; 0x300) == 0) {</pre>
+<pre>          if ((uVar9 &amp; 0xc0) == 0) {</pre>
+<pre>            if ((uVar9 &amp; 0x18) != 0) {</pre>
+<pre>              *(undefined4 *)(iVar11 + 0x51e8) = 0xc;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            *(undefined4 *)(iVar11 + 0x51e8) = 3;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          iVar11 = *(int *)(iVar11 + 0x51e8);</pre>
+<pre>          if (((iVar11 == 0) || (iVar11 == 0xc)) || (iVar11 == 3)) {</pre>
+<pre>            *(undefined4 *)(uVar15 * 0x1140 + param_1 + 0x51e8) = 0xf;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      *(undefined4 *)(iVar11 + 0x51e8) = 0;</pre>
+<pre>    }</pre>
+<pre>    iVar11 = uVar15 * 0x1140 + param_1;</pre>
+<pre>    RTMPMakeRSNIE(param_1,*(undefined4 *)(iVar11 + 0x51dc),*(undefined4 *)(iVar11 + 0x51e0),uVar15);</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16982) != cVar3) {</pre>
+<pre>    RTMPSetPhyMode(param_1,cVar3);</pre>
+<pre>  }</pre>
+<pre>  SetCommonHT(param_1);</pre>
+<pre><span class="green">  memcpy((void *)(param_1 + 0x169e4),__src,6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  uVar15 = Status;</pre>
+<pre>  if (*(byte *)(param_1 + 0x16982) &lt; 5) {</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>LAB_0006abd4:</pre>
+<pre>    uVar9 = 0;</pre>
+<pre>    if (cVar3 == '\0') {</pre>
+<pre>      if (*(int *)(param_1 + 0x29f8) == 4) {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>          Status = Status &amp; 0xfffffffe;</pre>
+<pre>          uVar16 = uVar15 &amp; 1;</pre>
+<pre>        }</pre>
+<pre>        iVar11 = 0;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        while( true ) {</pre>
+<pre>          uVar15 = 0;</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x20000) == 0) {</pre>
+<pre>            if (cVar3 == '\0') {</pre>
+<pre>              *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x101c) = 0xb0100;</pre>
+<pre>            }</pre>
+<pre>            iVar13 = 1;</pre>
+<pre>            while( true ) {</pre>
+<pre>              uVar15 = 0;</pre>
+<pre>              if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>                uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>              }</pre>
+<pre>              if (((uVar15 &amp; 0x20000) == 0) || (iVar13 == 100)) break;</pre>
+<pre>              iVar13 = iVar13 + 1;</pre>
+<pre>            }</pre>
+<pre>            if ((uVar15 &amp; 0x2ff00) == 0x100) {</pre>
+<pre>              uVar9 = uVar15 &amp; 0xff;</pre>
+<pre>              goto LAB_0006acb8;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          iVar11 = iVar11 + 1;</pre>
+<pre>          if (iVar11 == 100) break;</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        uVar9 = 0;</pre>
+<pre>LAB_0006acb8:</pre>
+<pre>        if ((int)(uVar15 &lt;&lt; 0xe) &lt; 0) {</pre>
+<pre>          printk("ERROR!!! ");</pre>
+<pre>          printk("BBP(viaMCU=%d) read R%d fail\n",0,1);</pre>
+<pre>          uVar9 = (uint)*(byte *)(param_1 + 0x4aca);</pre>
+<pre>LAB_0006ae4c:</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>          Status = Status &amp; 0xfffffffe;</pre>
+<pre>          uVar16 = uVar15 &amp; 1;</pre>
+<pre>        }</pre>
+<pre>        iVar11 = 0;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        while( true ) {</pre>
+<pre>          uVar15 = 0;</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x20000) == 0) {</pre>
+<pre>            if (cVar3 == '\0') {</pre>
+<pre>              *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x7028) = 0xb0100;</pre>
+<pre>            }</pre>
+<pre>            AsicSendCommandToMcuBBP(param_1,0x80,0xff,0,0,0);</pre>
+<pre>            RTMPusecDelay(1000);</pre>
+<pre>            iVar13 = 1;</pre>
+<pre>            while( true ) {</pre>
+<pre>              uVar15 = 0;</pre>
+<pre>              if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>                uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>              }</pre>
+<pre>              if (((uVar15 &amp; 0x20000) == 0) || (iVar13 == 100)) break;</pre>
+<pre>              iVar13 = iVar13 + 1;</pre>
+<pre>            }</pre>
+<pre>            if ((uVar15 &amp; 0x2ff00) == 0x100) {</pre>
+<pre>              uVar9 = uVar15 &amp; 0xff;</pre>
+<pre>              goto LAB_0006adf4;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          iVar11 = iVar11 + 1;</pre>
+<pre>          if (iVar11 == 100) break;</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        uVar9 = 0;</pre>
+<pre>LAB_0006adf4:</pre>
+<pre>        if ((int)(uVar15 &lt;&lt; 0xe) &lt; 0) {</pre>
+<pre>          printk("ERROR!!! ");</pre>
+<pre>          printk("BBP(viaMCU=%d) read R%d fail\n",1,1);</pre>
+<pre>          uVar9 = (uint)*(byte *)(param_1 + 0x4aca);</pre>
+<pre>          if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>            *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) =</pre>
+<pre>                 *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) &amp; 0xfffdffff;</pre>
+<pre>          }</pre>
+<pre>          goto LAB_0006ae4c;</pre>
+<pre>        }</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      if (cVar3 == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        if (uVar16 != 0) {</pre>
+<pre>          Status = Status | 1;</pre>
+<pre>        }</pre>
+<pre>        goto LAB_0006ae70;</pre>
+<pre>      }</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>LAB_0006ae70:</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre>    uVar15 = Status;</pre>
+<pre>    if (cVar3 == '\0') {</pre>
+<pre>      uVar9 = uVar9 &amp; 0xe7;</pre>
+<pre>      if (*(int *)(param_1 + 0x29f8) != 4) {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>          Status = Status &amp; 0xfffffffe;</pre>
+<pre>          uVar16 = uVar15 &amp; 1;</pre>
+<pre>        }</pre>
+<pre>        iVar11 = 1;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        while( true ) {</pre>
+<pre>          uVar15 = 0;</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x20000) == 0) goto LAB_0006b018;</pre>
+<pre>          iVar13 = iVar11 % 0x14;</pre>
+<pre>          iVar11 = iVar11 + 1;</pre>
+<pre>          if ((iVar13 == 0) &amp;&amp; (cVar3 == '\0')) {</pre>
+<pre>            *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar15 &amp; 0xfffdffff;</pre>
+<pre>          }</pre>
+<pre><span class="green">          printk(&amp;_LC12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          if (iVar11 == 100) break;</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        goto LAB_0006b0bc;</pre>
+<pre>      }</pre>
+<pre>      uVar16 = 0;</pre>
+<pre>      if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        uVar16 = uVar15 &amp; 1;</pre>
+<pre>      }</pre>
+<pre>      iVar11 = 1;</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      while( true ) {</pre>
+<pre>        uVar15 = 0;</pre>
+<pre>        if (cVar3 == '\0') {</pre>
+<pre>          uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>        }</pre>
+<pre>        if ((uVar15 &amp; 0x20000) == 0) goto LAB_0006af04;</pre>
+<pre>        iVar11 = iVar11 + 1;</pre>
+<pre><span class="green">        printk(&amp;_LC12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar11 == 100) break;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      goto LAB_0006af44;</pre>
+<pre>    }</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    if ((*(uint *)(param_1 + 0x4bf4) &amp; 0xf0) != 0x20) goto LAB_0006abd4;</pre>
+<pre>    uVar9 = 0;</pre>
+<pre>    if (cVar3 == '\0') {</pre>
+<pre>      if (*(int *)(param_1 + 0x29f8) == 4) {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>          Status = Status &amp; 0xfffffffe;</pre>
+<pre>          uVar16 = uVar15 &amp; 1;</pre>
+<pre>        }</pre>
+<pre>        iVar11 = 0;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        while( true ) {</pre>
+<pre>          uVar15 = 0;</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x20000) == 0) {</pre>
+<pre>            if (cVar3 == '\0') {</pre>
+<pre>              *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x101c) = 0xb0100;</pre>
+<pre>            }</pre>
+<pre>            iVar13 = 1;</pre>
+<pre>            while( true ) {</pre>
+<pre>              uVar15 = 0;</pre>
+<pre>              if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>                uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>              }</pre>
+<pre>              if (((uVar15 &amp; 0x20000) == 0) || (iVar13 == 100)) break;</pre>
+<pre>              iVar13 = iVar13 + 1;</pre>
+<pre>            }</pre>
+<pre>            if ((uVar15 &amp; 0x2ff00) == 0x100) {</pre>
+<pre>              uVar9 = uVar15 &amp; 0xff;</pre>
+<pre>              goto LAB_0006a8e8;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          iVar11 = iVar11 + 1;</pre>
+<pre>          if (iVar11 == 100) break;</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        uVar9 = 0;</pre>
+<pre>LAB_0006a8e8:</pre>
+<pre>        if ((int)(uVar15 &lt;&lt; 0xe) &lt; 0) {</pre>
+<pre>          printk("ERROR!!! ");</pre>
+<pre>          printk("BBP(viaMCU=%d) read R%d fail\n",0,1);</pre>
+<pre>          uVar9 = (uint)*(byte *)(param_1 + 0x4aca);</pre>
+<pre>LAB_0006aa7c:</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>          Status = Status &amp; 0xfffffffe;</pre>
+<pre>          uVar16 = uVar15 &amp; 1;</pre>
+<pre>        }</pre>
+<pre>        iVar11 = 0;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        while( true ) {</pre>
+<pre>          uVar15 = 0;</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x20000) == 0) {</pre>
+<pre>            if (cVar3 == '\0') {</pre>
+<pre>              *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x7028) = 0xb0100;</pre>
+<pre>            }</pre>
+<pre>            AsicSendCommandToMcuBBP(param_1,0x80,0xff,0,0,0);</pre>
+<pre>            RTMPusecDelay(1000);</pre>
+<pre>            iVar13 = 1;</pre>
+<pre>            while( true ) {</pre>
+<pre>              uVar15 = 0;</pre>
+<pre>              if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>                uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>              }</pre>
+<pre>              if (((uVar15 &amp; 0x20000) == 0) || (iVar13 == 100)) break;</pre>
+<pre>              iVar13 = iVar13 + 1;</pre>
+<pre>            }</pre>
+<pre>            if ((uVar15 &amp; 0x2ff00) == 0x100) {</pre>
+<pre>              uVar9 = uVar15 &amp; 0xff;</pre>
+<pre>              goto LAB_0006aa24;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          iVar11 = iVar11 + 1;</pre>
+<pre>          if (iVar11 == 100) break;</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        uVar9 = 0;</pre>
+<pre>LAB_0006aa24:</pre>
+<pre>        if ((int)(uVar15 &lt;&lt; 0xe) &lt; 0) {</pre>
+<pre>          printk("ERROR!!! ");</pre>
+<pre>          printk("BBP(viaMCU=%d) read R%d fail\n",1,1);</pre>
+<pre>          uVar9 = (uint)*(byte *)(param_1 + 0x4aca);</pre>
+<pre>          if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>            *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) =</pre>
+<pre>                 *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) &amp; 0xfffdffff;</pre>
+<pre>          }</pre>
+<pre>          goto LAB_0006aa7c;</pre>
+<pre>        }</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      if (cVar3 == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        if (uVar16 != 0) {</pre>
+<pre>          Status = Status | 1;</pre>
+<pre>        }</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    uVar15 = Status;</pre>
+<pre>    if (cVar3 == '\0') {</pre>
+<pre>      uVar9 = uVar9 &amp; 0xe7 | 0x10;</pre>
+<pre>      if (*(int *)(param_1 + 0x29f8) != 4) {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>          Status = Status &amp; 0xfffffffe;</pre>
+<pre>          uVar16 = uVar15 &amp; 1;</pre>
+<pre>        }</pre>
+<pre>        iVar11 = 1;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        while( true ) {</pre>
+<pre>          uVar15 = 0;</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x20000) == 0) goto LAB_0006b018;</pre>
+<pre>          iVar13 = iVar11 % 0x14;</pre>
+<pre>          iVar11 = iVar11 + 1;</pre>
+<pre>          if ((iVar13 == 0) &amp;&amp; (cVar3 == '\0')) {</pre>
+<pre>            *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar15 &amp; 0xfffdffff;</pre>
+<pre>          }</pre>
+<pre><span class="green">          printk(&amp;_LC12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          if (iVar11 == 100) break;</pre>
+<pre><span class="green">          cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        }</pre>
+<pre>        goto LAB_0006b0bc;</pre>
+<pre>      }</pre>
+<pre>      uVar16 = 0;</pre>
+<pre>      if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        uVar16 = uVar15 &amp; 1;</pre>
+<pre>      }</pre>
+<pre>      iVar11 = 1;</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      while( true ) {</pre>
+<pre>        uVar15 = 0;</pre>
+<pre>        if (cVar3 == '\0') {</pre>
+<pre>          uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>        }</pre>
+<pre>        if ((uVar15 &amp; 0x20000) == 0) goto LAB_0006af04;</pre>
+<pre>        iVar11 = iVar11 + 1;</pre>
+<pre><span class="green">        printk(&amp;_LC12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar11 == 100) break;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      goto LAB_0006af44;</pre>
+<pre>    }</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>LAB_0006b12c:</pre>
+<pre>  uVar15 = Status;</pre>
+<pre>  uVar9 = 0;</pre>
+<pre>  if (cVar3 == '\0') {</pre>
+<pre>    if (*(int *)(param_1 + 0x29f8) == 4) {</pre>
+<pre>      uVar16 = 0;</pre>
+<pre>      if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        uVar16 = uVar15 &amp; 1;</pre>
+<pre>      }</pre>
+<pre>      iVar11 = 0;</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      while( true ) {</pre>
+<pre>        uVar15 = 0;</pre>
+<pre>        if (cVar3 == '\0') {</pre>
+<pre>          uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>        }</pre>
+<pre>        if ((uVar15 &amp; 0x20000) == 0) {</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x101c) = 0xb0300;</pre>
+<pre>          }</pre>
+<pre>          iVar13 = 1;</pre>
+<pre>          while( true ) {</pre>
+<pre>            uVar15 = 0;</pre>
+<pre>            if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>              uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>            }</pre>
+<pre>            if (((uVar15 &amp; 0x20000) == 0) || (iVar13 == 100)) break;</pre>
+<pre>            iVar13 = iVar13 + 1;</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x2ff00) == 0x300) {</pre>
+<pre>            uVar9 = uVar15 &amp; 0xff;</pre>
+<pre>            goto LAB_0006b214;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        iVar11 = iVar11 + 1;</pre>
+<pre>        if (iVar11 == 100) break;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      uVar9 = 0;</pre>
+<pre>LAB_0006b214:</pre>
+<pre>      if ((int)(uVar15 &lt;&lt; 0xe) &lt; 0) {</pre>
+<pre>        printk("ERROR!!! ");</pre>
+<pre>        printk("BBP(viaMCU=%d) read R%d fail\n",0,3);</pre>
+<pre>        uVar9 = (uint)*(byte *)(param_1 + 0x4acc);</pre>
+<pre>LAB_0006b3ac:</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      uVar16 = 0;</pre>
+<pre>      if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        uVar16 = uVar15 &amp; 1;</pre>
+<pre>      }</pre>
+<pre>      iVar11 = 0;</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      while( true ) {</pre>
+<pre>        uVar15 = 0;</pre>
+<pre>        if (cVar3 == '\0') {</pre>
+<pre>          uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>        }</pre>
+<pre>        if ((uVar15 &amp; 0x20000) == 0) {</pre>
+<pre>          if (cVar3 == '\0') {</pre>
+<pre>            *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x7028) = 0xb0300;</pre>
+<pre>          }</pre>
+<pre>          AsicSendCommandToMcuBBP(param_1,0x80,0xff,0,0,0);</pre>
+<pre>          RTMPusecDelay(1000);</pre>
+<pre>          iVar13 = 1;</pre>
+<pre>          while( true ) {</pre>
+<pre>            uVar15 = 0;</pre>
+<pre>            if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>              uVar15 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>            }</pre>
+<pre>            if (((uVar15 &amp; 0x20000) == 0) || (iVar13 == 100)) break;</pre>
+<pre>            iVar13 = iVar13 + 1;</pre>
+<pre>          }</pre>
+<pre>          if ((uVar15 &amp; 0x2ff00) == 0x300) {</pre>
+<pre>            uVar9 = uVar15 &amp; 0xff;</pre>
+<pre>            goto LAB_0006b354;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        iVar11 = iVar11 + 1;</pre>
+<pre>        if (iVar11 == 100) break;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      uVar9 = 0;</pre>
+<pre>LAB_0006b354:</pre>
+<pre>      if ((int)(uVar15 &lt;&lt; 0xe) &lt; 0) {</pre>
+<pre>        printk("ERROR!!! ");</pre>
+<pre>        printk("BBP(viaMCU=%d) read R%d fail\n",1,3);</pre>
+<pre>        uVar9 = (uint)*(byte *)(param_1 + 0x4acc);</pre>
+<pre>        if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>          *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) =</pre>
+<pre>               *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) &amp; 0xfffdffff;</pre>
+<pre>        }</pre>
+<pre>        goto LAB_0006b3ac;</pre>
+<pre>      }</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre>    if (cVar3 != '\x01') {</pre>
+<pre>      uVar15 = *(uint *)(param_1 + 0x4bf4);</pre>
+<pre>      goto LAB_0006b3d4;</pre>
+<pre>    }</pre>
+<pre>    Status = Status &amp; 0xfffffffe;</pre>
+<pre>    if (uVar16 != 0) {</pre>
+<pre>      Status = Status | 1;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  uVar15 = *(uint *)(param_1 + 0x4bf4);</pre>
+<pre>LAB_0006b3d4:</pre>
+<pre>  uVar16 = Status;</pre>
+<pre>  uVar9 = uVar9 &amp; 0xe7;</pre>
+<pre>  if ((uVar15 &amp; 0xf) == 3) {</pre>
+<pre>    uVar9 = uVar9 | 0x10;</pre>
+<pre>  }</pre>
+<pre>  else if ((uVar15 &amp; 0xf) == 2) {</pre>
+<pre>    uVar9 = uVar9 | 8;</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>    if (*(int *)(param_1 + 0x29f8) == 4) {</pre>
+<pre>      uVar15 = 0;</pre>
+<pre>      if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        uVar15 = uVar16 &amp; 1;</pre>
+<pre>      }</pre>
+<pre>      iVar11 = 1;</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      while( true ) {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (cVar3 == '\0') {</pre>
+<pre>          uVar16 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c);</pre>
+<pre>        }</pre>
+<pre>        if ((uVar16 &amp; 0x20000) == 0) break;</pre>
+<pre>        iVar11 = iVar11 + 1;</pre>
+<pre><span class="green">        printk(&amp;_LC12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar11 == 100) goto LAB_0006b4cc;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      if (cVar3 == '\0') {</pre>
+<pre>        *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c) = uVar9 | 0xa0300;</pre>
+<pre>      }</pre>
+<pre>      *(char *)(param_1 + 0x4acc) = (char)uVar9;</pre>
+<pre>      if (iVar11 != 100) goto LAB_0006b4ec;</pre>
+<pre>LAB_0006b4cc:</pre>
+<pre>      printk("ERROR!!! ");</pre>
+<pre>      printk("BBP write R%d fail\n",3);</pre>
+<pre>LAB_0006b4ec:</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      uVar15 = 0;</pre>
+<pre>      if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>        Status = Status &amp; 0xfffffffe;</pre>
+<pre>        uVar15 = uVar16 &amp; 1;</pre>
+<pre>      }</pre>
+<pre>      iVar11 = 1;</pre>
+<pre><span class="green">      cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      while( true ) {</pre>
+<pre>        uVar16 = 0;</pre>
+<pre>        if (cVar3 == '\0') {</pre>
+<pre>          uVar16 = *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028);</pre>
+<pre>        }</pre>
+<pre>        if ((uVar16 &amp; 0x20000) == 0) break;</pre>
+<pre>        iVar13 = iVar11 % 0x14;</pre>
+<pre>        iVar11 = iVar11 + 1;</pre>
+<pre>        if ((iVar13 == 0) &amp;&amp; (cVar3 == '\0')) {</pre>
+<pre>          *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar16 &amp; 0xfffdffff;</pre>
+<pre>        }</pre>
+<pre><span class="green">        printk(&amp;_LC12)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar11 == 100) goto LAB_0006b648;</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      if (cVar3 == '\0') {</pre>
+<pre>        *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar9 | 0xa0300;</pre>
+<pre>      }</pre>
+<pre>      iVar13 = AsicSendCommandToMcuBBP(param_1,0x80,0xff,0,0,0);</pre>
+<pre>      if (*(char *)(param_1 + 0x16964) == '\x01') {</pre>
+<pre>        RTMPusecDelay(1000);</pre>
+<pre>      }</pre>
+<pre>      if ((iVar13 == 0) &amp;&amp; (*(char *)(param_1 + 0xec) == '\0')) {</pre>
+<pre>        *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar9 | 0x80300;</pre>
+<pre>      }</pre>
+<pre>      *(char *)(param_1 + 0x4acc) = (char)uVar9;</pre>
+<pre>      if (iVar11 != 100) goto LAB_0006b690;</pre>
+<pre>LAB_0006b648:</pre>
+<pre>      printk("ERROR!!! ");</pre>
+<pre>      printk("BBP write R%d fail\n",3);</pre>
+<pre>      if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>        *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) =</pre>
+<pre>             *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) &amp; 0xfffdffff;</pre>
+<pre>LAB_0006b690:</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre><span class="green">        cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    if ((cVar3 == '\x01') &amp;&amp; (Status = Status &amp; 0xfffffffe, uVar15 != 0)) {</pre>
+<pre>      Status = Status | 1;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  if ((4 &lt; *(byte *)(param_1 + 0x16982)) || (bVar2)) {</pre>
+<pre>    if (*(char *)(param_1 + 0x16a90) == '\0') {</pre>
+<pre>      *(undefined2 *)(param_1 + 0x16aaa) = 0x2f;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a98) = 7;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a9e) = 2;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a9f) = 6;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16aa0) = 10;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a9a) = 1;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16aa1) = 4;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16aa2) = 3;</pre>
+<pre>      *(undefined2 *)(param_1 + 0x16aa8) = 0x5e;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a90) = 1;</pre>
+<pre>      AsicEvaluateRxAnt[param_1 + 3] = (code)0x3;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a99) = 1;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a9b) = 4;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a9c) = 4;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16a9d) = 3;</pre>
+<pre>      *(undefined2 *)(param_1 + 0x16aa4) = 0;</pre>
+<pre>      *(undefined2 *)(param_1 + 0x16aa6) = 0;</pre>
+<pre>    }</pre>
+<pre>    AsicSetEdcaParm(param_1,param_1 + 0x16a90);</pre>
+<pre>    if (*(char *)(param_1 + 0x16874) == '\0') {</pre>
+<pre>      *(undefined2 *)(param_1 + 0x1688e) = 0x2f;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16874) = 1;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x1687c) = 7;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16882) = 2;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16884) = 10;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16885) = 4;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16886) = 3;</pre>
+<pre>      *(undefined2 *)(param_1 + 0x1688c) = 0x5e;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x1687b) = 3;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x1687d) = 2;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x1687e) = 2;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x1687f) = 4;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16880) = 4;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16881) = 3;</pre>
+<pre>      *(undefined1 *)(param_1 + 0x16883) = 10;</pre>
+<pre>      *(undefined2 *)(param_1 + 0x16888) = 0;</pre>
+<pre>      *(undefined2 *)(param_1 + 0x1688a) = 0;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    AsicSetEdcaParm(param_1,0);</pre>
+<pre>  }</pre>
+<pre>  if (*(byte *)(param_1 + 0x16982) &lt; 5) {</pre>
+<pre>    *(uint *)(param_1 + 0x16afc) = *(uint *)(param_1 + 0x16afc) &amp; 0xfffdffff;</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0x16a88) == '\0') {</pre>
+<pre>    *(uint *)(param_1 + 0x76904) = *(uint *)(param_1 + 0x76904) &amp; 0xffefffff;</pre>
+<pre>    pcVar6 = AsicDisableRDG;</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>    *(uint *)(param_1 + 0x76904) = *(uint *)(param_1 + 0x76904) | 0x100000;</pre>
+<pre>    pcVar6 = AsicEnableRDG;</pre>
+<pre>  }</pre>
+<pre>  (*pcVar6)(param_1);</pre>
+<pre><span class="green">  memcpy((void *)(param_1 + 0x51ac),__src,6)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  AsicSetBssid(param_1,__src);</pre>
+<pre>  AsicSetMcastWC(param_1);</pre>
+<pre>  if ((*(char *)(param_1 + 0xec) == '\0') &amp;&amp;</pre>
+<pre>     (*(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x1800) = 0, *(char *)(param_1 + 0xec) == '\0')) {</pre>
+<pre>    *(undefined4 *)(*(int *)(param_1 + 0xdc) + 0x1804) = 0;</pre>
+<pre>  }</pre>
+<pre>  iVar11 = 0x180c;</pre>
+<pre><span class="green">  cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  while( true ) {</pre>
+<pre>    if (cVar3 == '\0') {</pre>
+<pre>      *(undefined4 *)(*(int *)(param_1 + 0xdc) + iVar11 + -4) = 0;</pre>
+<pre>    }</pre>
+<pre>    if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>      *(undefined4 *)(*(int *)(param_1 + 0xdc) + iVar11) = 0;</pre>
+<pre>    }</pre>
+<pre>    iVar11 = iVar11 + 8;</pre>
+<pre>    if (iVar11 == 0x1ffc) break;</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  *(undefined2 *)(param_1 + 0x71358) = 5;</pre>
+<pre>  *(uint *)(param_1 + 0x5d350) = *(uint *)(param_1 + 0x5d350) &amp; 0xffff3f80 | 0x4003;</pre>
+<pre>  *(undefined1 *)(param_1 + 0x5d190) = 1;</pre>
+<pre>  *(undefined1 *)(param_1 + 0x169ed) = *(undefined1 *)(param_1 + 0x169ec);</pre>
+<pre>  AsicBBPAdjust(param_1);</pre>
+<pre>  *(uint *)(param_1 + 0x16abc) = *(uint *)(param_1 + 0x16abc) &amp; 0xfffffffb;</pre>
+<pre>  AsicSwitchChannel(param_1,*(undefined1 *)(param_1 + 0x169ed),0);</pre>
+<pre>  AsicLockChannel(param_1,*(undefined1 *)(param_1 + 0x169ed));</pre>
+<pre>  MlmeSetTxPreamble(param_1,*(undefined2 *)(param_1 + 0x16a70));</pre>
+<pre>  for (bVar4 = 0; bVar4 &lt; *(byte *)(param_1 + 0x51aa); bVar4 = bVar4 + 1) {</pre>
+<pre>    MlmeUpdateTxRates(param_1,0,bVar4);</pre>
+<pre>    if (4 &lt; *(byte *)(param_1 + 0x16982)) {</pre>
+<pre>      MlmeUpdateHtTxRates(param_1,bVar4);</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  *(undefined1 *)(param_1 + 0x16acc) = 0;</pre>
+<pre>  AsicUpdateProtect(param_1,0,0x3f,1,0);</pre>
+<pre>  APUpdateCapabilityAndErpIe(param_1);</pre>
+<pre>  APUpdateOperationMode(param_1);</pre>
+<pre>  RTMPSetLEDStatus(param_1,1);</pre>
+<pre>  puVar17 = (undefined2 *)(param_1 + 0x5d12a);</pre>
+<pre>  iVar11 = 0;</pre>
+<pre>  do {</pre>
+<pre>    *puVar17 = 2;</pre>
+<pre>    iVar13 = iVar11 + 1;</pre>
+<pre>    AsicRemovePairwiseKeyEntry(param_1,iVar11);</pre>
+<pre>    puVar17 = puVar17 + 0x510;</pre>
+<pre>    iVar11 = iVar13;</pre>
+<pre>  } while (iVar13 != 0x20);</pre>
+<pre>  for (uVar15 = 0; uVar15 &lt; *(byte *)(param_1 + 0x51aa); uVar15 = uVar15 + 1 &amp; 0xff) {</pre>
+<pre>    iVar11 = uVar15 * 0x1140 + param_1;</pre>
+<pre>    *(undefined1 *)(iVar11 + 0x52d7) = 2;</pre>
+<pre>    if (*(int *)(iVar11 + 0x51dc) - 3U &lt; 7) {</pre>
+<pre>      *(undefined1 *)(iVar11 + 0x5240) = 1;</pre>
+<pre>    }</pre>
+<pre>    iVar13 = uVar15 * 0x1140 + param_1;</pre>
+<pre>    iVar11 = *(int *)(iVar13 + 0x51e0);</pre>
+<pre>    uVar9 = (*(byte *)(param_1 + 0xb0) - 3) + uVar15;</pre>
+<pre>    if (iVar11 == 0) {</pre>
+<pre>      iVar11 = uVar15 * 0x10c;</pre>
+<pre>      puVar18 = (undefined1 *)(param_1 + iVar11 + 0x755d4);</pre>
+<pre>      iVar19 = param_1 + 0x75594 + iVar11;</pre>
+<pre>      uVar16 = 0;</pre>
+<pre>      do {</pre>
+<pre>        uVar1 = *puVar18;</pre>
+<pre>        if ((puVar18[1] != '\0') &amp;&amp;</pre>
+<pre>           (AsicAddSharedKeyEntry(param_1,uVar15,uVar16,iVar19),</pre>
+<pre>           (uint)*(byte *)(iVar13 + 0x5240) == (uVar16 &amp; 0xff))) {</pre>
+<pre>          uVar5 = RandomByte(param_1);</pre>
+<pre>          *(undefined1 *)(param_1 + uVar16 * 0x43 + iVar11 + 0x755b4) = uVar5;</pre>
+<pre>          uVar5 = RandomByte(param_1);</pre>
+<pre>          puVar18[-0x1f] = uVar5;</pre>
+<pre>          uVar5 = RandomByte(param_1);</pre>
+<pre>          puVar18[-0x1e] = uVar5;</pre>
+<pre>          RTMPSetWcidSecurityInfo(param_1,uVar15,uVar16,uVar1,uVar9 &amp; 0xff,0);</pre>
+<pre>        }</pre>
+<pre>        uVar16 = uVar16 + 1;</pre>
+<pre>        puVar18 = puVar18 + 0x43;</pre>
+<pre>        iVar19 = iVar19 + 0x43;</pre>
+<pre>      } while (uVar16 != 4);</pre>
+<pre>    }</pre>
+<pre>    else if (((iVar11 == 4) || (iVar11 == 6)) || (iVar11 == 8)) {</pre>
+<pre>      iVar11 = uVar15 * 0x1140;</pre>
+<pre>      iVar19 = param_1 + iVar11 + 0x5255;</pre>
+<pre>      iVar20 = param_1 + iVar11 + 0x51ac;</pre>
+<pre>      GenRandom(param_1,iVar20,iVar19);</pre>
+<pre>      iVar13 = param_1 + iVar11 + 0x52b7;</pre>
+<pre>      GenRandom(param_1,iVar20,iVar13);</pre>
+<pre>      iVar22 = param_1 + iVar11 + 0x5295;</pre>
+<pre>      WpaDeriveGTK(iVar19,iVar13,iVar20,iVar22,0x20);</pre>
+<pre>      WPAInstallSharedKey(param_1,*(undefined1 *)(param_1 + iVar11 + 0x51e4),uVar15,</pre>
+<pre>                          *(undefined1 *)(param_1 + iVar11 + 0x5240),uVar9 &amp; 0xff,1,iVar22,0x20);</pre>
+<pre>    }</pre>
+<pre>    iVar11 = uVar15 * 0x1140 + param_1;</pre>
+<pre>    uVar21 = *(undefined4 *)(iVar11 + 0x51dc);</pre>
+<pre>    if (2 &lt; RTDebugLevel) {</pre>
+<pre>      uVar7 = GetAuthMode((int)(char)uVar21);</pre>
+<pre>      uVar14 = *(undefined4 *)(iVar11 + 0x51e0);</pre>
+<pre>      uVar8 = GetEncryptType((int)(char)uVar14);</pre>
+<pre>      printk("### BSS(%d) AuthMode(%d)=%s, WepStatus(%d)=%s , AccessControlList.Policy=%ld\n",uVar15</pre>
+<pre>             ,uVar21,uVar7,uVar14,uVar8,*(undefined4 *)(iVar11 + 0x5928));</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  RTMPSetPiggyBack(param_1,*(undefined1 *)(param_1 + 0x16a7f));</pre>
+<pre>  ApLogEvent(param_1,__src,0);</pre>
+<pre>  *(undefined4 *)(param_1 + 0x1f0f8) = 0;</pre>
+<pre>  *(undefined4 *)(param_1 + 0x1f0f0) = 0;</pre>
+<pre>  *(uint *)(param_1 + 0x16abc) = *(uint *)(param_1 + 0x16abc) | 0x200000;</pre>
+<pre>  RTMP_IndicateMediaState(param_1,1);</pre>
+<pre>  *(uint *)(param_1 + 0x76904) = *(uint *)(param_1 + 0x76904) &amp; 0xffffffbf;</pre>
+<pre>  APMakeAllBssBeacon(param_1);</pre>
+<pre>  APUpdateAllBeaconFrame(param_1);</pre>
+<pre>  *(undefined1 *)(param_1 + 0x16acc) = 0;</pre>
+<pre>  AsicEnableBssSync(param_1);</pre>
+<pre>  if ((*(char *)(param_1 + 0xec) == '\0') &amp;&amp;</pre>
+<pre>     (*(uint *)(*(int *)(param_1 + 0xdc) + 0x1128) =</pre>
+<pre>           *(uint *)(*(int *)(param_1 + 0xdc) + 0x1128) &amp; 0xffff0000 | 0x60,</pre>
+<pre>     *(char *)(param_1 + 0xec) == '\0')) {</pre>
+<pre>    *(uint *)(*(int *)(param_1 + 0xdc) + 0x112c) = *(uint *)(*(int *)(param_1 + 0xdc) + 0x112c) | 1;</pre>
+<pre>  }</pre>
+<pre>  WPA_APSetGroupRekeyAction(param_1);</pre>
+<pre>  if (RTDebugLevel &lt; 3) {</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  printk("&lt;=== APStartUp\n");</pre>
+<pre>  return;</pre>
+<pre>LAB_0006b018:</pre>
+<pre>  if (cVar3 == '\0') {</pre>
+<pre>    *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar9 | 0xa0100;</pre>
+<pre>  }</pre>
+<pre>  iVar13 = AsicSendCommandToMcuBBP(param_1,0x80,0xff,0,0,0);</pre>
+<pre>  if (*(char *)(param_1 + 0x16964) == '\x01') {</pre>
+<pre>    RTMPusecDelay(1000);</pre>
+<pre>  }</pre>
+<pre>  if ((iVar13 == 0) &amp;&amp; (*(char *)(param_1 + 0xec) == '\0')) {</pre>
+<pre>    *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) = uVar9 | 0x80100;</pre>
+<pre>  }</pre>
+<pre>  *(char *)(param_1 + 0x4aca) = (char)uVar9;</pre>
+<pre>  if (iVar11 == 100) {</pre>
+<pre>LAB_0006b0bc:</pre>
+<pre>    printk("ERROR!!! ");</pre>
+<pre>    printk("BBP write R%d fail\n",1);</pre>
+<pre>    if (*(char *)(param_1 + 0xec) == '\0') {</pre>
+<pre>      *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) =</pre>
+<pre>           *(uint *)(*(int *)(param_1 + 0xdc) + 0x7028) &amp; 0xfffdffff;</pre>
+<pre>      goto LAB_0006b104;</pre>
+<pre>    }</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre>LAB_0006b104:</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xad)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  if (cVar3 == '\x01') goto LAB_0006b118;</pre>
+<pre><span class="green">  cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  goto LAB_0006b12c;</pre>
+<pre>LAB_0006af04:</pre>
+<pre>  if (cVar3 == '\0') {</pre>
+<pre>    *(uint *)(*(int *)(param_1 + 0xdc) + 0x101c) = uVar9 | 0xa0100;</pre>
+<pre>  }</pre>
+<pre>  *(char *)(param_1 + 0x4aca) = (char)uVar9;</pre>
+<pre>  if (iVar11 == 100) {</pre>
+<pre>LAB_0006af44:</pre>
+<pre>    printk("ERROR!!! ");</pre>
+<pre>    printk("BBP write R%d fail\n",1);</pre>
+<pre>  }</pre>
+<pre>  if (*(char *)(param_1 + 0xad) == '\x01') {</pre>
+<pre>LAB_0006b118:</pre>
+<pre>    Status = Status &amp; 0xfffffffe;</pre>
+<pre>    if (uVar16 != 0) {</pre>
+<pre>      Status = Status | 1;</pre>
+<pre>    }</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  else {</pre>
+<pre><span class="green">    cVar3 = *(char *)(param_1 + 0xec)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  goto LAB_0006b12c;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

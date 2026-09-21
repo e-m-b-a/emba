@@ -1,0 +1,351 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./c0dd09722bb92eacf9bb8e634dbc95c5.html" title="./c0dd09722bb92eacf9bb8e634dbc95c5.html" >&laquo; Back to c0dd09722bb92eacf9bb8e634dbc95c5</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Heritage AFTER dead removal. Example location: r0x00423014 : 0x00403cbc */</pre>
+<pre>/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */</pre>
+<pre>/* WARNING: Restarted to delay deadcode elimination for space: ram */</pre>
+<br />
+<pre>undefined4 tcprequest_main(int param_1,undefined4 *param_2)</pre>
+<br />
+<pre>{</pre>
+<pre>  int iVar1;</pre>
+<pre>  hostent *phVar2;</pre>
+<pre>  uint __fd;</pre>
+<pre>  uint uVar3;</pre>
+<pre>  int *piVar4;</pre>
+<pre>  __fd_mask *p_Var5;</pre>
+<pre>  size_t __n;</pre>
+<pre>  ssize_t sVar6;</pre>
+<pre>  FILE *__stream;</pre>
+<pre>  int iVar7;</pre>
+<pre>  undefined4 uVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  char *pcVar10;</pre>
+<pre>  int local_4c8 [2];</pre>
+<pre>  timeval local_4c0;</pre>
+<pre>  sockaddr local_4b8;</pre>
+<pre>  uint local_4a8 [32];</pre>
+<pre>  char local_428 [1024];</pre>
+<pre>  </pre>
+<pre>  __stream = _stdout;</pre>
+<pre>  if (param_1 &lt; 3) {</pre>
+<a class="reference" href="./d32fc0442c2e3fd0725d280ca3ad82ad.html" title="./d32fc0442c2e3fd0725d280ca3ad82ad.html" ><pre>    FUN_00403810(*param_2);</pre></a>
+
+<pre>    return 0;</pre>
+<pre>  }</pre>
+<pre>  uVar9 = 0x50;</pre>
+<pre>  if (param_1 != 3) {</pre>
+<pre>    uVar9 = atoi((char *)param_2[3]);</pre>
+<pre>    if ((int)uVar9 &lt; 1) {</pre>
+<pre>      uVar9 = 0x50;</pre>
+<pre>    }</pre>
+<pre>    if (param_1 != 4) {</pre>
+<pre>      uVar8 = *param_2;</pre>
+<pre><span class="green">      while (iVar1 = getopt(param_1 + -3,(char **)(param_2 + 3),"sf:t:"), 0 &lt; iVar1) {</span>   //possible issue identified - semgrep</pre>
+<pre>        if (iVar1 == 0x73) {</pre>
+<pre>          DAT_00422a24 = 1;</pre>
+<pre>        }</pre>
+<pre>        else if (iVar1 == 0x74) {</pre>
+<pre>          DAT_00422110 = atoi(_optarg);</pre>
+<pre>          if (DAT_00422110 &lt; 1) {</pre>
+<pre>            DAT_00422110 = 5;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          if (iVar1 != 0x66) {</pre>
+<a class="reference" href="./d32fc0442c2e3fd0725d280ca3ad82ad.html" title="./d32fc0442c2e3fd0725d280ca3ad82ad.html" ><pre>            FUN_00403810(uVar8);</pre></a>
+
+<pre>                    /* WARNING: Subroutine does not return */</pre>
+<pre>            exit(0);</pre>
+<pre>          }</pre>
+<pre>          DAT_00422a20 = _optarg;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  pcVar10 = (char *)param_2[2];</pre>
+<pre>  local_4c8[1] = 4;</pre>
+<pre>  phVar2 = gethostbyname(pcVar10);</pre>
+<pre>  if (phVar2 == (hostent *)0x0) {</pre>
+<pre>    fprintf(_stderr,"Can not get host by name: %s\n",pcVar10);</pre>
+<pre>    return 0xffffffff;</pre>
+<pre>  }</pre>
+<pre>  __fd = socket(2,2,0);</pre>
+<pre>  if (__fd == 0xffffffff) {</pre>
+<pre>    fputs("Can not create socket\n",_stderr);</pre>
+<pre>    return 0xffffffff;</pre>
+<pre>  }</pre>
+<pre>  uVar3 = fcntl(__fd,3);</pre>
+<pre>  fcntl(__fd,4,uVar3 | 0x80);</pre>
+<pre>  local_4b8.sa_data._2_4_ = *(undefined4 *)*phVar2-&gt;h_addr_list;</pre>
+<pre>  local_4b8.sa_data._0_2_ = (ushort)((uVar9 &amp; 0xffff) &lt;&lt; 8) | (ushort)((uVar9 &amp; 0xffff) &gt;&gt; 8);</pre>
+<pre>  local_4b8.sa_family = 2;</pre>
+<pre>  local_4b8.sa_data[6] = '\0';</pre>
+<pre>  local_4b8.sa_data[7] = '\0';</pre>
+<pre>  local_4b8.sa_data[8] = '\0';</pre>
+<pre>  local_4b8.sa_data[9] = '\0';</pre>
+<pre>  local_4b8.sa_data[10] = '\0';</pre>
+<pre>  local_4b8.sa_data[0xb] = '\0';</pre>
+<pre>  local_4b8.sa_data[0xc] = '\0';</pre>
+<pre>  local_4b8.sa_data[0xd] = '\0';</pre>
+<pre>  iVar1 = connect(__fd,&amp;local_4b8,0x10);</pre>
+<pre>  if (iVar1 != -1) {</pre>
+<pre>    return 0xffffffff;</pre>
+<pre>  }</pre>
+<pre>  piVar4 = __errno_location();</pre>
+<pre>  if (*piVar4 == 0x96) {</pre>
+<pre>    p_Var5 = (__fd_mask *)local_4a8;</pre>
+<pre>    do {</pre>
+<pre>      *p_Var5 = 0;</pre>
+<pre>      p_Var5 = p_Var5 + 1;</pre>
+<pre>    } while (p_Var5 != (__fd_mask *)local_428);</pre>
+<pre>    local_4a8[__fd &gt;&gt; 5] = local_4a8[__fd &gt;&gt; 5] | 1 &lt;&lt; (__fd &amp; 0x1f);</pre>
+<pre>    local_4c0.tv_sec = DAT_00422110;</pre>
+<pre>    local_4c0.tv_usec = 0;</pre>
+<pre>    iVar1 = select(__fd + 1,(fd_set *)0x0,(fd_set *)local_4a8,(fd_set *)0x0,&amp;local_4c0);</pre>
+<pre>    if (((0 &lt; iVar1) &amp;&amp;</pre>
+<pre>        (iVar1 = getsockopt(__fd,0xffff,0x1007,local_4c8,(socklen_t *)(local_4c8 + 1)), iVar1 == 0))</pre>
+<pre>       &amp;&amp; (local_4c8[0] == 0)) {</pre>
+<pre>      uVar9 = fcntl(__fd,3);</pre>
+<pre>      fcntl(__fd,4,uVar9 &amp; 0xffffff7f);</pre>
+<pre>      pcVar10 = (char *)param_2[1];</pre>
+<pre>      __n = strlen(pcVar10);</pre>
+<pre>      sVar6 = send(__fd,pcVar10,__n,0);</pre>
+<pre>      if (sVar6 != -1) {</pre>
+<pre>        if ((DAT_00422a20 != (char *)0x0) &amp;&amp;</pre>
+<pre><span class="green">           (__stream = fopen(DAT_00422a20,"w"), __stream == (FILE *)0x0)) {</span>   //possible issue identified - semgrep</pre>
+<pre>          __stream = _stdout;</pre>
+<pre>        }</pre>
+<pre>        uVar9 = 0;</pre>
+<pre>LAB_00403cdc:</pre>
+<pre><span class="green">        sVar6 = recv(__fd,local_428,0x400,0)</span></span>   //possible issue identified - semgrep</pre>
+<pre>        iVar1 = 0;</pre>
+<pre>        if (DAT_00422a24 != 0) {</pre>
+<pre>LAB_00403dc0:</pre>
+<pre>          if (5 &lt; uVar9) goto LAB_00403ddc;</pre>
+<pre>          if (sVar6 &lt;= iVar1) goto LAB_00403cdc;</pre>
+<pre>          iVar7 = (int)local_428[iVar1];</pre>
+<pre>          switch(uVar9) {</pre>
+<pre>          case 0:</pre>
+<pre>            if (0x17 &lt; (iVar7 - 9U &amp; 0xff)) goto LAB_00403db8;</pre>
+<pre>            if ((1 &lt;&lt; (iVar7 - 9U &amp; 0x1f) &amp; 0x800013U) == 0) {</pre>
+<pre>              uVar9 = 1;</pre>
+<pre>            }</pre>
+<pre>            break;</pre>
+<pre>          case 1:</pre>
+<pre>            if (iVar7 == 10) {</pre>
+<pre>              uVar9 = 3;</pre>
+<pre>            }</pre>
+<pre>            else if (iVar7 == 0xd) {</pre>
+<pre>              uVar9 = 2;</pre>
+<pre>            }</pre>
+<pre>            break;</pre>
+<pre>          case 2:</pre>
+<pre>            uVar9 = 4;</pre>
+<pre>            if (iVar7 == 10) {</pre>
+<pre>              iVar1 = iVar1 + 1;</pre>
+<pre>              goto LAB_00403dc0;</pre>
+<pre>            }</pre>
+<pre>LAB_00403db8:</pre>
+<pre>            uVar9 = 1;</pre>
+<pre>            break;</pre>
+<pre>          case 3:</pre>
+<pre>          case 5:</pre>
+<pre>            uVar9 = 6;</pre>
+<pre>            if (iVar7 != 10) goto LAB_00403db8;</pre>
+<pre>            break;</pre>
+<pre>          case 4:</pre>
+<pre>            uVar9 = 5;</pre>
+<pre>            if (iVar7 != 0xd) goto LAB_00403db8;</pre>
+<pre>            iVar1 = iVar1 + 1;</pre>
+<pre>            goto LAB_00403dc0;</pre>
+<pre>          }</pre>
+<pre>          iVar1 = iVar1 + 1;</pre>
+<pre>          goto LAB_00403dc0;</pre>
+<pre>        }</pre>
+<pre>        goto LAB_00403de0;</pre>
+<pre>      }</pre>
+<pre>      fputs("can not send request message\n",_stderr);</pre>
+<pre>      goto LAB_00403e38;</pre>
+<pre>    }</pre>
+<pre>  }</pre>
+<pre>  close(__fd);</pre>
+<pre>  fprintf(_stderr,"Can not connect to %s:%d\n",pcVar10,uVar9);</pre>
+<pre>  return 0xffffffff;</pre>
+<pre>LAB_00403ddc:</pre>
+<pre>  DAT_00422a24 = 0;</pre>
+<pre>LAB_00403de0:</pre>
+<pre>  if (0 &lt; sVar6) {</pre>
+<pre>    local_428[sVar6] = '\0';</pre>
+<pre>    fputs(local_428 + iVar1,__stream);</pre>
+<pre>    goto LAB_00403cdc;</pre>
+<pre>  }</pre>
+<pre>  if (__stream != _stdout) {</pre>
+<pre>    fclose(__stream);</pre>
+<pre>  }</pre>
+<pre>LAB_00403e38:</pre>
+<pre>  close(__fd);</pre>
+<pre>  return 0;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

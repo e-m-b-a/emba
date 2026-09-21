@@ -1,0 +1,482 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./b437a544fb8a964f0a421986bde3fae4.html" title="./b437a544fb8a964f0a421986bde3fae4.html" >&laquo; Back to b437a544fb8a964f0a421986bde3fae4</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Removing unreachable block (ram,0x00403eb0) */</pre>
+<pre>/* WARNING: Removing unreachable block (ram,0x00403f10) */</pre>
+<pre>/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */</pre>
+<br />
+<a class="reference" href="./8f93581b104478266c0a023a826c5409.html" title="./8f93581b104478266c0a023a826c5409.html" ><pre>void FUN_00403250(uint param_1,int param_2,int param_3)</pre></a>
+
+<br />
+<pre>{</pre>
+<pre>  undefined2 uVar1;</pre>
+<pre>  int iVar2;</pre>
+<pre>  uint uVar3;</pre>
+<pre>  socklen_t *psVar4;</pre>
+<pre>  __fd_mask *p_Var5;</pre>
+<pre>  int iVar6;</pre>
+<pre>  ssize_t sVar7;</pre>
+<pre>  char *pcVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  tm *__src;</pre>
+<pre>  int iVar10;</pre>
+<pre>  uint uVar11;</pre>
+<pre>  uint uVar12;</pre>
+<pre>  uint uVar13;</pre>
+<pre>  char *__format;</pre>
+<pre>  uint uVar14;</pre>
+<pre>  uint uVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  int iVar17;</pre>
+<pre>  int iVar18;</pre>
+<pre>  uint uVar19;</pre>
+<pre>  uint uVar20;</pre>
+<pre>  int iVar21;</pre>
+<pre>  double dVar22;</pre>
+<pre>  double dVar23;</pre>
+<pre>  double dVar24;</pre>
+<pre>  double dVar25;</pre>
+<pre>  socklen_t local_460 [2];</pre>
+<pre>  timeval local_458;</pre>
+<pre>  timeval local_450;</pre>
+<pre>  timeval local_448;</pre>
+<pre>  undefined1 local_440 [8];</pre>
+<pre>  undefined1 auStack_438 [8];</pre>
+<pre>  char acStack_430 [40];</pre>
+<pre>  tm tStack_408;</pre>
+<pre>  undefined4 local_3dc;</pre>
+<pre>  undefined4 local_3d8;</pre>
+<pre>  undefined4 local_3d4;</pre>
+<pre>  uint local_3b4;</pre>
+<pre>  uint local_3b0;</pre>
+<pre>  __fd_mask local_3ac [32];</pre>
+<pre>  undefined4 local_32c [2];</pre>
+<pre>  int local_324;</pre>
+<pre>  char acStack_2ac [516];</pre>
+<pre>  uint local_a8;</pre>
+<pre>  uint local_a4;</pre>
+<pre>  uint local_a0;</pre>
+<pre>  uint local_9c;</pre>
+<pre>  uint local_98;</pre>
+<pre>  uint local_94;</pre>
+<pre>  uint local_90;</pre>
+<pre>  uint local_8c;</pre>
+<pre>  uint local_88;</pre>
+<pre>  uint local_84;</pre>
+<pre>  int local_80;</pre>
+<pre>  uint local_7c;</pre>
+<pre>  int local_78;</pre>
+<pre>  undefined1 *local_74;</pre>
+<pre>  undefined1 *local_70;</pre>
+<pre>  int local_6c;</pre>
+<pre>  uint local_68;</pre>
+<pre>  socklen_t *local_64;</pre>
+<pre>  socklen_t *local_60;</pre>
+<pre>  </pre>
+<pre>  if (debug != 0) {</pre>
+<pre>    puts("Listening...");</pre>
+<pre>  }</pre>
+<pre>  local_64 = local_460;</pre>
+<pre>  local_460[0] = 0x10;</pre>
+<pre>  local_68 = 1 &lt;&lt; (param_1 &amp; 0x1f);</pre>
+<pre>  local_60 = local_64 + (param_1 &gt;&gt; 5);</pre>
+<pre>  local_70 = local_440;</pre>
+<pre>  local_74 = auStack_438;</pre>
+<pre>  local_458.tv_sec = 0;</pre>
+<pre>  local_6c = 0;</pre>
+<pre>  do {</pre>
+<pre>    local_458.tv_usec = 0;</pre>
+<pre>    do {</pre>
+<pre>      do {</pre>
+<pre>        while( true ) {</pre>
+<pre>          psVar4 = local_60;</pre>
+<pre>          uVar11 = local_68;</pre>
+<pre>          p_Var5 = local_3ac;</pre>
+<pre>          do {</pre>
+<pre>            *p_Var5 = 0;</pre>
+<pre>            p_Var5 = p_Var5 + 1;</pre>
+<pre>          } while (p_Var5 != local_32c);</pre>
+<pre>          local_60[0x2d] = local_60[0x2d] | local_68;</pre>
+<pre>          iVar6 = select(param_1 + 1,(fd_set *)local_3ac,(fd_set *)0x0,(fd_set *)0x0,&amp;local_458);</pre>
+<pre>          if ((iVar6 != 1) || ((uVar11 &amp; psVar4[0x2d]) == 0)) break;</pre>
+<pre><span class="green">          sVar7 = recvfrom(param_1,&amp;DAT_0041cea0,0x5dc,0,(sockaddr *)local_440,local_64)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          if (sVar7 &lt; 0) {</pre>
+<pre>            perror("recvfrom");</pre>
+<pre>          }</pre>
+<pre>          else if (sVar7 - 1U &lt; 0x5db) {</pre>
+<pre>            gettimeofday(&amp;local_450,(__timezone_ptr_t)0x0);</pre>
+<pre>            local_80 = local_450.tv_sec;</pre>
+<pre>            local_78 = local_450.tv_usec;</pre>
+<pre>            if (debug != 0) {</pre>
+<pre>              printf("packet of length %d received\n",sVar7);</pre>
+<pre>              printf("Source: Address family %d\n",(uint)(ushort)local_440._0_2_);</pre>
+<pre>              uVar1 = local_440._2_2_;</pre>
+<pre>              if (local_440._0_2_ == 2) {</pre>
+<pre>                uVar11 = (uint)(ushort)local_440._2_2_;</pre>
+<pre>                pcVar8 = inet_ntoa((in_addr)local_440._4_4_);</pre>
+<pre>                uVar11 = (uVar11 &amp; 0xff) &lt;&lt; 8 | (uint)((ushort)uVar1 &gt;&gt; 8);</pre>
+<pre>                __format = "Source: INET Port %d host %s\n";</pre>
+<pre>              }</pre>
+<pre>              else {</pre>
+<pre>                if (local_440._0_2_ != 10) {</pre>
+<pre>                  printf("Source: Address family %d\n");</pre>
+<pre>                  goto LAB_004036bc;</pre>
+<pre>                }</pre>
+<pre>                uVar11 = (uint)*(ushort *)(local_70 + 2);</pre>
+<pre><span class="green">                pcVar8 = inet_ntop(10,local_74,acStack_2ac,0x200)</span></span>   //possible issue identified - semgrep</pre>
+<pre>                __format = "Source: INET6 Port %d host %s\n";</pre>
+<pre>              }</pre>
+<pre>              printf(__format,uVar11,pcVar8);</pre>
+<pre>            }</pre>
+<pre>LAB_004036bc:</pre>
+<pre>            uVar20 = DAT_0041cec0;</pre>
+<pre>            uVar19 = DAT_0041cebc;</pre>
+<pre>            uVar13 = DAT_0041ceb8;</pre>
+<pre>            uVar11 = DAT_0041cea8;</pre>
+<pre>            uVar14 = DAT_0041cea0 &lt;&lt; 0x18;</pre>
+<pre>            local_98 = DAT_0041cea0 &gt;&gt; 0x18;</pre>
+<pre>            uVar12 = DAT_0041cea0 &gt;&gt; 8;</pre>
+<pre>            uVar9 = DAT_0041cea0 &amp; 0xff00;</pre>
+<pre>            if ((local_98 &amp; 0x80) != 0) {</pre>
+<pre>              local_98 = local_98 | 0xffffff00;</pre>
+<pre>            }</pre>
+<pre>            local_a0 = DAT_0041cec8 &lt;&lt; 0x18 | DAT_0041cec8 &gt;&gt; 0x18 | (DAT_0041cec8 &amp; 0xff0000) &gt;&gt; 8</pre>
+<pre>                       | (DAT_0041cec8 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            local_9c = DAT_0041cecc &lt;&lt; 0x18 | DAT_0041cecc &gt;&gt; 0x18 | (DAT_0041cecc &amp; 0xff0000) &gt;&gt; 8</pre>
+<pre>                       | (DAT_0041cecc &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            local_8c = DAT_0041ceb0;</pre>
+<pre>            local_88 = DAT_0041ceb4;</pre>
+<pre>            local_94 = DAT_0041cea4;</pre>
+<pre>            local_90 = DAT_0041ceac;</pre>
+<pre>            local_84 = DAT_0041cec4;</pre>
+<pre>            if (DAT_0041ce98 != 0) {</pre>
+<pre>              local_448.tv_sec = DAT_0041ce9c + 0x7c558180 + local_a0;</pre>
+<pre>              local_448.tv_usec = (local_9c &gt;&gt; 0xc) + ((local_9c &gt;&gt; 10) + 0x8000 &gt;&gt; 0x10) * -0x2f7;</pre>
+<pre>              iVar6 = settimeofday(&amp;local_448,(timezone *)0x0);</pre>
+<pre>              if (iVar6 &lt; 0) {</pre>
+<pre>                pcVar8 = "settimeofday";</pre>
+<pre>                goto LAB_00403cb0;</pre>
+<pre>              }</pre>
+<pre>              if (debug != 0) {</pre>
+<pre>                printf("set time to %lu.%.6lu\n",local_448.tv_sec,local_448.tv_usec);</pre>
+<pre>              }</pre>
+<pre>              time((time_t *)(local_460 + 1));</pre>
+<pre>              __src = localtime((time_t *)(local_460 + 1));</pre>
+<pre><span class="green">              memcpy(&amp;tStack_408,__src,0x2c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>              strftime(acStack_430,0x27,"[%Y][%m][%d][%H][%M][%S]",&amp;tStack_408);</pre>
+<pre>              syslog(0xc5,"Time synchronized");</pre>
+<pre>            }</pre>
+<pre>            uVar3 = local_90;</pre>
+<pre>            local_7c = local_80 + 0x83aa7e80;</pre>
+<pre>            uVar11 = uVar11 &lt;&lt; 0x18 | uVar11 &gt;&gt; 0x18 | (uVar11 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                     (uVar11 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            local_a8 = uVar13 &lt;&lt; 0x18 | uVar13 &gt;&gt; 0x18 | (uVar13 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                       (uVar13 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            local_a4 = uVar20 &lt;&lt; 0x18 | uVar20 &gt;&gt; 0x18 | (uVar20 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                       (uVar20 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            uVar20 = (local_78 * 0x7bd &gt;&gt; 0xb) + local_78 * 0x10c6;</pre>
+<pre>            uVar19 = uVar19 &lt;&lt; 0x18 | uVar19 &gt;&gt; 0x18 | (uVar19 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                     (uVar19 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            uVar13 = local_84 &lt;&lt; 0x18 | local_84 &gt;&gt; 0x18 | (local_84 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                     (local_84 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>            if (debug != 0) {</pre>
+<pre>              uVar15 = local_90 &gt;&gt; 0x18;</pre>
+<pre>              uVar16 = local_90 &lt;&lt; 0x18 | uVar15 | (local_90 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                       (local_90 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>              printf("LI=%d  VN=%d  Mode=%d  Stratum=%d  Poll=%d  Precision=%d\n",uVar14 &gt;&gt; 0x1e,</pre>
+<pre>                     (uVar14 &amp; 0x38000000) &gt;&gt; 0x1b,(uVar14 &amp; 0x7000000) &gt;&gt; 0x18,(uVar9 &lt;&lt; 8) &gt;&gt; 0x10</pre>
+<pre>                     ,(uVar12 &amp; 0xff00) &gt;&gt; 8,local_98);</pre>
+<pre>              dVar24 = (double)(int)(local_94 &lt;&lt; 0x18 | local_94 &gt;&gt; 0x18 |</pre>
+<pre>                                     (local_94 &amp; 0xff0000) &gt;&gt; 8 | (local_94 &amp; 0xff00) &lt;&lt; 8) *</pre>
+<pre>                       15.2587890625;</pre>
+<pre>              printf("Delay=%.1f  Dispersion=%.1f  Refid=%u.%u.%u.%u\n",local_94,SUB84(dVar24,0),</pre>
+<pre>                     (int)((ulonglong)dVar24 &gt;&gt; 0x20),(double)(int)uVar11 * 15.2587890625,</pre>
+<pre>                     uVar3 &amp; 0xff,(int)uVar16 &gt;&gt; 0x10 &amp; 0xff,(int)uVar16 &gt;&gt; 8 &amp; 0xff,uVar15);</pre>
+<pre>              printf("Reference %u.%.10u\n",</pre>
+<pre>                     local_8c &lt;&lt; 0x18 | local_8c &gt;&gt; 0x18 | (local_8c &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                     (local_8c &amp; 0xff00) &lt;&lt; 8,</pre>
+<pre>                     local_88 &lt;&lt; 0x18 | local_88 &gt;&gt; 0x18 | (local_88 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                     (local_88 &amp; 0xff00) &lt;&lt; 8);</pre>
+<pre>              printf("Originate %u.%.10u\n",local_a8,uVar19);</pre>
+<pre>              printf("Receive   %u.%.10u\n",local_a4,uVar13);</pre>
+<pre>              printf("Transmit  %u.%.10u\n",local_a0,local_9c);</pre>
+<pre>              printf("Our recv  %u.%.10u\n",local_7c,uVar20);</pre>
+<pre>            }</pre>
+<pre>            iVar6 = local_7c - local_a8;</pre>
+<pre>            uVar9 = uVar20 - uVar19;</pre>
+<pre>            if (uVar20 &lt; uVar19) {</pre>
+<pre>              uVar9 = ~(uVar19 - uVar20);</pre>
+<pre>              iVar6 = iVar6 + -1;</pre>
+<pre>            }</pre>
+<pre>            iVar21 = local_a0 - local_a4;</pre>
+<pre>            uVar12 = local_9c - uVar13;</pre>
+<pre>            if (local_9c &lt; uVar13) {</pre>
+<pre>              iVar21 = iVar21 + -1;</pre>
+<pre>              uVar12 = ~(uVar13 - local_9c);</pre>
+<pre>            }</pre>
+<pre>            iVar17 = local_a4 - local_a8;</pre>
+<pre>            uVar14 = uVar13 - uVar19;</pre>
+<pre>            if (uVar13 &lt; uVar19) {</pre>
+<pre>              uVar14 = ~(uVar19 - uVar13);</pre>
+<pre>              iVar17 = iVar17 + -1;</pre>
+<pre>            }</pre>
+<pre>            iVar18 = local_7c - local_a0;</pre>
+<pre>            uVar13 = uVar20 - local_9c;</pre>
+<pre>            if (uVar20 &lt; local_9c) {</pre>
+<pre>              iVar18 = iVar18 + -1;</pre>
+<pre>              uVar13 = ~(local_9c - uVar20);</pre>
+<pre>            }</pre>
+<pre>            local_32c[0] = 0;</pre>
+<pre>            iVar10 = adjtimex(local_32c);</pre>
+<pre>            iVar2 = local_324;</pre>
+<pre>            if (iVar10 &lt; 0) {</pre>
+<pre>LAB_00403ca4:</pre>
+<pre>              pcVar8 = "adjtimex";</pre>
+<pre>LAB_00403cb0:</pre>
+<pre>              perror(pcVar8);</pre>
+<pre>                    /* WARNING: Subroutine does not return */</pre>
+<pre>              exit(1);</pre>
+<pre>            }</pre>
+<pre>            dVar24 = (double)(int)uVar9;</pre>
+<pre>            if ((int)uVar9 &lt; 0) {</pre>
+<pre>              dVar24 = dVar24 + 4294967296.0;</pre>
+<pre>            }</pre>
+<pre>            dVar25 = (double)(int)uVar14;</pre>
+<pre>            dVar24 = (double)iVar6 * 1000000.0 + dVar24 * 0.00023283064365386963;</pre>
+<pre>            if ((int)uVar14 &lt; 0) {</pre>
+<pre>              dVar25 = dVar25 + 4294967296.0;</pre>
+<pre>            }</pre>
+<pre>            dVar22 = (double)(int)uVar13;</pre>
+<pre>            if ((int)uVar13 &lt; 0) {</pre>
+<pre>              dVar22 = dVar22 + 4294967296.0;</pre>
+<pre>            }</pre>
+<pre>            if (debug != 0) {</pre>
+<pre>              dVar23 = (double)(int)uVar12;</pre>
+<pre>              if ((int)uVar12 &lt; 0) {</pre>
+<pre>                dVar23 = dVar23 + 4294967296.0;</pre>
+<pre>              }</pre>
+<pre>              dVar22 = ((double)iVar17 * 1000000.0 + dVar25 * 0.00023283064365386963) -</pre>
+<pre>                       ((double)iVar18 * 1000000.0 + dVar22 * 0.00023283064365386963);</pre>
+<pre>              dVar25 = (double)iVar21 * 1000000.0 + dVar23 * 0.00023283064365386963;</pre>
+<pre>              printf("Total elapsed: %9.2f\nServer stall:  %9.2f\nSlop:          %9.2f\n",</pre>
+<pre>                     &amp;DAT_00410000,SUB84(dVar24,0),(int)((ulonglong)dVar24 &gt;&gt; 0x20),dVar25,</pre>
+<pre>                     dVar24 - dVar25);</pre>
+<pre>              dVar22 = dVar22 * 0.5;</pre>
+<pre>              printf(</pre>
+<pre>                    "Skew:          %9.2f\nFrequency:     %9d\n day   second     elapsed    stall     skew  dispersion  freq\n"</pre>
+<pre>                    );</pre>
+<pre>              printf("%d %5d.%.3d  %8.1f %8.1f  %8.1f %8.1f %9d\n",local_7c / 0x15180 + 0x3aac,</pre>
+<pre>                     local_7c % 0x15180,uVar20 / 0x418937,SUB84(dVar24,0),</pre>
+<pre>                     (int)((ulonglong)dVar24 &gt;&gt; 0x20),SUB84(dVar25,0),</pre>
+<pre>                     (int)((ulonglong)dVar25 &gt;&gt; 0x20),SUB84(dVar22,0),</pre>
+<pre>                     (int)((ulonglong)dVar22 &gt;&gt; 0x20),(double)(int)uVar11 * 15.2587890625,iVar2);</pre>
+<pre>            }</pre>
+<pre>            fflush(_stdout);</pre>
+<pre>            if (((DAT_0041ce94 != 0) &amp;&amp; (iVar6 = contemplate_data(local_7c), debug == 0)) &amp;&amp;</pre>
+<pre>               (iVar6 != iVar2)) {</pre>
+<pre>              local_32c[0] = 2;</pre>
+<pre>              local_324 = iVar6;</pre>
+<pre>              iVar6 = adjtimex(local_32c);</pre>
+<pre>              if (iVar6 &lt; 0) goto LAB_00403ca4;</pre>
+<pre>            }</pre>
+<pre>            DAT_0041cb80 = 0;</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            printf("Ooops.  pack_len=%d\n",sVar7);</pre>
+<pre>            fflush(_stdout);</pre>
+<pre>          }</pre>
+<pre>          if ((param_2 &lt;= local_6c) &amp;&amp; (param_2 != 0)) {</pre>
+<pre>            return;</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      } while (iVar6 == 4);</pre>
+<pre>      if (iVar6 &lt; 0) {</pre>
+<pre>        perror("select");</pre>
+<pre>      }</pre>
+<pre>    } while (local_458.tv_sec != 0);</pre>
+<pre>    if ((param_2 &lt;= local_6c) &amp;&amp; (param_2 != 0)) {</pre>
+<pre>      return;</pre>
+<pre>    }</pre>
+<pre>    if (debug != 0) {</pre>
+<pre>      fputs("Sending ...\n",_stderr);</pre>
+<pre>    }</pre>
+<pre><span class="green">    memset(&amp;local_3dc,0,0x30)</span></span>   //possible issue identified - semgrep</pre>
+<pre>    local_3d4 = 0x100;</pre>
+<pre>    local_3d8 = 0x100;</pre>
+<pre>    local_3dc = 0xfa04001b;</pre>
+<pre>    gettimeofday(&amp;local_450,(__timezone_ptr_t)0x0);</pre>
+<pre>    uVar11 = local_450.tv_sec + 0x83aa7e80;</pre>
+<pre>    uVar13 = (local_450.tv_usec * 0x7bd &gt;&gt; 0xb) + local_450.tv_usec * 0x10c6;</pre>
+<pre>    local_3b4 = uVar11 * 0x1000000 | uVar11 &gt;&gt; 0x18 | (uVar11 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                (uVar11 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>    local_3b0 = uVar13 * 0x1000000 | uVar13 &gt;&gt; 0x18 | (uVar13 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                (uVar13 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>    send(param_1,&amp;local_3dc,0x30,0);</pre>
+<pre>    DAT_0041d47c = local_450.tv_sec;</pre>
+<pre>    DAT_0041d480 = local_450.tv_usec;</pre>
+<pre>    local_6c = local_6c + 1;</pre>
+<pre>    local_458.tv_sec = param_3;</pre>
+<pre>  } while( true );</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

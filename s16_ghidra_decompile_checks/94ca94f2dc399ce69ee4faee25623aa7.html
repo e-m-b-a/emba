@@ -1,0 +1,456 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./dcb3a31078b114c8ba5a4bce78c2914d.html" title="./dcb3a31078b114c8ba5a4bce78c2914d.html" >&laquo; Back to dcb3a31078b114c8ba5a4bce78c2914d</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<a class="reference" href="./94ca94f2dc399ce69ee4faee25623aa7.html" title="./94ca94f2dc399ce69ee4faee25623aa7.html" ><pre>uint FUN_0040c9e4(undefined4 *param_1,int param_2,int param_3,undefined4 param_4,int *param_5)</pre></a>
+
+<br />
+<pre>{</pre>
+<pre>  uint uVar1;</pre>
+<pre>  int *piVar2;</pre>
+<pre>  int iVar3;</pre>
+<pre>  int iVar4;</pre>
+<pre>  undefined4 uVar5;</pre>
+<pre>  char *pcVar6;</pre>
+<pre>  int iVar7;</pre>
+<pre>  char *pcVar8;</pre>
+<pre>  int iVar9;</pre>
+<pre>  undefined4 uVar10;</pre>
+<pre>  uint uVar11;</pre>
+<pre>  uint uVar12;</pre>
+<pre>  int iVar13;</pre>
+<pre>  int *piVar14;</pre>
+<pre>  code *pcVar15;</pre>
+<pre>  longlong lVar16;</pre>
+<pre>  char acStack_d0 [16];</pre>
+<pre>  char acStack_c0 [128];</pre>
+<pre>  int *local_40;</pre>
+<pre>  undefined4 local_3c;</pre>
+<pre>  int local_38;</pre>
+<pre>  int local_34;</pre>
+<pre>  char *local_30;</pre>
+<pre>  char *local_2c;</pre>
+<pre>  </pre>
+<pre>  piVar14 = (int *)*param_5;</pre>
+<pre>  uVar12 = 0xffffffff;</pre>
+<pre>  if (piVar14 == param_5) {</pre>
+<pre>    return 0;</pre>
+<pre>  }</pre>
+<pre>  local_30 = acStack_d0;</pre>
+<pre>  local_2c = acStack_c0;</pre>
+<pre>LAB_0040ca54:</pre>
+<pre>  sobj_free(param_4);</pre>
+<pre>  switch(piVar14[2]) {</pre>
+<pre>  case 0:</pre>
+<pre>    pcVar8 = (char *)sobj_new();</pre>
+<pre>    if (pcVar8 != (char *)0x0) {</pre>
+<pre>      iVar9 = piVar14[5];</pre>
+<pre>      if (piVar14[5] == 0) {</pre>
+<pre>        iVar9 = param_3;</pre>
+<pre>      }</pre>
+<a class="reference" href="./5b251d8bac6d542e905c81455359199c.html" title="./5b251d8bac6d542e905c81455359199c.html" ><pre>      pcVar6 = (char *)FUN_0040c950(param_1,iVar9,piVar14[4]);</pre></a>
+
+<pre>      iVar9 = piVar14[3];</pre>
+<pre>      if (iVar9 - 3U &lt; 2) {</pre>
+<pre>        lVar16 = atoll(pcVar6);</pre>
+<pre>        if (iVar9 == 3) {</pre>
+<pre>          lVar16 = lVar16 + 1;</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          lVar16 = lVar16 + -1;</pre>
+<pre>        }</pre>
+<pre>LAB_0040cc10:</pre>
+<pre><span class="green">        sprintf(local_2c,"%lld",(int)lVar16,(int)((ulonglong)lVar16 &gt;&gt; 0x20))</span></span>   //possible issue identified - semgrep</pre>
+<pre>        pcVar15 = sobj_add_string;</pre>
+<pre>        pcVar6 = local_2c;</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<a class="reference" href="./c3e01cf7bd76030f152239fe46503c79.html" title="./c3e01cf7bd76030f152239fe46503c79.html" ><pre>        uVar12 = FUN_0040d858(param_1,param_2,param_3,pcVar8,piVar14 + 6);</pre></a>
+
+<pre>        if ((int)uVar12 &lt; 0) goto LAB_0040d408;</pre>
+<pre>        if (piVar14[3] != 0) {</pre>
+<pre>          lVar16 = atoll(pcVar6);</pre>
+<pre>          iVar9 = (int)((ulonglong)lVar16 &gt;&gt; 0x20);</pre>
+<pre>          uVar12 = (uint)lVar16;</pre>
+<pre>          pcVar6 = (char *)sobj_get_string(pcVar8);</pre>
+<pre>          lVar16 = atoll(pcVar6);</pre>
+<pre>          iVar3 = (int)((ulonglong)lVar16 &gt;&gt; 0x20);</pre>
+<pre>          uVar1 = (uint)lVar16;</pre>
+<pre>          uVar11 = uVar1 + uVar12;</pre>
+<pre>          if (piVar14[3] == 1) {</pre>
+<pre>            iVar9 = (uint)(uVar11 &lt; uVar1) + iVar3 + iVar9;</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            uVar11 = uVar12 - uVar1;</pre>
+<pre>            iVar9 = (iVar9 - iVar3) - (uint)(uVar12 &lt; uVar11);</pre>
+<pre>          }</pre>
+<pre>          lVar16 = CONCAT44(iVar9,uVar11);</pre>
+<pre>          goto LAB_0040cc10;</pre>
+<pre>        }</pre>
+<pre>        pcVar15 = sobj_move;</pre>
+<pre>        pcVar6 = pcVar8;</pre>
+<pre>      }</pre>
+<pre>      (*pcVar15)(param_4,pcVar6);</pre>
+<pre>      iVar9 = piVar14[5];</pre>
+<pre>      if (piVar14[5] == 0) {</pre>
+<pre>        iVar9 = param_3;</pre>
+<pre>      }</pre>
+<pre>      iVar3 = piVar14[4];</pre>
+<pre>      uVar10 = sobj_get_string(param_4);</pre>
+<a class="reference" href="./b95da15042c3cc93eec2f3b6fba37ff0.html" title="./b95da15042c3cc93eec2f3b6fba37ff0.html" ><pre>      FUN_0040c984(param_1,iVar9,iVar3,uVar10);</pre></a>
+
+<pre>      uVar12 = 0;</pre>
+<pre>LAB_0040d408:</pre>
+<pre>      sobj_del(pcVar8);</pre>
+<pre>      goto switchD_0040ca90_default;</pre>
+<pre>    }</pre>
+<pre>    goto LAB_0040d260;</pre>
+<pre>  case 1:</pre>
+<a class="reference" href="./faa0ad9ca71a814316f01f1d700f2168.html" title="./faa0ad9ca71a814316f01f1d700f2168.html" ><pre>    uVar12 = FUN_0040dc50(param_1,3,param_3,piVar14 + 3);</pre></a>
+
+<pre>    if (-1 &lt; (int)uVar12) {</pre>
+<pre>      piVar2 = piVar14 + 7;</pre>
+<pre>      if (uVar12 != 0) {</pre>
+<pre>        piVar2 = piVar14 + 5;</pre>
+<pre>      }</pre>
+<a class="reference" href="./94ca94f2dc399ce69ee4faee25623aa7.html" title="./94ca94f2dc399ce69ee4faee25623aa7.html" ><pre>      uVar12 = FUN_0040c9e4(param_1,3,param_3,param_4,piVar2);</pre></a>
+
+<pre>    }</pre>
+<pre>    goto LAB_0040d34c;</pre>
+<pre>  case 2:</pre>
+<a class="reference" href="./fc611db2431a33616d7915f16c0668b7.html" title="./fc611db2431a33616d7915f16c0668b7.html" ><pre>    uVar12 = FUN_0040d56c(param_1,param_2,param_3,param_4,piVar14 + 3);</pre></a>
+
+<pre>    goto LAB_0040d34c;</pre>
+<pre>  case 3:</pre>
+<pre>    do {</pre>
+<a class="reference" href="./faa0ad9ca71a814316f01f1d700f2168.html" title="./faa0ad9ca71a814316f01f1d700f2168.html" ><pre>      uVar12 = FUN_0040dc50(param_1,2,param_3,piVar14 + 3);</pre></a>
+
+<pre>      if (((int)uVar12 &lt; 1) ||</pre>
+<a class="reference" href="./94ca94f2dc399ce69ee4faee25623aa7.html" title="./94ca94f2dc399ce69ee4faee25623aa7.html" ><pre>         (uVar12 = FUN_0040c9e4(param_1,2,param_3,param_4,piVar14 + 5), (int)uVar12 &lt; 0))</pre></a>
+
+<pre>      goto LAB_0040cd74;</pre>
+<pre>    } while ((uVar12 == 4) || (2 &lt; uVar12 - 1));</pre>
+<pre>    if (uVar12 == 3) goto switchD_0040ca90_default;</pre>
+<pre>LAB_0040cd74:</pre>
+<pre>    sobj_free(param_4);</pre>
+<pre>    if ((uVar12 != 2) &amp;&amp; (uVar12 != 4)) goto switchD_0040ca90_default;</pre>
+<pre>    uVar12 = 0;</pre>
+<pre>    goto LAB_0040d37c;</pre>
+<pre>  case 4:</pre>
+<pre>    local_38 = sobj_new();</pre>
+<pre>    local_34 = sobj_new();</pre>
+<pre>    iVar9 = sobj_new();</pre>
+<pre>    if (iVar9 == 0) {</pre>
+<pre>      client_printf(*param_1,"\n!! %s &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;\n","INTERNAL ERROR");</pre>
+<pre>      client_printf(*param_1,"memory allocation failed !");</pre>
+<pre>      client_printf(*param_1,"\n!! %s &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;\n","INTERNAL ERROR");</pre>
+<pre>      uVar12 = 0xffffffff;</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<a class="reference" href="./c3e01cf7bd76030f152239fe46503c79.html" title="./c3e01cf7bd76030f152239fe46503c79.html" ><pre>      iVar3 = FUN_0040d858(param_1,param_2,param_3,iVar9,piVar14 + 3);</pre></a>
+
+<pre>      uVar12 = 0xffffffff;</pre>
+<pre>      if (-1 &lt; iVar3) {</pre>
+<pre>        local_3c = param_1[3];</pre>
+<pre>        param_1[3] = 0;</pre>
+<a class="reference" href="./5b251d8bac6d542e905c81455359199c.html" title="./5b251d8bac6d542e905c81455359199c.html" ><pre>        uVar10 = FUN_0040c950(param_1,param_3,"InDeX");</pre></a>
+
+<pre>        sobj_add_string(local_38,uVar10);</pre>
+<a class="reference" href="./5b251d8bac6d542e905c81455359199c.html" title="./5b251d8bac6d542e905c81455359199c.html" ><pre>        uVar10 = FUN_0040c950(param_1,param_3,"VaLuE");</pre></a>
+
+<pre>        sobj_add_string(local_34,uVar10);</pre>
+<pre>        iVar3 = 0;</pre>
+<pre>        iVar4 = sobj_get_length(iVar9);</pre>
+<pre>        if (iVar4 != 0) {</pre>
+<pre>          uVar10 = xmldb_anchor_node(local_3c);</pre>
+<pre>          uVar5 = sobj_get_string(iVar9);</pre>
+<pre>          iVar3 = xmldb_find_node(uVar10,uVar5,0,1);</pre>
+<pre>        }</pre>
+<pre>        local_40 = piVar14 + 5;</pre>
+<pre>        iVar4 = 0;</pre>
+<pre>        uVar12 = 0;</pre>
+<pre>LAB_0040d0b4:</pre>
+<pre>        iVar13 = iVar3;</pre>
+<pre>        if (iVar13 != 0) {</pre>
+<pre>          iVar4 = iVar4 + 1;</pre>
+<pre><span class="green">          sprintf(local_30,"%d",iVar4)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          if (param_1[3] != 0) {</pre>
+<pre>            xmldb_del_anchor();</pre>
+<pre>          }</pre>
+<pre>          uVar10 = xmldb_set_anchor(iVar13);</pre>
+<pre>          param_1[3] = uVar10;</pre>
+<a class="reference" href="./b95da15042c3cc93eec2f3b6fba37ff0.html" title="./b95da15042c3cc93eec2f3b6fba37ff0.html" ><pre>          FUN_0040c984(param_1,param_3,"InDeX",local_30);</pre></a>
+
+<pre>          uVar10 = xmlnode_get_value(iVar13);</pre>
+<a class="reference" href="./b95da15042c3cc93eec2f3b6fba37ff0.html" title="./b95da15042c3cc93eec2f3b6fba37ff0.html" ><pre>          FUN_0040c984(param_1,param_3,"VaLuE",uVar10);</pre></a>
+
+<a class="reference" href="./94ca94f2dc399ce69ee4faee25623aa7.html" title="./94ca94f2dc399ce69ee4faee25623aa7.html" ><pre>          uVar12 = FUN_0040c9e4(param_1,4,param_3,param_4,local_40);</pre></a>
+
+<pre>          if (((((int)uVar12 &lt; 0) || (uVar12 == 3)) || (uVar12 == 2)) ||</pre>
+<pre>             (iVar3 = iVar13, uVar12 == 1)) goto LAB_0040d0bc;</pre>
+<pre>          do {</pre>
+<pre>            iVar3 = xmlnode_get_sibling(iVar3);</pre>
+<pre>            if (iVar3 == 0) break;</pre>
+<pre>            pcVar8 = (char *)xmlnode_get_name(iVar3);</pre>
+<pre>            pcVar6 = (char *)xmlnode_get_name(iVar13);</pre>
+<pre>            iVar7 = strcmp(pcVar8,pcVar6);</pre>
+<pre>          } while (iVar7 != 0);</pre>
+<pre>          goto LAB_0040d0b4;</pre>
+<pre>        }</pre>
+<pre>LAB_0040d0bc:</pre>
+<pre>        pcVar8 = (char *)sobj_get_string(local_38);</pre>
+<pre>        if (*pcVar8 == '\0') {</pre>
+<a class="reference" href="./f7ebd1a5647b3f3eb056799a91c81583.html" title="./f7ebd1a5647b3f3eb056799a91c81583.html" ><pre>          uVar10 = FUN_0040c86c(param_1,param_3,"InDeX");</pre></a>
+
+<a class="reference" href="./b39d5f8f4cdd9b9c8704fd0549c6b9a2.html" title="./b39d5f8f4cdd9b9c8704fd0549c6b9a2.html" ><pre>          FUN_0040995c(uVar10);</pre></a>
+
+<a class="reference" href="./f7ebd1a5647b3f3eb056799a91c81583.html" title="./f7ebd1a5647b3f3eb056799a91c81583.html" ><pre>          uVar10 = FUN_0040c86c(param_1,param_3,"VaLuE");</pre></a>
+
+<a class="reference" href="./b39d5f8f4cdd9b9c8704fd0549c6b9a2.html" title="./b39d5f8f4cdd9b9c8704fd0549c6b9a2.html" ><pre>          FUN_0040995c(uVar10);</pre></a>
+
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          uVar10 = sobj_get_string(local_38,param_3);</pre>
+<a class="reference" href="./b95da15042c3cc93eec2f3b6fba37ff0.html" title="./b95da15042c3cc93eec2f3b6fba37ff0.html" ><pre>          FUN_0040c984(param_1,param_3,"InDeX",uVar10);</pre></a>
+
+<pre>          uVar10 = sobj_get_string(local_34);</pre>
+<a class="reference" href="./b95da15042c3cc93eec2f3b6fba37ff0.html" title="./b95da15042c3cc93eec2f3b6fba37ff0.html" ><pre>          FUN_0040c984(param_1,param_3,"VaLuE",uVar10);</pre></a>
+
+<pre>        }</pre>
+<pre>        if (param_1[3] != 0) {</pre>
+<pre>          xmldb_del_anchor();</pre>
+<pre>        }</pre>
+<pre>        param_1[3] = local_3c;</pre>
+<pre>        if ((uVar12 != 3) &amp;&amp; ((sobj_free(param_4), uVar12 == 2 || (uVar12 == 4)))) {</pre>
+<pre>          uVar12 = 0;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    if (local_38 != 0) {</pre>
+<pre>      sobj_del(local_38);</pre>
+<pre>    }</pre>
+<pre>    if (local_34 != 0) {</pre>
+<pre>      sobj_del(local_34);</pre>
+<pre>    }</pre>
+<pre>    if (iVar9 != 0) {</pre>
+<pre>      sobj_del(iVar9);</pre>
+<pre>    }</pre>
+<pre>LAB_0040d34c:</pre>
+<pre>    if (uVar12 == 4) {</pre>
+<pre>switchD_0040ca90_caseD_9:</pre>
+<pre>      uVar12 = -(uint)(2 &lt; param_2 - 2U) | 4;</pre>
+<pre>      break;</pre>
+<pre>    }</pre>
+<pre>switchD_0040ca90_default:</pre>
+<pre>    if (uVar12 != 0) break;</pre>
+<pre>LAB_0040d37c:</pre>
+<pre>    piVar14 = (int *)*piVar14;</pre>
+<pre>    if (piVar14 == param_5) {</pre>
+<pre>LAB_0040d3a4:</pre>
+<pre>      sobj_free(param_4);</pre>
+<pre>      return uVar12;</pre>
+<pre>    }</pre>
+<pre>    goto LAB_0040ca54;</pre>
+<pre>  case 5:</pre>
+<pre>    pcVar8 = (char *)sobj_new();</pre>
+<pre>    if (pcVar8 != (char *)0x0) {</pre>
+<a class="reference" href="./c3e01cf7bd76030f152239fe46503c79.html" title="./c3e01cf7bd76030f152239fe46503c79.html" ><pre>      iVar9 = FUN_0040d858(param_1,param_2,param_3,pcVar8,piVar14 + 3);</pre></a>
+
+<pre>      uVar12 = 0xffffffff;</pre>
+<pre>      if (-1 &lt; iVar9) {</pre>
+<pre>        uVar10 = sobj_get_string(pcVar8);</pre>
+<pre>        client_puts(uVar10,*param_1);</pre>
+<pre>        uVar12 = 0;</pre>
+<pre>      }</pre>
+<pre>      goto LAB_0040d408;</pre>
+<pre>    }</pre>
+<pre>LAB_0040d260:</pre>
+<pre>    client_printf(*param_1,"\n!! %s &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;\n","INTERNAL ERROR");</pre>
+<pre>    client_printf(*param_1,"memory allocation failed !");</pre>
+<pre>    client_printf(*param_1,"\n!! %s &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;\n","INTERNAL ERROR");</pre>
+<pre>    uVar12 = 0xffffffff;</pre>
+<pre>    break;</pre>
+<pre>  case 6:</pre>
+<a class="reference" href="./c3e01cf7bd76030f152239fe46503c79.html" title="./c3e01cf7bd76030f152239fe46503c79.html" ><pre>    uVar12 = FUN_0040d858(param_1,param_2,param_3,param_4,piVar14 + 3);</pre></a>
+
+<pre>    if (-1 &lt; (int)uVar12) {</pre>
+<pre>      uVar12 = 3;</pre>
+<pre>    }</pre>
+<pre>    break;</pre>
+<pre>  case 7:</pre>
+<pre>    uVar12 = 2;</pre>
+<pre>    break;</pre>
+<pre>  case 8:</pre>
+<pre>    uVar12 = 1;</pre>
+<pre>    break;</pre>
+<pre>  case 9:</pre>
+<pre>    goto switchD_0040ca90_caseD_9;</pre>
+<pre>  default:</pre>
+<pre>    goto switchD_0040ca90_default;</pre>
+<pre>  }</pre>
+<pre>  if (uVar12 == 3) {</pre>
+<pre>    return 3;</pre>
+<pre>  }</pre>
+<pre>  goto LAB_0040d3a4;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

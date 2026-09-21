@@ -1,0 +1,637 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./0a7a4b6cc70a19deed20ec7bb61caac6.html" title="./0a7a4b6cc70a19deed20ec7bb61caac6.html" >&laquo; Back to 0a7a4b6cc70a19deed20ec7bb61caac6</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Type propagation algorithm not settling */</pre>
+<pre>/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */</pre>
+<br />
+<a class="reference" href="./d005a8d48368df8d36ddb5bfeb2696c4.html" title="./d005a8d48368df8d36ddb5bfeb2696c4.html" ><pre>void FUN_00404e0c(int *param_1,int param_2,uint param_3,byte *param_4,ushort param_5,char param_6)</pre></a>
+
+<br />
+<pre>{</pre>
+<pre>  undefined **ppuVar1;</pre>
+<pre>  int *piVar2;</pre>
+<pre>  ushort uVar3;</pre>
+<pre>  int iVar4;</pre>
+<pre>  char cVar5;</pre>
+<pre>  int iVar6;</pre>
+<pre>  int *piVar7;</pre>
+<pre>  int iVar8;</pre>
+<pre>  int iVar9;</pre>
+<pre>  undefined4 uVar10;</pre>
+<pre>  byte bVar11;</pre>
+<pre>  undefined **ppuVar12;</pre>
+<pre>  int *piVar13;</pre>
+<pre>  uint uVar14;</pre>
+<pre>  uint uVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  byte *pbVar17;</pre>
+<pre>  byte *pbVar18;</pre>
+<pre>  int unaff_s0;</pre>
+<pre>  undefined *puVar19;</pre>
+<pre>  undefined4 *puVar20;</pre>
+<pre>  byte *pbVar21;</pre>
+<pre>  int *piVar22;</pre>
+<pre>  char *pcVar23;</pre>
+<pre>  undefined4 *puVar24;</pre>
+<pre>  byte *pbVar25;</pre>
+<pre>  undefined **ppuVar26;</pre>
+<pre>  byte *pbVar27;</pre>
+<pre>  byte *pbVar28;</pre>
+<pre>  undefined1 local_630 [4];</pre>
+<pre>  ushort local_62c;</pre>
+<pre>  undefined1 local_62a;</pre>
+<pre>  undefined1 local_629;</pre>
+<pre>  undefined1 auStack_628 [16];</pre>
+<pre>  undefined1 auStack_618 [16];</pre>
+<pre>  undefined1 local_608;</pre>
+<pre>  undefined1 local_607;</pre>
+<pre>  undefined2 local_606;</pre>
+<pre>  undefined1 auStack_604 [1348];</pre>
+<pre>  byte *local_c0;</pre>
+<pre>  byte *local_bc;</pre>
+<pre>  int local_b0 [5];</pre>
+<pre>  char acStack_9c [48];</pre>
+<pre>  undefined1 auStack_6c [28];</pre>
+<pre>  undefined *local_50;</pre>
+<pre>  uint local_4c;</pre>
+<pre>  int *local_48;</pre>
+<pre>  uint local_44;</pre>
+<pre>  uint local_40;</pre>
+<pre>  </pre>
+<pre>  iVar6 = g_conf;</pre>
+<pre>  uVar14 = *(uint *)(g_conf + 0x70) + 1;</pre>
+<pre>  *(uint *)(g_conf + 0x74) = (uint)(uVar14 &lt; *(uint *)(g_conf + 0x70)) + *(int *)(g_conf + 0x74);</pre>
+<pre>  *(uint *)(iVar6 + 0x70) = uVar14;</pre>
+<pre>  uVar14 = param_1[0x1e] + 1;</pre>
+<pre>  param_1[0x1f] = (uint)(uVar14 &lt; (uint)param_1[0x1e]) + param_1[0x1f];</pre>
+<pre>  param_1[0x1e] = uVar14;</pre>
+<pre>  puVar19 = (undefined *)(uint)*param_4;</pre>
+<pre>  pbVar27 = (byte *)(uint)param_5;</pre>
+<pre>  param_3 = param_3 &amp; 0xffff;</pre>
+<pre>  if ((((1 &lt; ((uint)(puVar19 + 0x7d) &amp; 0xff)) &amp;&amp; (puVar19 != (undefined *)0x8f)) &amp;&amp;</pre>
+<pre>      (puVar19 != (undefined *)0xce)) &amp;&amp;</pre>
+<pre>     ((puVar19 != (undefined *)0x82 &amp;&amp; (puVar19 != (undefined *)0x80)))) {</pre>
+<pre>    ppuVar12 = &amp;PTR_s_Destination_Unreachable_0041a114;</pre>
+<pre>    do {</pre>
+<pre>      pcVar23 = *ppuVar12;</pre>
+<pre>      if (pcVar23 == (char *)0x0) {</pre>
+<pre>        pcVar23 = "Unknown";</pre>
+<pre>        break;</pre>
+<pre>      }</pre>
+<pre>      ppuVar26 = ppuVar12 + -1;</pre>
+<pre>      ppuVar12 = ppuVar12 + 2;</pre>
+<pre>    } while (*ppuVar26 != puVar19);</pre>
+<a class="reference" href="./08124a0f742862fe8baedf5690cbab4f.html" title="./08124a0f742862fe8baedf5690cbab4f.html" ><pre>    local_50 = (undefined *)FUN_00401330(puVar19,param_4[1]);</pre></a>
+
+<pre>    local_4c = (uint)param_4[1];</pre>
+<pre>    local_48 = param_1 + 1;</pre>
+<pre>    dolog(7,"Ignoring ICMPv6: %s (%u), %s (%u) received on %s\n",pcVar23,puVar19);</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  uVar3 = *(ushort *)(param_4 + 2);</pre>
+<pre>  param_4[2] = 0;</pre>
+<pre>  param_4[3] = 0;</pre>
+<a class="reference" href="./94c382a35140d5ee830de019fab68cc7.html" title="./94c382a35140d5ee830de019fab68cc7.html" ><pre>  uVar14 = FUN_004011e0(param_2,0x3a,param_4,pbVar27);</pre></a>
+
+<pre>  *(short *)(param_4 + 2) = (short)uVar14;</pre>
+<pre>  if (uVar14 != uVar3) {</pre>
+<pre>    puVar19 = (undefined *)(uint)*param_4;</pre>
+<pre>    ppuVar12 = &amp;PTR_s_Destination_Unreachable_0041a114;</pre>
+<pre>    do {</pre>
+<pre>      pcVar23 = *ppuVar12;</pre>
+<pre>      if (pcVar23 == (char *)0x0) {</pre>
+<pre>        pcVar23 = "Unknown";</pre>
+<pre>        break;</pre>
+<pre>      }</pre>
+<pre>      ppuVar26 = ppuVar12 + -1;</pre>
+<pre>      ppuVar12 = ppuVar12 + 2;</pre>
+<pre>    } while (*ppuVar26 != puVar19);</pre>
+<a class="reference" href="./08124a0f742862fe8baedf5690cbab4f.html" title="./08124a0f742862fe8baedf5690cbab4f.html" ><pre>    local_4c = FUN_00401330(puVar19,param_4[1]);</pre></a>
+
+<pre>    local_44 = (uint)*(ushort *)(param_4 + 2);</pre>
+<pre>    local_48 = (int *)(uint)param_4[1];</pre>
+<pre>    local_50 = puVar19;</pre>
+<pre>    local_40 = (uint)uVar3;</pre>
+<pre>    dolog(4,"CORRUPT-&gt;DROP (%s): Received a ICMPv6 %s (%u) with wrong checksum (%x vs %x)\n",</pre>
+<pre>          param_1 + 1,pcVar23);</pre>
+<pre>  }</pre>
+<pre>  ppuVar26 = &amp;PTR_s_Destination_Unreachable_0041a114;</pre>
+<pre>  puVar19 = (undefined *)(uint)*param_4;</pre>
+<pre>  ppuVar12 = ppuVar26;</pre>
+<pre>  do {</pre>
+<pre>    pcVar23 = *ppuVar12;</pre>
+<pre>    if (pcVar23 == (char *)0x0) {</pre>
+<pre>      pcVar23 = "Unknown";</pre>
+<pre>      break;</pre>
+<pre>    }</pre>
+<pre>    ppuVar1 = ppuVar12 + -1;</pre>
+<pre>    ppuVar12 = ppuVar12 + 2;</pre>
+<pre>  } while (*ppuVar1 != puVar19);</pre>
+<a class="reference" href="./08124a0f742862fe8baedf5690cbab4f.html" title="./08124a0f742862fe8baedf5690cbab4f.html" ><pre>  local_50 = (undefined *)FUN_00401330(puVar19,param_4[1]);</pre></a>
+
+<pre>  local_4c = (uint)param_4[1];</pre>
+<pre>  local_48 = param_1 + 1;</pre>
+<pre>  dolog(7,"Received ICMPv6: %s (%u), %s (%u) received on %s\n",pcVar23,puVar19);</pre>
+<pre>  puVar19 = (undefined *)(uint)*param_4;</pre>
+<pre>  if (puVar19 != (undefined *)0x80) {</pre>
+<pre>    if ((*(uint *)(param_2 + 8) &amp; 0xc0ff) != 0x80fe) {</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>      FUN_00401448(4,"Ignoring non-LinkLocal MLD from %s received on %s/%u\n",param_2 + 8,param_1);</pre></a>
+
+<pre>      return;</pre>
+<pre>    }</pre>
+<pre>    if (puVar19 == (undefined *)0x83) {</pre>
+<pre>      pbVar27 = param_4 + 8;</pre>
+<pre>      int_set_mld_version(param_1,1,param_3);</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>      FUN_00401448(7,"Received a ICMPv6 MLDv1 Report for %s on %s/%u\n",pbVar27,param_1);</pre></a>
+
+<pre>      if (((param_4[8] == 0xff) &amp;&amp; ((param_4[9] &amp; 0xf) != 1)) &amp;&amp; ((param_4[9] &amp; 0xf) != 2)) {</pre>
+<pre>        iVar6 = groupint_get(pbVar27,param_1,&amp;stack0xffffffd8);</pre>
+<pre>        if (iVar6 == 0) {</pre>
+<pre>          pcVar23 = "Couldn\'t find or create new group %s for %s/%u\n";</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          iVar6 = grpint_refresh(iVar6,&amp;stack0xffffffdc,1);</pre>
+<pre>          if (iVar6 != 0) {</pre>
+<pre>            if (unaff_s0 == 0) {</pre>
+<pre>              return;</pre>
+<pre>            }</pre>
+<a class="reference" href="./df78c5288db82d5323ccf7f9e62e0e0a.html" title="./df78c5288db82d5323ccf7f9e62e0e0a.html" ><pre>            FUN_00403ef4(param_1,pbVar27);</pre></a>
+
+<pre>            return;</pre>
+<pre>          }</pre>
+<pre>          pcVar23 = "Couldn\'t create subscription to %s for %s/%u\n";</pre>
+<pre>        }</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>        FUN_00401448(4,pcVar23,pbVar27,param_1);</pre></a>
+
+<pre>      }</pre>
+<pre>      return;</pre>
+<pre>    }</pre>
+<pre>    if (puVar19 == (undefined *)0x84) {</pre>
+<pre>      pbVar27 = param_4 + 8;</pre>
+<pre>      int_set_mld_version(param_1,1,param_3);</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>      FUN_00401448(7,"Received a ICMPv6 MLDv1 Reduction for %s on %s/%u\n",pbVar27,param_1);</pre></a>
+
+<pre>      if (((param_4[8] == 0xff) &amp;&amp; ((param_4[9] &amp; 0xf) != 1)) &amp;&amp; ((param_4[9] &amp; 0xf) != 2)) {</pre>
+<pre>        iVar6 = group_find(pbVar27);</pre>
+<pre>        if (iVar6 == 0) {</pre>
+<pre>          pcVar23 = "Couldn\'t find group %s for reduction of %s/%u\n";</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          iVar6 = grpint_find(*(undefined4 *)(iVar6 + 0x10),param_1);</pre>
+<pre>          if (iVar6 == 0) {</pre>
+<pre>            pcVar23 = "Couldn\'t find the grpint %s for reduction of %s/%u\n";</pre>
+<pre>          }</pre>
+<pre>          else {</pre>
+<pre>            iVar9 = subscr_unsub(*(undefined4 *)(iVar6 + 4),&amp;stack0xffffffe0);</pre>
+<pre>            if (iVar9 != 0) {</pre>
+<pre>              if (0 &lt; *(int *)(*(int *)(iVar6 + 4) + 8)) {</pre>
+<pre>                return;</pre>
+<pre>              }</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>              FUN_00401448(7,"Querying for other listeners to %s on interface %s/%u\n",pbVar27,</pre></a>
+
+<pre>                           param_1);</pre>
+<a class="reference" href="./73f53fa10d2b14a0b27d9db65a7e3d91.html" title="./73f53fa10d2b14a0b27d9db65a7e3d91.html" ><pre>              FUN_004044e0(param_1,pbVar27,0,0);</pre></a>
+
+<pre>              *(undefined4 *)(*(int *)(iVar6 + 4) + 8) = 0xfffffffe;</pre>
+<pre>              return;</pre>
+<pre>            }</pre>
+<pre>            pcVar23 = "Couldn\'t unsubscribe from %s on interface %s/%u\n";</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>        FUN_00401448(4,pcVar23,pbVar27,param_1);</pre></a>
+
+<pre>      }</pre>
+<pre>      return;</pre>
+<pre>    }</pre>
+<pre>    if ((puVar19 != (undefined *)0x8f) &amp;&amp; (puVar19 != (undefined *)0xce)) {</pre>
+<pre>      if (puVar19 == (undefined *)0x82) {</pre>
+<pre>        dolog(7,"Received a ICMPv6 MLD Query on %s\n",param_1 + 1,param_4);</pre>
+<pre>        if (param_5 == 0x18) {</pre>
+<pre>          uVar10 = 1;</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          uVar10 = 2;</pre>
+<pre>        }</pre>
+<pre>        int_set_mld_version(param_1,uVar10);</pre>
+<pre>        if ((*(int *)(g_conf + 0x30) == 0) &amp;&amp;</pre>
+<pre>           (((*(int *)(g_conf + 0x2c) != 0 || (param_1[7] == 0)) || (param_1[7] == 1)))) {</pre>
+<pre>          for (puVar24 = (undefined4 *)**(undefined4 **)(g_conf + 0xc); puVar24 != (undefined4 *)0x0</pre>
+<pre>              ; puVar24 = (undefined4 *)*puVar24) {</pre>
+<pre>            iVar6 = puVar24[2];</pre>
+<pre>            if (iVar6 != 0) {</pre>
+<pre>              for (puVar20 = (undefined4 *)**(undefined4 **)(iVar6 + 0x10);</pre>
+<pre>                  puVar20 != (undefined4 *)0x0; puVar20 = (undefined4 *)*puVar20) {</pre>
+<pre>                if (((int *)puVar20[2] != (int *)0x0) &amp;&amp; (*(int *)puVar20[2] == *param_1)) {</pre>
+<a class="reference" href="./090591c532523b3078e97af1b0c10049.html" title="./090591c532523b3078e97af1b0c10049.html" ><pre>                  FUN_00403c08(param_1,iVar6);</pre></a>
+
+<pre>                }</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>          return;</pre>
+<pre>        }</pre>
+<pre>        if ((*(int *)(g_conf + 0x2c) == 0) &amp;&amp; ((*(int *)(g_conf + 0x30) != 0 || (param_1[7] == 2))))</pre>
+<pre>        {</pre>
+<a class="reference" href="./32413095cd4610d28b13cf9642165ce8.html" title="./32413095cd4610d28b13cf9642165ce8.html" ><pre>          FUN_00403168(param_1,0);</pre></a>
+
+<pre>          return;</pre>
+<pre>        }</pre>
+<pre>        dolog(7,"Did not answer query on %s\n",param_1 + 1);</pre>
+<pre>        return;</pre>
+<pre>      }</pre>
+<pre>      do {</pre>
+<pre>        pcVar23 = *ppuVar26;</pre>
+<pre>        if (pcVar23 == (char *)0x0) {</pre>
+<pre>          pcVar23 = "Unknown";</pre>
+<pre>          break;</pre>
+<pre>        }</pre>
+<pre>        ppuVar12 = ppuVar26 + -1;</pre>
+<pre>        ppuVar26 = ppuVar26 + 2;</pre>
+<pre>      } while (*ppuVar12 != puVar19);</pre>
+<a class="reference" href="./08124a0f742862fe8baedf5690cbab4f.html" title="./08124a0f742862fe8baedf5690cbab4f.html" ><pre>      FUN_00401330(puVar19,param_4[1]);</pre></a>
+
+<pre>      dolog(7,"ICMP type %s (%u), %s (%u) got through\n",pcVar23,puVar19);</pre>
+<pre>      return;</pre>
+<pre>    }</pre>
+<pre>    local_b0[0] = 0;</pre>
+<pre>    pbVar25 = (byte *)((*(ushort *)(param_4 + 6) &amp; 0xff) &lt;&lt; 8 |</pre>
+<pre>                      (uint)(*(ushort *)(param_4 + 6) &gt;&gt; 8));</pre>
+<pre>    int_set_mld_version(param_1,2,param_3);</pre>
+<pre>    pbVar28 = (byte *)(param_1 + 1);</pre>
+<pre>    local_c0 = pbVar25;</pre>
+<pre>    dolog(7,"Received a ICMPv6 MLDv2 Report (%u) on %s (grec\'s: %u)\n",*param_4,pbVar28);</pre>
+<pre>    if (pbVar27 &lt; (byte *)((int)pbVar25 * 0x14 + 8)) {</pre>
+<pre>      dolog(3,"Ignoring packet with invalid number of Group Records (would exceed packetlength)\n");</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre><span class="green">      memset(acStack_9c,0,0x2e)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">      memset(auStack_6c,0,0x2e)</span></span>   //possible issue identified - semgrep</pre>
+<pre>      local_b0[2] = 0;</pre>
+<pre>      local_b0[3] = 0;</pre>
+<pre>      local_b0[4] = 0;</pre>
+<pre>      pbVar21 = param_4 + 8;</pre>
+<pre>      local_b0[1] = 0;</pre>
+<pre>      for (; pbVar25 != (byte *)0x0; pbVar25 = pbVar25 + -1) {</pre>
+<pre>        if (param_4 + (int)pbVar27 &lt; pbVar21) {</pre>
+<pre>          pcVar23 = "Reached outside the packet (ngrec=%u) received on %s, length %u -&gt; ignoring\n";</pre>
+<pre>          pbVar17 = pbVar25;</pre>
+<pre>          pbVar21 = pbVar28;</pre>
+<pre>          local_c0 = pbVar27;</pre>
+<pre>LAB_0040418c:</pre>
+<pre>          dolog(3,pcVar23,pbVar17,pbVar21);</pre>
+<pre>          return;</pre>
+<pre>        }</pre>
+<pre>        pbVar17 = (byte *)(uint)*pbVar21;</pre>
+<pre>        uVar3 = *(ushort *)(pbVar21 + 2);</pre>
+<pre>        if (5 &lt; ((uint)(pbVar17 + -1) &amp; 0xff)) {</pre>
+<pre>          pcVar23 = "Unknown Group Record Type %u/0x%x (ngrec=%u) on %s -&gt; Ignoring Report\n";</pre>
+<pre>          pbVar21 = pbVar17;</pre>
+<pre>          local_c0 = pbVar25;</pre>
+<pre>          local_bc = pbVar28;</pre>
+<pre>          goto LAB_0040418c;</pre>
+<pre>        }</pre>
+<pre>        if ((pbVar21[4] != 0xff) || (iVar6 = 0, 1 &lt; (pbVar21[5] &amp; 0xf) - 1)) {</pre>
+<pre>          pbVar17 = pbVar21 + 4;</pre>
+<pre><span class="green">          inet_ntop(10,pbVar17,acStack_9c,0x2e)</span></span>   //possible issue identified - semgrep</pre>
+<pre>          iVar6 = groupint_get(pbVar17,param_1,local_b0);</pre>
+<pre>          if (iVar6 == 0) {</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>            FUN_00401448(4,</pre></a>
+
+<pre>                         "L4:IPv6:ICMPv6:MLD2_Report Couldn\'t find or create new group for %s on %s/%u\n"</pre>
+<pre>                         ,pbVar17,param_1);</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        uVar14 = (uVar3 &amp; 0xff) &lt;&lt; 8 | (uint)(uVar3 &gt;&gt; 8);</pre>
+<pre>        pbVar17 = pbVar21 + 0x14;</pre>
+<pre>        if (uVar14 == 0) {</pre>
+<pre>          if (iVar6 != 0) {</pre>
+<pre>            bVar11 = *pbVar21;</pre>
+<pre>            if (((bVar11 == 2) || (bVar11 == 4)) || (uVar10 = 2, bVar11 == 6)) {</pre>
+<pre>              uVar10 = 1;</pre>
+<pre>            }</pre>
+<pre>            iVar6 = grpint_refresh(iVar6,local_b0 + 1,uVar10);</pre>
+<pre>            if (iVar6 == 0) {</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>              FUN_00401448(4,"Couldn\'t refresh subscription to %s for %s/%u\n",pbVar21 + 4,param_1)</pre></a>
+
+<pre>              ;</pre>
+<pre>              return;</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          iVar9 = uVar14 * 0x10;</pre>
+<pre>          pbVar18 = pbVar17;</pre>
+<pre>          if (pbVar27 &lt; pbVar17 + (iVar9 - (int)param_4)) {</pre>
+<pre>            dolog(3,</pre>
+<pre>                  "Ignoring packet with invalid number (%u) of sources (would exceed packetlength)\n"</pre>
+<pre>                  ,uVar14);</pre>
+<pre>            return;</pre>
+<pre>          }</pre>
+<pre>          do {</pre>
+<pre>            uVar14 = uVar14 - 1;</pre>
+<pre>            if (iVar6 != 0) {</pre>
+<pre>              bVar11 = *pbVar21;</pre>
+<pre>              uVar10 = 1;</pre>
+<pre>              if (((bVar11 == 2) || (bVar11 == 4)) || (bVar11 == 6)) {</pre>
+<pre>                uVar10 = 2;</pre>
+<pre>              }</pre>
+<pre>              iVar8 = grpint_refresh(iVar6,pbVar18,uVar10);</pre>
+<pre>              if (iVar8 == 0) {</pre>
+<a class="reference" href="./74fa57b834709f9b4a82d0f9f1a826e0.html" title="./74fa57b834709f9b4a82d0f9f1a826e0.html" ><pre>                FUN_00401448(3,"Couldn\'t subscribe sourced from %s on %s/%u\n",pbVar18,param_1);</pre></a>
+
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>            pbVar18 = pbVar18 + 0x10;</pre>
+<pre>          } while (uVar14 != 0);</pre>
+<pre>          pbVar17 = pbVar17 + iVar9;</pre>
+<pre>        }</pre>
+<pre>        if (local_b0[0] != 0) {</pre>
+<a class="reference" href="./df78c5288db82d5323ccf7f9e62e0e0a.html" title="./df78c5288db82d5323ccf7f9e62e0e0a.html" ><pre>          FUN_00403ef4(param_1,pbVar21 + 4);</pre></a>
+
+<pre>        }</pre>
+<pre>        pbVar21 = pbVar17 + pbVar21[1];</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre><span class="green">  cVar5 = *(char *)(param_2 + 7)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  if (cVar5 != '\0') {</pre>
+<pre>    *(char *)(param_2 + 7) = cVar5 + -1;</pre>
+<pre><span class="green">    cVar5 = *(char *)(param_2 + 7)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  }</pre>
+<pre>  iVar6 = g_conf;</pre>
+<pre>  if (cVar5 != '\0') {</pre>
+<pre>    if (param_6 != '\0') {</pre>
+<pre>      dolog(4,</pre>
+<pre>            "Ignoring (%s): ICMPv6 Echo Req because header chain includes some of extension headers\n"</pre>
+<pre>            ,param_1 + 1);</pre>
+<pre>      return;</pre>
+<pre>    }</pre>
+<pre>    if (((*(char *)(param_2 + 8) != -1) &amp;&amp;</pre>
+<pre>        (((*(uint *)(param_2 + 8) != 0 || (*(int *)(param_2 + 0xc) != 0)) ||</pre>
+<pre>         ((*(int *)(param_2 + 0x10) != 0 || (*(int *)(param_2 + 0x14) != 0)))))) &amp;&amp;</pre>
+<pre>       (((((*(int *)(param_2 + 0x18) != 0 || (*(int *)(param_2 + 0x1c) != 0)) ||</pre>
+<pre>          (*(int *)(param_2 + 0x20) != 0)) || (*(int *)(param_2 + 0x24) != 0)) &amp;&amp;</pre>
+<pre>        ((*(uint *)(param_2 + 8) &amp; 0xc0ff) != 0x80fe)))) {</pre>
+<pre>      if (*(char *)(param_2 + 0x18) == -1) {</pre>
+<pre>        bVar11 = *(byte *)(param_2 + 0x19) &amp; 0xf;</pre>
+<pre>        if (bVar11 == 1) {</pre>
+<pre>          return;</pre>
+<pre>        }</pre>
+<pre>        if (bVar11 == 2) {</pre>
+<pre>          return;</pre>
+<pre>        }</pre>
+<pre>        if ((*(byte *)(param_2 + 0x19) &amp; 0xf) == 0) {</pre>
+<pre>          return;</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      iVar6 = group_find(param_2 + 0x18);</pre>
+<pre>      if (iVar6 != 0) {</pre>
+<pre>        uVar14 = *(uint *)(iVar6 + 0x20);</pre>
+<pre>        uVar15 = *(uint *)(iVar6 + 0x18) + param_3;</pre>
+<pre>        uVar16 = uVar14 + 1;</pre>
+<pre>        *(uint *)(iVar6 + 0x1c) = (uint)(uVar15 &lt; *(uint *)(iVar6 + 0x18)) + *(int *)(iVar6 + 0x1c);</pre>
+<pre>        piVar2 = __Jv_RegisterClasses;</pre>
+<pre>        *(uint *)(iVar6 + 0x18) = uVar15;</pre>
+<pre>        *(uint *)(iVar6 + 0x20) = uVar16;</pre>
+<pre>        *(uint *)(iVar6 + 0x24) = (uint)(uVar16 &lt; uVar14) + *(int *)(iVar6 + 0x24);</pre>
+<pre>        iVar4 = ___register_frame_info;</pre>
+<pre>        iVar8 = _stderr;</pre>
+<pre>        iVar9 = _in6addr_any;</pre>
+<pre>        for (puVar24 = (undefined4 *)**(undefined4 **)(iVar6 + 0x10); puVar24 != (undefined4 *)0x0;</pre>
+<pre>            puVar24 = (undefined4 *)*puVar24) {</pre>
+<pre>          piVar22 = (int *)puVar24[2];</pre>
+<pre>          if ((piVar22 != (int *)0x0) &amp;&amp; (*param_1 != *piVar22)) {</pre>
+<pre>            piVar7 = param_1;</pre>
+<pre>            for (puVar20 = *(undefined4 **)piVar22[1]; puVar20 != (undefined4 *)0x0;</pre>
+<pre>                puVar20 = (undefined4 *)*puVar20) {</pre>
+<pre>              piVar13 = (int *)puVar20[2];</pre>
+<pre>              if (((piVar13 != (int *)0x0) &amp;&amp;</pre>
+<pre>                  (((((*piVar13 == iVar9 &amp;&amp; (piVar13[1] == iVar8)) &amp;&amp; (piVar13[2] == iVar4)) &amp;&amp;</pre>
+<pre>                    (piVar7 = piVar2, (int *)piVar13[3] == piVar2)) ||</pre>
+<pre>                   (((*piVar13 == *(int *)(param_2 + 8) &amp;&amp; (piVar13[1] == *(int *)(param_2 + 0xc)))</pre>
+<pre>                    &amp;&amp; ((piVar13[2] == *(int *)(param_2 + 0x10) &amp;&amp;</pre>
+<pre>                        (piVar13[3] == *(int *)(param_2 + 0x14))))))))) &amp;&amp;</pre>
+<pre>                 ((piVar13[4] == 1 &amp;&amp;</pre>
+<pre>                  (piVar7 = (int *)int_find(*piVar22,piVar7), piVar7 != (int *)0x0)))) {</pre>
+<a class="reference" href="./b3df69405c7e94c4b57c3e477ad710b5.html" title="./b3df69405c7e94c4b57c3e477ad710b5.html" ><pre>                FUN_00402b0c(param_1,piVar7,param_2,param_3);</pre></a>
+
+<pre>                break;</pre>
+<pre>              }</pre>
+<pre>            }</pre>
+<pre>          }</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    return;</pre>
+<pre>  }</pre>
+<pre>  pbVar27 = pbVar27 + -4;</pre>
+<pre>  uVar14 = *(uint *)(g_conf + 0x80);</pre>
+<pre>  piVar2 = (int *)(g_conf + 0x84);</pre>
+<pre>  uVar15 = uVar14 + 1;</pre>
+<pre>  *(uint *)(g_conf + 0x80) = uVar15;</pre>
+<pre>  *(uint *)(iVar6 + 0x84) = (uint)(uVar15 &lt; uVar14) + *piVar2;</pre>
+<pre>  uVar15 = (uint)pbVar27 &amp; 0xffff;</pre>
+<pre><span class="green">  memset(local_630,0,0x60c)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  uVar14 = uVar15 + 4 &amp; 0xffff;</pre>
+<pre>  local_62c = (ushort)(uVar14 &lt;&lt; 8) | (ushort)(uVar14 &gt;&gt; 8);</pre>
+<pre>  local_630[0] = 0x60;</pre>
+<pre>  local_62a = 0x3a;</pre>
+<pre>  local_629 = 0x40;</pre>
+<pre><span class="green">  memcpy(auStack_628,param_1 + 0x11,0x10)</span></span>   //possible issue identified - semgrep</pre>
+<pre><span class="green">  memcpy(auStack_618,(void *)(param_2 + 8),0x10)</span></span>   //possible issue identified - semgrep</pre>
+<pre>  local_608 = 0x81;</pre>
+<pre>  local_607 = 0;</pre>
+<pre>  if ((byte *)0x5dc &lt; pbVar27) {</pre>
+<pre>    pbVar27 = (byte *)0x5dc;</pre>
+<pre>  }</pre>
+<pre><span class="green">  memcpy(auStack_604,param_4 + 4,(size_t)pbVar27)</span></span>   //possible issue identified - semgrep</pre>
+<a class="reference" href="./94c382a35140d5ee830de019fab68cc7.html" title="./94c382a35140d5ee830de019fab68cc7.html" ><pre>  local_606 = FUN_004011e0(local_630,0x3a,&amp;local_608,uVar14);</pre></a>
+
+<pre>  ppuVar12 = &amp;PTR_s_Destination_Unreachable_0041a114;</pre>
+<pre>  do {</pre>
+<pre>    pcVar23 = *ppuVar12;</pre>
+<pre>    if (pcVar23 == (char *)0x0) {</pre>
+<pre>      pcVar23 = "Unknown";</pre>
+<pre>      break;</pre>
+<pre>    }</pre>
+<pre>    ppuVar26 = ppuVar12 + -1;</pre>
+<pre>    ppuVar12 = ppuVar12 + 2;</pre>
+<pre>  } while (*ppuVar26 != (undefined *)0x81);</pre>
+<a class="reference" href="./08124a0f742862fe8baedf5690cbab4f.html" title="./08124a0f742862fe8baedf5690cbab4f.html" ><pre>  uVar10 = FUN_00401330(0x81,0);</pre></a>
+
+<pre>  dolog(7,"Sending ICMPv6 Type %s (%u) code %s (%u) on %s/%u\n",pcVar23,0x81,uVar10,0,param_1 + 1,</pre>
+<pre>        *param_1);</pre>
+<a class="reference" href="./b3df69405c7e94c4b57c3e477ad710b5.html" title="./b3df69405c7e94c4b57c3e477ad710b5.html" ><pre>  FUN_00402b0c(0,param_1,local_630,uVar15 + 0x2c &amp; 0xffff);</pre></a>
+
+<pre>  iVar6 = g_conf;</pre>
+<pre>  uVar14 = *(uint *)(g_conf + 0x78) + 1;</pre>
+<pre>  *(uint *)(g_conf + 0x7c) = (uint)(uVar14 &lt; *(uint *)(g_conf + 0x78)) + *(int *)(g_conf + 0x7c);</pre>
+<pre>  *(uint *)(iVar6 + 0x78) = uVar14;</pre>
+<pre>  uVar14 = param_1[0x20] + 1;</pre>
+<pre>  param_1[0x21] = (uint)(uVar14 &lt; (uint)param_1[0x20]) + param_1[0x21];</pre>
+<pre>  param_1[0x20] = uVar14;</pre>
+<pre>  return;</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>

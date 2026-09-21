@@ -1,0 +1,449 @@
+<!-- 
+EMBA - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2025 Siemens Energy AG
+
+EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+EMBA is licensed under GPLv3
+
+Author(s) and contributors from the EMBA project are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
+-->
+
+<!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>EMBA firmware report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./../style/style.css" type="text/css">
+  <link rel="icon" type="image/png" href="./../style/favicon.png">
+</head>
+<body>
+
+<div id="sidenav" class="side">
+  <div id="logo">
+    <a class="inherit" href="./../index.html"><img class="inherit" id="logoImage" src="./../style/emba.svg" alt="logo"></a>
+  </div>
+  <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a> <!-- nosem -->
+      <a class="backButton" href="./../index.html">&laquo; Back to main</a>
+<a class="modul" href="./30b52c1e3fe1ce83d40476f8d3c7c327.html" title="./30b52c1e3fe1ce83d40476f8d3c7c327.html" >&laquo; Back to 30b52c1e3fe1ce83d40476f8d3c7c327</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
+  </div>
+
+  <a href="ERRORLINK"><div id="buttonErrorInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div></a>
+  <a href="TIMELINK"><div id="buttonTimeInvisible" class="rectButton"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 19 2)"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 5.5v4H5"/></g></svg></div></a>
+
+  <div id="buttonSizer" class="rectButton buttonClose" onclick="buttonNav()"></div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+<br />
+<pre>/* WARNING: Restarted to delay deadcode elimination for space: stack */</pre>
+<br />
+<a class="reference" href="./c856d2d7dd49212580277e82706a9fe4.html" title="./c856d2d7dd49212580277e82706a9fe4.html" ><pre>undefined4 FUN_0040f438(int param_1,uint *param_2,uint *param_3,undefined4 param_4)</pre></a>
+
+<br />
+<pre>{</pre>
+<pre>  uint uVar1;</pre>
+<pre>  uint uVar2;</pre>
+<pre>  uint uVar3;</pre>
+<pre>  uint uVar4;</pre>
+<pre>  uint uVar5;</pre>
+<pre>  uint uVar6;</pre>
+<pre>  undefined4 uVar7;</pre>
+<pre>  int iVar8;</pre>
+<pre>  uint uVar9;</pre>
+<pre>  undefined4 uVar10;</pre>
+<pre>  char *pcVar11;</pre>
+<pre>  uint uVar12;</pre>
+<pre>  char *pcVar13;</pre>
+<pre>  uint *puVar14;</pre>
+<pre>  uint in_t0;</pre>
+<pre>  uint in_t2;</pre>
+<pre>  uint in_t3;</pre>
+<pre>  uint in_t4;</pre>
+<pre>  uint in_t5;</pre>
+<pre>  uint in_t6;</pre>
+<pre>  uint uVar15;</pre>
+<pre>  uint uVar16;</pre>
+<pre>  uint *puVar17;</pre>
+<pre>  undefined8 uVar18;</pre>
+<pre>  ushort local_b0 [2];</pre>
+<pre>  undefined4 local_ac;</pre>
+<pre>  undefined4 *local_a8;</pre>
+<pre>  uint local_a4;</pre>
+<pre>  uint local_a0;</pre>
+<pre>  uint local_9c;</pre>
+<pre>  uint local_98;</pre>
+<pre>  uint local_94;</pre>
+<pre>  uint local_90;</pre>
+<pre>  uint local_8c;</pre>
+<pre>  uint local_88;</pre>
+<pre>  uint local_84;</pre>
+<pre>  uint local_80;</pre>
+<pre>  uint local_7c;</pre>
+<pre>  uint local_78;</pre>
+<pre>  uint local_74;</pre>
+<pre>  uint local_70;</pre>
+<pre>  uint local_6c;</pre>
+<pre>  uint local_68;</pre>
+<pre>  uint local_64;</pre>
+<pre>  uint local_60;</pre>
+<pre>  uint local_5c;</pre>
+<pre>  uint local_58;</pre>
+<pre>  uint local_50;</pre>
+<pre>  uint local_4c;</pre>
+<pre>  uint local_48;</pre>
+<pre>  undefined1 local_44 [4];</pre>
+<pre>  undefined1 local_40 [4];</pre>
+<pre>  undefined1 local_3c [4];</pre>
+<pre>  undefined1 local_38 [4];</pre>
+<pre>  byte local_34;</pre>
+<pre>  undefined4 *local_30;</pre>
+<pre>  </pre>
+<pre>  local_a8 = &amp;local_ac;</pre>
+<pre>  puVar14 = param_2 + 1;</pre>
+<pre>  local_ac = 0;</pre>
+<pre>  local_30 = local_a8;</pre>
+<pre>  do {</pre>
+<pre>    if (param_3 &lt; puVar14) {</pre>
+<pre>      return 0;</pre>
+<pre>    }</pre>
+<pre>    uVar12 = *param_2;</pre>
+<pre>    uVar16 = (uVar12 &amp; 0xff) &lt;&lt; 8 | (uVar12 &amp; 0xffff) &gt;&gt; 8;</pre>
+<pre>    uVar15 = (uVar12 &gt;&gt; 0x10 &amp; 0xff) &lt;&lt; 8 | uVar12 &gt;&gt; 0x18;</pre>
+<pre>    puVar17 = (uint *)((int)puVar14 + uVar15);</pre>
+<pre>    uVar18 = dhcp6optstr(uVar16);</pre>
+<pre>    uVar9 = 7;</pre>
+<pre>    pcVar11 = "copyin_option";</pre>
+<pre>    pcVar13 = "get DHCP option %s, len %d";</pre>
+<pre>    uVar12 = uVar15;</pre>
+<pre>    dprintf(7,"copyin_option","get DHCP option %s, len %d",(int)uVar18,uVar15);</pre>
+<pre>    if (param_3 &lt; puVar17) {</pre>
+<pre>      dprintf(6,"copyin_option","malformed DHCP option");</pre>
+<pre>      goto LAB_0040fa08;</pre>
+<pre>    }</pre>
+<pre>    if (uVar16 == 0xd) {</pre>
+<pre>      if (((param_1 - 0x19U &lt; 2) || (param_1 == 3)) || (param_1 == 5)) {</pre>
+<pre>        if (uVar15 + 4 &lt; 6) goto LAB_0040fad8;</pre>
+<pre>        uVar9 = ((ushort)param_2[1] &amp; 0xff) &lt;&lt; 8 | (uint)(ushort)((ushort)param_2[1] &gt;&gt; 8);</pre>
+<pre>        local_b0[0] = (ushort)uVar9;</pre>
+<a class="reference" href="./61c6efd39cf4f05d051393d9dff31117.html" title="./61c6efd39cf4f05d051393d9dff31117.html" ><pre>        uVar7 = FUN_0040b0f0(uVar9);</pre></a>
+
+<pre>        dprintf(7,"","  status code: %s",uVar7,uVar12);</pre>
+<pre>        iVar8 = dhcp6_find_listval(param_4,2,local_b0,0);</pre>
+<pre>        if (iVar8 == 0) {</pre>
+<pre>          iVar8 = dhcp6_add_listval(param_4,2,local_b0,0);</pre>
+<pre>          if (iVar8 == 0) goto LAB_0040fa08;</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          dprintf(6,"copyin_option","duplicated status code (%d)",(uint)local_b0[0],uVar12);</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>      else {</pre>
+<pre>        uVar7 = dhcp6optstr(param_1);</pre>
+<pre>        uVar10 = dhcp6optstr(0xd);</pre>
+<pre>        dprintf(6,"copyin_option","%s is an invalid position for %s",uVar7,uVar10);</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>    else {</pre>
+<pre>      if (uVar16 == 0x1a) {</pre>
+<pre>        if (param_1 == 0x19) {</pre>
+<pre>          if (0x1c &lt; uVar15 + 4) {</pre>
+<pre>            uVar15 = (int)param_2 + 3U &amp; 3;</pre>
+<pre>            uVar1 = (int)param_2 + 7U &amp; 3;</pre>
+<pre>            uVar5 = (int)param_2 + 0xbU &amp; 3;</pre>
+<pre>            uVar2 = (int)param_2 + 0xfU &amp; 3;</pre>
+<pre>            uVar3 = (int)param_2 + 0x13U &amp; 3;</pre>
+<pre>            uVar4 = (int)param_2 + 0x17U &amp; 3;</pre>
+<pre>            uVar6 = (uint)param_2 &amp; 3;</pre>
+<pre>            local_50 = (*(int *)(((int)param_2 + 3U) - uVar15) &lt;&lt; (3 - uVar15) * 8 |</pre>
+<pre>                       (uint)((ulonglong)uVar18 &gt;&gt; 0x20) &amp; 0xffffffffU &gt;&gt; (uVar15 + 1) * 8) &amp;</pre>
+<pre>                       -1 &lt;&lt; (4 - uVar6) * 8 | *(uint *)((int)param_2 - uVar6) &gt;&gt; uVar6 * 8;</pre>
+<pre>            uVar15 = (uint)(param_2 + 1) &amp; 3;</pre>
+<pre>            local_4c = (*(int *)(((int)param_2 + 7U) - uVar1) &lt;&lt; (3 - uVar1) * 8 |</pre>
+<pre>                       uVar9 &amp; 0xffffffffU &gt;&gt; (uVar1 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar15) * 8 |</pre>
+<pre>                       *(uint *)((int)(param_2 + 1) - uVar15) &gt;&gt; uVar15 * 8;</pre>
+<pre>            uVar9 = (uint)(param_2 + 2) &amp; 3;</pre>
+<pre>            local_48 = (*(int *)(((int)param_2 + 0xbU) - uVar5) &lt;&lt; (3 - uVar5) * 8 |</pre>
+<pre>                       (uint)pcVar11 &amp; 0xffffffffU &gt;&gt; (uVar5 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                       *(uint *)((int)(param_2 + 2) - uVar9) &gt;&gt; uVar9 * 8;</pre>
+<pre>            uVar9 = (uint)(param_2 + 3) &amp; 3;</pre>
+<pre>            local_44 = (undefined1  [4])</pre>
+<pre>                       ((*(int *)(((int)param_2 + 0xfU) - uVar2) &lt;&lt; (3 - uVar2) * 8 |</pre>
+<pre>                        (uint)pcVar13 &amp; 0xffffffffU &gt;&gt; (uVar2 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                       *(uint *)((int)(param_2 + 3) - uVar9) &gt;&gt; uVar9 * 8);</pre>
+<pre>            uVar9 = (uint)(param_2 + 4) &amp; 3;</pre>
+<pre>            local_40 = (undefined1  [4])</pre>
+<pre>                       ((*(int *)(((int)param_2 + 0x13U) - uVar3) &lt;&lt; (3 - uVar3) * 8 |</pre>
+<pre>                        (uint)uVar18 &amp; 0xffffffffU &gt;&gt; (uVar3 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                       *(uint *)((int)(param_2 + 4) - uVar9) &gt;&gt; uVar9 * 8);</pre>
+<pre>            uVar9 = (uint)(param_2 + 5) &amp; 3;</pre>
+<pre>            local_3c = (undefined1  [4])</pre>
+<pre>                       ((*(int *)(((int)param_2 + 0x17U) - uVar4) &lt;&lt; (3 - uVar4) * 8 |</pre>
+<pre>                        in_t0 &amp; 0xffffffffU &gt;&gt; (uVar4 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                       *(uint *)((int)(param_2 + 5) - uVar9) &gt;&gt; uVar9 * 8);</pre>
+<pre>            local_38 = (undefined1  [4])param_2[6];</pre>
+<pre>            uVar9 = (uint)local_44 &amp; 0xff;</pre>
+<pre>            local_34 = (byte)param_2[7];</pre>
+<pre>            if (uVar9 &lt; 0x81) {</pre>
+<pre>              in_t6 = local_4c &gt;&gt; 0x18;</pre>
+<pre>              in_t0 = (local_48 &amp; 0xff0000) &gt;&gt; 8;</pre>
+<pre>              uVar12 = (uint)(local_38 + 1) &amp; 3;</pre>
+<pre>              in_t5 = ((uint)local_34 &lt;&lt; 0x18 | in_t5 &amp; 0xffffff) &amp; -1 &lt;&lt; (4 - uVar12) * 8 |</pre>
+<pre>                      *(uint *)(local_38 + 1 + -uVar12) &gt;&gt; uVar12 * 8;</pre>
+<pre>              uVar12 = (uint)(local_40 + 1) &amp; 3;</pre>
+<pre>              in_t3 = ((int)local_3c &lt;&lt; 0x18 | in_t3 &amp; 0xffffff) &amp; -1 &lt;&lt; (4 - uVar12) * 8 |</pre>
+<pre>                      *(uint *)(local_40 + 1 + -uVar12) &gt;&gt; uVar12 * 8;</pre>
+<pre>              uVar12 = (uint)(local_3c + 1) &amp; 3;</pre>
+<pre>              in_t4 = (param_2[6] &lt;&lt; 0x18 | in_t4 &amp; 0xffffff) &amp; -1 &lt;&lt; (4 - uVar12) * 8 |</pre>
+<pre>                      *(uint *)(local_3c + 1 + -uVar12) &gt;&gt; uVar12 * 8;</pre>
+<pre>              uVar12 = (uint)(local_44 + 1) &amp; 3;</pre>
+<pre>              in_t2 = ((int)local_40 &lt;&lt; 0x18 | in_t2 &amp; 0xffffff) &amp; -1 &lt;&lt; (4 - uVar12) * 8 |</pre>
+<pre>                      *(uint *)(local_44 + 1 + -uVar12) &gt;&gt; uVar12 * 8;</pre>
+<pre>              local_a4 = local_4c &lt;&lt; 0x18 | in_t6 | (local_4c &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                         (local_4c &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>              local_a0 = local_48 &lt;&lt; 0x18 | local_48 &gt;&gt; 0x18 | in_t0 | (local_48 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>              local_9c = in_t2;</pre>
+<pre>              local_98 = in_t3;</pre>
+<pre>              local_94 = in_t4;</pre>
+<pre>              local_90 = in_t5;</pre>
+<pre>              local_8c = uVar9;</pre>
+<pre>              uVar7 = in6addr2str(&amp;local_9c,0);</pre>
+<pre>              puVar14 = &amp;local_a4;</pre>
+<pre>              dprintf(7,"copyin_option","  IA_PD prefix: %s/%d pltime=%lu vltime=%lu",uVar7,local_8c</pre>
+<pre>                      ,local_a4,local_a0);</pre>
+<pre>              iVar8 = dhcp6_find_listval(param_4,5,puVar14,0);</pre>
+<pre>              if (iVar8 == 0) {</pre>
+<pre>                local_ac = 0;</pre>
+<pre>                local_a8 = local_30;</pre>
+<a class="reference" href="./c856d2d7dd49212580277e82706a9fe4.html" title="./c856d2d7dd49212580277e82706a9fe4.html" ><pre>                iVar8 = FUN_0040f438(0x1a,(int)param_2 + 0x1d,puVar17);</pre></a>
+
+<pre>                if (iVar8 != 0) goto LAB_0040fa08;</pre>
+<pre>                uVar7 = 5;</pre>
+<pre>                goto LAB_0040f9ac;</pre>
+<pre>              }</pre>
+<pre>              uVar7 = in6addr2str(&amp;local_9c,0);</pre>
+<pre>              dprintf(6,"copyin_option","duplicated IA_PD prefix %s/%d pltime=%lu vltime=%lu",uVar7,</pre>
+<pre>                      local_8c,local_a4,local_a0);</pre>
+<pre>              goto LAB_0040f530;</pre>
+<pre>            }</pre>
+<pre>            dprintf(6,"copyin_option","invalid prefix length (%d)",uVar9,uVar12);</pre>
+<pre>          }</pre>
+<pre>LAB_0040fad8:</pre>
+<pre>          dprintf(6,"","  malformed DHCP option: type %d",uVar16,uVar12);</pre>
+<pre>          goto LAB_0040fa08;</pre>
+<pre>        }</pre>
+<pre>        uVar7 = dhcp6optstr(param_1);</pre>
+<pre>        uVar10 = 0x1a;</pre>
+<pre>LAB_0040f9e4:</pre>
+<pre>        uVar10 = dhcp6optstr(uVar10);</pre>
+<pre>        dprintf(6,"copyin_option","%s is an invalid position for %s",uVar7,uVar10);</pre>
+<pre>LAB_0040fa08:</pre>
+<pre>        dhcp6_clear_list(local_30);</pre>
+<pre>        return 0xffffffff;</pre>
+<pre>      }</pre>
+<pre>      if (uVar16 == 5) {</pre>
+<pre>        if (param_1 != 3) {</pre>
+<pre>          uVar7 = dhcp6optstr(param_1);</pre>
+<pre>          uVar10 = 5;</pre>
+<pre>          goto LAB_0040f9e4;</pre>
+<pre>        }</pre>
+<pre>        if (uVar15 + 4 &lt; 0x1c) goto LAB_0040fad8;</pre>
+<pre>        local_74 = param_2[5];</pre>
+<pre>        local_70 = param_2[6];</pre>
+<pre>        uVar12 = (int)param_2 + 3U &amp; 3;</pre>
+<pre>        uVar9 = (int)param_2 + 7U &amp; 3;</pre>
+<pre>        uVar15 = (int)param_2 + 0xbU &amp; 3;</pre>
+<pre>        uVar16 = (int)param_2 + 0xfU &amp; 3;</pre>
+<pre>        uVar1 = (int)param_2 + 0x13U &amp; 3;</pre>
+<pre>        in_t0 = local_74 &gt;&gt; 0x18;</pre>
+<pre>        uVar5 = (uint)(param_2 + 1) &amp; 3;</pre>
+<pre>        in_t3 = (*(int *)(((int)param_2 + 7U) - uVar9) &lt;&lt; (3 - uVar9) * 8 |</pre>
+<pre>                in_t3 &amp; 0xffffffffU &gt;&gt; (uVar9 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar5) * 8 |</pre>
+<pre>                *(uint *)((int)(param_2 + 1) - uVar5) &gt;&gt; uVar5 * 8;</pre>
+<pre>        uVar9 = (uint)(param_2 + 2) &amp; 3;</pre>
+<pre>        in_t4 = (*(int *)(((int)param_2 + 0xbU) - uVar15) &lt;&lt; (3 - uVar15) * 8 |</pre>
+<pre>                in_t4 &amp; 0xffffffffU &gt;&gt; (uVar15 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                *(uint *)((int)(param_2 + 2) - uVar9) &gt;&gt; uVar9 * 8;</pre>
+<pre>        uVar9 = (uint)(param_2 + 3) &amp; 3;</pre>
+<pre>        in_t5 = (*(int *)(((int)param_2 + 0xfU) - uVar16) &lt;&lt; (3 - uVar16) * 8 |</pre>
+<pre>                in_t5 &amp; 0xffffffffU &gt;&gt; (uVar16 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                *(uint *)((int)(param_2 + 3) - uVar9) &gt;&gt; uVar9 * 8;</pre>
+<pre>        uVar9 = (uint)(param_2 + 4) &amp; 3;</pre>
+<pre>        in_t6 = (*(int *)(((int)param_2 + 0x13U) - uVar1) &lt;&lt; (3 - uVar1) * 8 |</pre>
+<pre>                in_t6 &amp; 0xffffffffU &gt;&gt; (uVar1 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                *(uint *)((int)(param_2 + 4) - uVar9) &gt;&gt; uVar9 * 8;</pre>
+<pre>        uVar9 = (uint)param_2 &amp; 3;</pre>
+<pre>        in_t2 = (*(int *)(((int)param_2 + 3U) - uVar12) &lt;&lt; (3 - uVar12) * 8 |</pre>
+<pre>                in_t2 &amp; 0xffffffffU &gt;&gt; (uVar12 + 1) * 8) &amp; -1 &lt;&lt; (4 - uVar9) * 8 |</pre>
+<pre>                *(uint *)((int)param_2 - uVar9) &gt;&gt; uVar9 * 8;</pre>
+<pre>        local_6c = local_74 &lt;&lt; 0x18 | in_t0 | (local_74 &amp; 0xff0000) &gt;&gt; 8 | (local_74 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>        local_68 = local_70 &lt;&lt; 0x18 | local_70 &gt;&gt; 0x18 | (local_70 &amp; 0xff0000) &gt;&gt; 8 |</pre>
+<pre>                   (local_70 &amp; 0xff00) &lt;&lt; 8;</pre>
+<pre>        local_88 = in_t2;</pre>
+<pre>        local_84 = in_t3;</pre>
+<pre>        local_80 = in_t4;</pre>
+<pre>        local_7c = in_t5;</pre>
+<pre>        local_78 = in_t6;</pre>
+<pre>        local_64 = in_t3;</pre>
+<pre>        local_60 = in_t4;</pre>
+<pre>        local_5c = in_t5;</pre>
+<pre>        local_58 = in_t6;</pre>
+<pre>        uVar7 = in6addr2str(&amp;local_64,0);</pre>
+<pre>        puVar14 = &amp;local_6c;</pre>
+<pre>        dprintf(7,"copyin_option","  IA_NA address: %s pltime=%lu vltime=%lu",uVar7,local_6c,</pre>
+<pre>                local_68);</pre>
+<pre>        iVar8 = dhcp6_find_listval(param_4,7,puVar14,0);</pre>
+<pre>        if (iVar8 == 0) {</pre>
+<pre>          local_ac = 0;</pre>
+<pre>          local_a8 = local_30;</pre>
+<a class="reference" href="./c856d2d7dd49212580277e82706a9fe4.html" title="./c856d2d7dd49212580277e82706a9fe4.html" ><pre>          iVar8 = FUN_0040f438(5,param_2 + 7,puVar17);</pre></a>
+
+<pre>          if (iVar8 != 0) goto LAB_0040fa08;</pre>
+<pre>          uVar7 = 7;</pre>
+<pre>LAB_0040f9ac:</pre>
+<pre>          iVar8 = dhcp6_add_listval(param_4,uVar7,puVar14,local_30);</pre>
+<pre>          if (iVar8 == 0) {</pre>
+<pre>            dhcp6_clear_list(local_30);</pre>
+<pre>            goto LAB_0040fa08;</pre>
+<pre>          }</pre>
+<pre>          dhcp6_clear_list(local_30);</pre>
+<pre>        }</pre>
+<pre>        else {</pre>
+<pre>          uVar7 = in6addr2str(&amp;local_64,0);</pre>
+<pre>          dprintf(6,"copyin_option","duplicated IA_NA address%s pltime=%lu vltime=%lu",uVar7,</pre>
+<pre>                  local_6c,local_68);</pre>
+<pre>        }</pre>
+<pre>      }</pre>
+<pre>    }</pre>
+<pre>LAB_0040f530:</pre>
+<pre>    puVar14 = puVar17 + 1;</pre>
+<pre>    param_2 = puVar17;</pre>
+<pre>  } while( true );</pre>
+<pre>}</pre>
+<br />
+  <!-- content end -->
+</div>
+
+<a href="https://github.com/e-m-b-a/emba" title="github.com/e-m-b-a/emba" target="_blank">
+  <div id="buttonInfo" class="rectButtonVisible">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" transform="translate(2 2)"><g stroke="white" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="8"/><path d="M8.5 12.5v-4h-1"/><path d="M7.5 12.5h2"/></g><circle cx="8.5" cy="5.5" fill="white" r="1"/></g></svg>
+  </div>
+</a>
+<div id="buttonBack" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M9.5 14.5l4-4l-4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="buttonForward" class="nonClickable rectButtonVisible"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><path d="M11.5 14.5l-4-4l4-4" fill="none" stroke="#444" stroke-linecap="round" stroke-linejoin="round"/></svg></div> 
+<div id="buttonDown" class="rectButton" onclick="scrollDown()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l-4 4l-4-4"/><path d="M14.5 10.5l-4 4l-4-4"/></g></svg></div>
+<div id="buttonUp" class="rectButton" onclick="scrollUp()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5l4-4l4 4"/><path d="M6.5 10.5l4-4l4 4"/></g></svg></div> 
+
+<script>
+window.onload = function () {
+  var buttons = document.getElementsByClassName("rectButton");
+  for (let i=0; i<buttons.length; i++) {
+    buttons[i].style.visibility = "visible";
+  }
+  var buttonDown = document.getElementById("buttonDown");
+  buttonDown.classList.add('rectButtonVisible');
+  buttonDown.classList.remove('rectButton');
+
+  var buttonUp = document.getElementById("buttonUp");
+  buttonUp.classList.add('rectButtonVisible');
+  buttonUp.classList.remove('rectButton');
+    
+  var buttonSizer = document.getElementById("buttonSizer");
+  buttonSizer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+  if (document.getElementById("buttonTime") !== null) {
+    var buttonTime = document.getElementById("buttonTime");
+    buttonTime.style.bottom = "50px";
+  }
+  if (document.getElementById("buttonError") !== null) {
+    var buttonError = document.getElementById("buttonError");
+    buttonError.style.bottom = "100px";
+  }
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./../style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
+  }
+}
+
+function openNav() {
+  document.getElementById("sidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function scrollDown() {
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function scrollUp() {
+  window.scrollTo(0,0);
+}
+
+function buttonNav() {
+  var button = document.getElementById("buttonSizer");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5v-4.978l-5-.022"/><path d="M18.5 2.5l-7 7"/><path d="M16.5 9.5l-5 .023V4.5"/><path d="M9.5 11.5l-7 7"/></g></svg>';
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
+    closeNav();
+  };
+}
+
+// the following function is currently not used
+// it is for future extensions
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
+}
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
+</script>
+
+</body>
+</html>
