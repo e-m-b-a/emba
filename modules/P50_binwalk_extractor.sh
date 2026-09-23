@@ -160,7 +160,10 @@ remove_uprintable_paths() {
       # Replaces carriage returns (\r), ASCII control characters, and non-ASCII byte corruption with a single '_'
       # lNEW_BASE=$(printf '%s' "${lBASE}" | sed -E 's/[\x00-\x1F\x7F-\xFF]+/_/g')
       # Forces raw byte matching to strip \r, control codes, and binary junk into single underscores
-      lNEW_BASE=$(LC_ALL=C; printf '%s' "${lBASE}" | tr -s '[\000-\037\177-\377]' '_')
+      lNEW_BASE=$(
+        LC_ALL=C
+        printf '%s' "${lBASE}" | tr -s '[\000-\037\177-\377]' '_'
+      )
 
       # Reconstruct the new full path
       lNEW_FILE="${lDIR}/${lNEW_BASE}"
