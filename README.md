@@ -19,6 +19,7 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 <p align="center">
   <a href="https://github.com/koalaman/shellcheck"><img src="https://github.com/e-m-b-a/emba/actions/workflows/shellcheck.yml/badge.svg"/></a>
   <a href="https://semgrep.dev/"><img src="https://github.com/e-m-b-a/emba/actions/workflows/semgrep.yml/badge.svg"/></a>
+  <a href="https://github.com/mvdan/sh"><img src="https://github.com/e-m-b-a/emba/actions/workflows/shfmt_checker.yml/badge.svg"/></a>
   <a href="https://www.gnu.org/software/bash/"><img src="https://img.shields.io/badge/Made%20with-Bash-1f425f.svg" /></a>
   <a href="https://github.com/e-m-b-a/emba/blob/master/LICENSE"><img src="https://img.shields.io/github/license/e-m-b-a/emba?label=License"></a>
   <a href="https://github.com/e-m-b-a/emba/graphs/contributors"><img src="https://img.shields.io/github/contributors/e-m-b-a/emba?color=9ea"></a>
