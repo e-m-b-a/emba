@@ -137,18 +137,46 @@ remove_uprintable_paths() {
   local lFIRMWARE_UNPRINT_FILES_ARR=()
   local lFW_FILE=""
   local lNEW_FILE=""
+  local lDIR=""
+  local lBASE=""
+  local lNEW_BASE=""
 
-  mapfile -t lFIRMWARE_UNPRINT_FILES_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -name '*[^[:print:]]*')
+  # 1. Use -depth so children are renamed BEFORE their parent directories are renamed
+  # 2. Use a hex-based pattern matching real binary unprintables (\x00-\x1F, \x7F)
+  mapfile -t lFIRMWARE_UNPRINT_FILES_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -depth -regextype posix-extended -regex '.*[\x00-\x1F\x7F].*')
+
   if [[ "${#lFIRMWARE_UNPRINT_FILES_ARR[@]}" -gt 0 ]]; then
     print_output "[*] Unprintable characters detected in extracted files -> cleanup started"
+
     for lFW_FILE in "${lFIRMWARE_UNPRINT_FILES_ARR[@]}"; do
-      print_output "[*] Cleanup of ${lFW_FILE} with unprintable characters"
-      # print_output "[*] Moving ${lFW_FILE} to ${lFW_FILE//[![:print:]]/_}"
-      # mv "${lFW_FILE}" "${lFW_FILE//[![:print:]]/_}" || true
-      lNEW_FILE=$(iconv -f UTF-8 -t ASCII//TRANSLIT <<<"${lFW_FILE}" || true)
-      if [[ -n "${lNEW_FILE}" ]]; then
+      # Verify the file still exists (handles race conditions or overlapping paths)
+      [[ -e "${lFW_FILE}" || -L "${lFW_FILE}" ]] || continue
+
+      # Extract the directory path and the raw filename separately
+      lDIR=$(dirname "${lFW_FILE}")
+      lBASE=$(basename "${lFW_FILE}")
+
+      # Sanitize ONLY the filename (the basename)
+      # Replaces carriage returns (\r), ASCII control characters, and non-ASCII byte corruption with a single '_'
+      # lNEW_BASE=$(printf '%s' "${lBASE}" | sed -E 's/[\x00-\x1F\x7F-\xFF]+/_/g')
+      # Forces raw byte matching to strip \r, control codes, and binary junk into single underscores
+      lNEW_BASE=$(
+        LC_ALL=C
+        printf '%s' "${lBASE}" | tr -s '\000-\037\177-\377' '_'
+        # printf '%s' "${lBASE}" | tr -s '[\000-\037\177-\377]' '_'
+      )
+
+      # Reconstruct the new full path
+      lNEW_FILE="${lDIR}/${lNEW_BASE}"
+
+      # Only move if the name actually changed
+      if [[ "${lFW_FILE}" != "${lNEW_FILE}" ]]; then
         print_output "[*] Moving ${lFW_FILE} to ${lNEW_FILE}"
-        mv "${lFW_FILE}" "${lNEW_FILE}" || print_output "[-] Cleanup of file ${lFW_FILE} not possible"
+        # just in case our new filename is already in place
+        if [[ -f "${lNEW_FILE}" ]]; then
+          lNEW_FILE="${lNEW_FILE}_${RANDOM}"
+        fi
+        mv -- "${lFW_FILE}" "${lNEW_FILE}" || print_output "[-] Cleanup of file ${lFW_FILE} not possible"
       fi
     done
   fi

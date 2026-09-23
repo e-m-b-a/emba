@@ -38,14 +38,17 @@ jobs:
           haskell: true
           large-packages: false
           swap-storage: true
-
       - name: Run Trivy vulnerability scanner on EMBA image
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1    # v0.35.0 - https://github.com/aquasecurity/trivy-action/releases/tag/v0.35.0
         with:
           image-ref: 'docker.io/embeddedanalyzer/emba:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          skip-dirs: '/external/semgrep-rules/*, /external/emba_venv/lib/**/site-packages/cve_searchsploit/exploitdb/exploits/*, /external/legacy/openssl-1.0.2u/demos*, /external/legacy/openssl-1.0.2u/ms/*'
+          skip-dirs: >-
+            /external/semgrep-rules/,
+            /external/emba_venv/lib/**/site-packages/cve_searchsploit/exploitdb/exploits/,
+            /external/legacy/openssl-1.0.2u/demos*,
+            /external/legacy/openssl-1.0.2u/ms*
           skip-files: '/usr/lib/llvm-21/libexec/analyze-c++'
           hide-progress: true
           timeout: 30m

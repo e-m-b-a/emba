@@ -169,6 +169,9 @@ S26_kernel_vuln_verifier() {
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
     fi
+    if [[ "${ORIG_K_ARCH}" == "NA" ]]; then
+      print_output "[-] No valid kernel architecture identified for kernel ${lK_VERSION}"
+    fi
 
     if [[ "${lK_VERSION}" == *".0" ]]; then
       lK_VERSION_KORG=${lK_VERSION%.0}
@@ -485,6 +488,10 @@ extract_kernel_arch() {
   fi
   if [[ "${ORIG_K_ARCH}" == *"Intel"* ]]; then
     ORIG_K_ARCH="x86"
+  fi
+  if [[ "${ORIG_K_ARCH}" == *"data"* ]]; then
+    ORIG_K_ARCH="NA"
+    return
   fi
 
   ORIG_K_ARCH="${ORIG_K_ARCH,,}"
