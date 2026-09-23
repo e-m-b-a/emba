@@ -1,0 +1,28 @@
+{
+  "identifier": "wireguard-tools",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "GPL-2.0-only"
+  ],
+  "grep_commands": [
+    "'\"^wireguard-tools\\ v%s\\ -\\ https:\\/\\/git\\.zx2c4\\.com\\/wireguard-tools\\/\"AND\"^[0-9]\\.[0-9]\\.[0-9]{8}$\"'"
+  ],
+  "vendor_names": [
+    "wireguard"
+  ],
+  "product_names": [
+    "wireguard-tools"
+  ],
+  "version_extraction": [
+    "sed -r 's/([0-9](\\.[0-9]+)+?)/:wireguard:wireguard-tools:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ],
+  "live_grep_commands": [],
+  "strict_grep_commands": [],
+  "zgrep_grep_commands": [],
+  "emulation_only_grep_commands": []
+}

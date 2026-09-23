@@ -16,7 +16,8 @@
     "^Dropbear\\ multi-purpose\\ version\\ 20[0-9][0-9]\\.[0-9][0-9]$",
     "^Dropbear\\ multi-purpose\\ version\\ [0-9]\\.[0-9]+$",
     "^Dropbear\\ sshd\\ (v)?20[0-9][0-9]\\.[0-9][0-9].*",
-    "^Dropbear\\ v20[0-9][0-9]\\.[0-9][0-9].*"
+    "^Dropbear\\ v20[0-9][0-9]\\.[0-9][0-9].*",
+    "^SSH-[0-9]\\.[0-9]+-dropbear_[0-9]{4}\\.[0-9]{1,2}$"
   ],
   "vendor_names": [
     "dropbear_ssh_project"
@@ -31,7 +32,8 @@
     "sed -r 's/Dropbear\\ sshd\\ (20[0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
     "sed -r 's/Dropbear\\ sshd\\ ([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
     "sed -r 's/Dropbear\\ sshd\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
-    "sed -r 's/Dropbear\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'"
+    "sed -r 's/Dropbear\\ v([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'",
+    "sed -r 's/SSH-[0-9]\\.[0-9]+-dropbear_([0-9]+(\\.[0-9]+)+?).*/:dropbear_ssh_project:dropbear_ssh:\\1/'"
   ],
   "affected_paths": [
     "NA"
