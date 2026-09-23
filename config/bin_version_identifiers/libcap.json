@@ -1,0 +1,24 @@
+{
+   "identifier": "libjap",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "unknown"
+   ],
+   "grep_commands": [
+      "^%s\\ is\\ the\\ shared\\ library\\ version:\\ libcap-[0-9]\\.[0-9]+\\.$"
+   ],
+   "vendor_names": [
+      "fullycapable"
+   ],
+   "product_names": [
+      "libcap"
+   ],
+   "version_extraction": [
+      "sed -r 's/.*libcap-([0-9](\\.[0-9]+)+?).*/::libcap:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

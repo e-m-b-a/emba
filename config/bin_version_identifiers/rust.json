@@ -1,0 +1,24 @@
+{
+  "identifier": "rustc",
+  "parsing_mode": [
+    "normal"
+  ],
+  "licenses": [
+    "Apache-2.0"
+  ],
+  "grep_commands": [
+    "^rustc\\ version\\ [0-9](\\.[0-9]+)+?"
+  ],
+  "vendor_names": [
+    "rust-lang"
+  ],
+  "product_names": [
+    "rust"
+  ],
+  "version_extraction": [
+    "sed -r 's/rustc\\ version\\ ([0-9](\\.[0-9]+)+?).*/:rust-lang:rust:\\1/'"
+  ],
+  "affected_paths": [
+    "NA"
+  ]
+}

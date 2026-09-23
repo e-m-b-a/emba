@@ -288,6 +288,7 @@ S09_identifier_threadings() {
       local lSTRICT_BINS_ARR_TMP=()
       mapfile -t lSTRICT_BINS_ARR_TMP < <(awk -F';' -v pat="${lAPP_NAME#/}" 'index($2, pat) > 0' "${P99_CSV_LOG}" | sort -u || true)
       lSTRICT_BINS_ARR+=("${lSTRICT_BINS_ARR_TMP[@]}")
+      print_output "[*] Add ${lSTRICT_BINS_ARR_TMP[*]} to strict bin binary testing area for ${lRULE_IDENTIFIER}" "no_log"
     done
 
     # before moving on we need to ensure our strings files are generated:
@@ -356,7 +357,7 @@ S09_identifier_threadings() {
   fi
 
   # This is the default mode!
-  if [[ "${lPARSING_MODE_ARR[*]}" == *"normal"* ]]; then
+  if [[ "${lPARSING_MODE_ARR[*]}" == *"normal"* ]] || [[ "${lPARSING_MODE_ARR[*]}" == *"multi_grep"* ]]; then
     print_dot
     # print_output "[*] FIRMWARE: ${FIRMWARE} / RTOS: ${RTOS} / FIRMWARE_PATH: ${FIRMWARE_PATH} / FIRMWARE_PATH_BAK: ${FIRMWARE_PATH_BAK}" "no_log"
 
@@ -761,6 +762,7 @@ bin_string_checker() {
   # remove the ' from the multi_grep identifiers:
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\'}"
   lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#\'}"
+  # replace the AND marker with \n to create an array with all the identifiers
   mapfile -t lVERSION_IDENTIFIERS_ARR < <(echo "${lVERSION_IDENTIFIER//AND/$'\n'}")
 
   local lPURL_IDENTIFIER="NA"
@@ -807,7 +809,7 @@ bin_string_checker() {
     mapfile -t lBIN_DATA_ARR < <(tr ';' '\n' <<<"${lBINARY_DATA}")
     lBINARY_PATH="${lBIN_DATA_ARR[1]}"
     if [[ ! -f "${lBINARY_PATH}" ]]; then
-      print_output "[-] Binary ${lBINARY_PATH} not found - Not testing for versions"
+      print_output "[-] Binary ${lBIN_DATA_ARR[*]} not found - Not testing for versions"
       continue
     fi
 

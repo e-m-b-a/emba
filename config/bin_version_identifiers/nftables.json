@@ -1,0 +1,24 @@
+{
+   "identifier": "nftables",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPLv2"
+   ],
+   "grep_commands": [
+      "'\"nftables\"AND\"nft_run_cmd_from_filename\"AND\"^[0-9](\\.[0-9]+)+?$\"'"
+   ],
+   "vendor_names": [
+      "netfilter"
+   ],
+   "product_names": [
+      "nftables"
+   ],
+   "version_extraction": [
+      "sed -r 's/([0-9](\\.[0-9]+)+?)$/:netfilter:nftables:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}

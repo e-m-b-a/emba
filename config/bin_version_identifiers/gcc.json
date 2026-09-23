@@ -1,0 +1,28 @@
+{
+   "identifier": "gcc",
+   "parsing_mode": [
+      "normal"
+   ],
+   "licenses": [
+      "GPLv3"
+   ],
+   "grep_commands": [
+      "^Compiled\\ by\\ GNU\\ CC\\ version\\ [0-9]+(\\.[0-9]+)+(\\.)?$",
+      "^GCC\\ [0-9]{2}(\\.[0-9]+)+?$",
+      "^GCC: \\(.*\\)\\ [0-9]{2}(\\.[0-9]+)+?$"
+   ],
+   "vendor_names": [
+      "gnu"
+   ],
+   "product_names": [
+      "gcc"
+   ],
+   "version_extraction": [
+      "sed -r 's/Compiled\\ by\\ GNU\\ CC\\ version\\ ([0-9]+(\\.[0-9]+)+).*/:gnu:gcc:\\1/'",
+      "sed -r 's/GCC\\ ([0-9]{2}(\\.[0-9]+)+?)/:gnu:gcc:\\1/'",
+      "sed -r 's/GCC:\\ \\(.*\\)\\ ([0-9]{2}(\\.[0-9]+)+?)/:gnu:gcc:\\1/'"
+   ],
+   "affected_paths": [
+      "NA"
+   ]
+}
