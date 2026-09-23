@@ -162,7 +162,8 @@ remove_uprintable_paths() {
       # Forces raw byte matching to strip \r, control codes, and binary junk into single underscores
       lNEW_BASE=$(
         LC_ALL=C
-        printf '%s' "${lBASE}" | tr -s '[\000-\037\177-\377]' '_'
+        printf '%s' "${lBASE}" | tr -s '\000-\037\177-\377' '_'
+        # printf '%s' "${lBASE}" | tr -s '[\000-\037\177-\377]' '_'
       )
 
       # Reconstruct the new full path
