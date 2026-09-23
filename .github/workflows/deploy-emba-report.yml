@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   analyze-and-deploy:
+    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
