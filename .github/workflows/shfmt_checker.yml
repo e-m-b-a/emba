@@ -1,4 +1,4 @@
-name: Check Formatting with shfmt
+name: shfmt
 
 on:
   push:
