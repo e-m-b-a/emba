@@ -109,11 +109,11 @@ pre a {
 }
 
 pre a:hover {
-  background-color: rgb(104 104 104);
+  background-color: rgb(104, 104, 104);
 }
 
 a pre:hover {
-  background-color: rgb(104 104 104);
+  background-color: rgb(104, 104, 104);
 }
 
 pre hr {
