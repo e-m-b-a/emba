@@ -8,11 +8,11 @@ on:
   schedule:
     - cron: '0 0 * * 1' # run every Monday
   # push:
-  #  branches:
-  #    - '**'        # matches every branch
+  #   branches:
+  #     - '**'        # matches every branch
   # pull_request:
-  #  branches:
-  #    - '**'
+  #   branches:
+  #     - '**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -44,11 +44,7 @@ jobs:
           image-ref: 'docker.io/embeddedanalyzer/emba:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          skip-dirs: >-
-            /external/semgrep-rules/,
-            /external/emba_venv/lib/**/site-packages/cve_searchsploit/exploitdb/exploits/,
-            /external/legacy/openssl-1.0.2u/demos*,
-            /external/legacy/openssl-1.0.2u/ms*
+          skip-dirs: '/external/semgrep-rules/,/external/emba_venv/lib/**/site-packages/cve_searchsploit/exploitdb/exploits/,/external/legacy/openssl-1.0.2u/*'
           skip-files: '/usr/lib/llvm-21/libexec/analyze-c++'
           hide-progress: true
           timeout: 30m

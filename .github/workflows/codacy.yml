@@ -15,12 +15,12 @@ name: Codacy Security Scan
 
 on:
   push:
-    branches: [ "master" ]
+    branches: '*'
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "master" ]
-  schedule:
-    - cron: '26 14 * * 1'
+    branches: '*'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,6 +42,7 @@ jobs:
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
         # uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08   # v4.4.7 - https://github.com/codacy/codacy-analysis-cli-action/releases/tag/v4.4.7
+        # uses: codacy/codacy-analysis-cli-action@master
         uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
         with:
           # Check https://github.com/codacy/codacy-analysis-cli#project-token to get your project token from your Codacy repository
@@ -55,10 +56,33 @@ jobs:
           # Force 0 exit code to allow SARIF file generation
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
-
+      - name: "Combine all SARIF runs by tool name"
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          # Combining all SARIF runs by tool name...
+          jq '.runs |= (
+            # Shorten tool driver name by replacing " (reported by " with " ("
+            map(.tool.driver.name |= sub(" \\(reported by "; " (")) |
+            # Group runs by tool name to create unique categories (Post-March 27, 2026 GitHub requirement)
+            group_by(.tool.driver.name) |
+            map(
+              # Store the group and the first element (as template)
+              . as $group |
+              .[0] as $first |
+              # Rebuild the run object by collecting data in a single pass
+              $first + {
+                # Collect all results and artifacts from the group, removing ruleIndex if it is -1
+                "results": ([$group[].results[] | if .ruleIndex == -1 then del(.ruleIndex) else . end] | unique),
+                "artifacts": ([$group[].artifacts[]] | unique),
+                # Keep individual invocations and remove workingDirectory if it matches "file:///codacy"
+                "invocations": ([$group[].invocations[] | if .workingDirectory.uri == "file:///codacy" then del(.workingDirectory) else . end])
+              }
+            )
+          )' -- './results.sarif' 1> './results-combined.sarif'
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1 - https://github.com/github/codeql-action/releases/tag/v4.35.1
         with:
           category: codacy-analysis
-          sarif_file: results.sarif
+          sarif_file: results-combined.sarif
