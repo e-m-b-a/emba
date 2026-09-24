@@ -56,10 +56,33 @@ jobs:
           # Force 0 exit code to allow SARIF file generation
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
-
+      - name: "Combine all SARIF runs by tool name"
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          # Combining all SARIF runs by tool name...
+          jq '.runs |= (
+            # Shorten tool driver name by replacing " (reported by " with " ("
+            map(.tool.driver.name |= sub(" \\(reported by "; " (")) |
+            # Group runs by tool name to create unique categories (Post-March 27, 2026 GitHub requirement)
+            group_by(.tool.driver.name) |
+            map(
+              # Store the group and the first element (as template)
+              . as $group |
+              .[0] as $first |
+              # Rebuild the run object by collecting data in a single pass
+              $first + {
+                # Collect all results and artifacts from the group, removing ruleIndex if it is -1
+                "results": ([$group[].results[] | if .ruleIndex == -1 then del(.ruleIndex) else . end] | unique),
+                "artifacts": ([$group[].artifacts[]] | unique),
+                # Keep individual invocations and remove workingDirectory if it matches "file:///codacy"
+                "invocations": ([$group[].invocations[] | if .workingDirectory.uri == "file:///codacy" then del(.workingDirectory) else . end])
+              }
+            )
+          )' -- './results.sarif' 1> './results-combined.sarif'
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1 - https://github.com/github/codeql-action/releases/tag/v4.35.1
         with:
           category: codacy-analysis
-          sarif_file: results.sarif
+          sarif_file: results-combined.sarif
