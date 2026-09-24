@@ -47,7 +47,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tSERVICE: ${SERVICE}"
 
       "${BUSYBOX}" echo -e "${NC}[*] Starting initial service ${ORANGE}${SERVICE_NAME} - ${SERVICE}${NC} ..."
-      # shellcheck disable=SC3060
+      # shellcheck disable=SC3060,SC2039
       "${BUSYBOX}" ls -l "${SERVICE/\ */}"
       # BINARY variable could be something like: binary parameter parameter ...
       ${SERVICE} & # nosemgrep

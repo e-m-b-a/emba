@@ -126,7 +126,7 @@ I01_default_apps() {
       rm -rf external/rustup
 
       curl https://sh.rustup.rs -sSf | sh -s -- -y
-      # shellcheck disable=SC1091
+      # shellcheck disable=SC1091,SC1090
       . "${HOME}"/.cargo/env
 
       export PATH="${PATH}":"${HOME}"/.cargo/bin
