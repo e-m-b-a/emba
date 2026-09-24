@@ -86,12 +86,7 @@ a.submodul:hover {
   border-top: 5px double #9f9f9f;
 }
 
-hr.double {
-  border: 0;
-  border-top: 5px double #9f9f9f;
-}
-
-hr.mono {
+.mono {
   border: 0;
   border-top: 2px solid #9f9f9f;
 }
