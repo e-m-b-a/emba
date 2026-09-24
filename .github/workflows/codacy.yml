@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   codacy-security-scan:
-    # if: github.repository_owner == 'e-m-b-a'
+    if: github.repository_owner == 'e-m-b-a'
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -42,8 +42,8 @@ jobs:
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
         # uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08   # v4.4.7 - https://github.com/codacy/codacy-analysis-cli-action/releases/tag/v4.4.7
-        # uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
-        uses: codacy/codacy-analysis-cli-action@master
+        # uses: codacy/codacy-analysis-cli-action@master
+        uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
         with:
           # Check https://github.com/codacy/codacy-analysis-cli#project-token to get your project token from your Codacy repository
           # You can also omit the token and run the tools that support default configurations
