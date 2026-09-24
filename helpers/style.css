@@ -51,32 +51,32 @@ a.submodul:hover {
   background-color: #6e6e6e;
 }
 
-a.d {
+.d {
   background: linear-gradient(270deg, #088b83 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
 
-a.p {
+.p {
   background: linear-gradient(270deg, #088a83 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
 
-a.s {
+.s {
   background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
 
-a.q {
+.q {
   background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
 
-a.l {
+.l {
   background: linear-gradient(270deg, #99079e 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
 
-a.f {
+.f {
   background: linear-gradient(270deg, #cc410b 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
@@ -86,12 +86,7 @@ a.f {
   border-top: 5px double #9f9f9f;
 }
 
-hr.double {
-  border: 0;
-  border-top: 5px double #9f9f9f;
-}
-
-hr.mono {
+.mono {
   border: 0;
   border-top: 2px solid #9f9f9f;
 }
@@ -109,11 +104,11 @@ pre a {
 }
 
 pre a:hover {
-  background-color: rgb(104 104 104);
+  background-color: rgb(104, 104, 104);
 }
 
 a pre:hover {
-  background-color: rgb(104 104 104);
+  background-color: rgb(104, 104, 104);
 }
 
 pre hr {
@@ -154,7 +149,7 @@ pre hr {
   overflow: hidden;
 }
 
-.expand[value="+ Show more results"]+.expand_area {
+.expand[value="+ Show more results"] + .expand_area {
   max-height: 0;
 }
 
@@ -296,7 +291,8 @@ pre hr {
   z-index: 1;
 }
 
-.side::-webkit-scrollbar,.main::-webkit-scrollbar {
+.side::-webkit-scrollbar,
+.main::-webkit-scrollbar {
   display: none;
 }
 
