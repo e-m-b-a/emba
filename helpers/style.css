@@ -154,7 +154,7 @@ pre hr {
   overflow: hidden;
 }
 
-.expand[value="+ Show more results"]+.expand_area {
+.expand[value="+ Show more results"] + .expand_area {
   max-height: 0;
 }
 
@@ -296,7 +296,8 @@ pre hr {
   z-index: 1;
 }
 
-.side::-webkit-scrollbar,.main::-webkit-scrollbar {
+.side::-webkit-scrollbar,
+.main::-webkit-scrollbar {
   display: none;
 }
 
