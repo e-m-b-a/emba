@@ -51,7 +51,7 @@ a.submodul:hover {
   background-color: #6e6e6e;
 }
 
-a.d {
+.d {
   background: linear-gradient(270deg, #088b83 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
@@ -66,7 +66,7 @@ a.s {
   padding-right: 18px !important;
 }
 
-a.q {
+.q {
   background: linear-gradient(270deg, #079e07 10px, rgb(0 0 0 / 0%) 0);
   padding-right: 18px !important;
 }
