@@ -39,8 +39,8 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <a class="modul p" data="p99" href="./p99_prepare_analyzer.html" title="./p99_prepare_analyzer.html">Analysis preparation</a>
 <a class="modul s" data="s03" href="./s03_firmware_bin_base_analyzer.html" title="./s03_firmware_bin_base_analyzer.html">Binary firmware basic analyzer</a>
 <a class="modul s" data="s05" href="./s05_firmware_details.html" title="./s05_firmware_details.html">Firmware and testing details</a>
-<a class="modul s" data="s07" href="./s07_bootloader_check.html" title="./s07_bootloader_check.html">Check bootloader and system startup</a>
 <a class="modul s" data="s06" href="./s06_distribution_identification.html" title="./s06_distribution_identification.html">System identification</a>
+<a class="modul s" data="s07" href="./s07_bootloader_check.html" title="./s07_bootloader_check.html">Check bootloader and system startup</a>
 <a class="modul s" data="s08" href="./s08_main_package_sbom.html" title="./s08_main_package_sbom.html">EMBA central package SBOM environment</a>
 <a class="modul s" data="s09" href="./s09_firmware_base_version_check.html" title="./s09_firmware_base_version_check.html">Static binary firmware versions detection</a>
 <a class="modul s" data="s12" href="./s12_binary_protection.html" title="./s12_binary_protection.html">Check binary protection mechanisms</a>
@@ -62,7 +62,6 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <a class="modul s" data="s130" href="./s130_binary_map_builder.html" title="./s130_binary_map_builder.html">Binary dependency map builder</a>
 <a class="modul l" data="l10" href="./l10_system_emulation.html" title="./l10_system_emulation.html">System emulation of Linux based embedded devices.</a>
 <a class="modul l" data="l15" href="./l15_emulated_checks_nmap.html" title="./l15_emulated_checks_nmap.html">Nmap scans of emulated device.</a>
-<a class="modul l" data="l22" href="./l22_upnp_hnap_checks.html" title="./l22_upnp_hnap_checks.html">Live UPnP/HNAP tests of emulated device.</a>
 <a class="modul l" data="l25" href="./l25_web_checks.html" title="./l25_web_checks.html">Web server analysis of emulated device</a>
 <a class="modul l" data="l35" href="./l35_metasploit_check.html" title="./l35_metasploit_check.html">Metasploit exploit checks of emulated device.</a>
 <a class="modul f" data="f02" href="./f02_toolchain.html" title="./f02_toolchain.html">Toolchain overview</a>
@@ -94,7 +93,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 
 <pre>[</span><span class="green">+</span>]</span><span class="green"> EMBA start command:</span><span class="orange"> ./emba -f ./DIR-600_fw_revb5_214b01_ALL_de_20130122.zip -l ./logs_emba -p ./scan-profiles/default-scan.emba -y -Q</span></pre>
 <pre></span></pre>
-<pre>[</span><span class="green">+</span>]</span><span class="green"> EMBA version: </span><span class="orange">2.0.3 / branch master / commit 95e1aace90d871f7410649f82616e9bc08df29d0</span></pre>
+<pre>[</span><span class="green">+</span>]</span><span class="green"> EMBA version: </span><span class="orange">2.0.4 / branch master / commit a7a0cd8133ee258f751d9d7c22abc571d5c6e0da</span></pre>
 <pre></span></pre>
 <br />
 <pre><hr class="mono" /></pre>
@@ -184,7 +183,7 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 <pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/787.html" title="787" target="_blank" >CWE787</a></span><span class="green"> - Out-of-bounds Write - </span><span class="orange">225 times.</span></pre>
 <pre>    </span><span class="orange"><a href="https://cwe.mitre.org/data/definitions/789.html" title="789" target="_blank" >CWE789</a></span><span class="green"> - Large memory allocation - </span><span class="orange">6 times.</span></pre>
 <br />
-<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">13590</span><span class="green"> possible vulnerabilities (</span><span class="orange">via semgrep in Ghidra decompiled code</span><span class="green">) in </span><span class="orange">43</span><span class="green"> tested binaries.</span></pre></a>
+<a class="refmodul" href="./s16_ghidra_decompile_checks.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">13593</span><span class="green"> possible vulnerabilities (</span><span class="orange">via semgrep in Ghidra decompiled code</span><span class="green">) in </span><span class="orange">43</span><span class="green"> tested binaries.</span></pre></a>
 <pre></span></pre>
 
 <a class="refmodul" href="./s14_weak_func_radare_check.html" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Found </span><span class="orange">562</span><span class="green"> usages of strcpy in </span><span class="orange">95</span><span class="green"> binaries.</span></pre></a>
@@ -251,49 +250,49 @@ Author(s) and contributors from the EMBA project are listed here: https://github
 
 <a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_busybox_1.14.1" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	busybox             :   1.14.1         :   CVEs: 17 (3)    :   Exploits: 0    :   Source: bb_verified         </span></pre></a>
 
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_xmldb_3" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	xmldb               :   3              :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ddnsd_0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ddnsd               :   0.1            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_igmpproxy_3.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	igmpproxy           :   3.0            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_llmnresp_1.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	llmnresp            :   1.0            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_iproute2_100224" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	iproute2            :   100224         :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_wireless_tools_26" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	wireless_tools      :   26             :   CVEs: 2         :   Exploits: 2    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ndisc6_0.9.9" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ndisc6              :   0.9.9          :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_trigger_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	trigger             :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_sysklogd_0.01" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	sysklogd            :   0.01           :   CVEs: 2         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_radvd_1.8" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	radvd               :   1.8            :   CVEs: 1         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_servd_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	servd               :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_dir-600_firmware_2.14b01" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	dir-600_firmware    :   2.14b01        :   CVEs: 6         :   Exploits: 3    :   Source: static_distri_analys</span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_hostapd_0.4.8" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	hostapd             :   0.4.8          :   CVEs: 27        :   Exploits: 1    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_logger_0.01" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	logger              :   0.01           :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_rndimgae_0.0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	rndimgae            :   0.0.1          :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_iptables_1.4.7" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	iptables            :   1.4.7          :   CVEs: 1         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_point-to-point_proto_2.4.2b3" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	point-to-point_proto:   2.4.2b3        :   CVEs: 5         :   Exploits: 1    :   Source: static_bin_analysis </span></pre></a>
+
+<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_logd_0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	logd                :   0.1            :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
+
 <a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_seama_0.20" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	seama               :   0.20           :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
 
 <a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ecmh_2005.02.09" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ecmh                :   2005.02.09     :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
 
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_igmpproxy_3.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	igmpproxy           :   3.0            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_logd_0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	logd                :   0.1            :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
 <a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_portt_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	portt               :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
 
 <a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_sed_4.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	sed                 :   4.0            :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_servd_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	servd               :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_rndimgae_0.0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	rndimgae            :   0.0.1          :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ddnsd_0.1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ddnsd               :   0.1            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_llmnresp_1.0" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	llmnresp            :   1.0            :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_trigger_1" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	trigger             :   1              :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_ndisc6_0.9.9" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	ndisc6              :   0.9.9          :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_radvd_1.8" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	radvd               :   1.8            :   CVEs: 1         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_hostapd_0.4.8" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	hostapd             :   0.4.8          :   CVEs: 27        :   Exploits: 1    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_xmldb_3" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	xmldb               :   3              :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_logger_0.01" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	logger              :   0.01           :   CVEs: 0         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_iptables_1.4.7" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	iptables            :   1.4.7          :   CVEs: 1         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_iproute2_100224" title="LINK" ><pre>[</span><span class="green">+</span>]</span><span class="green"> Component details: 	iproute2            :   100224         :   CVEs: 0         :   Exploits: 0    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_sysklogd_0.01" title="LINK" ><pre>[</span><span class="orange">+</span>]</span><span class="orange"> Component details: 	sysklogd            :   0.01           :   CVEs: 2         :   Exploits: 0    :   Source: static_bin_analysis </span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_dir-600_firmware_2.14b01" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	dir-600_firmware    :   2.14b01        :   CVEs: 6         :   Exploits: 3    :   Source: static_distri_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_wireless_tools_26" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	wireless_tools      :   26             :   CVEs: 2         :   Exploits: 2    :   Source: user_mode_bin_analys</span></pre></a>
-
-<a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_point-to-point_proto_2.4.2b3" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	point-to-point_proto:   2.4.2b3        :   CVEs: 5         :   Exploits: 1    :   Source: static_bin_analysis </span></pre></a>
 
 <a class="refmodul" href="./f17_cve_bin_tool.html#anchor_cve_dnsmasq_2.45" title="LINK" ><pre>[</span><span class="magenta">+</span>]</span><span class="magenta"> Component details: 	dnsmasq             :   2.45           :   CVEs: 29        :   Exploits: 9    :   Source: static_bin_analysis </span></pre></a>
 
