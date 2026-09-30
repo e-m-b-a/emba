@@ -698,15 +698,14 @@ detect_root_dir_helper() {
     done
   fi
 
-  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
   # currently not working: mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "/bin/\|/lib/\|/etc/\|/root/\|/dev/\|/opt/\|/proc/\|/lib64\|/boot/\|/home/" | cut -d ';' -f2 | grep "${lSEARCH_PATH}" | sort -u || true)
-  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
-    lCNT="$(awk '{print $1}' <<<"${lR_PATH}")" # field 1
+  # Stream and parse candidates with a shell builtin. Storing the entire list
+  # and spawning two awk processes per candidate is costly on large trees.
+  while IFS=' ' read -r lCNT lR_PATH; do
     if [[ "${lCNT}" -lt 5 ]]; then
       # we only use paths with more then 4 matches as possible root path
       continue
     fi
-    lR_PATH=$(awk '{print $2}' <<<"${lR_PATH}") # field 2
     if [[ -d "${lR_PATH}" ]]; then
       ROOT_PATH+=("${lR_PATH}")
       if [[ -z "${lMECHANISM}" ]]; then
@@ -715,7 +714,7 @@ detect_root_dir_helper() {
         lMECHANISM="${lMECHANISM} / dir names"
       fi
     fi
-  done
+  done < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     export RTOS=1
