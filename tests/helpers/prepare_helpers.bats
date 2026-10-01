@@ -17,7 +17,10 @@ load ../setup.bash
 setup() {
   setup_emba_test_env
   # shellcheck disable=SC1091
+  source "${HELP_DIR}/helpers_emba_print.sh"
+  # shellcheck disable=SC1091
   source "${HELP_DIR}/helpers_emba_prepare.sh"
+  export DISABLE_DOTS=1
 }
 
 teardown() {
@@ -40,6 +43,46 @@ teardown() {
   [ "${RTOS}" -eq 0 ]
   [ "${#ROOT_PATH[@]}" -eq 1 ]
   [ "${ROOT_PATH[0]}" = "${lROOT_PATH}" ]
+}
+
+@test "binary_architecture_threader atomically deduplicates concurrent files in strict mode" {
+  local lBINARY="${LOG_DIR}/duplicate.bin"
+  local IFS=$'\n\t'
+  local lPID=""
+  local lPIDS=()
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  printf 'duplicate content' >"${lBINARY}"
+
+  set -u
+  for _ in {1..16}; do
+    binary_architecture_threader "${lBINARY}" "test" &
+    lPIDS+=("$!")
+  done
+  for lPID in "${lPIDS[@]}"; do
+    wait "${lPID}"
+  done
+  wait
+  set +u
+
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
+  [ "$(find "${TMP_DIR}/p99_md5sum_done" -type f | wc -l)" -eq 1 ]
+}
+
+@test "binary_architecture_threader reuses CSV hashes and preserves noclobber" {
+  local lBINARY="${LOG_DIR}/existing.bin"
+  local lMD5SUM=""
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  printf 'existing content' >"${lBINARY}"
+  lMD5SUM="$(md5sum "${lBINARY}" | cut -d ' ' -f1)"
+  printf 'test;%s;NA;NA;NA;;NA;data;%s;;\n' "${lBINARY}" "${lMD5SUM}" >"${P99_CSV_LOG}"
+
+  set -o noclobber
+  binary_architecture_threader "${lBINARY}" "test"
+  [[ -o noclobber ]]
+  set +o noclobber
+
+  [ -e "${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}/${lMD5SUM}" ]
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
 }
 
 @test "convert_timeformat converts days to seconds" {

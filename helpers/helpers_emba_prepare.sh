@@ -180,19 +180,40 @@ binary_architecture_threader() {
   local lD_DATA="NA"
   local lD_ARCH_GUESSED="NA"
   local lMD5SUM=""
-  lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
-  lMD5SUM="${lMD5SUM/\ */}"
+  local lMD5SUM_INDEX=""
+  local lNOCLOBBER=0
   if [[ "${lBINARY}" == *".raw" ]]; then
     return
   fi
+  lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
+  lMD5SUM="${lMD5SUM/\ */}"
+  if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
+    return
+  fi
 
-  if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
+  lMD5SUM_INDEX="${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}"
+  if [[ ! -d "${lMD5SUM_INDEX}" ]]; then
+    mkdir -p "${lMD5SUM_INDEX}"
+  fi
+  # Atomically claim a hash. Filesystem lookups avoid scanning an ever-growing
+  # hash log for every extracted file and prevent races between workers.
+  if [[ -o noclobber ]]; then
+    lNOCLOBBER=1
+  else
+    set -o noclobber
+  fi
+  if ! : 2>/dev/null >"${lMD5SUM_INDEX}/${lMD5SUM}"; then
+    if [[ "${lNOCLOBBER}" -eq 0 ]]; then
+      set +o noclobber
+    fi
     return
   fi
-  if [[ -f "${P99_CSV_LOG}" ]] && grep -q "${lMD5SUM}" "${P99_CSV_LOG}" 2>/dev/null; then
+  if [[ "${lNOCLOBBER}" -eq 0 ]]; then
+    set +o noclobber
+  fi
+  if [[ -f "${P99_CSV_LOG}" ]] && grep -Fq ";${lMD5SUM};" "${P99_CSV_LOG}" 2>/dev/null; then
     return
   fi
-  echo "${lMD5SUM}" >>"${TMP_DIR}/p99_md5sum_done.tmp"
 
   print_dot
 
