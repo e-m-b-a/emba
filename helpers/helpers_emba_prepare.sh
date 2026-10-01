@@ -170,6 +170,59 @@ set_exclude() {
   print_excluded
 }
 
+initialize_p99_hash_index() {
+  local lINDEX_DIR="${TMP_DIR}/p99_md5sum_done"
+  local lINDEX_READY="${TMP_DIR}/p99_md5sum_done.initialized"
+  local lINDEX_LOCK="${TMP_DIR}/p99_md5sum_done.lock"
+  local lHASH_PATTERN=';([[:xdigit:]]{32});+$'
+  local lCSV_LINE=""
+  local lMD5SUM=""
+  local lPREFIX=""
+  local lSHARD_ID=0
+  local lSTATUS=0
+  local lNOCLOBBER=0
+  local lSHARD_DIRS=()
+
+  if [[ -f "${lINDEX_READY}" ]]; then
+    return
+  fi
+  mkdir -p "${lINDEX_DIR}"
+
+  # Initialization is lazy because this helper is used from several extractor
+  # modules. Only the first worker imports restart hashes; later workers perform
+  # a single marker lookup and avoid scanning the growing CSV entirely.
+  if [[ -o noclobber ]]; then
+    lNOCLOBBER=1
+    set +o noclobber
+  fi
+  (
+    flock -x 9 || exit 1
+    if [[ -f "${lINDEX_READY}" ]]; then
+      exit 0
+    fi
+
+    for ((lSHARD_ID = 0; lSHARD_ID < 256; lSHARD_ID++)); do
+      printf -v lPREFIX '%02x' "${lSHARD_ID}"
+      lSHARD_DIRS+=("${lINDEX_DIR}/${lPREFIX}")
+    done
+    mkdir -p "${lSHARD_DIRS[@]}"
+
+    if [[ -f "${P99_CSV_LOG}" ]]; then
+      while IFS= read -r lCSV_LINE; do
+        if [[ "${lCSV_LINE}" =~ ${lHASH_PATTERN} ]]; then
+          lMD5SUM="${BASH_REMATCH[1],,}"
+          : >"${lINDEX_DIR}/${lMD5SUM:0:2}/${lMD5SUM}"
+        fi
+      done <"${P99_CSV_LOG}"
+    fi
+    : >"${lINDEX_READY}"
+  ) 9>"${lINDEX_LOCK}" || lSTATUS="$?"
+  if [[ "${lNOCLOBBER}" -eq 1 ]]; then
+    set -o noclobber
+  fi
+  return "${lSTATUS}"
+}
+
 binary_architecture_threader() {
   local lBINARY="${1:-}"
   local lSOURCE_MODULE="${2:-}"
@@ -183,6 +236,10 @@ binary_architecture_threader() {
   local lMD5SUM_INDEX=""
   local lNOCLOBBER=0
   if [[ "${lBINARY}" == *".raw" ]]; then
+    return
+  fi
+  if ! initialize_p99_hash_index; then
+    print_output "[-] Failed to initialize P99 hash index" "no_log"
     return
   fi
   lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
@@ -214,10 +271,6 @@ binary_architecture_threader() {
   if [[ "${lNOCLOBBER}" -eq 0 ]]; then
     set +o noclobber
   fi
-  if [[ -f "${P99_CSV_LOG}" ]] && grep -Fq ";${lMD5SUM};" "${P99_CSV_LOG}" 2>/dev/null; then
-    return
-  fi
-
   print_dot
 
   D_FILE_OUTPUT=$(file -b "${lBINARY}")
@@ -252,7 +305,7 @@ binary_architecture_threader() {
     lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
   fi
 
-  write_csv_log_to_path "${P99_CSV_LOG}" "${lSOURCE_MODULE}" "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}" &
+  write_csv_log_to_path "${P99_CSV_LOG}" "${lSOURCE_MODULE}" "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}"
 }
 
 architecture_check() {
