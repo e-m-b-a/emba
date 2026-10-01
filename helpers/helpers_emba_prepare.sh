@@ -251,15 +251,19 @@ binary_architecture_threader() {
 claim_p99_hash() {
   local lMD5SUM="${1:-}"
   local lMD5SUM_INDEX=""
+  local lINDEX_READY="${TMP_DIR}/p99_md5sum_done.initialized"
   local lNOCLOBBER=0
 
   if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
     return 1
   fi
   lMD5SUM="${lMD5SUM,,}"
-  if ! initialize_p99_hash_index; then
-    print_output "[-] Failed to initialize P99 hash index" "no_log"
-    return 1
+  if [[ "${P99_HASH_INDEX_INITIALIZED_FOR:-}" != "${lINDEX_READY}" ]]; then
+    if ! initialize_p99_hash_index; then
+      print_output "[-] Failed to initialize P99 hash index" "no_log"
+      return 1
+    fi
+    P99_HASH_INDEX_INITIALIZED_FOR="${lINDEX_READY}"
   fi
 
   lMD5SUM_INDEX="${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}"
@@ -299,35 +303,185 @@ analyze_binary_architecture() {
   if [[ "${D_FILE_OUTPUT}" == *"ELF"* ]]; then
     # noreorder, pic, cpic, o32, mips32
     local lREADELF_H_ARR=()
+    local lREADELF_LINE=""
+    local lCOMMENT_VALUE=""
+    local lCOMMENT_KEY=""
+    local lCOMMENT_EXISTING=""
+    local lCOMMENT_ID=0
+    local lCOMMENT_SORT_ID=0
+    local lCOMMENT_DUPLICATE=0
+    local lIN_COMMENT_SECTION=0
+    local lCOMMENT_VALUES=()
+    local lCOMMENT_FIELDS=()
+    local lCOMMENT_SORTED=()
 
-    mapfile -t lREADELF_H_ARR < <(readelf -W -h "${lBINARY}" 2>/dev/null || true)
-
-    lD_FLAGS_CNT=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Flags:" || true)
-    lD_FLAGS_CNT="${lD_FLAGS_CNT// /}"
-    lD_FLAGS_CNT="${lD_FLAGS_CNT/*Flags:/}"
-    lD_FLAGS_CNT="${lD_FLAGS_CNT/0x0/}"
-
-    lD_MACHINE=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Machine:" || true)
-    lD_MACHINE="${lD_MACHINE// /}"
-    lD_MACHINE="${lD_MACHINE/*Machine:/}"
-    lD_MACHINE=$(sed -E 's/^[[:space:]]+//' <<<"${lD_MACHINE}")
-
-    # ELF32/64
-    lD_CLASS=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Class:" || true)
-    lD_CLASS="${lD_CLASS/*Class:/}"
-    lD_CLASS=$(sed -E 's/^[[:space:]]+//' <<<"${lD_CLASS}")
-
-    # endianes
-    lD_DATA=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Data:" || true)
-    lD_DATA="${lD_DATA/*Data:/}"
-    lD_DATA=$(sed -E 's/^[[:space:]]+//' <<<"${lD_DATA}")
-
-    lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null | grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
-    lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
-    lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
+    mapfile -t lREADELF_H_ARR < <(readelf -W -h -p .comment "${lBINARY}" 2>/dev/null || true)
+    for lREADELF_LINE in "${lREADELF_H_ARR[@]}"; do
+      if [[ "${lREADELF_LINE}" == *"String dump"* ]]; then
+        lIN_COMMENT_SECTION=1
+        lCOMMENT_VALUES+=("  ")
+        continue
+      fi
+      if [[ "${lIN_COMMENT_SECTION}" -eq 1 ]]; then
+        read -r -a lCOMMENT_FIELDS <<<"${lREADELF_LINE}"
+        lCOMMENT_VALUES+=("${lCOMMENT_FIELDS[2]:-} ${lCOMMENT_FIELDS[3]:-} ${lCOMMENT_FIELDS[4]:-}")
+        continue
+      fi
+      case "${lREADELF_LINE}" in
+      *"Flags:"*)
+        lD_FLAGS_CNT="${lREADELF_LINE// /}"
+        lD_FLAGS_CNT="${lD_FLAGS_CNT/*Flags:/}"
+        lD_FLAGS_CNT="${lD_FLAGS_CNT/0x0/}"
+        ;;
+      *"Machine:"*)
+        lD_MACHINE="${lREADELF_LINE// /}"
+        lD_MACHINE="${lD_MACHINE/*Machine:/}"
+        ;;
+      *"Class:"*)
+        lD_CLASS="${lREADELF_LINE/*Class:/}"
+        lD_CLASS="${lD_CLASS#"${lD_CLASS%%[![:space:]]*}"}"
+        ;;
+      *"Data:"*)
+        lD_DATA="${lREADELF_LINE/*Data:/}"
+        lD_DATA="${lD_DATA#"${lD_DATA%%[![:space:]]*}"}"
+        ;;
+      esac
+    done
+    lD_ARCH_GUESSED=""
+    for lCOMMENT_VALUE in "${lCOMMENT_VALUES[@]}"; do
+      lCOMMENT_DUPLICATE=0
+      for lCOMMENT_EXISTING in "${lCOMMENT_SORTED[@]}"; do
+        if [[ "${lCOMMENT_VALUE}" == "${lCOMMENT_EXISTING}" ]]; then
+          lCOMMENT_DUPLICATE=1
+          break
+        fi
+      done
+      if [[ "${lCOMMENT_DUPLICATE}" -eq 1 ]]; then
+        continue
+      fi
+      lCOMMENT_SORTED+=("${lCOMMENT_VALUE}")
+    done
+    # Preserve sort -u ordering without starting grep/awk/sort/tr for each ELF.
+    for ((lCOMMENT_ID = 1; lCOMMENT_ID < ${#lCOMMENT_SORTED[@]}; lCOMMENT_ID++)); do
+      lCOMMENT_KEY="${lCOMMENT_SORTED[lCOMMENT_ID]}"
+      lCOMMENT_SORT_ID=$((lCOMMENT_ID - 1))
+      while [[ "${lCOMMENT_SORT_ID}" -ge 0 && "${lCOMMENT_SORTED[lCOMMENT_SORT_ID]}" > "${lCOMMENT_KEY}" ]]; do
+        lCOMMENT_SORTED[lCOMMENT_SORT_ID + 1]="${lCOMMENT_SORTED[lCOMMENT_SORT_ID]}"
+        lCOMMENT_SORT_ID=$((lCOMMENT_SORT_ID - 1))
+      done
+      lCOMMENT_SORTED[lCOMMENT_SORT_ID + 1]="${lCOMMENT_KEY}"
+    done
+    for lCOMMENT_VALUE in "${lCOMMENT_SORTED[@]}"; do
+      lD_ARCH_GUESSED+="${lCOMMENT_VALUE},"
+    done
   fi
 
   write_csv_log_to_path "${P99_CSV_LOG}" "${lSOURCE_MODULE}" "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}"
+}
+
+populate_p99_backend() {
+  local lFILES_LIST="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lFILE_COUNT="${3:-0}"
+  local lMAX_THREADS="${MAX_MOD_THREADS:-1}"
+  local lWORKER_COUNT=0
+  local lWORKER_DIR=""
+  local lWORKER_FILE=""
+  local lSTATUS=0
+  local lWORKER_FILES=()
+  local lWORKER_PIDS=()
+
+  if ! [[ "${lMAX_THREADS}" =~ ^[1-9][0-9]*$ ]]; then
+    lMAX_THREADS=1
+  fi
+  lWORKER_COUNT=$((2 * lMAX_THREADS))
+  if [[ "${lFILE_COUNT}" -lt "${lWORKER_COUNT}" ]]; then
+    lWORKER_COUNT="${lFILE_COUNT}"
+  fi
+  if [[ "${lWORKER_COUNT}" -lt 1 ]]; then
+    return
+  fi
+
+  lWORKER_DIR=$(mktemp -d "${TMP_DIR}/p99_backend_workers.XXXXXX") || return
+  if ! split -n "r/${lWORKER_COUNT}" -t '\0' -d -a 5 "${lFILES_LIST}" "${lWORKER_DIR}/worker_"; then
+    print_output "[-] Failed to partition P99 backend work" "no_log"
+    rm -r -- "${lWORKER_DIR}"
+    return 1
+  fi
+  lWORKER_FILES=("${lWORKER_DIR}"/worker_*)
+
+  for lWORKER_FILE in "${lWORKER_FILES[@]}"; do
+    p99_backend_worker "${lWORKER_FILE}" "${lSOURCE_MODULE}" &
+    lWORKER_PIDS+=("$!")
+  done
+  wait_for_pid "${lWORKER_PIDS[@]}" || lSTATUS="$?"
+  rm -r -- "${lWORKER_DIR}"
+  return "${lSTATUS}"
+}
+
+p99_backend_worker() {
+  local lWORKER_FILE="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lHASH_BATCH_SIZE="${P99_HASH_BATCH_SIZE:-128}"
+  local lMD5_RECORD=""
+  local lMD5SUM=""
+  local lBINARY=""
+  local lFILE_OUTPUT=""
+  local lRECORD_ID=0
+  local lMD5_RECORDS=()
+  local lINPUT_FILES=()
+  local lHASHED_FILES=()
+  local lHASHES=()
+  local lFILE_OUTPUTS=()
+
+  if ! [[ "${lHASH_BATCH_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
+    lHASH_BATCH_SIZE=128
+  fi
+  # GNU md5sum -z and file -0 -0 produce unescaped, NUL-delimited records.
+  # Bounded batches avoid one checksum and one file process per extracted file.
+  while mapfile -d '' -n "${lHASH_BATCH_SIZE}" -t lINPUT_FILES && ((${#lINPUT_FILES[@]})); do
+    lHASHED_FILES=()
+    for lBINARY in "${lINPUT_FILES[@]}"; do
+      if [[ "${lBINARY}" != *".raw" ]]; then
+        lHASHED_FILES+=("${lBINARY}")
+      fi
+    done
+    if ((${#lHASHED_FILES[@]} == 0)); then
+      lINPUT_FILES=()
+      continue
+    fi
+
+    mapfile -d '' -t lMD5_RECORDS < <(md5sum -z -- "${lHASHED_FILES[@]}" 2>/dev/null || true)
+    lHASHED_FILES=()
+    lHASHES=()
+    for lMD5_RECORD in "${lMD5_RECORDS[@]}"; do
+      if [[ "${#lMD5_RECORD}" -lt 35 ]]; then
+        continue
+      fi
+      lMD5SUM="${lMD5_RECORD:0:32}"
+      lBINARY="${lMD5_RECORD:34}"
+      if claim_p99_hash "${lMD5SUM}"; then
+        lHASHES+=("${lMD5SUM}")
+        lHASHED_FILES+=("${lBINARY}")
+      fi
+    done
+    if ((${#lHASHED_FILES[@]} == 0)); then
+      lINPUT_FILES=()
+      lMD5_RECORDS=()
+      continue
+    fi
+
+    mapfile -d '' -t lFILE_OUTPUTS < <(file -0 -0 -b -- "${lHASHED_FILES[@]}" 2>/dev/null || true)
+    for ((lRECORD_ID = 0; lRECORD_ID < ${#lHASHED_FILES[@]}; lRECORD_ID++)); do
+      lFILE_OUTPUT="${lFILE_OUTPUTS[lRECORD_ID]:-unreadable}"
+      analyze_binary_architecture "${lHASHED_FILES[lRECORD_ID]}" "${lSOURCE_MODULE}" "${lHASHES[lRECORD_ID]}" "${lFILE_OUTPUT}"
+    done
+    lINPUT_FILES=()
+    lMD5_RECORDS=()
+    lHASHED_FILES=()
+    lHASHES=()
+    lFILE_OUTPUTS=()
+  done <"${lWORKER_FILE}"
 }
 
 architecture_check() {

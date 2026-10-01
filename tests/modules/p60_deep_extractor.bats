@@ -9,13 +9,14 @@
 # EMBA is licensed under GPLv3
 # SPDX-License-Identifier: GPL-3.0-only
 
-# shellcheck disable=SC1091,SC2016,SC2034,SC2317
+# shellcheck disable=SC1091,SC2016,SC2030,SC2034,SC2317
 
 load ../setup.bash
 
 setup() {
   setup_emba_test_env
   source "${MOD_DIR}/P60_deep_extractor.sh"
+  source "${HELP_DIR}/helpers_emba_prepare.sh"
 
   export FIRMWARE_PATH_CP="${LOG_DIR}/firmware"
   export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
@@ -28,6 +29,7 @@ setup() {
   export DISABLE_DEEP=0
   export MAIN_LOG_FILE="emba.log"
   export CAPTURE_FILE="${TMP_DIR}/p60-captured-files"
+  export WORKER_COUNTS="${TMP_DIR}/p60-worker-counts"
   export END_FILE="${TMP_DIR}/p60-module-end"
   ROOT_PATH=()
 
@@ -45,7 +47,10 @@ setup() {
   linux_basic_identification() { printf '0\n'; }
   claim_p99_hash() { return 0; }
   analyze_binary_architecture() { printf '%q;%s;%s\n' "$1" "$3" "$4" >>"${CAPTURE_FILE}"; }
-  wait_for_pid() { wait; }
+  wait_for_pid() {
+    printf '%s\n' "$#" >>"${WORKER_COUNTS}"
+    wait
+  }
   module_end_log() { printf '%s\n' "$2" >"${END_FILE}"; }
 }
 
@@ -62,7 +67,7 @@ teardown() {
 
   [ "$(wc -l <"${CAPTURE_FILE}")" -eq 2 ]
   [ "$(<"${END_FILE}")" -eq 2 ]
-  [ "$(find "${TMP_DIR}/p99_backend_workers" -type f | wc -l)" -eq 2 ]
+  grep -qx '2' "${WORKER_COUNTS}"
   grep -Fq "$(printf '%q' "${FIRMWARE_PATH_CP}/first.bin");9dd4e461268c8034f5c8564e155c67a6;very short file (no magic)" "${CAPTURE_FILE}"
   grep -Fq "$(printf '%q' "${FIRMWARE_PATH_CP}/line"$'\n'"break.bin");fbade9e36a3f36d3d676c1b808451dd7;very short file (no magic)" "${CAPTURE_FILE}"
 }
@@ -84,14 +89,15 @@ teardown() {
   for lFILE_ID in {1..10}; do
     printf 'payload-%s\n' "${lFILE_ID}" >"${FIRMWARE_PATH_CP}/file_${lFILE_ID}"
   done
+  touch "${FIRMWARE_PATH_CP}/ignored.raw"
   find "${FIRMWARE_PATH_CP}" -type f -print0 >"${lFILE_LIST}"
 
-  populate_p99_backend "${lFILE_LIST}" test 10
+  populate_p99_backend "${lFILE_LIST}" test 11
 
   [ "$(wc -l <"${CAPTURE_FILE}")" -eq 10 ]
-  [ "$(wc -l <"${MD5_INVOCATIONS}")" -eq 6 ]
-  [ "$(wc -l <"${FILE_INVOCATIONS}")" -eq 6 ]
-  [ "$(find "${TMP_DIR}/p99_backend_workers" -type f | wc -l)" -eq 4 ]
+  [ "$(wc -l <"${MD5_INVOCATIONS}")" -eq 7 ]
+  [ "$(wc -l <"${FILE_INVOCATIONS}")" -eq 7 ]
+  grep -qx '4' "${WORKER_COUNTS}"
 }
 
 @test "populate_p99_backend atomically skips duplicate content" {

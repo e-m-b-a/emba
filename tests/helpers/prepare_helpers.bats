@@ -10,7 +10,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 
-# shellcheck disable=SC1091
+# shellcheck disable=SC1091,SC2032
 
 load ../setup.bash
 
@@ -129,6 +129,45 @@ teardown() {
 
   [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
   [ "$(awk -F ';' '{print $8}' "${P99_CSV_LOG}")" = "preclassified data" ]
+}
+
+@test "analyze_binary_architecture parses ELF metadata in strict mode" {
+  local lBINARY="${LOG_DIR}/strict-elf.bin"
+  local lMD5SUM="9dd4e461268c8034f5c8564e155c67a6"
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  touch "${lBINARY}"
+  readelf() {
+    printf '%s\n' \
+      '  Class:                             ELF32' \
+      '  Data:                              2s complement, little endian' \
+      '  Machine:                           MIPS R3000' \
+      '  Flags:                             0x0' \
+      "String dump of section '.comment':" \
+      '  [ 0] Z compiler one' \
+      '  [ 1] A compiler one'
+  }
+
+  set -euo pipefail
+  analyze_binary_architecture "${lBINARY}" "test" "${lMD5SUM}" "ELF test data"
+  set +euo pipefail
+
+  [ "$(awk -F ';' '{print $3}' "${P99_CSV_LOG}")" = "ELF32" ]
+  [ "$(awk -F ';' '{print $5}' "${P99_CSV_LOG}")" = "MIPSR3000" ]
+  [ "$(awk -F ';' '{print $7}' "${P99_CSV_LOG}")" = "  ,A compiler one,Z compiler one," ]
+}
+
+@test "claim_p99_hash caches index initialization per worker" {
+  local lINITIALIZE_CALLS=0
+  unset P99_HASH_INDEX_INITIALIZED_FOR
+  initialize_p99_hash_index() {
+    ((lINITIALIZE_CALLS += 1))
+    mkdir -p "${TMP_DIR}/p99_md5sum_done/aa" "${TMP_DIR}/p99_md5sum_done/bb"
+  }
+
+  claim_p99_hash "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  claim_p99_hash "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+
+  [ "${lINITIALIZE_CALLS}" -eq 1 ]
 }
 
 @test "convert_timeformat converts days to seconds" {
