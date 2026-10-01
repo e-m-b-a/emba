@@ -226,35 +226,43 @@ initialize_p99_hash_index() {
 binary_architecture_threader() {
   local lBINARY="${1:-}"
   local lSOURCE_MODULE="${2:-}"
-
-  local lD_FLAGS_CNT=""
-  local lD_MACHINE="NA"
-  local lD_CLASS="NA"
-  local lD_DATA="NA"
-  local lD_ARCH_GUESSED="NA"
-  local lMD5SUM=""
-  local lMD5SUM_INDEX=""
-  local lNOCLOBBER=0
+  local lMD5SUM="${3:-}"
   if [[ "${lBINARY}" == *".raw" ]]; then
     return
   fi
-  if ! initialize_p99_hash_index; then
-    print_output "[-] Failed to initialize P99 hash index" "no_log"
-    return
+  if [[ -z "${lMD5SUM}" ]]; then
+    lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
+    # GNU md5sum prefixes escaped output with a backslash when the filename
+    # contains characters such as a backslash or newline.
+    lMD5SUM="${lMD5SUM#\\}"
+    lMD5SUM="${lMD5SUM/\ */}"
+  else
+    lMD5SUM="${lMD5SUM,,}"
   fi
-  lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
-  # GNU md5sum prefixes escaped output with a backslash when the filename
-  # contains characters such as a backslash or newline.
-  lMD5SUM="${lMD5SUM#\\}"
-  lMD5SUM="${lMD5SUM/\ */}"
   if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
     return
   fi
+  if ! claim_p99_hash "${lMD5SUM}"; then
+    return
+  fi
+  analyze_binary_architecture "${lBINARY}" "${lSOURCE_MODULE}" "${lMD5SUM}"
+}
+
+claim_p99_hash() {
+  local lMD5SUM="${1:-}"
+  local lMD5SUM_INDEX=""
+  local lNOCLOBBER=0
+
+  if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
+    return 1
+  fi
+  lMD5SUM="${lMD5SUM,,}"
+  if ! initialize_p99_hash_index; then
+    print_output "[-] Failed to initialize P99 hash index" "no_log"
+    return 1
+  fi
 
   lMD5SUM_INDEX="${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}"
-  if [[ ! -d "${lMD5SUM_INDEX}" ]]; then
-    mkdir -p "${lMD5SUM_INDEX}"
-  fi
   # Atomically claim a hash. Filesystem lookups avoid scanning an ever-growing
   # hash log for every extracted file and prevent races between workers.
   if [[ -o noclobber ]]; then
@@ -266,14 +274,28 @@ binary_architecture_threader() {
     if [[ "${lNOCLOBBER}" -eq 0 ]]; then
       set +o noclobber
     fi
-    return
+    return 1
   fi
   if [[ "${lNOCLOBBER}" -eq 0 ]]; then
     set +o noclobber
   fi
   print_dot
+}
 
-  D_FILE_OUTPUT=$(file -b "${lBINARY}")
+analyze_binary_architecture() {
+  local lBINARY="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lMD5SUM="${3:-}"
+  local D_FILE_OUTPUT="${4:-}"
+  local lD_FLAGS_CNT=""
+  local lD_MACHINE="NA"
+  local lD_CLASS="NA"
+  local lD_DATA="NA"
+  local lD_ARCH_GUESSED="NA"
+
+  if [[ -z "${D_FILE_OUTPUT}" ]]; then
+    D_FILE_OUTPUT=$(file -b -- "${lBINARY}")
+  fi
   if [[ "${D_FILE_OUTPUT}" == *"ELF"* ]]; then
     # noreorder, pic, cpic, o32, mips32
     local lREADELF_H_ARR=()

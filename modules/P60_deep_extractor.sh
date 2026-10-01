@@ -78,16 +78,12 @@ P60_deep_extractor() {
 
     print_output "[*] Populating backend data for ${ORANGE}${lFILES_EXT_COUNT}${NC} files ... could take some time" "no_log"
 
-    while IFS= read -r -d '' lBINARY; do
-      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-      local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
-      max_pids_protection $((2 * "${MAX_MOD_THREADS}")) lWAIT_PIDS_P99_ARR
-    done <"${lFILES_EXT_LIST}"
+    populate_p99_backend "${lFILES_EXT_LIST}" "${FUNCNAME[0]}" "${lFILES_EXT_COUNT}" &
+    local lP99_BACKEND_PID="$!"
 
     local lLINUX_PATH_COUNTER=0
     lLINUX_PATH_COUNTER=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
-    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+    wait_for_pid "${lP99_BACKEND_PID}"
 
     print_ln
     print_output "[*] Found ${ORANGE}${lFILES_EXT_COUNT}${NC} files at all."
@@ -106,6 +102,108 @@ P60_deep_extractor() {
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_COUNT}"
+}
+
+populate_p99_backend() {
+  local lFILES_LIST="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lFILE_COUNT="${3:-0}"
+  local lMAX_THREADS="${MAX_MOD_THREADS:-1}"
+  local lWORKER_COUNT=0
+  local lWORKER_DIR="${TMP_DIR}/p99_backend_workers"
+  local lBINARY=""
+  local lWORKER_FILE=""
+  local lWORKER_ID=0
+  local lFD=""
+  local lWORKER_FILES=()
+  local lWORKER_FDS=()
+  local lWORKER_PIDS=()
+
+  if ! [[ "${lMAX_THREADS}" =~ ^[1-9][0-9]*$ ]]; then
+    lMAX_THREADS=1
+  fi
+  lWORKER_COUNT=$((2 * lMAX_THREADS))
+  if [[ "${lFILE_COUNT}" -lt "${lWORKER_COUNT}" ]]; then
+    lWORKER_COUNT="${lFILE_COUNT}"
+  fi
+  if [[ "${lWORKER_COUNT}" -lt 1 ]]; then
+    return
+  fi
+
+  mkdir -p "${lWORKER_DIR}"
+  for ((lWORKER_ID = 0; lWORKER_ID < lWORKER_COUNT; lWORKER_ID++)); do
+    lWORKER_FILE="${lWORKER_DIR}/worker_${lWORKER_ID}.list"
+    : >"${lWORKER_FILE}"
+    lWORKER_FILES+=("${lWORKER_FILE}")
+    exec {lFD}>"${lWORKER_FILE}"
+    lWORKER_FDS+=("${lFD}")
+  done
+
+  lWORKER_ID=0
+  while IFS= read -r -d '' lBINARY; do
+    printf '%s\0' "${lBINARY}" >&"${lWORKER_FDS[lWORKER_ID]}"
+    lWORKER_ID=$(((lWORKER_ID + 1) % lWORKER_COUNT))
+  done <"${lFILES_LIST}"
+  for lFD in "${lWORKER_FDS[@]}"; do
+    exec {lFD}>&-
+  done
+
+  for lWORKER_FILE in "${lWORKER_FILES[@]}"; do
+    p99_backend_worker "${lWORKER_FILE}" "${lSOURCE_MODULE}" &
+    lWORKER_PIDS+=("$!")
+  done
+  wait_for_pid "${lWORKER_PIDS[@]}"
+}
+
+p99_backend_worker() {
+  local lWORKER_FILE="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lHASH_BATCH_SIZE="${P99_HASH_BATCH_SIZE:-128}"
+  local lMD5_RECORD=""
+  local lMD5SUM=""
+  local lBINARY=""
+  local lFILE_OUTPUT=""
+  local lRECORD_ID=0
+  local lMD5_RECORDS=()
+  local lHASHED_FILES=()
+  local lHASHES=()
+  local lFILE_OUTPUTS=()
+
+  if ! [[ "${lHASH_BATCH_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
+    lHASH_BATCH_SIZE=128
+  fi
+  # GNU md5sum -z and file -0 -0 produce unescaped, NUL-delimited records.
+  # Bounded batches avoid one checksum and one file process per extracted file.
+  while mapfile -d '' -n "${lHASH_BATCH_SIZE}" -t lHASHED_FILES && ((${#lHASHED_FILES[@]})); do
+    mapfile -d '' -t lMD5_RECORDS < <(md5sum -z -- "${lHASHED_FILES[@]}" 2>/dev/null || true)
+    lHASHED_FILES=()
+    lHASHES=()
+    for lMD5_RECORD in "${lMD5_RECORDS[@]}"; do
+      if [[ "${#lMD5_RECORD}" -lt 35 ]]; then
+        continue
+      fi
+      lMD5SUM="${lMD5_RECORD:0:32}"
+      lBINARY="${lMD5_RECORD:34}"
+      if claim_p99_hash "${lMD5SUM}"; then
+        lHASHES+=("${lMD5SUM}")
+        lHASHED_FILES+=("${lBINARY}")
+      fi
+    done
+    if ((${#lHASHED_FILES[@]} == 0)); then
+      lMD5_RECORDS=()
+      continue
+    fi
+
+    mapfile -d '' -t lFILE_OUTPUTS < <(file -0 -0 -b -- "${lHASHED_FILES[@]}" 2>/dev/null || true)
+    for ((lRECORD_ID = 0; lRECORD_ID < ${#lHASHED_FILES[@]}; lRECORD_ID++)); do
+      lFILE_OUTPUT="${lFILE_OUTPUTS[lRECORD_ID]:-unreadable}"
+      analyze_binary_architecture "${lHASHED_FILES[lRECORD_ID]}" "${lSOURCE_MODULE}" "${lHASHES[lRECORD_ID]}" "${lFILE_OUTPUT}"
+    done
+    lMD5_RECORDS=()
+    lHASHED_FILES=()
+    lHASHES=()
+    lFILE_OUTPUTS=()
+  done <"${lWORKER_FILE}"
 }
 
 check_disk_space() {

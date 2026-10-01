@@ -103,6 +103,34 @@ teardown() {
   [ "$(awk -F ';' '{print $9}' "${P99_CSV_LOG}")" = "${lMD5SUM}" ]
 }
 
+@test "binary_architecture_threader accepts a precomputed checksum" {
+  local lBINARY="${LOG_DIR}/precomputed.bin"
+  local lMD5SUM=""
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  printf 'precomputed content' >"${lBINARY}"
+  lMD5SUM="$(md5sum "${lBINARY}" | cut -d ' ' -f1)"
+
+  md5sum() { return 99; }
+  binary_architecture_threader "${lBINARY}" "test" "${lMD5SUM^^}"
+
+  [ -e "${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}/${lMD5SUM}" ]
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
+  [ "$(awk -F ';' '{print $9}' "${P99_CSV_LOG}")" = "${lMD5SUM}" ]
+}
+
+@test "analyze_binary_architecture accepts precomputed file output" {
+  local lBINARY="${LOG_DIR}/preclassified.bin"
+  local lMD5SUM="9dd4e461268c8034f5c8564e155c67a6"
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  printf 'x' >"${lBINARY}"
+
+  file() { return 99; }
+  analyze_binary_architecture "${lBINARY}" "test" "${lMD5SUM}" "preclassified data"
+
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
+  [ "$(awk -F ';' '{print $8}' "${P99_CSV_LOG}")" = "preclassified data" ]
+}
+
 @test "convert_timeformat converts days to seconds" {
   result="$(convert_timeformat "2d")"
   [ "${result}" = "$((2 * 24 * 3600))" ]
