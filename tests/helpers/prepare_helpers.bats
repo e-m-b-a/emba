@@ -85,6 +85,24 @@ teardown() {
   [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
 }
 
+@test "binary_architecture_threader accepts GNU md5sum escaped filenames" {
+  local lBINARY="${LOG_DIR}/escaped\\name.bin"
+  local lMD5_OUTPUT=""
+  local lMD5SUM=""
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  printf 'escaped filename content' >"${lBINARY}"
+  lMD5_OUTPUT="$(md5sum "${lBINARY}")"
+  lMD5SUM="$(printf 'escaped filename content' | md5sum | cut -d ' ' -f1)"
+  [[ "${lMD5_OUTPUT}" == \\* ]]
+
+  binary_architecture_threader "${lBINARY}" "test"
+  wait
+
+  [ -e "${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}/${lMD5SUM}" ]
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
+  [ "$(awk -F ';' '{print $9}' "${P99_CSV_LOG}")" = "${lMD5SUM}" ]
+}
+
 @test "convert_timeformat converts days to seconds" {
   result="$(convert_timeformat "2d")"
   [ "${result}" = "$((2 * 24 * 3600))" ]

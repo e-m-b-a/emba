@@ -186,6 +186,9 @@ binary_architecture_threader() {
     return
   fi
   lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
+  # GNU md5sum prefixes escaped output with a backslash when the filename
+  # contains characters such as a backslash or newline.
+  lMD5SUM="${lMD5SUM#\\}"
   lMD5SUM="${lMD5SUM/\ */}"
   if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
     return
