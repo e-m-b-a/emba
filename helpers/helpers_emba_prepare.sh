@@ -227,6 +227,7 @@ binary_architecture_threader() {
   local lBINARY="${1:-}"
   local lSOURCE_MODULE="${2:-}"
   local lMD5SUM="${3:-}"
+  local lP99_HASH_INDEX_INITIALIZED_FOR=""
   if [[ "${lBINARY}" == *".raw" ]]; then
     return
   fi
@@ -258,12 +259,12 @@ claim_p99_hash() {
     return 1
   fi
   lMD5SUM="${lMD5SUM,,}"
-  if [[ "${P99_HASH_INDEX_INITIALIZED_FOR:-}" != "${lINDEX_READY}" ]]; then
+  if [[ "${lP99_HASH_INDEX_INITIALIZED_FOR:-}" != "${lINDEX_READY}" ]]; then
     if ! initialize_p99_hash_index; then
       print_output "[-] Failed to initialize P99 hash index" "no_log"
       return 1
     fi
-    P99_HASH_INDEX_INITIALIZED_FOR="${lINDEX_READY}"
+    lP99_HASH_INDEX_INITIALIZED_FOR="${lINDEX_READY}"
   fi
 
   lMD5SUM_INDEX="${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}"
@@ -423,6 +424,9 @@ p99_backend_worker() {
   local lWORKER_FILE="${1:-}"
   local lSOURCE_MODULE="${2:-}"
   local lHASH_BATCH_SIZE="${P99_HASH_BATCH_SIZE:-128}"
+  # Bash locals are dynamically scoped, so claim_p99_hash updates this cache
+  # once per worker without introducing an indirect global variable.
+  local lP99_HASH_INDEX_INITIALIZED_FOR=""
   local lMD5_RECORD=""
   local lMD5SUM=""
   local lBINARY=""

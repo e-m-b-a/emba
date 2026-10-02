@@ -158,7 +158,7 @@ teardown() {
 
 @test "claim_p99_hash caches index initialization per worker" {
   local lINITIALIZE_CALLS=0
-  unset P99_HASH_INDEX_INITIALIZED_FOR
+  local lP99_HASH_INDEX_INITIALIZED_FOR=""
   initialize_p99_hash_index() {
     ((lINITIALIZE_CALLS += 1))
     mkdir -p "${TMP_DIR}/p99_md5sum_done/aa" "${TMP_DIR}/p99_md5sum_done/bb"
