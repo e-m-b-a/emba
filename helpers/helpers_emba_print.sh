@@ -352,9 +352,10 @@ write_csv_log_to_path() {
   local lSOURCE_MODULE="${2:-}"
   shift 2
   local lCSV_ITEMS=("$@")
+  local lCSV_LINE=""
 
-  # shellcheck disable=SC2005
-  echo "$(printf '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}" && printf '\n')" >>"${lCSV_LOG}" || true
+  printf -v lCSV_LINE '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}"
+  printf '%s\n' "${lCSV_LINE}" >>"${lCSV_LOG}" || true
 }
 
 # For generating json log file in LOG_DIR/json_logs/<module_name>.json

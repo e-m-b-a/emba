@@ -58,7 +58,11 @@ P60_deep_extractor() {
     return
   fi
 
-  mapfile -t lFILES_EXT_ARR < <(find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw")
+  local lFILES_EXT_LIST="${TMP_DIR}/p60_extracted_files.list"
+  local lFILES_EXT_COUNT=0
+  find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw" -print0 >"${lFILES_EXT_LIST}"
+  lFILES_EXT_COUNT="$(tr -cd '\0' <"${lFILES_EXT_LIST}" | wc -c)"
+  lFILES_EXT_COUNT="${lFILES_EXT_COUNT// /}"
   local lFILES_P99=0
   if [[ -f "${P99_CSV_LOG}" ]]; then
     lFILES_P99=$(wc -l "${P99_CSV_LOG}")
@@ -67,27 +71,24 @@ P60_deep_extractor() {
 
   # we only do the P99 populating if we have done something with the deep extractor
   # and we have now more files found as already known in P99
-  if [[ "${NO_EXTRACTED}" -eq 0 ]] && [[ "${#lFILES_EXT_ARR[@]}" -gt "${lFILES_P99}" ]]; then
+  if [[ "${NO_EXTRACTED}" -eq 0 ]] && [[ "${lFILES_EXT_COUNT}" -gt "${lFILES_P99}" ]]; then
     sub_module_title "Extraction results"
 
-    print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files."
+    print_output "[*] Extracted ${ORANGE}${lFILES_EXT_COUNT}${NC} files."
 
-    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"
+    print_output "[*] Populating backend data for ${ORANGE}${lFILES_EXT_COUNT}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_EXT_ARR[@]}"; do
-      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-      local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
-    done
+    populate_p99_backend "${lFILES_EXT_LIST}" "${FUNCNAME[0]}" "${lFILES_EXT_COUNT}" &
+    local lP99_BACKEND_PID="$!"
 
     local lLINUX_PATH_COUNTER=0
     lLINUX_PATH_COUNTER=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
-    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+    wait_for_pid "${lP99_BACKEND_PID}"
 
     print_ln
-    print_output "[*] Found ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files at all."
+    print_output "[*] Found ${ORANGE}${lFILES_EXT_COUNT}${NC} files at all."
     print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
-    print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_P99_BEFORE}${NC} files, after deep extraction we have now ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files extracted."
+    print_output "[*] Before deep extraction we had ${ORANGE}${lFILES_P99_BEFORE}${NC} files, after deep extraction we have now ${ORANGE}${lFILES_EXT_COUNT}${NC} files extracted."
 
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
     export FIRMWARE_PATH="${FIRMWARE_PATH_CP}"
@@ -95,12 +96,12 @@ P60_deep_extractor() {
     if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
       write_csv_log "FILES" "LINUX_PATH_COUNTER" "Root PATH detected"
       for lR_PATH in "${ROOT_PATH[@]}"; do
-        write_csv_log "${#lFILES_EXT_ARR[@]}" "${lLINUX_PATH_COUNTER}" "${lR_PATH}"
+        write_csv_log "${lFILES_EXT_COUNT}" "${lLINUX_PATH_COUNTER}" "${lR_PATH}"
       done
     fi
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${#lFILES_EXT_ARR[@]}"
+  module_end_log "${FUNCNAME[0]}" "${lFILES_EXT_COUNT}"
 }
 
 check_disk_space() {
@@ -111,22 +112,19 @@ check_disk_space() {
 deep_extractor() {
   sub_module_title "Deep extraction mode"
 
-  local lFILES_DEEP_PRE_ARR=()
-  local lBINARY=""
+  local lFILES_DEEP_PRE_LIST="${TMP_DIR}/p60_deep_pre_files.list"
+  local lFILES_DEEP_PRE_COUNT=0
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] No ${P99_CSV_LOG} log file available ... trying to create it now"
-    mapfile -t lFILES_DEEP_PRE_ARR < <(find "${LOG_DIR}/firmware" -type f)
+    find "${LOG_DIR}/firmware" -type f ! -name '*.raw' -print0 >"${lFILES_DEEP_PRE_LIST}"
     if [[ -f "${FIRMWARE_PATH}" ]]; then
-      lFILES_DEEP_PRE_ARR+=("${FIRMWARE_PATH}")
+      printf '%s\0' "${FIRMWARE_PATH}" >>"${lFILES_DEEP_PRE_LIST}"
     fi
-    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DEEP_PRE_ARR[@]}${NC} files ... could take some time" "no_log"
+    lFILES_DEEP_PRE_COUNT="$(tr -cd '\0' <"${lFILES_DEEP_PRE_LIST}" | wc -c)"
+    lFILES_DEEP_PRE_COUNT="${lFILES_DEEP_PRE_COUNT// /}"
+    print_output "[*] Populating backend data for ${ORANGE}${lFILES_DEEP_PRE_COUNT}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_DEEP_PRE_ARR[@]}"; do
-      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-      local lTMP_PID="$!"
-      lWAIT_PIDS_P60_ARR+=("${lTMP_PID}")
-    done
-    wait_for_pid "${lWAIT_PIDS_P60_ARR[@]}"
+    populate_p99_backend "${lFILES_DEEP_PRE_LIST}" "${FUNCNAME[0]}" "${lFILES_DEEP_PRE_COUNT}"
     detect_root_dir_helper "${LOG_DIR}/firmware"
     if [[ ${RTOS} -eq 0 ]]; then
       export NO_EXTRACTED=1

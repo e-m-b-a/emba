@@ -50,19 +50,16 @@ P99_prepare_analyzer() {
   check_firmware
 
   # The following code is just in case we have not already created our P99_CSV_LOG file
-  local lFILES_ARR=()
-  local lBINARY=""
+  local lFILES_LIST="${TMP_DIR}/p99_prepare_files.list"
+  local lFILES_COUNT=0
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] INFO: No ${P99_CSV_LOG} log file available ... trying to create it now"
-    mapfile -t lFILES_ARR < <(find "${LOG_DIR}/firmware" -type f)
-    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ARR[@]}${NC} files ... could take some time" "no_log"
+    find "${LOG_DIR}/firmware" -type f ! -name '*.raw' -print0 >"${lFILES_LIST}"
+    lFILES_COUNT="$(tr -cd '\0' <"${lFILES_LIST}" | wc -c)"
+    lFILES_COUNT="${lFILES_COUNT// /}"
+    print_output "[*] Populating backend data for ${ORANGE}${lFILES_COUNT}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_ARR[@]}"; do
-      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-      local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
-    done
-    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+    populate_p99_backend "${lFILES_LIST}" "${FUNCNAME[0]}" "${lFILES_COUNT}"
   fi
 
   # do we need this. We should check it and remove the complete code

@@ -95,6 +95,14 @@ teardown() {
   [ -n "${result}" ]
 }
 
+@test "write_csv_log_to_path preserves CSV formatting" {
+  local lCSV_LOG="${LOG_DIR}/custom.csv"
+
+  write_csv_log_to_path "${lCSV_LOG}" "source" "first" "second"
+
+  [ "$(<"${lCSV_LOG}")" = "source;first;second;;" ]
+}
+
 @test "format_log strips ANSI codes when FORMAT_LOG=0" {
   FORMAT_LOG=0
   result="$(format_log $'\\033[0;32mtest\\033[0m')"
