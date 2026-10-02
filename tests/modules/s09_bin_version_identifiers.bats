@@ -69,7 +69,7 @@ bvi_config_for_identifier() {
     return 0
   fi
 
-  lSEARCH_RESULTS=$(printf '%s\0' "${BIN_VERSION_CFG_ARR[@]}" | \
+  lSEARCH_RESULTS=$(printf '%s\0' "${BIN_VERSION_CFG_ARR[@]}" |
     xargs -0 -r jq -r --arg i "${lRULE_IDENTIFIER}" 'select(.identifier == $i) | input_filename' 2>/dev/null | sort -u)
   lCFG_FILE=$(head -n1 <<<"${lSEARCH_RESULTS}")
 
@@ -129,9 +129,9 @@ bvi_normalize_identifier() {
 # dumps "<config name><TAB><raw grep regex>" for every grep command which is
 # applied by S09 in static mode (normal/multi_grep and strict)
 bvi_all_static_identifiers() {
-  printf '%s\0' "${BIN_VERSION_CFG_ARR[@]}" | \
+  printf '%s\0' "${BIN_VERSION_CFG_ARR[@]}" |
     xargs -0 -r jq -r '(.identifier // input_filename) as $i | ((.grep_commands // [])[] | [$i, .]), ((.strict_grep_commands // [])[] | [$i, .]) | @tsv' \
-    2>/dev/null
+      2>/dev/null
 }
 
 # dumps one TSV line per static rule which S09 could apply:
@@ -139,7 +139,7 @@ bvi_all_static_identifiers() {
 # the corpus key is exactly the file name create_minimal_binary_corpus generates
 # note: join("\t") instead of @tsv - @tsv would escape the backslashes of the regex
 bvi_static_rules() {
-  printf '%s\0' "${BIN_VERSION_CFG_ARR[@]}" | \
+  printf '%s\0' "${BIN_VERSION_CFG_ARR[@]}" |
     xargs -0 -r jq -r '(.identifier // input_filename) as $id
                        | ((.parsing_mode // []) | join(",")) as $mode
                        | [ ((.grep_commands // [])       | to_entries[] | [.value, ((.key + 1) | tostring), "grep_commands"]),
@@ -147,7 +147,7 @@ bvi_static_rules() {
                        | .[]
                        | [($id + "_" + .[1] + ".bin"), $id, .[1], .[2], $mode, .[0]]
                        | join("\t")' \
-    2>/dev/null
+      2>/dev/null
 }
 
 @test "bin_version_testdata corpus directory is present and not empty" {
@@ -170,7 +170,10 @@ bvi_static_rules() {
     fi
   done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "every bin_version_testdata grep id points to an existing grep command" {
@@ -201,7 +204,10 @@ bvi_static_rules() {
     fi
   done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "corpus grep ids match the identifier field of their json config" {
@@ -224,7 +230,10 @@ bvi_static_rules() {
     fi
   done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "every corpus file is matched by its configured grep identifier" {
@@ -267,14 +276,23 @@ bvi_static_rules() {
     done
   done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "every corpus file is not empty and is handled as binary by grep" {
   local lCORPUS_FILE=""
   for lCORPUS_FILE in "${BIN_VERSION_CORPUS_ARR[@]}"; do
-    [ -s "${lCORPUS_FILE}" ] || { echo "[*] empty corpus file: ${lCORPUS_FILE}" >&2; false; }
-    grep -q -a -E "." "${lCORPUS_FILE}" || { echo "[*] corpus file without any data: ${lCORPUS_FILE}" >&2; false; }
+    [ -s "${lCORPUS_FILE}" ] || {
+      echo "[*] empty corpus file: ${lCORPUS_FILE}" >&2
+      false
+    }
+    grep -q -a -E "." "${lCORPUS_FILE}" || {
+      echo "[*] corpus file without any data: ${lCORPUS_FILE}" >&2
+      false
+    }
   done
 }
 
@@ -308,7 +326,10 @@ bvi_static_rules() {
     done
   done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "multi_grep identifiers require all AND separated fragments in the corpus" {
@@ -349,7 +370,10 @@ bvi_static_rules() {
   done
 
   [ "${lCHECKED}" -gt 0 ] || echo "[*] no multi_grep corpus files available - test is a no-op" >&2
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "corpus regexes do not match unrelated placeholder content" {
@@ -373,7 +397,10 @@ bvi_static_rules() {
     done
   done < <(bvi_all_static_identifiers)
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "bin_version_identifiers configs are valid json and provide the mandatory fields" {
@@ -448,7 +475,10 @@ bvi_static_rules() {
     fi
   done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "strict mode rules provide affected_paths and every parsing_mode is known" {
@@ -484,9 +514,12 @@ bvi_static_rules() {
       fi
     done < <(jq -r '[(.affected_paths // []) | length] + [(.parsing_mode // []) | join(" ")] | join("|")' \
       "${lCFG_FILE}" 2>/dev/null)
-    done
+  done
 
-  [ -z "${lFAILURES}" ] || { printf '%s' "${lFAILURES}" >&2; false; }
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
 }
 
 @test "bvi_normalize_identifier splits multi_grep identifiers and drops quoting and anchors" {
@@ -594,7 +627,7 @@ bvi_static_rules() {
     lRAW_IDENTIFIER="${lRULE_ARR[${lCORPUS_KEY}]#*|}"
     lRULE_IDENTIFIER="${lCORPUS_KEY%_*}"
 
-    lID_TOTAL_ARR[${lRULE_IDENTIFIER}]=$(( ${lID_TOTAL_ARR[${lRULE_IDENTIFIER}]:-0} + 1 ))
+    lID_TOTAL_ARR[${lRULE_IDENTIFIER}]=$((${lID_TOTAL_ARR[${lRULE_IDENTIFIER}]:-0} + 1))
     if [[ "${lJSON_KEY}" == "grep_commands" ]]; then
       lGC_TOTAL=$((lGC_TOTAL + 1))
     else
@@ -619,7 +652,7 @@ bvi_static_rules() {
 
     if [[ "${lRULE_MATCHES}" -eq 1 ]]; then
       lKEY_MATCHED=$((lKEY_MATCHED + 1))
-      lID_MATCHED_ARR[${lRULE_IDENTIFIER}]=$(( ${lID_MATCHED_ARR[${lRULE_IDENTIFIER}]:-0} + 1 ))
+      lID_MATCHED_ARR[${lRULE_IDENTIFIER}]=$((${lID_MATCHED_ARR[${lRULE_IDENTIFIER}]:-0} + 1))
       if [[ "${lJSON_KEY}" == "grep_commands" ]]; then
         lGC_MATCHED=$((lGC_MATCHED + 1))
       else
@@ -627,7 +660,7 @@ bvi_static_rules() {
       fi
     else
       lKEY_STALE=$((lKEY_STALE + 1))
-      lID_STALE_ARR[${lRULE_IDENTIFIER}]=$(( ${lID_STALE_ARR[${lRULE_IDENTIFIER}]:-0} + 1 ))
+      lID_STALE_ARR[${lRULE_IDENTIFIER}]=$((${lID_STALE_ARR[${lRULE_IDENTIFIER}]:-0} + 1))
       lSTALE_ID_NAMES+="${lRULE_IDENTIFIER} "
     fi
   done
