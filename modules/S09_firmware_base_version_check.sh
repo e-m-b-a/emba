@@ -943,7 +943,7 @@ create_minimal_binary_corpus() {
   local lCORPUS_log="${lCORPUS_PATH}/logfile.txt"
   touch "${lCORPUS_log}" 2>/dev/null || true
   local lCORPUS_FILE="${lCORPUS_PATH}/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}"
-  local lORIG_CORPUS_FILE="${TESTS_DIR}/bin_version_testdata/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}"
+  local lORIG_CORPUS_FILE="${TESTS_DIR}/bin_version_testdata/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}.bin"
   local lCORPUS_FILE_tmp="${lCORPUS_FILE}_${RANDOM}.bin"
   local lCORPUS_FILE="${lCORPUS_FILE}.bin"
   [[ -f "${lCORPUS_FILE}" ]] && return
