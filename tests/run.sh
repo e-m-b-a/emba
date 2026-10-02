@@ -44,6 +44,14 @@ while IFS= read -r -d '' TEST_FILE; do
   echo ""
 done < <(find "${INVOCATION_PATH}" -name 'bats-core' -prune -o -name '*.bats' -print0)
 
+echo "--- Statistics: S09 version identifier testdata coverage ---"
+# bats hides the output of passing tests - the coverage report is printed
+# always via its own runner so the statistics are not only visible on failure
+if ! "${INVOCATION_PATH}/scripts/bin_version_testdata/coverage_report.sh"; then
+  echo "[!] the S09 testdata coverage report detected inconsistencies"
+fi
+echo ""
+
 echo "==================================="
 echo " Results: ${PASSED}/${TOTAL} passed, ${FAILED} failed"
 echo "==================================="
