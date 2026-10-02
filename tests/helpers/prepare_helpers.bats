@@ -24,6 +24,24 @@ teardown() {
   teardown_emba_test_env
 }
 
+@test "detect_root_dir_helper handles strict-mode IFS and paths containing spaces" {
+  local lROOT_PATH="${LOG_DIR}/firmware root"
+  export P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  IFS=$'\n\t'
+  ROOT_PATH=()
+  mkdir -p "${lROOT_PATH}"/{bin,etc,home,lib,sbin}
+  touch "${P99_CSV_LOG}"
+
+  print_output() { :; }
+  write_link() { :; }
+
+  detect_root_dir_helper "${LOG_DIR}"
+
+  [ "${RTOS}" -eq 0 ]
+  [ "${#ROOT_PATH[@]}" -eq 1 ]
+  [ "${ROOT_PATH[0]}" = "${lROOT_PATH}" ]
+}
+
 @test "convert_timeformat converts days to seconds" {
   result="$(convert_timeformat "2d")"
   [ "${result}" = "$((2 * 24 * 3600))" ]
