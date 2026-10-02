@@ -8,9 +8,9 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "'\"^can't initialize iptables table .\\%s': \\%s$\"AND\"^[1-9](\\.[0-9]+)?+$\"'",
-    "iptables\\ v[1-9](\\.[0-9]+)+?([a-z])?",
-    "iptables\\ v[1-9](\\.[0-9]+)+?([a-z])?$"
+    "'\"^can't\\ initialize\\ iptables\\ table\\ .\\%s':\\ \\%s$\"AND\"^[1-9](\\.[0-9]+)+$\"'",
+    "iptables\\ v[1-9](\\.[0-9]+)+([a-z])?",
+    "iptables\\ v[1-9](\\.[0-9]+)+([a-z])?$"
   ],
   "vendor_names": [
     "netfilter"

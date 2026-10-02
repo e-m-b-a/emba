@@ -7,9 +7,9 @@
     "Zlib"
   ],
   "grep_commands": [
-    "^\\ unzip\\ [0-9]\\.([0-9]+)\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*$",
-    "deflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark\\ Adler",
-    "inflate\\ [0-9](\\.[0-9]+)+?\\ Copyright.*Mark Adler"
+    "^\\ unzip\\ [0-9](\\.[0-9]+)+\\ Copyright 1998-20[0-9][0-9] Gilles Vollant.*$",
+    "deflate\\ [0-9](\\.[0-9]+)+\\ Copyright.*Mark\\ Adler",
+    "inflate\\ [0-9](\\.[0-9]+)+\\ Copyright.*Mark Adler"
   ],
   "vendor_names": [
     "zlib"

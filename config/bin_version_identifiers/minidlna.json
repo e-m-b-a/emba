@@ -9,11 +9,11 @@
     "unknown"
   ],
   "grep_commands": [
-    "'\"MiniDLNA is already running. EXITING.\"AND\"^[0-9](\\.[0-9]+)?+$\"'",
-    "^Starting\\ MiniDLNA\\ version\\ [0-9](\\.[0-9]+)+?"
+    "'\"MiniDLNA\\ is\\ already\\ running\\.\\ EXITING\\.\"AND\"^[0-9](\\.[0-9]+)+$\"'",
+    "^Starting\\ MiniDLNA\\ version\\ [0-9](\\.[0-9]+)+"
   ],
   "live_grep_commands": [
-    "^MiniDLNA\\ [0-9](\\.[0-9]+)+?\\ "
+    "^MiniDLNA\\ [0-9](\\.[0-9]+)+\\ "
   ],
   "vendor_names": [
     "minidlna_project"

@@ -7,9 +7,9 @@
     "GPL-2.0-only"
   ],
   "grep_commands": [
-    "^hostapd\\ v[0-9](\\.[0-9]+)+?(-devel)?$",
-    "hostapd\\ v[0-9](\\.[0-9]+)+?$",
-    "hostapd\\ v[0-9](\\.[0-9]+)+?\\.x$"
+    "^hostapd\\ v[0-9](\\.[0-9]+)+(-devel)?$",
+    "hostapd\\ v[0-9](\\.[0-9]+)+$",
+    "hostapd\\ v[0-9](\\.[0-9]+)+\\.x$"
   ],
   "vendor_names": [
     "w1.fi"
