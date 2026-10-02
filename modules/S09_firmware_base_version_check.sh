@@ -312,7 +312,7 @@ S09_identifier_threadings() {
           continue
         fi
         for lVERSION_IDENTIFIER in "${lSTRICT_VERSION_IDENTIFIER_ARR[@]}"; do
-          local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}"+1))
+          local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}" + 1))
           lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#*$'\t'}"
 
           # print_output "[*] Testing STRICT identifier ${lVERSION_IDENTIFIER}" "no_log"
@@ -350,7 +350,7 @@ S09_identifier_threadings() {
         continue
       fi
       for lVERSION_IDENTIFIER in "${lZGREP_VERSION_IDENTIFIER_ARR[@]}"; do
-        local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}"+1))
+        local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}" + 1))
         lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#*$'\t'}"
 
         # print_output "[*] Testing zgrep identifier ${ORANGE}${lVERSION_IDENTIFIER}${NC} on binary ${ORANGE}${lBINARY_PATH}${NC}"
@@ -388,7 +388,7 @@ S09_identifier_threadings() {
       # if no strings available ... go ahead and test all the bins against our identifiers
       if [[ -f "${lSTRINGS_OUTPUT}" ]]; then
         for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-          local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}"+1))
+          local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}" + 1))
           lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#*$'\t'}"
 
           # print_output "[*] Testing identifier ${lVERSION_IDENTIFIER} for RTOS firmware" "no_log"
@@ -415,7 +415,7 @@ S09_identifier_threadings() {
     # TODO: change to local vars via parameters - this is ugly as hell!
     local lVERSION_IDENTIFIER=""
     for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
-      local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}"+1))
+      local lIDENTIFIER_ID=$(("${lVERSION_IDENTIFIER%%$'\t'*}" + 1))
       lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER#*$'\t'}"
 
       # print_output "[*] Calling with ${lVERSION_IDENTIFIER}" "no_log"
@@ -977,21 +977,20 @@ create_minimal_binary_corpus() {
       lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"/}"
       lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
     fi
-    
-    grep -o -a -E ".{0,300}${lVERSION_IDENTIFIER//[\^\$]}.{0,300}" "${lBINARY_PATH}" >> "${lCORPUS_FILE_tmp}" || true
+
+    grep -o -a -E ".{0,300}${lVERSION_IDENTIFIER//[\^\$]/}.{0,300}" "${lBINARY_PATH}" >>"${lCORPUS_FILE_tmp}" || true
 
     lCORP_SIZE=$(wc -c <"${lCORPUS_FILE_tmp}")
     write_log "[*] Generated corpus for binary ${lBINARY_PATH} with size ${lCORP_SIZE} - rule ${lRULE_IDENTIFIER}/${lVERSION_IDENTIFIER}" "${lCORPUS_log}"
- done
- if [[ ! -f "${lCORPUS_FILE}" ]]; then
-   # mv -n does not overwrite existing files
-   if mv -n "${lCORPUS_FILE_tmp}" "${lCORPUS_FILE}"; then
-     lCORP_SIZE=$(wc -c <"${lCORPUS_FILE}")
-     write_log "[*] Generated final corpus for binary ${lBINARY_PATH} with size ${lCORP_SIZE} - rule ${lRULE_IDENTIFIER}/${lVERSION_IDENTIFIER_ORIG}" "${lCORPUS_log}"
-   else
-     # lCORPUS_FILE already available -> we can remove our tmp file
-     rm -f "${lCORPUS_FILE_tmp}"
-   fi
- fi
+  done
+  if [[ ! -f "${lCORPUS_FILE}" ]]; then
+    # mv -n does not overwrite existing files
+    if mv -n "${lCORPUS_FILE_tmp}" "${lCORPUS_FILE}"; then
+      lCORP_SIZE=$(wc -c <"${lCORPUS_FILE}")
+      write_log "[*] Generated final corpus for binary ${lBINARY_PATH} with size ${lCORP_SIZE} - rule ${lRULE_IDENTIFIER}/${lVERSION_IDENTIFIER_ORIG}" "${lCORPUS_log}"
+    else
+      # lCORPUS_FILE already available -> we can remove our tmp file
+      rm -f "${lCORPUS_FILE_tmp}"
+    fi
+  fi
 }
-
