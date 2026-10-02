@@ -924,6 +924,14 @@ bin_string_checker() {
   done
 }
 
+# enable/disable with BINARY_CORPUS_GENERATION in defaults or in scanning profile
+# This mechanism automatically generates EMBA binary testing corpus files.
+# It automatically checks if the testing file is already available and checks it only if
+# it is missing. A PR on missing testing files should be very easy with this mechanisms.
+# Additionally, this mechanism will help in building and submitting new identifiers in
+# config/bin_version_identifiers. Just build the new identifier and the testfile will be
+# generated automatically in the s09 module directory -> just copy it to tests/bin_version_testdata
+# and submit a PR
 create_minimal_binary_corpus() {
   [[ "${BINARY_CORPUS_GENERATION}" -ne 1 ]] && return
   local lRULE_IDENTIFIER="${1:-}"
@@ -948,12 +956,6 @@ create_minimal_binary_corpus() {
   lVERSION_IDENTIFIER_FULL="${lVERSION_IDENTIFIER_FULL#\'}"
   mapfile -t lVERSION_IDENTIFIERS_ARR < <(echo "${lVERSION_IDENTIFIER_FULL//AND/$'\n'}")
 
-  # extract the identifier of the grep command from the rule.json.
-  # For this we use jq to extract all grep commands, then we grep for our identifier and extract the line number as identifier
-  # on multiple matches we translage them to something like 1_2_3
-  # in our json we have every backslash escaped. Now we need to bring this back to find the original rule in our
-  # json
-  # local lVERSION_IDENTIFIER_tmp=${lVERSION_IDENTIFIER_ORIG//\\/\\\\}
   write_log "[*] Testing ${lRULE_IDENTIFIER}.json for identifier ${lVERSION_IDENTIFIER_FULL}" "${lCORPUS_log}"
   [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p "${lCORPUS_PATH}"
 
