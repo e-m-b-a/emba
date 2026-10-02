@@ -7,7 +7,7 @@
     "ISC"
   ],
   "grep_commands": [
-    "'\"iw\\ version\\ %s\"AND\"^[0-9]+\\.[0-9]+$\"'"
+    "'\"^iw\\ version\\ %s$\"AND\"^[0-9]+\\.[0-9]+$\"'"
   ],
   "vendor_names": [
     "NA"
