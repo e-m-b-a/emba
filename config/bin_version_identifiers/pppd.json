@@ -8,10 +8,10 @@
     "unknown"
   ],
   "grep_commands": [
-    "'\"pppd\\ %s\\ started\\ by\\ %s,\\ uid\\ %d\"AND\"^[1-3](\\.[0-9]+)+?([a-c][0-9])?$\"'",
-    "pppd\\ version\\ [1-3](\\.[0-9]+)+?([a-c][0-9])?$",
-    "pppd\\ version\\ [1-3](\\.[0-9]+)+?([a-c][0-9])?\\ ",
-    "pppd\\.so\\.[1-3](\\.[0-9]+)+?([a-c][0-9])?$"
+    "'\"pppd\\ %s\\ started\\ by\\ %s,\\ uid\\ %d\"AND\"^[1-3](\\.[0-9]+)+([a-c][0-9])?$\"'",
+    "pppd\\ version\\ [1-3](\\.[0-9]+)+([a-c][0-9])?$",
+    "pppd\\ version\\ [1-3](\\.[0-9]+)+([a-c][0-9])?\\ ",
+    "pppd\\.so\\.[1-3](\\.[0-9]+)+([a-c][0-9])?$"
   ],
   "vendor_names": [
     "point-to-point_protocol_project"

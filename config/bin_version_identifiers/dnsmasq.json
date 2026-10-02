@@ -8,8 +8,8 @@
   ],
   "grep_commands": [
     "^[dD]nsmasq\\ version\\ [0-9]\\.[0-9]+",
-    "dnsmasq-[0-9]\\.[0-9]+$",
-    "dnsmasq\\ [0-9]\\.[0-9]+$"
+    "dnsmasq-[0-9]\\.[0-9]+",
+    "dnsmasq\\ [0-9]\\.[0-9]+"
   ],
   "vendor_names": [
     "dnsmasq",
