@@ -320,7 +320,7 @@ S09_identifier_threadings() {
           if [[ -n ${lVERSION_IDENTIFIED} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${lAPP_NAME} ${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}$(print_path "${lBINARY_PATH}")${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}static - strict${GREEN})."
-            create_minimal_binary_corpus "${lRULE_IDENTIFIER}" "${lIDENTIFIER_ID}" "${lBINARY_PATH}" "${lVERSION_IDENTIFIER}"
+            # create_minimal_binary_corpus "${lRULE_IDENTIFIER}" "${lIDENTIFIER_ID}" "${lBINARY_PATH}" "${lVERSION_IDENTIFIER}"
             if version_parsing_logging "${S09_CSV_LOG}" "S09_firmware_base_version_check" "${lVERSION_IDENTIFIED}" "${lBINARY_ENTRY}" "${lRULE_IDENTIFIER}" "lVENDOR_NAME_ARR" "lPRODUCT_NAME_ARR" "lLICENSES_ARR" "lCSV_REGEX_ARR"; then
               # print_output "[*] back from logging for ${lVERSION_IDENTIFIED} -> continue to next binary"
               continue 2
