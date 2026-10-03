@@ -19,6 +19,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jo
+
       - name: Setup bats
         run: |
           curl -sL https://github.com/bats-core/bats-core/archive/refs/tags/v1.11.0.tar.gz | tar xz
