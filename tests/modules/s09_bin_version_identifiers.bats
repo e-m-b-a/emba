@@ -489,10 +489,11 @@ bvi_static_rules() {
   local lBASENAME=""
   local lMODE=""
   local lMODE_ENTRY=""
-  local lMODE_COUNT="0"
-  local lPATH_COUNT="0"
+  local lMODE_COUNT=0
+  local lPATH_COUNT=0
   for lCFG_FILE in "${BIN_VERSION_CFG_ARR[@]}"; do
     lBASENAME="$(basename "${lCFG_FILE}" .json)"
+    lMODE_COUNT=0
 
     # one jq pass: affected_paths count|space separated parsing modes
     while IFS='|' read -r lPATH_COUNT lMODE; do

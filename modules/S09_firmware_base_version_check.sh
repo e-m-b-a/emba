@@ -980,7 +980,10 @@ create_minimal_binary_corpus() {
       lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
     fi
 
-    grep -o -a -E ".{0,300}${lVERSION_IDENTIFIER//[\^\$]/}.{0,300}" "${lBINARY_PATH}" >>"${lCORPUS_FILE_tmp}" || true
+    lVERSION_IDENTIFIER=${lVERSION_IDENTIFIER%$}
+    lVERSION_IDENTIFIER=${lVERSION_IDENTIFIER#^}
+
+    grep -o -a -E ".{0,300}${lVERSION_IDENTIFIER}.{0,300}" "${lBINARY_PATH}" >>"${lCORPUS_FILE_tmp}" || true
 
     lCORP_SIZE=$(wc -c <"${lCORPUS_FILE_tmp}")
     write_log "[*] Generated corpus for binary ${lBINARY_PATH} with size ${lCORP_SIZE} - rule ${lRULE_IDENTIFIER}/${lVERSION_IDENTIFIER}" "${lCORPUS_log}"
