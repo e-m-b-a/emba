@@ -40,6 +40,7 @@ teardown() {
 
 @test "collect_web_crawl_candidates preserves variants and deduplicates exactly" {
   local lWEB_ROOT="${LOG_DIR}/web-root"
+  local lEXPECTED_PATH=""
   local lWEB_URLS=()
   local -A lCRAWLED_URLS=()
   mkdir -p "${lWEB_ROOT}/z/x/a" "${lWEB_ROOT}/other"
@@ -49,11 +50,9 @@ teardown() {
 
   [ "${#lWEB_URLS[@]}" -eq 5 ]
   [ "${#lCRAWLED_URLS[@]}" -eq 5 ]
-  [ "${lCRAWLED_URLS[index.php]}" -eq 1 ]
-  [ "${lCRAWLED_URLS["a/index.php"]}" -eq 1 ]
-  [ "${lCRAWLED_URLS["x/a/index.php"]}" -eq 1 ]
-  [ "${lCRAWLED_URLS["z/x/a/index.php"]}" -eq 1 ]
-  [ "${lCRAWLED_URLS["other/index.php"]}" -eq 1 ]
+  for lEXPECTED_PATH in "index.php" "a/index.php" "x/a/index.php" "z/x/a/index.php" "other/index.php"; do
+    [ "${lCRAWLED_URLS[${lEXPECTED_PATH}]}" -eq 1 ]
+  done
 }
 
 @test "collect_web_crawl_candidates treats associative keys literally in strict mode" {
