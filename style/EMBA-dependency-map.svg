@@ -3873,7 +3873,7 @@
 <!-- INET.LAN&#45;1.php -->
 <g id="node299" class="node">
 <title>INET.LAN&#45;1.php</title>
-<g id="a_node299"><a xlink:href="271|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/INET.LAN-1.php|NA|main-binary" xlink:title="INET.LAN&#45;1.php">
+<g id="a_node299"><a xlink:href="138|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INET.LAN-1.php|NA|main-binary" xlink:title="INET.LAN&#45;1.php">
 <polygon fill="#f6b26b" stroke="black" points="2923,-120 2835,-120 2835,-84 2923,-84 2923,-120"/>
 <text xml:space="preserve" text-anchor="middle" x="2879" y="-98.5" font-family="Arial" font-size="10.00" fill="white">INET.LAN&#45;1.php</text>
 </a>
