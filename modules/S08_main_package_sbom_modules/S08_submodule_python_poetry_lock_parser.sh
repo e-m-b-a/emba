@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 S08_submodule_python_poetry_lock_parser() {
   local lPACKAGING_SYSTEM="python_poetry_lock"

@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  This module is using Ghidra to generate decompiled code from the firmware binaries.
 #               This module uses the ghidra script Haruspex.java (https://github.com/0xdea/ghidra-scripts)

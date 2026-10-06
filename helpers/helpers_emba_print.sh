@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  All functions for colorizing terminal output and handling logging
 

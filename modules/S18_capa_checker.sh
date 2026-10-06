@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  This module uses capa (https://github.com/mandiant/capa) for detecting binary behavior
 #               Currently capa only supports x86 architecture

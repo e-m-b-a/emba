@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  This module tries to identify the kernel file and the init command line
 #               The identified kernel binary file is extracted with vmlinux-to-elf

@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094

@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Iterates through a list with regex identifiers of version details
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and

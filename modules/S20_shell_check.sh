@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Checks for bugs, stylistic errors, etc. in shell scripts, then it lists the found error types.
 

@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  After modules s115/s116 was able to identify BusyBox with the version identifier
 #               and the included applets this module checks the possible vulnerabilities

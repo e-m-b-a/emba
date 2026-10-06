@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Looks for ssh-related files and checks squid configuration.
 #               Checks for the XZ backdoor documented as CVE-2024-3094

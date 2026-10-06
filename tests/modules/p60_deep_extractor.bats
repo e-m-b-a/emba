@@ -8,6 +8,7 @@
 #
 # EMBA is licensed under GPLv3
 # SPDX-License-Identifier: GPL-3.0-only
+# Author(s): Mihai Macarie
 
 # shellcheck disable=SC1091,SC2016,SC2030,SC2034,SC2317
 

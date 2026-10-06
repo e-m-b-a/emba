@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 #
 # Description:  This module tests identified lighttpd configuration files for interesting areas.
 #               It is based on details from the following sources:

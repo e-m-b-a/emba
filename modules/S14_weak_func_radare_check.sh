@@ -14,6 +14,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  This module identifies binaries that are using weak functions and creates a ranking of areas to look first.
 #               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg).

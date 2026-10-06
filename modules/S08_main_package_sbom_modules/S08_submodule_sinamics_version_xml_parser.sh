@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Searches for Siemens Sinamics VERSIONS.XML files and builds needed SBOM details
 # shellcheck disable=SC2094

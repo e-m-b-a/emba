@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Checks for bugs and possible vulnerabilities in perl scripts with zarn - https://github.com/htrgouvea/zarn
 #               See also https://heitorgouvea.me/2023/03/19/static-security-analysis-tool-perl

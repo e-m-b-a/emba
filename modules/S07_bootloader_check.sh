@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Scans for device tree blobs, bootloader and startup files and checks for the default runlevel.
 

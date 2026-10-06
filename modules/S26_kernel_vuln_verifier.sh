@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  After module s24 was able to identify the kernel, the downloader
 #               helper function "kernel_downloader" has downloaded the kernel sources

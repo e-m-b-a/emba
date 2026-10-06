@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  This module was the first module that existed in emba. The main idea was to identify the binaries that were using weak
 #               functions and to establish a ranking of areas to look at first.

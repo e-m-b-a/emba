@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 # Credits:   Binarly for support
 
 # Description:  Uses FwHunt for identification of vulnerabilities in possible UEFI firmware

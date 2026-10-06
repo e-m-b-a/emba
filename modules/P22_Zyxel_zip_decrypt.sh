@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Extracts Zyxel firmware images that are protected with a password
 #               Further information can be found in this paper:

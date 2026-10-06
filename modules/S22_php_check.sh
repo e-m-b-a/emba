@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Stefan Haboeck
+# Contributor(s): Stefan Haboeck, Mihai Macarie
 
 # Description:  Checks for vulnerabilities in php scripts.
 #               Checks for configuration issues in php.ini files

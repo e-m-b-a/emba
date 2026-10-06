@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Determines kernel version and description and checks for kernel configuration.
 #               It uses linux-exploit-suggester to check for possible kernel exploits and analyzes kernel modules to find which

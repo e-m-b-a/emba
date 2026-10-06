@@ -8,6 +8,7 @@
 #
 # EMBA is licensed under GPLv3
 # SPDX-License-Identifier: GPL-3.0-only
+# Author(s): Mihai Macarie
 
 load ../setup.bash
 

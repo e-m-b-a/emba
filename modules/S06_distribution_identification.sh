@@ -12,7 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Benedikt Kuehne
+# Contributor(s): Benedikt Kuehne, Mihai Macarie
 
 # Description: Identifies the main Linux distribution like Kali Linux, Debian, Fedora or OpenWRT
 

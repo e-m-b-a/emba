@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Searches for http and webserver (Apache, nginx, Lighttpd, etc.) related files and checks for php.ini.
 

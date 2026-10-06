@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Chao Yang - firmianay
+# Contributor(s): Chao Yang - firmianay, Mihai Macarie
 
 # Description:  Runs a Docker container with cwe-checker on Ghidra to check binary for
 #               common bug classes such as vicious functions or integer overflows.

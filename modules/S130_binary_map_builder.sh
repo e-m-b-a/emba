@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Google Gemini AI
+# Contributor(s): Mihai Macarie
 
 S130_binary_map_builder() {
   module_log_init "${FUNCNAME[0]}"
