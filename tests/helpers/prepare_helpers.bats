@@ -132,6 +132,7 @@ teardown() {
 }
 
 @test "analyze_binary_architecture parses ELF metadata in strict mode" {
+  local IFS=$'\n\t'
   local lBINARY="${LOG_DIR}/strict-elf.bin"
   local lMD5SUM="9dd4e461268c8034f5c8564e155c67a6"
   local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"

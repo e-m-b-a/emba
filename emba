@@ -14,7 +14,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Stefan Haboeck
+# Contributor(s): Stefan Haboeck, Mihai Macarie
 
 # Description:  Main script for load all necessary files and call main function of modules
 

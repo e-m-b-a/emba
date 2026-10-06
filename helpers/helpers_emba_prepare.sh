@@ -324,7 +324,7 @@ analyze_binary_architecture() {
         continue
       fi
       if [[ "${lIN_COMMENT_SECTION}" -eq 1 ]]; then
-        read -r -a lCOMMENT_FIELDS <<<"${lREADELF_LINE}"
+        IFS=$' \t\n' read -r -a lCOMMENT_FIELDS <<<"${lREADELF_LINE}"
         lCOMMENT_VALUES+=("${lCOMMENT_FIELDS[2]:-} ${lCOMMENT_FIELDS[3]:-} ${lCOMMENT_FIELDS[4]:-}")
         continue
       fi
