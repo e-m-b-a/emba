@@ -34,13 +34,13 @@ S23_lua_check() {
   # find scripts with cgilua as contend:
   mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'grep -H cgilua\. "%" 2>/dev/null || true | cut -d : -f1' | sort -u || true)
   # extract lua scripts that are known as lua scripts in out P99_CSV_LOG
-  mapfile -t lLUA_CGI_FILES_ARR_2 < <(grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lLUA_CGI_FILES_ARR_2 < <((grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
   # find files with lua in the name and some lua content
-  mapfile -t lLUA_CGI_FILES_ARR_3 < <(grep "\.lua;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lLUA_CGI_FILES_ARR_3 < <((grep "\.lua;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
 
   LUA_CGI_FILES_ARR=("${LUA_CGI_FILES_ARR[@]}" "${lLUA_CGI_FILES_ARR_2[@]}" "${lLUA_CGI_FILES_ARR_3[@]}")
 
-  mapfile -t LUA_CGI_FILES_ARR < <(printf "%s\n" "${LUA_CGI_FILES_ARR[@]}" | sort -u)
+  mapfile -d '' -t LUA_CGI_FILES_ARR < <(printf '%s\0' "${LUA_CGI_FILES_ARR[@]}" | sort -zu)
 
   sub_module_title "LUA linter checks module"
 

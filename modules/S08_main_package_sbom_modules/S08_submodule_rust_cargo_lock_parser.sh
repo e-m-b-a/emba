@@ -44,7 +44,7 @@ S08_submodule_rust_cargo_lock_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lRST_ARCHIVES_ARR < <(grep "Cargo.lock" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lRST_ARCHIVES_ARR < <((grep "Cargo.lock" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
 
   if [[ "${#lRST_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

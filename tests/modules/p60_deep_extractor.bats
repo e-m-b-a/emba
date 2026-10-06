@@ -23,6 +23,7 @@ setup() {
   export MAX_MOD_THREADS=2
   export MAX_EXT_SPACE=1024
   export SBOM_MINIMAL=0
+  export DISABLE_DOTS=1
   export RTOS=1
   export UEFI_VERIFIED=0
   export DJI_DETECTED=0
@@ -56,6 +57,36 @@ setup() {
 
 teardown() {
   teardown_emba_test_env
+}
+
+@test "P60 discovers a new file when its existing P99 path contains a newline" {
+  local lEXISTING="${FIRMWARE_PATH_CP}/existing"$'\n'"file.bin"
+  local lNEW="${FIRMWARE_PATH_CP}/new"$'\n'";100%.bin"$'\n'
+  local lHASH=""
+  local lPATHS=()
+  source "${HELP_DIR}/helpers_emba_print.sh"
+  source "${HELP_DIR}/helpers_emba_prepare.sh"
+  module_log_init() { :; }
+  module_title() { :; }
+  pre_module_reporter() { :; }
+  sub_module_title() { :; }
+  module_end_log() { :; }
+  print_output() { :; }
+  print_dot() { :; }
+  print_ln() { :; }
+
+  printf 'first payload' >"${lEXISTING}"
+  lHASH="$(md5sum <"${lEXISTING}" | cut -d ' ' -f1)"
+  write_csv_log_to_path "${P99_CSV_LOG}" test "${lEXISTING}" NA NA NA NA NA data "${lHASH}"
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
+  printf 'second payload' >"${lNEW}"
+
+  P60_deep_extractor
+
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 2 ]
+  mapfile -d '' -t lPATHS < <(cut -d ';' -f2 "${P99_CSV_LOG}" | p99_decode_paths)
+  [ "${lPATHS[0]}" = "${lEXISTING}" ]
+  [ "${lPATHS[1]}" = "${lNEW}" ]
 }
 
 @test "P60 batches NUL-safe paths through a fixed worker pool" {
@@ -103,7 +134,6 @@ teardown() {
 @test "populate_p99_backend atomically skips duplicate content" {
   local lFILE_LIST="${TMP_DIR}/duplicates.list"
   local lFILE_ID=0
-  export DISABLE_DOTS=1
   print_dot() { :; }
   write_csv_log_to_path() {
     local lOUTPUT_FILE="$1"

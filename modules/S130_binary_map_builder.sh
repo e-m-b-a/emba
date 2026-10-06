@@ -159,14 +159,14 @@ setup_environment() {
   # Get files for processing - if P99_CSV_LOG available we can use this
   export ALL_EXEC_FILES_ARR=()
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t ALL_EXEC_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$\|\.uncompressed$")
+    mapfile -d '' -t ALL_EXEC_FILES_ARR < <((cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$\|\.uncompressed$" || true) | p99_decode_paths)
   else
     mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f ! \( -name "*.uncompressed" -o -name "*.raw" \) 2>/dev/null | sort -u)
   fi
   if [[ "${#ALL_EXEC_FILES_ARR[@]}" -gt "${MAX_MAP_FILES}" ]]; then
     print_output "[*] INFO: A huge number of files (${#ALL_EXEC_FILES_ARR[@]} -gt ${MAX_MAP_FILES}) detected ... limit the module to a maximum of ${MAX_MAP_FILES} executables only"
     if [[ -f "${P99_CSV_LOG}" ]]; then
-      mapfile -t ALL_EXEC_FILES_ARR < <(grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}" || true)
+      mapfile -d '' -t ALL_EXEC_FILES_ARR < <((grep "ELF\|executable\|script" "${P99_CSV_LOG}" | cut -d ';' -f2 | grep -v "\.raw" | head -n "${MAX_MAP_FILES}" || true) | p99_decode_paths)
     else
       # quick and dirty backup solution to not handle all the executable files
       mapfile -t ALL_EXEC_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -executable ! -name "*.raw" 2>/dev/null | sort -u | head -n "${MAX_MAP_FILES}" || true)
@@ -445,7 +445,7 @@ search_parse_log_helper() {
   # print_output "[*] Testing ${lDEPENDENCY} from ${lFILE_TO_CHECK} against ${FIRMWARE_PATH} - marker ${lMARKER}"
   #
   if [[ -f "${P99_CSV_LOG}" ]]; then
-    mapfile -t lDEPENDENCY_TARGET_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY%\/}$" || true)
+    mapfile -d '' -t lDEPENDENCY_TARGET_ARR < <((cut -d ';' -f2 "${P99_CSV_LOG}" | grep "${lDEPENDENCY%\/}$" || true) | p99_decode_paths)
   else
     mapfile -t lDEPENDENCY_TARGET_ARR < <(find "${FIRMWARE_PATH}" -wholename "*${lDEPENDENCY%\/}" || true)
   fi

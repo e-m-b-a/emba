@@ -164,6 +164,7 @@ zyxel_zip_extractor() {
           print_output "[+] Found valid ${ORANGE}compress.img${GREEN} and extract it now"
           # extract the path to compress.img
           lCOMPRESS_IMG=$(cut -d ';' -f2 <<<"${lCOMPRESS_IMG}") # field 2
+          p99_decode_path lCOMPRESS_IMG
           unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" 0
           local lFILES_ZYXEL_ARR=()
           mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" -type f ! -name "*.raw")

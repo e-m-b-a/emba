@@ -78,7 +78,7 @@ S16_ghidra_decompile_checks() {
     # to keep analysis time low we only check these bins
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
-  mapfile -t lBINARIES_ALL_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lBINARIES_ALL_ARR < <((grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true) | p99_decode_paths)
   # as we do duplicate checking later on we do not care about duplicate entries now
   lBINARIES_ARR=("${lBINARIES_ARR[@]}" "${lBINARIES_ALL_ARR[@]}")
 
@@ -109,6 +109,7 @@ S16_ghidra_decompile_checks() {
 
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       lBIN_TO_CHECK=$(grep -F "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -1 || true)
+      p99_decode_path lBIN_TO_CHECK
     fi
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       continue
@@ -199,7 +200,7 @@ ghidra_analyzer() {
     return
   fi
 
-  if [[ $(grep -F "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
+  if [[ $(p99_csv_record_for_path "${lBIN_TO_CHECK}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
     print_output "[*] Tricore processor detected - adjusting Ghidra parameters" "no_log"
     lGHIDRA_OPTS_ARR+=("-processor" "tricore:LE:32:default" "-cspec" "default")
   fi

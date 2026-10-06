@@ -32,13 +32,13 @@ S12_binary_protection() {
     printf "\t%-13.13s  %-16.16s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
       "RELRO" "CANARY" "NX" "PIE" "RPATH" "RUNPATH" "SYMBOLS" "FORTIFY" "FILE" | tee -a "${TMP_DIR}"/s12.tmp
 
-    while read -r lBINARY; do
+    while IFS= read -r -d '' lBINARY; do
       binary_protection_threader "${lBINARY}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
       lWAIT_PIDS_S12+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S12
-    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+    done < <((grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
 
     wait_for_pid "${lWAIT_PIDS_S12[@]}"
 

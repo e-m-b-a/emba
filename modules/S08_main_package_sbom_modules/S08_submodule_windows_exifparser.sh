@@ -31,7 +31,7 @@ S08_submodule_windows_exifparser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -t lEXE_ARCHIVES_ARR < <(grep "PE32\|MSI" "${P99_CSV_LOG}" | grep -v "ASCII text\|Unicode text" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lEXE_ARCHIVES_ARR < <((grep "PE32\|MSI" "${P99_CSV_LOG}" | grep -v "ASCII text\|Unicode text" | cut -d ';' -f2 || true) | p99_decode_paths)
 
   if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lEXE_ARCHIVES_ARR[@]}${NC} Windows exe files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

@@ -118,7 +118,7 @@ populate_karrays() {
   local lKERNEL_MODULES_PATHS_ARR=()
   local lPATH_TO_CHECK=""
 
-  mapfile -t lKERNEL_MODULES_PATHS_ARR < <(grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lKERNEL_MODULES_PATHS_ARR < <((grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
   for lPATH_TO_CHECK in "${lKERNEL_MODULES_PATHS_ARR[@]}"; do
     # we remove the complete path in front of the possible kernel version:
     # asdf/bla/root-dir/lib/modules/ -> gets removed

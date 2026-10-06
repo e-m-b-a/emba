@@ -60,6 +60,7 @@ S13_weak_func_check() {
       lBIN_FILE="$(cut -d ';' -f8 <<<"${lBINARY}")"    # field 8
       lBIN_MD5_SUM="$(cut -d ';' -f9 <<<"${lBINARY}")" # field 9
       lBINARY=$(cut -d ';' -f2 <<<"${lBINARY}")        # field 2
+      p99_decode_path lBINARY
       if [[ "${lBIN_FILE}" == *"ELF"* ]]; then
         if [[ "${lBIN_FILE}" == *"x86-64"* ]]; then
           function_check_x86_64 "${lBINARY}" "${lBIN_MD5_SUM}" "${lVULNERABLE_FUNCTIONS_ARR[@]}" &

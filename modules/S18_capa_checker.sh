@@ -36,7 +36,7 @@ S18_capa_checker() {
   local lWAIT_PIDS_S18=()
   local lCAPA_RESULTS=0
 
-  while read -r lBINARY; do
+  while IFS= read -r -d '' lBINARY; do
     # bypass the Linux kernel
     [[ "${lBINARY}" == *"vmlinuz"* ]] && continue
 
@@ -67,7 +67,7 @@ S18_capa_checker() {
     else
       capa_runner_fct "${lBINARY}"
     fi
-  done < <(grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  done < <((grep "ELF.*Intel\|PE32\|MSI" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S18[@]}"
 
@@ -95,11 +95,11 @@ capa_runner_fct() {
   local lBIN_MD5=""
   local lCAPA_OPTS=()
 
-  if grep -q "${lBINARY}.*ELF" "${P99_CSV_LOG}"; then
+  if p99_csv_record_for_path "${lBINARY}" | grep -q ";ELF"; then
     lCAPA_OPTS=("--os" "linux")
-  elif grep -q "${lBINARY}.*PE32" "${P99_CSV_LOG}"; then
+  elif p99_csv_record_for_path "${lBINARY}" | grep -q ";PE32"; then
     lCAPA_OPTS=("--os" "windows")
-  elif grep -q "${lBINARY}.*MSI" "${P99_CSV_LOG}"; then
+  elif p99_csv_record_for_path "${lBINARY}" | grep -q ";MSI"; then
     lCAPA_OPTS=("--os" "windows")
   else
     print_output "[-] No supported architecture identified for capa on $(print_path "${lBINARY}")" "no_log"

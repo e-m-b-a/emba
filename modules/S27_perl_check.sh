@@ -38,18 +38,18 @@ S27_perl_check() {
   export PERL5LIB="${EXT_DIR}"/zarn/lib
 
   write_csv_log "Script path" "Perl issues detected" "common linux file" "vuln title" "vuln line nr" "vuln note"
-  mapfile -t lPERL_SCRIPTS_ARR < <(grep "Perl script.*executable" "${P99_CSV_LOG}" | sort -u || true)
+  mapfile -d '' -t lPERL_SCRIPTS_ARR < <((grep "Perl script.*executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
   for lPL_SCRIPT in "${lPERL_SCRIPTS_ARR[@]}"; do
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      lNAME=$(basename "$(cut -d ';' -f2 <<<"${lPL_SCRIPT}")" 2>/dev/null) # field 2
+      lNAME=$(basename "${lPL_SCRIPT}" 2>/dev/null)
       if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
     ((lS27_PL_SCRIPTS += 1))
-    s27_zarn_perl_checks "$(cut -d ';' -f2 <<<"${lPL_SCRIPT}")" & # field 2
+    s27_zarn_perl_checks "${lPL_SCRIPT}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S27+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S27

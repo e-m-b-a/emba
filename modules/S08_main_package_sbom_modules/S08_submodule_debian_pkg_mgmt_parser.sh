@@ -34,7 +34,7 @@ S08_submodule_debian_pkg_mgmt_parser() {
 
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(grep "dpkg/status" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lDEBIAN_MGMT_STATUS_ARR < <((grep "dpkg/status" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
 
   if [[ "${#lDEBIAN_MGMT_STATUS_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

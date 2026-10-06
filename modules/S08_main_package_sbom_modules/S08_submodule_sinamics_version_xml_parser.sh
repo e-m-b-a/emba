@@ -46,7 +46,7 @@ S08_submodule_sinamics_version_xml_parser() {
   local lXML_CHECKED_ARR=()
   local lXML_MD5=""
 
-  mapfile -t lVERSION_XML_ARR < <(grep "VERSIONS\.XML;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+  mapfile -d '' -t lVERSION_XML_ARR < <((grep "VERSIONS\.XML;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
 
   if [[ "${#lVERSION_XML_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lVERSION_XML_ARR[@]}${NC} Sinamics VERSIONS.XML files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

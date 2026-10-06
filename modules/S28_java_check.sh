@@ -35,7 +35,7 @@ S28_java_check() {
   export JAVA_DECOMPILER="${EXT_DIR}/vineflower-1.11.2.jar"
 
   write_csv_log "Script path" "Java issues detected" "common linux file" "vuln title" "vuln line nr" "vuln note"
-  mapfile -t lJAVA_BINS_ARR < <(grep "Java\ archive\|\.jar;\|\.war;\|\.java;\|\.class;" "${P99_CSV_LOG}" | sort -u || true)
+  mapfile -d '' -t lJAVA_BINS_ARR < <((grep "Java\ archive\|\.jar;\|\.war;\|\.java;\|\.class;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
 
   if [[ "${#lJAVA_BINS_ARR[@]}" -eq 0 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
@@ -46,13 +46,13 @@ S28_java_check() {
     if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      lJNAME=$(basename "$(cut -d ';' -f2 <<<"${lJAVA_BINARY}")" 2>/dev/null) # field 2
+      lJNAME=$(basename "${lJAVA_BINARY}" 2>/dev/null)
       if grep -E -q "^${lJNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
     ((lS28_JAVA_SCRIPTS += 1))
-    s28_java_decompile "$(cut -d ';' -f2 <<<"${lJAVA_BINARY}")" & # field 2
+    s28_java_decompile "${lJAVA_BINARY}" &
     local lTMP_PID="$!"
     lWAIT_PIDS_S28+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S28

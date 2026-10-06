@@ -58,7 +58,7 @@ S06_distribution_identification() {
           continue
         fi
       fi
-      mapfile -t lFOUND_FILES_ARR < <(grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
+      mapfile -d '' -t lFOUND_FILES_ARR < <((grep "${lSEARCH_FILE};" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
       for lFILE in "${lFOUND_FILES_ARR[@]}"; do
         local lLOG_DEST_PATH=""
         local lSINAMICS_VERSION=""
@@ -242,9 +242,9 @@ dlink_image_sign() {
   local lDLINK_FW_VER_tmp=""
 
   # mapfile -t lDLINK_BUILDVER_ARR < <(find "${FIRMWARE_PATH}" -xdev -path "*config/buildver")
-  mapfile -t lDLINK_BUILDVER_ARR < <(grep "config/buildver;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  mapfile -d '' -t lDLINK_BUILDVER_ARR < <((grep "config/buildver;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
   for lDLINK_BVER in "${lDLINK_BUILDVER_ARR[@]}"; do
-    DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "${lDLINK_BVER/;*/}" || true)
+    DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "${lDLINK_BVER}" || true)
     if ! [[ "${DLINK_FW_VER}" =~ ^v.* ]]; then
       DLINK_FW_VER="v${DLINK_FW_VER}"
     fi
@@ -254,7 +254,7 @@ dlink_image_sign() {
   local lDLINK_BUILDREV_ARR=()
   # probably we can use this in the future. Currently there is no need for it:
   # mapfile -t lDLINK_BUILDREV_ARR < <(find "${FIRMWARE_PATH}" -xdev -path "*config/buildrev")
-  mapfile -t lDLINK_BUILDREV_ARR < <(grep "config/buildrev;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+  mapfile -d '' -t lDLINK_BUILDREV_ARR < <((grep "config/buildrev;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
   for lDLINK_BREV in "${lDLINK_BUILDREV_ARR[@]}"; do
     lDLINK_FW_VER_tmp=$(grep -E "^[A-Z][0-9]+" "${lDLINK_BREV}" || true)
     # -> B01

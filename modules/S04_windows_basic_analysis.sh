@@ -135,6 +135,7 @@ S04_windows_basic_analysis() {
   if [[ "${#lEXE_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     for lEXE_ARCHIVE in "${lEXE_ARCHIVES_ARR[@]}"; do
       lEXE_ARCHIVE=$(cut -d ';' -f2 <<<"${lEXE_ARCHIVE}") # field 2
+      p99_decode_path lEXE_ARCHIVE
       lEXE_NAME=$(basename "${lEXE_ARCHIVE}")
 
       sub_module_title "exifdata for ${lEXE_NAME}" "${LOG_PATH_MODULE}/exifdata_${lEXE_NAME}.log"

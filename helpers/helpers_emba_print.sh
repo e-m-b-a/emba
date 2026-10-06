@@ -343,6 +343,61 @@ write_csv_log() {
   echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')" >>"${lCSV_LOG}" || true
 }
 
+# P99 remains line-delimited. Ordinary paths retain their legacy representation.
+# Only paths with record/field separators (or the reserved tag) are encoded.
+# Tagging distinguishes these from literal percent sequences in older CSVs.
+p99_encode_path() {
+  local -n lrP99_PATH="${1}"
+  if [[ "${lrP99_PATH}" == *$'\n'* || "${lrP99_PATH}" == *$'\r'* || "${lrP99_PATH}" == *';'* || "${lrP99_PATH}" == @P99:* ]]; then
+    lrP99_PATH="${lrP99_PATH//%/%25}"
+    lrP99_PATH="${lrP99_PATH//$'\n'/%0A}"
+    lrP99_PATH="${lrP99_PATH//$'\r'/%0D}"
+    lrP99_PATH="${lrP99_PATH//;/%3B}"
+    lrP99_PATH="@P99:${lrP99_PATH}"
+  fi
+}
+
+# Decode in place to preserve trailing newlines; never evaluate firmware paths.
+p99_decode_path() {
+  local -n lrP99_PATH="${1}"
+  if [[ "${lrP99_PATH}" == @P99:* ]]; then
+    lrP99_PATH="${lrP99_PATH#@P99:}"
+    lrP99_PATH="${lrP99_PATH//%0A/$'\n'}"
+    lrP99_PATH="${lrP99_PATH//%0D/$'\r'}"
+    lrP99_PATH="${lrP99_PATH//%3B/;}"
+    # Decode percent last so escape-looking literals do not get decoded twice.
+    lrP99_PATH="${lrP99_PATH//%25/%}"
+  fi
+}
+
+# Convert selected CSV path fields to NUL-delimited filesystem paths.
+p99_decode_paths() {
+  local lP99_PATH=""
+  while IFS= read -r lP99_PATH; do
+    p99_decode_path lP99_PATH
+    printf '%s\0' "${lP99_PATH}"
+  done
+}
+
+p99_csv_record_for_path() {
+  local lP99_PATH="${1:-}"
+  p99_encode_path lP99_PATH
+  grep -F -- ";${lP99_PATH};" "${P99_CSV_LOG}" || true
+}
+
+p99_csv_records_under_path() {
+  local lP99_PREFIX="${1:-}"
+  local lENCODED_PREFIX="${lP99_PREFIX//%/%25}"
+  lENCODED_PREFIX="${lENCODED_PREFIX//$'\n'/%0A}"
+  lENCODED_PREFIX="${lENCODED_PREFIX//$'\r'/%0D}"
+  lENCODED_PREFIX="${lENCODED_PREFIX//;/%3B}"
+  local lPREFIX_PATTERNS=(-e ";@P99:${lENCODED_PREFIX}")
+  if [[ "${lP99_PREFIX}" != *$'\n'* && "${lP99_PREFIX}" != *$'\r'* && "${lP99_PREFIX}" != *';'* && "${lP99_PREFIX}" != @P99:* ]]; then
+    lPREFIX_PATTERNS+=(-e ";${lP99_PREFIX}")
+  fi
+  grep -F "${lPREFIX_PATTERNS[@]}" -- "${P99_CSV_LOG}" || true
+}
+
 # for generating csv log file in somewhere else
 # $1: path with filename for csv log file
 # $2: source module
@@ -354,6 +409,9 @@ write_csv_log_to_path() {
   local lCSV_ITEMS=("$@")
   local lCSV_LINE=""
 
+  if [[ -n "${P99_CSV_LOG:-}" && "${lCSV_LOG}" == "${P99_CSV_LOG}" && "${#lCSV_ITEMS[@]}" -gt 0 ]]; then
+    p99_encode_path 'lCSV_ITEMS[0]'
+  fi
   printf -v lCSV_LINE '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}"
   printf '%s\n' "${lCSV_LINE}" >>"${lCSV_LOG}" || true
 }

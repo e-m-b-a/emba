@@ -41,7 +41,7 @@ S10_binaries_basic_check() {
     print_output "[!] Config not found"
   elif [[ -n "${lVULNERABLE_FUNCTIONS}" ]]; then
     print_output "[*] Interesting functions: ""$(echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g')""\\n"
-    while read -r lBINARY; do
+    while IFS= read -r -d '' lBINARY; do
       lBIN_COUNT=$((lBIN_COUNT + 1))
       mapfile -t lVUL_FUNC_RESULT_ARR < <(readelf -W -s --use-dynamic "${lBINARY}" 2>/dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
       # Fallback: just in case the dynamic section not working -> check static relocations
@@ -59,7 +59,7 @@ S10_binaries_basic_check() {
         write_csv_log "${lBINARY}" "${#lVUL_FUNC_RESULT_ARR[@]}"
         lCOUNTER=$((lCOUNTER + 1))
       fi
-    done < <(grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+    done < <((grep ";ELF" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
     print_ln
     print_output "[*] Found ""${ORANGE}${lCOUNTER}${NC}"" binaries with interesting functions in ""${ORANGE}${lBIN_COUNT}${NC}"" files (vulnerable functions: ""$(echo -e "${lVULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ /g')"")"
   fi

@@ -31,7 +31,7 @@ S22_php_check() {
   export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]]; then
-    mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
+    mapfile -d '' -t lPHP_SCRIPTS_ARR < <((grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
     write_csv_log "Script path" "PHP issue" "source (e.g. semgrep)" "common linux file"
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
 
@@ -283,7 +283,7 @@ s22_check_php_ini() {
   local lPHP_INISCAN_PATH="${EXT_DIR}/iniscan/vendor/bin/iniscan"
 
   # mapfile -t lPHP_INI_FILES_ARR < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-  mapfile -t lPHP_INI_FILES_ARR < <(grep "php.ini;" "${P99_CSV_LOG}" | sort -u || true)
+  mapfile -d '' -t lPHP_INI_FILES_ARR < <((grep "php.ini;" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
   if [[ "${#lPHP_INI_FILES_ARR[@]}" -eq 0 ]]; then
     print_output "[-] No PHP.ini issues found"
     return
@@ -292,7 +292,7 @@ s22_check_php_ini() {
   disable_strict_mode "${STRICT_MODE}"
   for lPHP_FILE in "${lPHP_INI_FILES_ARR[@]}"; do
     # print_output "[*] iniscan check of $(print_path "${lPHP_FILE}")"
-    mapfile -t lINISCAN_RESULT_ARR < <("${lPHP_INISCAN_PATH}" scan --path="${lPHP_FILE/;*/}" || true)
+    mapfile -t lINISCAN_RESULT_ARR < <("${lPHP_INISCAN_PATH}" scan --path="${lPHP_FILE}" || true)
     for lINI_RESULT_LINE in "${lINISCAN_RESULT_ARR[@]}"; do
       local lLIMIT_CHECK=""
       # nosemgrep
@@ -328,7 +328,7 @@ s22_check_php_ini() {
     done
     if [[ "${S22_PHP_INI_ISSUES}" -gt 0 ]]; then
       print_ln
-      print_output "[+] Found ${ORANGE}${S22_PHP_INI_ISSUES}${GREEN} PHP configuration issues in php config file :${ORANGE} $(print_path "${lPHP_FILE/;*/}")"
+      print_output "[+] Found ${ORANGE}${S22_PHP_INI_ISSUES}${GREEN} PHP configuration issues in php config file :${ORANGE} $(print_path "${lPHP_FILE}")"
       print_ln
     else
       print_output "[-] No PHP.ini issues found"
