@@ -61,6 +61,7 @@ set_defaults() {
   export FILE_ARR=()
   export MAX_MODS=0
   export MAX_MOD_THREADS=0
+  export L25_CRAWL_WORKERS=1 # opt in to parallel web crawling via scan profile
   export RESTART=0     # if we find an unfinished EMBA scan we try to only process not finished modules
   export FINAL_FW_RM=0 # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0    # test only dependency

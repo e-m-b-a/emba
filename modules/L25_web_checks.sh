@@ -445,7 +445,7 @@ crawl_web_urls() {
   local lREQUEST_URL="${3:-}"
   local lCRAWL_LOG="${4:-}"
   local -n lrCRAWL_URLS="${5:-}"
-  local lWORKER_COUNT="${MAX_MOD_THREADS:-1}"
+  local lWORKER_COUNT="${L25_CRAWL_WORKERS:-1}"
   local lBATCH_SIZE=128
   local lURL_OFFSET=0
   local lBATCH_ID=0
@@ -483,6 +483,17 @@ crawl_web_urls() {
         lBATCH_URLS=("${lFAILED_URLS[@]}")
         lFAILED_URLS=()
         run_web_crawl_batch "${lIP_}" "${lPORT_}" "${lREQUEST_URL}" "${lCRAWL_LOG}" lBATCH_URLS lFAILED_URLS "${lWORKER_COUNT}" "${lWORKER_DIR}" "${lBATCH_ID}" || true
+        if ! system_online_check "${lIP_}" "${lPORT_}" 0; then
+          restart_emulation "${lIP_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}" 1 || true
+          print_output "[-] Target went offline during retry; crawl incomplete"
+          rm -r -- "${lWORKER_DIR}"
+          return 1
+        fi
+        if [[ "${#lFAILED_URLS[@]}" -gt 0 ]]; then
+          print_output "[-] Requests still failed after recovery; crawl incomplete"
+          rm -r -- "${lWORKER_DIR}"
+          return 1
+        fi
       fi
     fi
     lURL_OFFSET=$((lURL_OFFSET + lBATCH_SIZE))
@@ -589,7 +600,7 @@ web_access_crawler() {
     enable_strict_mode "${STRICT_MODE}" 0
     return
   fi
-  print_output "[*] Crawling ${ORANGE}${#lWEB_URLS[@]}${NC} unique web paths with up to ${ORANGE}$((MAX_MOD_THREADS < 4 ? MAX_MOD_THREADS : 4))${NC} workers" "no_log"
+  print_output "[*] Crawling ${ORANGE}${#lWEB_URLS[@]}${NC} unique web paths (serial by default; L25_CRAWL_WORKERS enables up to four workers)" "no_log"
   if ! crawl_web_urls "${lIP_}" "${lPORT_}" "${lREQUEST_URL}" "${LOG_PATH_MODULE}/crawling_${lIP_}-${lPORT_}.log" lWEB_URLS; then
     print_output "[-] System not responding - Not performing further web crawling"
     enable_strict_mode "${STRICT_MODE}" 0

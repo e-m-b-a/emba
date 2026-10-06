@@ -17,6 +17,7 @@ format_log() { printf '%s' "${1:-}"; }
 color_output() { printf '%s' "${1:-}"; }
 write_log() { printf '%s\n' "${1:-}" >>"${2:-${LOG_FILE}}"; }
 system_online_check() {
+  [[ "${lALWAYS_OFFLINE:-0}" -eq 1 ]] && return 1
   [[ -z "${lATTEMPTS_LOG:-}" ]] && return 0
   [[ "$(wc -l <"${lATTEMPTS_LOG}")" -gt 1 ]]
 }
@@ -26,6 +27,7 @@ setup() {
   setup_emba_test_env
   export LOG_PATH_MODULE="${LOG_DIR}/l25_web_checks"
   export MAX_MOD_THREADS=2
+  export L25_CRAWL_WORKERS=2
   export HTTP_RAND_REF_SIZE="NA"
   export IMAGE_NAME="test-image"
   export STATE_CHECK_MECHANISM="PING"
@@ -130,4 +132,38 @@ teardown() {
   set +o pipefail
 
   [ "$(grep -c '^200 OK:3$' "${lCRAWL_LOG}")" -eq 2 ]
+}
+
+@test "crawl_web_urls defaults to serial even when module threading is enabled" {
+  local lCRAWL_LOG="${LOG_PATH_MODULE}/serial.log"
+  local lPID_LOG="${LOG_PATH_MODULE}/serial-workers.log"
+  local lWEB_URLS=(one two three)
+  unset L25_CRAWL_WORKERS
+  MAX_MOD_THREADS=64
+  lCURL_OPTS_ARR=()
+  CURL_CMD_ARR=(serial_curl)
+  serial_curl() {
+    printf '%s\n' "${lWORKER_LOG}" >>"${lPID_LOG}"
+    printf '200:1'
+  }
+  crawl_web_urls "127.0.0.1" "8080" "http://127.0.0.1:8080" "${lCRAWL_LOG}" lWEB_URLS
+  [ "$(sort -u "${lPID_LOG}" | wc -l)" -eq 1 ]
+}
+
+@test "crawl_web_urls reports failure when the retry leaves the target offline" {
+  local lCRAWL_LOG="${LOG_PATH_MODULE}/offline.log"
+  local lATTEMPTS_LOG="${LOG_PATH_MODULE}/offline-attempts.log"
+  local lALWAYS_OFFLINE=1
+  local lWEB_URLS=(one)
+  lCURL_OPTS_ARR=()
+  CURL_CMD_ARR=(offline_curl)
+  offline_curl() {
+    printf 'attempt\n' >>"${lATTEMPTS_LOG}"
+    printf '000:0'
+  }
+  if crawl_web_urls "127.0.0.1" "8080" "http://127.0.0.1:8080" "${lCRAWL_LOG}" lWEB_URLS; then
+    false
+  fi
+  [ "$(wc -l <"${lATTEMPTS_LOG}")" -eq 2 ]
+  [ -z "$(find "${TMP_DIR}" -maxdepth 1 -name 'l25_crawl_workers.*' -print)" ]
 }
