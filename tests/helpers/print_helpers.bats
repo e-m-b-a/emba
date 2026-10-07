@@ -77,6 +77,29 @@ teardown() {
   [ "$(cut -d ';' -f2 "${CSV_DIR}/other.csv")" = '/firmware/literal%0A.bin' ]
 }
 
+@test "P99 serialization preserves original files and symlinks without extractor cleanup" {
+  local P99_CSV_LOG="${CSV_DIR}/p99.csv"
+  local lPATH=""
+  local lPATHS=("${LOG_DIR}/"$'line\nbreak;100%.bin' "${LOG_DIR}/line_break;100%.bin")
+  local lDECODED_PATHS=()
+  local lLINK="${LOG_DIR}/firmware-link"
+  local IFS=$'\n\t'
+  set -euo pipefail
+  touch -- "${lPATHS[@]}"
+  ln -s -- "${lPATHS[0]}" "${lLINK}"
+  for lPATH in "${lPATHS[@]}"; do
+    write_csv_log_to_path "${P99_CSV_LOG}" test "${lPATH}" NA
+  done
+  mapfile -d '' -t lDECODED_PATHS < <(cut -d ';' -f2 "${P99_CSV_LOG}" | p99_decode_paths)
+  [ "${#lDECODED_PATHS[@]}" -eq 2 ]
+  [ "${lDECODED_PATHS[0]}" = "${lPATHS[0]}" ]
+  [ "${lDECODED_PATHS[1]}" = "${lPATHS[1]}" ]
+  [ -f "${lPATHS[0]}" ]
+  [ -f "${lPATHS[1]}" ]
+  [ -f "${lLINK}" ]
+  [ "$(readlink -- "${lLINK}")" = "${lPATHS[0]}" ]
+}
+
 @test "strip_color_codes removes ANSI escape sequences" {
   result="$(strip_color_codes $'\033[0;32mhello\033[0m')"
   [ "${result}" = "hello" ]

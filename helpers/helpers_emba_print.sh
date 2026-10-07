@@ -347,6 +347,10 @@ write_csv_log() {
 # P99 remains line-delimited. Ordinary paths retain their legacy representation.
 # Only paths with record/field separators (or the reserved tag) are encoded.
 # Tagging distinguishes these from literal percent sequences in older CSVs.
+# Unlike P50's remove_uprintable_paths, this is serialization, not filesystem
+# cleanup: it never renames files or changes symlink targets. P99 also receives
+# paths outside the P50/P55 cleanup flow, and printable semicolons still need
+# escaping after that cleanup. Keep the codec reversible and independent.
 p99_encode_path() {
   local -n lrP99_PATH="${1}"
   if [[ "${lrP99_PATH}" == *$'\n'* || "${lrP99_PATH}" == *$'\r'* || "${lrP99_PATH}" == *';'* || "${lrP99_PATH}" == @P99:* ]]; then

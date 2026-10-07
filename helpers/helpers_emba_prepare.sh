@@ -228,7 +228,6 @@ binary_architecture_threader() {
   local lBINARY="${1:-}"
   local lSOURCE_MODULE="${2:-}"
   local lMD5SUM="${3:-}"
-  local lP99_HASH_INDEX_INITIALIZED_FOR=""
   if [[ "${lBINARY}" == *".raw" ]]; then
     return
   fi
@@ -252,6 +251,9 @@ binary_architecture_threader() {
 
 claim_p99_hash() {
   local lMD5SUM="${1:-}"
+  # Workers pass their initialized marker explicitly; standalone calls use an
+  # empty local cache instead of assigning a caller-scoped or global variable.
+  local lP99_HASH_INDEX_INITIALIZED_FOR="${2:-}"
   local lMD5SUM_INDEX=""
   local lINDEX_READY="${TMP_DIR}/p99_md5sum_done.initialized"
   local lNOCLOBBER=0
@@ -425,9 +427,7 @@ p99_backend_worker() {
   local lWORKER_FILE="${1:-}"
   local lSOURCE_MODULE="${2:-}"
   local lHASH_BATCH_SIZE="${P99_HASH_BATCH_SIZE:-128}"
-  # Bash locals are dynamically scoped, so claim_p99_hash updates this cache
-  # once per worker without introducing an indirect global variable.
-  local lP99_HASH_INDEX_INITIALIZED_FOR=""
+  local lWORKER_HASH_INDEX_CACHE="${TMP_DIR}/p99_md5sum_done.initialized"
   local lMD5_RECORD=""
   local lMD5SUM=""
   local lBINARY=""
@@ -442,6 +442,8 @@ p99_backend_worker() {
   if ! [[ "${lHASH_BATCH_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
     lHASH_BATCH_SIZE=128
   fi
+  # Initialize once per worker; pass a read-only cache value to every claim.
+  initialize_p99_hash_index || return 1
   # GNU md5sum -z and file -0 -0 produce unescaped, NUL-delimited records.
   # Bounded batches avoid one checksum and one file process per extracted file.
   while mapfile -d '' -n "${lHASH_BATCH_SIZE}" -t lINPUT_FILES && ((${#lINPUT_FILES[@]})); do
@@ -465,7 +467,7 @@ p99_backend_worker() {
       fi
       lMD5SUM="${lMD5_RECORD:0:32}"
       lBINARY="${lMD5_RECORD:34}"
-      if claim_p99_hash "${lMD5SUM}"; then
+      if claim_p99_hash "${lMD5SUM}" "${lWORKER_HASH_INDEX_CACHE}"; then
         lHASHES+=("${lMD5SUM}")
         lHASHED_FILES+=("${lBINARY}")
       fi

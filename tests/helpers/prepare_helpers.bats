@@ -233,17 +233,29 @@ teardown() {
 
 @test "claim_p99_hash caches index initialization per worker" {
   local lINITIALIZE_CALLS=0
-  local lP99_HASH_INDEX_INITIALIZED_FOR=""
+  local lWORKER_CACHE="${TMP_DIR}/p99_md5sum_done.initialized"
   initialize_p99_hash_index() {
     ((lINITIALIZE_CALLS += 1))
     mkdir -p "${TMP_DIR}/p99_md5sum_done/aa" "${TMP_DIR}/p99_md5sum_done/bb"
   }
 
-  claim_p99_hash "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  claim_p99_hash "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  initialize_p99_hash_index
+  claim_p99_hash "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "${lWORKER_CACHE}"
+  claim_p99_hash "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" "${lWORKER_CACHE}"
 
   [ "${lINITIALIZE_CALLS}" -eq 1 ]
-  [ -n "${lP99_HASH_INDEX_INITIALIZED_FOR}" ]
+  [ -n "${lWORKER_CACHE}" ]
+}
+
+@test "claim_p99_hash standalone calls do not leak cache state" {
+  local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
+  local IFS=$'\n\t'
+  set -euo pipefail
+  claim_p99_hash "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  [[ ! -v lP99_HASH_INDEX_INITIALIZED_FOR ]]
+  run claim_p99_hash "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  [ "${status}" -eq 1 ]
+  claim_p99_hash "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 }
 
 @test "convert_timeformat converts days to seconds" {
