@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -35,7 +34,7 @@ S08_submodule_python_requirements_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -d '' -t lPY_REQUIREMENTS_ARR < <((grep "requirements.*\.txt" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lPY_REQUIREMENTS_ARR < <(grep "requirements.*\.txt" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lPY_REQUIREMENTS_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lPY_REQUIREMENTS_ARR[@]}${NC} python requirement files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

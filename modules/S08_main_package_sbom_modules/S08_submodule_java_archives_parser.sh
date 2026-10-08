@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -47,7 +46,7 @@ S08_submodule_java_archives_parser() {
   local lJ_JAVA_FILE_NAME=""
   local lPOM_CHECKED_ARR=()
 
-  mapfile -d '' -t lJAVA_ARCHIVES_ARR < <((grep "\.jar;\|\.war;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lJAVA_ARCHIVES_ARR < <(grep "\.jar;\|\.war;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lJAVA_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lJAVA_ARCHIVES_ARR[@]}${NC} Java archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
@@ -132,7 +131,7 @@ S08_submodule_java_archives_parser() {
 
   # our first attempt was to extract the pom.xml files directly from the java files
   # the following approach is using already available pom.xml files (we can see this in source code repos)
-  mapfile -d '' -t lJAVA_POM_XML_ARR < <((grep "pom\.xml;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lJAVA_POM_XML_ARR < <(grep "pom\.xml;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lJAVA_POM_XML_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lJAVA_POM_XML_ARR[@]}${NC} Java pom.xml:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

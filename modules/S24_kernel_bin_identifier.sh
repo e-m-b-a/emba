@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  This module tries to identify the kernel file and the init command line
 #               The identified kernel binary file is extracted with vmlinux-to-elf
@@ -73,7 +72,6 @@ binary_kernel_check_threader() {
   local lFILE_NAME=""
 
   lFILE_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
-  p99_decode_path lFILE_PATH
   lFILE_NAME=$(basename "${lFILE_PATH}")
 
   local lLOG_FILE="${LOG_PATH_MODULE}/threading_${lFILE_NAME}.tmp"
@@ -163,7 +161,7 @@ binary_kernel_check_threader() {
         if ! grep -q "${lMD5_SUM}" "${P99_CSV_LOG}"; then
           # we need to add our elf file to our main p99 csv file:
           binary_architecture_threader "${lFILE_PATH}.elf" "${FUNCNAME[0]}"
-          lBINARY_ENTRY="$(p99_csv_record_for_path "${lFILE_PATH}.elf" | sort -u | head -1 || true)"
+          lBINARY_ENTRY="$(grep -F "${lFILE_PATH}.elf" "${P99_CSV_LOG}" | sort -u | head -1 || true)"
         else
           # there is already an entry available in our P99 csv log -> we extract this one
           lBINARY_ENTRY="$(grep "${lMD5_SUM}" "${P99_CSV_LOG}" | sort -u | head -1 || true)"

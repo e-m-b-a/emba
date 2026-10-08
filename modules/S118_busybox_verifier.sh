@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  After modules s115/s116 was able to identify BusyBox with the version identifier
 #               and the included applets this module checks the possible vulnerabilities
@@ -55,7 +54,7 @@ S118_busybox_verifier() {
       local lVERSION_JSON_CFG="${CONFIG_DIR}"/bin_version_identifiers/busybox.json
       local lVERSION_IDENTIFIER_ARR=()
       local lVERSION_IDENTIFIER=""
-      lBINARY_DATA=$(p99_csv_record_for_path "${lBB_BIN}" | grep ";ELF" | head -1 || true)
+      lBINARY_DATA=$(grep ";${lBB_BIN};.*ELF" "${P99_CSV_LOG}" | head -1 || true)
       if [[ -z ${lBINARY_DATA} ]]; then
         # we have not found our binary as ELF
         continue
@@ -122,7 +121,7 @@ S118_busybox_verifier() {
       print_error "[-] S118 - No file detected for ${lBB_BIN} ... testing for further SBOM entries"
       continue
     fi
-    if ! [[ "$(p99_csv_record_for_path "${lBB_BIN}" | cut -d ';' -f8 || true)" == *"ELF"* ]]; then
+    if ! [[ "$(grep "${lBB_BIN}" "${P99_CSV_LOG}" | cut -d ';' -f8 || true)" == *"ELF"* ]]; then
       print_error "[-] No ELF file detected for ${lBB_BIN} ... testing for further SBOM entries"
       continue
     fi

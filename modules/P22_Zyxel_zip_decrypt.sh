@@ -79,6 +79,7 @@ zyxel_zip_extractor() {
     return
   fi
 
+  remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
   mapfile -t lZLD_BINS_ARR < <(find "${lEXTRACTION_DIR_}" -name "zld_fsextract")
   lRI_FILE_BIN="$(basename -s .ri "${lRI_FILE_}")".bin
 
@@ -139,6 +140,7 @@ zyxel_zip_extractor() {
 
         7z x -p"${lZIP_KEY}" -o"${lEXTRACTION_DIR_}"/firmware_zyxel_extracted "${lRI_FILE_BIN_PATH}" || true
 
+        remove_uprintable_paths "${lEXTRACTION_DIR_}/firmware_zyxel_extracted" || return 1
         mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted" -type f ! -name "*.raw")
 
         print_ln
@@ -165,9 +167,9 @@ zyxel_zip_extractor() {
           print_output "[+] Found valid ${ORANGE}compress.img${GREEN} and extract it now"
           # extract the path to compress.img
           lCOMPRESS_IMG=$(cut -d ';' -f2 <<<"${lCOMPRESS_IMG}") # field 2
-          p99_decode_path lCOMPRESS_IMG
           unblobber "${lCOMPRESS_IMG}" "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" 0
           local lFILES_ZYXEL_ARR=()
+          remove_uprintable_paths "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" || return 1
           mapfile -t lFILES_ZYXEL_ARR < <(find "${lEXTRACTION_DIR_}/firmware_zyxel_extracted/compress_img_extracted" -type f ! -name "*.raw")
 
           print_output "[*] Zyxel 2nd stage - Extracted ${ORANGE}${#lFILES_ZYXEL_ARR[@]}${NC} files from the firmware image."

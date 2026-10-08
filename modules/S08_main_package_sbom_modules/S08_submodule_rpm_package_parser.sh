@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -48,7 +47,7 @@ S08_submodule_rpm_package_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -d '' -t lRPM_ARCHIVES_ARR < <((grep "\.rpm;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lRPM_ARCHIVES_ARR < <(grep "\.rpm;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lRPM_ARCHIVES_ARR[@]}${NC} RPM archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

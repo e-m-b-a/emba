@@ -16,6 +16,7 @@ load ../setup.bash
 
 setup() {
   setup_emba_test_env
+  source "${HELP_DIR}/helpers_emba_path.sh"
   source "${MOD_DIR}/P60_deep_extractor.sh"
   source "${HELP_DIR}/helpers_emba_prepare.sh"
 
@@ -60,37 +61,7 @@ teardown() {
   teardown_emba_test_env
 }
 
-@test "P60 discovers a new file when its existing P99 path contains a newline" {
-  local lEXISTING="${FIRMWARE_PATH_CP}/existing"$'\n'"file.bin"
-  local lNEW="${FIRMWARE_PATH_CP}/new"$'\n'";100%.bin"$'\n'
-  local lHASH=""
-  local lPATHS=()
-  source "${HELP_DIR}/helpers_emba_print.sh"
-  source "${HELP_DIR}/helpers_emba_prepare.sh"
-  module_log_init() { :; }
-  module_title() { :; }
-  pre_module_reporter() { :; }
-  sub_module_title() { :; }
-  module_end_log() { :; }
-  print_output() { :; }
-  print_dot() { :; }
-  print_ln() { :; }
-
-  printf 'first payload' >"${lEXISTING}"
-  lHASH="$(md5sum <"${lEXISTING}" | cut -d ' ' -f1)"
-  write_csv_log_to_path "${P99_CSV_LOG}" test "${lEXISTING}" NA NA NA NA NA data "${lHASH}"
-  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 1 ]
-  printf 'second payload' >"${lNEW}"
-
-  P60_deep_extractor
-
-  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 2 ]
-  mapfile -d '' -t lPATHS < <(cut -d ';' -f2 "${P99_CSV_LOG}" | p99_decode_paths)
-  [ "${lPATHS[0]}" = "${lEXISTING}" ]
-  [ "${lPATHS[1]}" = "${lNEW}" ]
-}
-
-@test "P60 batches NUL-safe paths through a fixed worker pool" {
+@test "P60 cleans extracted paths before batching through a fixed worker pool" {
   printf 'x' >"${FIRMWARE_PATH_CP}/first.bin"
   printf 'z' >"${FIRMWARE_PATH_CP}/line"$'\n'"break.bin"
   touch "${FIRMWARE_PATH_CP}/ignored.raw"
@@ -101,7 +72,28 @@ teardown() {
   [ "$(<"${END_FILE}")" -eq 2 ]
   grep -qx '2' "${WORKER_COUNTS}"
   grep -Fq "$(printf '%q' "${FIRMWARE_PATH_CP}/first.bin");9dd4e461268c8034f5c8564e155c67a6;very short file (no magic)" "${CAPTURE_FILE}"
-  grep -Fq "$(printf '%q' "${FIRMWARE_PATH_CP}/line"$'\n'"break.bin");fbade9e36a3f36d3d676c1b808451dd7;very short file (no magic)" "${CAPTURE_FILE}"
+  grep -Fq "$(printf '%q' "${FIRMWARE_PATH_CP}/line_break.bin");fbade9e36a3f36d3d676c1b808451dd7;very short file (no magic)" "${CAPTURE_FILE}"
+}
+
+@test "P60 cleans newly extracted paths before comparing plain CSV record counts" {
+  local lEXISTING="${FIRMWARE_PATH_CP}/existing.bin"
+  local lNEW="${FIRMWARE_PATH_CP}/new"$'\n'";100%.bin"$'\n'
+  local lHASH=""
+  source "${HELP_DIR}/helpers_emba_print.sh"
+  source "${HELP_DIR}/helpers_emba_prepare.sh"
+  print_output() { :; }
+  print_dot() { :; }
+  print_ln() { :; }
+  printf first >"${lEXISTING}"
+  lHASH="$(md5sum <"${lEXISTING}" | cut -d ' ' -f1)"
+  write_csv_log_to_path "${P99_CSV_LOG}" test "${lEXISTING}" NA NA NA NA NA data "${lHASH}"
+  printf second >"${lNEW}"
+
+  P60_deep_extractor
+
+  [ "$(wc -l <"${P99_CSV_LOG}")" -eq 2 ]
+  [ -f "${FIRMWARE_PATH_CP}/new__100%.bin_" ]
+  grep -Fq ";${FIRMWARE_PATH_CP}/new__100%.bin_;" "${P99_CSV_LOG}"
 }
 
 @test "populate_p99_backend batches checksum subprocesses" {

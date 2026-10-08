@@ -35,6 +35,11 @@ P99_prepare_analyzer() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local lNEG_LOG=1
+  local lCLEANED_PATHS=0
+  remove_uprintable_paths "${LOG_DIR}/firmware" lCLEANED_PATHS || return 1
+  if [[ "${lCLEANED_PATHS}" -gt 0 ]] || { [[ -f "${P99_CSV_LOG}" ]] && grep -Fq ';@P99:' "${P99_CSV_LOG}"; }; then
+    invalidate_p99_path_cache || return 1
+  fi
 
   export LINUX_PATH_COUNTER=0
   LINUX_PATH_COUNTER="$(linux_basic_identification "${LOG_DIR}/firmware")"

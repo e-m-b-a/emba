@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Mihai Macarie
 
 # Description:  Checks for bugs, stylistic errors, etc. in shell scripts, then it lists the found error types.
 
@@ -33,7 +32,7 @@ S20_shell_check() {
   local lS20_SEMGREP_ISSUES=0
   local lWAIT_PIDS_S20_ARR=()
 
-  mapfile -d '' -t lSH_SCRIPTS_ARR < <((grep "shell script, ASCII text executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
+  mapfile -t lSH_SCRIPTS_ARR < <(grep "shell script, ASCII text executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
   if [[ ${SHELLCHECK} -eq 1 ]]; then
@@ -41,14 +40,14 @@ S20_shell_check() {
     for lSH_SCRIPT in "${lSH_SCRIPTS_ARR[@]}"; do
       ((S20_SCRIPTS += 1))
       if [[ "${THREADED}" -eq 1 ]]; then
-        s20_script_check "${lSH_SCRIPT}" &
+        s20_script_check "${lSH_SCRIPT/;*/}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S20_ARR+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S20_ARR
         continue
       else
-        s20_script_check "${lSH_SCRIPT}"
+        s20_script_check "${lSH_SCRIPT/;*/}"
       fi
     done
 
@@ -126,12 +125,12 @@ s20_eval_script_check() {
 
   for lSH_SCRIPT in "${lSH_SCRIPTS_ARR[@]}"; do
     # print_output "[*] Testing ${ORANGE}${lSH_SCRIPT}${NC} for eval usage" "no_log"
-    if grep "eval " "${lSH_SCRIPT}" | grep -q -v "^#.*"; then
+    if grep "eval " "${lSH_SCRIPT/;*/}" | grep -q -v "^#.*"; then
       lEVAL_RESULTS=1
-      lSH_SCRIPT_NAME="$(basename "${lSH_SCRIPT}")"
+      lSH_SCRIPT_NAME="$(basename "${lSH_SCRIPT/;*/}")"
       local lSHELL_LOG="${LOG_PATH_MODULE}"/sh_eval_sources/"${lSH_SCRIPT_NAME}".log
       ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/sh_eval_sources/
-      [[ -f "${lSH_SCRIPT}" ]] && cp "${lSH_SCRIPT}" "${lSHELL_LOG}"
+      [[ -f "${lSH_SCRIPT/;*/}" ]] && cp "${lSH_SCRIPT/;*/}" "${lSHELL_LOG}"
       sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "${lSHELL_LOG}"
       print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${lSH_SCRIPT_NAME}${NC}" "" "${lSHELL_LOG}"
 
@@ -144,7 +143,7 @@ s20_eval_script_check() {
           fi
         fi
         # "${GPT_INPUT_FILE_}" "${lAI_ANCHOR_}" "GPT-Prio-$lGPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-        write_csv_AI_tmp "$(cut_path "${lSH_SCRIPT}")" "${lAI_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lSHELL_LOG}" "" ""
+        write_csv_AI_tmp "$(cut_path "${lSH_SCRIPT/;*/}")" "${lAI_ANCHOR_}" "${lGPT_PRIO_}" "${GPT_QUESTION}" "${lSHELL_LOG}" "" ""
         # add ChatGPT link
         printf '%s\n\n' "" >>"${lSHELL_LOG}"
         write_anchor_AI "${lAI_ANCHOR_}" "${lSHELL_LOG}"

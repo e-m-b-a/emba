@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -45,7 +44,7 @@ S08_submodule_rust_cargo_lock_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
 
-  mapfile -d '' -t lRST_ARCHIVES_ARR < <((grep "Cargo.lock" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lRST_ARCHIVES_ARR < <(grep "Cargo.lock" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lRST_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lRST_ARCHIVES_ARR[@]}${NC} Rust Cargo.lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

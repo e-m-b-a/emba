@@ -14,7 +14,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Mihai Macarie
 
 # Description:  This module identifies binaries that are using weak functions and creates a ranking of areas to look first.
 #               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg).
@@ -63,7 +62,6 @@ S14_weak_func_radare_check() {
       lBIN_FILE="$(cut -d ';' -f8 <<<"${lBINARY}")"    # field 8
       lBIN_MD5_SUM="$(cut -d ';' -f9 <<<"${lBINARY}")" # field 9
       lBINARY=$(cut -d ';' -f2 <<<"${lBINARY}")        # field 2
-      p99_decode_path lBINARY
       # we run throught the bins and check if the bin was already analysed via objdump:
       lBIN_NAME=$(basename "${lBINARY}" 2>/dev/null)
       if [[ -n "$(find "${LOG_DIR}"/s13_weak_func_check/vul_func_*"${lBIN_NAME}".txt -print -quit 2>/dev/null)" ]]; then

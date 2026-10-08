@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Mihai Macarie
 
 # Description:  Checks for bugs, stylistic errors, etc. in python scripts, then it lists the found error types.
 #               For bandit configuration the ./config/bandit.yaml file can be adjusted
@@ -38,27 +37,27 @@ S21_python_check() {
 
     write_csv_log "Script path" "Python issues detected" "common linux file"
     # mapfile -t lPYTHON_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
-    mapfile -d '' -t lPYTHON_SCRIPTS_ARR < <((grep "Python script.*executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
+    mapfile -t lPYTHON_SCRIPTS_ARR < <(grep "Python script.*executable" "${P99_CSV_LOG}" | sort -u || true)
 
     for lPY_SCRIPT in "${lPYTHON_SCRIPTS_ARR[@]}"; do
       if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
         # if we have the base linux config file we only test non known Linux binaries
         # with this we do not waste too much time on open source Linux stuff
-        lNAME=$(basename "${lPY_SCRIPT}" 2>/dev/null)
+        lNAME=$(basename "$(cut -d ';' -f2 <<<"${lPY_SCRIPT}")" 2>/dev/null) # field 2
         if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           continue
         fi
       fi
       ((lS21_PY_SCRIPTS += 1))
       if [[ "${THREADED}" -eq 1 ]]; then
-        s21_script_bandit "${lPY_SCRIPT}" &
+        s21_script_bandit "$(cut -d ';' -f2 <<<"${lPY_SCRIPT}")" & # field 2
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"
         lWAIT_PIDS_S21_ARR+=("${lTMP_PID}")
         max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_S21_ARR
         continue
       else
-        s21_script_bandit "${lPY_SCRIPT}"
+        s21_script_bandit "$(cut -d ';' -f2 <<<"${lPY_SCRIPT}")" # field 2
       fi
     done
 

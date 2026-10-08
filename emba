@@ -551,6 +551,17 @@ main() {
     # Now we have the firmware and log path, lets set some additional paths
     FIRMWARE_PATH="$(abs_path "${FIRMWARE_PATH}")"
 
+    # Preserve the supplied image. Unsafe input names are copied into the scan
+    # workspace under a clean name before any extractor derives output paths.
+    if [[ -f "${FIRMWARE_PATH}" && "${FIRMWARE_PATH}" == *[\;[:cntrl:]]* && -z "${FIRMWARE_PATH1}" && "${RESCAN_SBOM}" -eq 0 ]]; then
+      local lINPUT_COPY_DIR=""
+      local lINPUT_COPY_NAME="${FIRMWARE_PATH##*/}"
+      sanitize_firmware_basename lINPUT_COPY_NAME
+      lINPUT_COPY_DIR="$(mktemp -d "${FIRMWARE_PATH_CP}/input.XXXXXX")" || exit 1
+      cp -p -- "${FIRMWARE_PATH}" "${lINPUT_COPY_DIR}/${lINPUT_COPY_NAME}" || exit 1
+      FIRMWARE_PATH="${lINPUT_COPY_DIR}/${lINPUT_COPY_NAME}"
+    fi
+
     # Check firmware type (file/directory)
     # copy the firmware outside of the docker and not a second time within the docker
     if [[ -d "${FIRMWARE_PATH}" ]]; then
@@ -560,8 +571,11 @@ main() {
       if [[ ${IN_DOCKER} -eq 0 ]]; then
         # in docker environment the firmware is already available
         print_output "    The provided firmware will be copied to ${ORANGE}""${FIRMWARE_PATH_CP}""/""$(basename "${FIRMWARE_PATH}")""${NC}" "no_log"
-        cp -pRPf "${FIRMWARE_PATH}" "${FIRMWARE_PATH_CP}""/""$(basename "${FIRMWARE_PATH}")"
-        FIRMWARE_PATH="${FIRMWARE_PATH_CP}""/""$(basename "${FIRMWARE_PATH}")"
+        local lFIRMWARE_COPY_NAME="${FIRMWARE_PATH##*/}"
+        sanitize_firmware_basename lFIRMWARE_COPY_NAME
+        cp -pRPf "${FIRMWARE_PATH}" "${FIRMWARE_PATH_CP}/${lFIRMWARE_COPY_NAME}"
+        FIRMWARE_PATH="${FIRMWARE_PATH_CP}/${lFIRMWARE_COPY_NAME}"
+        remove_uprintable_paths "${FIRMWARE_PATH_CP}" || exit 1
         export OUTPUT_DIR="${FIRMWARE_PATH_CP}"
       else
         # need to set it as fallback:

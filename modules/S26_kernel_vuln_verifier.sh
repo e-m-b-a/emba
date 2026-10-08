@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  After module s24 was able to identify the kernel, the downloader
 #               helper function "kernel_downloader" has downloaded the kernel sources
@@ -465,7 +464,7 @@ extract_kernel_arch() {
   local lKERNEL_ELF_PATH="${1:-}"
   export ORIG_K_ARCH=""
 
-  ORIG_K_ARCH=$(p99_csv_record_for_path "${lKERNEL_ELF_PATH}" | cut -d ';' -f8 || true)
+  ORIG_K_ARCH=$(grep ";${lKERNEL_ELF_PATH};" "${P99_CSV_LOG}" | cut -d ';' -f8 || true)
 
   if [[ "${ORIG_K_ARCH}" == *"ARM aarch64"* ]]; then
     # for ARM -> ARM aarch64 to ARM64

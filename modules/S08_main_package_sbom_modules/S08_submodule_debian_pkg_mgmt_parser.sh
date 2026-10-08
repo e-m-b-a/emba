@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -35,7 +34,7 @@ S08_submodule_debian_pkg_mgmt_parser() {
 
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -d '' -t lDEBIAN_MGMT_STATUS_ARR < <((grep "dpkg/status" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lDEBIAN_MGMT_STATUS_ARR < <(grep "dpkg/status" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lDEBIAN_MGMT_STATUS_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lDEBIAN_MGMT_STATUS_ARR[@]}${NC} debian package management files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

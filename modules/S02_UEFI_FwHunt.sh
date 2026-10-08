@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 # Credits:   Binarly for support
 
 # Description:  Uses FwHunt for identification of vulnerabilities in possible UEFI firmware
@@ -39,7 +38,6 @@ S02_UEFI_FwHunt() {
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
       while read -r lFILE_DETAILS; do
         lEXTRACTED_FILE=$(cut -d ';' -f2 <<<"${lFILE_DETAILS}") # field 2
-        p99_decode_path lEXTRACTED_FILE
         if [[ ${THREADED} -eq 1 ]]; then
           fwhunter "${lEXTRACTED_FILE}" &
           local lTMP_PID="$!"

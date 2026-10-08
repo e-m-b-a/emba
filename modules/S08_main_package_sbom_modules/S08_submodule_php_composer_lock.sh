@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -36,7 +35,7 @@ S08_submodule_php_composer_lock() {
   local lPKG_MD5=""
   local lWAIT_PIDS_S08_ARR_LCK=()
 
-  mapfile -d '' -t lCOMPOSER_LCK_ARCHIVES_ARR < <((grep "/composer\.lock;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lCOMPOSER_LCK_ARCHIVES_ARR < <(grep "/composer\.lock;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lCOMPOSER_LCK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lCOMPOSER_LCK_ARCHIVES_ARR[@]}${NC} PHP composer lock archives:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

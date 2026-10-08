@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Mihai Macarie
 
 # Description:  Determines kernel version and description and checks for kernel configuration.
 #               It uses linux-exploit-suggester to check for possible kernel exploits and analyzes kernel modules to find which
@@ -119,7 +118,7 @@ populate_karrays() {
   local lKERNEL_MODULES_PATHS_ARR=()
   local lPATH_TO_CHECK=""
 
-  mapfile -d '' -t lKERNEL_MODULES_PATHS_ARR < <((grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lKERNEL_MODULES_PATHS_ARR < <(grep -E "/lib/modules/*[0-9]+\.[0-9]+" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   for lPATH_TO_CHECK in "${lKERNEL_MODULES_PATHS_ARR[@]}"; do
     # we remove the complete path in front of the possible kernel version:
     # asdf/bla/root-dir/lib/modules/ -> gets removed

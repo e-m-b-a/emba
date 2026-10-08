@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Mihai Macarie
 
 # Description:  Looks for ssh-related files and checks squid configuration.
 #               Checks for the XZ backdoor documented as CVE-2024-3094
@@ -175,8 +174,7 @@ check_squid() {
 
   while read -r lSQUID_FILE; do
     lSQUID_FILE=$(cut -d ';' -f2 <<<"${lSQUID_FILE}") # field 2
-    p99_decode_path lSQUID_FILE
-    print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lSQUID_FILE}")${NC}"
+    print_output "[+] Found possible squid executable: ""${ORANGE}$(print_path "${lSQUID_FILE/;*/}")${NC}"
     write_csv_log "Squid executable" "${lSQUID_FILE}" "NA"
     ((SQUID_VUL_CNT += 1))
   done < <(grep "squid" "${P99_CSV_LOG}" | grep ";ELF" || true)

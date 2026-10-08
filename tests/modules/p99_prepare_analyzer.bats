@@ -16,6 +16,8 @@ load ../setup.bash
 
 setup() {
   setup_emba_test_env
+  source "${HELP_DIR}/helpers_emba_path.sh"
+  source "${HELP_DIR}/helpers_emba_prepare.sh"
   source "${MOD_DIR}/P99_prepare_analyzer.sh"
 
   mkdir -p "${LOG_DIR}/firmware"
@@ -59,5 +61,19 @@ teardown() {
   [ "$(sed -n '1p' "${CAPTURE_FILE}")" = "P99_prepare_analyzer;2" ]
   [ "$(wc -l <"${CAPTURE_FILE}")" -eq 3 ]
   grep -Fqx "$(printf '%q' "${LOG_DIR}/firmware/first.bin")" "${CAPTURE_FILE}"
-  grep -Fqx "$(printf '%q' "${LOG_DIR}/firmware/line"$'\n'"break.bin")" "${CAPTURE_FILE}"
+  grep -Fqx "$(printf '%q' "${LOG_DIR}/firmware/line_break.bin")" "${CAPTURE_FILE}"
+}
+
+@test "P99 rebuild archives old encoded records and indexes after filesystem cleanup" {
+  touch "${LOG_DIR}/firmware/line"$'\n'";break.bin"
+  printf 'test;@P99:/old%%0Apath;data;\n' >"${P99_CSV_LOG}"
+  mkdir -p "${TMP_DIR}/p99_md5sum_done/aa"
+  touch "${TMP_DIR}/p99_md5sum_done/aa/old-hash" "${TMP_DIR}/p99_md5sum_done.initialized"
+
+  P99_prepare_analyzer
+
+  grep -Fqx "$(printf '%q' "${LOG_DIR}/firmware/line__break.bin")" "${CAPTURE_FILE}"
+  [ ! -e "${TMP_DIR}/p99_md5sum_done.initialized" ]
+  [ "$(find "${CSV_DIR}" -name old-hash | wc -l)" -eq 1 ]
+  [ "$(find "${CSV_DIR}" -name p99_prepare_analyzer.csv | wc -l)" -eq 1 ]
 }

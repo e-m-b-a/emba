@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Chao Yang - firmianay, Mihai Macarie
+# Contributor(s): Chao Yang - firmianay
 
 # Description:  Runs a Docker container with cwe-checker on Ghidra to check binary for
 #               common bug classes such as vicious functions or integer overflows.
@@ -90,7 +90,7 @@ cwe_check() {
     mapfile -t lBINARIES_ARR < <(grep -h "strcpy\|system" "${S13_CSV_LOG}" "${S14_CSV_LOG}" "${S15_CSV_LOG}" 2>/dev/null | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
     # we usually get a path like /sbin/httpd which is not resolvable and needs to queried again in the P99_CSV_LOG later on
   fi
-  mapfile -d '' -t lBINARIES_ALL_ARR < <((grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lBINARIES_ALL_ARR < <(grep -v "ASCII text\|Unicode text" "${P99_CSV_LOG}" | grep ";ELF" | cut -d ';' -f2 || true)
   # as we do duplicate checking later on we do not care about duplicate entries now
   lBINARIES_ARR=("${lBINARIES_ARR[@]}" "${lBINARIES_ALL_ARR[@]}")
 
@@ -116,7 +116,6 @@ cwe_check() {
     lBIN_TO_CHECK="${lBIN_TO_CHECK#\.}"
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       lBIN_TO_CHECK=$(grep "$(escape_echo "${lBIN_TO_CHECK}")" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u | head -1 || true)
-      p99_decode_path lBIN_TO_CHECK
     fi
     if ! [[ -f "${lBIN_TO_CHECK}" ]]; then
       continue
@@ -182,7 +181,7 @@ cwe_checker_threaded() {
   local lCWE_CHECKER_TXT_LOG_FILE="${LOG_PATH_MODULE}/cwe_${lNAME}_${lRAND_LOG_ID}.log"
   lBINARY=$(readlink -f "${lBINARY}")
 
-  if [[ $(p99_csv_record_for_path "${lBINARY}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
+  if [[ $(grep -F "$(escape_echo "${lBINARY}")" "${P99_CSV_LOG}" | cut -d ';' -f8 | sort -u | head -1 || true) == *"Tricore"* ]]; then
     print_output "[*] Tricore processor detected - adjusting Ghidra parameters" "no_log"
     lCWE_CHECKER_BARE_METAL_CFG="${CONFIG_DIR}/cwe_checker_tricore.json"
     lCWE_CHECKER_OPTS_ARR+=("--bare-metal-config" "${lCWE_CHECKER_BARE_METAL_CFG}")

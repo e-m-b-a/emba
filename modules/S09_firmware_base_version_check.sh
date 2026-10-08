@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Mihai Macarie
 
 # Description:  Iterates through a list with regex identifiers of version details
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and
@@ -54,7 +53,7 @@ S09_firmware_base_version_check() {
   local lFILE_ARR_TMP=()
   # P99 csv log is already unique but it has a lot of non binary files in it -> we pre-filter it now
   export FILE_ARR=()
-  mapfile -d '' -t FILE_ARR < <((grep -v "\/\.git\|Git\ pack\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true) | p99_decode_paths)
+  mapfile -t FILE_ARR < <(grep -v "\/\.git\|Git\ pack\|image\ data\|ASCII\ text\|Unicode\ text\|\ compressed\ data\|\ archive" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
@@ -116,7 +115,7 @@ S09_firmware_base_version_check() {
       # we have the matching filesystem bin in "${LOG_PATH_MODULE}"/known_system_files.txt
       # now we just need to do a diff on them and we should have only the non matching files
       comm -23 "${LOG_PATH_MODULE}/firmware_binaries_sorted.txt" "${LOG_PATH_MODULE}"/known_system_pkg_files_sorted.txt >"${LOG_PATH_MODULE}"/known_system_files_diffed.txt || true
-      mapfile -d '' -t lFILE_ARR_TMP < <(p99_decode_paths <"${LOG_PATH_MODULE}"/known_system_files_diffed.txt)
+      mapfile -t lFILE_ARR_TMP <"${LOG_PATH_MODULE}"/known_system_files_diffed.txt
 
       local lINIT_FILES_CNT=0
       lINIT_FILES_CNT="$(wc -l <"${P99_CSV_LOG}")"
@@ -129,7 +128,7 @@ S09_firmware_base_version_check() {
           if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ || "${lFILE}" =~ .*__symbols__.* ]]; then
             # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
             continue
-          elif p99_csv_record_for_path "${lFILE}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty\|Git\ pack"; then
+          elif grep -F "${lFILE}" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep -q "text\|compressed\|archive\|empty\|Git\ pack"; then
             # extract the stored file details and match it against some patterns we do not further process:
             continue
           fi
@@ -303,7 +302,6 @@ S09_identifier_threadings() {
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
         MD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")      # field 9
         lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
-        p99_decode_path lBINARY_PATH
         lAPP_NAME="$(basename "${lBINARY_PATH}")"
         local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
@@ -340,7 +338,6 @@ S09_identifier_threadings() {
 
     for lBINARY_ENTRY in "${lZGREP_BINS_ARR[@]}"; do
       lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
-      p99_decode_path lBINARY_PATH
       if ! [[ -f "${lBINARY_PATH}" ]]; then
         continue
       fi
@@ -443,8 +440,7 @@ version_parsing_logging() {
   local lPURL_IDENTIFIER=""
 
   if [[ "${lBINARY_ENTRY}" != "NA" ]]; then
-    lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
-    p99_decode_path lBINARY_PATH
+    lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}")      # field 2
     lBIN_FILE_DETAILS=$(cut -d ';' -f8 <<<"${lBINARY_ENTRY}") # field 8
     lMD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")          # field 9
   fi
@@ -716,7 +712,7 @@ generate_strings() {
     return
   fi
 
-  mapfile -t lBIN_DATA_ARR < <(p99_csv_record_for_path "${lBINARY_PATH}" | tr ';' '\n' || true)
+  mapfile -t lBIN_DATA_ARR < <(grep -F ";${lBINARY_PATH};" "${P99_CSV_LOG}" | tr ';' '\n' || true)
 
   if [[ "${#lBIN_DATA_ARR[@]}" -lt 7 ]]; then
     # print_output "[*] No ${lBINARY_PATH} in P99 csv found ... return"
@@ -812,7 +808,6 @@ bin_string_checker() {
 
     mapfile -t lBIN_DATA_ARR < <(tr ';' '\n' <<<"${lBINARY_DATA}")
     lBINARY_PATH="${lBIN_DATA_ARR[1]}"
-    p99_decode_path lBINARY_PATH
     if [[ ! -f "${lBINARY_PATH}" ]]; then
       print_output "[-] Binary ${lBIN_DATA_ARR[*]} not found - Not testing for versions"
       continue

@@ -13,11 +13,142 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Functions for handling paths and other file/directories based operations
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
+
+# Use one filesystem-name policy before P modules create any CSV records.
+# Keep spaces, backslashes and UTF-8; remove CSV separators and control bytes.
+sanitize_firmware_basename() {
+  local -n lrBASENAME="${1}"
+  local -x LC_ALL=C
+  lrBASENAME="${lrBASENAME//[;[:cntrl:]]/_}"
+}
+
+apply_firmware_path_renames() {
+  local -n lrPATH="${1}"
+  local -n lrOLD_PATHS="${2}"
+  local -n lrNEW_PATHS="${3}"
+  local lID=0
+  for ((lID = 0; lID < ${#lrOLD_PATHS[@]}; lID++)); do
+    if [[ "${lrPATH}" == "${lrOLD_PATHS[lID]}" || "${lrPATH}" == "${lrOLD_PATHS[lID]}/"* ]]; then
+      lrPATH="${lrNEW_PATHS[lID]}${lrPATH#"${lrOLD_PATHS[lID]}"}"
+    fi
+  done
+}
+
+remove_uprintable_paths() {
+  local lROOT="${1%/}"
+  local -x LC_ALL=C
+  local lLIST=""
+  local lPATH=""
+  local lDIR=""
+  local lBASE=""
+  local lNEW_BASE=""
+  local lNEW_PATH=""
+  local lSUFFIX=""
+  local lLINK=""
+  local lTARGET=""
+  local lOLD_TARGET=""
+  local lID=0
+  local lCOLLISION=0
+  local lPATHS=()
+  local lOLD_PATHS=()
+  local lNEW_PATHS=()
+  local lLINKS=()
+  local lLINK_RECORDS=()
+  local lTARGETS=()
+  local lTARGET_ARRAY=()
+  local lABSOLUTE_TARGETS=()
+
+  # Never traverse symlink roots or rename the caller's root/parent directory.
+  if [[ ! -d "${lROOT}" || -L "${lROOT}" || "${lROOT}" == *[\;[:cntrl:]]* ]]; then
+    print_output "[-] Invalid firmware cleanup root: ${lROOT}" "no_log"
+    return 1
+  fi
+  lLIST="$(mktemp "${TMP_DIR}/firmware_cleanup.XXXXXX")" || return 1
+  if ! find -P "${lROOT}" -depth -mindepth 1 -name '*[;[:cntrl:]]*' -print0 >|"${lLIST}"; then
+    rm -f -- "${lLIST}"
+    return 1
+  fi
+  mapfile -d '' -t lPATHS <"${lLIST}"
+  rm -f -- "${lLIST}"
+  if ((${#lPATHS[@]} == 0)); then
+    [[ -n "${2:-}" ]] && printf -v "${2}" '%s' 0
+    return 0
+  fi
+
+  # Capture targets before renaming parents. Do not follow any symlink into a
+  # mounted/external tree; relative and firmware-absolute links are repaired.
+  # Fetch all link names/targets in one native pass. Only links with potentially
+  # changed parents or targets need normalization and rename-map processing.
+  mapfile -d '' -t lLINK_RECORDS < <(find -P "${lROOT}" -type l -printf '%p\0%l\0')
+  for ((lID = 0; lID < ${#lLINK_RECORDS[@]}; lID += 2)); do
+    lLINK="${lLINK_RECORDS[lID]}"
+    lTARGET="${lLINK_RECORDS[lID + 1]}"
+    if [[ "${lLINK%/*}${lTARGET}" != *[\;[:cntrl:]]* ]]; then
+      continue
+    fi
+    lLINKS+=("${lLINK}")
+    if [[ "${lTARGET}" == "${lROOT}/"* ]]; then
+      lABSOLUTE_TARGETS+=(2)
+    elif [[ "${lTARGET}" == /* ]]; then
+      lABSOLUTE_TARGETS+=(1)
+      lTARGET="${lROOT}${lTARGET}"
+    else
+      lABSOLUTE_TARGETS+=(0)
+      lTARGET="${lLINK%/*}/${lTARGET}"
+    fi
+    mapfile -d '' -t lTARGET_ARRAY < <(realpath -z -m -s -- "${lTARGET}")
+    lTARGETS+=("${lTARGET_ARRAY[0]}")
+  done
+
+  for lPATH in "${lPATHS[@]}"; do
+    lDIR="${lPATH%/*}"
+    lBASE="${lPATH##*/}"
+    lNEW_BASE="${lBASE}"
+    sanitize_firmware_basename lNEW_BASE
+    lNEW_PATH="${lDIR}/${lNEW_BASE}"
+    lCOLLISION=0
+    # Include directories and dangling links in collision checks. Never merge
+    # directories or overwrite an existing extracted artifact.
+    while [[ -e "${lNEW_PATH}" || -L "${lNEW_PATH}" ]]; do
+      ((lCOLLISION += 1))
+      lSUFFIX="_${lCOLLISION}"
+      lNEW_PATH="${lDIR}/${lNEW_BASE:0:255-${#lSUFFIX}}${lSUFFIX}"
+    done
+    if ! mv -T -n -- "${lPATH}" "${lNEW_PATH}" || [[ -e "${lPATH}" || -L "${lPATH}" ]]; then
+      print_output "[-] Firmware path cleanup failed: ${lPATH}" "no_log"
+      return 1
+    fi
+    lOLD_PATHS+=("${lPATH}")
+    lNEW_PATHS+=("${lNEW_PATH}")
+  done
+
+  for ((lID = 0; lID < ${#lLINKS[@]}; lID++)); do
+    lLINK="${lLINKS[lID]}"
+    lTARGET="${lTARGETS[lID]}"
+    lOLD_TARGET="${lTARGET}"
+    apply_firmware_path_renames lLINK lOLD_PATHS lNEW_PATHS
+    apply_firmware_path_renames lTARGET lOLD_PATHS lNEW_PATHS
+    if [[ "${lTARGET}" == "${lOLD_TARGET}" && "${lLINK%/*}" == "${lLINKS[lID]%/*}" ]]; then
+      continue
+    fi
+    if [[ "${lABSOLUTE_TARGETS[lID]}" -eq 1 ]]; then
+      lTARGET="${lTARGET#"${lROOT}"}"
+    elif [[ "${lABSOLUTE_TARGETS[lID]}" -eq 0 ]]; then
+      mapfile -d '' -t lTARGET_ARRAY < <(realpath -z -m -s --relative-to="${lLINK%/*}" -- "${lTARGET}")
+      lTARGET="${lTARGET_ARRAY[0]}"
+    fi
+    ln -sfnT -- "${lTARGET}" "${lLINK}" || return 1
+  done
+  print_output "[*] Cleaned ${#lOLD_PATHS[@]} firmware paths (control characters/semicolons)" "no_log"
+  [[ -n "${2:-}" ]] && printf -v "${2}" '%s' "${#lOLD_PATHS[@]}"
+  return 0
+}
 
 check_path_valid() {
   local lC_PATH="${1:-}"

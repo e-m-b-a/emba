@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -51,7 +50,7 @@ S08_submodule_openwrt_ipk_package_parser() {
   local lPKG_MD5=""
   local lPOS_RES=0
 
-  mapfile -d '' -t lIPK_ARCHIVES_ARR < <((grep "\.ipk;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lIPK_ARCHIVES_ARR < <(grep "\.ipk;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
 
   if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     write_log "[*] Found ${ORANGE}${#lIPK_ARCHIVES_ARR[@]}${NC} OpenWRT ipk files:" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"

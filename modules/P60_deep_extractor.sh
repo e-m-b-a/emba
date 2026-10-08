@@ -61,6 +61,7 @@ P60_deep_extractor() {
 
   local lFILES_EXT_LIST="${TMP_DIR}/p60_extracted_files.list"
   local lFILES_EXT_COUNT=0
+  remove_uprintable_paths "${FIRMWARE_PATH_CP}" || return 1
   find "${FIRMWARE_PATH_CP}" -type f ! -name "*.raw" -print0 >"${lFILES_EXT_LIST}"
   lFILES_EXT_COUNT="$(tr -cd '\0' <"${lFILES_EXT_LIST}" | wc -c)"
   lFILES_EXT_COUNT="${lFILES_EXT_COUNT// /}"
@@ -117,6 +118,7 @@ deep_extractor() {
   local lFILES_DEEP_PRE_COUNT=0
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] No ${P99_CSV_LOG} log file available ... trying to create it now"
+    remove_uprintable_paths "${LOG_DIR}/firmware" || return 1
     find "${LOG_DIR}/firmware" -type f ! -name '*.raw' -print0 >"${lFILES_DEEP_PRE_LIST}"
     if [[ -f "${FIRMWARE_PATH}" ]]; then
       printf '%s\0' "${FIRMWARE_PATH}" >>"${lFILES_DEEP_PRE_LIST}"

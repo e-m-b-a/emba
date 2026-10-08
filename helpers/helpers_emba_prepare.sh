@@ -171,6 +171,24 @@ set_exclude() {
   print_excluded
 }
 
+invalidate_p99_path_cache() {
+  local lBACKUP_DIR=""
+  local lOLD_PATH=""
+  if [[ ! -e "${P99_CSV_LOG}" && ! -e "${TMP_DIR}/p99_md5sum_done" && ! -e "${TMP_DIR}/p99_md5sum_done.initialized" ]]; then
+    return 0
+  fi
+  # Keep old records/index recoverable when upgrading an interrupted codec run
+  # or when final cleanup changed paths that were already indexed.
+  lBACKUP_DIR="$(mktemp -d "${CSV_DIR}/p99_path_cleanup.XXXXXX")" || return 1
+  for lOLD_PATH in "${P99_CSV_LOG}" "${TMP_DIR}/p99_md5sum_done" "${TMP_DIR}/p99_md5sum_done.initialized"; do
+    if [[ -e "${lOLD_PATH}" ]]; then
+      mv -T -- "${lOLD_PATH}" "${lBACKUP_DIR}/${lOLD_PATH##*/}" || return 1
+    fi
+  done
+  ROOT_PATH=()
+  print_output "[*] Rebuilding backend after path cleanup; old data saved in ${lBACKUP_DIR}" "no_log"
+}
+
 initialize_p99_hash_index() {
   local lINDEX_DIR="${TMP_DIR}/p99_md5sum_done"
   local lINDEX_READY="${TMP_DIR}/p99_md5sum_done.initialized"
@@ -735,7 +753,7 @@ prepare_all_file_arrays() {
 
   # we exclude all the raw files from binwalk
   # readarray -t ALL_FILES_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f ! -name "*.raw")
-  readarray -d '' -t ALL_FILES_ARR < <((cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$" || true) | p99_decode_paths)
+  readarray -t ALL_FILES_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$")
 
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
@@ -754,7 +772,7 @@ prepare_file_arr() {
   export FILE_ARR=()
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" || true' 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- || true)
   # readarray -t FILE_ARR < <(find "${lFIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
-  readarray -d '' -t FILE_ARR < <((cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$" || true) | p99_decode_paths)
+  readarray -t FILE_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.raw$" || true)
   # RTOS handling:
   if [[ -f ${lFIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
     # readarray -t FILE_ARR_RTOS < <(find "${OUTPUT_DIR}" -xdev -type f -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3- )
@@ -789,11 +807,11 @@ prepare_binary_arr() {
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; grep "ELF\|PE32" | cut -d: -f1 || true)
   # readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file %' | grep "ELF\|PE32" | cut -d: -f1 2>/dev/null || true)
-  readarray -d '' -t lBINARIES_TMP_ARR < <((grep ";ELF\|;PE32" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  readarray -t lBINARIES_TMP_ARR < <(grep ";ELF\|;PE32" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   if [[ "${#lBINARIES_TMP_ARR[@]}" -gt 0 ]]; then
     for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
       if [[ -f "${lBINARY}" ]]; then
-        lBIN_MD5=$(md5sum <"${lBINARY}" | cut -d\  -f1)
+        lBIN_MD5=$(md5sum "${lBINARY}" | cut -d\  -f1)
         if [[ ! " ${lMD5_DONE_INT_ARR[*]} " =~ ${lBIN_MD5} ]]; then
           BINARIES+=("${lBINARY}")
           lMD5_DONE_INT_ARR+=("${lBIN_MD5}")
@@ -824,7 +842,7 @@ prepare_file_arr_limited() {
   #  -o -iname "*.js" -o -iname "*.info" -o -iname "*.md" -o -iname "*.log" -o -iname "*.yml" -o -iname "*.bmp" -o -path "*/\.git/*" \) \
   #  -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3-)
 
-  readarray -d '' -t FILE_ARR_LIMITED < <((cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.udeb$\|\.deb$\|\.ipk$\|\.pdf$\\|\.php$\|\.txt$\|\.doc$\|\.rtf$\|\.docx\|\.htm$\|\.md5$\|\..sha1$\|\.torrent$\|\.png$\|\.svg$\|\.js$\|\.info$\|\.md$\|\.log$\|\.yml$\|\.bmp$\|\.git\/" | sort -u || true) | p99_decode_paths)
+  readarray -t FILE_ARR_LIMITED < <(cut -d ';' -f2 "${P99_CSV_LOG}" | grep -v "\.udeb$\|\.deb$\|\.ipk$\|\.pdf$\\|\.php$\|\.txt$\|\.doc$\|\.rtf$\|\.docx\|\.htm$\|\.md5$\|\..sha1$\|\.torrent$\|\.png$\|\.svg$\|\.js$\|\.info$\|\.md$\|\.log$\|\.yml$\|\.bmp$\|\.git\/" | sort -u || true)
 
 }
 
@@ -888,7 +906,6 @@ detect_root_dir_helper() {
   local lINTERPRETER_FULL_RPATH_ARR=()
   local lR_PATH=""
   local lINTERPRETER_ESCAPED=""
-  local lROOT_RECORD=""
   local lCNT=0
 
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
@@ -899,7 +916,7 @@ detect_root_dir_helper() {
   if [[ "${SBOM_MINIMAL:-0}" -eq 0 ]]; then
     # xargs threading is much faster. Big testcase firmware 9mins vs. 3mins
     # mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file -b % 2>/dev/null' | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
-    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(p99_csv_records_under_path "${lSEARCH_PATH}" | grep "ELF" | cut -d ';' -f8 | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
+    mapfile -t lINTERPRETER_FULL_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | cut -d ';' -f8 | grep "ELF.*interpreter /" | sed "s/.*interpreter\ //" | sed "s/,\ .*$//" | sort -u || true)
 
     if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
@@ -907,7 +924,7 @@ detect_root_dir_helper() {
         # lets escape it
         lINTERPRETER_ESCAPED=$(sed -e 's/\//\\\//g' <<<"${lINTERPRETER_PATH}")
         # mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
-        mapfile -d '' -t lINTERPRETER_FULL_RPATH_ARR < <((cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true) | p99_decode_paths)
+        mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true)
         for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
           # remove the interpreter path from the full path:
           lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
@@ -922,7 +939,7 @@ detect_root_dir_helper() {
     fi
 
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
-    mapfile -d '' -t lROOTx_PATH_ARR < <((p99_csv_records_under_path "${lSEARCH_PATH}" | grep "ELF" | grep "bin/busybox" | cut -d ';' -f2 | sed -E 's/\/.?bin\/busybox.*//' | sort -u || true) | p99_decode_paths)
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/busybox" | cut -d ';' -f2 | sed -E 's/\/.?bin\/busybox.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=("${lR_PATH}")
@@ -934,7 +951,7 @@ detect_root_dir_helper() {
       fi
     done
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
-    mapfile -d '' -t lROOTx_PATH_ARR < <((p99_csv_records_under_path "${lSEARCH_PATH}" | grep "ELF" | grep "bin/bash" | cut -d ';' -f2 | sed -E 's/\/.?bin\/bash.*//' | sort -u || true) | p99_decode_paths)
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/bash" | cut -d ';' -f2 | sed -E 's/\/.?bin\/bash.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=("${lR_PATH}")
@@ -946,7 +963,7 @@ detect_root_dir_helper() {
       fi
     done
     # mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -print0|xargs -r -0 -P 16 -I % sh -c 'file % | grep "ELF" | cut -d: -f1 | sed -E "s/\/.?bin\/sh//"' || true)
-    mapfile -d '' -t lROOTx_PATH_ARR < <((p99_csv_records_under_path "${lSEARCH_PATH}" | grep "ELF" | grep "bin/sh;" | cut -d ';' -f2 | sed -E 's/\/.?bin\/sh.*//' | sort -u || true) | p99_decode_paths)
+    mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "bin/sh;" | cut -d ';' -f2 | sed -E 's/\/.?bin\/sh.*//' | sort -u || true)
     for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
       if [[ -d "${lR_PATH}" ]]; then
         ROOT_PATH+=("${lR_PATH}")
@@ -962,10 +979,7 @@ detect_root_dir_helper() {
   # currently not working: mapfile -t lROOTx_PATH_ARR < <(grep ";${lSEARCH_PATH}.*ELF" "${P99_CSV_LOG}" | grep "/bin/\|/lib/\|/etc/\|/root/\|/dev/\|/opt/\|/proc/\|/lib64\|/boot/\|/home/" | cut -d ';' -f2 | grep "${lSEARCH_PATH}" | sort -u || true)
   # Stream and parse candidates with a shell builtin. Storing the entire list
   # and spawning two awk processes per candidate is costly on large trees.
-  while IFS= read -r -d '' lROOT_RECORD; do
-    lROOT_RECORD="${lROOT_RECORD#"${lROOT_RECORD%%[! ]*}"}"
-    lCNT="${lROOT_RECORD%% *}"
-    lR_PATH="${lROOT_RECORD#* }"
+  while IFS=' ' read -r lCNT lR_PATH; do
     if [[ "${lCNT}" -lt 5 ]]; then
       # we only use paths with more then 4 matches as possible root path
       continue
@@ -978,7 +992,7 @@ detect_root_dir_helper() {
         lMECHANISM="${lMECHANISM} / dir names"
       fi
     fi
-  done < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname -z {} + | sort -z | uniq -zc | sort -zr)
+  done < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     export RTOS=1
@@ -989,7 +1003,7 @@ detect_root_dir_helper() {
   fi
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
-    mapfile -d '' -t ROOT_PATH < <(printf '%s\0' "${ROOT_PATH[@]}" | sed -z '/^$/d' | sort -zu)
+    mapfile -t ROOT_PATH < <(printf "%s\n" "${ROOT_PATH[@]}" | sed '/^$/d' | sort -u)
   fi
   if [[ -v ROOT_PATH[@] && "${RTOS}" -eq 0 ]]; then
     print_output "[*] Found ${ORANGE}${#ROOT_PATH[@]}${NC} different root directories:"

@@ -12,7 +12,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
-# Contributor(s): Mihai Macarie
 
 # Description:  Searches known locations for package management information
 # shellcheck disable=SC2094
@@ -41,9 +40,9 @@ S08_submodule_rpm_pkg_mgmt_parser() {
   local lPKG_MD5=""
 
   # this handles the Berkley database
-  mapfile -d '' -t lRPM_PACKAGE_DBS_BRK_ARR < <((grep "rpm/Packages;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lRPM_PACKAGE_DBS_BRK_ARR < <(grep "rpm/Packages;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   # this handles the sqlite database
-  mapfile -d '' -t lRPM_PACKAGE_DBS_SQLITE_ARR < <((grep "rpm/rpmdb.sqlite;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true) | p99_decode_paths)
+  mapfile -t lRPM_PACKAGE_DBS_SQLITE_ARR < <(grep "rpm/rpmdb.sqlite;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   lRPM_PACKAGE_DBS_ARR=("${lRPM_PACKAGE_DBS_BRK_ARR[@]}" "${lRPM_PACKAGE_DBS_SQLITE_ARR[@]}")
 
   if [[ "${#lRPM_PACKAGE_DBS_ARR[@]}" -gt 0 ]]; then
