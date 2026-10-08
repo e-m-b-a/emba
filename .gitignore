@@ -14,3 +14,5 @@ config/ai_config.env
 config/dependencytrack.env
 *config/cve-database.db
 tests/bats-core/
+tests/bin_version_testdata/corpus_generator.log
+tests/bin_version_testdata/logfile.txt

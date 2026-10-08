@@ -7,7 +7,7 @@
       "GPLv2"
    ],
    "grep_commands": [
-      "'\"nftables\"AND\"nft_run_cmd_from_filename\"AND\"^[0-9](\\.[0-9]+)+?$\"'"
+      "'\"nftables\"AND\"nft_run_cmd_from_filename\"AND\"^[0-9](\\.[0-9]{1,2}){1,3}$\"'"
    ],
    "vendor_names": [
       "netfilter"

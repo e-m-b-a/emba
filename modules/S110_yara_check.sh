@@ -63,7 +63,7 @@ S110_yara_check() {
           print_output "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           write_log "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           write_log "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
-          echo "" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
+          : >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}".txt
           write_csv_log "${lYRULE}" "${lMATCH_FILE}"
           lCOUNTING=$((lCOUNTING + 1))
         fi
