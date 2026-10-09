@@ -144,13 +144,13 @@ reset_network_emulation() {
     print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
     write_script_exec "echo -e \"Deleting TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
   fi
-  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+  if [[ "${lEXECUTE}" -lt 2 ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip tuntap del dev ${TAPDEV_0} mode tap" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     lEXECUTE_tmp=1
   else
     lEXECUTE_tmp="${lEXECUTE}"
   fi
-  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  if [[ -f "${ARCHIVE_PATH}"/run.sh ]] && ! grep -q "ip tuntap del dev ${TAPDEV_0} mode tap" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    write_script_exec "ip tuntap del dev ${TAPDEV_0} mode tap" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
   fi
 }
 

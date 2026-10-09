@@ -277,7 +277,7 @@ cleanup_tap() {
   mapfile -t lTAP_CLEAN_ARR < <(ifconfig | grep tap | cut -d: -f1 || true)
   for lTAP_TO_CLEAN in "${lTAP_CLEAN_ARR[@]}"; do
     print_output "[*] Cleaning up TAP interface ${lTAP_TO_CLEAN}"
-    tunctl -d "${lTAP_TO_CLEAN}" || print_error "[-] Error in tap cleanup"
+    ip tuntap del dev ${lTAP_TO_CLEAN} mode tap
   done
 }
 
@@ -2132,8 +2132,7 @@ setup_network_emulation() {
   export HOSTNETDEV_0="${TAPDEV_0}"
   print_output "[*] Creating TAP device ${ORANGE}${TAPDEV_0}${NC} ..."
   write_script_exec "echo -e \"Creating TAP device ${TAPDEV_0}\n\"" "${ARCHIVE_PATH}"/run.sh 0
-  write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation - install uml-utilities package\" && exit 1)" "${ARCHIVE_PATH}"/run.sh 0
-  write_script_exec "tunctl -t ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
+  write_script_exec "ip tuntap add dev ${TAPDEV_0} mode tap" "${ARCHIVE_PATH}"/run.sh 1
 
   if [[ "${lVLAN_ID}" != "NONE" ]]; then
     HOSTNETDEV_0="${TAPDEV_0}"."${lVLAN_ID}"
