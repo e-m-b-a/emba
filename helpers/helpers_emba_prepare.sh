@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Preparation for testing firmware:
 #                 Check log directory
@@ -170,65 +171,342 @@ set_exclude() {
   print_excluded
 }
 
+invalidate_p99_path_cache() {
+  local lBACKUP_DIR=""
+  local lOLD_PATH=""
+  if [[ ! -e "${P99_CSV_LOG}" && ! -e "${TMP_DIR}/p99_md5sum_done" && ! -e "${TMP_DIR}/p99_md5sum_done.initialized" ]]; then
+    return 0
+  fi
+  # Keep old records/index recoverable when upgrading an interrupted codec run
+  # or when final cleanup changed paths that were already indexed.
+  lBACKUP_DIR="$(mktemp -d "${CSV_DIR}/p99_path_cleanup.XXXXXX")" || return 1
+  for lOLD_PATH in "${P99_CSV_LOG}" "${TMP_DIR}/p99_md5sum_done" "${TMP_DIR}/p99_md5sum_done.initialized"; do
+    if [[ -e "${lOLD_PATH}" ]]; then
+      mv -T -- "${lOLD_PATH}" "${lBACKUP_DIR}/${lOLD_PATH##*/}" || return 1
+    fi
+  done
+  ROOT_PATH=()
+  print_output "[*] Rebuilding backend after path cleanup; old data saved in ${lBACKUP_DIR}" "no_log"
+}
+
+initialize_p99_hash_index() {
+  local lINDEX_DIR="${TMP_DIR}/p99_md5sum_done"
+  local lINDEX_READY="${TMP_DIR}/p99_md5sum_done.initialized"
+  local lINDEX_LOCK="${TMP_DIR}/p99_md5sum_done.lock"
+  local lHASH_PATTERN=';([[:xdigit:]]{32});+$'
+  local lCSV_LINE=""
+  local lMD5SUM=""
+  local lPREFIX=""
+  local lSHARD_ID=0
+  local lSTATUS=0
+  local lNOCLOBBER=0
+  local lSHARD_DIRS_ARR=()
+
+  if [[ -f "${lINDEX_READY}" ]]; then
+    return
+  fi
+  mkdir -p "${lINDEX_DIR}"
+
+  # Initialization is lazy because this helper is used from several extractor
+  # modules. Only the first worker imports restart hashes; later workers perform
+  # a single marker lookup and avoid scanning the growing CSV entirely.
+  if [[ -o noclobber ]]; then
+    lNOCLOBBER=1
+    set +o noclobber
+  fi
+  (
+    flock -x 9 || exit 1
+    if [[ -f "${lINDEX_READY}" ]]; then
+      exit 0
+    fi
+
+    for ((lSHARD_ID = 0; lSHARD_ID < 256; lSHARD_ID++)); do
+      printf -v lPREFIX '%02x' "${lSHARD_ID}"
+      lSHARD_DIRS_ARR+=("${lINDEX_DIR}/${lPREFIX}")
+    done
+    mkdir -p "${lSHARD_DIRS_ARR[@]}"
+
+    if [[ -f "${P99_CSV_LOG}" ]]; then
+      while IFS= read -r lCSV_LINE; do
+        if [[ "${lCSV_LINE}" =~ ${lHASH_PATTERN} ]]; then
+          lMD5SUM="${BASH_REMATCH[1],,}"
+          : >"${lINDEX_DIR}/${lMD5SUM:0:2}/${lMD5SUM}"
+        fi
+      done <"${P99_CSV_LOG}"
+    fi
+    : >"${lINDEX_READY}"
+  ) 9>"${lINDEX_LOCK}" || lSTATUS="$?"
+  if [[ "${lNOCLOBBER}" -eq 1 ]]; then
+    set -o noclobber
+  fi
+  return "${lSTATUS}"
+}
+
 binary_architecture_threader() {
   local lBINARY="${1:-}"
   local lSOURCE_MODULE="${2:-}"
+  local lMD5SUM="${3:-}"
+  if [[ "${lBINARY}" == *".raw" ]]; then
+    return
+  fi
+  if [[ -z "${lMD5SUM}" ]]; then
+    lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
+    # GNU md5sum prefixes escaped output with a backslash when the filename
+    # contains characters such as a backslash or newline.
+    lMD5SUM="${lMD5SUM#\\}"
+    lMD5SUM="${lMD5SUM/\ */}"
+  else
+    lMD5SUM="${lMD5SUM,,}"
+  fi
+  if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
+    return
+  fi
+  if ! claim_p99_hash "${lMD5SUM}"; then
+    return
+  fi
+  analyze_binary_architecture "${lBINARY}" "${lSOURCE_MODULE}" "${lMD5SUM}"
+}
 
+claim_p99_hash() {
+  local lMD5SUM="${1:-}"
+  # Workers pass their initialized marker explicitly; standalone calls use an
+  # empty local cache instead of assigning a caller-scoped or global variable.
+  local lP99_HASH_INDEX_INITIALIZED_FOR="${2:-}"
+  local lMD5SUM_INDEX=""
+  local lINDEX_READY="${TMP_DIR}/p99_md5sum_done.initialized"
+  local lNOCLOBBER=0
+
+  if ! [[ "${lMD5SUM}" =~ ^[[:xdigit:]]{32}$ ]]; then
+    return 1
+  fi
+  lMD5SUM="${lMD5SUM,,}"
+  if [[ "${lP99_HASH_INDEX_INITIALIZED_FOR:-}" != "${lINDEX_READY}" ]]; then
+    if ! initialize_p99_hash_index; then
+      print_output "[-] Failed to initialize P99 hash index" "no_log"
+      return 1
+    fi
+    lP99_HASH_INDEX_INITIALIZED_FOR="${lINDEX_READY}"
+  fi
+
+  lMD5SUM_INDEX="${TMP_DIR}/p99_md5sum_done/${lMD5SUM:0:2}"
+  # Atomically claim a hash. Filesystem lookups avoid scanning an ever-growing
+  # hash log for every extracted file and prevent races between workers.
+  if [[ -o noclobber ]]; then
+    lNOCLOBBER=1
+  else
+    set -o noclobber
+  fi
+  if ! : 2>/dev/null >"${lMD5SUM_INDEX}/${lMD5SUM}"; then
+    if [[ "${lNOCLOBBER}" -eq 0 ]]; then
+      set +o noclobber
+    fi
+    return 1
+  fi
+  if [[ "${lNOCLOBBER}" -eq 0 ]]; then
+    set +o noclobber
+  fi
+  print_dot
+}
+
+analyze_binary_architecture() {
+  local lBINARY="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lMD5SUM="${3:-}"
+  local D_FILE_OUTPUT="${4:-}"
   local lD_FLAGS_CNT=""
   local lD_MACHINE="NA"
   local lD_CLASS="NA"
   local lD_DATA="NA"
   local lD_ARCH_GUESSED="NA"
-  local lMD5SUM=""
-  lMD5SUM="$(md5sum "${lBINARY}" || print_output "[-] Checksum error for binary ${lBINARY}" "no_log")"
-  lMD5SUM="${lMD5SUM/\ */}"
-  if [[ "${lBINARY}" == *".raw" ]]; then
-    return
-  fi
 
-  if grep -q "${lMD5SUM}" "${TMP_DIR}/p99_md5sum_done.tmp" 2>/dev/null; then
-    return
+  if [[ -z "${D_FILE_OUTPUT}" ]]; then
+    D_FILE_OUTPUT=$(file -b -- "${lBINARY}")
   fi
-  if [[ -f "${P99_CSV_LOG}" ]] && grep -q "${lMD5SUM}" "${P99_CSV_LOG}" 2>/dev/null; then
-    return
-  fi
-  echo "${lMD5SUM}" >>"${TMP_DIR}/p99_md5sum_done.tmp"
-
-  print_dot
-
-  D_FILE_OUTPUT=$(file -b "${lBINARY}")
   if [[ "${D_FILE_OUTPUT}" == *"ELF"* ]]; then
     # noreorder, pic, cpic, o32, mips32
     local lREADELF_H_ARR=()
+    local lREADELF_LINE=""
+    local lCOMMENT_VALUE=""
+    local lCOMMENT_KEY=""
+    local lCOMMENT_EXISTING=""
+    local lCOMMENT_ID=0
+    local lCOMMENT_SORT_ID=0
+    local lCOMMENT_DUPLICATE=0
+    local lIN_COMMENT_SECTION=0
+    local lCOMMENT_VALUES_ARR=()
+    local lCOMMENT_FIELDS_ARR=()
+    local lCOMMENT_SORTED_ARR=()
 
-    mapfile -t lREADELF_H_ARR < <(readelf -W -h "${lBINARY}" 2>/dev/null || true)
-
-    lD_FLAGS_CNT=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Flags:" || true)
-    lD_FLAGS_CNT="${lD_FLAGS_CNT// /}"
-    lD_FLAGS_CNT="${lD_FLAGS_CNT/*Flags:/}"
-    lD_FLAGS_CNT="${lD_FLAGS_CNT/0x0/}"
-
-    lD_MACHINE=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Machine:" || true)
-    lD_MACHINE="${lD_MACHINE// /}"
-    lD_MACHINE="${lD_MACHINE/*Machine:/}"
-    lD_MACHINE=$(sed -E 's/^[[:space:]]+//' <<<"${lD_MACHINE}")
-
-    # ELF32/64
-    lD_CLASS=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Class:" || true)
-    lD_CLASS="${lD_CLASS/*Class:/}"
-    lD_CLASS=$(sed -E 's/^[[:space:]]+//' <<<"${lD_CLASS}")
-
-    # endianes
-    lD_DATA=$(printf -- '%s\n' "${lREADELF_H_ARR[@]}" | grep "Data:" || true)
-    lD_DATA="${lD_DATA/*Data:/}"
-    lD_DATA=$(sed -E 's/^[[:space:]]+//' <<<"${lD_DATA}")
-
-    lD_ARCH_GUESSED=$(readelf -W -p .comment "${lBINARY}" 2>/dev/null | grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
-    lD_ARCH_GUESSED="${lD_ARCH_GUESSED%%,/}"
-    lD_ARCH_GUESSED="${lD_ARCH_GUESSED##,/}"
+    mapfile -t lREADELF_H_ARR < <(readelf -W -h -p .comment "${lBINARY}" 2>/dev/null || true)
+    for lREADELF_LINE in "${lREADELF_H_ARR[@]}"; do
+      if [[ "${lREADELF_LINE}" == *"String dump"* ]]; then
+        lIN_COMMENT_SECTION=1
+        lCOMMENT_VALUES_ARR+=("  ")
+        continue
+      fi
+      if [[ "${lIN_COMMENT_SECTION}" -eq 1 ]]; then
+        IFS=$' \t\n' read -r -a lCOMMENT_FIELDS_ARR <<<"${lREADELF_LINE}"
+        lCOMMENT_VALUES_ARR+=("${lCOMMENT_FIELDS_ARR[2]:-} ${lCOMMENT_FIELDS_ARR[3]:-} ${lCOMMENT_FIELDS_ARR[4]:-}")
+        continue
+      fi
+      case "${lREADELF_LINE}" in
+      *"Flags:"*)
+        lD_FLAGS_CNT="${lREADELF_LINE// /}"
+        lD_FLAGS_CNT="${lD_FLAGS_CNT/*Flags:/}"
+        lD_FLAGS_CNT="${lD_FLAGS_CNT/0x0/}"
+        ;;
+      *"Machine:"*)
+        lD_MACHINE="${lREADELF_LINE// /}"
+        lD_MACHINE="${lD_MACHINE/*Machine:/}"
+        ;;
+      *"Class:"*)
+        lD_CLASS="${lREADELF_LINE/*Class:/}"
+        lD_CLASS="${lD_CLASS#"${lD_CLASS%%[![:space:]]*}"}"
+        ;;
+      *"Data:"*)
+        lD_DATA="${lREADELF_LINE/*Data:/}"
+        lD_DATA="${lD_DATA#"${lD_DATA%%[![:space:]]*}"}"
+        ;;
+      esac
+    done
+    lD_ARCH_GUESSED=""
+    for lCOMMENT_VALUE in "${lCOMMENT_VALUES_ARR[@]}"; do
+      lCOMMENT_DUPLICATE=0
+      for lCOMMENT_EXISTING in "${lCOMMENT_SORTED_ARR[@]}"; do
+        if [[ "${lCOMMENT_VALUE}" == "${lCOMMENT_EXISTING}" ]]; then
+          lCOMMENT_DUPLICATE=1
+          break
+        fi
+      done
+      if [[ "${lCOMMENT_DUPLICATE}" -eq 1 ]]; then
+        continue
+      fi
+      lCOMMENT_SORTED_ARR+=("${lCOMMENT_VALUE}")
+    done
+    # Preserve sort -u ordering without starting grep/awk/sort/tr for each ELF.
+    for ((lCOMMENT_ID = 1; lCOMMENT_ID < ${#lCOMMENT_SORTED_ARR[@]}; lCOMMENT_ID++)); do
+      lCOMMENT_KEY="${lCOMMENT_SORTED_ARR[lCOMMENT_ID]}"
+      lCOMMENT_SORT_ID=$((lCOMMENT_ID - 1))
+      while [[ "${lCOMMENT_SORT_ID}" -ge 0 && "${lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID]}" > "${lCOMMENT_KEY}" ]]; do
+        lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID + 1]="${lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID]}"
+        lCOMMENT_SORT_ID=$((lCOMMENT_SORT_ID - 1))
+      done
+      lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID + 1]="${lCOMMENT_KEY}"
+    done
+    for lCOMMENT_VALUE in "${lCOMMENT_SORTED_ARR[@]}"; do
+      lD_ARCH_GUESSED+="${lCOMMENT_VALUE},"
+    done
   fi
 
-  write_csv_log_to_path "${P99_CSV_LOG}" "${lSOURCE_MODULE}" "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}" &
+  write_csv_log_to_path "${P99_CSV_LOG}" "${lSOURCE_MODULE}" "${lBINARY}" "${lD_CLASS}" "${lD_DATA}" "${lD_MACHINE}" "${lD_FLAGS_CNT}" "${lD_ARCH_GUESSED}" "${D_FILE_OUTPUT//\;/,}" "${lMD5SUM}"
+}
+
+populate_p99_backend() {
+  local lFILES_LIST="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lFILE_COUNT="${3:-0}"
+  local lMAX_THREADS="${MAX_MOD_THREADS:-1}"
+  local lWORKER_COUNT=0
+  local lWORKER_DIR=""
+  local lWORKER_FILE=""
+  local lSTATUS=0
+  local lWORKER_FILES_ARR=()
+  local lWORKER_PIDS_ARR=()
+
+  if ! [[ "${lMAX_THREADS}" =~ ^[1-9][0-9]*$ ]]; then
+    lMAX_THREADS=1
+  fi
+  lWORKER_COUNT=$((2 * lMAX_THREADS))
+  if [[ "${lFILE_COUNT}" -lt "${lWORKER_COUNT}" ]]; then
+    lWORKER_COUNT="${lFILE_COUNT}"
+  fi
+  if [[ "${lWORKER_COUNT}" -lt 1 ]]; then
+    return
+  fi
+
+  lWORKER_DIR=$(mktemp -d "${TMP_DIR}/p99_backend_workers.XXXXXX") || return
+  if ! split -n "r/${lWORKER_COUNT}" -t '\0' -d -a 5 "${lFILES_LIST}" "${lWORKER_DIR}/worker_"; then
+    print_output "[-] Failed to partition P99 backend work" "no_log"
+    rm -r -- "${lWORKER_DIR}"
+    return 1
+  fi
+  lWORKER_FILES_ARR=("${lWORKER_DIR}"/worker_*)
+
+  for lWORKER_FILE in "${lWORKER_FILES_ARR[@]}"; do
+    p99_backend_worker "${lWORKER_FILE}" "${lSOURCE_MODULE}" &
+    lWORKER_PIDS_ARR+=("$!")
+  done
+  wait_for_pid "${lWORKER_PIDS_ARR[@]}" || lSTATUS="$?"
+  rm -r -- "${lWORKER_DIR}"
+  return "${lSTATUS}"
+}
+
+p99_backend_worker() {
+  local lWORKER_FILE="${1:-}"
+  local lSOURCE_MODULE="${2:-}"
+  local lHASH_BATCH_SIZE="${P99_HASH_BATCH_SIZE:-128}"
+  local lWORKER_HASH_INDEX_CACHE="${TMP_DIR}/p99_md5sum_done.initialized"
+  local lMD5_RECORD=""
+  local lMD5SUM=""
+  local lBINARY=""
+  local lFILE_OUTPUT=""
+  local lRECORD_ID=0
+  local lMD5_RECORDS_ARR=()
+  local lINPUT_FILES_ARR=()
+  local lHASHED_FILES_ARR=()
+  local lHASHES_ARR=()
+  local lFILE_OUTPUTS_ARR=()
+
+  if ! [[ "${lHASH_BATCH_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
+    lHASH_BATCH_SIZE=128
+  fi
+  # Initialize once per worker; pass a read-only cache value to every claim.
+  initialize_p99_hash_index || return 1
+  # GNU md5sum -z and file -0 -0 produce unescaped, NUL-delimited records.
+  # Bounded batches avoid one checksum and one file process per extracted file.
+  while mapfile -d '' -n "${lHASH_BATCH_SIZE}" -t lINPUT_FILES_ARR && ((${#lINPUT_FILES_ARR[@]})); do
+    lHASHED_FILES_ARR=()
+    for lBINARY in "${lINPUT_FILES_ARR[@]}"; do
+      if [[ "${lBINARY}" != *".raw" ]]; then
+        lHASHED_FILES_ARR+=("${lBINARY}")
+      fi
+    done
+    if ((${#lHASHED_FILES_ARR[@]} == 0)); then
+      lINPUT_FILES_ARR=()
+      continue
+    fi
+
+    mapfile -d '' -t lMD5_RECORDS_ARR < <(md5sum -z -- "${lHASHED_FILES_ARR[@]}" 2>/dev/null || true)
+    lHASHED_FILES_ARR=()
+    lHASHES_ARR=()
+    for lMD5_RECORD in "${lMD5_RECORDS_ARR[@]}"; do
+      if [[ "${#lMD5_RECORD}" -lt 35 ]]; then
+        continue
+      fi
+      lMD5SUM="${lMD5_RECORD:0:32}"
+      lBINARY="${lMD5_RECORD:34}"
+      if claim_p99_hash "${lMD5SUM}" "${lWORKER_HASH_INDEX_CACHE}"; then
+        lHASHES_ARR+=("${lMD5SUM}")
+        lHASHED_FILES_ARR+=("${lBINARY}")
+      fi
+    done
+    if ((${#lHASHED_FILES_ARR[@]} == 0)); then
+      lINPUT_FILES_ARR=()
+      lMD5_RECORDS_ARR=()
+      continue
+    fi
+
+    mapfile -d '' -t lFILE_OUTPUTS_ARR < <(file -0 -0 -b -- "${lHASHED_FILES_ARR[@]}" 2>/dev/null || true)
+    for ((lRECORD_ID = 0; lRECORD_ID < ${#lHASHED_FILES_ARR[@]}; lRECORD_ID++)); do
+      lFILE_OUTPUT="${lFILE_OUTPUTS_ARR[lRECORD_ID]:-unreadable}"
+      analyze_binary_architecture "${lHASHED_FILES_ARR[lRECORD_ID]}" "${lSOURCE_MODULE}" "${lHASHES_ARR[lRECORD_ID]}" "${lFILE_OUTPUT}"
+    done
+    lINPUT_FILES_ARR=()
+    lMD5_RECORDS_ARR=()
+    lHASHED_FILES_ARR=()
+    lHASHES_ARR=()
+    lFILE_OUTPUTS_ARR=()
+  done <"${lWORKER_FILE}"
 }
 
 architecture_check() {

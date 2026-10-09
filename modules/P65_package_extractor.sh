@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Identification and extraction of typical package archives like deb, apk, ipk
 
@@ -65,6 +66,7 @@ P65_package_extractor() {
     lDISK_SPACE_CRIT=1
   fi
 
+  remove_uprintable_paths "${FIRMWARE_PATH_CP}" || return 1
   mapfile -t lFILES_POST_PACKAGE_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f ! -name "*.raw")
 
   if [[ "${#lFILES_POST_PACKAGE_ARR[@]}" -gt "${FILES_PRE_PACKAGE}" ]]; then
@@ -104,6 +106,7 @@ rpm_extractor() {
   local lRPM=""
 
   print_output "[*] Identify RPM archives and extracting it to the root directories ..."
+  remove_uprintable_paths "${FIRMWARE_PATH_CP}" || return 1
   mapfile -t lRPM_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.rpm" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
   if [[ "${#lRPM_ARCHIVES_ARR[@]}" -gt 0 ]]; then
@@ -134,6 +137,7 @@ apk_extractor() {
   local lAPK=""
 
   print_output "[*] Identify apk archives and extracting it to the root directories ..."
+  remove_uprintable_paths "${FIRMWARE_PATH_CP}" || return 1
   mapfile -t lAPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
   if [[ "${#lAPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
@@ -163,6 +167,7 @@ ipk_extractor() {
   local lIPK=""
 
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
+  remove_uprintable_paths "${FIRMWARE_PATH_CP}" || return 1
   mapfile -t lIPK_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
   if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
@@ -206,6 +211,7 @@ deb_extractor() {
   local lDEB=""
 
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
+  remove_uprintable_paths "${FIRMWARE_PATH_CP}" || return 1
   mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH_CP}" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
   if [[ "${#lDEB_ARCHIVES_ARR[@]}" -gt 0 ]]; then

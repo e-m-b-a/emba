@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # The documentation can be generated with the following command:
 # perl -ne "s/^\t+//; print if m/END_OF_DOCS'?\$/ .. m/^\s*'?END_OF_DOCS'?\$/ and not m/END_OF_DOCS'?$/;" modules/template_module.sh
@@ -187,9 +188,11 @@ exe_extractor() {
   local lBINARY=""
   local lWAIT_PIDS_P99_ARR=()
 
+  remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
   mapfile -t lFILES_EXE_ARR < <(find "${lEXTRACTION_DIR}" -type f)
   if [[ -d "${lEXTRACTION_DIR%\/}_binwalk" ]]; then
     local lFILES_EXE_ARR_2=()
+    remove_uprintable_paths "${lEXTRACTION_DIR%\/}_binwalk" || return 1
     mapfile -t lFILES_EXE_ARR_2 < <(find "${lEXTRACTION_DIR%\/}_binwalk" -type f ! -name "*.raw")
     lFILES_EXE_ARR=("${lFILES_EXE_ARR[@]}" "${lFILES_EXE_ARR_2[@]}")
   fi

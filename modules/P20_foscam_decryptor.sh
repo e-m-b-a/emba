@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Extracts encrypted firmware images from the vendor Foscam
 #              See https://github.com/pr0v3rbs/FirmAE/issues/21
@@ -182,6 +183,7 @@ foscam_ubi_extractor() {
       fi
 
       print_output "[*] Checking ${lEXTRACTION_DIR_%\/}_binwalk_extracted for files and directories"
+      remove_uprintable_paths "${lEXTRACTION_DIR_%\/}_binwalk_extracted" || return 1
       mapfile -t lFILES_FOSCAM_UBI_ARR < <(find "${lEXTRACTION_DIR_%\/}_binwalk_extracted" -type f ! -name "*.raw")
       print_ln
       print_output "[*] Extracted ${ORANGE}${#lFILES_FOSCAM_UBI_ARR[@]}${NC} files from the firmware image."

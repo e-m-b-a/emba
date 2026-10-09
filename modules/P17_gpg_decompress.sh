@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Extracts gpg compressed (not encrypted) firmware images
 #               This technique is used by Linksys/Belkin
@@ -74,6 +75,7 @@ gpg_decompress_extractor() {
       print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
     fi
 
+    remove_uprintable_paths "${LOG_DIR}/firmware/firmware_gpg_extracted" || return 1
     mapfile -t lFILES_GPG_ARR < <(find "${LOG_DIR}/firmware/firmware_gpg_extracted" -type f ! -name "*.raw")
     print_output "[*] Extracted ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files from GPG compressed file."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_GPG_ARR[@]}${NC} files ... could take some time" "no_log"

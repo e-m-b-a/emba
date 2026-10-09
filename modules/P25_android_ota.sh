@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Extracts Android OTA update files - see https://github.com/e-m-b-a/emba/issues/233
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -60,6 +61,7 @@ android_ota_extractor() {
 
   python3 "${EXT_DIR}"/payload_dumper/payload_dumper.py --out "${lEXTRACTION_DIR_}" "${lOTA_INIT_PATH_}" | tee -a "${LOG_FILE}"
 
+  remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
   mapfile -t lFILES_OTA_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
 
   print_output "[*] Extracted ${ORANGE}${#lFILES_OTA_ARR[@]}${NC} files from the firmware image."

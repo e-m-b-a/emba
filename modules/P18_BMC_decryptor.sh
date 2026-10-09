@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Decrypts and extracts firmware images from Supermicro BMC
 #               Using https://github.com/c0d3z3r0/smcbmc
@@ -77,6 +78,7 @@ bmc_extractor() {
     print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
   fi
 
+  remove_uprintable_paths "${lEXTRACTION_PATH}" || return 1
   mapfile -t lFILES_BMC_ARR < <(find "${lEXTRACTION_PATH}" -type f ! -name "*.raw")
   print_output "[*] Extracted ${ORANGE}${#lFILES_BMC_ARR[@]}${NC} files from BMC encrypted firmware."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BMC_ARR[@]}${NC} files ... could take some time" "no_log"

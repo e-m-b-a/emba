@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Some preparation tasks:
 #               * check_firmware
@@ -34,6 +35,11 @@ P99_prepare_analyzer() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local lNEG_LOG=1
+  local lCLEANED_PATHS=0
+  remove_uprintable_paths "${LOG_DIR}/firmware" lCLEANED_PATHS || return 1
+  if [[ "${lCLEANED_PATHS}" -gt 0 ]] || { [[ -f "${P99_CSV_LOG}" ]] && grep -Fq ';@P99:' "${P99_CSV_LOG}"; }; then
+    invalidate_p99_path_cache || return 1
+  fi
 
   export LINUX_PATH_COUNTER=0
   LINUX_PATH_COUNTER="$(linux_basic_identification "${LOG_DIR}/firmware")"
@@ -50,19 +56,16 @@ P99_prepare_analyzer() {
   check_firmware
 
   # The following code is just in case we have not already created our P99_CSV_LOG file
-  local lFILES_ARR=()
-  local lBINARY=""
+  local lFILES_LIST="${TMP_DIR}/p99_prepare_files.list"
+  local lFILES_COUNT=0
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
     print_output "[-] INFO: No ${P99_CSV_LOG} log file available ... trying to create it now"
-    mapfile -t lFILES_ARR < <(find "${LOG_DIR}/firmware" -type f)
-    print_output "[*] Populating backend data for ${ORANGE}${#lFILES_ARR[@]}${NC} files ... could take some time" "no_log"
+    find "${LOG_DIR}/firmware" -type f ! -name '*.raw' -print0 >"${lFILES_LIST}"
+    lFILES_COUNT="$(tr -cd '\0' <"${lFILES_LIST}" | wc -c)"
+    lFILES_COUNT="${lFILES_COUNT// /}"
+    print_output "[*] Populating backend data for ${ORANGE}${lFILES_COUNT}${NC} files ... could take some time" "no_log"
 
-    for lBINARY in "${lFILES_ARR[@]}"; do
-      binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
-      local lTMP_PID="$!"
-      lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
-    done
-    wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
+    populate_p99_backend "${lFILES_LIST}" "${FUNCNAME[0]}" "${lFILES_COUNT}"
   fi
 
   # do we need this. We should check it and remove the complete code

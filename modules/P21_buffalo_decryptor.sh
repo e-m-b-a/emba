@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Extracts encrypted firmware images from the vendor Buffalo
 #              See https://modemizer.wordpress.com/2015/08/05/restoring-the-original-buffalo-firmware-on-the-wbmr-hp-g300h/
@@ -109,6 +110,7 @@ buffalo_enc_extractor() {
 
       print_output "[*] Checking ${lEXTRACTION_FILE/\.bin/}_binwalk_extracted for files and directories"
       if [[ -d "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" ]]; then
+        remove_uprintable_paths "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" || return 1
         mapfile -t lFILES_BUFFALO_ARR < <(find "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" -type f ! -name "*.raw")
         print_ln
         print_output "[*] Extracted ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files from the firmware image."
