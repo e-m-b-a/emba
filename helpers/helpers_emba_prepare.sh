@@ -200,7 +200,7 @@ initialize_p99_hash_index() {
   local lSHARD_ID=0
   local lSTATUS=0
   local lNOCLOBBER=0
-  local lSHARD_DIRS=()
+  local lSHARD_DIRS_ARR=()
 
   if [[ -f "${lINDEX_READY}" ]]; then
     return
@@ -222,9 +222,9 @@ initialize_p99_hash_index() {
 
     for ((lSHARD_ID = 0; lSHARD_ID < 256; lSHARD_ID++)); do
       printf -v lPREFIX '%02x' "${lSHARD_ID}"
-      lSHARD_DIRS+=("${lINDEX_DIR}/${lPREFIX}")
+      lSHARD_DIRS_ARR+=("${lINDEX_DIR}/${lPREFIX}")
     done
-    mkdir -p "${lSHARD_DIRS[@]}"
+    mkdir -p "${lSHARD_DIRS_ARR[@]}"
 
     if [[ -f "${P99_CSV_LOG}" ]]; then
       while IFS= read -r lCSV_LINE; do
@@ -333,20 +333,20 @@ analyze_binary_architecture() {
     local lCOMMENT_SORT_ID=0
     local lCOMMENT_DUPLICATE=0
     local lIN_COMMENT_SECTION=0
-    local lCOMMENT_VALUES=()
-    local lCOMMENT_FIELDS=()
-    local lCOMMENT_SORTED=()
+    local lCOMMENT_VALUES_ARR=()
+    local lCOMMENT_FIELDS_ARR=()
+    local lCOMMENT_SORTED_ARR=()
 
     mapfile -t lREADELF_H_ARR < <(readelf -W -h -p .comment "${lBINARY}" 2>/dev/null || true)
     for lREADELF_LINE in "${lREADELF_H_ARR[@]}"; do
       if [[ "${lREADELF_LINE}" == *"String dump"* ]]; then
         lIN_COMMENT_SECTION=1
-        lCOMMENT_VALUES+=("  ")
+        lCOMMENT_VALUES_ARR+=("  ")
         continue
       fi
       if [[ "${lIN_COMMENT_SECTION}" -eq 1 ]]; then
-        IFS=$' \t\n' read -r -a lCOMMENT_FIELDS <<<"${lREADELF_LINE}"
-        lCOMMENT_VALUES+=("${lCOMMENT_FIELDS[2]:-} ${lCOMMENT_FIELDS[3]:-} ${lCOMMENT_FIELDS[4]:-}")
+        IFS=$' \t\n' read -r -a lCOMMENT_FIELDS_ARR <<<"${lREADELF_LINE}"
+        lCOMMENT_VALUES_ARR+=("${lCOMMENT_FIELDS_ARR[2]:-} ${lCOMMENT_FIELDS_ARR[3]:-} ${lCOMMENT_FIELDS_ARR[4]:-}")
         continue
       fi
       case "${lREADELF_LINE}" in
@@ -370,9 +370,9 @@ analyze_binary_architecture() {
       esac
     done
     lD_ARCH_GUESSED=""
-    for lCOMMENT_VALUE in "${lCOMMENT_VALUES[@]}"; do
+    for lCOMMENT_VALUE in "${lCOMMENT_VALUES_ARR[@]}"; do
       lCOMMENT_DUPLICATE=0
-      for lCOMMENT_EXISTING in "${lCOMMENT_SORTED[@]}"; do
+      for lCOMMENT_EXISTING in "${lCOMMENT_SORTED_ARR[@]}"; do
         if [[ "${lCOMMENT_VALUE}" == "${lCOMMENT_EXISTING}" ]]; then
           lCOMMENT_DUPLICATE=1
           break
@@ -381,19 +381,19 @@ analyze_binary_architecture() {
       if [[ "${lCOMMENT_DUPLICATE}" -eq 1 ]]; then
         continue
       fi
-      lCOMMENT_SORTED+=("${lCOMMENT_VALUE}")
+      lCOMMENT_SORTED_ARR+=("${lCOMMENT_VALUE}")
     done
     # Preserve sort -u ordering without starting grep/awk/sort/tr for each ELF.
-    for ((lCOMMENT_ID = 1; lCOMMENT_ID < ${#lCOMMENT_SORTED[@]}; lCOMMENT_ID++)); do
-      lCOMMENT_KEY="${lCOMMENT_SORTED[lCOMMENT_ID]}"
+    for ((lCOMMENT_ID = 1; lCOMMENT_ID < ${#lCOMMENT_SORTED_ARR[@]}; lCOMMENT_ID++)); do
+      lCOMMENT_KEY="${lCOMMENT_SORTED_ARR[lCOMMENT_ID]}"
       lCOMMENT_SORT_ID=$((lCOMMENT_ID - 1))
-      while [[ "${lCOMMENT_SORT_ID}" -ge 0 && "${lCOMMENT_SORTED[lCOMMENT_SORT_ID]}" > "${lCOMMENT_KEY}" ]]; do
-        lCOMMENT_SORTED[lCOMMENT_SORT_ID + 1]="${lCOMMENT_SORTED[lCOMMENT_SORT_ID]}"
+      while [[ "${lCOMMENT_SORT_ID}" -ge 0 && "${lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID]}" > "${lCOMMENT_KEY}" ]]; do
+        lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID + 1]="${lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID]}"
         lCOMMENT_SORT_ID=$((lCOMMENT_SORT_ID - 1))
       done
-      lCOMMENT_SORTED[lCOMMENT_SORT_ID + 1]="${lCOMMENT_KEY}"
+      lCOMMENT_SORTED_ARR[lCOMMENT_SORT_ID + 1]="${lCOMMENT_KEY}"
     done
-    for lCOMMENT_VALUE in "${lCOMMENT_SORTED[@]}"; do
+    for lCOMMENT_VALUE in "${lCOMMENT_SORTED_ARR[@]}"; do
       lD_ARCH_GUESSED+="${lCOMMENT_VALUE},"
     done
   fi
@@ -410,8 +410,8 @@ populate_p99_backend() {
   local lWORKER_DIR=""
   local lWORKER_FILE=""
   local lSTATUS=0
-  local lWORKER_FILES=()
-  local lWORKER_PIDS=()
+  local lWORKER_FILES_ARR=()
+  local lWORKER_PIDS_ARR=()
 
   if ! [[ "${lMAX_THREADS}" =~ ^[1-9][0-9]*$ ]]; then
     lMAX_THREADS=1
@@ -430,13 +430,13 @@ populate_p99_backend() {
     rm -r -- "${lWORKER_DIR}"
     return 1
   fi
-  lWORKER_FILES=("${lWORKER_DIR}"/worker_*)
+  lWORKER_FILES_ARR=("${lWORKER_DIR}"/worker_*)
 
-  for lWORKER_FILE in "${lWORKER_FILES[@]}"; do
+  for lWORKER_FILE in "${lWORKER_FILES_ARR[@]}"; do
     p99_backend_worker "${lWORKER_FILE}" "${lSOURCE_MODULE}" &
-    lWORKER_PIDS+=("$!")
+    lWORKER_PIDS_ARR+=("$!")
   done
-  wait_for_pid "${lWORKER_PIDS[@]}" || lSTATUS="$?"
+  wait_for_pid "${lWORKER_PIDS_ARR[@]}" || lSTATUS="$?"
   rm -r -- "${lWORKER_DIR}"
   return "${lSTATUS}"
 }
@@ -451,11 +451,11 @@ p99_backend_worker() {
   local lBINARY=""
   local lFILE_OUTPUT=""
   local lRECORD_ID=0
-  local lMD5_RECORDS=()
-  local lINPUT_FILES=()
-  local lHASHED_FILES=()
-  local lHASHES=()
-  local lFILE_OUTPUTS=()
+  local lMD5_RECORDS_ARR=()
+  local lINPUT_FILES_ARR=()
+  local lHASHED_FILES_ARR=()
+  local lHASHES_ARR=()
+  local lFILE_OUTPUTS_ARR=()
 
   if ! [[ "${lHASH_BATCH_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
     lHASH_BATCH_SIZE=128
@@ -464,48 +464,48 @@ p99_backend_worker() {
   initialize_p99_hash_index || return 1
   # GNU md5sum -z and file -0 -0 produce unescaped, NUL-delimited records.
   # Bounded batches avoid one checksum and one file process per extracted file.
-  while mapfile -d '' -n "${lHASH_BATCH_SIZE}" -t lINPUT_FILES && ((${#lINPUT_FILES[@]})); do
-    lHASHED_FILES=()
-    for lBINARY in "${lINPUT_FILES[@]}"; do
+  while mapfile -d '' -n "${lHASH_BATCH_SIZE}" -t lINPUT_FILES_ARR && ((${#lINPUT_FILES_ARR[@]})); do
+    lHASHED_FILES_ARR=()
+    for lBINARY in "${lINPUT_FILES_ARR[@]}"; do
       if [[ "${lBINARY}" != *".raw" ]]; then
-        lHASHED_FILES+=("${lBINARY}")
+        lHASHED_FILES_ARR+=("${lBINARY}")
       fi
     done
-    if ((${#lHASHED_FILES[@]} == 0)); then
-      lINPUT_FILES=()
+    if ((${#lHASHED_FILES_ARR[@]} == 0)); then
+      lINPUT_FILES_ARR=()
       continue
     fi
 
-    mapfile -d '' -t lMD5_RECORDS < <(md5sum -z -- "${lHASHED_FILES[@]}" 2>/dev/null || true)
-    lHASHED_FILES=()
-    lHASHES=()
-    for lMD5_RECORD in "${lMD5_RECORDS[@]}"; do
+    mapfile -d '' -t lMD5_RECORDS_ARR < <(md5sum -z -- "${lHASHED_FILES_ARR[@]}" 2>/dev/null || true)
+    lHASHED_FILES_ARR=()
+    lHASHES_ARR=()
+    for lMD5_RECORD in "${lMD5_RECORDS_ARR[@]}"; do
       if [[ "${#lMD5_RECORD}" -lt 35 ]]; then
         continue
       fi
       lMD5SUM="${lMD5_RECORD:0:32}"
       lBINARY="${lMD5_RECORD:34}"
       if claim_p99_hash "${lMD5SUM}" "${lWORKER_HASH_INDEX_CACHE}"; then
-        lHASHES+=("${lMD5SUM}")
-        lHASHED_FILES+=("${lBINARY}")
+        lHASHES_ARR+=("${lMD5SUM}")
+        lHASHED_FILES_ARR+=("${lBINARY}")
       fi
     done
-    if ((${#lHASHED_FILES[@]} == 0)); then
-      lINPUT_FILES=()
-      lMD5_RECORDS=()
+    if ((${#lHASHED_FILES_ARR[@]} == 0)); then
+      lINPUT_FILES_ARR=()
+      lMD5_RECORDS_ARR=()
       continue
     fi
 
-    mapfile -d '' -t lFILE_OUTPUTS < <(file -0 -0 -b -- "${lHASHED_FILES[@]}" 2>/dev/null || true)
-    for ((lRECORD_ID = 0; lRECORD_ID < ${#lHASHED_FILES[@]}; lRECORD_ID++)); do
-      lFILE_OUTPUT="${lFILE_OUTPUTS[lRECORD_ID]:-unreadable}"
-      analyze_binary_architecture "${lHASHED_FILES[lRECORD_ID]}" "${lSOURCE_MODULE}" "${lHASHES[lRECORD_ID]}" "${lFILE_OUTPUT}"
+    mapfile -d '' -t lFILE_OUTPUTS_ARR < <(file -0 -0 -b -- "${lHASHED_FILES_ARR[@]}" 2>/dev/null || true)
+    for ((lRECORD_ID = 0; lRECORD_ID < ${#lHASHED_FILES_ARR[@]}; lRECORD_ID++)); do
+      lFILE_OUTPUT="${lFILE_OUTPUTS_ARR[lRECORD_ID]:-unreadable}"
+      analyze_binary_architecture "${lHASHED_FILES_ARR[lRECORD_ID]}" "${lSOURCE_MODULE}" "${lHASHES_ARR[lRECORD_ID]}" "${lFILE_OUTPUT}"
     done
-    lINPUT_FILES=()
-    lMD5_RECORDS=()
-    lHASHED_FILES=()
-    lHASHES=()
-    lFILE_OUTPUTS=()
+    lINPUT_FILES_ARR=()
+    lMD5_RECORDS_ARR=()
+    lHASHED_FILES_ARR=()
+    lHASHES_ARR=()
+    lFILE_OUTPUTS_ARR=()
   done <"${lWORKER_FILE}"
 }
 

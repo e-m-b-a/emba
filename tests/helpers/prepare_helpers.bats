@@ -50,16 +50,16 @@ teardown() {
   local lBINARY="${LOG_DIR}/duplicate.bin"
   local IFS=$'\n\t'
   local lPID=""
-  local lPIDS=()
+  local lPIDS_ARR=()
   local P99_CSV_LOG="${CSV_DIR}/p99_prepare_analyzer.csv"
   printf 'duplicate content' >"${lBINARY}"
 
   set -u
   for _ in {1..16}; do
     binary_architecture_threader "${lBINARY}" "test" &
-    lPIDS+=("$!")
+    lPIDS_ARR+=("$!")
   done
-  for lPID in "${lPIDS[@]}"; do
+  for lPID in "${lPIDS_ARR[@]}"; do
     wait "${lPID}"
   done
   wait
