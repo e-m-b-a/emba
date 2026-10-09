@@ -693,7 +693,7 @@ main_emulation() {
     fi
 
     print_output "[*] Add network.sh entry to ${ORANGE}${lINIT_OUT}${NC}"
-    : >>"${lINIT_OUT}" || true
+    echo "" >>"${lINIT_OUT}" || true
     echo "/firmadyne/network.sh &" >>"${lINIT_OUT}" || print_error "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
 
     if (grep -q "/firmadyne/run_service.sh" "${lINIT_OUT}"); then

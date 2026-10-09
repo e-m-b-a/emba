@@ -941,6 +941,7 @@ create_minimal_binary_corpus() {
 
   local lCORPUS_PATH="${S09_LOG_DIR}/binary_corpus_tmp"
   local lCORPUS_log="${lCORPUS_PATH}/logfile.txt"
+  [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p "${lCORPUS_PATH}"
   touch "${lCORPUS_log}" 2>/dev/null || true
   local lCORPUS_FILE="${lCORPUS_PATH}/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}"
   local lORIG_CORPUS_FILE="${TESTS_DIR}/bin_version_testdata/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}.bin"
@@ -957,7 +958,6 @@ create_minimal_binary_corpus() {
   mapfile -t lVERSION_IDENTIFIERS_ARR < <(echo "${lVERSION_IDENTIFIER_FULL//AND/$'\n'}")
 
   write_log "[*] Testing ${lRULE_IDENTIFIER}.json for identifier ${lVERSION_IDENTIFIER_FULL}" "${lCORPUS_log}"
-  [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p "${lCORPUS_PATH}"
 
   write_log "[*] Extracted id for rule ${lRULE_IDENTIFIER} - ${lVERSION_IDENTIFIER_ORIG}: ${lIDENTIFIER_ID}" "${lCORPUS_log}"
   write_log "[*] Generate corpus for rule ${lRULE_IDENTIFIER}" "${lCORPUS_log}"
