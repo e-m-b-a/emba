@@ -7,10 +7,10 @@
     "unknown"
   ],
   "grep_commands": [
-    "info,\\ udhcp\\ client\\ \\(v[0-9](\\.[0-9]+)+?\\)\\ started",
-    "udhcp\\ [0-9](\\.[0-9]+)+?$",
-    "udhcpc\\ \\(v[0-9](\\.[0-9]+)+?(-pre)?\\)\\ started$",
-    "udhcpcd,\\ version\\ [0-9](\\.[0-9]+)+?"
+    "info,\\ udhcp\\ client\\ \\(v[0-9](\\.[0-9]+)+\\)\\ started",
+    "udhcp\\ [0-9](\\.[0-9]+)+$",
+    "udhcpc\\ \\(v[0-9](\\.[0-9]+)+(-pre)?\\)\\ started$",
+    "udhcpcd,\\ version\\ [0-9](\\.[0-9]+)+"
   ],
   "vendor_names": [
     "NA"

@@ -28,10 +28,10 @@
     "tcpdump"
   ],
   "grep_commands": [
-    "'\"^dump\"AND\"^\\[\\ -T\\ type\\ \\]\\ \\[\\ --version\\ \\]\\ \\[\\ -V\\ file\\ \\]$\"AND\"^[2-9](\\.[0-9]+)+?$\"'",
-    "^tcpdump\\ version\\ [2-9](\\.[0-9]+)+?$",
-    "tcpdump\\.[2-9](\\.[0-9]+)+?\\ version",
-    "'\"^dump_packet_and_trunc$\"AND\"^%s\\ version\\ [2-9](\\.[0-9]+)+?$\"'"
+    "'\"^dump\"AND\"^\\[\\ -T\\ type\\ \\]\\ \\[\\ --version\\ \\]\\ \\[\\ -V\\ file\\ \\]$\"AND\"^[2-9](\\.[0-9]+)+$\"'",
+    "^tcpdump\\ version\\ [2-9](\\.[0-9]+)+$",
+    "tcpdump\\.[2-9](\\.[0-9]+)+\\ version",
+    "'\"^dump_packet_and_trunc$\"AND\"^%s\\ version\\ [2-9](\\.[0-9]+)+$\"'"
   ],
   "live_grep_commands": [],
   "zgrep_grep_commands": [],

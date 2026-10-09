@@ -120,6 +120,7 @@ set_defaults() {
   export EXT_DIR="${INVOCATION_PATH}/external"
   export HELP_DIR="${INVOCATION_PATH}/helpers"
   export MOD_DIR="${INVOCATION_PATH}/modules"
+  export TESTS_DIR="${INVOCATION_PATH}/tests"
   export MOD_DIR_LOCAL="${INVOCATION_PATH}/EMBA-Non-free/modules_local"
   export PID_LOGGING=0
   # this will be in TMP_DIR/pid_notes.log
@@ -160,6 +161,10 @@ set_defaults() {
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+
+  # BINARY_CORPUS_GENERATION enables the building of small binary artifacts of all detected
+  # components for later analysis or for testcase generation emba_logs/s09_firmware_base_version_check/binary_corpus_tmp/
+  export BINARY_CORPUS_GENERATION=1
   export Q_MOD_PID=""
   export UEFI_VERIFIED=0
   export MAIN_CONTAINER=""

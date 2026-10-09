@@ -7,7 +7,7 @@
     "Libpng"
   ],
   "grep_commands": [
-    "libpng\\ version\\ [0-9](\\.[0-9]+)+?\\ "
+    "libpng\\ version\\ [0-9](\\.[0-9]+)+\\ "
   ],
   "vendor_names": [
     "greg_roelofs",
