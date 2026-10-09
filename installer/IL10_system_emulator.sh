@@ -88,9 +88,9 @@ IL10_system_emulator() {
       # download_file "uml-utilities.deb" "${UML_UTILITIES_URL}" "external/uml-utilities.deb"
       download_file "libfuse2t64" "${LIBFUSE_URL}" "external/libfuse2t64.deb"
       dpkg -i "external/libfuse2t64.deb"
-      dpkg -i "external/uml-utilities.deb"
+      # dpkg -i "external/uml-utilities.deb"
       rm -f "external/libfuse2t64.deb"
-      rm -f "external/uml-utilities.deb"
+      # rm -f "external/uml-utilities.deb"
 
       download_file "busybox.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/busybox-v${BB_VER}.zip" "external/EMBA_Live_bins/busybox.zip"
       download_file "console.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/console.zip" "external/EMBA_Live_bins/console.zip"

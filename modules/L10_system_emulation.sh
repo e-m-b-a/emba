@@ -277,7 +277,7 @@ cleanup_tap() {
   mapfile -t lTAP_CLEAN_ARR < <(ifconfig | grep tap | cut -d: -f1 || true)
   for lTAP_TO_CLEAN in "${lTAP_CLEAN_ARR[@]}"; do
     print_output "[*] Cleaning up TAP interface ${lTAP_TO_CLEAN}"
-    ip tuntap del dev ${lTAP_TO_CLEAN} mode tap
+    ip tuntap del dev "${lTAP_TO_CLEAN}" mode tap || print_error "[-] Error in tap cleanup"
   done
 }
 

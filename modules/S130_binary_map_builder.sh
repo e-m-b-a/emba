@@ -234,12 +234,12 @@ system_emulator_init_runner() {
     if [[ ${EUID} -eq 0 ]]; then
       ip route flush dev "${lTAP_INTERFACE}"
       ip link set "${lTAP_INTERFACE}" down
-      ip link delete "${lTAP_INTERFACE}"
+      # ip link delete "${lTAP_INTERFACE}"
       ip tuntap del dev "${lTAP_INTERFACE}" mode tap
     else
       sudo ip route flush dev "${lTAP_INTERFACE}"
       sudo ip link set "${lTAP_INTERFACE}" down
-      sudo ip link delete "${lTAP_INTERFACE}"
+      # sudo ip link delete "${lTAP_INTERFACE}"
       sudo ip tuntap del dev "${lTAP_INTERFACE}" mode tap
     fi
   fi
