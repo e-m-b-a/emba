@@ -109,7 +109,9 @@ bvi_raw_grep_identifier() {
 #   * the optional outer ' quoting is removed
 #   * multi_grep identifiers are split on the AND marker
 #   * the per fragment " quoting is removed
-#   * ^ and $ are dropped, the corpus holds a context window around the match
+#   * only a leading ^ and a trailing $ are dropped, the corpus holds a context
+#     window around the match - a blanket removal of ^ and $ would corrupt
+#     escaped literals like \$Revision and leave an invalid ERE
 bvi_normalize_identifier() {
   local lRAW_IDENTIFIER="${1:-}"
 
@@ -120,7 +122,9 @@ bvi_normalize_identifier() {
   local lIDENTIFIER_FRAGMENT=""
   while IFS= read -r lIDENTIFIER_FRAGMENT; do
     lIDENTIFIER_FRAGMENT="${lIDENTIFIER_FRAGMENT//\"/}"
-    lIDENTIFIER_FRAGMENT="${lIDENTIFIER_FRAGMENT//[\^\$]/}"
+    # keep this in sync with create_minimal_binary_corpus in S09
+    lIDENTIFIER_FRAGMENT="${lIDENTIFIER_FRAGMENT%$}"
+    lIDENTIFIER_FRAGMENT="${lIDENTIFIER_FRAGMENT#^}"
     [[ -z "${lIDENTIFIER_FRAGMENT}" ]] && continue
     printf '%s\n' "${lIDENTIFIER_FRAGMENT}"
   done < <(printf '%s\n' "${lIDENTIFIER_FULL//AND/$'\n'}")
