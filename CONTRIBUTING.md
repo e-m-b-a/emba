@@ -54,6 +54,9 @@ It also sketches the typical integration process of patches.
 - Variables always need to be initialized
   - e.g., local lVARIABLE=""
 
+- Arrays always need to be initialized and properly named `_ARR`:
+  - e.g., local lVARIABLE_ARR=()
+
 - Local variables should always start with "l"
   - e.g., local lVARIABLE=""
   - Note: This will be enforced in the future!
