@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Extracts firmware with binwalk to the module log directory.
 #               This module is a fallback module for the very rare case that our extraction process was failing
@@ -81,7 +82,7 @@ P50_binwalk_extractor() {
 
   print_ln
   if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
-    remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}"
+    remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}" || return 1
     mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f)
   fi
 
@@ -129,55 +130,4 @@ linux_basic_identification() {
     fi
   fi
   echo "${lLINUX_PATH_COUNTER_BINWALK}"
-}
-
-remove_uprintable_paths() {
-  local lOUTPUT_DIR_BINWALK="${1:-}"
-
-  local lFIRMWARE_UNPRINT_FILES_ARR=()
-  local lFW_FILE=""
-  local lNEW_FILE=""
-  local lDIR=""
-  local lBASE=""
-  local lNEW_BASE=""
-
-  # 1. Use -depth so children are renamed BEFORE their parent directories are renamed
-  # 2. Use a hex-based pattern matching real binary unprintables (\x00-\x1F, \x7F)
-  mapfile -t lFIRMWARE_UNPRINT_FILES_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -depth -regextype posix-extended -regex '.*[\x00-\x1F\x7F].*')
-
-  if [[ "${#lFIRMWARE_UNPRINT_FILES_ARR[@]}" -gt 0 ]]; then
-    print_output "[*] Unprintable characters detected in extracted files -> cleanup started"
-
-    for lFW_FILE in "${lFIRMWARE_UNPRINT_FILES_ARR[@]}"; do
-      # Verify the file still exists (handles race conditions or overlapping paths)
-      [[ -e "${lFW_FILE}" || -L "${lFW_FILE}" ]] || continue
-
-      # Extract the directory path and the raw filename separately
-      lDIR=$(dirname "${lFW_FILE}")
-      lBASE=$(basename "${lFW_FILE}")
-
-      # Sanitize ONLY the filename (the basename)
-      # Replaces carriage returns (\r), ASCII control characters, and non-ASCII byte corruption with a single '_'
-      # lNEW_BASE=$(printf '%s' "${lBASE}" | sed -E 's/[\x00-\x1F\x7F-\xFF]+/_/g')
-      # Forces raw byte matching to strip \r, control codes, and binary junk into single underscores
-      lNEW_BASE=$(
-        LC_ALL=C
-        printf '%s' "${lBASE}" | tr -s '\000-\037\177-\377' '_'
-        # printf '%s' "${lBASE}" | tr -s '[\000-\037\177-\377]' '_'
-      )
-
-      # Reconstruct the new full path
-      lNEW_FILE="${lDIR}/${lNEW_BASE}"
-
-      # Only move if the name actually changed
-      if [[ "${lFW_FILE}" != "${lNEW_FILE}" ]]; then
-        print_output "[*] Moving ${lFW_FILE} to ${lNEW_FILE}"
-        # just in case our new filename is already in place
-        if [[ -f "${lNEW_FILE}" ]]; then
-          lNEW_FILE="${lNEW_FILE}_${RANDOM}"
-        fi
-        mv -- "${lFW_FILE}" "${lNEW_FILE}" || print_output "[-] Cleanup of file ${lFW_FILE} not possible"
-      fi
-    done
-  fi
 }

@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  Gives some very basic information about the provided firmware binary.
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -23,6 +24,11 @@ P02_firmware_bin_file_check() {
   module_title "Binary firmware file analyzer"
   pre_module_reporter "${FUNCNAME[0]}"
   set_p02_default_exports
+  local lCLEANED_PATHS=0
+  remove_uprintable_paths "${LOG_DIR}/firmware" lCLEANED_PATHS || return 1
+  if [[ "${lCLEANED_PATHS}" -gt 0 ]] || { [[ -f "${P99_CSV_LOG}" ]] && grep -Fq ';@P99:' "${P99_CSV_LOG}"; }; then
+    invalidate_p99_path_cache || return 1
+  fi
 
   # we set this var global to 1 if we find something UEFI related
   export UEFI_DETECTED=0
@@ -161,6 +167,7 @@ fw_bin_detector() {
   local lCHECK_FILE="${1:-}"
   local lCHECK_FILE_NAME=""
   lCHECK_FILE_NAME="$(basename "${lCHECK_FILE}")"
+  sanitize_firmware_basename lCHECK_FILE_NAME
   local lFILE_BIN_OUT=""
   local lHEX_FIRST_LINE=""
   local lQNAP_ENC_CHECK=""

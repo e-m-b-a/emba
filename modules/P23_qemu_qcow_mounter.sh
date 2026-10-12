@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Mounts and extracts Qemu QCOW2 images
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -95,6 +96,7 @@ qcow_extractor() {
     done
   fi
 
+  remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
   mapfile -t lFILES_QCOW_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
 
   print_output "[*] Extracted ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files from the firmware image."
@@ -196,6 +198,7 @@ qcow_extractor_nbd_mnt() {
 
       copy_qemu_nbd "${lTMP_QCOW_MOUNT}" "${lEXTRACTION_DIR_FINAL}"
 
+      remove_uprintable_paths "${lEXTRACTION_DIR_FINAL}" || return 1
       mapfile -t lFILES_QCOW_ARR < <(find "${lEXTRACTION_DIR_FINAL}" -type f ! -name "*.raw")
 
       print_output "[*] Extracted ${ORANGE}${#lFILES_QCOW_ARR[@]}${NC} files from the firmware image."

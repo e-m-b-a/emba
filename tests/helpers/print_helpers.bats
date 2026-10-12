@@ -8,6 +8,7 @@
 #
 # EMBA is licensed under GPLv3
 # SPDX-License-Identifier: GPL-3.0-only
+# Contributor(s): Mihai Macarie
 #
 
 # shellcheck disable=SC1091,SC2034
@@ -93,6 +94,14 @@ teardown() {
 @test "safe_echo outputs string" {
   result="$(safe_echo "test")"
   [ -n "${result}" ]
+}
+
+@test "write_csv_log_to_path preserves CSV formatting" {
+  local lCSV_LOG="${LOG_DIR}/custom.csv"
+
+  write_csv_log_to_path "${lCSV_LOG}" "source" "first" "second"
+
+  [ "$(<"${lCSV_LOG}")" = "source;first;second;;" ]
 }
 
 @test "format_log strips ANSI codes when FORMAT_LOG=0" {

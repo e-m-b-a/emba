@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Mounts and extracts extX images (currently binwalk destroys the permissions and the symlinks)
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -75,6 +76,7 @@ ext_extractor() {
     print_ln
     print_output "[*] Unmounting ${ORANGE}${lTMP_EXT_MOUNT}${NC} directory"
 
+    remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
     mapfile -t lFILES_EXT_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
     print_output "[*] Extracted ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files from the EXT filesystem."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_EXT_ARR[@]}${NC} files ... could take some time" "no_log"

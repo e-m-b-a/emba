@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Extracts vmdk images
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -100,6 +101,7 @@ vmdk_extractor() {
     local lVMDK_FILES_ARR=()
     local lBINARY=""
     local lWAIT_PIDS_P99_ARR=()
+    remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
     mapfile -t lVMDK_FILES_ARR < <(find "${lEXTRACTION_DIR_}" -type f)
 
     print_output "[*] Extracted ${ORANGE}${#lVMDK_FILES_ARR[@]}${NC} files from the firmware image."

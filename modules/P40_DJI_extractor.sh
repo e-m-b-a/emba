@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: Extracts DJI drone firmware with https://github.com/o-gs/dji-firmware-tools
 #
@@ -108,6 +109,7 @@ dji_imah_firmware_extractor() {
   if [[ -f "${lFIRMWARE_PATH}" ]]; then
     # usually we have a tar file that we need to extract first:
     unblobber "${FIRMWARE_PATH_BAK}" "${lEXTRACTION_DIR}" 0
+    remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
     mapfile -t lFILES_UNBLOB_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
     for lBINARY in "${lFILES_UNBLOB_ARR[@]}"; do
       binary_architecture_threader "${lBINARY}" "${FUNCNAME[0]}" &
@@ -123,9 +125,11 @@ dji_imah_firmware_extractor() {
       print_output "[+] Found some Linux filesytem - stopping extraction module"
       return
     fi
+    remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
     mapfile -t lDJI_FILE_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw" -exec du -h {} + | sort -r -h | awk '{print $2}')
   else
     # if we have the tar file already extracted to lFIRMWARE_PATH, we can use this directory
+    remove_uprintable_paths "${lFIRMWARE_PATH}" || return 1
     mapfile -t lDJI_FILE_ARR < <(find "${lFIRMWARE_PATH}" -type f ! -name "*.raw" -exec du -h {} + | sort -r -h | awk '{print $2}')
   fi
 
@@ -197,9 +201,11 @@ dji_imah_firmware_extractor() {
       hexdump -C "${lDJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       print_ln
       "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${lEXTRACTION_DIR}"/dji_prak_"${lFNAME}"_"${lDJI_KEY}" -f -i "${lDJI_FILE}" -k "${lDJI_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${lFNAME}"_"${lDJI_KEY}"_extracted.log || true
+      remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
       mapfile -t lFILES_EXT_KEY_ARR < <(find "${lEXTRACTION_DIR}" -type f -wholename "*dji_prak_${lFNAME}_${lDJI_KEY}*" ! -size 0 || true)
       if [[ "${#lFILES_EXT_KEY_ARR[@]}" -gt 0 ]]; then
         print_ln "no_log"
+        remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
         mapfile -t lFILES_DJI_ARR < <(find "${lEXTRACTION_DIR}" -type f -wholename "*dji_prak_${lFNAME}_${lDJI_KEY}*")
         print_output "[*] Extracted ${ORANGE}${#lFILES_DJI_ARR[@]}${NC} files."
         print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DJI_ARR[@]}${NC} files ... could take some time" "no_log"
@@ -236,6 +242,7 @@ dji_imah_firmware_extractor() {
           unblobber "${lFILE_EXT_KEY}" "${lOUTPUT_DIR}" 0
 
           # mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f -print0|xargs -r -0 -P 16 -I % sh -c 'file "%"')
+          remove_uprintable_paths "${lOUTPUT_DIR}" || return 1
           mapfile -t lUB_EXTRACTED_FILES_ARR < <(find "${lOUTPUT_DIR}" -type f ! -name "*.raw")
 
           if [[ "${#lUB_EXTRACTED_FILES_ARR[@]}" -gt 0 ]]; then
@@ -326,6 +333,7 @@ dji_xv4_firmware_extractor() {
     return
   fi
 
+  remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
   mapfile -t lXV4_EXTRACTEDFILES_ARR < <(find "${lEXTRACTION_DIR_}" -type f -name "*.bin" || true)
 
   for lXV4_EXTRACED_FILE in "${lXV4_EXTRACTEDFILES_ARR[@]}"; do
@@ -334,6 +342,7 @@ dji_xv4_firmware_extractor() {
     unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}" 0
   done
 
+  remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
   mapfile -t lFILES_DJI_XV4_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
   print_output "[*] Extracted ${ORANGE}${#lFILES_DJI_XV4_ARR[@]}${NC} files from ${ORANGE}${lFIRMWARE_NAME_}${NC}." "no_log"
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_DJI_XV4_ARR[@]}${NC} files ... could take some time" "no_log"

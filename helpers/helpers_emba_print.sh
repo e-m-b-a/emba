@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Mihai Macarie
 
 # Description:  All functions for colorizing terminal output and handling logging
 
@@ -352,9 +353,17 @@ write_csv_log_to_path() {
   local lSOURCE_MODULE="${2:-}"
   shift 2
   local lCSV_ITEMS=("$@")
+  local lCSV_LINE=""
 
-  # shellcheck disable=SC2005
-  echo "$(printf '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}" && printf '\n')" >>"${lCSV_LOG}" || true
+  # All P99 producers must clean their extracted tree before enumerating files.
+  # Reject a missed caller rather than corrupting the plain line-based CSV.
+  if [[ "${lCSV_LOG}" == "${P99_CSV_LOG:-}" && "${lCSV_ITEMS[0]:-}" == *[\;[:cntrl:]]* ]]; then
+    print_output "[-] Unclean firmware path passed to P99: ${lCSV_ITEMS[0]}" "no_log"
+    return 1
+  fi
+
+  printf -v lCSV_LINE '%s;%s;' "${lSOURCE_MODULE}" "${lCSV_ITEMS[@]}"
+  printf '%s\n' "${lCSV_LINE}" >>"${lCSV_LOG}" || true
 }
 
 # For generating json log file in LOG_DIR/json_logs/<module_name>.json

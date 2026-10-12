@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description:  Extracts firmware with unblob to the module log directory.
 #               IMPORTANT: The results are currently not used for further analysis.
@@ -86,7 +87,7 @@ P55_unblob_extractor() {
   if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     print_ln
     if [[ -d "${lOUTPUT_DIR_UNBLOB}" ]]; then
-      remove_uprintable_paths "${lOUTPUT_DIR_UNBLOB}"
+      remove_uprintable_paths "${lOUTPUT_DIR_UNBLOB}" || return 1
       mapfile -t lFILES_UNBLOB_ARR < <(find "${lOUTPUT_DIR_UNBLOB}" -type f ! -name "*.raw")
     fi
 
@@ -131,7 +132,7 @@ P55_unblob_extractor() {
     fi
 
     if [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
-      remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}"
+      remove_uprintable_paths "${lOUTPUT_DIR_BINWALK}" || return 1
       mapfile -t lFILES_BINWALK_ARR < <(find "${lOUTPUT_DIR_BINWALK}" -type f ! -name "*.raw")
     fi
 

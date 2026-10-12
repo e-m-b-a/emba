@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 
 # Description: As binwalk has issues with UBI filesystems we are going to extract them here
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -70,6 +71,7 @@ ubi_extractor() {
   print_output "[*] Extracted ${ORANGE}${FILES_UBI_EXT}${NC} files from the firmware image via UBI extraction round 2."
 
   if [[ -d "${lEXTRACTION_DIR_}" ]]; then
+    remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
     mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'file -b "%"' | grep "UBI image" || true)
 
     for lUBI_DATA in "${lUBI_1st_ROUND_ARR[@]}"; do
@@ -87,6 +89,7 @@ ubi_extractor() {
 
     print_ln
 
+    remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
     mapfile -t lFILES_UBI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
     print_output "[*] Extracted ${ORANGE}${#lFILES_UBI_ARR[@]}${NC} files from the UBI firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UBI_ARR[@]}${NC} files ... could take some time" "no_log"

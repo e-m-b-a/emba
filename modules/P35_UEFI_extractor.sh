@@ -12,6 +12,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Author(s): Michael Messner
+# Contributor(s): Mihai Macarie
 # Credits:   Binarly for support
 
 # Description: Extracts UEFI images with BIOSUtilities - https://github.com/platomav/BIOSUtilities/tree/refactor
@@ -58,6 +59,7 @@ P35_UEFI_extractor() {
       lEXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${lFW_NAME_}"_unblob_extracted
       unblobber "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}" 0
 
+      remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
       mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
 
       print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image in Unblob mode."
@@ -103,6 +105,7 @@ P35_UEFI_extractor() {
         print_output "[+] Binwalk extraction output for ${lFW_NAME_}" "" "${lBINWALK_LOG_FILE}"
       fi
 
+      remove_uprintable_paths "${lEXTRACTION_DIR}" || return 1
       mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR}" -type f ! -name "*.raw")
 
       print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image in Binwalk mode."
@@ -200,6 +203,7 @@ ami_extractor() {
     find "${lEXTRACTION_DIR_}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
     print_ln
 
+    remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
     mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
     print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from the firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
@@ -282,6 +286,7 @@ uefi_extractor() {
   lPE32_IMAGE=$(grep -c "PE32 image" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
   lDRIVER_COUNT=$(grep -c "DXE driver" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
 
+  remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
   mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
 
   print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image."
