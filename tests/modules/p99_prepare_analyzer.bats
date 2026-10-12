@@ -77,3 +77,15 @@ teardown() {
   [ "$(find "${CSV_DIR}" -name old-hash | wc -l)" -eq 1 ]
   [ "$(find "${CSV_DIR}" -name p99_prepare_analyzer.csv | wc -l)" -eq 1 ]
 }
+
+@test "P99 backend failure stops file array preparation and module completion" {
+  touch "${LOG_DIR}/firmware/first.bin"
+  populate_p99_backend() { return 17; }
+  prepare_all_file_arrays() { touch "${CAPTURE_FILE}"; }
+  module_end_log() { touch "${CAPTURE_FILE}"; }
+
+  run P99_prepare_analyzer
+
+  [ "${status}" -eq 17 ]
+  [ ! -e "${CAPTURE_FILE}" ]
+}

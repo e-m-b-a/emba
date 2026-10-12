@@ -52,7 +52,6 @@ setup() {
   analyze_binary_architecture() { printf '%q;%s;%s\n' "$1" "$3" "$4" >>"${CAPTURE_FILE}"; }
   wait_for_pid() {
     printf '%s\n' "$#" >>"${WORKER_COUNTS}"
-    wait
   }
   module_end_log() { printf '%s\n' "$2" >"${END_FILE}"; }
 }
@@ -145,4 +144,73 @@ teardown() {
 
   [ "$(wc -l <"${P99_CSV_LOG}")" -eq 2 ]
   [ "$(find "${TMP_DIR}/p99_md5sum_done" -type f | wc -l)" -eq 2 ]
+}
+
+@test "populate_p99_backend reports index initialization failures after polling workers" {
+  local lFILE_LIST="${TMP_DIR}/failures.list"
+  touch "${FIRMWARE_PATH_CP}/first.bin" "${FIRMWARE_PATH_CP}/second.bin"
+  find "${FIRMWARE_PATH_CP}" -type f -print0 >"${lFILE_LIST}"
+  initialize_p99_hash_index() { return 1; }
+  wait_for_pid() { return 0; }
+
+  run populate_p99_backend "${lFILE_LIST}" test 2
+
+  [ "${status}" -eq 1 ]
+  [ ! -e "${P99_CSV_LOG}" ]
+  [ "$(find "${TMP_DIR}" -maxdepth 1 -name 'p99_backend_workers.*' | wc -l)" -eq 0 ]
+}
+
+@test "populate_p99_backend retains a failed worker status while reaping successful workers" {
+  local lFILE_LIST="${TMP_DIR}/mixed.list"
+  printf 'first\0second\0third\0fourth\0' >"${lFILE_LIST}"
+  wait_for_pid() { return 0; }
+  p99_backend_worker() {
+    if [[ "$1" == *worker_00000 ]]; then
+      return 23
+    fi
+    printf 'completed\n' >>"${CAPTURE_FILE}"
+  }
+
+  run populate_p99_backend "${lFILE_LIST}" test 4
+
+  [ "${status}" -eq 23 ]
+  [ "$(wc -l <"${CAPTURE_FILE}")" -eq 3 ]
+  [ "$(find "${TMP_DIR}" -maxdepth 1 -name 'p99_backend_workers.*' | wc -l)" -eq 0 ]
+}
+
+@test "populate_p99_backend reports partitioning failures and removes its work directory" {
+  local lFILE_LIST="${TMP_DIR}/partition.list"
+  printf 'first\0' >"${lFILE_LIST}"
+  split() { return 31; }
+
+  run populate_p99_backend "${lFILE_LIST}" test 1
+
+  [ "${status}" -eq 1 ]
+  [ "$(find "${TMP_DIR}" -maxdepth 1 -name 'p99_backend_workers.*' | wc -l)" -eq 0 ]
+}
+
+@test "P60 stops before identification or reporting when its backend child fails" {
+  touch "${FIRMWARE_PATH_CP}/first.bin"
+  populate_p99_backend() { return 27; }
+  linux_basic_identification() { touch "${CAPTURE_FILE}"; }
+
+  run P60_deep_extractor
+
+  [ "${status}" -eq 27 ]
+  [ ! -e "${CAPTURE_FILE}" ]
+  [ ! -e "${END_FILE}" ]
+}
+
+@test "P60 fallback failure stops root detection deep extraction and module completion" {
+  source "${MOD_DIR}/P60_deep_extractor.sh"
+  touch "${FIRMWARE_PATH_CP}/first.bin"
+  populate_p99_backend() { return 19; }
+  detect_root_dir_helper() { touch "${CAPTURE_FILE}"; }
+  deeper_extractor_helper() { touch "${CAPTURE_FILE}"; }
+
+  run P60_deep_extractor
+
+  [ "${status}" -eq 19 ]
+  [ ! -e "${CAPTURE_FILE}" ]
+  [ ! -e "${END_FILE}" ]
 }

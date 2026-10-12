@@ -65,7 +65,7 @@ P99_prepare_analyzer() {
     lFILES_COUNT="${lFILES_COUNT// /}"
     print_output "[*] Populating backend data for ${ORANGE}${lFILES_COUNT}${NC} files ... could take some time" "no_log"
 
-    populate_p99_backend "${lFILES_LIST}" "${FUNCNAME[0]}" "${lFILES_COUNT}"
+    populate_p99_backend "${lFILES_LIST}" "${FUNCNAME[0]}" "${lFILES_COUNT}" || return "$?"
   fi
 
   # do we need this. We should check it and remove the complete code

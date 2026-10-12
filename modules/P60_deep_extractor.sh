@@ -47,7 +47,7 @@ P60_deep_extractor() {
 
   check_disk_space
   if ! [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
-    deep_extractor
+    deep_extractor || return "$?"
   else
     print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
     print_output "[!] $(print_date) - Ending extraction processes - no deep extraction performed" "main"
@@ -84,8 +84,8 @@ P60_deep_extractor() {
     local lP99_BACKEND_PID="$!"
 
     local lLINUX_PATH_COUNTER=0
+    wait "${lP99_BACKEND_PID}" || return "$?"
     lLINUX_PATH_COUNTER=$(linux_basic_identification "${FIRMWARE_PATH_CP}")
-    wait_for_pid "${lP99_BACKEND_PID}"
 
     print_ln
     print_output "[*] Found ${ORANGE}${lFILES_EXT_COUNT}${NC} files at all."
@@ -127,7 +127,7 @@ deep_extractor() {
     lFILES_DEEP_PRE_COUNT="${lFILES_DEEP_PRE_COUNT// /}"
     print_output "[*] Populating backend data for ${ORANGE}${lFILES_DEEP_PRE_COUNT}${NC} files ... could take some time" "no_log"
 
-    populate_p99_backend "${lFILES_DEEP_PRE_LIST}" "${FUNCNAME[0]}" "${lFILES_DEEP_PRE_COUNT}"
+    populate_p99_backend "${lFILES_DEEP_PRE_LIST}" "${FUNCNAME[0]}" "${lFILES_DEEP_PRE_COUNT}" || return "$?"
     detect_root_dir_helper "${LOG_DIR}/firmware"
     if [[ ${RTOS} -eq 0 ]]; then
       export NO_EXTRACTED=1

@@ -409,6 +409,7 @@ populate_p99_backend() {
   local lWORKER_COUNT=0
   local lWORKER_DIR=""
   local lWORKER_FILE=""
+  local lWORKER_PID=""
   local lSTATUS=0
   local lWORKER_FILES_ARR=()
   local lWORKER_PIDS_ARR=()
@@ -437,7 +438,12 @@ populate_p99_backend() {
     lWORKER_PIDS_ARR+=("$!")
   done
   wait_for_pid "${lWORKER_PIDS_ARR[@]}" || lSTATUS="$?"
-  rm -r -- "${lWORKER_DIR}"
+  # The polling helper does not reap children or expose their exit statuses.
+  # Reap every worker, retaining failure even if a later worker succeeds.
+  for lWORKER_PID in "${lWORKER_PIDS_ARR[@]}"; do
+    wait "${lWORKER_PID}" || lSTATUS="$?"
+  done
+  rm -r -- "${lWORKER_DIR}" || lSTATUS="$?"
   return "${lSTATUS}"
 }
 
