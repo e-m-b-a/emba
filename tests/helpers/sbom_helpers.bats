@@ -20,10 +20,34 @@ setup() {
   source "${HELP_DIR}/helpers_emba_print.sh"
   # shellcheck disable=SC1091
   source "${HELP_DIR}/helpers_emba_sbom_helpers.sh"
+  export SBOM_LOG_PATH="${LOG_DIR}/sbom"
+  PROPERTIES_JSON_ARR=()
+  unset SBOM_INCLUDE_LICENSE
 }
 
 teardown() {
   teardown_emba_test_env
+}
+
+@test "build_sbom_json_component_arr includes a detected license by default" {
+  build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "MIT" "NA" "NA" "NA"
+  jq -e '.licenses == [{"license": {"name": "MIT"}}]' "${SBOM_LOG_PATH}/deb_curl_${SBOM_COMP_BOM_REF}.json"
+}
+
+@test "build_sbom_json_component_arr preserves a license name with punctuation" {
+  local lLICENSE='Custom "Dual" License'
+  build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "${lLICENSE}" "NA" "NA" "NA"
+  jq -e --arg license "${lLICENSE}" '.licenses == [{"license": {"name": $license}}]' "${SBOM_LOG_PATH}/deb_curl_${SBOM_COMP_BOM_REF}.json"
+}
+
+@test "build_sbom_json_component_arr omits missing licenses" {
+  local lLICENSE=""
+  # The former opt-in path serialized an empty value as {"license": {}}.
+  SBOM_INCLUDE_LICENSE=true
+  for lLICENSE in "" "NA" "null" "unknown"; do
+    build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "${lLICENSE}" "NA" "NA" "NA"
+    jq -e 'has("licenses") | not' "${SBOM_LOG_PATH}/deb_curl_${SBOM_COMP_BOM_REF}.json"
+  done
 }
 
 @test "build_purl_identifier builds basic purl" {

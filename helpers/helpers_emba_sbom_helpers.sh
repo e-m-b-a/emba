@@ -234,9 +234,7 @@ build_sbom_json_component_arr() {
   if [[ -n "${lAPP_VERS}" ]] && [[ "${lAPP_VERS}" == "NA" ]]; then
     lAPP_VERS=""
   fi
-  if [[ -n "${lAPP_LIC}" ]] && [[ "${lAPP_LIC}" == "NA" || "${lAPP_LIC}" == "null" || "${lAPP_LIC}" == "unknown" ]]; then
-    lAPP_LIC_ARR=()
-  else
+  if [[ -n "${lAPP_LIC}" && "${lAPP_LIC}" != "NA" && "${lAPP_LIC}" != "null" && "${lAPP_LIC}" != "unknown" ]]; then
     lAPP_LIC_ARR+=("name=${lAPP_LIC}")
   fi
   if [[ -n "${lCPE_IDENTIFIER}" ]] && [[ "${lCPE_IDENTIFIER}" == "NA" ]]; then
@@ -266,10 +264,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=("group=${lPACKAGING_SYSTEM}")
   lCOMPONENT_ARR+=("bom-ref=${SBOM_COMP_BOM_REF}")
 
-  # TODO: License information is currently disabled for Dependency Track compatibility.
-  #       Set SBOM_INCLUDE_LICENSE=true to include license data in SBOM output.
-  #       Re-enable when the EMBA SBOM is fully supported by Dependency Track.
-  if [[ "${SBOM_INCLUDE_LICENSE:-false}" == "true" ]] && [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
+  if [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
     local lTMP_IDENTIFIER="${RANDOM}"
     [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
     # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
