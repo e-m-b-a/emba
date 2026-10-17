@@ -189,7 +189,9 @@ fw_bin_detector() {
   lBMC_CHECK=$(grep -c "libipmi.so" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
   if [[ "${SBOM_MINIMAL:-0}" -ne 1 ]]; then
     lDJI_PRAK_ENC_CHECK=$(grep -c "PRAK\|RREK\|IAEK\|PUEK" "${LOG_PATH_MODULE}/strings_${lCHECK_FILE_NAME}.txt" || true)
-    lDJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${lCHECK_FILE}" | grep -c "^0:" || true)
+    # only the first 3 bytes matter (magic at offset 0) - grepping the whole file buffers
+    # it as one "line" when it contains no newlines, which can exhaust memory on large files
+    lDJI_XV4_ENC_CHECK=$(head -c 3 "${lCHECK_FILE}" | grep -caP "^\x78\x56\x34" || true)
     # we are running binwalk on the file to analyze the output afterwards:
     "${BINWALK_BIN[@]}" "${lCHECK_FILE}" >"${LOG_PATH_MODULE}"/p02_binwalk_output.txt || true
     if [[ -f "${LOG_PATH_MODULE}"/p02_binwalk_output.txt ]]; then
