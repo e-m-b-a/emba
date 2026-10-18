@@ -44,7 +44,7 @@ S118_busybox_verifier() {
     # first grep is for identification of possible binary files - only the ELF files from P99
     # are used below, so only grep those (a recursive grep over all extracted files buffers
     # huge newline-free files as one "line", which can exhaust memory)
-    mapfile -t lBB_BINS_ARR < <(awk -F';' '$8 ~ /ELF/ {print $2}' "${P99_CSV_LOG}" | sort -u | xargs -r -d '\n' grep -l -a -E "BusyBox" 2>/dev/null || true)
+    mapfile -t lBB_BINS_ARR < <(awk -F';' '$8 ~ /ELF/ {print $2}' "${P99_CSV_LOG}" | sort -u | xargs -r -d '\n' grep -l -E "BusyBox" 2>/dev/null || true)
 
     for lBB_BIN in "${lBB_BINS_ARR[@]}"; do
       if [[ "${lBB_BIN}" == *".raw" ]]; then
