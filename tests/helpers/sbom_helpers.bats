@@ -29,20 +29,31 @@ teardown() {
   teardown_emba_test_env
 }
 
-@test "build_sbom_json_component_arr includes a detected license by default" {
+@test "build_sbom_json_component_arr omits licenses by default" {
+  command -v jo >/dev/null || skip "jo is not installed"
+  build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "MIT" "NA" "NA" "NA"
+  jq -e 'has("licenses") | not' "${SBOM_LOG_PATH}/deb_curl_${SBOM_COMP_BOM_REF}.json"
+}
+
+@test "build_sbom_json_component_arr includes a detected license when enabled" {
+  command -v jo >/dev/null || skip "jo is not installed"
+  SBOM_INCLUDE_LICENSE=true
   build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "MIT" "NA" "NA" "NA"
   jq -e '.licenses == [{"license": {"name": "MIT"}}]' "${SBOM_LOG_PATH}/deb_curl_${SBOM_COMP_BOM_REF}.json"
 }
 
 @test "build_sbom_json_component_arr preserves a license name with punctuation" {
+  command -v jo >/dev/null || skip "jo is not installed"
   local lLICENSE='Custom "Dual" License'
+  SBOM_INCLUDE_LICENSE=true
   build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "${lLICENSE}" "NA" "NA" "NA"
   jq -e --arg license "${lLICENSE}" '.licenses == [{"license": {"name": $license}}]' "${SBOM_LOG_PATH}/deb_curl_${SBOM_COMP_BOM_REF}.json"
 }
 
 @test "build_sbom_json_component_arr omits missing licenses" {
+  command -v jo >/dev/null || skip "jo is not installed"
   local lLICENSE=""
-  # The former opt-in path serialized an empty value as {"license": {}}.
+  # The opt-in path serialized an empty value as {"license": {}}.
   SBOM_INCLUDE_LICENSE=true
   for lLICENSE in "" "NA" "null" "unknown"; do
     build_sbom_json_component_arr "deb" "library" "curl" "7.68.0" "NA" "${lLICENSE}" "NA" "NA" "NA"
