@@ -391,8 +391,8 @@
 <g id="node30" class="node">
 <title>HTTP.BRIDGE&#45;1.php</title>
 <g id="a_node30"><a xlink:href="140|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/HTTP.BRIDGE-1.php|NA|main-binary" xlink:title="HTTP.BRIDGE&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="2818.75,-2178 2709,-2178 2709,-2142 2818.75,-2142 2818.75,-2178"/>
-<text xml:space="preserve" text-anchor="middle" x="2763.88" y="-2156.5" font-family="Arial" font-size="10.00" fill="white">HTTP.BRIDGE&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2818.75,-2262 2709,-2262 2709,-2226 2818.75,-2226 2818.75,-2262"/>
+<text xml:space="preserve" text-anchor="middle" x="2763.88" y="-2240.5" font-family="Arial" font-size="10.00" fill="white">HTTP.BRIDGE&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -763,8 +763,8 @@
 <g id="node58" class="node">
 <title>IP6T.WAN&#45;2.php</title>
 <g id="a_node58"><a xlink:href="121|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IP6T.WAN-2.php|NA|main-binary" xlink:title="IP6T.WAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="2798.5,-2262 2709,-2262 2709,-2226 2798.5,-2226 2798.5,-2262"/>
-<text xml:space="preserve" text-anchor="middle" x="2753.75" y="-2240.5" font-family="Arial" font-size="10.00" fill="white">IP6T.WAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2798.5,-2346 2709,-2346 2709,-2310 2798.5,-2310 2798.5,-2346"/>
+<text xml:space="preserve" text-anchor="middle" x="2753.75" y="-2324.5" font-family="Arial" font-size="10.00" fill="white">IP6T.WAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -772,8 +772,8 @@
 <g id="node59" class="node">
 <title>INFSVCS.LAN&#45;2.php</title>
 <g id="a_node59"><a xlink:href="143|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INFSVCS.LAN-2.php|NA|main-binary" xlink:title="INFSVCS.LAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="2818.75,-2346 2709,-2346 2709,-2310 2818.75,-2310 2818.75,-2346"/>
-<text xml:space="preserve" text-anchor="middle" x="2763.88" y="-2324.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.LAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2461.75,-2745 2352,-2745 2352,-2709 2461.75,-2709 2461.75,-2745"/>
+<text xml:space="preserve" text-anchor="middle" x="2406.88" y="-2723.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.LAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -871,8 +871,8 @@
 <g id="node66" class="node">
 <title>PFWD.NAT&#45;1.php</title>
 <g id="a_node66"><a xlink:href="281|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/PFWD.NAT-1.php|NA|main-binary" xlink:title="PFWD.NAT&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="2467.75,-2745 2373,-2745 2373,-2709 2467.75,-2709 2467.75,-2745"/>
-<text xml:space="preserve" text-anchor="middle" x="2420.38" y="-2723.5" font-family="Arial" font-size="10.00" fill="white">PFWD.NAT&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1816.75,-2745 1722,-2745 1722,-2709 1816.75,-2709 1816.75,-2745"/>
+<text xml:space="preserve" text-anchor="middle" x="1769.38" y="-2723.5" font-family="Arial" font-size="10.00" fill="white">PFWD.NAT&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -880,8 +880,8 @@
 <g id="node67" class="node">
 <title>draw_elements.php</title>
 <g id="a_node67"><a xlink:href="1.4K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/webinc/body/draw_elements.php|NA|main-binary" xlink:title="draw_elements.php">
-<polygon fill="#f6b26b" stroke="black" points="1822.75,-2745 1722,-2745 1722,-2709 1822.75,-2709 1822.75,-2745"/>
-<text xml:space="preserve" text-anchor="middle" x="1772.38" y="-2723.5" font-family="Arial" font-size="10.00" fill="white">draw_elements.php</text>
+<polygon fill="#f6b26b" stroke="black" points="331.75,-2199 231,-2199 231,-2163 331.75,-2163 331.75,-2199"/>
+<text xml:space="preserve" text-anchor="middle" x="281.38" y="-2177.5" font-family="Arial" font-size="10.00" fill="white">draw_elements.php</text>
 </a>
 </g>
 </g>
@@ -889,8 +889,8 @@
 <g id="node68" class="node">
 <title>DHCPS6.LAN&#45;2.php</title>
 <g id="a_node68"><a xlink:href="271|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/DHCPS6.LAN-2.php|NA|main-binary" xlink:title="DHCPS6.LAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="337.75,-2199 231,-2199 231,-2163 337.75,-2163 337.75,-2199"/>
-<text xml:space="preserve" text-anchor="middle" x="284.38" y="-2177.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="337.75,-1695 231,-1695 231,-1659 337.75,-1659 337.75,-1695"/>
+<text xml:space="preserve" text-anchor="middle" x="284.38" y="-1673.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -913,8 +913,8 @@
 <g id="node70" class="node">
 <title>DHCP4&#45;RENEW.sh</title>
 <g id="a_node70"><a xlink:href="144|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/events/DHCP4-RENEW.sh|NA|main-binary" xlink:title="DHCP4&#45;RENEW.sh">
-<polygon fill="#93c47d" stroke="black" points="335.5,-1695 231,-1695 231,-1659 335.5,-1659 335.5,-1695"/>
-<text xml:space="preserve" text-anchor="middle" x="283.25" y="-1673.5" font-family="Arial" font-size="10.00" fill="white">DHCP4&#45;RENEW.sh</text>
+<polygon fill="#93c47d" stroke="black" points="335.5,-1485 231,-1485 231,-1449 335.5,-1449 335.5,-1485"/>
+<text xml:space="preserve" text-anchor="middle" x="283.25" y="-1463.5" font-family="Arial" font-size="10.00" fill="white">DHCP4&#45;RENEW.sh</text>
 </a>
 </g>
 </g>
@@ -952,8 +952,8 @@
 <g id="node73" class="node">
 <title>HTTP.WAN&#45;1.php</title>
 <g id="a_node73"><a xlink:href="424|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/HTTP.WAN-1.php|NA|main-binary" xlink:title="HTTP.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="325,-1485 231,-1485 231,-1449 325,-1449 325,-1485"/>
-<text xml:space="preserve" text-anchor="middle" x="278" y="-1463.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="325,-1401 231,-1401 231,-1365 325,-1365 325,-1401"/>
+<text xml:space="preserve" text-anchor="middle" x="278" y="-1379.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -961,8 +961,8 @@
 <g id="node74" class="node">
 <title>FIREWALL&#45;2.php</title>
 <g id="a_node74"><a xlink:href="422|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/FIREWALL-2.php|NA|main-binary" xlink:title="FIREWALL&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="323.5,-1401 231,-1401 231,-1365 323.5,-1365 323.5,-1401"/>
-<text xml:space="preserve" text-anchor="middle" x="277.25" y="-1379.5" font-family="Arial" font-size="10.00" fill="white">FIREWALL&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2507.5,-246 2415,-246 2415,-210 2507.5,-210 2507.5,-246"/>
+<text xml:space="preserve" text-anchor="middle" x="2461.25" y="-224.5" font-family="Arial" font-size="10.00" fill="white">FIREWALL&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -970,8 +970,8 @@
 <g id="node75" class="node">
 <title>INET.WAN&#45;4.php</title>
 <g id="a_node75"><a xlink:href="138|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INET.WAN-4.php|NA|main-binary" xlink:title="INET.WAN&#45;4.php">
-<polygon fill="#f6b26b" stroke="black" points="2506.75,-246 2415,-246 2415,-210 2506.75,-210 2506.75,-246"/>
-<text xml:space="preserve" text-anchor="middle" x="2460.88" y="-224.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;4.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2821.75,-1317 2730,-1317 2730,-1281 2821.75,-1281 2821.75,-1317"/>
+<text xml:space="preserve" text-anchor="middle" x="2775.88" y="-1295.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;4.php</text>
 </a>
 </g>
 </g>
@@ -1009,8 +1009,8 @@
 <g id="node78" class="node">
 <title>INET.WAN&#45;5.php</title>
 <g id="a_node78"><a xlink:href="138|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INET.WAN-5.php|NA|main-binary" xlink:title="INET.WAN&#45;5.php">
-<polygon fill="#f6b26b" stroke="black" points="2821.75,-1317 2730,-1317 2730,-1281 2821.75,-1281 2821.75,-1317"/>
-<text xml:space="preserve" text-anchor="middle" x="2775.88" y="-1295.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;5.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2821.75,-1695 2730,-1695 2730,-1659 2821.75,-1659 2821.75,-1695"/>
+<text xml:space="preserve" text-anchor="middle" x="2775.88" y="-1673.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;5.php</text>
 </a>
 </g>
 </g>
@@ -1036,8 +1036,8 @@
 <g id="node81" class="node">
 <title>S90sessions.php</title>
 <g id="a_node81"><a xlink:href="1.0K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/defnodes/S90sessions.php|NA|main-binary" xlink:title="S90sessions.php">
-<polygon fill="#f6b26b" stroke="black" points="2821,-1695 2730,-1695 2730,-1659 2821,-1659 2821,-1695"/>
-<text xml:space="preserve" text-anchor="middle" x="2775.5" y="-1673.5" font-family="Arial" font-size="10.00" fill="white">S90sessions.php</text>
+<polygon fill="#f6b26b" stroke="black" points="301,-498 210,-498 210,-462 301,-462 301,-498"/>
+<text xml:space="preserve" text-anchor="middle" x="255.5" y="-476.5" font-family="Arial" font-size="10.00" fill="white">S90sessions.php</text>
 </a>
 </g>
 </g>
@@ -1171,8 +1171,8 @@
 <g id="node92" class="node">
 <title>mldproxy_helper.sh</title>
 <g id="a_node92"><a xlink:href="266|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/mldproxy_helper.sh|NA|main-binary" xlink:title="mldproxy_helper.sh">
-<polygon fill="#93c47d" stroke="black" points="310.75,-498 210,-498 210,-462 310.75,-462 310.75,-498"/>
-<text xml:space="preserve" text-anchor="middle" x="260.38" y="-476.5" font-family="Arial" font-size="10.00" fill="white">mldproxy_helper.sh</text>
+<polygon fill="#93c47d" stroke="black" points="1528.75,-246 1428,-246 1428,-210 1528.75,-210 1528.75,-246"/>
+<text xml:space="preserve" text-anchor="middle" x="1478.38" y="-224.5" font-family="Arial" font-size="10.00" fill="white">mldproxy_helper.sh</text>
 </a>
 </g>
 </g>
@@ -1189,8 +1189,8 @@
 <g id="node94" class="node">
 <title>HTTP.WAN&#45;3.php</title>
 <g id="a_node94"><a xlink:href="187|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/HTTP.WAN-3.php|NA|main-binary" xlink:title="HTTP.WAN&#45;3.php">
-<polygon fill="#f6b26b" stroke="black" points="1522,-246 1428,-246 1428,-210 1522,-210 1522,-246"/>
-<text xml:space="preserve" text-anchor="middle" x="1475" y="-224.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;3.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2845,-2094 2751,-2094 2751,-2058 2845,-2058 2845,-2094"/>
+<text xml:space="preserve" text-anchor="middle" x="2798" y="-2072.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;3.php</text>
 </a>
 </g>
 </g>
@@ -1198,8 +1198,8 @@
 <g id="node95" class="node">
 <title>DHCPS6.LAN&#45;4.php</title>
 <g id="a_node95"><a xlink:href="288|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/DHCPS6.LAN-4.php|NA|main-binary" xlink:title="DHCPS6.LAN&#45;4.php">
-<polygon fill="#f6b26b" stroke="black" points="2857.75,-2094 2751,-2094 2751,-2058 2857.75,-2058 2857.75,-2094"/>
-<text xml:space="preserve" text-anchor="middle" x="2804.38" y="-2072.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;4.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2311.75,-2787 2205,-2787 2205,-2751 2311.75,-2751 2311.75,-2787"/>
+<text xml:space="preserve" text-anchor="middle" x="2258.38" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;4.php</text>
 </a>
 </g>
 </g>
@@ -1231,8 +1231,8 @@
 <g id="node98" class="node">
 <title>ICMP.WAN&#45;2.php</title>
 <g id="a_node98"><a xlink:href="339|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/ICMP.WAN-2.php|NA|main-binary" xlink:title="ICMP.WAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="2319.25,-2787 2226,-2787 2226,-2751 2319.25,-2751 2319.25,-2787"/>
-<text xml:space="preserve" text-anchor="middle" x="2272.62" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">ICMP.WAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2151.25,-2787 2058,-2787 2058,-2751 2151.25,-2751 2151.25,-2787"/>
+<text xml:space="preserve" text-anchor="middle" x="2104.62" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">ICMP.WAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -1297,8 +1297,8 @@
 <g id="node104" class="node">
 <title>conntrack_flush.sh</title>
 <g id="a_node104"><a xlink:href="298|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/conntrack_flush.sh|NA|main-binary" xlink:title="conntrack_flush.sh">
-<polygon fill="#93c47d" stroke="black" points="2177.5,-2787 2079,-2787 2079,-2751 2177.5,-2751 2177.5,-2787"/>
-<text xml:space="preserve" text-anchor="middle" x="2128.25" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">conntrack_flush.sh</text>
+<polygon fill="#93c47d" stroke="black" points="1190.5,-2787 1092,-2787 1092,-2751 1190.5,-2751 1190.5,-2787"/>
+<text xml:space="preserve" text-anchor="middle" x="1141.25" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">conntrack_flush.sh</text>
 </a>
 </g>
 </g>
@@ -2412,12 +2412,12 @@
 <path fill="none" stroke="black" d="M791.01,-1453.39C791.01,-1480.97 791.01,-1530 791.01,-1530 791.01,-1530 1278.54,-1530 1278.54,-1530"/>
 <polygon fill="black" stroke="black" points="1278.54,-1533.5 1288.54,-1530 1278.54,-1526.5 1278.54,-1533.5"/>
 </g>
-<!-- _M&#45;SEARCH.resp.php -->
+<!-- __M&#45;SEARCH.resp.php -->
 <g id="node179" class="node">
-<title>_M&#45;SEARCH.resp.php</title>
-<g id="a_node179"><a xlink:href="293|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/upnp/_M-SEARCH.resp.php|NA|main-binary" xlink:title="_M&#45;SEARCH.resp.php">
-<polygon fill="#f6b26b" stroke="black" points="388.75,-2598 273,-2598 273,-2562 388.75,-2562 388.75,-2598"/>
-<text xml:space="preserve" text-anchor="middle" x="330.88" y="-2576.5" font-family="Arial" font-size="10.00" fill="white">_M&#45;SEARCH.resp.php</text>
+<title>__M&#45;SEARCH.resp.php</title>
+<g id="a_node179"><a xlink:href="293|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/upnp/__M-SEARCH.resp.php|NA|main-binary" xlink:title="__M&#45;SEARCH.resp.php">
+<polygon fill="#f6b26b" stroke="black" points="394,-2598 273,-2598 273,-2562 394,-2562 394,-2598"/>
+<text xml:space="preserve" text-anchor="middle" x="333.5" y="-2576.5" font-family="Arial" font-size="10.00" fill="white">__M&#45;SEARCH.resp.php</text>
 </a>
 </g>
 </g>
@@ -2473,8 +2473,8 @@
 <g id="node184" class="node">
 <title>ICMP.WAN&#45;1.php</title>
 <g id="a_node184"><a xlink:href="339|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/ICMP.WAN-1.php|NA|main-binary" xlink:title="ICMP.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="1185.25,-2787 1092,-2787 1092,-2751 1185.25,-2751 1185.25,-2787"/>
-<text xml:space="preserve" text-anchor="middle" x="1138.63" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">ICMP.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="513.25,-2787 420,-2787 420,-2751 513.25,-2751 513.25,-2787"/>
+<text xml:space="preserve" text-anchor="middle" x="466.63" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">ICMP.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -2482,8 +2482,8 @@
 <g id="node185" class="node">
 <title>WIFI.WLAN&#45;2.php</title>
 <g id="a_node185"><a xlink:href="248|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/WIFI.WLAN-2.php|NA|main-binary" xlink:title="WIFI.WLAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="517,-2787 420,-2787 420,-2751 517,-2751 517,-2787"/>
-<text xml:space="preserve" text-anchor="middle" x="468.5" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">WIFI.WLAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="370,-2787 273,-2787 273,-2751 370,-2751 370,-2787"/>
+<text xml:space="preserve" text-anchor="middle" x="321.5" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">WIFI.WLAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -2491,8 +2491,8 @@
 <g id="node186" class="node">
 <title>DHCPS6.LAN&#45;3.php</title>
 <g id="a_node186"><a xlink:href="288|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/DHCPS6.LAN-3.php|NA|main-binary" xlink:title="DHCPS6.LAN&#45;3.php">
-<polygon fill="#f6b26b" stroke="black" points="379.75,-2787 273,-2787 273,-2751 379.75,-2751 379.75,-2787"/>
-<text xml:space="preserve" text-anchor="middle" x="326.38" y="-2765.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;3.php</text>
+<polygon fill="#f6b26b" stroke="black" points="295.75,-813 189,-813 189,-777 295.75,-777 295.75,-813"/>
+<text xml:space="preserve" text-anchor="middle" x="242.38" y="-791.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;3.php</text>
 </a>
 </g>
 </g>
@@ -2575,8 +2575,8 @@
 <g id="node194" class="node">
 <title>S12flashspeed.php</title>
 <g id="a_node194"><a xlink:href="290|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/defnodes/S12flashspeed.php|NA|main-binary" xlink:title="S12flashspeed.php">
-<polygon fill="#f6b26b" stroke="black" points="288.25,-813 189,-813 189,-777 288.25,-777 288.25,-813"/>
-<text xml:space="preserve" text-anchor="middle" x="238.63" y="-791.5" font-family="Arial" font-size="10.00" fill="white">S12flashspeed.php</text>
+<polygon fill="#f6b26b" stroke="black" points="519.25,-225 420,-225 420,-189 519.25,-189 519.25,-225"/>
+<text xml:space="preserve" text-anchor="middle" x="469.63" y="-203.5" font-family="Arial" font-size="10.00" fill="white">S12flashspeed.php</text>
 </a>
 </g>
 </g>
@@ -2614,8 +2614,8 @@
 <g id="node197" class="node">
 <title>UPNP.LAN&#45;1.php</title>
 <g id="a_node197"><a xlink:href="333|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/UPNP.LAN-1.php|NA|main-binary" xlink:title="UPNP.LAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="512.5,-225 420,-225 420,-189 512.5,-189 512.5,-225"/>
-<text xml:space="preserve" text-anchor="middle" x="466.25" y="-203.5" font-family="Arial" font-size="10.00" fill="white">UPNP.LAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="659.5,-225 567,-225 567,-189 659.5,-189 659.5,-225"/>
+<text xml:space="preserve" text-anchor="middle" x="613.25" y="-203.5" font-family="Arial" font-size="10.00" fill="white">UPNP.LAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -2623,8 +2623,8 @@
 <g id="node198" class="node">
 <title>VSVR.NAT&#45;1.php</title>
 <g id="a_node198"><a xlink:href="265|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/VSVR.NAT-1.php|NA|main-binary" xlink:title="VSVR.NAT&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="659.5,-225 567,-225 567,-189 659.5,-189 659.5,-225"/>
-<text xml:space="preserve" text-anchor="middle" x="613.25" y="-203.5" font-family="Arial" font-size="10.00" fill="white">VSVR.NAT&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="806.5,-225 714,-225 714,-189 806.5,-189 806.5,-225"/>
+<text xml:space="preserve" text-anchor="middle" x="760.25" y="-203.5" font-family="Arial" font-size="10.00" fill="white">VSVR.NAT&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -2641,8 +2641,8 @@
 <g id="node200" class="node">
 <title>WIFI.WLAN&#45;1.php</title>
 <g id="a_node200"><a xlink:href="371|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/WIFI.WLAN-1.php|NA|main-binary" xlink:title="WIFI.WLAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="811,-225 714,-225 714,-189 811,-189 811,-225"/>
-<text xml:space="preserve" text-anchor="middle" x="762.5" y="-203.5" font-family="Arial" font-size="10.00" fill="white">WIFI.WLAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1672,-204 1575,-204 1575,-168 1672,-168 1672,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="1623.5" y="-182.5" font-family="Arial" font-size="10.00" fill="white">WIFI.WLAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -2854,8 +2854,8 @@
 <g id="node215" class="node">
 <title>iptlan.php</title>
 <g id="a_node215"><a xlink:href="3.6K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IPTABLES/iptlan.php|NA|main-binary" xlink:title="iptlan.php">
-<polygon fill="#f6b26b" stroke="black" points="1192,-2955 1134,-2955 1134,-2919 1192,-2919 1192,-2955"/>
-<text xml:space="preserve" text-anchor="middle" x="1163" y="-2933.5" font-family="Arial" font-size="10.00" fill="white">iptlan.php</text>
+<polygon fill="#f6b26b" stroke="black" points="79,-2850 21,-2850 21,-2814 79,-2814 79,-2850"/>
+<text xml:space="preserve" text-anchor="middle" x="50" y="-2828.5" font-family="Arial" font-size="10.00" fill="white">iptlan.php</text>
 </a>
 </g>
 </g>
@@ -2887,8 +2887,8 @@
 <g id="node218" class="node">
 <title>setup.php</title>
 <g id="a_node218"><a xlink:href="46|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/web/setup.php|NA|main-binary" xlink:title="setup.php">
-<polygon fill="#f6b26b" stroke="black" points="79.75,-2850 21,-2850 21,-2814 79.75,-2814 79.75,-2850"/>
-<text xml:space="preserve" text-anchor="middle" x="50.38" y="-2828.5" font-family="Arial" font-size="10.00" fill="white">setup.php</text>
+<polygon fill="#f6b26b" stroke="black" points="79.75,-2682 21,-2682 21,-2646 79.75,-2646 79.75,-2682"/>
+<text xml:space="preserve" text-anchor="middle" x="50.38" y="-2660.5" font-family="Arial" font-size="10.00" fill="white">setup.php</text>
 </a>
 </g>
 </g>
@@ -2896,8 +2896,8 @@
 <g id="node219" class="node">
 <title>INFSVCS.LAN&#45;3.php</title>
 <g id="a_node219"><a xlink:href="143|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INFSVCS.LAN-3.php|NA|main-binary" xlink:title="INFSVCS.LAN&#45;3.php">
-<polygon fill="#f6b26b" stroke="black" points="1684.75,-204 1575,-204 1575,-168 1684.75,-168 1684.75,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="1629.88" y="-182.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.LAN&#45;3.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1831.75,-204 1722,-204 1722,-168 1831.75,-168 1831.75,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="1776.88" y="-182.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.LAN&#45;3.php</text>
 </a>
 </g>
 </g>
@@ -2905,8 +2905,8 @@
 <g id="node220" class="node">
 <title>time.php</title>
 <g id="a_node220"><a xlink:href="8.3K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/time.php|NA|main-binary" xlink:title="time.php">
-<polygon fill="#f6b26b" stroke="black" points="75,-2682 21,-2682 21,-2646 75,-2646 75,-2682"/>
-<text xml:space="preserve" text-anchor="middle" x="48" y="-2660.5" font-family="Arial" font-size="10.00" fill="white">time.php</text>
+<polygon fill="#f6b26b" stroke="black" points="75,-2598 21,-2598 21,-2562 75,-2562 75,-2598"/>
+<text xml:space="preserve" text-anchor="middle" x="48" y="-2576.5" font-family="Arial" font-size="10.00" fill="white">time.php</text>
 </a>
 </g>
 </g>
@@ -2923,8 +2923,8 @@
 <g id="node222" class="node">
 <title>DHCPS6.INF.php</title>
 <g id="a_node222"><a xlink:href="414|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/DHCPS6.INF.php|NA|main-binary" xlink:title="DHCPS6.INF.php">
-<polygon fill="#f6b26b" stroke="black" points="1837.75,-204 1743,-204 1743,-168 1837.75,-168 1837.75,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="1790.38" y="-182.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.INF.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2656.75,-204 2562,-204 2562,-168 2656.75,-168 2656.75,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="2609.38" y="-182.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.INF.php</text>
 </a>
 </g>
 </g>
@@ -2932,8 +2932,8 @@
 <g id="node223" class="node">
 <title>DEVICE.TIME.php</title>
 <g id="a_node223"><a xlink:href="1.8K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/DEVICE.TIME.php|NA|main-binary" xlink:title="DEVICE.TIME.php">
-<polygon fill="#f6b26b" stroke="black" points="2662,-204 2562,-204 2562,-168 2662,-168 2662,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="2612" y="-182.5" font-family="Arial" font-size="10.00" fill="white">DEVICE.TIME.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2809,-204 2709,-204 2709,-168 2809,-168 2809,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="2759" y="-182.5" font-family="Arial" font-size="10.00" fill="white">DEVICE.TIME.php</text>
 </a>
 </g>
 </g>
@@ -2941,8 +2941,8 @@
 <g id="node224" class="node">
 <title>SMS.php</title>
 <g id="a_node224"><a xlink:href="383|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/SMS.php|NA|main-binary" xlink:title="SMS.php">
-<polygon fill="#f6b26b" stroke="black" points="77.5,-2598 21,-2598 21,-2562 77.5,-2562 77.5,-2598"/>
-<text xml:space="preserve" text-anchor="middle" x="49.25" y="-2576.5" font-family="Arial" font-size="10.00" fill="white">SMS.php</text>
+<polygon fill="#f6b26b" stroke="black" points="77.5,-2514 21,-2514 21,-2478 77.5,-2478 77.5,-2514"/>
+<text xml:space="preserve" text-anchor="middle" x="49.25" y="-2492.5" font-family="Arial" font-size="10.00" fill="white">SMS.php</text>
 </a>
 </g>
 </g>
@@ -3049,8 +3049,8 @@
 <g id="node233" class="node">
 <title>killpid.sh</title>
 <g id="a_node233"><a xlink:href="115|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/killpid.sh|NA|main-binary" xlink:title="killpid.sh">
-<polygon fill="#93c47d" stroke="black" points="75.25,-2514 21,-2514 21,-2478 75.25,-2478 75.25,-2514"/>
-<text xml:space="preserve" text-anchor="middle" x="48.13" y="-2492.5" font-family="Arial" font-size="10.00" fill="white">killpid.sh</text>
+<polygon fill="#93c47d" stroke="black" points="75.25,-2430 21,-2430 21,-2394 75.25,-2394 75.25,-2430"/>
+<text xml:space="preserve" text-anchor="middle" x="48.13" y="-2408.5" font-family="Arial" font-size="10.00" fill="white">killpid.sh</text>
 </a>
 </g>
 </g>
@@ -3088,8 +3088,8 @@
 <g id="node236" class="node">
 <title>IP6TFIREWALL.php</title>
 <g id="a_node236"><a xlink:href="3.5K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IP6TFIREWALL.php|NA|main-binary" xlink:title="IP6TFIREWALL.php">
-<polygon fill="#f6b26b" stroke="black" points="2814.25,-204 2709,-204 2709,-168 2814.25,-168 2814.25,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="2761.62" y="-182.5" font-family="Arial" font-size="10.00" fill="white">IP6TFIREWALL.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2877.25,-750 2772,-750 2772,-714 2877.25,-714 2877.25,-750"/>
+<text xml:space="preserve" text-anchor="middle" x="2824.62" y="-728.5" font-family="Arial" font-size="10.00" fill="white">IP6TFIREWALL.php</text>
 </a>
 </g>
 </g>
@@ -3154,8 +3154,8 @@
 <g id="node242" class="node">
 <title>iptables_rmmod.sh</title>
 <g id="a_node242"><a xlink:href="42|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/iptables_rmmod.sh|NA|main-binary" xlink:title="iptables_rmmod.sh">
-<polygon fill="#93c47d" stroke="black" points="2870.5,-750 2772,-750 2772,-714 2870.5,-714 2870.5,-750"/>
-<text xml:space="preserve" text-anchor="middle" x="2821.25" y="-728.5" font-family="Arial" font-size="10.00" fill="white">iptables_rmmod.sh</text>
+<polygon fill="#93c47d" stroke="black" points="2870.5,-1947 2772,-1947 2772,-1911 2870.5,-1911 2870.5,-1947"/>
+<text xml:space="preserve" text-anchor="middle" x="2821.25" y="-1925.5" font-family="Arial" font-size="10.00" fill="white">iptables_rmmod.sh</text>
 </a>
 </g>
 </g>
@@ -3217,8 +3217,8 @@
 <g id="node247" class="node">
 <title>pfwd.php</title>
 <g id="a_node247"><a xlink:href="1.9K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/libs/pfwd.php|NA|main-binary" xlink:title="pfwd.php">
-<polygon fill="#f6b26b" stroke="black" points="76.75,-2430 21,-2430 21,-2394 76.75,-2394 76.75,-2430"/>
-<text xml:space="preserve" text-anchor="middle" x="48.88" y="-2408.5" font-family="Arial" font-size="10.00" fill="white">pfwd.php</text>
+<polygon fill="#f6b26b" stroke="black" points="76.75,-2052 21,-2052 21,-2016 76.75,-2016 76.75,-2052"/>
+<text xml:space="preserve" text-anchor="middle" x="48.88" y="-2030.5" font-family="Arial" font-size="10.00" fill="white">pfwd.php</text>
 </a>
 </g>
 </g>
@@ -3259,8 +3259,8 @@
 <g id="node251" class="node">
 <title>IPTMACCTRL.php</title>
 <g id="a_node251"><a xlink:href="2.2K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IPTMACCTRL.php|NA|main-binary" xlink:title="IPTMACCTRL.php">
-<polygon fill="#f6b26b" stroke="black" points="2871.25,-1947 2772,-1947 2772,-1911 2871.25,-1911 2871.25,-1947"/>
-<text xml:space="preserve" text-anchor="middle" x="2821.62" y="-1925.5" font-family="Arial" font-size="10.00" fill="white">IPTMACCTRL.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2010.25,-2808 1911,-2808 1911,-2772 2010.25,-2772 2010.25,-2808"/>
+<text xml:space="preserve" text-anchor="middle" x="1960.63" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">IPTMACCTRL.php</text>
 </a>
 </g>
 </g>
@@ -3376,8 +3376,8 @@
 <g id="node260" class="node">
 <title>bsc_wlan_main.php</title>
 <g id="a_node260"><a xlink:href="3.0K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/webinc/body/bsc_wlan_main.php|NA|main-binary" xlink:title="bsc_wlan_main.php">
-<polygon fill="#f6b26b" stroke="black" points="2034.25,-2808 1932,-2808 1932,-2772 2034.25,-2772 2034.25,-2808"/>
-<text xml:space="preserve" text-anchor="middle" x="1983.13" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">bsc_wlan_main.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1677.25,-2808 1575,-2808 1575,-2772 1677.25,-2772 1677.25,-2808"/>
+<text xml:space="preserve" text-anchor="middle" x="1626.13" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">bsc_wlan_main.php</text>
 </a>
 </g>
 </g>
@@ -3445,8 +3445,8 @@
 <g id="node266" class="node">
 <title>ICMP.WAN&#45;3.php</title>
 <g id="a_node266"><a xlink:href="507|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/ICMP.WAN-3.php|NA|main-binary" xlink:title="ICMP.WAN&#45;3.php">
-<polygon fill="#f6b26b" stroke="black" points="1668.25,-2808 1575,-2808 1575,-2772 1668.25,-2772 1668.25,-2808"/>
-<text xml:space="preserve" text-anchor="middle" x="1621.63" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">ICMP.WAN&#45;3.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1521.25,-2808 1428,-2808 1428,-2772 1521.25,-2772 1521.25,-2808"/>
+<text xml:space="preserve" text-anchor="middle" x="1474.63" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">ICMP.WAN&#45;3.php</text>
 </a>
 </g>
 </g>
@@ -3454,8 +3454,8 @@
 <g id="node267" class="node">
 <title>IUM.php</title>
 <g id="a_node267"><a xlink:href="543|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/IUM.php|NA|main-binary" xlink:title="IUM.php">
-<polygon fill="#f6b26b" stroke="black" points="75,-2052 21,-2052 21,-2016 75,-2016 75,-2052"/>
-<text xml:space="preserve" text-anchor="middle" x="48" y="-2030.5" font-family="Arial" font-size="10.00" fill="white">IUM.php</text>
+<polygon fill="#f6b26b" stroke="black" points="75,-1149 21,-1149 21,-1113 75,-1113 75,-1149"/>
+<text xml:space="preserve" text-anchor="middle" x="48" y="-1127.5" font-family="Arial" font-size="10.00" fill="white">IUM.php</text>
 </a>
 </g>
 </g>
@@ -3643,8 +3643,8 @@
 <g id="node280" class="node">
 <title>DNS6.LAN&#45;1.php</title>
 <g id="a_node280"><a xlink:href="185|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/DNS6.LAN-1.php|NA|main-binary" xlink:title="DNS6.LAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="1520.5,-2808 1428,-2808 1428,-2772 1520.5,-2772 1520.5,-2808"/>
-<text xml:space="preserve" text-anchor="middle" x="1474.25" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">DNS6.LAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1373.5,-2808 1281,-2808 1281,-2772 1373.5,-2772 1373.5,-2808"/>
+<text xml:space="preserve" text-anchor="middle" x="1327.25" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">DNS6.LAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -3676,8 +3676,8 @@
 <g id="node283" class="node">
 <title>IPTFIREWALL.php</title>
 <g id="a_node283"><a xlink:href="6.2K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IPTFIREWALL.php|NA|main-binary" xlink:title="IPTFIREWALL.php">
-<polygon fill="#f6b26b" stroke="black" points="1381,-2808 1281,-2808 1281,-2772 1381,-2772 1381,-2808"/>
-<text xml:space="preserve" text-anchor="middle" x="1331" y="-2786.5" font-family="Arial" font-size="10.00" fill="white">IPTFIREWALL.php</text>
+<polygon fill="#f6b26b" stroke="black" points="268,-2703 168,-2703 168,-2667 268,-2667 268,-2703"/>
+<text xml:space="preserve" text-anchor="middle" x="218" y="-2681.5" font-family="Arial" font-size="10.00" fill="white">IPTFIREWALL.php</text>
 </a>
 </g>
 </g>
@@ -3685,8 +3685,8 @@
 <g id="node284" class="node">
 <title>wps.xml</title>
 <g id="a_node284"><a xlink:href="610|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/widget/wps.xml|NA|main-binary" xlink:title="wps.xml">
-<polygon fill="#f6b26b" stroke="black" points="75,-1149 21,-1149 21,-1113 75,-1113 75,-1149"/>
-<text xml:space="preserve" text-anchor="middle" x="48" y="-1127.5" font-family="Arial" font-size="10.00" fill="white">wps.xml</text>
+<polygon fill="#f6b26b" stroke="black" points="75,-1065 21,-1065 21,-1029 75,-1029 75,-1065"/>
+<text xml:space="preserve" text-anchor="middle" x="48" y="-1043.5" font-family="Arial" font-size="10.00" fill="white">wps.xml</text>
 </a>
 </g>
 </g>
@@ -3763,8 +3763,8 @@
 <g id="node290" class="node">
 <title>PHYINF.ETH&#45;2.php</title>
 <g id="a_node290"><a xlink:href="208|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/PHYINF.ETH-2.php|NA|main-binary" xlink:title="PHYINF.ETH&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="271,-2703 168,-2703 168,-2667 271,-2667 271,-2703"/>
-<text xml:space="preserve" text-anchor="middle" x="219.5" y="-2681.5" font-family="Arial" font-size="10.00" fill="white">PHYINF.ETH&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="271,-204 168,-204 168,-168 271,-168 271,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="219.5" y="-182.5" font-family="Arial" font-size="10.00" fill="white">PHYINF.ETH&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -3898,8 +3898,8 @@
 <g id="node301" class="node">
 <title>HTTP.WAN&#45;2.php</title>
 <g id="a_node301"><a xlink:href="424|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/HTTP.WAN-2.php|NA|main-binary" xlink:title="HTTP.WAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="262,-204 168,-204 168,-168 262,-168 262,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="215" y="-182.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="955,-204 861,-204 861,-168 955,-168 955,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="908" y="-182.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -3907,8 +3907,8 @@
 <g id="node302" class="node">
 <title>igmpproxy_helper.sh</title>
 <g id="a_node302"><a xlink:href="269|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/igmpproxy_helper.sh|NA|main-binary" xlink:title="igmpproxy_helper.sh">
-<polygon fill="#93c47d" stroke="black" points="967,-204 861,-204 861,-168 967,-168 967,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="914" y="-182.5" font-family="Arial" font-size="10.00" fill="white">igmpproxy_helper.sh</text>
+<polygon fill="#93c47d" stroke="black" points="1114,-204 1008,-204 1008,-168 1114,-168 1114,-204"/>
+<text xml:space="preserve" text-anchor="middle" x="1061" y="-182.5" font-family="Arial" font-size="10.00" fill="white">igmpproxy_helper.sh</text>
 </a>
 </g>
 </g>
@@ -3925,8 +3925,8 @@
 <g id="node304" class="node">
 <title>DNS4.LAN&#45;1.php</title>
 <g id="a_node304"><a xlink:href="272|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/DNS4.LAN-1.php|NA|main-binary" xlink:title="DNS4.LAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="1100.5,-204 1008,-204 1008,-168 1100.5,-168 1100.5,-204"/>
-<text xml:space="preserve" text-anchor="middle" x="1054.25" y="-182.5" font-family="Arial" font-size="10.00" fill="white">DNS4.LAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2213.5,-183 2121,-183 2121,-147 2213.5,-147 2213.5,-183"/>
+<text xml:space="preserve" text-anchor="middle" x="2167.25" y="-161.5" font-family="Arial" font-size="10.00" fill="white">DNS4.LAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -4003,8 +4003,8 @@
 <g id="node311" class="node">
 <title>IPV6.CHILD.php</title>
 <g id="a_node311"><a xlink:href="964|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/IPV6.CHILD.php|NA|main-binary" xlink:title="IPV6.CHILD.php">
-<polygon fill="#93c47d" stroke="black" points="2211.25,-183 2121,-183 2121,-147 2211.25,-147 2211.25,-183"/>
-<text xml:space="preserve" text-anchor="middle" x="2166.12" y="-161.5" font-family="Arial" font-size="10.00" fill="white">IPV6.CHILD.php</text>
+<polygon fill="#93c47d" stroke="black" points="2358.25,-183 2268,-183 2268,-147 2358.25,-147 2358.25,-183"/>
+<text xml:space="preserve" text-anchor="middle" x="2313.12" y="-161.5" font-family="Arial" font-size="10.00" fill="white">IPV6.CHILD.php</text>
 </a>
 </g>
 </g>
@@ -4054,8 +4054,8 @@
 <g id="node316" class="node">
 <title>IPTMASQ.php</title>
 <g id="a_node316"><a xlink:href="2.5K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IPTMASQ.php|NA|main-binary" xlink:title="IPTMASQ.php">
-<polygon fill="#f6b26b" stroke="black" points="2935.75,-2262 2856,-2262 2856,-2226 2935.75,-2226 2935.75,-2262"/>
-<text xml:space="preserve" text-anchor="middle" x="2895.88" y="-2240.5" font-family="Arial" font-size="10.00" fill="white">IPTMASQ.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2935.75,-2346 2856,-2346 2856,-2310 2935.75,-2310 2935.75,-2346"/>
+<text xml:space="preserve" text-anchor="middle" x="2895.88" y="-2324.5" font-family="Arial" font-size="10.00" fill="white">IPTMASQ.php</text>
 </a>
 </g>
 </g>
@@ -4063,8 +4063,8 @@
 <g id="node317" class="node">
 <title>INET.WAN&#45;2.php</title>
 <g id="a_node317"><a xlink:href="278|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/INET.WAN-2.php|NA|main-binary" xlink:title="INET.WAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="2359.75,-183 2268,-183 2268,-147 2359.75,-147 2359.75,-183"/>
-<text xml:space="preserve" text-anchor="middle" x="2313.88" y="-161.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2884.75,-540 2793,-540 2793,-504 2884.75,-504 2884.75,-540"/>
+<text xml:space="preserve" text-anchor="middle" x="2838.88" y="-518.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -4102,8 +4102,8 @@
 <g id="node321" class="node">
 <title>feature.php</title>
 <g id="a_node321"><a xlink:href="726|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/webinc/feature.php|NA|main-binary" xlink:title="feature.php">
-<polygon fill="#f6b26b" stroke="black" points="85.75,-1065 21,-1065 21,-1029 85.75,-1029 85.75,-1065"/>
-<text xml:space="preserve" text-anchor="middle" x="53.38" y="-1043.5" font-family="Arial" font-size="10.00" fill="white">feature.php</text>
+<polygon fill="#f6b26b" stroke="black" points="85.75,-981 21,-981 21,-945 85.75,-945 85.75,-981"/>
+<text xml:space="preserve" text-anchor="middle" x="53.38" y="-959.5" font-family="Arial" font-size="10.00" fill="white">feature.php</text>
 </a>
 </g>
 </g>
@@ -4111,8 +4111,8 @@
 <g id="node322" class="node">
 <title>bwc.php</title>
 <g id="a_node322"><a xlink:href="4.6K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/libs/bwc.php|NA|main-binary" xlink:title="bwc.php">
-<polygon fill="#f6b26b" stroke="black" points="75,-981 21,-981 21,-945 75,-945 75,-981"/>
-<text xml:space="preserve" text-anchor="middle" x="48" y="-959.5" font-family="Arial" font-size="10.00" fill="white">bwc.php</text>
+<polygon fill="#f6b26b" stroke="black" points="75,-687 21,-687 21,-651 75,-651 75,-687"/>
+<text xml:space="preserve" text-anchor="middle" x="48" y="-665.5" font-family="Arial" font-size="10.00" fill="white">bwc.php</text>
 </a>
 </g>
 </g>
@@ -4120,8 +4120,8 @@
 <g id="node323" class="node">
 <title>ACL.php</title>
 <g id="a_node323"><a xlink:href="977|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/ACL.php|NA|main-binary" xlink:title="ACL.php">
-<polygon fill="#f6b26b" stroke="black" points="75.25,-687 21,-687 21,-651 75.25,-651 75.25,-687"/>
-<text xml:space="preserve" text-anchor="middle" x="48.13" y="-665.5" font-family="Arial" font-size="10.00" fill="white">ACL.php</text>
+<polygon fill="#f6b26b" stroke="black" points="75.25,-477 21,-477 21,-441 75.25,-441 75.25,-477"/>
+<text xml:space="preserve" text-anchor="middle" x="48.13" y="-455.5" font-family="Arial" font-size="10.00" fill="white">ACL.php</text>
 </a>
 </g>
 </g>
@@ -4129,8 +4129,8 @@
 <g id="node324" class="node">
 <title>INET.WAN&#45;1.php</title>
 <g id="a_node324"><a xlink:href="138|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INET.WAN-1.php|NA|main-binary" xlink:title="INET.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="2884.75,-540 2793,-540 2793,-504 2884.75,-504 2884.75,-540"/>
-<text xml:space="preserve" text-anchor="middle" x="2838.88" y="-518.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2884.75,-834 2793,-834 2793,-798 2884.75,-798 2884.75,-834"/>
+<text xml:space="preserve" text-anchor="middle" x="2838.88" y="-812.5" font-family="Arial" font-size="10.00" fill="white">INET.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -4147,8 +4147,8 @@
 <g id="node326" class="node">
 <title>MACCTRL.php</title>
 <g id="a_node326"><a xlink:href="225|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/MACCTRL.php|NA|main-binary" xlink:title="MACCTRL.php">
-<polygon fill="#f6b26b" stroke="black" points="1742.5,-2892 1659,-2892 1659,-2856 1742.5,-2856 1742.5,-2892"/>
-<text xml:space="preserve" text-anchor="middle" x="1700.75" y="-2870.5" font-family="Arial" font-size="10.00" fill="white">MACCTRL.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1721.5,-2892 1638,-2892 1638,-2856 1721.5,-2856 1721.5,-2892"/>
+<text xml:space="preserve" text-anchor="middle" x="1679.75" y="-2870.5" font-family="Arial" font-size="10.00" fill="white">MACCTRL.php</text>
 </a>
 </g>
 </g>
@@ -4180,8 +4180,8 @@
 <g id="node329" class="node">
 <title>iptwan.php</title>
 <g id="a_node329"><a xlink:href="5.8K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IPTABLES/iptwan.php|NA|main-binary" xlink:title="iptwan.php">
-<polygon fill="#f6b26b" stroke="black" points="84.25,-477 21,-477 21,-441 84.25,-441 84.25,-477"/>
-<text xml:space="preserve" text-anchor="middle" x="52.63" y="-455.5" font-family="Arial" font-size="10.00" fill="white">iptwan.php</text>
+<polygon fill="#f6b26b" stroke="black" points="504.25,-57 441,-57 441,-21 504.25,-21 504.25,-57"/>
+<text xml:space="preserve" text-anchor="middle" x="472.63" y="-35.5" font-family="Arial" font-size="10.00" fill="white">iptwan.php</text>
 </a>
 </g>
 </g>
@@ -4198,8 +4198,8 @@
 <g id="node331" class="node">
 <title>INFSVCS.LAN&#45;5.php</title>
 <g id="a_node331"><a xlink:href="143|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INFSVCS.LAN-5.php|NA|main-binary" xlink:title="INFSVCS.LAN&#45;5.php">
-<polygon fill="#f6b26b" stroke="black" points="2902.75,-834 2793,-834 2793,-798 2902.75,-798 2902.75,-834"/>
-<text xml:space="preserve" text-anchor="middle" x="2847.88" y="-812.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.LAN&#45;5.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2902.75,-1800 2793,-1800 2793,-1764 2902.75,-1764 2902.75,-1800"/>
+<text xml:space="preserve" text-anchor="middle" x="2847.88" y="-1778.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.LAN&#45;5.php</text>
 </a>
 </g>
 </g>
@@ -4402,8 +4402,8 @@
 <g id="node337" class="node">
 <title>WPS.php</title>
 <g id="a_node337"><a xlink:href="717|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/WPS.php|NA|main-binary" xlink:title="WPS.php">
-<polygon fill="#f6b26b" stroke="black" points="499,-57 441,-57 441,-21 499,-21 499,-57"/>
-<text xml:space="preserve" text-anchor="middle" x="470" y="-35.5" font-family="Arial" font-size="10.00" fill="white">WPS.php</text>
+<polygon fill="#f6b26b" stroke="black" points="604,-57 546,-57 546,-21 604,-21 604,-57"/>
+<text xml:space="preserve" text-anchor="middle" x="575" y="-35.5" font-family="Arial" font-size="10.00" fill="white">WPS.php</text>
 </a>
 </g>
 </g>
@@ -4435,8 +4435,8 @@
 <g id="node340" class="node">
 <title>BWC.php</title>
 <g id="a_node340"><a xlink:href="261|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/BWC.php|NA|main-binary" xlink:title="BWC.php">
-<polygon fill="#f6b26b" stroke="black" points="604.75,-57 546,-57 546,-21 604.75,-21 604.75,-57"/>
-<text xml:space="preserve" text-anchor="middle" x="575.38" y="-35.5" font-family="Arial" font-size="10.00" fill="white">BWC.php</text>
+<polygon fill="#f6b26b" stroke="black" points="709.75,-57 651,-57 651,-21 709.75,-21 709.75,-57"/>
+<text xml:space="preserve" text-anchor="middle" x="680.38" y="-35.5" font-family="Arial" font-size="10.00" fill="white">BWC.php</text>
 </a>
 </g>
 </g>
@@ -4444,8 +4444,8 @@
 <g id="node341" class="node">
 <title>HTTP.LAN&#45;2.php</title>
 <g id="a_node341"><a xlink:href="137|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/HTTP.LAN-2.php|NA|main-binary" xlink:title="HTTP.LAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="2883.25,-1800 2793,-1800 2793,-1764 2883.25,-1764 2883.25,-1800"/>
-<text xml:space="preserve" text-anchor="middle" x="2838.12" y="-1778.5" font-family="Arial" font-size="10.00" fill="white">HTTP.LAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2883.25,-2829 2793,-2829 2793,-2793 2883.25,-2793 2883.25,-2829"/>
+<text xml:space="preserve" text-anchor="middle" x="2838.12" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">HTTP.LAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -4486,8 +4486,8 @@
 <g id="node345" class="node">
 <title>LOGD.php</title>
 <g id="a_node345"><a xlink:href="706|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/LOGD.php|NA|main-binary" xlink:title="LOGD.php">
-<polygon fill="#f6b26b" stroke="black" points="713.5,-57 651,-57 651,-21 713.5,-21 713.5,-57"/>
-<text xml:space="preserve" text-anchor="middle" x="682.25" y="-35.5" font-family="Arial" font-size="10.00" fill="white">LOGD.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1532.5,-36 1470,-36 1470,0 1532.5,0 1532.5,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="1501.25" y="-14.5" font-family="Arial" font-size="10.00" fill="white">LOGD.php</text>
 </a>
 </g>
 </g>
@@ -4510,8 +4510,8 @@
 <g id="node347" class="node">
 <title>HTTP.WAN&#45;4.php</title>
 <g id="a_node347"><a xlink:href="187|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/HTTP.WAN-4.php|NA|main-binary" xlink:title="HTTP.WAN&#45;4.php">
-<polygon fill="#f6b26b" stroke="black" points="2887,-2829 2793,-2829 2793,-2793 2887,-2793 2887,-2829"/>
-<text xml:space="preserve" text-anchor="middle" x="2840" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;4.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2740,-2829 2646,-2829 2646,-2793 2740,-2793 2740,-2829"/>
+<text xml:space="preserve" text-anchor="middle" x="2693" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">HTTP.WAN&#45;4.php</text>
 </a>
 </g>
 </g>
@@ -4519,8 +4519,8 @@
 <g id="node348" class="node">
 <title>INET.LAN&#45;3.php</title>
 <g id="a_node348"><a xlink:href="138|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INET.LAN-3.php|NA|main-binary" xlink:title="INET.LAN&#45;3.php">
-<polygon fill="#f6b26b" stroke="black" points="1600,-2892 1512,-2892 1512,-2856 1600,-2856 1600,-2892"/>
-<text xml:space="preserve" text-anchor="middle" x="1556" y="-2870.5" font-family="Arial" font-size="10.00" fill="white">INET.LAN&#45;3.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1579,-2892 1491,-2892 1491,-2856 1579,-2856 1579,-2892"/>
+<text xml:space="preserve" text-anchor="middle" x="1535" y="-2870.5" font-family="Arial" font-size="10.00" fill="white">INET.LAN&#45;3.php</text>
 </a>
 </g>
 </g>
@@ -4528,8 +4528,8 @@
 <g id="node349" class="node">
 <title>ENLAN.php</title>
 <g id="a_node349"><a xlink:href="668|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/ENLAN.php|NA|main-binary" xlink:title="ENLAN.php">
-<polygon fill="#f6b26b" stroke="black" points="1454.5,-2892 1386,-2892 1386,-2856 1454.5,-2856 1454.5,-2892"/>
-<text xml:space="preserve" text-anchor="middle" x="1420.25" y="-2870.5" font-family="Arial" font-size="10.00" fill="white">ENLAN.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1433.5,-2892 1365,-2892 1365,-2856 1433.5,-2856 1433.5,-2892"/>
+<text xml:space="preserve" text-anchor="middle" x="1399.25" y="-2870.5" font-family="Arial" font-size="10.00" fill="white">ENLAN.php</text>
 </a>
 </g>
 </g>
@@ -4546,8 +4546,8 @@
 <g id="node351" class="node">
 <title>phyinf.php</title>
 <g id="a_node351"><a xlink:href="1.5K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/PHYINF/phyinf.php|NA|main-binary" xlink:title="phyinf.php">
-<polygon fill="#f6b26b" stroke="black" points="1531,-36 1470,-36 1470,0 1531,0 1531,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="1500.5" y="-14.5" font-family="Arial" font-size="10.00" fill="white">phyinf.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1636,-36 1575,-36 1575,0 1636,0 1636,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="1605.5" y="-14.5" font-family="Arial" font-size="10.00" fill="white">phyinf.php</text>
 </a>
 </g>
 </g>
@@ -4555,8 +4555,8 @@
 <g id="node352" class="node">
 <title>WIFI.PHYINF.php</title>
 <g id="a_node352"><a xlink:href="360|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/WIFI.PHYINF.php|NA|main-binary" xlink:title="WIFI.PHYINF.php">
-<polygon fill="#f6b26b" stroke="black" points="2742.25,-2829 2646,-2829 2646,-2793 2742.25,-2793 2742.25,-2829"/>
-<text xml:space="preserve" text-anchor="middle" x="2694.12" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">WIFI.PHYINF.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2469.25,-2829 2373,-2829 2373,-2793 2469.25,-2793 2469.25,-2829"/>
+<text xml:space="preserve" text-anchor="middle" x="2421.12" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">WIFI.PHYINF.php</text>
 </a>
 </g>
 </g>
@@ -4636,8 +4636,8 @@
 <g id="node359" class="node">
 <title>HTTP.LAN&#45;3.php</title>
 <g id="a_node359"><a xlink:href="137|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/HTTP.LAN-3.php|NA|main-binary" xlink:title="HTTP.LAN&#45;3.php">
-<polygon fill="#f6b26b" stroke="black" points="2463.25,-2829 2373,-2829 2373,-2793 2463.25,-2793 2463.25,-2829"/>
-<text xml:space="preserve" text-anchor="middle" x="2418.12" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">HTTP.LAN&#45;3.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1854.25,-2829 1764,-2829 1764,-2793 1854.25,-2793 1854.25,-2829"/>
+<text xml:space="preserve" text-anchor="middle" x="1809.13" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">HTTP.LAN&#45;3.php</text>
 </a>
 </g>
 </g>
@@ -4708,8 +4708,8 @@
 <g id="node365" class="node">
 <title>ping.sh</title>
 <g id="a_node365"><a xlink:href="167|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/ping.sh|NA|main-binary" xlink:title="ping.sh">
-<polygon fill="#93c47d" stroke="black" points="1629,-36 1575,-36 1575,0 1629,0 1629,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="1602" y="-14.5" font-family="Arial" font-size="10.00" fill="white">ping.sh</text>
+<polygon fill="#93c47d" stroke="black" points="1734,-36 1680,-36 1680,0 1734,0 1734,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="1707" y="-14.5" font-family="Arial" font-size="10.00" fill="white">ping.sh</text>
 </a>
 </g>
 </g>
@@ -4750,8 +4750,8 @@
 <g id="node369" class="node">
 <title>DDNS4.WAN&#45;1.php</title>
 <g id="a_node369"><a xlink:href="547|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/DDNS4.WAN-1.php|NA|main-binary" xlink:title="DDNS4.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="1888.75,-2829 1785,-2829 1785,-2793 1888.75,-2793 1888.75,-2829"/>
-<text xml:space="preserve" text-anchor="middle" x="1836.88" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">DDNS4.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1048.75,-2829 945,-2829 945,-2793 1048.75,-2793 1048.75,-2829"/>
+<text xml:space="preserve" text-anchor="middle" x="996.88" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">DDNS4.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -4786,8 +4786,8 @@
 <g id="node373" class="node">
 <title>slp.php</title>
 <g id="a_node373"><a xlink:href="233|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/slp.php|NA|main-binary" xlink:title="slp.php">
-<polygon fill="#f6b26b" stroke="black" points="1734,-36 1680,-36 1680,0 1734,0 1734,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="1707" y="-14.5" font-family="Arial" font-size="10.00" fill="white">slp.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1839,-36 1785,-36 1785,0 1839,0 1839,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="1812" y="-14.5" font-family="Arial" font-size="10.00" fill="white">slp.php</text>
 </a>
 </g>
 </g>
@@ -4804,8 +4804,8 @@
 <g id="node375" class="node">
 <title>tools_sys_ulcfg.php</title>
 <g id="a_node375"><a xlink:href="889|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/webinc/body/tools_sys_ulcfg.php|NA|main-binary" xlink:title="tools_sys_ulcfg.php">
-<polygon fill="#f6b26b" stroke="black" points="1048,-2829 945,-2829 945,-2793 1048,-2793 1048,-2829"/>
-<text xml:space="preserve" text-anchor="middle" x="996.5" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">tools_sys_ulcfg.php</text>
+<polygon fill="#f6b26b" stroke="black" points="901,-2829 798,-2829 798,-2793 901,-2793 901,-2829"/>
+<text xml:space="preserve" text-anchor="middle" x="849.5" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">tools_sys_ulcfg.php</text>
 </a>
 </g>
 </g>
@@ -4858,8 +4858,8 @@
 <g id="node379" class="node">
 <title>DHCPS4.LAN&#45;4.php</title>
 <g id="a_node379"><a xlink:href="142|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/DHCPS4.LAN-4.php|NA|main-binary" xlink:title="DHCPS4.LAN&#45;4.php">
-<polygon fill="#f6b26b" stroke="black" points="904.75,-2829 798,-2829 798,-2793 904.75,-2793 904.75,-2829"/>
-<text xml:space="preserve" text-anchor="middle" x="851.38" y="-2807.5" font-family="Arial" font-size="10.00" fill="white">DHCPS4.LAN&#45;4.php</text>
+<polygon fill="#f6b26b" stroke="black" points="253.75,-729 147,-729 147,-693 253.75,-693 253.75,-729"/>
+<text xml:space="preserve" text-anchor="middle" x="200.38" y="-707.5" font-family="Arial" font-size="10.00" fill="white">DHCPS4.LAN&#45;4.php</text>
 </a>
 </g>
 </g>
@@ -4894,8 +4894,8 @@
 <g id="node383" class="node">
 <title>IP6T.WAN&#45;1.php</title>
 <g id="a_node383"><a xlink:href="121|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IP6T.WAN-1.php|NA|main-binary" xlink:title="IP6T.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="236.5,-729 147,-729 147,-693 236.5,-693 236.5,-729"/>
-<text xml:space="preserve" text-anchor="middle" x="191.75" y="-707.5" font-family="Arial" font-size="10.00" fill="white">IP6T.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2504.5,-162 2415,-162 2415,-126 2504.5,-126 2504.5,-162"/>
+<text xml:space="preserve" text-anchor="middle" x="2459.75" y="-140.5" font-family="Arial" font-size="10.00" fill="white">IP6T.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -4903,8 +4903,8 @@
 <g id="node384" class="node">
 <title>DHCPS4.INF.php</title>
 <g id="a_node384"><a xlink:href="414|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/DHCPS4.INF.php|NA|main-binary" xlink:title="DHCPS4.INF.php">
-<polygon fill="#f6b26b" stroke="black" points="2509.75,-162 2415,-162 2415,-126 2509.75,-126 2509.75,-162"/>
-<text xml:space="preserve" text-anchor="middle" x="2462.38" y="-140.5" font-family="Arial" font-size="10.00" fill="white">DHCPS4.INF.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2908.75,-1107 2814,-1107 2814,-1071 2908.75,-1071 2908.75,-1107"/>
+<text xml:space="preserve" text-anchor="middle" x="2861.38" y="-1085.5" font-family="Arial" font-size="10.00" fill="white">DHCPS4.INF.php</text>
 </a>
 </g>
 </g>
@@ -4936,8 +4936,8 @@
 <g id="node387" class="node">
 <title>SEALPAC&#45;SAVE.sh</title>
 <g id="a_node387"><a xlink:href="317|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/events/SEALPAC-SAVE.sh|NA|main-binary" xlink:title="SEALPAC&#45;SAVE.sh">
-<polygon fill="#93c47d" stroke="black" points="2918.5,-1107 2814,-1107 2814,-1071 2918.5,-1071 2918.5,-1107"/>
-<text xml:space="preserve" text-anchor="middle" x="2866.25" y="-1085.5" font-family="Arial" font-size="10.00" fill="white">SEALPAC&#45;SAVE.sh</text>
+<polygon fill="#93c47d" stroke="black" points="2918.5,-1464 2814,-1464 2814,-1428 2918.5,-1428 2918.5,-1464"/>
+<text xml:space="preserve" text-anchor="middle" x="2866.25" y="-1442.5" font-family="Arial" font-size="10.00" fill="white">SEALPAC&#45;SAVE.sh</text>
 </a>
 </g>
 </g>
@@ -4945,8 +4945,8 @@
 <g id="node388" class="node">
 <title>DHCPS6.LAN&#45;5.php</title>
 <g id="a_node388"><a xlink:href="140|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/DHCPS6.LAN-5.php|NA|main-binary" xlink:title="DHCPS6.LAN&#45;5.php">
-<polygon fill="#f6b26b" stroke="black" points="2920.75,-1464 2814,-1464 2814,-1428 2920.75,-1428 2920.75,-1464"/>
-<text xml:space="preserve" text-anchor="middle" x="2867.38" y="-1442.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;5.php</text>
+<polygon fill="#f6b26b" stroke="black" points="232.75,-2850 126,-2850 126,-2814 232.75,-2814 232.75,-2850"/>
+<text xml:space="preserve" text-anchor="middle" x="179.38" y="-2828.5" font-family="Arial" font-size="10.00" fill="white">DHCPS6.LAN&#45;5.php</text>
 </a>
 </g>
 </g>
@@ -4954,8 +4954,8 @@
 <g id="node389" class="node">
 <title>UPNP.LAN&#45;2.php</title>
 <g id="a_node389"><a xlink:href="137|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/UPNP.LAN-2.php|NA|main-binary" xlink:title="UPNP.LAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="218.5,-2850 126,-2850 126,-2814 218.5,-2814 218.5,-2850"/>
-<text xml:space="preserve" text-anchor="middle" x="172.25" y="-2828.5" font-family="Arial" font-size="10.00" fill="white">UPNP.LAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="218.5,-2619 126,-2619 126,-2583 218.5,-2583 218.5,-2619"/>
+<text xml:space="preserve" text-anchor="middle" x="172.25" y="-2597.5" font-family="Arial" font-size="10.00" fill="white">UPNP.LAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -4987,8 +4987,8 @@
 <g id="node392" class="node">
 <title>WAN&#45;1_dhcp_cb.sh</title>
 <g id="a_node392"><a xlink:href="568|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/events/WAN-1_dhcp_cb.sh|NA|main-binary" xlink:title="WAN&#45;1_dhcp_cb.sh">
-<polygon fill="#93c47d" stroke="black" points="229,-2619 126,-2619 126,-2583 229,-2583 229,-2619"/>
-<text xml:space="preserve" text-anchor="middle" x="177.5" y="-2597.5" font-family="Arial" font-size="10.00" fill="white">WAN&#45;1_dhcp_cb.sh</text>
+<polygon fill="#93c47d" stroke="black" points="229,-2535 126,-2535 126,-2499 229,-2499 229,-2535"/>
+<text xml:space="preserve" text-anchor="middle" x="177.5" y="-2513.5" font-family="Arial" font-size="10.00" fill="white">WAN&#45;1_dhcp_cb.sh</text>
 </a>
 </g>
 </g>
@@ -5011,8 +5011,8 @@
 <g id="node394" class="node">
 <title>UPNP.LAN&#45;4.php</title>
 <g id="a_node394"><a xlink:href="137|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/UPNP.LAN-4.php|NA|main-binary" xlink:title="UPNP.LAN&#45;4.php">
-<polygon fill="#f6b26b" stroke="black" points="218.5,-2535 126,-2535 126,-2499 218.5,-2499 218.5,-2535"/>
-<text xml:space="preserve" text-anchor="middle" x="172.25" y="-2513.5" font-family="Arial" font-size="10.00" fill="white">UPNP.LAN&#45;4.php</text>
+<polygon fill="#f6b26b" stroke="black" points="218.5,-2451 126,-2451 126,-2415 218.5,-2415 218.5,-2451"/>
+<text xml:space="preserve" text-anchor="middle" x="172.25" y="-2429.5" font-family="Arial" font-size="10.00" fill="white">UPNP.LAN&#45;4.php</text>
 </a>
 </g>
 </g>
@@ -5044,8 +5044,8 @@
 <g id="node397" class="node">
 <title>WAN.php</title>
 <g id="a_node397"><a xlink:href="1.4K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/WAN.php|NA|main-binary" xlink:title="WAN.php">
-<polygon fill="#f6b26b" stroke="black" points="1843,-36 1785,-36 1785,0 1843,0 1843,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="1814" y="-14.5" font-family="Arial" font-size="10.00" fill="white">WAN.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2725,-36 2667,-36 2667,0 2725,0 2725,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="2696" y="-14.5" font-family="Arial" font-size="10.00" fill="white">WAN.php</text>
 </a>
 </g>
 </g>
@@ -5053,8 +5053,8 @@
 <g id="node398" class="node">
 <title>IP6T.WAN&#45;4.php</title>
 <g id="a_node398"><a xlink:href="121|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IP6T.WAN-4.php|NA|main-binary" xlink:title="IP6T.WAN&#45;4.php">
-<polygon fill="#f6b26b" stroke="black" points="215.5,-2451 126,-2451 126,-2415 215.5,-2415 215.5,-2451"/>
-<text xml:space="preserve" text-anchor="middle" x="170.75" y="-2429.5" font-family="Arial" font-size="10.00" fill="white">IP6T.WAN&#45;4.php</text>
+<polygon fill="#f6b26b" stroke="black" points="215.5,-2367 126,-2367 126,-2331 215.5,-2331 215.5,-2367"/>
+<text xml:space="preserve" text-anchor="middle" x="170.75" y="-2345.5" font-family="Arial" font-size="10.00" fill="white">IP6T.WAN&#45;4.php</text>
 </a>
 </g>
 </g>
@@ -5095,8 +5095,8 @@
 <g id="node402" class="node">
 <title>gena.php</title>
 <g id="a_node402"><a xlink:href="4.4K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/upnpinc/gena.php|NA|main-binary" xlink:title="gena.php">
-<polygon fill="#f6b26b" stroke="black" points="2722.75,-36 2667,-36 2667,0 2722.75,0 2722.75,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="2694.88" y="-14.5" font-family="Arial" font-size="10.00" fill="white">gena.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2827.75,-36 2772,-36 2772,0 2827.75,0 2827.75,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="2799.88" y="-14.5" font-family="Arial" font-size="10.00" fill="white">gena.php</text>
 </a>
 </g>
 </g>
@@ -5157,12 +5157,12 @@
 </a>
 </g>
 </g>
-<!-- _NOTIFY.req.ab.php -->
+<!-- __NOTIFY.req.ab.php -->
 <g id="node408" class="node">
-<title>_NOTIFY.req.ab.php</title>
-<g id="a_node408"><a xlink:href="315|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/upnp/_NOTIFY.req.ab.php|NA|main-binary" xlink:title="_NOTIFY.req.ab.php">
-<polygon fill="#f6b26b" stroke="black" points="231.25,-2367 126,-2367 126,-2331 231.25,-2331 231.25,-2367"/>
-<text xml:space="preserve" text-anchor="middle" x="178.63" y="-2345.5" font-family="Arial" font-size="10.00" fill="white">_NOTIFY.req.ab.php</text>
+<title>__NOTIFY.req.ab.php</title>
+<g id="a_node408"><a xlink:href="315|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/upnp/__NOTIFY.req.ab.php|NA|main-binary" xlink:title="__NOTIFY.req.ab.php">
+<polygon fill="#f6b26b" stroke="black" points="362.5,-1863 252,-1863 252,-1827 362.5,-1827 362.5,-1863"/>
+<text xml:space="preserve" text-anchor="middle" x="307.25" y="-1841.5" font-family="Arial" font-size="10.00" fill="white">__NOTIFY.req.ab.php</text>
 </a>
 </g>
 </g>
@@ -5239,8 +5239,8 @@
 <g id="node416" class="node">
 <title>wps</title>
 <g id="a_node416"><a xlink:href="731K| MIPS, MIPS32 version 1 (SYSV)|STATIC NX !PIE !CANARY |/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/usr/sbin/wps|EXEC NET FILE |main-binary" xlink:title="wps">
-<polygon fill="#1a3a5f" stroke="black" points="2826,-36 2772,-36 2772,0 2826,0 2826,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="2799" y="-14.5" font-family="Arial" font-size="10.00" fill="white">wps</text>
+<polygon fill="#1a3a5f" stroke="black" points="2931,-36 2877,-36 2877,0 2931,0 2931,-36"/>
+<text xml:space="preserve" text-anchor="middle" x="2904" y="-14.5" font-family="Arial" font-size="10.00" fill="white">wps</text>
 </a>
 </g>
 </g>
@@ -5257,8 +5257,8 @@
 <g id="node418" class="node">
 <title>SetWLanSettings24.php</title>
 <g id="a_node418"><a xlink:href="2.6K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/templates/hnap/SetWLanSettings24.php|NA|main-binary" xlink:title="SetWLanSettings24.php">
-<polygon fill="#f6b26b" stroke="black" points="373.75,-1863 252,-1863 252,-1827 373.75,-1827 373.75,-1863"/>
-<text xml:space="preserve" text-anchor="middle" x="312.88" y="-1841.5" font-family="Arial" font-size="10.00" fill="white">SetWLanSettings24.php</text>
+<polygon fill="#f6b26b" stroke="black" points="373.75,-1779 252,-1779 252,-1743 373.75,-1743 373.75,-1779"/>
+<text xml:space="preserve" text-anchor="middle" x="312.88" y="-1757.5" font-family="Arial" font-size="10.00" fill="white">SetWLanSettings24.php</text>
 </a>
 </g>
 </g>
@@ -5293,8 +5293,8 @@
 <g id="node422" class="node">
 <title>INFSVCS.WAN&#45;1.php</title>
 <g id="a_node422"><a xlink:href="143|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INFSVCS.WAN-1.php|NA|main-binary" xlink:title="INFSVCS.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="365.5,-1779 252,-1779 252,-1743 365.5,-1743 365.5,-1779"/>
-<text xml:space="preserve" text-anchor="middle" x="308.75" y="-1757.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="365.5,-288 252,-288 252,-252 365.5,-252 365.5,-288"/>
+<text xml:space="preserve" text-anchor="middle" x="308.75" y="-266.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -5416,8 +5416,8 @@
 <g id="node431" class="node">
 <title>S10init.sh</title>
 <g id="a_node431"><a xlink:href="119|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/init.d/S10init.sh|NA|main-binary" xlink:title="S10init.sh">
-<polygon fill="#93c47d" stroke="black" points="2936.5,-36 2877,-36 2877,0 2936.5,0 2936.5,-36"/>
-<text xml:space="preserve" text-anchor="middle" x="2906.75" y="-14.5" font-family="Arial" font-size="10.00" fill="white">S10init.sh</text>
+<polygon fill="#93c47d" stroke="black" points="2999.5,-498 2940,-498 2940,-462 2999.5,-462 2999.5,-498"/>
+<text xml:space="preserve" text-anchor="middle" x="2969.75" y="-476.5" font-family="Arial" font-size="10.00" fill="white">S10init.sh</text>
 </a>
 </g>
 </g>
@@ -5425,8 +5425,8 @@
 <g id="node432" class="node">
 <title>NETSNIPER.NAT&#45;1.php</title>
 <g id="a_node432"><a xlink:href="267|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/setcfg/NETSNIPER.NAT-1.php|NA|main-binary" xlink:title="NETSNIPER.NAT&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="375.25,-288 252,-288 252,-252 375.25,-252 375.25,-288"/>
-<text xml:space="preserve" text-anchor="middle" x="313.63" y="-266.5" font-family="Arial" font-size="10.00" fill="white">NETSNIPER.NAT&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1047.25,-288 924,-288 924,-252 1047.25,-252 1047.25,-288"/>
+<text xml:space="preserve" text-anchor="middle" x="985.63" y="-266.5" font-family="Arial" font-size="10.00" fill="white">NETSNIPER.NAT&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -5449,8 +5449,8 @@
 <g id="node434" class="node">
 <title>firewall.php</title>
 <g id="a_node434"><a xlink:href="891|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/FIREWALL/firewall.php|NA|main-binary" xlink:title="firewall.php">
-<polygon fill="#f6b26b" stroke="black" points="3005.5,-498 2940,-498 2940,-462 3005.5,-462 3005.5,-498"/>
-<text xml:space="preserve" text-anchor="middle" x="2972.75" y="-476.5" font-family="Arial" font-size="10.00" fill="white">firewall.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2081.5,-2976 2016,-2976 2016,-2940 2081.5,-2940 2081.5,-2976"/>
+<text xml:space="preserve" text-anchor="middle" x="2048.75" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">firewall.php</text>
 </a>
 </g>
 </g>
@@ -5467,8 +5467,8 @@
 <g id="node436" class="node">
 <title>index.php</title>
 <g id="a_node436"><a xlink:href="388|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/web/index.php|NA|main-binary" xlink:title="index.php">
-<polygon fill="#f6b26b" stroke="black" points="2998,-1800 2940,-1800 2940,-1764 2998,-1764 2998,-1800"/>
-<text xml:space="preserve" text-anchor="middle" x="2969" y="-1778.5" font-family="Arial" font-size="10.00" fill="white">index.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2998,-771 2940,-771 2940,-735 2998,-735 2998,-771"/>
+<text xml:space="preserve" text-anchor="middle" x="2969" y="-749.5" font-family="Arial" font-size="10.00" fill="white">index.php</text>
 </a>
 </g>
 </g>
@@ -5509,8 +5509,8 @@
 <g id="node440" class="node">
 <title>IPT.WAN&#45;1.php</title>
 <g id="a_node440"><a xlink:href="118|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/IPT.WAN-1.php|NA|main-binary" xlink:title="IPT.WAN&#45;1.php">
-<polygon fill="#f6b26b" stroke="black" points="2961.25,-2346 2877,-2346 2877,-2310 2961.25,-2310 2961.25,-2346"/>
-<text xml:space="preserve" text-anchor="middle" x="2919.12" y="-2324.5" font-family="Arial" font-size="10.00" fill="white">IPT.WAN&#45;1.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2961.25,-2262 2877,-2262 2877,-2226 2961.25,-2226 2961.25,-2262"/>
+<text xml:space="preserve" text-anchor="middle" x="2919.12" y="-2240.5" font-family="Arial" font-size="10.00" fill="white">IPT.WAN&#45;1.php</text>
 </a>
 </g>
 </g>
@@ -5644,8 +5644,8 @@
 <g id="node449" class="node">
 <title>version.php</title>
 <g id="a_node449"><a xlink:href="2.8K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/webinc/body/version.php|NA|main-binary" xlink:title="version.php">
-<polygon fill="#f6b26b" stroke="black" points="2082.25,-2976 2016,-2976 2016,-2940 2082.25,-2940 2082.25,-2976"/>
-<text xml:space="preserve" text-anchor="middle" x="2049.12" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">version.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1746.25,-2976 1680,-2976 1680,-2940 1746.25,-2940 1746.25,-2976"/>
+<text xml:space="preserve" text-anchor="middle" x="1713.13" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">version.php</text>
 </a>
 </g>
 </g>
@@ -5653,8 +5653,8 @@
 <g id="node450" class="node">
 <title>FDISK.php</title>
 <g id="a_node450"><a xlink:href="513|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/fatlady/FDISK.php|NA|main-binary" xlink:title="FDISK.php">
-<polygon fill="#f6b26b" stroke="black" points="1765.75,-2976 1701,-2976 1701,-2940 1765.75,-2940 1765.75,-2976"/>
-<text xml:space="preserve" text-anchor="middle" x="1733.38" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">FDISK.php</text>
+<polygon fill="#f6b26b" stroke="black" points="3004.75,-855 2940,-855 2940,-819 3004.75,-819 3004.75,-855"/>
+<text xml:space="preserve" text-anchor="middle" x="2972.38" y="-833.5" font-family="Arial" font-size="10.00" fill="white">FDISK.php</text>
 </a>
 </g>
 </g>
@@ -5680,8 +5680,8 @@
 <g id="node453" class="node">
 <title>igmpproxy_helper.php</title>
 <g id="a_node453"><a xlink:href="1.2K|POSIX shell script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/scripts/libs/igmpproxy_helper.php|NA|main-binary" xlink:title="igmpproxy_helper.php">
-<polygon fill="#93c47d" stroke="black" points="1035.25,-288 924,-288 924,-252 1035.25,-252 1035.25,-288"/>
-<text xml:space="preserve" text-anchor="middle" x="979.63" y="-266.5" font-family="Arial" font-size="10.00" fill="white">igmpproxy_helper.php</text>
+<polygon fill="#93c47d" stroke="black" points="1203.25,-288 1092,-288 1092,-252 1203.25,-252 1203.25,-288"/>
+<text xml:space="preserve" text-anchor="middle" x="1147.63" y="-266.5" font-family="Arial" font-size="10.00" fill="white">igmpproxy_helper.php</text>
 </a>
 </g>
 </g>
@@ -5698,8 +5698,8 @@
 <g id="node455" class="node">
 <title>upnp.php</title>
 <g id="a_node455"><a xlink:href="692|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/phplib/upnp.php|NA|main-binary" xlink:title="upnp.php">
-<polygon fill="#f6b26b" stroke="black" points="1651.75,-2976 1596,-2976 1596,-2940 1651.75,-2940 1651.75,-2976"/>
-<text xml:space="preserve" text-anchor="middle" x="1623.88" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">upnp.php</text>
+<polygon fill="#f6b26b" stroke="black" points="1630.75,-2976 1575,-2976 1575,-2940 1630.75,-2940 1630.75,-2976"/>
+<text xml:space="preserve" text-anchor="middle" x="1602.88" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">upnp.php</text>
 </a>
 </g>
 </g>
@@ -5791,8 +5791,8 @@
 <g id="node463" class="node">
 <title>DevInfo.txt</title>
 <g id="a_node463"><a xlink:href="41|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/web/DevInfo.txt|NA|main-binary" xlink:title="DevInfo.txt">
-<polygon fill="#f6b26b" stroke="black" points="1555.75,-2976 1491,-2976 1491,-2940 1555.75,-2940 1555.75,-2976"/>
-<text xml:space="preserve" text-anchor="middle" x="1523.38" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">DevInfo.txt</text>
+<polygon fill="#f6b26b" stroke="black" points="1534.75,-2976 1470,-2976 1470,-2940 1534.75,-2940 1534.75,-2976"/>
+<text xml:space="preserve" text-anchor="middle" x="1502.38" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">DevInfo.txt</text>
 </a>
 </g>
 </g>
@@ -5833,8 +5833,8 @@
 <g id="node467" class="node">
 <title>version.txt</title>
 <g id="a_node467"><a xlink:href="41|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/web/version.txt|NA|main-binary" xlink:title="version.txt">
-<polygon fill="#f6b26b" stroke="black" points="1447.75,-2976 1386,-2976 1386,-2940 1447.75,-2940 1447.75,-2976"/>
-<text xml:space="preserve" text-anchor="middle" x="1416.88" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">version.txt</text>
+<polygon fill="#f6b26b" stroke="black" points="1426.75,-2976 1365,-2976 1365,-2940 1426.75,-2940 1426.75,-2976"/>
+<text xml:space="preserve" text-anchor="middle" x="1395.88" y="-2954.5" font-family="Arial" font-size="10.00" fill="white">version.txt</text>
 </a>
 </g>
 </g>
@@ -6955,8 +6955,8 @@
 <g id="node557" class="node">
 <title>INFSVCS.WAN&#45;2.php</title>
 <g id="a_node557"><a xlink:href="143|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/services/INFSVCS.WAN-2.php|NA|main-binary" xlink:title="INFSVCS.WAN&#45;2.php">
-<polygon fill="#f6b26b" stroke="black" points="1205.5,-288 1092,-288 1092,-252 1205.5,-252 1205.5,-288"/>
-<text xml:space="preserve" text-anchor="middle" x="1148.75" y="-266.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.WAN&#45;2.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2360.5,-267 2247,-267 2247,-231 2360.5,-231 2360.5,-267"/>
+<text xml:space="preserve" text-anchor="middle" x="2303.75" y="-245.5" font-family="Arial" font-size="10.00" fill="white">INFSVCS.WAN&#45;2.php</text>
 </a>
 </g>
 </g>
@@ -7288,8 +7288,8 @@
 <g id="node584" class="node">
 <title>SetWLanSettings54.php</title>
 <g id="a_node584"><a xlink:href="1.7K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/etc/templates/hnap/SetWLanSettings54.php|NA|main-binary" xlink:title="SetWLanSettings54.php">
-<polygon fill="#f6b26b" stroke="black" points="2368.75,-267 2247,-267 2247,-231 2368.75,-231 2368.75,-267"/>
-<text xml:space="preserve" text-anchor="middle" x="2307.88" y="-245.5" font-family="Arial" font-size="10.00" fill="white">SetWLanSettings54.php</text>
+<polygon fill="#f6b26b" stroke="black" points="2830.75,-2178 2709,-2178 2709,-2142 2830.75,-2142 2830.75,-2178"/>
+<text xml:space="preserve" text-anchor="middle" x="2769.88" y="-2156.5" font-family="Arial" font-size="10.00" fill="white">SetWLanSettings54.php</text>
 </a>
 </g>
 </g>
@@ -7414,8 +7414,8 @@
 <g id="node594" class="node">
 <title>misc_config.xml</title>
 <g id="a_node594"><a xlink:href="2.0K|PHP script|NA|/logs/firmware/unblob_extracted/firmware_extract/DIR-600_fw_revb5_214b01_ALL_de_20130122/dir600b_v2.14_d1mg.bin_extract/1179788-3612812.squashfs_v4_le_extract/htdocs/widget/misc_config.xml|NA|main-binary" xlink:title="misc_config.xml">
-<polygon fill="#f6b26b" stroke="black" points="1326.25,-2955 1239,-2955 1239,-2919 1326.25,-2919 1326.25,-2955"/>
-<text xml:space="preserve" text-anchor="middle" x="1282.63" y="-2933.5" font-family="Arial" font-size="10.00" fill="white">misc_config.xml</text>
+<polygon fill="#f6b26b" stroke="black" points="1305.25,-2955 1218,-2955 1218,-2919 1305.25,-2919 1305.25,-2955"/>
+<text xml:space="preserve" text-anchor="middle" x="1261.63" y="-2933.5" font-family="Arial" font-size="10.00" fill="white">misc_config.xml</text>
 </a>
 </g>
 </g>
