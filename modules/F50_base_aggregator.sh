@@ -515,6 +515,7 @@ output_binaries() {
       write_link "s14"
     fi
     write_csv_log "strcpy" "${STRCPY_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    print_ln
   fi
 
   local lDATA_GENERATED=0
