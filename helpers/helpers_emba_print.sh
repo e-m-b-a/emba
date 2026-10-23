@@ -166,7 +166,11 @@ print_output() {
   if [[ "${lTYPE_CHECK}" == "[-]" || "${lTYPE_CHECK}" == "[*]" || "${lTYPE_CHECK}" == "[!]" || "${lTYPE_CHECK}" == "[+]" ]]; then
     local lCOLOR_OUTPUT_STRING=""
     lCOLOR_OUTPUT_STRING="$(color_output "${lOUTPUT}")"
-    lCOLOR_OUTPUT_STRING="${lCOLOR_OUTPUT_STRING//$'\n'/}"
+    # ensure our color_output does not break our REF linking
+    lCOLOR_OUTPUT_STRING="${lCOLOR_OUTPUT_STRING//$'\r'/}"
+    if [[ "${lCOLOR_OUTPUT_STRING}" == *$'\n'"${NC}" ]]; then
+      lCOLOR_OUTPUT_STRING="${lCOLOR_OUTPUT_STRING%$'\n'"${NC}"}${NC}"
+    fi
     safe_echo "${lCOLOR_OUTPUT_STRING}"
     if [[ "${lLOG_SETTING}" == "main" ]]; then
       if [[ -z "${lREF_LINK:-}" ]]; then
