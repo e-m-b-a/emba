@@ -6,6 +6,9 @@
   "licenses": [
     "GPL-3.0-only"
   ],
+  "links": [
+    "https://www.gnu.org/software/bash/"
+  ],
   "grep_commands": [
     "[Bb]ash,\\ version\\ [0-9](\\.[0-9]+)+?",
     "[Bb]ash.*version\\ [0-9](\\.[0-9]+)+?"
