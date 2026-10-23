@@ -141,6 +141,14 @@ teardown() {
   [ "${result}" = $'[+] test line\n[REF] f15#anchor' ]
 }
 
+@test "print_output does not add a blank line before REF links with colored logs" {
+  FORMAT_LOG=1
+  run print_output $'[+] test line\n' "" "f15#anchor"
+  [ "${status}" -eq 0 ]
+  result="$(strip_color_codes "$(tr -d '\r' <"${LOG_FILE}")")"
+  [ "${result}" = $'[+] test line\n[REF] f15#anchor' ]
+}
+
 @test "print_output strips carriage returns from CRLF messages" {
   run print_output $'[+] test line\r\n' "" "f15#anchor"
   [ "${status}" -eq 0 ]
