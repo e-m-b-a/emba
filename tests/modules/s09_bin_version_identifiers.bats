@@ -485,6 +485,56 @@ bvi_static_rules() {
   }
 }
 
+@test "bin_version_identifiers configs use only known keys with valid value types" {
+  local lFAILURES=""
+
+  local lCFG_FILE=""
+  local lBASENAME=""
+  local lJSON_TYPE=""
+  local lCHECK_RESULT=""
+  local lCHECK_LINE=""
+  local lALLOWED_KEYS='["affected_paths","emulation_only_grep_commands","grep_commands","identifier","licenses","links","live_grep_commands","parsing_mode","product_names","strict_grep_commands","vendor_names","version_extraction","zgrep_grep_commands"]'
+  local lARRAY_KEYS='["affected_paths","emulation_only_grep_commands","grep_commands","licenses","links","live_grep_commands","parsing_mode","product_names","strict_grep_commands","vendor_names","version_extraction","zgrep_grep_commands"]'
+  local lREQUIRED_KEYS='["affected_paths","identifier","licenses","parsing_mode","product_names","vendor_names","version_extraction"]'
+
+  for lCFG_FILE in "${BIN_VERSION_CFG_ARR[@]}"; do
+    lBASENAME="$(basename "${lCFG_FILE}")"
+
+    if ! lJSON_TYPE=$(jq -r 'type' "${lCFG_FILE}" 2>/dev/null); then
+      lFAILURES+="${lBASENAME}: invalid json
+"
+      continue
+    fi
+    if [[ "${lJSON_TYPE}" != "object" ]]; then
+      lFAILURES+="${lBASENAME}: root must be a JSON object, got ${lJSON_TYPE}
+"
+      continue
+    fi
+
+    lCHECK_RESULT=$(jq -r --argjson allowed "${lALLOWED_KEYS}" --argjson arrays "${lARRAY_KEYS}" --argjson required "${lREQUIRED_KEYS}" '
+      . as $cfg
+      | (($cfg | keys) - $allowed | .[] | "unknown key \"\(.)\""),
+        ($required[] as $key | select(($cfg | has($key)) | not) | "missing key \"\($key)\""),
+        ($cfg | to_entries[] | select(.key == "identifier") | select(((.value | type) != "string") or ((.value | length) == 0)) | "identifier must be a non-empty string"),
+        ($cfg | to_entries[] | select(.key as $key | $arrays | index($key)) | select((.value | type) != "array") | "\(.key) must be an array, got \(.value | type)"),
+        ($cfg | to_entries[] | select(.key as $key | $arrays | index($key)) | select((.value | type) == "array") | .key as $key | .value | to_entries[] | select(((.value | type) != "string") or ((.value | length) == 0)) | "\($key)[\(.key)] must be a non-empty string"),
+        ($cfg | [.grep_commands, .live_grep_commands, .strict_grep_commands, .zgrep_grep_commands, .emulation_only_grep_commands] | map(select(type == "array") | length) | add // 0) as $count | select($count == 0) | "has no entries in any grep command list"
+    ' "${lCFG_FILE}" 2>/dev/null)
+
+    if [[ -n "${lCHECK_RESULT}" ]]; then
+      while IFS= read -r lCHECK_LINE; do
+        lFAILURES+="${lBASENAME}: ${lCHECK_LINE}
+"
+      done <<<"${lCHECK_RESULT}"
+    fi
+  done
+
+  [ -z "${lFAILURES}" ] || {
+    printf '%s' "${lFAILURES}" >&2
+    false
+  }
+}
+
 @test "strict mode rules provide affected_paths and every parsing_mode is known" {
   local lFAILURES=""
   local lALLOWED_MODES=" normal live multi_grep strict zgrep no_static emulation_only "
