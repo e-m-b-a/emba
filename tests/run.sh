@@ -33,16 +33,18 @@ TOTAL=0
 PASSED=0
 FAILED=0
 
-while IFS= read -r -d '' TEST_FILE; do
+# jo reads stdin when called with an empty argument list, and build_sbom_json_component_arr triggered that during sbom_helpers.bats, consuming the remaining NUL-separated test paths from the loop.
+# tests/run.sh now reads the file list on fd 3 and runs bats with stdin from /dev/null:
+while IFS= read -r -d '' TEST_FILE <&3; do
   echo "--- Running: $(basename "${TEST_FILE}") ---"
-  if "${BATS_BIN}" "${TEST_FILE}"; then
+  if "${BATS_BIN}" "${TEST_FILE}" </dev/null; then
     PASSED=$((PASSED + 1))
   else
     FAILED=$((FAILED + 1))
   fi
   TOTAL=$((TOTAL + 1))
   echo ""
-done < <(find "${INVOCATION_PATH}" -name 'bats-core' -prune -o -name '*.bats' -print0)
+done 3< <(find "${INVOCATION_PATH}" -name 'bats-core' -prune -o -name '*.bats' -print0)
 
 echo "--- Statistics: S09 version identifier testdata coverage ---"
 # bats hides the output of passing tests - the coverage report is printed

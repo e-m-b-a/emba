@@ -121,6 +121,42 @@ teardown() {
   [ "${status}" -eq 0 ]
 }
 
+@test "print_output preserves internal newlines" {
+  result="$(print_output $'[*] first line\nsecond line')"
+  result="$(strip_color_codes "${result}")"
+  [[ "${result}" == *$'first line\nsecond line'* ]]
+}
+
+@test "print_output preserves multiline messages in log files" {
+  run print_output $'[*] first line\nsecond line' "" "f15#anchor"
+  [ "${status}" -eq 0 ]
+  result="$(tr -d '\r' <"${LOG_FILE}")"
+  [ "${result}" = $'[*] first line\nsecond line\n[REF] f15#anchor' ]
+}
+
+@test "print_output does not add a blank line before REF links" {
+  run print_output $'[+] test line\n' "" "f15#anchor"
+  [ "${status}" -eq 0 ]
+  result="$(tr -d '\r' <"${LOG_FILE}")"
+  [ "${result}" = $'[+] test line\n[REF] f15#anchor' ]
+}
+
+@test "print_output does not add a blank line before REF links with colored logs" {
+  FORMAT_LOG=1
+  run print_output $'[+] test line\n' "" "f15#anchor"
+  [ "${status}" -eq 0 ]
+  result="$(strip_color_codes "$(tr -d '\r' <"${LOG_FILE}")")"
+  [ "${result}" = $'[+] test line\n[REF] f15#anchor' ]
+}
+
+@test "print_output strips carriage returns from CRLF messages" {
+  run print_output $'[+] test line\r\n' "" "f15#anchor"
+  [ "${status}" -eq 0 ]
+  ! grep -qF $'\r\r' "${LOG_FILE}"
+  result="$(tr -d '\r' <"${LOG_FILE}")"
+  [ "${result}" = $'[+] test line\n[REF] f15#anchor' ]
+}
+
 @test "print_date returns a date string" {
   result="$(print_date)"
   [ -n "${result}" ]
