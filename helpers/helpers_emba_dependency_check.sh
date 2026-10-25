@@ -266,7 +266,7 @@ dependency_check() {
     print_output "    Internet connection - \\c" "no_log"
 
     if [[ -d "${EXT_DIR}"/onlinechecker ]]; then
-      rm -rf "${EXT_DIR}"/onlinechecker 2>/dev/null
+      rm -rf "${EXT_DIR:?EXT_DIR is unset or empty}"/onlinechecker 2>/dev/null
     fi
 
     # the update check can be disabled via NO_UPDATE_CHECK

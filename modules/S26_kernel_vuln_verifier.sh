@@ -208,7 +208,7 @@ S26_kernel_vuln_verifier() {
     write_link "${LOG_DIR}/kernel_downloader.log"
 
     lKERNEL_DIR="${LOG_PATH_MODULE}/linux-${lK_VERSION_KORG}"
-    [[ -d "${lKERNEL_DIR}" ]] && rm -rf "${lKERNEL_DIR}"
+    [[ -d "${lKERNEL_DIR}" ]] && rm -rf "${lKERNEL_DIR:?lKERNEL_DIR is unset or empty}"
     if ! [[ -d "${lKERNEL_DIR}" ]] && [[ "$(file "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION_KORG}.tar.gz")" == *"gzip compressed data"* ]]; then
       print_output "[*] Kernel version ${ORANGE}${lK_VERSION}${NC} extraction ... "
       tar -xzf "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION_KORG}.tar.gz" -C "${LOG_PATH_MODULE}"

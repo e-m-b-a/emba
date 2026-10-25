@@ -70,10 +70,10 @@ S09_firmware_base_version_check() {
     # Debian:
     find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u >"${LOG_PATH_MODULE}"/debian_known_files.txt || true
     # the extracted packages are used to further limit the static tests
-    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/debian_known_packages.txt || true
+    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} + | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/debian_known_packages.txt || true
     # OpenWRT
     find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
-    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} + | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)

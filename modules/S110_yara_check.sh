@@ -42,7 +42,7 @@ S110_yara_check() {
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
     if [[ ! -f "${lDIR_COMB_YARA}" ]]; then
-      find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n' | sort -n >"${lDIR_COMB_YARA}"
+      find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} + | xargs printf 'include "%s"\n' | sort -n >"${lDIR_COMB_YARA}"
     fi
 
     write_csv_log "yara rule" "matched file"

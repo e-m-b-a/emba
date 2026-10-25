@@ -173,7 +173,7 @@ S08_submodule_bsd_package_parser() {
         lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
       done
 
-      [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR}"/pkg_tmp
+      [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR:?TMP_DIR is unset or empty}"/pkg_tmp
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 

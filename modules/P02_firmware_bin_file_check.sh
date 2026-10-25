@@ -70,7 +70,7 @@ get_fw_dir_details() {
   # we create a log file with all file hashes of the firmware directory
   # this is needed to check the firmware directory on a possible restart against this
   # file and decide if we can restart a firmware analysis process or not
-  find "${lFIRMWARE_PATH_DIR}" -type f -exec md5sum {} \; | sort -u | awk '{print $1}' >"${LOG_PATH_MODULE}/firmware_hashes.log" || true
+  find "${lFIRMWARE_PATH_DIR}" -type f -exec md5sum {} + | sort -u | awk '{print $1}' >"${LOG_PATH_MODULE}/firmware_hashes.log" || true
 }
 
 get_fw_file_details() {

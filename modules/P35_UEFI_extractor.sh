@@ -89,7 +89,7 @@ P35_UEFI_extractor() {
         done
         if [[ "${UEFI_VERIFIED}" -ne 1 && "${RTOS}" -eq 1 ]]; then
           # if we have no UEFI firmware and no Linux filesystem, we remove this file junks now
-          rm -rf "${lEXTRACTION_DIR}" || true
+          rm -rf "${lEXTRACTION_DIR:?lEXTRACTION_DIR is unset or empty}" || true
         fi
       fi
     fi
@@ -134,7 +134,7 @@ P35_UEFI_extractor() {
         done
         if [[ "${UEFI_VERIFIED}" -ne 1 && "${RTOS}" -eq 1 ]]; then
           # if we have no UEFI firmware and no Linux filesystem, we remove this file junks now
-          rm -rf "${lEXTRACTION_DIR}" || true
+          rm -rf "${lEXTRACTION_DIR:?lEXTRACTION_DIR is unset or empty}" || true
         fi
       fi
     fi

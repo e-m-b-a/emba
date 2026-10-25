@@ -129,7 +129,7 @@ load_default_environment() {
 
   export DOT_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.dot"
   export DOT_FILE_tmp_dir="${LOG_PATH_MODULE}/tmp_dot"
-  rm -rf "${DOT_FILE_tmp_dir}"
+  rm -rf "${DOT_FILE_tmp_dir:?DOT_FILE_tmp_dir is unset or empty}"
   mkdir "${DOT_FILE_tmp_dir}"
 
   # External assets - downloaded once for offline capability.
