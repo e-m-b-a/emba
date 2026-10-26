@@ -369,7 +369,7 @@ if ! command -v docker >/dev/null || ! command -v docker compose >/dev/null; the
     [[ "${UBUNTU_OS}" -eq 1 ]] && OS="ubuntu"
     apt-get install -y ca-certificates curl gnupg
     install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/"${OS}"/gpg -o /etc/apt/keyrings/docker.asc
+    curl -fsSL --url https://download.docker.com/linux/"${OS}"/gpg -o /etc/apt/keyrings/docker.asc
     chmod a+r /etc/apt/keyrings/docker.asc
     # Add the repository to Apt sources:
     if [[ "${UBUNTU_OS}" -eq 1 ]]; then

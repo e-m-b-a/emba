@@ -31,7 +31,7 @@ KERNEL_RELEASES_FILE=$(mktemp) || {
 }
 KERNEL_OUTPUT_CSV="./config/kernel_details.csv"
 
-if ! curl -sf "${KERNEL_RELEASES_URL}" >"${KERNEL_RELEASES_FILE}"; then
+if ! curl -sf --url "${KERNEL_RELEASES_URL}" >"${KERNEL_RELEASES_FILE}"; then
   print_output "[-] Error downloading ${KERNEL_RELEASES_FILE}" "no_log"
   exit 1
 fi
@@ -46,7 +46,7 @@ for KERNEL_SUB_DIR in "${KERNEL_SUB_DIR_ARR[@]}"; do
   KERNEL_SUB_DIR=${KERNEL_SUB_DIR/<a href=\"/}
   KERNEL_SUB_DIR=${KERNEL_SUB_DIR/\">v*/}
   print_output "[*] Testing kernel sub dir: ${ORANGE}${KERNEL_SUB_DIR}${NC}" "no_log"
-  curl -s "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >>"${KERNEL_RELEASES_FILE}"
+  curl -s --url "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >>"${KERNEL_RELEASES_FILE}"
 done
 
 # extract kernel versions and release dates:

@@ -264,7 +264,7 @@ check_jnap_access() {
 
   for lSYSINFO_CGI in "${lSYSINFO_CGI_ARR[@]}"; do
     print_output "[*] Testing for sysinfo.cgi" "no_log"
-    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${lPORT}"/"${lSYSINFO_CGI}" >"${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log || true
+    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET --url http://"${IP_ADDRESS_}":"${lPORT}"/"${lSYSINFO_CGI}" >"${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log || true
 
     if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log ]]; then
       if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log; then
@@ -279,7 +279,7 @@ check_jnap_access() {
     lJNAP_EPT_NAME="${lJNAP_EPT##*/}" # basename
     local lJNAP_ACTION="X-JNAP-Action: ${lJNAP_EPT}"
     local lDATA="{}"
-    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "${lDATA}" http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >"${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log || true
+    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "${lDATA}" --url http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >"${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log || true
 
     if [[ -s "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]]; then
       if grep -q "_ErrorUnauthorized" "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log; then
