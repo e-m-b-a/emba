@@ -30,8 +30,12 @@ L15_emulated_checks_nmap() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -v IP_ADDRESS_ ]]; then
-      check_live_nmap_basic "${IP_ADDRESS_}"
-      lMODULE_END=1
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing Nmap checks"
+      else
+        check_live_nmap_basic "${IP_ADDRESS_}"
+        lMODULE_END=1
+      fi
     else
       print_output "[!] No IP address found"
     fi

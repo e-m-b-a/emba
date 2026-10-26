@@ -39,6 +39,11 @@ L35_metasploit_check() {
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing Metasploit checks"
+        module_end_log "${FUNCNAME[0]}" "${lMODULE_END}"
+        return
+      fi
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing Metasploit checks"
@@ -61,6 +66,8 @@ check_live_metasploit() {
   sub_module_title "Metasploit tests for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
   local lPORTS=""
   local lPORTS_ARR=()
+  local lPORTS_ARR_VALID=()
+  local lPORT=""
   local lMSF_VULN=""
   local lMSF_VULNS_VERIFIED_ARR=()
   local lMSF_CVEs_ARR=()
@@ -79,7 +86,19 @@ check_live_metasploit() {
     return
   fi
 
-  printf -v lPORTS "%s " "${lPORTS_ARR[@]}"
+  for lPORT in "${lPORTS_ARR[@]}"; do
+    if ! check_for_valid_port "${lPORT}"; then
+      print_output "[-] Invalid port ${ORANGE}${lPORT}${NC} detected - skipping"
+      continue
+    fi
+    lPORTS_ARR_VALID+=("${lPORT}")
+  done
+  if [[ "${#lPORTS_ARR_VALID[@]}" -eq 0 ]]; then
+    print_output "[-] No valid open ports identified ..."
+    return
+  fi
+
+  printf -v lPORTS "%s " "${lPORTS_ARR_VALID[@]}"
   lPORTS=${lPORTS//\ /,}
   lPORTS="${lPORTS%,}"
   print_output "[*] Testing system with IP address ${ORANGE}${IP_ADDRESS_}${NC} and ports ${ORANGE}${lPORTS}${NC}."

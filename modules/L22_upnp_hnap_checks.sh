@@ -32,6 +32,11 @@ L22_upnp_hnap_checks() {
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing UPnP/HNAP checks"
+        module_end_log "${FUNCNAME[0]}" "${UPNP_UP}"
+        return
+      fi
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing UPnP/HNAP checks"
@@ -78,6 +83,10 @@ check_basic_upnp() {
     lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
     print_output "[*] UPnP reachability check for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}"
     if [[ "${lSERVICE}" == *"upnp"* && "${lTCP_UDP}" == *"tcp"* ]]; then
+      if ! check_for_valid_port "${lPORT}"; then
+        print_output "[-] Invalid port ${ORANGE}${lPORT}${NC} detected - skipping"
+        continue
+      fi
       print_output "[*] Testing UPnP reachability for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}" "no_log"
       if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
@@ -145,6 +154,12 @@ check_basic_hnap_jnap() {
       lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
       print_output "[*] Analyzing service ${ORANGE}${lPORT_SERVICE} - ${lPORT} - ${IP_ADDRESS_}${NC}" "no_log"
       if [[ "${lSERVICE}" == "unknown" ]] || [[ "${lSERVICE}" == "tcpwrapped" ]]; then
+        continue
+      fi
+      if ! check_for_valid_port "${lPORT}"; then
+        continue
+      fi
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
         continue
       fi
 
@@ -258,6 +273,15 @@ check_jnap_access() {
 
   # Todo: PORT!!!
   local lPORT=80
+
+  if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing JNAP checks"
+    return
+  fi
+  if ! check_for_valid_port "${lPORT}"; then
+    print_output "[-] Invalid port ${ORANGE}${lPORT}${NC} - Not performing JNAP checks"
+    return
+  fi
 
   # https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt
   mapfile -t lSYSINFO_CGI_ARR < <(find "${LOG_DIR}"/firmware -type f -name "sysinfo.cgi" -o -name "getstinfo.cgi" | sort -u 2>/dev/null || true)

@@ -23,6 +23,11 @@ restart_emulation() {
   local lSTATE_CHECK_MECHANISM="${4:-"PING"}"
   local lRESTART_FORCE="${5:-0}"
 
+  if ! check_for_valid_ip_address "${lIP_ADDRESS}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${lIP_ADDRESS}${NC}" "no_log"
+    return 1
+  fi
+
   if [[ "${lRESTART_FORCE}" -eq 0 ]]; then
     if ping -c 1 "${lIP_ADDRESS}" &>/dev/null; then
       print_output "[+] System with ${ORANGE}${lIP_ADDRESS}${GREEN} responding again - probably it recovered automatically.${NC}" "no_log"
@@ -210,6 +215,15 @@ service_online_check() {
   local lNMAP_SERV_TCP_ARR=()
   local lSERVICE=""
 
+  if ! check_for_valid_ip_address "${lIP_ADDRESS}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${lIP_ADDRESS}${NC}" "no_log"
+    return 1
+  fi
+  if [[ "${lNW_SERVICE}" != "NA" ]] && ! check_for_valid_port "${lNW_SERVICE}"; then
+    print_output "[-] Invalid network service port ${ORANGE}${lNW_SERVICE}${NC}" "no_log"
+    return 1
+  fi
+
   # if we are called without a network service we extract our services and use them
   # otherwise we are only checking for the service provided by the caller
   if [[ "${lNW_SERVICE}" == "NA" ]]; then
@@ -249,6 +263,15 @@ system_online_check() {
   # print details or do it silent
   local lPRINT_OUTPUT="${3:-1}"
 
+  if ! check_for_valid_ip_address "${lIP_ADDRESS}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${lIP_ADDRESS}${NC}" "no_log"
+    return 1
+  fi
+  if [[ "${lNW_SERVICE}" != "NA" ]] && ! check_for_valid_port "${lNW_SERVICE}"; then
+    print_output "[-] Invalid network service port ${ORANGE}${lNW_SERVICE}${NC}" "no_log"
+    return 1
+  fi
+
   # STATE_CHECK_MECHANISM is exported by l10
 
   if [[ $(wc -l 2>/dev/null <"${TMP_DIR}/emulation_restarting.log") -gt "${MAX_SYSTEM_RESTART_CNT}" ]]; then
@@ -282,6 +305,11 @@ hping_check() {
   local lRESTARTER=0
   local lMAX_PING_CNT=50
 
+  if ! check_for_valid_ip_address "${lIP_ADDRESS}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${lIP_ADDRESS}${NC}" "no_log"
+    return 1
+  fi
+
   while ! [[ "$(hping3 -n -c 1 "${lIP_ADDRESS}" 2>/dev/null | grep -c "^len=")" -gt 0 ]]; do
     lRESTARTER=1
     [[ "${lPRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... hping mode" "no_log"
@@ -312,6 +340,11 @@ ping_check() {
   local lPRINT_OUTPUT="${2:-1}"
   local lCOUNTER=1
   local lRESTARTER=0
+
+  if ! check_for_valid_ip_address "${lIP_ADDRESS}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${lIP_ADDRESS}${NC}" "no_log"
+    return 1
+  fi
 
   while ! ping -c 1 "${lIP_ADDRESS}"; do
     lRESTARTER=1
@@ -371,4 +404,34 @@ check_emulation_port() {
   else
     echo -e "${GREEN}""ok""${NC}"
   fi
+}
+
+check_for_valid_port() {
+  local lPORT="${1:-}"
+  if [[ ! "${lPORT}" =~ ^[0-9]{1,5}$ ]]; then
+    return 1
+  fi
+  if ((10#${lPORT} < 1 || 10#${lPORT} > 65535)); then
+    return 1
+  fi
+  return 0
+}
+
+check_for_valid_ip_address() {
+  local lIP_ADDRESS="${1:-}"
+  local lOCTET=""
+  local -a lOCTETS_ARR=()
+  if [[ ! "${lIP_ADDRESS}" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+    return 1
+  fi
+  IFS='.' read -r -a lOCTETS_ARR <<<"${lIP_ADDRESS}"
+  for lOCTET in "${lOCTETS_ARR[@]}"; do
+    if [[ ! "${lOCTET}" =~ ^(0|[1-9][0-9]{0,2})$ ]]; then
+      return 1
+    fi
+    if ((10#${lOCTET} > 255)); then
+      return 1
+    fi
+  done
+  return 0
 }

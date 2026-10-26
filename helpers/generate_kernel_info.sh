@@ -45,6 +45,7 @@ mapfile -t KERNEL_SUB_DIR_ARR < <(grep "a href=\"v[0-9]\." "${KERNEL_RELEASES_FI
 for KERNEL_SUB_DIR in "${KERNEL_SUB_DIR_ARR[@]}"; do
   KERNEL_SUB_DIR=${KERNEL_SUB_DIR/<a href=\"/}
   KERNEL_SUB_DIR=${KERNEL_SUB_DIR/\">v*/}
+  [[ ! "${KERNEL_SUB_DIR}" =~ ^v[0-9]+(\.[0-9]+)*/$ ]] && continue
   print_output "[*] Testing kernel sub dir: ${ORANGE}${KERNEL_SUB_DIR}${NC}" "no_log"
   curl -s --url "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >>"${KERNEL_RELEASES_FILE}"
 done
