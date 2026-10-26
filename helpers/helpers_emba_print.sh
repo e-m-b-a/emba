@@ -449,7 +449,7 @@ write_pid_log() {
 }
 
 write_link() {
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     local lLINK="${1:-}"
     lLINK="$(format_log "[REF] ${lLINK}" 1)"
     local lLOG_FILE_ALT="${2:-}"
@@ -492,7 +492,7 @@ copy_and_link_file() {
 }
 
 write_anchor() {
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     local lANCHOR="${1:-}"
     lANCHOR="$(format_log "[ANC] ""${lANCHOR}" 1)"
     local lLOG_FILE_ALT="${2:-}"
@@ -665,7 +665,7 @@ format_log() {
   local lLOG_STRING="${1:-}"
   # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
   local lOVERWRITE_SETTING="${2:-}"
-  if [[ ${FORMAT_LOG} -eq 0 ]] || [[ ${lOVERWRITE_SETTING} -eq 1 ]]; then
+  if [[ "${FORMAT_LOG}" -eq 0 ]] || [[ "${lOVERWRITE_SETTING}" -eq 1 ]]; then
     echo "${lLOG_STRING}" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" |
       sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" |
       sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" |
@@ -975,7 +975,7 @@ write_csv_AI_tmp() {
 }
 
 write_anchor_AI() {
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     local lLINK="${1:-}"
     lLINK="$(format_log "[ASK_AI] ""${lLINK}" 1)"
     local lLOG_FILE_ALT="${2:-}"

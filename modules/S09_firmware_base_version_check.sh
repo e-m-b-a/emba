@@ -855,7 +855,7 @@ bin_string_checker() {
         lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"/}"
         lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
       fi
-      if [[ ${RTOS} -eq 0 ]]; then
+      if [[ "${RTOS}" -eq 0 ]]; then
         if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]]; then
           # print_output "[!] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)

@@ -36,7 +36,7 @@ P55_unblob_extractor() {
   fi
 
   # If we have found a linux filesystem we do not need an unblob extraction
-  if [[ ${RTOS} -eq 0 ]]; then
+  if [[ "${RTOS}" -eq 0 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi

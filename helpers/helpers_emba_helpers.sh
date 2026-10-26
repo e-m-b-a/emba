@@ -25,7 +25,7 @@ run_web_reporter_mod_name() {
   local lLOG_FILES_ARR=()
   local lLOG_FILE=""
 
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     # usually we should only find one file:
     mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMOD_NAME}*.txt" | sort)
     for lLOG_FILE in "${lLOG_FILES_ARR[@]}"; do

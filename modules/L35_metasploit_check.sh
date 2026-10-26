@@ -34,7 +34,7 @@ L35_metasploit_check() {
     module_title "Metasploit exploit checks of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ ${IN_DOCKER} -eq 0 ]]; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 

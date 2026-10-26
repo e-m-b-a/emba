@@ -198,7 +198,7 @@ if [[ "${IMAGE_DETAILS}" != *"DOS/MBR boot sector; partition"* ]]; then
   exit 1
 fi
 
-if ! [[ ${EUID} -eq 0 ]]; then
+if ! [[ "${EUID}" -eq 0 ]]; then
   echo -e "[-] Setting up the firmware mounter requires root privileges"
   exit 1
 fi

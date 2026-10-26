@@ -38,7 +38,7 @@ S02_UEFI_FwHunt() {
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
       while read -r lFILE_DETAILS; do
         lEXTRACTED_FILE=$(cut -d ';' -f2 <<<"${lFILE_DETAILS}") # field 2
-        if [[ ${THREADED} -eq 1 ]]; then
+        if [[ "${THREADED}" -eq 1 ]]; then
           fwhunter "${lEXTRACTED_FILE}" &
           local lTMP_PID="$!"
           store_kill_pids "${lTMP_PID}"
@@ -51,7 +51,7 @@ S02_UEFI_FwHunt() {
     fi
   fi
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S02_ARR[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S02_ARR[@]}"
 
   fwhunter_logging
 

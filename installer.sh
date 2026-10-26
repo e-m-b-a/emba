@@ -252,7 +252,7 @@ if ! grep -q "ssse3" /proc/cpuinfo 2>/dev/null; then
   fi
 fi
 
-if ! [[ ${EUID} -eq 0 ]] && [[ ${LIST_DEP} -eq 0 ]]; then
+if ! [[ "${EUID}" -eq 0 ]] && [[ "${LIST_DEP}" -eq 0 ]]; then
   echo -e "\\n""${RED}""Run EMBA installation script with root permissions!""${NC}\\n"
   print_help
   exit 1
@@ -302,7 +302,7 @@ if [[ "${IN_DOCKER}" -eq 0 ]]; then
   fi
 fi
 
-if [[ ${LIST_DEP} -eq 0 ]]; then
+if [[ "${LIST_DEP}" -eq 0 ]]; then
   if ! [[ -d "external" ]]; then
     echo -e "\\n""${ORANGE}""Created external directory: ./external""${NC}"
     mkdir external

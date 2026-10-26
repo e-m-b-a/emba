@@ -38,7 +38,7 @@ S110_yara_check() {
   local lMEM_LIMIT=$(("${TOTAL_MEMORY}" * 80 / 100))
   local lYARA_OUT_LINE=""
 
-  if [[ ${YARA} -eq 1 ]]; then
+  if [[ "${YARA}" -eq 1 ]]; then
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
     if [[ ! -f "${lDIR_COMB_YARA}" ]]; then

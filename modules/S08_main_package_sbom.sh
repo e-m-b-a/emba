@@ -43,7 +43,7 @@ S08_main_package_sbom() {
 
   local lS08_MODULE=""
 
-  if [[ ${THREADED} -eq 1 ]]; then
+  if [[ "${THREADED}" -eq 1 ]]; then
     for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
       print_output "[*] SBOM - starting ${lS08_MODULE}" "no_log"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &

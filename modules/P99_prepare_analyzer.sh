@@ -28,7 +28,7 @@ export PRE_THREAD_ENA=0
 P99_prepare_analyzer() {
 
   # this module is the latest in the preparation phase. So, wait for all the others
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"
@@ -45,7 +45,7 @@ P99_prepare_analyzer() {
   LINUX_PATH_COUNTER="$(linux_basic_identification "${LOG_DIR}/firmware")"
 
   # we have a linux:
-  if [[ ${LINUX_PATH_COUNTER} -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]]; then
+  if [[ "${LINUX_PATH_COUNTER}" -gt 0 || "${#ROOT_PATH[@]}" -gt 1 ]]; then
     export FIRMWARE=1
     # FIRMWARE_PATH="$(abs_path "${OUTPUT_DIR}")"
     export FIRMWARE_PATH="${LOG_DIR}"/firmware
@@ -72,7 +72,7 @@ P99_prepare_analyzer() {
   # as we rely on P99_CSV_LOG
   prepare_all_file_arrays "${FIRMWARE_PATH}"
 
-  if [[ ${KERNEL} -eq 0 ]]; then
+  if [[ "${KERNEL}" -eq 0 ]]; then
     architecture_check "${FIRMWARE_PATH}"
     architecture_dep_check
   fi

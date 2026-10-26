@@ -305,7 +305,7 @@ radare_decomp_output_function_details() {
     local lNETWORKING_="${GREEN}networking: ${lNW_CSV}${NC}"
   fi
 
-  if [[ ${COUNT_FUNC} -gt 0 ]]; then
+  if [[ "${COUNT_FUNC}" -gt 0 ]]; then
     local lOUTPUT=""
     if [[ "${lFUNCTION}" == "strcpy" ]]; then
       lOUTPUT="[+] ""$(print_path "${lBINARY}")""${lCOMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${lFUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${lNETWORKING_}""${NC}"

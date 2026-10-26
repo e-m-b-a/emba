@@ -30,7 +30,7 @@ S115_usermode_emulator() {
 
   if [[ "${QEMULATION}" -eq 1 && "${RTOS}" -eq 0 ]]; then
 
-    if [[ ${IN_DOCKER} -eq 0 ]]; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
 

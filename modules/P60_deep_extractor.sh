@@ -129,7 +129,7 @@ deep_extractor() {
 
     populate_p99_backend "${lFILES_DEEP_PRE_LIST}" "${FUNCNAME[0]}" "${lFILES_DEEP_PRE_COUNT}" || return "$?"
     detect_root_dir_helper "${LOG_DIR}/firmware"
-    if [[ ${RTOS} -eq 0 ]]; then
+    if [[ "${RTOS}" -eq 0 ]]; then
       export NO_EXTRACTED=1
       return
     fi

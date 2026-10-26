@@ -31,7 +31,7 @@ S21_python_check() {
   local lVTYPE=""
   local lWAIT_PIDS_S21_ARR=()
 
-  if [[ ${PYTHON_CHECK} -eq 1 ]]; then
+  if [[ "${PYTHON_CHECK}" -eq 1 ]]; then
     # clearing tmp log file first
     rm -f "${TMP_DIR:?TMP_DIR is unset or empty}"/S21_VULNS.tmp
 

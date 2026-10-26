@@ -26,7 +26,7 @@ S16_ghidra_decompile_checks() {
 
   # Further testing needed:
   export INTERNAL_LINKING=1
-  if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
+  if [[ "${BINARY_EXTENDED}" -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
     return

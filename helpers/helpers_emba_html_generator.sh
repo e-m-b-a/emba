@@ -747,16 +747,16 @@ add_link_to_index() {
     insert_line "navigation end" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
   else
     for ((COUNT = 0; COUNT <= ${#lINDEX_NAV_GROUP_ARR[@]}; COUNT++)); do
-      if [[ ${COUNT} -eq 0 ]] && [[ ${lC_NUMBER} -lt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true) ]]; then
+      if [[ "${COUNT}" -eq 0 ]] && [[ "${lC_NUMBER}" -lt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true)" ]]; then
         insert_line "${lINDEX_NAV_GROUP_ARR[${COUNT}]}" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
         continue
-      elif [[ ${COUNT} -eq $((${#lINDEX_NAV_GROUP_ARR[@]} - 1)) ]] && [[ ${lC_NUMBER} -gt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true) ]]; then
+      elif [[ "${COUNT}" -eq $((${#lINDEX_NAV_GROUP_ARR[@]} - 1)) ]] && [[ "${lC_NUMBER}" -gt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true)" ]]; then
         insert_line "navigation end" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
         continue
       fi
       # COUNT+1 is not available on the last element - we need to check the array for this:
       if [[ -v lINDEX_NAV_GROUP_ARR[${COUNT}] ]] && [[ -v lINDEX_NAV_GROUP_ARR[$((COUNT + 1))] ]]; then
-        if [[ ${lC_NUMBER} -gt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true) ]] && [[ ${lC_NUMBER} -lt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[$((COUNT + 1))]:1}" || true) ]]; then
+        if [[ "${lC_NUMBER}" -gt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true)" ]] && [[ "${lC_NUMBER}" -lt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[$((COUNT + 1))]:1}" || true)" ]]; then
           insert_line "${lINDEX_NAV_GROUP_ARR[$((COUNT + 1))]}" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
         fi
       fi

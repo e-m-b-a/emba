@@ -219,7 +219,7 @@ system_emulator_init_runner() {
     return
   }
 
-  if [[ ${EUID} -eq 0 ]]; then
+  if [[ "${EUID}" -eq 0 ]]; then
     timeout 360s ./run.sh
   else
     sudo timeout 360s ./run.sh
@@ -231,7 +231,7 @@ system_emulator_init_runner() {
   lTAP_INTERFACE=$(grep "ip route flush" ./run.sh || true)
   lTAP_INTERFACE=${lTAP_INTERFACE//*\ /}
   if [[ -n "${lTAP_INTERFACE}" ]]; then
-    if [[ ${EUID} -eq 0 ]]; then
+    if [[ "${EUID}" -eq 0 ]]; then
       ip route flush dev "${lTAP_INTERFACE}"
       ip link set "${lTAP_INTERFACE}" down
       # ip link delete "${lTAP_INTERFACE}"

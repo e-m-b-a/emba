@@ -178,7 +178,7 @@ check_squid() {
     write_csv_log "Squid executable" "${lSQUID_FILE}" "NA"
     ((SQUID_VUL_CNT += 1))
   done < <(grep "squid" "${P99_CSV_LOG}" | grep ";ELF" || true)
-  [[ ${SQUID_VUL_CNT} -eq 0 ]] && print_output "[-] No possible squid executable found"
+  [[ "${SQUID_VUL_CNT}" -eq 0 ]] && print_output "[-] No possible squid executable found"
 
   local lSQUID_DAEMON_CONFIG_LOCS_ARR=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
   mapfile -t lSQUID_PATHS_ARR < <(mod_path_array "${lSQUID_DAEMON_CONFIG_LOCS_ARR[@]}")

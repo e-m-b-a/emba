@@ -24,7 +24,7 @@
 export THREAD_PRIO=0
 
 S17_cwe_checker() {
-  if [[ ${BINARY_EXTENDED} -eq 1 ]]; then
+  if [[ "${BINARY_EXTENDED}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Check binaries for vulnerabilities with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"

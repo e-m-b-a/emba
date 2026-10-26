@@ -77,7 +77,7 @@ S99_grepit() {
 
   write_csv_log "Grepit test" "Number of results" "Used args for grep" "Regex used" "Grepit comment"
 
-  if [[ ${THREADED} -eq 1 ]]; then
+  if [[ "${THREADED}" -eq 1 ]]; then
     for GREPIT_MODULE in "${lGREPIT_MODULES_ARR[@]}"; do
       "${GREPIT_MODULE}" &
       local lTMP_PID="$!"
@@ -91,7 +91,7 @@ S99_grepit() {
     done
   fi
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S99_ARR[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S99_ARR[@]}"
 
   grepit_reporter
 

@@ -85,7 +85,7 @@ log_folder() {
       print_output "[*] If you answer with ${ORANGE}n${NC}o, EMBA tries to process the unfinished test${NC}" "no_log"
     fi
 
-    if [[ ${OVERWRITE_LOG} -eq 1 ]]; then
+    if [[ "${OVERWRITE_LOG}" -eq 1 ]]; then
       lUSER_ANSWER="y"
     else
       read -p "(Y/n)  " -r lUSER_ANSWER
@@ -129,7 +129,7 @@ log_folder() {
   fi
 
   readarray -t lD_LOG_FILES_ARR < <(find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools -o -path ./EMBA-Non-free -o -path ./tests \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100)
-  if [[ ${USE_DOCKER} -eq 1 && ${#lD_LOG_FILES_ARR[@]} -gt 0 ]]; then
+  if [[ "${USE_DOCKER}" -eq 1 && "${#lD_LOG_FILES_ARR[@]}" -gt 0 ]]; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
     for lD_LOG_FILE in "${lD_LOG_FILES_ARR[@]}"; do
@@ -521,7 +521,7 @@ architecture_check() {
     return
   fi
 
-  if [[ ${ARCH_CHECK} -eq 1 ]]; then
+  if [[ "${ARCH_CHECK}" -eq 1 ]]; then
     print_output "[*] Architecture auto detection and backend data population for ${ORANGE}${#ALL_FILES_ARR[@]}${NC} files (could take some time)\\n"
     # lARCH_MIPS_CNT -> 32 bit MIPS
     local lARCH_MIPS_CNT=0

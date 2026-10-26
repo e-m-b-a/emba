@@ -178,7 +178,7 @@ cut_path() {
   local lC_PATH=""
   lC_PATH="$(abs_path "${1:-}")"
 
-  if [[ ${SHORT_PATH} -eq 1 ]]; then
+  if [[ "${SHORT_PATH}" -eq 1 ]]; then
     local lSHORT=""
     local lFIRST=""
     local lPREFIX_PRE_CHECK=""

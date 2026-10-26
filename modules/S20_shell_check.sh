@@ -35,7 +35,7 @@ S20_shell_check() {
   mapfile -t lSH_SCRIPTS_ARR < <(grep "shell script, ASCII text executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
-  if [[ ${SHELLCHECK} -eq 1 ]]; then
+  if [[ "${SHELLCHECK}" -eq 1 ]]; then
     sub_module_title "Check scripts with shellcheck"
     for lSH_SCRIPT in "${lSH_SCRIPTS_ARR[@]}"; do
       ((S20_SCRIPTS += 1))
