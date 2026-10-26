@@ -266,6 +266,7 @@ check_jnap_access() {
   local lJNAP_ENDPOINTS_ARR=()
   local lSYSINFO_CGI_ARR=()
   local lSYSINFO_CGI=""
+  local lSYSINFO_CGI_NAME=""
   local lJNAP_EPT=""
   local lJNAP_EPT_NAME=""
 
@@ -284,23 +285,36 @@ check_jnap_access() {
   fi
 
   # https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt
-  mapfile -t lSYSINFO_CGI_ARR < <(find "${LOG_DIR}"/firmware -type f -name "sysinfo.cgi" -o -name "getstinfo.cgi" | sort -u 2>/dev/null || true)
+  mapfile -t lSYSINFO_CGI_ARR < <(find "${LOG_DIR}"/firmware -type f \( -name "sysinfo.cgi" -o -name "getstinfo.cgi" \) | sort -u 2>/dev/null || true)
 
   for lSYSINFO_CGI in "${lSYSINFO_CGI_ARR[@]}"; do
-    print_output "[*] Testing for sysinfo.cgi" "no_log"
-    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET --url http://"${IP_ADDRESS_}":"${lPORT}"/"${lSYSINFO_CGI}" >"${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log || true
+    lSYSINFO_CGI_NAME="${lSYSINFO_CGI##*/}"
+    if [[ ! "${lSYSINFO_CGI_NAME}" =~ ^(sysinfo|getstinfo)\.cgi$ ]]; then
+      print_output "[-] Invalid CGI filename ${ORANGE}${lSYSINFO_CGI_NAME}${NC} - skipping"
+      continue
+    fi
+    print_output "[*] Testing for ${ORANGE}${lSYSINFO_CGI_NAME}${NC}" "no_log"
+    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET --url "http://${IP_ADDRESS_}:${lPORT}/${lSYSINFO_CGI_NAME}" >"${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log || true
 
-    if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log ]]; then
-      if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log; then
-        print_output "[+] Found sensitive information in sysinfo.cgi - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
-        grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log | tee -a "${LOG_FILE}"
+    if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log ]]; then
+      if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log; then
+        print_output "[+] Found sensitive information in ${ORANGE}${lSYSINFO_CGI_NAME}${NC} - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
+        grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log | tee -a "${LOG_FILE}"
       fi
     fi
   done
 
   for lJNAP_EPT in "${lJNAP_ENDPOINTS_ARR[@]}"; do
-    print_output "[*] Testing JNAP action: ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
+    if [[ "${lJNAP_EPT}" == *[[:space:][:cntrl:]]* ]] || [[ "${lJNAP_EPT}" != http*://* ]]; then
+      print_output "[-] Invalid JNAP action ${ORANGE}${lJNAP_EPT}${NC} - skipping"
+      continue
+    fi
     lJNAP_EPT_NAME="${lJNAP_EPT##*/}" # basename
+    if [[ ! "${lJNAP_EPT_NAME}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+      print_output "[-] Invalid JNAP endpoint name ${ORANGE}${lJNAP_EPT_NAME}${NC} - skipping"
+      continue
+    fi
+    print_output "[*] Testing JNAP action: ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
     local lJNAP_ACTION="X-JNAP-Action: ${lJNAP_EPT}"
     local lDATA="{}"
     curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "${lDATA}" --url http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >"${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log || true
