@@ -408,7 +408,9 @@ config_find() {
         fi
       done
 
-      eval "lFIND_RESULTS_ARR=($(for i in "${lFIND_RESULTS_ARR[@]}"; do echo "\"${i}\""; done | sort -u))"
+      if [[ "${#lFIND_RESULTS_ARR[@]}" -gt 0 ]]; then
+        mapfile -t lFIND_RESULTS_ARR < <(printf "%s\n" "${lFIND_RESULTS_ARR[@]}" | sort -u)
+      fi
       # Todo: we should remove this and use the lFIND_RESULTS_ARR array in the modules
       for lFOUND_ENTRY in "${lFIND_RESULTS_ARR[@]}"; do
         echo -e "${lFOUND_ENTRY}"

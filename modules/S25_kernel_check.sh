@@ -167,19 +167,23 @@ populate_karrays() {
   fi
 
   # unique our results
-  eval "lKERNEL_VERSION_ARR=($(for i in "${lKERNEL_VERSION_ARR[@]}"; do
-    if [[ -z "${i}" ]]; then
-      # remove empty entries:
+  local -a lKERNEL_VERSION_FILTERED_ARR=()
+  local lKERNEL_VERSION=""
+  for lKERNEL_VERSION in "${lKERNEL_VERSION_ARR[@]}"; do
+    if [[ -z "${lKERNEL_VERSION}" ]]; then
       continue
     fi
-    if ! [[ "${i}" =~ .*[0-9]\.[0-9].* ]]; then
-      # remove lines without a possible version identifier like *1.2*
+    if ! [[ "${lKERNEL_VERSION}" =~ .*[0-9]\.[0-9].* ]]; then
       continue
     fi
-    echo "\"${i}\""
-  done | sort -u))"
+    lKERNEL_VERSION_FILTERED_ARR+=("${lKERNEL_VERSION}")
+  done
 
-  # eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"${i}}\"" ; done | sort -u))"
+  lKERNEL_VERSION_ARR=()
+  if [[ "${#lKERNEL_VERSION_FILTERED_ARR[@]}" -gt 0 ]]; then
+    mapfile -t lKERNEL_VERSION_ARR < <(printf '%s\n' "${lKERNEL_VERSION_FILTERED_ARR[@]}" | sort -u)
+  fi
+
   mapfile -t KERNEL_DESC < <(printf "%s\n" "${KERNEL_DESC[@]}" | sort -u)
 
   # if we have no kernel version identified -> we try to identify a possible identifier in the path:
