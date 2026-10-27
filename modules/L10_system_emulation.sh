@@ -1326,8 +1326,8 @@ cleanup_emulator() {
   fi
 
   # ugly cleanup:
-  rm -rf -- /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}" 2>/dev/null || true
-  rm -rf -- /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}".S1 2>/dev/null || true
+  rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}" 2>/dev/null || true
+  rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}".S1 2>/dev/null || true
   if [[ -f /tmp/do_not_create_run.sh ]]; then
     rm /tmp/do_not_create_run.sh || true
   fi

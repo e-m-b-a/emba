@@ -1056,5 +1056,5 @@ creating_dev_area() {
     mknod -m 660 "${lR_PATH}"/dev/tts/3 c 4 67 2>/dev/null || true
   fi
 
-  chown -v -- root:tty "${lR_PATH}/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
+  chown -v root:tty "${lR_PATH}/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
 }
