@@ -54,7 +54,7 @@ IF17_cve_bin_tool() {
       echo "linux_kernel,linux,2.6.36" >>"./cve_bin_tool_health_check.csv"
 
       if ! [[ -d "${HOME}"/.cache/cve-bin-tool ]]; then
-        mkdir "${HOME}"/.cache/cve-bin-tool
+        mkdir -- "${HOME}"/.cache/cve-bin-tool
       fi
 
       if [[ "${GH_ACTION}" -eq 1 ]]; then

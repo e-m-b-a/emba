@@ -74,7 +74,7 @@ S08_submodule_alpine_apk_package_parser() {
       lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if ! [[ -d "${TMP_DIR}"/apk ]]; then
-        mkdir "${TMP_DIR}"/apk || true
+        mkdir -- "${TMP_DIR}"/apk || true
       fi
       tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
 

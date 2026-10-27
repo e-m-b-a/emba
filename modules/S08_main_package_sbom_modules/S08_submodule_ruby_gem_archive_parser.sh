@@ -72,7 +72,7 @@ S08_submodule_ruby_gem_archive_parser() {
       lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if ! [[ -d "${TMP_DIR}"/gems ]]; then
-        mkdir "${TMP_DIR}"/gems || true
+        mkdir -- "${TMP_DIR}"/gems || true
       fi
       tar -x -f "${lGEM_ARCHIVE}" -C "${TMP_DIR}"/gems || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed"
       # └─$ gunzip -k metadata.gz

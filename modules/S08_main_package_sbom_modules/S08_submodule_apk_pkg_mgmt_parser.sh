@@ -54,7 +54,7 @@ S08_submodule_apk_pkg_mgmt_parser() {
       lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if [[ ! -d "${LOG_PATH_MODULE}"/apk_tmp_db ]]; then
-        mkdir "${LOG_PATH_MODULE}"/apk_tmp_db
+        mkdir -- "${LOG_PATH_MODULE}"/apk_tmp_db
       fi
       if grep -q "^C:" "${lPACKAGE_FILE}" 2>/dev/null; then
         # split lPACKAGE_FILE on empty lines into separate package entry files for further processing

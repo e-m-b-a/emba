@@ -38,7 +38,7 @@ S24_kernel_bin_identifier() {
   local lWAIT_PIDS_S24_main=()
   # just in case s09 has not already created the strings output directory
   if ! [[ -d "${S09_LOG_DIR}"/strings_bins/ ]]; then
-    mkdir -p "${S09_LOG_DIR}"/strings_bins/ 2>/dev/null
+    mkdir -p -- "${S09_LOG_DIR}"/strings_bins/ 2>/dev/null
   fi
 
   while read -r lBINARY_ENTRY; do
@@ -98,7 +98,7 @@ binary_kernel_check_threader() {
   # files now. We use the same destination directory as for s09.
   lSTRINGS_OUTPUT="${S09_LOG_DIR}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -d "${S09_LOG_DIR}/strings_bins" ]]; then
-    mkdir -p "${S09_LOG_DIR}/strings_bins"
+    mkdir -p -- "${S09_LOG_DIR}/strings_bins"
   fi
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
     strings "${lFILE_PATH}" | uniq >"${lSTRINGS_OUTPUT}" || true

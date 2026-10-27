@@ -316,19 +316,19 @@ prepare_emulator() {
     fi
 
     if ! [[ -d "${lR_PATH}""/proc" ]]; then
-      mkdir "${lR_PATH}""/proc" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/proc" 2>/dev/null || true
     fi
 
     if ! [[ -d "${lR_PATH}""/sys" ]]; then
-      mkdir "${lR_PATH}""/sys" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/sys" 2>/dev/null || true
     fi
 
     if ! [[ -d "${lR_PATH}""/run" ]]; then
-      mkdir "${lR_PATH}""/run" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/run" 2>/dev/null || true
     fi
 
     if ! [[ -d "${lR_PATH}""/dev/" ]]; then
-      mkdir "${lR_PATH}""/dev/" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/dev/" 2>/dev/null || true
     fi
 
     if ! mount | grep "${lR_PATH}"/proc >/dev/null; then
@@ -603,7 +603,7 @@ emulate_strace_run() {
 
         if [[ ! -d "${R_PATH}""${lPATH_MISSING}" ]]; then
           write_log "[*] Creating directory ${ORANGE}${R_PATH}${lPATH_MISSING}${NC}" "${lLOG_FILE_STRACER}"
-          mkdir -p "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
+          mkdir -p -- "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
           # continue
         fi
         if [[ -n "${lFILENAME_FOUND}" ]]; then
@@ -982,7 +982,7 @@ creating_dev_area() {
 
   if ! [[ -d "${lR_PATH}"/dev/mtd ]]; then
     print_output "[*] Creating and populating /dev/mtd"
-    mkdir -p "${lR_PATH}"/dev/mtd 2>/dev/null || true
+    mkdir -p -- "${lR_PATH}"/dev/mtd 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtd/0 c 90 0 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtd/1 c 90 2 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtd/2 c 90 4 2>/dev/null || true
@@ -1021,7 +1021,7 @@ creating_dev_area() {
 
   if ! [[ -d "${lR_PATH}"/dev/mtdblock ]]; then
     print_output "[*] Creating and populating /dev/mtdblock"
-    mkdir -p "${lR_PATH}"/dev/mtdblock 2>/dev/null || true
+    mkdir -p -- "${lR_PATH}"/dev/mtdblock 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtdblock/0 b 31 0 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtdblock/1 b 31 1 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtdblock/2 b 31 2 2>/dev/null || true
@@ -1049,7 +1049,7 @@ creating_dev_area() {
 
   if ! [[ -d "${lR_PATH}"/dev/tts ]]; then
     print_output "[*] Creating and populating /dev/tts"
-    mkdir -p "${lR_PATH}"/dev/tts 2>/dev/null || true
+    mkdir -p -- "${lR_PATH}"/dev/tts 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/0 c 4 64 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/1 c 4 65 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/2 c 4 66 2>/dev/null || true

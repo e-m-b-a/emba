@@ -172,7 +172,7 @@ ipk_extractor() {
 
   if [[ "${#lIPK_ARCHIVES_ARR[@]}" -gt 0 ]]; then
     print_output "[*] Found ${ORANGE}${#lIPK_ARCHIVES_ARR[@]}${NC} IPK archives - extracting them to the root directories ..."
-    mkdir "${LOG_DIR}"/ipk_tmp
+    mkdir -- "${LOG_DIR}"/ipk_tmp
     for lR_PATH in "${ROOT_PATH[@]}"; do
       for lIPK in "${lIPK_ARCHIVES_ARR[@]}"; do
         lIPK_NAME=$(basename "${lIPK}")

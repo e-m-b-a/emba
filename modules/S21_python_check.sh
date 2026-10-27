@@ -101,7 +101,7 @@ s21_script_bandit() {
 
   lVULNS=$(grep -c ">> Issue: " "${lPY_LOG}" 2>/dev/null || true)
   if [[ "${lVULNS}" -ne 0 ]]; then
-    [[ ! -d "${lS21_SOURCE_DIR}" ]] && mkdir -p "${lS21_SOURCE_DIR}"
+    [[ ! -d "${lS21_SOURCE_DIR}" ]] && mkdir -p -- "${lS21_SOURCE_DIR}"
 
     # safe the sources and link it in the lSHELL_LOG
     write_log "" "${lPY_LOG}"

@@ -89,7 +89,7 @@ s27_zarn_perl_checks() {
   lPL_LOG="${LOG_PATH_MODULE}/zarn_${lNAME}.txt"
   if [[ "${lPL_SCRIPT: -4}" == ".cgi" ]]; then
     if ! [[ -d "${TMP_DIR}"/s27 ]]; then
-      mkdir "${TMP_DIR}"/s27
+      mkdir -- "${TMP_DIR}"/s27
     fi
     # as zarn does not like cgi's, we need to temp rename these files now
     cp "${lPL_SCRIPT}" "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}"
@@ -104,7 +104,7 @@ s27_zarn_perl_checks() {
   ## reporting starts here
   lVULNS=$(grep -c "\[vuln\]" "${lPL_LOG}" 2>/dev/null || true)
   if [[ "${lVULNS}" -gt 0 ]]; then
-    [[ ! -d "${lS27_SOURCE_DIR}" ]] && mkdir -p "${lS27_SOURCE_DIR}"
+    [[ ! -d "${lS27_SOURCE_DIR}" ]] && mkdir -p -- "${lS27_SOURCE_DIR}"
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""

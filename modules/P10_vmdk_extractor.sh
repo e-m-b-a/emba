@@ -88,7 +88,7 @@ vmdk_extractor() {
     }
     if [[ -f "${lTMP_VMDK_MNT}" ]]; then
       print_output "[*] Extracting ${ORANGE}${lMOUNT_DEV}${NC} to firmware directory ${ORANGE}${lEXTRACTION_DIR_}/${lDEV_NAME}${NC}"
-      mkdir -p "${lEXTRACTION_DIR_}/${lDEV_NAME}" || true
+      mkdir -p -- "${lEXTRACTION_DIR_}/${lDEV_NAME}" || true
       tar -xvf "${lTMP_VMDK_MNT}" -C "${lEXTRACTION_DIR_}/${lDEV_NAME}" || {
         print_error "[-] Extracting VMDK ${lTMP_VMDK_MNT} to ${lEXTRACTION_DIR_}/${lDEV_NAME} failed ..."
         continue

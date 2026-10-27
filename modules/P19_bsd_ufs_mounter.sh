@@ -67,7 +67,7 @@ ufs_extractor() {
   fi
   if mount -r -t ufs -o ufstype=ufs2 "${lUFS_PATH_}" "${lTMP_UFS_MOUNT}"; then
     print_output "[*] Copying ${ORANGE}${lTMP_UFS_MOUNT}${NC} to firmware tmp directory (${ORANGE}${lEXTRACTION_DIR_}${NC})"
-    mkdir -p "${lEXTRACTION_DIR_}" 2>/dev/null || true
+    mkdir -p -- "${lEXTRACTION_DIR_}" 2>/dev/null || true
     cp -pri -- "${lTMP_UFS_MOUNT}"/* "${lEXTRACTION_DIR_}" 2>/dev/null || true
     print_ln
     print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR_}${NC}) as base directory:"

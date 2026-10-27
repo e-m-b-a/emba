@@ -68,7 +68,7 @@ ext_extractor() {
     fi
 
     print_output "[*] Copying ${ORANGE}${lTMP_EXT_MOUNT}${NC} to firmware tmp directory (${lEXTRACTION_DIR_})"
-    mkdir -p "${lEXTRACTION_DIR_}"
+    mkdir -p -- "${lEXTRACTION_DIR_}"
     cp -pri -- "${lTMP_EXT_MOUNT}"/* "${lEXTRACTION_DIR_}"
     print_ln
     print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR_}${NC}) as base directory:"

@@ -42,7 +42,7 @@ S13_weak_func_check() {
     module_wait "S12_binary_protection"
 
     if ! [[ -d "${TMP_DIR}" ]]; then
-      mkdir "${TMP_DIR}"
+      mkdir -- "${TMP_DIR}"
     fi
 
     # OBJDMP_ARCH, READELF are set in dependency check

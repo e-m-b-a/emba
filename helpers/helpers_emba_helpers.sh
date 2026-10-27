@@ -408,7 +408,7 @@ module_wait() {
 
 store_kill_pids() {
   local lPID="${1:-}"
-  ! [[ -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
+  ! [[ -d "${TMP_DIR}" ]] && mkdir -p -- "${TMP_DIR}"
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
     echo "${lPID}" >>"${TMP_DIR}"/EXIT_KILL_PIDS.log || true
   fi

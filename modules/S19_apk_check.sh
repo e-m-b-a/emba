@@ -48,7 +48,7 @@ apk_checker() {
   fi
 
   export GOTMPDIR="${TMP_DIR}"/apkhunt
-  mkdir "${GOTMPDIR}"
+  mkdir -- "${GOTMPDIR}"
 
   write_csv_log "APK" "Identified issues" "log path"
 

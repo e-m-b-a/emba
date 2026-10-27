@@ -117,8 +117,8 @@ s22_vuln_check_semgrep() {
       local lGPT_PRIO_=5
       local lAI_ANCHOR=""
 
-      [[ ! -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
-      [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p "${lS22_SOURCE_DIR}"
+      [[ ! -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir -- "${LOG_PATH_MODULE}"/semgrep_sources/
+      [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p -- "${lS22_SOURCE_DIR}"
 
       lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
       lSEMG_ISSUE_NAME="${lSEMG_ISSUE_NAME/name=\"/}"
@@ -227,7 +227,7 @@ s22_vuln_check() {
   local lGPT_PRIO_=4
   local lAI_ANCHOR=""
   if [[ "${lVULNS}" -gt 0 ]]; then
-    [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p "${lS22_SOURCE_DIR}"
+    [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p -- "${lS22_SOURCE_DIR}"
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""

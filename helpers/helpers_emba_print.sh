@@ -476,7 +476,7 @@ copy_and_link_file() {
   local lLOG_FILE="${3:-}"
 
   if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
-    mkdir -p "$(dirname "${lDST_FILE}")" || true
+    mkdir -p -- "$(dirname "${lDST_FILE}")" || true
   fi
   # we only copy if the lDST_FILE is not already there
   if ! [[ -f "${lDST_FILE}" ]]; then
@@ -770,7 +770,7 @@ module_start_log() {
     mv "${LOG_PATH_MODULE}" "${OLD_LOG_DIR}" || true
   fi
   if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}" || true
+    mkdir -- "${LOG_PATH_MODULE}" || true
   fi
 }
 

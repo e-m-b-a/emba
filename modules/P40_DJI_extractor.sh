@@ -81,7 +81,7 @@ dji_imah_firmware_extractor() {
   local lFIRMWARE_PATH="${1:-}"
   local lEXTRACTION_DIR="${2:-}"
   if ! [[ -d "${lEXTRACTION_DIR}" ]]; then
-    mkdir "${lEXTRACTION_DIR}"
+    mkdir -- "${lEXTRACTION_DIR}"
   fi
 
   local lFW_NAME_=""
@@ -305,10 +305,10 @@ dji_xv4_firmware_extractor() {
     return
   fi
   if ! [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    mkdir "${lEXTRACTION_DIR_}"
+    mkdir -- "${lEXTRACTION_DIR_}"
   fi
   if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}"
+    mkdir -- "${LOG_PATH_MODULE}"
   fi
 
   lFIRMWARE_NAME_="$(basename "${lFIRMWARE_PATH_}")"

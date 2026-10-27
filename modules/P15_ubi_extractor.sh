@@ -27,7 +27,7 @@ P15_ubi_extractor() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     lEXTRACTION_DIR="${LOG_DIR}/firmware/ubi_extracted"
-    mkdir -p "${lEXTRACTION_DIR}" || true
+    mkdir -p -- "${lEXTRACTION_DIR}" || true
 
     ubi_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 

@@ -94,7 +94,7 @@ prepare_docker_home_dir() {
   if [[ -d "${EXT_DIR}"/cwe_checker/.config ]]; then
     # print_output "[*] Restoring config directory in read-only container" "no_log"
     if ! [[ -d "${HOME}"/.config/ ]]; then
-      mkdir -p "${HOME}"/.config
+      mkdir -p -- "${HOME}"/.config
     fi
     cp -pr -- "${EXT_DIR}/cwe_checker/.config/"* "${HOME}/.config/"
     # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
@@ -209,7 +209,7 @@ check_docker_version() {
 
 preparing_cve_bin_tool() {
   print_output "    Preparing cve-bin-tool ..." "no_log"
-  [[ ! -d "${HOME}"/.cache/cve-bin-tool ]] && mkdir "${HOME}"/.cache/cve-bin-tool
+  [[ ! -d "${HOME}"/.cache/cve-bin-tool ]] && mkdir -- "${HOME}"/.cache/cve-bin-tool
 
   # this is a health check of the cve-bin-tool with our database
 

@@ -129,7 +129,7 @@ s20_eval_script_check() {
       lEVAL_RESULTS=1
       lSH_SCRIPT_NAME="$(basename "${lSH_SCRIPT/;*/}")"
       local lSHELL_LOG="${LOG_PATH_MODULE}"/sh_eval_sources/"${lSH_SCRIPT_NAME}".log
-      ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/sh_eval_sources/
+      ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir -- "${LOG_PATH_MODULE}"/sh_eval_sources/
       [[ -f "${lSH_SCRIPT/;*/}" ]] && cp "${lSH_SCRIPT/;*/}" "${lSHELL_LOG}"
       sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "${lSHELL_LOG}"
       print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${lSH_SCRIPT_NAME}${NC}" "" "${lSHELL_LOG}"
@@ -180,7 +180,7 @@ s20_reporter() {
   local lS20_SOURCE_DIR="${LOG_PATH_MODULE}/sh_sources"
 
   if [[ "${lVULNS}" -ne 0 ]]; then
-    [[ ! -d "${lS20_SOURCE_DIR}" ]] && mkdir -p "${lS20_SOURCE_DIR}"
+    [[ ! -d "${lS20_SOURCE_DIR}" ]] && mkdir -p -- "${lS20_SOURCE_DIR}"
 
     # safe the sources and link it in the lSHELL_LOG
     write_log "" "${lSHELL_LOG}"

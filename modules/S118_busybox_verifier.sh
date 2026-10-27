@@ -251,7 +251,7 @@ busybox_vuln_testing_threader() {
   local lLOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${lCVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
-    mkdir "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
+    mkdir -- "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
   fi
 
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)

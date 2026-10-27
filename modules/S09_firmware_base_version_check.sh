@@ -150,7 +150,7 @@ S09_firmware_base_version_check() {
   # lets start generating the strings from all our relevant binaries
   print_output "[*] Generate strings overview for static version analysis of ${ORANGE}${#FILE_ARR[@]}${NC} files ..."
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
-    mkdir "${LOG_PATH_MODULE}"/strings_bins || true 2>/dev/null
+    mkdir -- "${LOG_PATH_MODULE}"/strings_bins || true 2>/dev/null
   fi
   export WAIT_PIDS_S09_ARR_tmp=()
   for lBIN in "${FILE_ARR[@]}"; do
@@ -946,7 +946,7 @@ create_minimal_binary_corpus() {
 
   local lCORPUS_PATH="${S09_LOG_DIR}/binary_corpus_tmp"
   local lCORPUS_log="${lCORPUS_PATH}/logfile.txt"
-  [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p "${lCORPUS_PATH}"
+  [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p -- "${lCORPUS_PATH}"
   touch "${lCORPUS_log}" 2>/dev/null || true
   local lCORPUS_FILE="${lCORPUS_PATH}/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}"
   local lORIG_CORPUS_FILE="${TESTS_DIR}/bin_version_testdata/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}.bin"

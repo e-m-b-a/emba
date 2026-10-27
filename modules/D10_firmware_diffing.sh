@@ -156,7 +156,7 @@ analyse_fw_files() {
         export LOG_PATH_MODULE_SUB="${LOG_PATH_MODULE}"/"${lLOG_FILE_SUB_NAME/.txt/}"
         export LOG_FILE_DETAILS="${LOG_PATH_MODULE_SUB}/${lLOG_FILE_SUB_NAME}"
 
-        ! [[ -d "${LOG_PATH_MODULE_SUB}" ]] && mkdir "${LOG_PATH_MODULE_SUB}"
+        ! [[ -d "${LOG_PATH_MODULE_SUB}" ]] && mkdir -- "${LOG_PATH_MODULE_SUB}"
 
         if [[ "${lSSDEEP_RANK}" -lt "${lSSDEEP_MIN_RANK}" ]]; then
           print_ln "no_log"
@@ -261,7 +261,7 @@ analyse_fw_files() {
 
             # now we check diff all the functions with differences and generate a xdot and png picture
             # see also https://book.rada.re/tools/radiff2/binary_diffing.html
-            ! [[ -d "${LOG_PATH_MODULE}"/r2_fct_graphing/ ]] && mkdir "${LOG_PATH_MODULE}"/r2_fct_graphing/
+            ! [[ -d "${LOG_PATH_MODULE}"/r2_fct_graphing/ ]] && mkdir -- "${LOG_PATH_MODULE}"/r2_fct_graphing/
             write_log "" "${LOG_FILE_DETAILS}"
             sub_module_title "Radare2 binary function diff for ${ORANGE}${lFW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
 

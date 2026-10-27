@@ -300,7 +300,7 @@ create_emulation_filesystem() {
   if [[ -d "${MNT_POINT}" ]]; then
     MNT_POINT="${MNT_POINT}"-"${RANDOM}"
   fi
-  mkdir "${MNT_POINT}" || true
+  mkdir -- "${MNT_POINT}" || true
 
   print_output "[*] Create Qemu filesystem for emulation - ${lROOT_PATH}.\\n"
   lIMAGE_SIZE="$(du -b --max-depth=0 "${lROOT_PATH}" | awk '{print $1}')"
@@ -357,8 +357,8 @@ create_emulation_filesystem() {
     "${HELP_DIR}"/fix_bins_lnk_emulation.sh "${MNT_POINT}"
 
     print_output "[*] Creating EMBA emulation helper directories within the firmware environment"
-    mkdir -p "${MNT_POINT}/firmadyne/libnvram/" || true
-    mkdir -p "${MNT_POINT}/firmadyne/libnvram.override/" || true
+    mkdir -p -- "${MNT_POINT}/firmadyne/libnvram/" || true
+    mkdir -p -- "${MNT_POINT}/firmadyne/libnvram.override/" || true
 
     print_output "[*] Patching filesystem (chroot)"
     cp "$(command -v busybox)" "${MNT_POINT}" || true
@@ -476,7 +476,7 @@ create_emulation_filesystem() {
     for lNVRAM_FILE in "${lNVRAM_FILE_LIST[@]}"; do
       if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
         if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
-          mkdir "${LOG_PATH_MODULE}"/nvram
+          mkdir -- "${LOG_PATH_MODULE}"/nvram
         fi
         lNVRAM_FILE="${lNVRAM_FILE/\./}"
         print_output "[*] Found possible NVRAM default file ${ORANGE}${lNVRAM_FILE}${NC} -> setup /firmadyne directory"
@@ -1283,7 +1283,7 @@ handle_fs_mounts() {
 
       if ! [[ -d "${MNT_POINT}""${lMOUNT_PT}" ]]; then
         print_output "[*] Creating target directory ${MNT_POINT}${lMOUNT_PT}"
-        mkdir -p "${MNT_POINT}""${lMOUNT_PT}"
+        mkdir -p -- "${MNT_POINT}""${lMOUNT_PT}"
       fi
       print_output "[*] Let's copy the identified area to the root filesystem - ${ORANGE}${lN_PATH}${NC} to ${ORANGE}${MNT_POINT}${lMOUNT_PT}${NC}"
       cp -pr --update=none "${lN_PATH}"* "${MNT_POINT}""${lMOUNT_PT}"
@@ -1311,7 +1311,7 @@ handle_fs_mounts() {
     if grep -q "lighttpd" "${MNT_POINT}"/firmadyne/service; then
       if ! [[ -d "${MNT_POINT}"/var/run/lighttpd ]]; then
         print_output "[*] Creating pid directory for lighttpd service"
-        mkdir -p "${MNT_POINT}"/var/run/lighttpd || true
+        mkdir -p -- "${MNT_POINT}"/var/run/lighttpd || true
       fi
     fi
   fi
@@ -2118,7 +2118,7 @@ setup_network_emulation() {
   export ARCHIVE_PATH="${LOG_PATH_MODULE}"/archive-"${IMAGE_NAME}"-"${RANDOM}"
 
   if ! [[ -d "${ARCHIVE_PATH}" ]]; then
-    mkdir "${ARCHIVE_PATH}"
+    mkdir -- "${ARCHIVE_PATH}"
   fi
 
   lTAP_ID=$(shuf -i 1-1000 -n 1)
@@ -2224,7 +2224,7 @@ write_network_config_to_filesystem() {
         lDIR_NAME_MISSING=$(dirname "${lFILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}/${lDIR_NAME_MISSING#/}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}/${lDIR_NAME_MISSING#/}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
+          mkdir -p -- "${MNT_POINT}/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
         fi
         lFOUND_MISSING=$(find "${MNT_POINT}" -type f -name "${lFILENAME_MISSING}" | head -1 || true)
         if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFILENAME_MISSING}" ]]; then
@@ -2285,7 +2285,7 @@ nvram_check() {
       mapfile -t lNVRAM_FILE_LIST < <(find . -xdev -type f -not -path "*/firmadyne*" -exec file {} \; | grep "ASCII text" || true)
 
       if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
-        mkdir "${LOG_PATH_MODULE}"/nvram
+        mkdir -- "${LOG_PATH_MODULE}"/nvram
       fi
 
       # need to check for firmadyne string in path

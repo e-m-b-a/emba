@@ -87,7 +87,7 @@ build_sbom_json_hashes_arr() {
   local lDUP_CHECK_VERS=""
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
-    mkdir "${SBOM_LOG_PATH}" 2>/dev/null || true
+    mkdir -- "${SBOM_LOG_PATH}" 2>/dev/null || true
   fi
 
   # hashes of the source file that is currently tested:
@@ -269,7 +269,7 @@ build_sbom_json_component_arr() {
   #       Re-enable when the EMBA SBOM is fully supported by Dependency Track.
   if [[ "${SBOM_INCLUDE_LICENSE:-false}" == "true" ]] && [[ "${#lAPP_LIC_ARR[@]}" -gt 0 ]]; then
     local lTMP_IDENTIFIER="${RANDOM}"
-    [[ ! -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
+    [[ ! -d "${TMP_DIR}" ]] && mkdir -p -- "${TMP_DIR}"
     # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
     jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" >"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
     lCOMPONENT_ARR+=("licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)")
@@ -285,7 +285,7 @@ build_sbom_json_component_arr() {
   lCOMPONENT_ARR+=("description=${lAPP_DESC_NEW//\ /%SPACE%}")
 
   if [[ ! -d "${SBOM_LOG_PATH}" ]]; then
-    mkdir "${SBOM_LOG_PATH}" 2>/dev/null || true
+    mkdir -- "${SBOM_LOG_PATH}" 2>/dev/null || true
   fi
 
   jo -n -- "${lCOMPONENT_ARR[@]}" >"${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"

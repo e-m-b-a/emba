@@ -124,7 +124,7 @@ deb_package_parser_threader() {
 
   local lDEB_LOG_PATH="${TMP_DIR}/deb_package_${lPKG_MD5}"
   if ! [[ -d "${lDEB_LOG_PATH}" ]]; then
-    mkdir "${lDEB_LOG_PATH}" || true
+    mkdir -- "${lDEB_LOG_PATH}" || true
   fi
   ar x "${lDEB_ARCHIVE}" --output "${lDEB_LOG_PATH}" || print_error "[-] Extraction error for debian archive ${lDEB_ARCHIVE}"
 

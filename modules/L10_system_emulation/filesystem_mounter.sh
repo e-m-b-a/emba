@@ -138,7 +138,7 @@ image_mounter() {
   lIMAGE_PATH="${lIMAGE_PATH%\/*}"
   lIMAGE_NAME="${lIMAGE/*\//}"
   lMNT_POINT="${lIMAGE_PATH}"/mounter
-  [[ ! -d "${lMNT_POINT}" ]] && mkdir "${lMNT_POINT}"
+  [[ ! -d "${lMNT_POINT}" ]] && mkdir -- "${lMNT_POINT}"
 
   echo -e "[*] Identify Qemu Image device for ${ORANGE}${lIMAGE_PATH}/${lIMAGE_NAME}${NC}"
   lDEVICE="$(add_partition_emulation "${lIMAGE_PATH}/${lIMAGE_NAME}")"

@@ -249,7 +249,7 @@ uefi_extractor() {
 
   lFIRMWARE_NAME_="$(basename "${lFIRMWARE_PATH_}")"
   if ! [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    mkdir -p "${lEXTRACTION_DIR_}"
+    mkdir -p -- "${lEXTRACTION_DIR_}"
   fi
   cp "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}/firmware"
   "${lUEFI_EXTRACT_BIN}" "${lEXTRACTION_DIR_}"/firmware all &>"${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log || print_error "[-] UEFI firmware extraction failed"

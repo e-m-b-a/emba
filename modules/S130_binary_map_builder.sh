@@ -40,7 +40,7 @@ S130_binary_map_builder() {
   fi
 
   # needed if we start the module standalone via the helper script
-  [[ ! -d "${LOG_PATH_MODULE}" ]] && mkdir -p "${LOG_PATH_MODULE}"
+  [[ ! -d "${LOG_PATH_MODULE}" ]] && mkdir -p -- "${LOG_PATH_MODULE}"
 
   load_default_environment
   setup_environment
@@ -130,7 +130,7 @@ load_default_environment() {
   export DOT_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.dot"
   export DOT_FILE_tmp_dir="${LOG_PATH_MODULE}/tmp_dot"
   rm -rf -- "${DOT_FILE_tmp_dir:?DOT_FILE_tmp_dir is unset or empty}"
-  mkdir "${DOT_FILE_tmp_dir}"
+  mkdir -- "${DOT_FILE_tmp_dir}"
 
   # External assets - downloaded once for offline capability.
   export JS_LIB="${EXT_DIR}/svg-pan-zoom.min.js"

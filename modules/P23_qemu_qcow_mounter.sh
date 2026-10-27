@@ -136,7 +136,7 @@ qcow_extractor_nbd_mnt() {
 
   sub_module_title "Qemu QCOW filesystem extractor"
 
-  mkdir -p "${lTMP_QCOW_MOUNT}" 2>/dev/null || true
+  mkdir -p -- "${lTMP_QCOW_MOUNT}" 2>/dev/null || true
   print_output "[*] Trying to mount ${ORANGE}${lQCOW_PATH_}${NC} to ${ORANGE}${lTMP_QCOW_MOUNT}${NC} directory"
 
   # if lsmod | grep -q nbd; then
@@ -229,7 +229,7 @@ copy_qemu_nbd() {
   fi
 
   print_output "[*] Copying ${ORANGE}${lSOURCE_CP}${NC} to firmware tmp directory (${ORANGE}${lDEST_CP}${NC})"
-  mkdir -p "${lDEST_CP}" 2>/dev/null || true
+  mkdir -p -- "${lDEST_CP}" 2>/dev/null || true
   cp -pri -- "${lSOURCE_CP}"/* "${lDEST_CP}" 2>/dev/null || true
   print_ln
   print_output "[*] Using the following firmware directory (${ORANGE}${lDEST_CP}${NC}) as base directory:"

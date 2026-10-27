@@ -131,7 +131,7 @@ ipk_package_parser_threader() {
 
   local lIPK_LOG_PATH="${TMP_DIR}/ipk_package_${lPKG_MD5}"
   if ! [[ -d "${lIPK_LOG_PATH}" ]]; then
-    mkdir "${lIPK_LOG_PATH}" || true
+    mkdir -- "${lIPK_LOG_PATH}" || true
   fi
   tar zxpf "${lIPK_ARCHIVE}" -C "${lIPK_LOG_PATH}" || print_error "[-] Extraction error for OpenWRT archive ${lIPK_ARCHIVE}"
 

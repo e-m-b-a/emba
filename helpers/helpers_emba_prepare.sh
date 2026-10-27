@@ -113,7 +113,7 @@ log_folder() {
       if [[ "${lNOT_FINISHED}" -eq 1 ]] && [[ -f "${LOG_DIR}"/backup_vars.log ]] && [[ "${lPOSSIBLE_RESTART}" -eq 1 ]]; then
         print_output "[*] EMBA tries to process the unfinished test" "no_log"
         if ! [[ -d "${TMP_DIR}" ]]; then
-          mkdir "${TMP_DIR}"
+          mkdir -- "${TMP_DIR}"
         fi
         touch "${TMP_DIR}"/restart_emba
       else
@@ -205,7 +205,7 @@ initialize_p99_hash_index() {
   if [[ -f "${lINDEX_READY}" ]]; then
     return
   fi
-  mkdir -p "${lINDEX_DIR}"
+  mkdir -p -- "${lINDEX_DIR}"
 
   # Initialization is lazy because this helper is used from several extractor
   # modules. Only the first worker imports restart hashes; later workers perform
@@ -224,7 +224,7 @@ initialize_p99_hash_index() {
       printf -v lPREFIX '%02x' "${lSHARD_ID}"
       lSHARD_DIRS_ARR+=("${lINDEX_DIR}/${lPREFIX}")
     done
-    mkdir -p "${lSHARD_DIRS_ARR[@]}"
+    mkdir -p -- "${lSHARD_DIRS_ARR[@]}"
 
     if [[ -f "${P99_CSV_LOG}" ]]; then
       while IFS= read -r lCSV_LINE; do

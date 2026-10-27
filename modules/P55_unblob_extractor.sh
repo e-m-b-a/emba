@@ -181,7 +181,7 @@ unblobber() {
   print_output "[*] Extracting binary blob ${ORANGE}$(basename "${lFIRMWARE_PATH}")${NC} to directory ${ORANGE}${lOUTPUT_DIR_UNBLOB}${NC}"
 
   if ! [[ -d "${lOUTPUT_DIR_UNBLOB}" ]]; then
-    mkdir -p "${lOUTPUT_DIR_UNBLOB}"
+    mkdir -p -- "${lOUTPUT_DIR_UNBLOB}"
   fi
 
   if [[ "${lVERBOSE}" -eq 1 ]]; then

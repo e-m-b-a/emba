@@ -207,7 +207,7 @@ ghidra_analyzer() {
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local lIDENTIFIER="${RANDOM}"
   if [[ ! -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}"
+    mkdir -- "${LOG_PATH_MODULE}"
   fi
 
   # adjust the max runtime for Ghidra with the current runtime
@@ -309,7 +309,7 @@ ghidra_analyzer() {
     mapfile -t lHARUSPEX_FILE_ARR < <(find /tmp/haruspex_"${lNAME}" -type f || true)
     # we only store decompiled code with issues:
     if ! [[ -d "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" ]]; then
-      mkdir "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}"
+      mkdir -- "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}"
     fi
     for lHARUSPEX_FILE in "${lHARUSPEX_FILE_ARR[@]}"; do
       # threading is currently not working because of mangled output

@@ -36,9 +36,9 @@ F17_cve_bin_tool() {
   local lNEG_LOG=0
   local MAX_MOD_THREADS=$((MAX_MOD_THREADS * 2))
 
-  mkdir "${LOG_PATH_MODULE}/json/" || true
-  mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
-  mkdir "${LOG_PATH_MODULE}/exploit/" || true
+  mkdir -- "${LOG_PATH_MODULE}/json/" || true
+  mkdir -- "${LOG_PATH_MODULE}/cve_sum/" || true
+  mkdir -- "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..." "no_log"
 
@@ -57,7 +57,7 @@ F17_cve_bin_tool() {
   # first round is primarly for removing duplicates, unhandled_file entries and printing a quick initial overview for the html report
   # 2nd round is for the real testing
   local lWAIT_PIDS_TEMP=()
-  [[ ! -d "${LOG_PATH_MODULE}/tmp/" ]] && mkdir -p "${LOG_PATH_MODULE}/tmp/"
+  [[ ! -d "${LOG_PATH_MODULE}/tmp/" ]] && mkdir -p -- "${LOG_PATH_MODULE}/tmp/"
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     sbom_preprocessing_threader "${lSBOM_ENTRY}" &
     local lTMP_PID="$!"
@@ -375,13 +375,13 @@ cve_bin_tool_threader() {
   lPRODUCT_NAME="${lPRODUCT_NAME%\'}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/cve_sum/" ]]; then
-    mkdir "${LOG_PATH_MODULE}/cve_sum/"
+    mkdir -- "${LOG_PATH_MODULE}/cve_sum/"
   fi
   if ! [[ -d "${LOG_PATH_MODULE}/json/" ]]; then
-    mkdir "${LOG_PATH_MODULE}/json/"
+    mkdir -- "${LOG_PATH_MODULE}/json/"
   fi
   if ! [[ -d "${LOG_PATH_MODULE}/exploit/" ]]; then
-    mkdir "${LOG_PATH_MODULE}/exploit/"
+    mkdir -- "${LOG_PATH_MODULE}/exploit/"
   fi
 
   python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true

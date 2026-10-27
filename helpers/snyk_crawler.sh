@@ -41,7 +41,7 @@ if [[ -d "${SAVE_PATH}" ]]; then
   rm -r -- "${SAVE_PATH}"
 fi
 if ! [[ -d "${SAVE_PATH}/vuln" ]]; then
-  mkdir -p "${SAVE_PATH}/vuln"
+  mkdir -p -- "${SAVE_PATH}/vuln"
 fi
 
 echo "[*] Generating URL list for snyk advisories"

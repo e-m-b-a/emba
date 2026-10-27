@@ -95,7 +95,7 @@ if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
       DIR_LNK_TARGET=$(dirname "${LNK_TARGET}")
       if ! [[ -d "${DIR_LNK_TARGET}" ]]; then
         echo "[*] Creating ${DIR_LNK_TARGET#\.}"
-        chroot . "${BUSYBOX}" mkdir -p "${DIR_LNK_TARGET#\.}"
+        chroot . "${BUSYBOX}" mkdir -p -- "${DIR_LNK_TARGET#\.}"
       fi
     else
       LNK_TARGET="${DIR_ORIG_FILE}"/"${TMP_LNK_ORIG}"
