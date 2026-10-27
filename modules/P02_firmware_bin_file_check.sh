@@ -158,7 +158,7 @@ generate_entropy_graph() {
     if [[ -s "${lENTROPY_PIC_PATH}" ]]; then
       write_link "${lENTROPY_PIC_PATH}"
     else
-      rm -f "${lENTROPY_PIC_PATH}" || print_error "[-] P02 - entropy pic removal error"
+      rm -f -- "${lENTROPY_PIC_PATH}" || print_error "[-] P02 - entropy pic removal error"
     fi
   fi
 }

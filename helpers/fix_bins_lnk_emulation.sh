@@ -118,7 +118,7 @@ if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
 
     echo -e "[*] Symlink file ${POSSIBLE_SYMLNK_NAME} - ${LNK_TARGET}"
     chroot . "${BUSYBOX}" rm "${POSSIBLE_DEAD_SYMLNK}"
-    chroot . "${BUSYBOX}" ln -s "${LNK_TARGET}" "${POSSIBLE_SYMLNK_NAME}"
+    chroot . "${BUSYBOX}" ln -s -- "${LNK_TARGET}" "${POSSIBLE_SYMLNK_NAME}"
   done
 fi
 

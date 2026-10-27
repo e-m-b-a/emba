@@ -38,7 +38,7 @@ if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
 fi
 
 if [[ -d "${SAVE_PATH}" ]]; then
-  rm -r "${SAVE_PATH}"
+  rm -r -- "${SAVE_PATH}"
 fi
 if ! [[ -d "${SAVE_PATH}/vuln" ]]; then
   mkdir -p "${SAVE_PATH}/vuln"
@@ -168,7 +168,7 @@ sort -nr -o "${SAVE_PATH}"/Snyk_PoC_results.csv "${SAVE_PATH}"/Snyk_PoC_results.
 
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   uniq "${SAVE_PATH}"/Snyk_PoC_results.csv >"${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
-  rm -r "${SAVE_PATH}"
+  rm -r -- "${SAVE_PATH}"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
 else
   echo "[-] Not able to copy generated PoC file to configuration directory ${EMBA_CONFIG_PATH}"

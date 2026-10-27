@@ -313,7 +313,7 @@ extract_kconfig() {
   export TMP1="${TMP_DIR}"/ikconfig$$.1
   export TMP2="${TMP_DIR}"/ikconfig$$.2
   # shellcheck disable=SC2064
-  trap "rm -f ${TMP1} ${TMP2}" 0
+  trap 'rm -f -- "${TMP1}" "${TMP2}"' 0
 
   # Initial attempt for uncompressed images or objects:
   dump_config "${IMG}" "${lLOG_FILE}"

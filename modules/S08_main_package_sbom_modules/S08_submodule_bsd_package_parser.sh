@@ -173,7 +173,7 @@ S08_submodule_bsd_package_parser() {
         lPROP_ARRAY_INIT_ARR+=("dependency:${lAPP_DEP#\ }")
       done
 
-      [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf "${TMP_DIR:?TMP_DIR is unset or empty}"/pkg_tmp
+      [[ -d "${TMP_DIR}"/pkg_tmp ]] && rm -rf -- "${TMP_DIR:?TMP_DIR is unset or empty}/pkg_tmp"
 
       build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
@@ -190,7 +190,7 @@ S08_submodule_bsd_package_parser() {
       write_log "[*] FreeBSD pkg archive details: ${ORANGE}${lPKG_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lPKG_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
-      rm -f "${TMP_DIR}"/+COMPACT_MANIFEST || true
+      rm -f -- "${TMP_DIR}/+COMPACT_MANIFEST" || true
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then

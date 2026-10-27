@@ -488,7 +488,7 @@ function_check_ARM32() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm -f "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -f -- "${FUNC_LOG:-}"
       continue
     fi
   done
@@ -618,7 +618,7 @@ function_check_x86_64() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm -f "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -f -- "${FUNC_LOG:-}"
       continue
     fi
   done

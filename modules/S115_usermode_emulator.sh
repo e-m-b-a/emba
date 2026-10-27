@@ -268,7 +268,7 @@ copy_firmware() {
 
   if [[ "${lFREE_SPACE}" -gt "${lNEEDED_SPACE}" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
-    cp -pri "${EMULATION_PATH_BASE}" "${LOG_PATH_MODULE}"/firmware 2>/dev/null
+    cp -pri -- "${EMULATION_PATH_BASE}" "${LOG_PATH_MODULE}/firmware" 2>/dev/null
     EMULATION_PATH_BASE="${LOG_PATH_MODULE}"/firmware
     print_output "[*] Firmware backup for emulation created in ${ORANGE}${EMULATION_PATH_BASE}${NC}"
   else
@@ -611,7 +611,7 @@ emulate_strace_run() {
           local lOUTPUT=""
           lOUTPUT=$(file -b "${lFILENAME_FOUND}")
           if [[ "${lOUTPUT}" != *"(named pipe)" ]]; then
-            cp -L "${lFILENAME_FOUND}" "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
+            cp -L -- "${lFILENAME_FOUND}" "${R_PATH}${lPATH_MISSING}" 2>/dev/null || true
           fi
           continue
         else
@@ -894,7 +894,7 @@ s115_cleanup() {
   # if we created a backup for emulation - lets delete it now
   if [[ -d "${LOG_PATH_MODULE}/firmware" ]]; then
     print_output "[*] Remove firmware copy from emulation directory." "no_log"
-    rm -r "${LOG_PATH_MODULE}"/firmware || true
+    rm -r -- "${LOG_PATH_MODULE}/firmware" || true
   fi
 }
 
@@ -1056,5 +1056,5 @@ creating_dev_area() {
     mknod -m 660 "${lR_PATH}"/dev/tts/3 c 4 67 2>/dev/null || true
   fi
 
-  chown -v root:tty "${lR_PATH}""/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
+  chown -v -- root:tty "${lR_PATH}/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
 }

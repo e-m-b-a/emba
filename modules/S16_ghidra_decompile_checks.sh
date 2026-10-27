@@ -148,7 +148,7 @@ S16_ghidra_decompile_checks() {
   wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
   # cleanup - remove the rest without issues now
-  rm -r /tmp/haruspex_* 2>/dev/null || true
+  rm -r -- /tmp/haruspex_* 2>/dev/null || true
 
   if [[ -n "$(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "semgrep_*.csv" -print -quit)" ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
@@ -230,10 +230,10 @@ ghidra_analyzer() {
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then
-    rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
+    rm -r -- "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
   if [[ -f "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" ]]; then
-    rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.gpr"
+    rm -r -- "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.gpr"
   fi
 
   # if Ghidra was not able to produce code we can return now:

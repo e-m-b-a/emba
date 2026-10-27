@@ -18,7 +18,7 @@ create_mock_firmware() {
     echo "Refusing to create mock firmware in unsafe directory: ${lFW_DIR}" >&2
     return 1
   fi
-  rm -rf "${lFW_DIR:?lFW_DIR is unset or empty}"
+  rm -rf -- "${lFW_DIR:?lFW_DIR is unset or empty}"
   mkdir -p "${lFW_DIR}/bin" "${lFW_DIR}/etc" "${lFW_DIR}/lib" "${lFW_DIR}/usr/bin"
   echo "#!/bin/sh" >"${lFW_DIR}/bin/busybox"
   echo "root:x:0:0:root:/root:/bin/sh" >"${lFW_DIR}/etc/passwd"

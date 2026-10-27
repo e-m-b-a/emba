@@ -129,7 +129,7 @@ load_default_environment() {
 
   export DOT_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.dot"
   export DOT_FILE_tmp_dir="${LOG_PATH_MODULE}/tmp_dot"
-  rm -rf "${DOT_FILE_tmp_dir:?DOT_FILE_tmp_dir is unset or empty}"
+  rm -rf -- "${DOT_FILE_tmp_dir:?DOT_FILE_tmp_dir is unset or empty}"
   mkdir "${DOT_FILE_tmp_dir}"
 
   # External assets - downloaded once for offline capability.
@@ -198,7 +198,7 @@ system_emulator_init_runner() {
   fi
 
   print_output "[*] Adjusting emulation runner script ..."
-  cp -r "${lEMU_PATH}" "${LOG_PATH_MODULE}/emulation_engine" || {
+  cp -r -- "${lEMU_PATH}" "${LOG_PATH_MODULE}/emulation_engine" || {
     print_error "[-] S130 - Adjusting emulation runner script failed"
     return
   }

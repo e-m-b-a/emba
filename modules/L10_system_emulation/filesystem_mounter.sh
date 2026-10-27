@@ -43,7 +43,7 @@ delete_device_entry() {
     losetup -d "$(losetup | grep "$(basename "${lIMAGE_NAME}")" | awk '{print $1}' || true)"
   fi
   dmsetup remove "$(basename "${lDEVICE}")" &>/dev/null || true
-  rm -rf "${lMNT_POINT:?}/"* || true
+  rm -rf -- "${lMNT_POINT:?}/"* || true
   sleep 1
 }
 
@@ -174,7 +174,7 @@ image_unmounter() {
   fi
 
   umount_qemu_image "${lMNT_POINT}"
-  rm -r "${lMNT_POINT}"
+  rm -r -- "${lMNT_POINT}"
 
   mapfile -t lDEVICE_ARR < <(losetup | grep "${lIMAGE_NAME}" | awk '{print $1}')
   for lDEVICE in "${lDEVICE_ARR[@]}"; do

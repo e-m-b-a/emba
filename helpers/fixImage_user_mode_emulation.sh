@@ -68,7 +68,7 @@ remove_file() {
   REMOVE="${1}"
   if [ -f "${REMOVE}" ]; then
     echo "[*] Removing ${REMOVE}"
-    "${BUSYBOX}" rm -f "${REMOVE}"
+    "${BUSYBOX}" rm -f -- "${REMOVE}"
   fi
 }
 

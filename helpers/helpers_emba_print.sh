@@ -153,7 +153,7 @@ print_debug() {
 print_output() {
   local lOUTPUT="${1:-}"
   local lLOG_SETTING="${2:-}"
-  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_FILE_MOD:-}" ]]; then
+  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_SETTINGS:-}" ]]; then
     local lLOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
@@ -828,7 +828,7 @@ module_end_log() {
   if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "${LOG_PATH_MODULE}" ]]; then
       if [[ -z "$(find "${LOG_PATH_MODULE}" -type f -print -quit)" ]]; then
-        rm -r "${LOG_PATH_MODULE}"
+        rm -r -- "${LOG_PATH_MODULE}"
       fi
     fi
   fi

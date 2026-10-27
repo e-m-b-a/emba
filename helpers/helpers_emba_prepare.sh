@@ -105,7 +105,7 @@ log_folder() {
         print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
         print_output "$(indent "$(mount | grep "${LOG_DIR}")")" "no_log"
       else
-        rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
+        rm -R -- "${LOG_DIR:?}/"* 2>/dev/null || true
         echo -e "\\n${GREEN}Successfully deleted: ${ORANGE}${LOG_DIR}${NC}\\n"
       fi
       ;;

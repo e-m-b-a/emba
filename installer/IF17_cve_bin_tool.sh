@@ -100,7 +100,7 @@ IF17_cve_bin_tool() {
       python3 external/cve-bin-tool/cve_bin_tool/cli.py --export external/cve-bin-tool/cve-database.db || true
 
       # cleanup
-      rm -r "${HOME}"/.cache/cve-bin-tool
+      rm -r -- "${HOME}/.cache/cve-bin-tool"
       rm external/cve-bin-tool/cve_bin_tool_health_check.csv
 
       if [[ -f external/cve-bin-tool/cve-database.db ]]; then

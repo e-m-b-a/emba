@@ -81,7 +81,7 @@ if ("${EMBA_BOOT}"); then
         TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
         if [[ -f "${TARGET_FILE}" ]]; then
           "${BUSYBOX}" echo "[*] Re-creating symlink ${TARGET_FILE} -> ${FILE}"
-          "${BUSYBOX}" ln -s "${TARGET_FILE}" "${FILE}"
+          "${BUSYBOX}" ln -s -- "${TARGET_FILE}" "${FILE}"
         else
           continue
         fi

@@ -153,7 +153,7 @@ L10_system_emulation() {
             main_emulation "${R_PATH}" "${lARCH_END}"
 
             if [[ -d "${MNT_POINT}" ]]; then
-              rm -r "${MNT_POINT}" || true
+              rm -r -- "${MNT_POINT}" || true
             fi
 
             if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
@@ -346,7 +346,7 @@ create_emulation_filesystem() {
 
   if mount | grep -q "${MNT_POINT}"; then
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf "${lROOT_PATH}"/* "${MNT_POINT}"/ || (print_output "[-] Warning: Root filesystem not copied!" && return)
+    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || (print_output "[-] Warning: Root filesystem not copied!" && return)
 
     print_output "[*] Binwalk v3+ creates raw files on extraction. We remove these files from our emulation root directory"
     find "${MNT_POINT}" -name "*.raw" -delete || true
@@ -506,11 +506,11 @@ link_libnvram_so() {
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram.so"
-    ln -sr "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so" || true
+    ln -sr -- "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so" || true
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram_ioctl.so"
-    ln -sr "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" || true
+    ln -sr -- "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" || true
   fi
 }
 
@@ -589,7 +589,7 @@ main_emulation() {
 
     if [[ -n "${lBAK_INIT_ORIG}" ]]; then
       print_output "[*] Restoring old init file: ${lBAK_INIT_ORIG}"
-      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_error "[-] Error restoring old init file ${lBAK_INIT_ORIG}"
+      cp -pr -- "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_error "[-] Error restoring old init file ${lBAK_INIT_ORIG}"
       lBAK_INIT_BACKUP=""
       lBAK_INIT_ORIG=""
     fi
@@ -610,7 +610,7 @@ main_emulation() {
 
       # write the init ELF file or sym link to the EMBA preInit script:
       # INIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
-      cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}" || true
+      cp -pr -- "${lINIT_OUT}" "${lBAK_INIT_BACKUP}" || true
 
       print_output "[*] Add ${lINIT_FILE} entry to ${ORANGE}${lINIT_OUT}${NC}"
       # we always add the identified init entry to the EMBA preInit script
@@ -634,7 +634,7 @@ main_emulation() {
       print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
       lBAK_INIT_ORIG="${lINIT_OUT}"
       lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${lINIT_OUT}".init)"
-      cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
+      cp -pr -- "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
 
       # identify mount operations for later handling and disabling
       mapfile -t lFS_MOUNTS_INIT_ARR < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "${MNT_POINT}""${lINIT_FILE}" | sort -u || true)
@@ -1108,7 +1108,7 @@ emulation_with_config() {
       fi
       # print_output "[-] Emulation archive: $ARCHIVE_PATH."
       # create_emulation_archive "$ARCHIVE_PATH"
-      rm -r "${ARCHIVE_PATH}" || true
+      rm -r -- "${ARCHIVE_PATH}" || true
     fi
   fi
 
@@ -1326,8 +1326,8 @@ cleanup_emulator() {
   fi
 
   # ugly cleanup:
-  rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}" 2>/dev/null || true
-  rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}".S1 2>/dev/null || true
+  rm -rf -- /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}" 2>/dev/null || true
+  rm -rf -- /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}".S1 2>/dev/null || true
   if [[ -f /tmp/do_not_create_run.sh ]]; then
     rm /tmp/do_not_create_run.sh || true
   fi
@@ -1350,7 +1350,7 @@ delete_device_entry() {
     losetup -d "$(losetup | grep "$(basename "${lIMAGE_NAME}")" | awk '{print $1}' || true)"
   fi
   dmsetup remove "$(basename "${lDEVICE}")" &>/dev/null || true
-  rm -rf "${lMNT_POINT:?}/"* || true
+  rm -rf -- "${lMNT_POINT:?}/"* || true
   sleep 1
 }
 

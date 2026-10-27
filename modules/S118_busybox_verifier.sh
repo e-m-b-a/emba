@@ -233,7 +233,7 @@ S118_busybox_verifier() {
   fi
 
   if [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
-    rm -r "${LOG_PATH_MODULE}/tmp" || true
+    rm -r -- "${LOG_PATH_MODULE}/tmp" || true
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"

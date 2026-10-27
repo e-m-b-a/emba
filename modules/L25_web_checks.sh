@@ -479,7 +479,7 @@ crawl_web_urls() {
     if ! system_online_check "${lIP_}" "${lPORT_}" 0; then
       lONLINE_CHECK_FAILED=$((lONLINE_CHECK_FAILED + 1))
       if [[ "${lONLINE_CHECK_FAILED}" -gt 10 ]]; then
-        rm -f "${TMP_DIR}/emulation_restarting.log"
+        rm -f -- "${TMP_DIR}/emulation_restarting.log"
         rm -r -- "${lWORKER_DIR}"
         return 1
       fi

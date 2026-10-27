@@ -205,7 +205,7 @@ cleaner() {
 
       if [[ -d "${LOG_DIR}/s115_usermode_emulator/firmware" ]]; then
         print_output "[*] $(print_date) - Removing emulation directory ${ORANGE}${LOG_DIR}/s115_usermode_emulator/firmware${NC}" "no_log"
-        rm -r "${LOG_DIR}/s115_usermode_emulator/firmware" || true
+        rm -r -- "${LOG_DIR}/s115_usermode_emulator/firmware" || true
       fi
     fi
 
@@ -278,7 +278,7 @@ cleaner() {
   fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -d "${TMP_DIR}" ]]; then
-    rm -r "${TMP_DIR}" 2>/dev/null || true
+    rm -r -- "${TMP_DIR}" 2>/dev/null || true
   fi
   export CLEANED=1
   if [[ "${lINTERRUPT_CLEAN}" -eq 1 ]]; then

@@ -76,7 +76,7 @@ check_bats_syntax() {
     local lINLINE_TEST_BODY=""
 
     lBATS_TEMP_FILE="$(mktemp)"
-    trap 'rm -f "${lBATS_TEMP_FILE}"' EXIT
+    trap 'rm -f -- "${lBATS_TEMP_FILE}"' EXIT
 
     while IFS= read -r lLINE || [[ -n "${lLINE}" ]]; do
 

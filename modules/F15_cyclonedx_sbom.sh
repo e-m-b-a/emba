@@ -90,7 +90,7 @@ F15_cyclonedx_sbom() {
       local lDUP_DEL=""
       print_output "[*] Deleting duplicates" "no_log"
       while read -r lDUP_DEL; do
-        rm -f "${lDUP_DEL}" || true
+        rm -f -- "${lDUP_DEL}" || true
       done <"${SBOM_LOG_PATH}"/duplicates_to_delete.txt
     fi
 

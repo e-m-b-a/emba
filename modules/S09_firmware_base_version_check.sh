@@ -996,12 +996,12 @@ create_minimal_binary_corpus() {
   if [[ ! -f "${lCORPUS_FILE}" ]]; then
     if [[ -s "${lCORPUS_FILE_tmp}" ]]; then
       # mv -n does not overwrite existing files
-      if mv -n "${lCORPUS_FILE_tmp}" "${lCORPUS_FILE}"; then
+      if mv -n -- "${lCORPUS_FILE_tmp}" "${lCORPUS_FILE}"; then
         lCORP_SIZE=$(wc -c <"${lCORPUS_FILE}")
         write_log "[*] Generated final corpus for binary ${lBINARY_PATH} with size ${lCORP_SIZE} - rule ${lRULE_IDENTIFIER}/${lVERSION_IDENTIFIER_ORIG}" "${lCORPUS_log}"
       else
         # lCORPUS_FILE already available -> we can remove our tmp file
-        rm -f "${lCORPUS_FILE_tmp}"
+        rm -f -- "${lCORPUS_FILE_tmp}"
       fi
     fi
   fi

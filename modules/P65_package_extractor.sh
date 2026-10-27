@@ -186,7 +186,7 @@ ipk_extractor() {
           tar xzf "${LOG_DIR}"/ipk_tmp/data.tar.gz --directory "${lR_PATH}" || true
         fi
         if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
-          rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
+          rm -r -- "${LOG_DIR}/ipk_tmp/"* 2>/dev/null || true
         fi
       done
     done
@@ -195,7 +195,7 @@ ipk_extractor() {
     print_ln "no_log"
     print_output "[*] Before ipk extraction we had ${ORANGE}${FILES_PRE_PACKAGE}${NC} files, after deep extraction we have ${ORANGE}${lFILES_AFTER_IPK}${NC} files extracted."
     if [[ -d "${LOG_DIR}"/ipk_tmp/ ]]; then
-      rm -r "${LOG_DIR}"/ipk_tmp/* 2>/dev/null || true
+      rm -r -- "${LOG_DIR}/ipk_tmp/"* 2>/dev/null || true
     fi
   else
     print_output "[-] No ipk packages extracted."

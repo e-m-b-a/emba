@@ -267,7 +267,7 @@ dji_imah_firmware_extractor() {
             # This could increase the extraction speed a lot!
             # continue 3
           else
-            rm -r "${lOUTPUT_DIR}" || true
+            rm -r -- "${lOUTPUT_DIR}" || true
           fi
         fi
       done

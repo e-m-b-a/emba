@@ -96,14 +96,14 @@ prepare_docker_home_dir() {
     if ! [[ -d "${HOME}"/.config/ ]]; then
       mkdir -p "${HOME}"/.config
     fi
-    cp -pr "${EXT_DIR}"/cwe_checker/.config/* "${HOME}"/.config/
+    cp -pr -- "${EXT_DIR}/cwe_checker/.config/"* "${HOME}/.config/"
     # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
-    cp -pr "${EXT_DIR}"/cwe_checker/.local/share/composer/.htaccess "${HOME}"/.local/share/composer/
-    cp -pr "${EXT_DIR}"/cwe_checker/.local/share/cwe_checker/* "${HOME}"/.local/share/cwe_checker/
+    cp -pr -- "${EXT_DIR}/cwe_checker/.local/share/composer/.htaccess" "${HOME}/.local/share/composer/"
+    cp -pr -- "${EXT_DIR}/cwe_checker/.local/share/cwe_checker/"* "${HOME}/.local/share/cwe_checker/"
 
     # quick hack to have kaleido in place for binwalk
     if [[ -L "${HOME}/.config/kaleido" ]]; then
-      ln -s "${EXT_DIR}/cwe_checker/.config/kaleido" "${HOME}/.config/kaleido"
+      ln -s -- "${EXT_DIR}/cwe_checker/.config/kaleido" "${HOME}/.config/kaleido"
     fi
   fi
 }
@@ -236,11 +236,11 @@ preparing_cve_bin_tool() {
       echo "cve-bin-tool database preparation finished" >>"${TMP_DIR}/tmp_state_data.log"
       print_output "[*] cve-bin-tool database preparation finished - possible malfunction identified" "no_log"
     fi
-    rm -f "${TMP_DIR}/cve_bin_tool_health_check_results.csv"
+    rm -f -- "${TMP_DIR}/cve_bin_tool_health_check_results.csv"
   else
     print_output "[-] cve-bin-tool database preparation failed - No CVE queries possible" "no_log"
   fi
-  [[ -f "${TMP_DIR}/cve_bin_tool_health_check.csv" ]] && rm -f "${TMP_DIR}/cve_bin_tool_health_check.csv"
+  [[ -f "${TMP_DIR}/cve_bin_tool_health_check.csv" ]] && rm -f -- "${TMP_DIR}/cve_bin_tool_health_check.csv"
 }
 
 dependency_check() {
@@ -266,7 +266,7 @@ dependency_check() {
     print_output "    Internet connection - \\c" "no_log"
 
     if [[ -d "${EXT_DIR}"/onlinechecker ]]; then
-      rm -rf "${EXT_DIR:?EXT_DIR is unset or empty}"/onlinechecker 2>/dev/null
+      rm -rf -- "${EXT_DIR:?EXT_DIR is unset or empty}/onlinechecker" 2>/dev/null
     fi
 
     # the update check can be disabled via NO_UPDATE_CHECK

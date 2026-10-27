@@ -153,7 +153,7 @@ S08_submodule_ruby_gem_archive_parser() {
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lPKG_MD5:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
-      rm -rf "${TMP_DIR:?TMP_DIR is unset or empty}"/gems || true
+      rm -rf -- "${TMP_DIR:?TMP_DIR is unset or empty}/gems" || true
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then

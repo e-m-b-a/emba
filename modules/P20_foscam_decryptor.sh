@@ -159,11 +159,11 @@ foscam_ubi_extractor() {
       mount -t ubifs "${lUBI_DEV}" "${lUBI_MNT_PT}"
       print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_%\/}/${lUBI_DEV}${NC}"
       mkdir -p "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
-      cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      cp -pri -- "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
       # after this we should have a ubi image in our extraction directory. This should be extractable via unblob
       print_output "[*] Umount ubi device from ${ORANGE}${lUBI_MNT_PT}/${lUBI_DEV}${NC}"
       umount "${lUBI_MNT_PT}" || true
-      rm -r "${lUBI_MNT_PT}" || true
+      rm -r -- "${lUBI_MNT_PT}" || true
     done
 
     # do some cleanup

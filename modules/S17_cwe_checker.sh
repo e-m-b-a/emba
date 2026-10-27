@@ -272,7 +272,7 @@ cwe_checker_threaded() {
       done
     else
       print_output "[-] Nothing found in ${ORANGE}${lNAME}${NC}" "no_log"
-      rm -f "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null
+      rm -f -- "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null
     fi
   fi
 

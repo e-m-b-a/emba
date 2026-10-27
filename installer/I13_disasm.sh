@@ -98,7 +98,7 @@ I13_disasm() {
         fi
         if [[ -f "external/${BINUTIL_VERSION_NAME}/binutils/objdump" ]]; then
           mv "external/${BINUTIL_VERSION_NAME}/binutils/objdump" "external/objdump"
-          rm -R "external/""${BINUTIL_VERSION_NAME}"
+          rm -R -- "external/${BINUTIL_VERSION_NAME}"
           rm "external/""${BINUTIL_VERSION_NAME}"".tar.gz"
           if [[ -f "external/objdump" ]]; then
             echo -e "${GREEN}""objdump installed successfully""${NC}"
