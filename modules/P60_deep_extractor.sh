@@ -178,9 +178,11 @@ deeper_extractor_helper() {
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
   print_output "[*] Deep extraction starting ..."
+  local lWAIT_PIDS_P60_init=()
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
     [[ ! -f "${lFILE_TMP}" ]] && continue
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
+    # MD5_DONE_DEEP defined in emba defaults
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ */}"* ]] && continue
     MD5_DONE_DEEP+=("${lFILE_MD5/\ */}")
     deeper_extractor_threader "${lFILE_TMP}" "${lFILE_MD5/\ */}" &

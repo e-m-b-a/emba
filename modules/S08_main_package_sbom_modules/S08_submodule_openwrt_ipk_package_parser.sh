@@ -44,6 +44,7 @@ S08_submodule_openwrt_ipk_package_parser() {
 
   local lIPK_ARCHIVES_ARR=()
   local lIPK_ARCHIVE=""
+  local lWAIT_PIDS_S08_ARR_LCK=()
 
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()

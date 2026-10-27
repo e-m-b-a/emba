@@ -26,7 +26,6 @@ P35_UEFI_extractor() {
     module_log_init "${FUNCNAME[0]}"
     module_title "UEFI extraction module"
     pre_module_reporter "${FUNCNAME[0]}"
-    export FILES_UEFI=0
 
     if [[ -d "${FIRMWARE_PATH}" ]]; then
       # as we currently handle only firmware files in the UEFI extraction module
@@ -183,8 +182,8 @@ ami_extractor() {
 
   local lFIRMWARE_PATH_="${1:-}"
   local lEXTRACTION_DIR_="${2:-}"
-  local lDIRS_UEFI=0
   local lFIRMWARE_NAME_=""
+  local lFILES_UEFI_ARR=()
 
   if ! [[ -f "${lFIRMWARE_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -216,7 +215,7 @@ ami_extractor() {
     wait_for_pid "${lWAIT_PIDS_P99_ARR[@]}"
 
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "further details"
-    write_csv_log "UEFI AMI extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UEFI}" "NA"
+    write_csv_log "UEFI AMI extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_UEFI_ARR[@]}" "NA"
 
     if [[ "${#lFILES_UEFI_ARR[@]}" -gt 5 ]]; then
       # with UEFI_VERIFIED=1 we do not run deep-extraction
@@ -238,7 +237,6 @@ uefi_extractor() {
   local lUEFI_EXTRACT_REPORT_FILE=""
 
   local lUEFI_EXTRACT_BIN="${EXT_DIR}""/UEFITool/UEFIExtract"
-  local lDIRS_UEFI=0
   local lNVARS=0
   local lPE32_IMAGE=0
   local lDRIVER_COUNT=0
@@ -253,7 +251,7 @@ uefi_extractor() {
   if ! [[ -d "${lEXTRACTION_DIR_}" ]]; then
     mkdir -p "${lEXTRACTION_DIR_}"
   fi
-  cp "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}"
+  cp "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}/firmware"
   "${lUEFI_EXTRACT_BIN}" "${lEXTRACTION_DIR_}"/firmware all &>"${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log || print_error "[-] UEFI firmware extraction failed"
 
   lUEFI_EXTRACT_REPORT_FILE="${lEXTRACTION_DIR_}"/firmware.report.txt
@@ -287,7 +285,10 @@ uefi_extractor() {
   lDRIVER_COUNT=$(grep -c "DXE driver" "${lUEFI_EXTRACT_REPORT_FILE}" || true)
 
   remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
+  local lFILES_UEFI_ARR=()
+  local lDIRS_UEFI_ARR=()
   mapfile -t lFILES_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type f ! -name "*.raw")
+  mapfile -t lDIRS_UEFI_ARR < <(find "${lEXTRACTION_DIR_}" -type d)
 
   print_output "[*] Extracted ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files from UEFI firmware image."
   print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UEFI_ARR[@]}${NC} files ... could take some time" "no_log"
@@ -306,7 +307,7 @@ uefi_extractor() {
     print_output "[*] Found ${ORANGE}${lPE32_IMAGE}${NC} PE32 images for architecture ${ORANGE}${lEFI_ARCH}${NC} drivers."
     print_output "[+] Possible architecture details found (${ORANGE}UEFI Extractor${GREEN}): ${ORANGE}${lEFI_ARCH}${NC}"
     backup_var "EFI_ARCH" "${lEFI_ARCH}"
-    if [[ "${FILES_UEFI}" -gt 0 ]] && [[ "${lDIRS_UEFI}" -gt 0 ]]; then
+    if [[ "${#lFILES_UEFI_ARR[@]}" -gt 0 ]] && [[ "${#lDIRS_UEFI_ARR[@]}" -gt 0 ]]; then
       # with UEFI_VERIFIED=1 we do not run deep-extraction
       export UEFI_VERIFIED=1
     fi
@@ -315,5 +316,5 @@ uefi_extractor() {
   print_ln
 
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "UEFI architecture"
-  write_csv_log "UEFITool extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${FILES_UEFI}" "${lDIRS_UEFI}" "${lEFI_ARCH}"
+  write_csv_log "UEFITool extractor" "${lFIRMWARE_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_UEFI_ARR[@]}" "${#lDIRS_UEFI_ARR[@]}" "${lEFI_ARCH}"
 }

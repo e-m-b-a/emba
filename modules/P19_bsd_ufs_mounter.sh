@@ -80,7 +80,7 @@ ufs_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files from the firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files ... could take some time" "no_log"
     for lBINARY in "${lFILES_UFS_ARR[@]}"; do
-      binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
+      binary_architecture_threader "${lBINARY}" "P19_bsd_ufs_mounter" &
       local lTMP_PID="$!"
       lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done

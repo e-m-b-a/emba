@@ -631,12 +631,12 @@ tear_down_cve_threader() {
 
     # now, we check the exploit-db results if we have a routersploit module:
     if [[ " ${lEXPLOIT_AVAIL_EDB_ARR[*]} " =~ "Exploit DB Id:" ]]; then
-      for lEID_VALUE in "${EXPLOIT_AVAIL_EDB_ARR[@]}"; do
+      for lEID_VALUE in "${lEXPLOIT_AVAIL_EDB_ARR[@]}"; do
         if ! [[ "${lEID_VALUE}" == *"Exploit DB Id:"* ]]; then
           continue
         fi
         lEID_VALUE=$(echo "${lEID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
-        mapfile -t lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR < <(grep "${lEID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
+        mapfile -t -O "${#lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}" lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR < <(grep "${lEID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
       done
 
       readarray -t lEXPLOIT_IDS_ARR < <(echo "${lEXPLOIT_AVAIL_EDB_ARR[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)

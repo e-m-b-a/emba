@@ -66,9 +66,9 @@ S118_busybox_verifier() {
       mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
       for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
         lVERSION_IDENTIFIED=$(strings "${lBB_BIN}" | grep -a -E "${lVERSION_IDENTIFIER}" | sort -u | head -1 || true)
+        local lLICENSES_ARR=()
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           local lRULE_IDENTIFIER=""
-          local lLICENSES_ARR=()
           local lPRODUCT_NAME_ARR=()
           local lVENDOR_NAME_ARR=()
           local lCSV_REGEX_ARR=()

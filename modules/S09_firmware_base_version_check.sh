@@ -57,6 +57,7 @@ S09_firmware_base_version_check() {
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
+  local lFILE_ARR_PKG=()
 
   # set default confidence level
   # 1 -> very-low
@@ -304,10 +305,10 @@ S09_identifier_threadings() {
       lBIN_FILE_DETAILS=$(cut -d ';' -f8 <<<"${lBINARY_ENTRY}") # field 8
       if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]]; then
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
-        MD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")      # field 9
+        lMD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")     # field 9
         lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
         lAPP_NAME="$(basename "${lBINARY_PATH}")"
-        local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
+        local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lAPP_NAME}".txt
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
           continue
         fi
@@ -338,6 +339,7 @@ S09_identifier_threadings() {
     #   use zgrep regex via zgrep on these files
 
     # we create an array with testing candidates based on the paths from the json configuration
+    local lZGREP_BINS_ARR=()
     for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
       local lZGREP_BINS_ARR_TMP=()
       mapfile -t lZGREP_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
@@ -548,7 +550,7 @@ version_parsing_logging() {
     # create component entry - this allows adding entries very flexible:
     build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lrLICENSES_ARR_ref[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
-    write_log "${PACKAGING_SYSTEM};${lBINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE:-NA};${lrLICENSES_ARR_ref[*]};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
+    write_log "${PACKAGING_SYSTEM};${lBINARY_PATH:-NA};${lMD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE:-NA};${lrLICENSES_ARR_ref[*]};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
     # we continue with the next binary -> set return as marker to get the knowledge in the caller
     return 0
   done
@@ -560,6 +562,9 @@ version_parsing_logging() {
 build_final_bins_threader() {
   local lFILE="${1:-}"
   local lBIN_FILE="${2:-}"
+
+  # Todo:
+  local lLICENSES_ARR=()
 
   if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ ]]; then
     # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here

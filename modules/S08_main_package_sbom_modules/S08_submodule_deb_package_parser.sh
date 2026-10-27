@@ -40,6 +40,7 @@ S08_submodule_deb_package_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
   local lPOS_RES=0
+  local lWAIT_PIDS_S08_ARR_LCK=()
 
   # mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
   mapfile -t lDEB_ARCHIVES_ARR < <(grep "\.deb;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)

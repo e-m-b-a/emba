@@ -338,7 +338,7 @@ dji_xv4_firmware_extractor() {
 
   for lXV4_EXTRACED_FILE in "${lXV4_EXTRACTEDFILES_ARR[@]}"; do
     lXV4_EXTRACED_FILE_NAME=$(basename "${lXV4_EXTRACED_FILE}")
-    lEXTRACTION_DIR_tmp="${lEXTRACTION_DIR}"/dji_xv4_extraction_"${lXV4_EXTRACED_FILE_NAME}"_unblob_extracted
+    lEXTRACTION_DIR_tmp="${lEXTRACTION_DIR_}"/dji_xv4_extraction_"${lXV4_EXTRACED_FILE_NAME}"_unblob_extracted
     unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}" 0
   done
 

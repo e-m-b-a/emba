@@ -102,16 +102,16 @@ buffalo_enc_extractor() {
       print_output "[*] Firmware file details: ${ORANGE}$(file "${lEXTRACTION_FILE_}")${NC}"
 
       local lBINWALK_LOG_FILE="${LOG_PATH_MODULE}/binwalk-${lEXTRACTION_FILE_NAME}.log"
-      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" "${lBINWALK_LOG_FILE}"
+      binwalker_matryoshka "${lEXTRACTION_FILE_}" "${lEXTRACTION_FILE_/\.bin/}_binwalk_extracted" "${lBINWALK_LOG_FILE}"
 
       if [[ -f "${lBINWALK_LOG_FILE}" ]]; then
         print_output "[+] Binwalk extraction output for ${lEXTRACTION_FILE_NAME}" "" "${lBINWALK_LOG_FILE}"
       fi
 
-      print_output "[*] Checking ${lEXTRACTION_FILE/\.bin/}_binwalk_extracted for files and directories"
-      if [[ -d "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" ]]; then
-        remove_uprintable_paths "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" || return 1
-        mapfile -t lFILES_BUFFALO_ARR < <(find "${lEXTRACTION_FILE/\.bin/}_binwalk_extracted" -type f ! -name "*.raw")
+      print_output "[*] Checking ${lEXTRACTION_FILE_/\.bin/}_binwalk_extracted for files and directories"
+      if [[ -d "${lEXTRACTION_FILE_/\.bin/}_binwalk_extracted" ]]; then
+        remove_uprintable_paths "${lEXTRACTION_FILE_/\.bin/}_binwalk_extracted" || return 1
+        mapfile -t lFILES_BUFFALO_ARR < <(find "${lEXTRACTION_FILE_/\.bin/}_binwalk_extracted" -type f ! -name "*.raw")
         print_ln
         print_output "[*] Extracted ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files from the firmware image."
         print_output "[*] Populating backend data for ${ORANGE}${#lFILES_BUFFALO_ARR[@]}${NC} files ... could take some time" "no_log"
