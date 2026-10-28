@@ -44,6 +44,7 @@ S08_submodule_openwrt_ipk_package_parser() {
 
   local lIPK_ARCHIVES_ARR=()
   local lIPK_ARCHIVE=""
+  local lWAIT_PIDS_S08_ARR_LCK=()
 
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
   local lPKG_CHECKED_ARR=()
@@ -130,7 +131,7 @@ ipk_package_parser_threader() {
 
   local lIPK_LOG_PATH="${TMP_DIR}/ipk_package_${lPKG_MD5}"
   if ! [[ -d "${lIPK_LOG_PATH}" ]]; then
-    mkdir "${lIPK_LOG_PATH}" || true
+    mkdir -- "${lIPK_LOG_PATH}" || true
   fi
   tar zxpf "${lIPK_ARCHIVE}" -C "${lIPK_LOG_PATH}" || print_error "[-] Extraction error for OpenWRT archive ${lIPK_ARCHIVE}"
 
@@ -231,5 +232,5 @@ ipk_package_parser_threader() {
   write_log "[*] OpenWRT ipk package details: ${ORANGE}${lIPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lIPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
   lPOS_RES=1
-  rm -r "${lIPK_LOG_PATH}" || true
+  rm -r -- "${lIPK_LOG_PATH}" || true
 }

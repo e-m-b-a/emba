@@ -24,7 +24,7 @@
 export THREAD_PRIO=0
 
 S17_cwe_checker() {
-  if [[ ${BINARY_EXTENDED} -eq 1 ]]; then
+  if [[ "${BINARY_EXTENDED}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Check binaries for vulnerabilities with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -272,13 +272,13 @@ cwe_checker_threaded() {
       done
     else
       print_output "[-] Nothing found in ${ORANGE}${lNAME}${NC}" "no_log"
-      rm -f "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null
+      rm -f -- "${lCWE_CHECKER_JSON_LOG_FILE}" 2>/dev/null
     fi
   fi
 
   if [[ -f "${LOG_FILE}" ]]; then
     cat "${LOG_FILE}" >>"${lOLD_LOG_FILE}"
-    rm "${LOG_FILE}" 2>/dev/null
+    rm -- "${LOG_FILE}" 2>/dev/null
   fi
   LOG_FILE="${lOLD_LOG_FILE}"
 }

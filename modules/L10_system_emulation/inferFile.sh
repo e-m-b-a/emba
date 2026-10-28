@@ -73,15 +73,15 @@ if ("${EMBA_BOOT}"); then
       fi
       if [ ! -e "${FILE}" ]; then # could not find original file (symbolic link or just file)
         if [ -h "${FILE}" ]; then # remove old symbolic link
-          "${BUSYBOX}" rm "${FILE}"
+          "${BUSYBOX}" rm -- "${FILE}"
         fi
         # find original program from binary directories
         "${BUSYBOX}" echo "[*] Analysing ${FILE}"
         FILE_NAME=$("${BUSYBOX}" basename "${FILE}")
-        if ("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -exec "${BUSYBOX}" grep -qr "${FILE_NAME}" {} \;); then
-          TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
+        TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
+        if [[ -f "${TARGET_FILE}" ]]; then
           "${BUSYBOX}" echo "[*] Re-creating symlink ${TARGET_FILE} -> ${FILE}"
-          "${BUSYBOX}" ln -s "${TARGET_FILE}" "${FILE}"
+          "${BUSYBOX}" ln -s -- "${TARGET_FILE}" "${FILE}"
         else
           continue
         fi
@@ -142,6 +142,6 @@ fi
 # finally add the EMBA default/backup entry, print it and remove the temp file
 "${BUSYBOX}" echo '/firmadyne/preInit.sh' >>/firmadyne/init
 "${BUSYBOX}" cat /firmadyne/init
-"${BUSYBOX}" rm /firmadyne/init_tmp
+"${BUSYBOX}" rm -- /firmadyne/init_tmp
 
 "${BUSYBOX}" echo "[*] EMBA inferFile script finished ..."

@@ -30,7 +30,7 @@ S22_php_check() {
   export S22_PHPINFO_ISSUES=0
   export S22_SEMGREP_ISSUES=0
 
-  if [[ ${PHP_CHECK} -eq 1 ]]; then
+  if [[ "${PHP_CHECK}" -eq 1 ]]; then
     mapfile -t lPHP_SCRIPTS_ARR < <(grep "PHP script" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
     write_csv_log "Script path" "PHP issue" "source (e.g. semgrep)" "common linux file"
     s22_vuln_check_caller "${lPHP_SCRIPTS_ARR[@]}"
@@ -117,8 +117,8 @@ s22_vuln_check_semgrep() {
       local lGPT_PRIO_=5
       local lAI_ANCHOR=""
 
-      [[ ! -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
-      [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p "${lS22_SOURCE_DIR}"
+      [[ ! -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir -- "${LOG_PATH_MODULE}"/semgrep_sources/
+      [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p -- "${lS22_SOURCE_DIR}"
 
       lSEMG_ISSUE_NAME=$(echo "${lSEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
       lSEMG_ISSUE_NAME="${lSEMG_ISSUE_NAME/name=\"/}"
@@ -227,7 +227,7 @@ s22_vuln_check() {
   local lGPT_PRIO_=4
   local lAI_ANCHOR=""
   if [[ "${lVULNS}" -gt 0 ]]; then
-    [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p "${lS22_SOURCE_DIR}"
+    [[ ! -d "${lS22_SOURCE_DIR}" ]] && mkdir -p -- "${lS22_SOURCE_DIR}"
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""
@@ -267,7 +267,7 @@ s22_vuln_check() {
     echo "${lVULNS}" >>"${TMP_DIR}"/S22_VULNS.tmp
   else
     # print_output "[*] Warning: No VULNS detected in $lPHP_LOG" "no_log"
-    rm "${lPHP_LOG}" 2>/dev/null || true
+    rm -- "${lPHP_LOG}" 2>/dev/null || true
   fi
 }
 

@@ -38,7 +38,7 @@ S24_kernel_bin_identifier() {
   local lWAIT_PIDS_S24_main=()
   # just in case s09 has not already created the strings output directory
   if ! [[ -d "${S09_LOG_DIR}"/strings_bins/ ]]; then
-    mkdir -p "${S09_LOG_DIR}"/strings_bins/ 2>/dev/null
+    mkdir -p -- "${S09_LOG_DIR}"/strings_bins/ 2>/dev/null
   fi
 
   while read -r lBINARY_ENTRY; do
@@ -50,12 +50,12 @@ S24_kernel_bin_identifier() {
 
   wait_for_pid "${lWAIT_PIDS_S24_main[@]}"
   # shellcheck disable=SC2153
-  find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -exec cat {} \; | tee -a "${LOG_FILE}"
+  find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -exec cat {} + | tee -a "${LOG_FILE}"
   if [[ -f "${S24_CSV_LOG}" ]]; then
     if [[ $(wc -l <"${S24_CSV_LOG}") -gt 1 ]]; then
       lNEG_LOG=$(wc -l <"${S24_CSV_LOG}" 2>/dev/null || echo 0)
     else
-      rm "${S24_CSV_LOG}"
+      rm -- "${S24_CSV_LOG:?S24_CSV_LOG is unset or empty}"
     fi
   fi
   if [[ -n "$(find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -print -quit)" ]]; then
@@ -98,7 +98,7 @@ binary_kernel_check_threader() {
   # files now. We use the same destination directory as for s09.
   lSTRINGS_OUTPUT="${S09_LOG_DIR}"/strings_bins/strings_"${lMD5_SUM}"_"${lBIN_NAME_REAL}".txt
   if ! [[ -d "${S09_LOG_DIR}/strings_bins" ]]; then
-    mkdir -p "${S09_LOG_DIR}/strings_bins"
+    mkdir -p -- "${S09_LOG_DIR}/strings_bins"
   fi
   if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
     strings "${lFILE_PATH}" | uniq >"${lSTRINGS_OUTPUT}" || true
@@ -313,7 +313,7 @@ extract_kconfig() {
   export TMP1="${TMP_DIR}"/ikconfig$$.1
   export TMP2="${TMP_DIR}"/ikconfig$$.2
   # shellcheck disable=SC2064
-  trap "rm -f ${TMP1} ${TMP2}" 0
+  trap 'rm -f -- "${TMP1}" "${TMP2}"' 0
 
   # Initial attempt for uncompressed images or objects:
   dump_config "${IMG}" "${lLOG_FILE}"

@@ -81,7 +81,7 @@ dji_imah_firmware_extractor() {
   local lFIRMWARE_PATH="${1:-}"
   local lEXTRACTION_DIR="${2:-}"
   if ! [[ -d "${lEXTRACTION_DIR}" ]]; then
-    mkdir "${lEXTRACTION_DIR}"
+    mkdir -- "${lEXTRACTION_DIR}"
   fi
 
   local lFW_NAME_=""
@@ -267,7 +267,7 @@ dji_imah_firmware_extractor() {
             # This could increase the extraction speed a lot!
             # continue 3
           else
-            rm -r "${lOUTPUT_DIR}" || true
+            rm -r -- "${lOUTPUT_DIR}" || true
           fi
         fi
       done
@@ -305,10 +305,10 @@ dji_xv4_firmware_extractor() {
     return
   fi
   if ! [[ -d "${lEXTRACTION_DIR_}" ]]; then
-    mkdir "${lEXTRACTION_DIR_}"
+    mkdir -- "${lEXTRACTION_DIR_}"
   fi
   if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}"
+    mkdir -- "${LOG_PATH_MODULE}"
   fi
 
   lFIRMWARE_NAME_="$(basename "${lFIRMWARE_PATH_}")"
@@ -338,7 +338,7 @@ dji_xv4_firmware_extractor() {
 
   for lXV4_EXTRACED_FILE in "${lXV4_EXTRACTEDFILES_ARR[@]}"; do
     lXV4_EXTRACED_FILE_NAME=$(basename "${lXV4_EXTRACED_FILE}")
-    lEXTRACTION_DIR_tmp="${lEXTRACTION_DIR}"/dji_xv4_extraction_"${lXV4_EXTRACED_FILE_NAME}"_unblob_extracted
+    lEXTRACTION_DIR_tmp="${lEXTRACTION_DIR_}"/dji_xv4_extraction_"${lXV4_EXTRACED_FILE_NAME}"_unblob_extracted
     unblobber "${lXV4_EXTRACED_FILE}" "${lEXTRACTION_DIR_tmp}" 0
   done
 

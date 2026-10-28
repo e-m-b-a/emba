@@ -32,7 +32,7 @@ S03_firmware_bin_base_analyzer() {
 
   if [[ -d "${FIRMWARE_PATH_CP}" ]]; then
     export OUTPUT_DIR="${FIRMWARE_PATH_CP}"
-    if [[ ${THREADED} -eq 1 ]]; then
+    if [[ "${THREADED}" -eq 1 ]]; then
       os_identification &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -47,7 +47,7 @@ S03_firmware_bin_base_analyzer() {
     export PRE_ARCH_Y_ARR=()
     export PRE_ARCH_A_ARR=()
     export PRE_ARCH_CPU_REC=""
-    if [[ ${RTOS} -eq 1 ]]; then
+    if [[ "${RTOS}" -eq 1 ]]; then
       print_output "[*] INFO: S03 Architecture detection mechanism is currently not available"
 
       # if [[ ${THREADED} -eq 1 ]]; then
@@ -61,7 +61,7 @@ S03_firmware_bin_base_analyzer() {
     fi
   fi
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S03_ARR[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S03_ARR[@]}"
 
   [[ -f "${TMP_DIR}"/s03_arch.tmp ]] && binary_architecture_reporter
 
@@ -104,7 +104,7 @@ os_identification() {
   local lWAIT_PIDS_S03_1_ARR=()
 
   for lOS in "${lOS_SEARCHER_ARR[@]}"; do
-    if [[ ${THREADED} -eq 1 ]]; then
+    if [[ "${THREADED}" -eq 1 ]]; then
       os_detection_thread_per_os "${lOS}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -114,7 +114,7 @@ os_identification() {
     fi
   done
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S03_1_ARR[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S03_1_ARR[@]}"
 
   if grep -q "Identified Android APK package - performing APK checks" "${P02_LOG}"; then
     lOS_="Android APK"
@@ -123,10 +123,10 @@ os_identification() {
   fi
 
   if [[ -f "${LOG_PATH_MODULE}/strings_firmware.txt" ]]; then
-    rm "${LOG_PATH_MODULE}/strings_firmware.txt" || true
+    rm -- "${LOG_PATH_MODULE}/strings_firmware.txt" || true
   fi
   if [[ -f "${LOG_PATH_MODULE}/all_strings_firmware.txt" ]]; then
-    rm "${LOG_PATH_MODULE}/all_strings_firmware.txt" || true
+    rm -- "${LOG_PATH_MODULE}/all_strings_firmware.txt" || true
   fi
 }
 

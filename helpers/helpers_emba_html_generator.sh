@@ -165,7 +165,7 @@ add_link_tags() {
 
           local lRES_PATH=""
           lRES_PATH="${ABS_HTML_PATH%/}/${lBACK_LINK_NEW%%.*}/res" # field 1
-          if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
+          if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p -- "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
           if [[ "${lREF_LINK}" == *"EMBA-dependency"* ]]; then
             cp "${EXT_DIR}/svg-pan-zoom.min.js" "${lRES_PATH}" || true
@@ -186,7 +186,7 @@ add_link_tags() {
           fi
 
           lRES_PATH="${ABS_HTML_PATH%/}/${lBACK_LINK_NEW%%.*}/res" # field 1
-          if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
+          if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p -- "${lRES_PATH}" >/dev/null || true; fi
           cp "${lREF_LINK}" "${lRES_PATH}""/""$(basename "${lREF_LINK}")" || true
           lHTML_LINK="$(sed -e "s@LINK@./${lBACK_LINK_NEW%%.*}/res/$(basename "${lREF_LINK}")@g" <<<"${LOCAL_LINK}" || true)""Download Qemu emulation archive.""${LINK_END}"
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "${lREF_LINK}").*@${lHTML_LINK}${P_END}@" "${lLINK_FILE}"
@@ -330,7 +330,7 @@ add_link_tags() {
             # copy msf file
             local lRES_PATH=""
             lRES_PATH="${ABS_HTML_PATH%/}/${lBACK_LINK%%.*}/res" # field 1
-            if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
+            if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p -- "${lRES_PATH}" >/dev/null || true; fi
             cp "${lMSF_KEY_FILE}" "${lRES_PATH}""/""$(basename "${lMSF_KEY_FILE}")" || true
             lHTML_LINK="$(sed -e "s@LINK@./${lBACK_LINK%%.*}/res/$(basename "${lMSF_KEY_FILE}")@g" <<<"${LOCAL_LINK}")""${lMSF_KEY_ELEM}""${LINK_END}"
             lLINK_COMMAND_ARR+=("${lMSF_KEY_LINE}"'s@'"${lMSF_KEY_ELEM}"'@'"${lHTML_LINK}"'@')
@@ -536,7 +536,7 @@ generate_info_file() {
 
   # we create something like html-report/sXYZ_module/
   if ! [[ -d "${lINFO_PATH}" ]]; then
-    mkdir -p "${lINFO_PATH}" || true
+    mkdir -p -- "${lINFO_PATH}" || true
   fi
 
   if [[ ! -f "${lINFO_PATH}""/""${lINFO_HTML_FILE}" ]] && [[ -f "${lINFO_FILE}" ]]; then
@@ -569,7 +569,7 @@ generate_info_file() {
       sed -i "${lLINE_NUMBER_INFO_NAV}""i""${lNAV_INFO_BACK_LINK}""&laquo; Back to ""$(basename "${lSRC_FILE%.html}")""${LINK_END}" "${lINFO_PATH}""/""${lINFO_HTML_FILE}"
     fi
 
-    ! [[ -d "${lTMP_INFO_DIR}" ]] && mkdir -p "${lTMP_INFO_DIR}"
+    ! [[ -d "${lTMP_INFO_DIR}" ]] && mkdir -p -- "${lTMP_INFO_DIR}"
     cp "${lINFO_FILE}" "${lTMP_INFO_FILE}" 2>/dev/null || true
 
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "${lTMP_INFO_FILE}" || true
@@ -599,7 +599,7 @@ generate_info_file() {
     readarray -t lEXPLOIT_FILES_ARR < <(grep -a "File: " "${lINFO_FILE}" | cut -d ":" -f 2 | sed 's@^\ @@' | sort -u || true)
     for lE_PATH in "${lEXPLOIT_FILES_ARR[@]}"; do
       if [[ -f "${lE_PATH}" ]]; then
-        if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p "${lRES_PATH}" >/dev/null || true; fi
+        if [[ ! -d "${lRES_PATH}" ]]; then mkdir -p -- "${lRES_PATH}" >/dev/null || true; fi
         cp "${lE_PATH}" "${lRES_PATH}""/""$(basename "${lE_PATH}")" || true
         lE_HTML_LINK="$(sed -e "s@LINK@./res/$(basename "${lE_PATH}")@g" <<<"${LOCAL_LINK}")""$(basename "${lE_PATH}")""${LINK_END}"
         printf "%s%sFile: %s%s\n" "${HR_MONO}" "${P_START}" "${lE_HTML_LINK}" "${P_END}" >>"${lTMP_INFO_FILE}"
@@ -636,7 +636,7 @@ generate_report_file() {
     fi
     local lTMP_FILE="${ABS_HTML_PATH%/}/${TEMP_PATH}/${lHTML_FILE}"
     if [[ ! -d "${ABS_HTML_PATH%/}/${TEMP_PATH}" ]]; then
-      mkdir "${ABS_HTML_PATH%/}/${TEMP_PATH}"
+      mkdir -- "${ABS_HTML_PATH%/}/${TEMP_PATH}"
     fi
 
     # parse log content and add to html file
@@ -747,16 +747,16 @@ add_link_to_index() {
     insert_line "navigation end" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
   else
     for ((COUNT = 0; COUNT <= ${#lINDEX_NAV_GROUP_ARR[@]}; COUNT++)); do
-      if [[ ${COUNT} -eq 0 ]] && [[ ${lC_NUMBER} -lt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true) ]]; then
+      if [[ "${COUNT}" -eq 0 ]] && [[ "${lC_NUMBER}" -lt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true)" ]]; then
         insert_line "${lINDEX_NAV_GROUP_ARR[${COUNT}]}" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
         continue
-      elif [[ ${COUNT} -eq $((${#lINDEX_NAV_GROUP_ARR[@]} - 1)) ]] && [[ ${lC_NUMBER} -gt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true) ]]; then
+      elif [[ "${COUNT}" -eq $((${#lINDEX_NAV_GROUP_ARR[@]} - 1)) ]] && [[ "${lC_NUMBER}" -gt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true)" ]]; then
         insert_line "navigation end" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
         continue
       fi
       # COUNT+1 is not available on the last element - we need to check the array for this:
       if [[ -v lINDEX_NAV_GROUP_ARR[${COUNT}] ]] && [[ -v lINDEX_NAV_GROUP_ARR[$((COUNT + 1))] ]]; then
-        if [[ ${lC_NUMBER} -gt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true) ]] && [[ ${lC_NUMBER} -lt $(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[$((COUNT + 1))]:1}" || true) ]]; then
+        if [[ "${lC_NUMBER}" -gt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[${COUNT}]:1}" || true)" ]] && [[ "${lC_NUMBER}" -lt "$(sed -E 's@^0*@@g' <<<"${lINDEX_NAV_GROUP_ARR[$((COUNT + 1))]:1}" || true)" ]]; then
           insert_line "${lINDEX_NAV_GROUP_ARR[$((COUNT + 1))]}" "${lMODUL_NAME}" "${lCLASS}" "${lDATA}"
         fi
       fi
@@ -794,9 +794,9 @@ update_index() {
   add_arrows
 
   # remove tempory files from web report
-  rm -R "${ABS_HTML_PATH:?}/${TEMP_PATH}"
+  rm -R -- "${ABS_HTML_PATH:?}/${TEMP_PATH}"
   rmdir "${ABS_HTML_PATH:?}/${ERR_PATH}" 2>/dev/null || true
-  rm -R "${ABS_HTML_PATH:?}"/qemu_init* 2>/dev/null || true
+  rm -R -- "${ABS_HTML_PATH:?}/qemu_init*" 2>/dev/null || true
 }
 
 scan_report() {
@@ -857,20 +857,20 @@ prepare_report() {
   ABS_HTML_PATH="$(abs_path "${HTML_PATH}")"
 
   if [ ! -d "${ABS_HTML_PATH%/}/${STYLE_PATH}" ]; then
-    mkdir -p "${ABS_HTML_PATH%/}/${STYLE_PATH}" || true
+    mkdir -p -- "${ABS_HTML_PATH%/}/${STYLE_PATH}" || true
     cp "${HELP_DIR}/style.css" "${ABS_HTML_PATH%/}/${STYLE_PATH}/style.css" || true
     cp "${HELP_DIR}/emba.svg" "${ABS_HTML_PATH%/}/${STYLE_PATH}/emba.svg" || true
     cp "${HELP_DIR}/embark.svg" "${ABS_HTML_PATH%/}/${STYLE_PATH}/embark.svg" || true
     cp "${HELP_DIR}/favicon.png" "${ABS_HTML_PATH%/}/${STYLE_PATH}/favicon.png" || true
   fi
   if [ ! -d "${ABS_HTML_PATH%/}/${TEMP_PATH}" ]; then
-    mkdir -p "${ABS_HTML_PATH%/}/${TEMP_PATH}" || true
+    mkdir -p -- "${ABS_HTML_PATH%/}/${TEMP_PATH}" || true
   fi
   if [ ! -d "${ABS_HTML_PATH%/}/${ERR_PATH}" ]; then
-    mkdir -p "${ABS_HTML_PATH%/}/${ERR_PATH}" || true
+    mkdir -p -- "${ABS_HTML_PATH%/}/${ERR_PATH}" || true
   fi
   if [ ! -d "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}" ]; then
-    mkdir -p "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}" || true
+    mkdir -p -- "${ABS_HTML_PATH%/}/${SUPPL_PATH_HTML}" || true
   fi
 
   cp "./helpers/base.html" "${ABS_HTML_PATH%/}/${INDEX_FILE}" || true

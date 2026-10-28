@@ -36,9 +36,9 @@ F17_cve_bin_tool() {
   local lNEG_LOG=0
   local MAX_MOD_THREADS=$((MAX_MOD_THREADS * 2))
 
-  mkdir "${LOG_PATH_MODULE}/json/" || true
-  mkdir "${LOG_PATH_MODULE}/cve_sum/" || true
-  mkdir "${LOG_PATH_MODULE}/exploit/" || true
+  mkdir -- "${LOG_PATH_MODULE}/json/" || true
+  mkdir -- "${LOG_PATH_MODULE}/cve_sum/" || true
+  mkdir -- "${LOG_PATH_MODULE}/exploit/" || true
 
   print_output "[*] Loading SBOM ..." "no_log"
 
@@ -57,7 +57,7 @@ F17_cve_bin_tool() {
   # first round is primarly for removing duplicates, unhandled_file entries and printing a quick initial overview for the html report
   # 2nd round is for the real testing
   local lWAIT_PIDS_TEMP=()
-  [[ ! -d "${LOG_PATH_MODULE}/tmp/" ]] && mkdir -p "${LOG_PATH_MODULE}/tmp/"
+  [[ ! -d "${LOG_PATH_MODULE}/tmp/" ]] && mkdir -p -- "${LOG_PATH_MODULE}/tmp/"
   for lSBOM_ENTRY in "${lSBOM_ARR[@]}"; do
     sbom_preprocessing_threader "${lSBOM_ENTRY}" &
     local lTMP_PID="$!"
@@ -223,7 +223,7 @@ F17_cve_bin_tool() {
 
     # Handle EMBA_sbom_vex_tmp.json if it exists
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
-      rm "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+      rm -- "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
     fi
   fi
 
@@ -375,19 +375,19 @@ cve_bin_tool_threader() {
   lPRODUCT_NAME="${lPRODUCT_NAME%\'}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/cve_sum/" ]]; then
-    mkdir "${LOG_PATH_MODULE}/cve_sum/"
+    mkdir -- "${LOG_PATH_MODULE}/cve_sum/"
   fi
   if ! [[ -d "${LOG_PATH_MODULE}/json/" ]]; then
-    mkdir "${LOG_PATH_MODULE}/json/"
+    mkdir -- "${LOG_PATH_MODULE}/json/"
   fi
   if ! [[ -d "${LOG_PATH_MODULE}/exploit/" ]]; then
-    mkdir "${LOG_PATH_MODULE}/exploit/"
+    mkdir -- "${LOG_PATH_MODULE}/exploit/"
   fi
 
   python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
 
   #  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
-  #    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
+  #    rm -- "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
   #  fi
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
@@ -472,7 +472,7 @@ cve_bin_tool_threader() {
 
   # we can now delete the temp log file
   if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" ]]; then
-    rm "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true
+    rm -- "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true
   fi
 
   # now, lets write the main f20 log file with the results of the current binary:
@@ -631,12 +631,12 @@ tear_down_cve_threader() {
 
     # now, we check the exploit-db results if we have a routersploit module:
     if [[ " ${lEXPLOIT_AVAIL_EDB_ARR[*]} " =~ "Exploit DB Id:" ]]; then
-      for lEID_VALUE in "${EXPLOIT_AVAIL_EDB_ARR[@]}"; do
+      for lEID_VALUE in "${lEXPLOIT_AVAIL_EDB_ARR[@]}"; do
         if ! [[ "${lEID_VALUE}" == *"Exploit DB Id:"* ]]; then
           continue
         fi
         lEID_VALUE=$(echo "${lEID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
-        mapfile -t lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR < <(grep "${lEID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
+        mapfile -t -O "${#lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR[@]}" lEXPLOIT_AVAIL_ROUTERSPLOIT1_ARR < <(grep "${lEID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
       done
 
       readarray -t lEXPLOIT_IDS_ARR < <(echo "${lEXPLOIT_AVAIL_EDB_ARR[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
@@ -907,7 +907,7 @@ tear_down_cve_threader() {
   jq . "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" >"${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.json"
 
   # cleanup
-  rm "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || true
+  rm -- "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || true
 }
 
 get_kernel_s25_data() {

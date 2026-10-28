@@ -79,7 +79,7 @@ S08_submodule_node_js_package_lock_parser() {
         lPOS_RES=1
       done <"${TMP_DIR}/node.lock.tmp"
       wait_for_pid "${lWAIT_PIDS_S08_ARR_LCK[@]}"
-      rm -f "${TMP_DIR}/node.lock.tmp"
+      rm -f -- "${TMP_DIR}/node.lock.tmp"
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then

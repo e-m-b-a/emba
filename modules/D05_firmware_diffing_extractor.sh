@@ -35,6 +35,7 @@ D05_firmware_diffing_extractor() {
   local lDIRS_EXT_UB=0
   local lUNIQUE_FILES_UB=0
   local lFILES_EXT_UB=0
+  local lLINUX_PATH_COUNTER=0
 
   # shellcheck disable=SC2153
   lMD5_FW_BIN1=$(md5sum "${FIRMWARE_PATH}")
@@ -52,7 +53,8 @@ D05_firmware_diffing_extractor() {
 
   if [[ -d "${OUTPUT_DIR_UNBLOB1}" ]]; then
     lNEG_LOG=1
-    linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB1}"
+    prepare_binary_arr "${OUTPUT_DIR_UNBLOB1}"
+    lLINUX_PATH_COUNTER=$(linux_basic_identification "${OUTPUT_DIR_UNBLOB1}")
     lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f | wc -l)
     lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l)
     lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type d | wc -l)
@@ -63,8 +65,7 @@ D05_firmware_diffing_extractor() {
     if [[ -f "${LOG_PATH_MODULE}"/firmware_image1.txt ]]; then
       write_link "${LOG_PATH_MODULE}"/firmware_image1.txt
     fi
-    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
-    prepare_binary_arr "${OUTPUT_DIR_UNBLOB1}"
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
     architecture_check
     detect_root_dir_helper "${OUTPUT_DIR_UNBLOB1}"
   fi
@@ -75,7 +76,8 @@ D05_firmware_diffing_extractor() {
 
   if [[ -d "${OUTPUT_DIR_UNBLOB2}" ]]; then
     lNEG_LOG=1
-    linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB2}"
+    prepare_binary_arr "${OUTPUT_DIR_UNBLOB2}"
+    lLINUX_PATH_COUNTER=$(linux_basic_identification "${OUTPUT_DIR_UNBLOB2}")
     lFILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f | wc -l)
     lUNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l)
     lDIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type d | wc -l)
@@ -86,8 +88,7 @@ D05_firmware_diffing_extractor() {
     if [[ -f "${LOG_PATH_MODULE}"/firmware_image2.txt ]]; then
       write_link "${LOG_PATH_MODULE}"/firmware_image2.txt
     fi
-    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
-    prepare_binary_arr "${OUTPUT_DIR_UNBLOB2}"
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${lLINUX_PATH_COUNTER}${NC}."
     architecture_check
     detect_root_dir_helper "${OUTPUT_DIR_UNBLOB2}"
 

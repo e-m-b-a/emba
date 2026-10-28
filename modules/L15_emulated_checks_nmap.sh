@@ -30,8 +30,12 @@ L15_emulated_checks_nmap() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -v IP_ADDRESS_ ]]; then
-      check_live_nmap_basic "${IP_ADDRESS_}"
-      lMODULE_END=1
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing Nmap checks"
+      else
+        check_live_nmap_basic "${IP_ADDRESS_}"
+        lMODULE_END=1
+      fi
     else
       print_output "[!] No IP address found"
     fi
@@ -201,7 +205,7 @@ l15_version_detector() {
     l15_version_detector_threader "${lVERSION_JSON_CFG}" "${lSERVICE}" "${lTYPE}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
-    WAIT_PIDS_L15_ARR_02+=("${lTMP_PID}")
+    lWAIT_PIDS_L15_ARR_02+=("${lTMP_PID}")
     max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_L15_ARR_02
   done
   wait_for_pid "${lWAIT_PIDS_L15_ARR_02[@]}"

@@ -30,7 +30,7 @@ S115_usermode_emulator() {
 
   if [[ "${QEMULATION}" -eq 1 && "${RTOS}" -eq 0 ]]; then
 
-    if [[ ${IN_DOCKER} -eq 0 ]]; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
 
@@ -268,7 +268,7 @@ copy_firmware() {
 
   if [[ "${lFREE_SPACE}" -gt "${lNEEDED_SPACE}" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
-    cp -pri "${EMULATION_PATH_BASE}" "${LOG_PATH_MODULE}"/firmware 2>/dev/null
+    cp -pri -- "${EMULATION_PATH_BASE}" "${LOG_PATH_MODULE}/firmware" 2>/dev/null
     EMULATION_PATH_BASE="${LOG_PATH_MODULE}"/firmware
     print_output "[*] Firmware backup for emulation created in ${ORANGE}${EMULATION_PATH_BASE}${NC}"
   else
@@ -316,19 +316,19 @@ prepare_emulator() {
     fi
 
     if ! [[ -d "${lR_PATH}""/proc" ]]; then
-      mkdir "${lR_PATH}""/proc" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/proc" 2>/dev/null || true
     fi
 
     if ! [[ -d "${lR_PATH}""/sys" ]]; then
-      mkdir "${lR_PATH}""/sys" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/sys" 2>/dev/null || true
     fi
 
     if ! [[ -d "${lR_PATH}""/run" ]]; then
-      mkdir "${lR_PATH}""/run" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/run" 2>/dev/null || true
     fi
 
     if ! [[ -d "${lR_PATH}""/dev/" ]]; then
-      mkdir "${lR_PATH}""/dev/" 2>/dev/null || true
+      mkdir -- "${lR_PATH}""/dev/" 2>/dev/null || true
     fi
 
     if ! mount | grep "${lR_PATH}"/proc >/dev/null; then
@@ -362,8 +362,8 @@ prepare_emulator() {
     else
       "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "${LOG_PATH_MODULE}"/chroot_fixes.txt || print_error "[-] Something weird going wrong in chroot filesystem fixing for ${lR_PATH}"
     fi
-    rm "${lR_PATH}"/fixImage_user_mode_emulation.sh || true
-    rm "${lR_PATH}"/busybox || true
+    rm -- "${lR_PATH}"/fixImage_user_mode_emulation.sh || true
+    rm -- "${lR_PATH}"/busybox || true
     print_bar
   fi
 }
@@ -402,7 +402,7 @@ run_init_test() {
       setup_chroot
     fi
     if [[ -f "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" ]]; then
-      rm "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" || true
+      rm -- "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" || true
     fi
   fi
   run_init_qemu "${lCPU_CONFIG}" "${lBIN_EMU_NAME_}" "${lLOG_FILE_INIT}" "${lEMULATOR}"
@@ -419,7 +419,7 @@ run_init_test() {
 
     for lCPU_CONFIG in "${lCPU_CONFIGS_ARR[@]}"; do
       if [[ -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" ]]; then
-        rm "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || true
+        rm -- "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || true
       fi
 
       run_init_qemu "${lCPU_CONFIG}" "${lBIN_EMU_NAME_}" "${lLOG_FILE_INIT}" "${lEMULATOR}"
@@ -603,7 +603,7 @@ emulate_strace_run() {
 
         if [[ ! -d "${R_PATH}""${lPATH_MISSING}" ]]; then
           write_log "[*] Creating directory ${ORANGE}${R_PATH}${lPATH_MISSING}${NC}" "${lLOG_FILE_STRACER}"
-          mkdir -p "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
+          mkdir -p -- "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
           # continue
         fi
         if [[ -n "${lFILENAME_FOUND}" ]]; then
@@ -611,7 +611,7 @@ emulate_strace_run() {
           local lOUTPUT=""
           lOUTPUT=$(file -b "${lFILENAME_FOUND}")
           if [[ "${lOUTPUT}" != *"(named pipe)" ]]; then
-            cp -L "${lFILENAME_FOUND}" "${R_PATH}""${lPATH_MISSING}" 2>/dev/null || true
+            cp -L -- "${lFILENAME_FOUND}" "${R_PATH}${lPATH_MISSING}" 2>/dev/null || true
           fi
           continue
         else
@@ -836,7 +836,7 @@ s115_cleanup() {
   local lBINARY_FROM_LOG=""
   local lLOG_FILE=""
 
-  # rm "${LOG_PATH_MODULE}""/stracer_*.txt" 2>/dev/null || true
+  # rm -- "${LOG_PATH_MODULE}""/stracer_*.txt" 2>/dev/null || true
 
   # if no emulation at all was possible the $lEMULATOR variable is not defined
   if [[ -n "${lEMULATOR}" ]]; then
@@ -852,8 +852,8 @@ s115_cleanup() {
   kill -9 "${PID_killer}" >/dev/null || true
 
   print_output "[*] Cleaning the emulation environment\\n" "no_log"
-  find "${EMULATION_PATH_BASE}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
-  find "${EMULATION_PATH_BASE}" -xdev -iname "*.core" -exec rm {} \; 2>/dev/null || true
+  find "${EMULATION_PATH_BASE}" -xdev -iname "qemu*static" -exec rm -- {} \; 2>/dev/null || true
+  find "${EMULATION_PATH_BASE}" -xdev -iname "*.core" -exec rm -- {} \; 2>/dev/null || true
 
   print_ln "no_log"
   print_output "[*] Umounting proc, sys and run" "no_log"
@@ -883,7 +883,7 @@ s115_cleanup() {
       # print_output "[*] LOG_FILE: $lLOG_FILE - Lines: $lLINES_OF_LOG" "no_log"
       if ! [[ -s "${lLOG_FILE}" ]] || [[ "${lLINES_OF_LOG}" -eq 0 ]]; then
         # print_output "[*] Removing empty log file: $lLOG_FILE" "no_log"
-        rm "${lLOG_FILE}" 2>/dev/null || true
+        rm -- "${lLOG_FILE}" 2>/dev/null || true
         continue
       fi
       lBINARY_FROM_LOG=$(basename "${lLOG_FILE}")
@@ -894,7 +894,7 @@ s115_cleanup() {
   # if we created a backup for emulation - lets delete it now
   if [[ -d "${LOG_PATH_MODULE}/firmware" ]]; then
     print_output "[*] Remove firmware copy from emulation directory." "no_log"
-    rm -r "${LOG_PATH_MODULE}"/firmware || true
+    rm -r -- "${LOG_PATH_MODULE}/firmware" || true
   fi
 }
 
@@ -982,7 +982,7 @@ creating_dev_area() {
 
   if ! [[ -d "${lR_PATH}"/dev/mtd ]]; then
     print_output "[*] Creating and populating /dev/mtd"
-    mkdir -p "${lR_PATH}"/dev/mtd 2>/dev/null || true
+    mkdir -p -- "${lR_PATH}"/dev/mtd 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtd/0 c 90 0 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtd/1 c 90 2 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtd/2 c 90 4 2>/dev/null || true
@@ -1021,7 +1021,7 @@ creating_dev_area() {
 
   if ! [[ -d "${lR_PATH}"/dev/mtdblock ]]; then
     print_output "[*] Creating and populating /dev/mtdblock"
-    mkdir -p "${lR_PATH}"/dev/mtdblock 2>/dev/null || true
+    mkdir -p -- "${lR_PATH}"/dev/mtdblock 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtdblock/0 b 31 0 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtdblock/1 b 31 1 2>/dev/null || true
     mknod -m 644 "${lR_PATH}"/dev/mtdblock/2 b 31 2 2>/dev/null || true
@@ -1049,12 +1049,12 @@ creating_dev_area() {
 
   if ! [[ -d "${lR_PATH}"/dev/tts ]]; then
     print_output "[*] Creating and populating /dev/tts"
-    mkdir -p "${lR_PATH}"/dev/tts 2>/dev/null || true
+    mkdir -p -- "${lR_PATH}"/dev/tts 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/0 c 4 64 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/1 c 4 65 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/2 c 4 66 2>/dev/null || true
     mknod -m 660 "${lR_PATH}"/dev/tts/3 c 4 67 2>/dev/null || true
   fi
 
-  chown -v root:tty "${lR_PATH}""/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
+  chown -v root:tty "${lR_PATH}/dev/"{console,ptmx,tty} >/dev/null 2>&1 || true
 }

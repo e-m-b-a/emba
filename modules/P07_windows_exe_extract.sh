@@ -154,7 +154,7 @@ exe_extractor() {
   lFIRMWARE_NAME="$(basename "${lFIRMWARE_PATH}")"
 
   if ! [[ -d "${lEXTRACTION_DIR}" ]]; then
-    mkdir "${lEXTRACTION_DIR}"
+    mkdir -- "${lEXTRACTION_DIR}"
   fi
 
   7z x -o"${lEXTRACTION_DIR}" "${lFIRMWARE_PATH}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/exe_extraction_"${lFIRMWARE_NAME}".log || print_error "[-] Windows exe extraction via 7zip failed"

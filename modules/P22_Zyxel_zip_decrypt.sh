@@ -125,7 +125,7 @@ zyxel_zip_extractor() {
 
       chmod +x "${lZLD_DIR}"/"${lZLD_BIN}"
       timeout --preserve-status --signal SIGINT 2s "${lCHROOT}" "${lOPTS[@]}" "${lZLD_DIR}" -- ./"${lEMULATOR}" -strace ./"${lZLD_BIN}" "${lRI_FILE_BIN}" AABBCCDD >>"${LOG_PATH_MODULE}"/zld_strace.log 2>&1 || true
-      rm "${lZLD_DIR}"/"${lEMULATOR}" || true
+      rm -- "${lZLD_DIR}"/"${lEMULATOR}" || true
 
       if [[ -f "${LOG_PATH_MODULE}"/zld_strace.log ]] && [[ -s "${LOG_PATH_MODULE}"/zld_strace.log ]]; then
         lZIP_KEY=$(grep -a -E "^[0-9]+\ execve.*AABBCCDD\",\"-o" "${LOG_PATH_MODULE}"/zld_strace.log | cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')

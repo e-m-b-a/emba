@@ -158,7 +158,7 @@ S08_submodule_python_poetry_lock_parser() {
         write_csv_log "${lPACKAGING_SYSTEM}" "${lPY_LCK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH:-NA}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
         lPOS_RES=1
       done <"${TMP_DIR}/poetry.lock.tmp"
-      rm -f "${TMP_DIR}/poetry.lock.tmp"
+      rm -f -- "${TMP_DIR}/poetry.lock.tmp"
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then

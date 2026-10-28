@@ -147,12 +147,12 @@ S26_kernel_vuln_verifier() {
 
     if ! [[ -f "${KERNEL_ELF_PATH}" ]]; then
       print_output "[-] Warning: Kernel ELF file not found"
-      module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+      module_end_log "${FUNCNAME[0]}" 0
       continue
     fi
     if ! [[ -v lK_VERSION ]]; then
       print_output "[-] Missing kernel version .. exit now"
-      module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+      module_end_log "${FUNCNAME[0]}" 0
       continue
     fi
 
@@ -208,7 +208,7 @@ S26_kernel_vuln_verifier() {
     write_link "${LOG_DIR}/kernel_downloader.log"
 
     lKERNEL_DIR="${LOG_PATH_MODULE}/linux-${lK_VERSION_KORG}"
-    [[ -d "${lKERNEL_DIR}" ]] && rm -rf "${lKERNEL_DIR}"
+    [[ -d "${lKERNEL_DIR}" ]] && rm -rf -- "${lKERNEL_DIR:?lKERNEL_DIR is unset or empty}"
     if ! [[ -d "${lKERNEL_DIR}" ]] && [[ "$(file "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION_KORG}.tar.gz")" == *"gzip compressed data"* ]]; then
       print_output "[*] Kernel version ${ORANGE}${lK_VERSION}${NC} extraction ... "
       tar -xzf "${lKERNEL_ARCH_PATH}/linux-${lK_VERSION_KORG}.tar.gz" -C "${LOG_PATH_MODULE}"
@@ -285,6 +285,7 @@ S26_kernel_vuln_verifier() {
     print_ln
 
     local lVULN=""
+    local lWAIT_PIDS_S26_ARR_MAIN=()
     for lVULN in "${lALL_KVULNS_ARR[@]}"; do
       vuln_checker_threader "${lVULN}" &
       local lTMP_PID="$!"

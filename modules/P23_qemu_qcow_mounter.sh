@@ -41,7 +41,7 @@ P23_qemu_qcow_mounter() {
     qcow_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
     #    if [[ -f "${TMP_DIR}"/firmware ]]; then
-    #      rm "${TMP_DIR}"/firmware
+    #      rm -- "${TMP_DIR}"/firmware
     #    fi
 
     if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
@@ -90,9 +90,9 @@ qcow_extractor() {
       l7ZIP_BROKEN_LNK_TARGET_NAME=${l7ZIP_BROKEN_LNK##*:\ }
       find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1
       l7ZIP_BROKEN_LNK_SOURCE=$(find "${lEXTRACTION_DIR}" -path "*${l7ZIP_BROKEN_LNK_SOURCE}" | sort -u | head -1)
-      rm "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+      rm -- "${l7ZIP_BROKEN_LNK_SOURCE}" || true
       l7ZIP_BROKEN_LNK_TARGET=$(find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1)
-      ln -s -r "${l7ZIP_BROKEN_LNK_TARGET}" "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+      ln -s -r -- "${l7ZIP_BROKEN_LNK_TARGET}" "${l7ZIP_BROKEN_LNK_SOURCE}" || true
     done
   fi
 
@@ -136,7 +136,7 @@ qcow_extractor_nbd_mnt() {
 
   sub_module_title "Qemu QCOW filesystem extractor"
 
-  mkdir -p "${lTMP_QCOW_MOUNT}" 2>/dev/null || true
+  mkdir -p -- "${lTMP_QCOW_MOUNT}" 2>/dev/null || true
   print_output "[*] Trying to mount ${ORANGE}${lQCOW_PATH_}${NC} to ${ORANGE}${lTMP_QCOW_MOUNT}${NC} directory"
 
   # if lsmod | grep -q nbd; then
@@ -218,7 +218,7 @@ qcow_extractor_nbd_mnt() {
     fi
   done
   qemu-nbd --disconnect /dev/"${lNBD_DEV_NAME}"
-  rm -r "${lTMP_QCOW_MOUNT}"
+  rm -r -- "${lTMP_QCOW_MOUNT}"
 }
 
 copy_qemu_nbd() {
@@ -229,8 +229,8 @@ copy_qemu_nbd() {
   fi
 
   print_output "[*] Copying ${ORANGE}${lSOURCE_CP}${NC} to firmware tmp directory (${ORANGE}${lDEST_CP}${NC})"
-  mkdir -p "${lDEST_CP}" 2>/dev/null || true
-  cp -pri "${lSOURCE_CP}"/* "${lDEST_CP}" 2>/dev/null || true
+  mkdir -p -- "${lDEST_CP}" 2>/dev/null || true
+  cp -pri -- "${lSOURCE_CP}"/* "${lDEST_CP}" 2>/dev/null || true
   print_ln
   print_output "[*] Using the following firmware directory (${ORANGE}${lDEST_CP}${NC}) as base directory:"
   find "${lDEST_CP}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"

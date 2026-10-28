@@ -42,7 +42,7 @@ for POSSIBLE_EXE in "${POSSIBLE_EXES_ARR[@]}"; do
   [[ -x "${POSSIBLE_EXE}" ]] && continue
   if [[ -f "${POSSIBLE_EXE}" ]]; then
     if [[ "${POSSIBLE_EXE}" == *"carved.elf" ]]; then
-      rm "${POSSIBLE_EXE}"
+      rm -- "${POSSIBLE_EXE}"
       continue
     fi
     echo "[*] Processing executable $(basename "${POSSIBLE_EXE}") - chmod privileges"
@@ -95,7 +95,7 @@ if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
       DIR_LNK_TARGET=$(dirname "${LNK_TARGET}")
       if ! [[ -d "${DIR_LNK_TARGET}" ]]; then
         echo "[*] Creating ${DIR_LNK_TARGET#\.}"
-        chroot . "${BUSYBOX}" mkdir -p "${DIR_LNK_TARGET#\.}"
+        chroot . "${BUSYBOX}" mkdir -p -- "${DIR_LNK_TARGET#\.}"
       fi
     else
       LNK_TARGET="${DIR_ORIG_FILE}"/"${TMP_LNK_ORIG}"
@@ -117,10 +117,10 @@ if [[ $(find "." -type l | wc -l) -lt "${SYMLINK_THRESHOLD}" ]]; then
     POSSIBLE_SYMLNK_NAME=${POSSIBLE_DEAD_SYMLNK/\./}
 
     echo -e "[*] Symlink file ${POSSIBLE_SYMLNK_NAME} - ${LNK_TARGET}"
-    chroot . "${BUSYBOX}" rm "${POSSIBLE_DEAD_SYMLNK}"
-    chroot . "${BUSYBOX}" ln -s "${LNK_TARGET}" "${POSSIBLE_SYMLNK_NAME}"
+    chroot . "${BUSYBOX}" rm -- "${POSSIBLE_DEAD_SYMLNK}"
+    chroot . "${BUSYBOX}" ln -s -- "${LNK_TARGET}" "${POSSIBLE_SYMLNK_NAME}"
   done
 fi
 
 cd "${HOME_DIR}" || exit 1
-rm "${ROOT_DIR}"/busybox
+rm -- "${ROOT_DIR}"/busybox

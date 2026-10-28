@@ -23,7 +23,7 @@ F50_base_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "${RESTART}" -eq 1 ]] && [[ -f "${LOG_FILE}" ]]; then
-    rm "${LOG_FILE}"
+    rm -- "${LOG_FILE}"
   fi
 
   get_data
@@ -1079,7 +1079,7 @@ os_detector() {
           SYSTEM+=" / v${lSYSTEM_VERSION}"
           VERIFIED=1
         done
-        if [[ ${VERIFIED} -eq 1 ]]; then
+        if [[ "${VERIFIED}" -eq 1 ]]; then
           print_os "${SYSTEM}"
         fi
       fi
@@ -1087,7 +1087,7 @@ os_detector() {
   fi
 
   #### The following check is needed if the aggreagator has failed till now
-  if [[ ${VERIFIED} -eq 0 && -f "${S03_LOG}" ]]; then
+  if [[ "${VERIFIED}" -eq 0 && -f "${S03_LOG}" ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
     mapfile -t lOS_DETECTED_ARR < <(grep "verified.*operating\ system\ detected" "${S03_LOG}" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
     if [[ "${#lOS_DETECTED_ARR[@]}" -gt 0 ]]; then
@@ -1110,11 +1110,11 @@ os_detector() {
   fi
 
   #### The following check is just in place if something went wrong
-  if [[ ${VERIFIED} -eq 0 ]]; then
+  if [[ "${VERIFIED}" -eq 0 ]]; then
     # usually the results of the kernel module checker are already used in f17 (first os check)
     # but just in case something went wrong we use it now
     os_kernel_module_detect
-    if [[ ${VERIFIED} -eq 1 ]]; then
+    if [[ "${VERIFIED}" -eq 1 ]]; then
       print_os "${SYSTEM}"
     fi
   fi
@@ -1143,7 +1143,7 @@ print_os() {
   local lSYSTEM="${1:-}"
   lSYSTEM="${lSYSTEM//[![:print:]]/}"
 
-  if [[ ${VERIFIED} -eq 1 ]]; then
+  if [[ "${VERIFIED}" -eq 1 ]]; then
     print_output "[+] Operating system detected (""${ORANGE}""verified${GREEN}): ${ORANGE}${lSYSTEM}${NC}"
     if [[ "${VERIFIED_S03}" -eq 1 ]]; then
       write_link "s03"

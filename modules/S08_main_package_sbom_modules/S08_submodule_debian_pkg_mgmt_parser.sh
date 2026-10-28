@@ -58,7 +58,7 @@ S08_submodule_debian_pkg_mgmt_parser() {
 
       if grep -q "Package: " "${lPACKAGE_FILE}"; then
         if [[ ! -d "${LOG_PATH_MODULE}"/dpkg_tmp_db ]]; then
-          mkdir "${LOG_PATH_MODULE}"/dpkg_tmp_db
+          mkdir -- "${LOG_PATH_MODULE}"/dpkg_tmp_db
         fi
 
         # split lPACKAGE_FILE on empty lines into separate package entry files for further processing

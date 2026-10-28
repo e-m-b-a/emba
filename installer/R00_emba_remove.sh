@@ -48,7 +48,7 @@ R00_emba_remove() {
 
   if [[ -f /etc/redis/redis.conf ]]; then
     echo -e "\\n""${ORANGE}""Removing redis configuration""${NC}"
-    rm /etc/redis/redis.conf
+    rm -- /etc/redis/redis.conf
   fi
   if [[ -f /etc/mongod.conf ]]; then
     echo -e "\\n""${ORANGE}""Removing EMBAs mongod configuration""${NC}"
@@ -56,12 +56,12 @@ R00_emba_remove() {
   fi
   if [[ -f /etc/apt/sources.list.d/mongodb-org-4.4.list ]]; then
     echo -e "\\n""${ORANGE}""Removing mongod sources.list configuration""${NC}"
-    rm /etc/apt/sources.list.d/mongodb-org-4.4.list
+    rm -- /etc/apt/sources.list.d/mongodb-org-4.4.list
   fi
   apt-get update
   systemctl daemon-reload
   echo -e "\\n""${ORANGE}""Removing EMBA docker image""${NC}"
-  docker image rm embeddedanalyzer/emba -f
+  docker image rm -- embeddedanalyzer/emba -f
   if [[ -d ./external ]]; then
     echo -e "\\n""${ORANGE}""Removing external directory""${NC}"
     rm -r ./external

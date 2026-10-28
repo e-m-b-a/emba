@@ -269,7 +269,7 @@ print_file_info() {
     echo -e "${ORANGE}""${1:-}"" has already been downloaded.""${NC}"
   fi
   if [[ -f "./.wget.log" ]]; then
-    rm "./.wget.log" || true
+    rm -- "./.wget.log" || true
   fi
 }
 
@@ -297,7 +297,7 @@ download_file() {
     chmod +x "${3:-}"
   fi
   if [[ -f "./.wget.log" ]]; then
-    rm "./.wget.log" || true
+    rm -- "./.wget.log" || true
   fi
 }
 

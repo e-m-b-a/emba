@@ -24,7 +24,7 @@ kernel_downloader() {
   local LOG_FILE="${LOG_PATH_MODULE}/kernel_downloader.log"
 
   if ! [[ -d "${lKERNEL_ARCH_PATH}" ]]; then
-    mkdir -p "${lKERNEL_ARCH_PATH}"
+    mkdir -p -- "${lKERNEL_ARCH_PATH}"
   fi
 
   # we wait until the s24 module is finished and hopefully shows us a kernel version
@@ -46,7 +46,7 @@ kernel_downloader() {
   fi
 
   if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir -p "${LOG_PATH_MODULE}"
+    mkdir -p -- "${LOG_PATH_MODULE}"
   fi
   # now we should have a csv log with a kernel version:
   if ! [[ -f "${S24_CSV_LOG}" ]]; then
@@ -108,7 +108,7 @@ kernel_downloader() {
       print_output "[*] $(print_date) - Kernel download for version ${ORANGE}${lK_VERSION}${NC}"
 
       if ! [[ -d "${TMP_DIR}" ]]; then
-        mkdir -p "${TMP_DIR}"
+        mkdir -p -- "${TMP_DIR}"
       fi
 
       disable_strict_mode "${STRICT_MODE}" 0
@@ -118,7 +118,7 @@ kernel_downloader() {
 
       if [[ -f "${TMP_DIR}"/wget.log ]]; then
         tee -a "${LOG_FILE}" <"${TMP_DIR}"/wget.log || true
-        rm "${TMP_DIR}"/wget.log
+        rm -- "${TMP_DIR}"/wget.log
       fi
       # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
       # checks for the file "${TMP_DIR}"/linux_download_failed. If this file is available it stops waiting for the kernel
@@ -128,7 +128,7 @@ kernel_downloader() {
 
         echo "failed" >"${TMP_DIR}"/linux_download_failed
         if [[ -f "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz ]]; then
-          rm "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz
+          rm -- "${lKERNEL_ARCH_PATH}"/linux-"${lK_VERSION}".tar.gz
         fi
       fi
     else

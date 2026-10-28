@@ -28,6 +28,11 @@ L25_web_checks() {
     export CURL_CREDS_ARR=()
 
     if [[ -v IP_ADDRESS_ ]]; then
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing web checks"
+        module_end_log "${FUNCNAME[0]}" "${WEB_RESULTS}"
+        return
+      fi
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 0 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing web checks"
@@ -66,6 +71,10 @@ main_web_check() {
       lPORT="${lPORT_SERVICE%%/*}"
       lPORT="${lPORT//[[:blank:]]/}" # field 1
       lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
+      if ! check_for_valid_port "${lPORT}"; then
+        print_output "[-] Invalid port ${ORANGE}${lPORT}${NC} detected - skipping"
+        continue
+      fi
       print_output "[*] Analyzing service ${ORANGE}${lSERVICE} - ${lPORT} - ${lIP_ADDRESS_}${NC}" "no_log"
       if [[ "${lSERVICE}" == "unknown" ]] || [[ "${lSERVICE}" == "tcpwrapped" ]]; then
         continue
@@ -470,7 +479,7 @@ crawl_web_urls() {
     if ! system_online_check "${lIP_}" "${lPORT_}" 0; then
       lONLINE_CHECK_FAILED=$((lONLINE_CHECK_FAILED + 1))
       if [[ "${lONLINE_CHECK_FAILED}" -gt 10 ]]; then
-        rm -f "${TMP_DIR}/emulation_restarting.log"
+        rm -f -- "${TMP_DIR}/emulation_restarting.log"
         rm -r -- "${lWORKER_DIR}"
         return 1
       fi

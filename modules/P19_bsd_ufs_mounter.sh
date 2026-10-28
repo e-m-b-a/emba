@@ -67,8 +67,8 @@ ufs_extractor() {
   fi
   if mount -r -t ufs -o ufstype=ufs2 "${lUFS_PATH_}" "${lTMP_UFS_MOUNT}"; then
     print_output "[*] Copying ${ORANGE}${lTMP_UFS_MOUNT}${NC} to firmware tmp directory (${ORANGE}${lEXTRACTION_DIR_}${NC})"
-    mkdir -p "${lEXTRACTION_DIR_}" 2>/dev/null || true
-    cp -pri "${lTMP_UFS_MOUNT}"/* "${lEXTRACTION_DIR_}" 2>/dev/null || true
+    mkdir -p -- "${lEXTRACTION_DIR_}" 2>/dev/null || true
+    cp -pri -- "${lTMP_UFS_MOUNT}"/* "${lEXTRACTION_DIR_}" 2>/dev/null || true
     print_ln
     print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR_}${NC}) as base directory:"
     find "${lEXTRACTION_DIR_}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
@@ -80,7 +80,7 @@ ufs_extractor() {
     print_output "[*] Extracted ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files from the firmware image."
     print_output "[*] Populating backend data for ${ORANGE}${#lFILES_UFS_ARR[@]}${NC} files ... could take some time" "no_log"
     for lBINARY in "${lFILES_UFS_ARR[@]}"; do
-      binary_architecture_threader "${lBINARY}" "P07_windows_exe_extract" &
+      binary_architecture_threader "${lBINARY}" "P19_bsd_ufs_mounter" &
       local lTMP_PID="$!"
       lWAIT_PIDS_P99_ARR+=("${lTMP_PID}")
     done
@@ -94,5 +94,5 @@ ufs_extractor() {
   else
     print_output "[-] Error in mounting ${ORANGE}${lUFS_PATH_}${NC} to ${ORANGE}${lTMP_UFS_MOUNT}${NC}"
   fi
-  rm -r "${lTMP_UFS_MOUNT}"
+  rm -r -- "${lTMP_UFS_MOUNT}"
 }

@@ -31,9 +31,9 @@ S21_python_check() {
   local lVTYPE=""
   local lWAIT_PIDS_S21_ARR=()
 
-  if [[ ${PYTHON_CHECK} -eq 1 ]]; then
+  if [[ "${PYTHON_CHECK}" -eq 1 ]]; then
     # clearing tmp log file first
-    rm -f "${TMP_DIR}"/S21_VULNS.tmp
+    rm -f -- "${TMP_DIR:?TMP_DIR is unset or empty}/S21_VULNS.tmp"
 
     write_csv_log "Script path" "Python issues detected" "common linux file"
     # mapfile -t lPYTHON_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -print0|xargs -r -0 -P 16 -I % sh -c 'md5sum "%" 2>/dev/null' | sort -u -k1,1 | cut -d\  -f3 )
@@ -101,7 +101,7 @@ s21_script_bandit() {
 
   lVULNS=$(grep -c ">> Issue: " "${lPY_LOG}" 2>/dev/null || true)
   if [[ "${lVULNS}" -ne 0 ]]; then
-    [[ ! -d "${lS21_SOURCE_DIR}" ]] && mkdir -p "${lS21_SOURCE_DIR}"
+    [[ ! -d "${lS21_SOURCE_DIR}" ]] && mkdir -p -- "${lS21_SOURCE_DIR}"
 
     # safe the sources and link it in the lSHELL_LOG
     write_log "" "${lPY_LOG}"

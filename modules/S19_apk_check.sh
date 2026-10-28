@@ -48,7 +48,7 @@ apk_checker() {
   fi
 
   export GOTMPDIR="${TMP_DIR}"/apkhunt
-  mkdir "${GOTMPDIR}"
+  mkdir -- "${GOTMPDIR}"
 
   write_csv_log "APK" "Identified issues" "log path"
 
@@ -66,7 +66,7 @@ apk_checker() {
     fi
   done
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S19_ARR[@]}"
-  [[ -d "${GOTMPDIR}" ]] && rm -rf "${GOTMPDIR}"
+  [[ -d "${GOTMPDIR}" ]] && rm -rf -- "${GOTMPDIR:?GOTMPDIR is unset or empty}"
 }
 
 apk_checker_helper() {
@@ -99,6 +99,6 @@ apk_checker_helper() {
   lAPK_DIR_NAME=$(dirname "${lAPK_FILE}")
   lAPK_STACS_DIR=$(grep "APK Static Analysis Path" "${lAPK_DIR_NAME}/APKHunt_${lAPK_NAME}"*.txt || true)
   lAPK_JAR="${lAPK_DIR_NAME}/${lAPK_NAME}.jar"
-  [[ -d "${lAPK_STACS_DIR}" ]] && rm -rf "${lAPK_STACS_DIR}"
-  [[ -f "${lAPK_JAR}" ]] && rm -rf "${lAPK_JAR}"
+  [[ -d "${lAPK_STACS_DIR}" ]] && rm -rf -- "${lAPK_STACS_DIR:?lAPK_STACS_DIR is unset or empty}"
+  [[ -f "${lAPK_JAR}" ]] && rm -rf -- "${lAPK_JAR:?lAPK_JAR is unset or empty}"
 }

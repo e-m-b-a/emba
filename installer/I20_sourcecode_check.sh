@@ -95,7 +95,7 @@ I20_sourcecode_check() {
       php composer.phar build --no-interaction || true
       php composer.phar global require psecio/iniscan --no-interaction || true
       cd "${HOME_PATH}" || (echo "Could not install EMBA component iniscan" && exit 1)
-      cp -r "${HOME}""/.config/composer/vendor/" "./external/iniscan/"
+      cp -r -- "${HOME}/.config/composer/vendor/" "./external/iniscan/"
 
       # vineflower Java decompiler
       download_file "vineflower-1.11.2.jar" "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2.jar" "external/vineflower-1.11.2.jar"

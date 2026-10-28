@@ -38,11 +38,11 @@ S110_yara_check() {
   local lMEM_LIMIT=$(("${TOTAL_MEMORY}" * 80 / 100))
   local lYARA_OUT_LINE=""
 
-  if [[ ${YARA} -eq 1 ]]; then
+  if [[ "${YARA}" -eq 1 ]]; then
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
     if [[ ! -f "${lDIR_COMB_YARA}" ]]; then
-      find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n' | sort -n >"${lDIR_COMB_YARA}"
+      find "${EXT_DIR}""/yara" -xdev -iname '*.yar' -exec realpath {} + | xargs printf 'include "%s"\n' | sort -n >"${lDIR_COMB_YARA}"
     fi
 
     write_csv_log "yara rule" "matched file"
@@ -78,7 +78,7 @@ S110_yara_check() {
     write_log "[*] Statistics:${lCOUNTING}"
 
     [[ "${lCOUNTING}" -eq 0 ]] && print_output "[-] No code patterns found with yara."
-    [[ -f "${lDIR_COMB_YARA}" ]] && rm "${lDIR_COMB_YARA}"
+    [[ -f "${lDIR_COMB_YARA}" ]] && rm -- "${lDIR_COMB_YARA}"
   else
     print_output "[!] YARA checks disabled - enable it in your scanning profile with ${ORANGE}export YARA=1${NC}."
   fi

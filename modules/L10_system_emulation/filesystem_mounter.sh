@@ -43,7 +43,7 @@ delete_device_entry() {
     losetup -d "$(losetup | grep "$(basename "${lIMAGE_NAME}")" | awk '{print $1}' || true)"
   fi
   dmsetup remove "$(basename "${lDEVICE}")" &>/dev/null || true
-  rm -rf "${lMNT_POINT:?}/"* || true
+  rm -rf -- "${lMNT_POINT:?}/"* || true
   sleep 1
 }
 
@@ -138,7 +138,7 @@ image_mounter() {
   lIMAGE_PATH="${lIMAGE_PATH%\/*}"
   lIMAGE_NAME="${lIMAGE/*\//}"
   lMNT_POINT="${lIMAGE_PATH}"/mounter
-  [[ ! -d "${lMNT_POINT}" ]] && mkdir "${lMNT_POINT}"
+  [[ ! -d "${lMNT_POINT}" ]] && mkdir -- "${lMNT_POINT}"
 
   echo -e "[*] Identify Qemu Image device for ${ORANGE}${lIMAGE_PATH}/${lIMAGE_NAME}${NC}"
   lDEVICE="$(add_partition_emulation "${lIMAGE_PATH}/${lIMAGE_NAME}")"
@@ -174,7 +174,7 @@ image_unmounter() {
   fi
 
   umount_qemu_image "${lMNT_POINT}"
-  rm -r "${lMNT_POINT}"
+  rm -r -- "${lMNT_POINT}"
 
   mapfile -t lDEVICE_ARR < <(losetup | grep "${lIMAGE_NAME}" | awk '{print $1}')
   for lDEVICE in "${lDEVICE_ARR[@]}"; do
@@ -198,7 +198,7 @@ if [[ "${IMAGE_DETAILS}" != *"DOS/MBR boot sector; partition"* ]]; then
   exit 1
 fi
 
-if ! [[ ${EUID} -eq 0 ]]; then
+if ! [[ "${EUID}" -eq 0 ]]; then
   echo -e "[-] Setting up the firmware mounter requires root privileges"
   exit 1
 fi

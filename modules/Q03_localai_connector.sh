@@ -129,10 +129,10 @@ ask_localai() {
 
   print_output "[*] Checking scripts with LocalAI that have a priority of ${ORANGE}${MINIMUM_GPT_PRIO}${NC} or higher" "no_log"
   if ! [[ -d "${lAI_FILE_DIR}" ]]; then
-    mkdir "${lAI_FILE_DIR}"
+    mkdir -- "${lAI_FILE_DIR}"
   fi
   if ! [[ -d "${AI_PROMPT_DIR}" ]]; then
-    mkdir "${AI_PROMPT_DIR}"
+    mkdir -- "${AI_PROMPT_DIR}"
   fi
 
   # generating Array for AI requests - sorting according the prio in field 3

@@ -74,7 +74,7 @@ S08_submodule_alpine_apk_package_parser() {
       lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if ! [[ -d "${TMP_DIR}"/apk ]]; then
-        mkdir "${TMP_DIR}"/apk || true
+        mkdir -- "${TMP_DIR}"/apk || true
       fi
       tar -xzf "${lAPK_ARCHIVE}" -C "${TMP_DIR}"/apk 2>/dev/null || print_error "[-] Extraction of APK package file ${lAPK_ARCHIVE} failed"
 
@@ -148,7 +148,7 @@ S08_submodule_alpine_apk_package_parser() {
       write_log "[*] Alpine apk archive details: ${ORANGE}${lAPK_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lAPK_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
-      rm -rf "${TMP_DIR}"/apk || true
+      rm -rf -- "${TMP_DIR:?TMP_DIR is unset or empty}/apk" || true
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then

@@ -97,8 +97,8 @@ I01_default_apps() {
       if [[ -f "external/tmp-extract/usr/bin/qemu-nios2-static" ]]; then
         echo "[*] Installing nios2 qemu binary ..."
         cp "external/tmp-extract/usr/bin/qemu-nios2-static" "/usr/bin/qemu-nios2-static" || (echo "[-] Installation of qemu-nios2-static failed" && exit 1)
-        rm -rf "external/tmp-extract/"
-        rm -rf "external/qemu-user-static_7.2.deb"
+        rm -rf -- "external/tmp-extract/"
+        rm -rf -- "external/qemu-user-static_7.2.deb"
         echo "[+] Installation of qemu-nios2-static finished"
       else
         echo "[-] Installation of qemu-nios2-static failed"
@@ -121,8 +121,8 @@ I01_default_apps() {
       sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       # Install Rust (used from cwe_checker and binwalk)
-      rm -rf "${HOME}"/.cargo
-      rm -rf "${HOME}"/.config
+      rm -rf -- "${HOME:?HOME is unset or empty}"/.cargo
+      rm -rf -- "${HOME:?HOME is unset or empty}"/.config
       rm -rf external/rustup
 
       curl https://sh.rustup.rs -sSf | sh -s -- -y

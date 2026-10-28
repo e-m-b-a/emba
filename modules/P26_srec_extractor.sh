@@ -73,7 +73,7 @@ srec_firmware_extractor() {
 
   print_output "[*] Converting S-Record file to binary format"
   # convert
-  rm -f "${lEXTRACTION_FILE_}"
+  rm -f -- "${lEXTRACTION_FILE_}"
   if srec_cat "${lSREC_FILE_PATH_}" -Motorola -fill 0xFF -within "${lSREC_FILE_PATH_}" -Motorola -Output "${lEXTRACTION_FILE_}" -Binary && [[ -s "${lEXTRACTION_FILE_}" ]]; then
     print_output "[+] Extracted S-Record firmware file to ${ORANGE}${lEXTRACTION_FILE_}${NC}"
 

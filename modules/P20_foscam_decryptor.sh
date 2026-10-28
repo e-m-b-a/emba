@@ -117,7 +117,7 @@ foscam_ubi_extractor() {
   fi
 
   print_output "[*] Extracting decrypted firmware to ${ORANGE}${lEXTRACTION_DIR_GZ}${NC}"
-  mkdir -p "${lEXTRACTION_DIR_GZ}" || true
+  mkdir -p -- "${lEXTRACTION_DIR_GZ}" || true
   tar -xzf "${lFIRMWARE_PATH_}" -C "${lEXTRACTION_DIR_GZ}" || true
 
   # check if we have the kernel modules available - special interest in docker
@@ -155,15 +155,15 @@ foscam_ubi_extractor() {
     for lUBI_DEV in "${lUBI_DEVS_ARR[@]}"; do
       local lUBI_MNT_PT="${lUBI_MNT_PT}-${RANDOM}"
       print_output "[*] Mounting ${ORANGE}${lUBI_DEV}${NC} ubi device to ${ORANGE}${lUBI_MNT_PT}${NC}"
-      mkdir -p "${lUBI_MNT_PT}" || true
+      mkdir -p -- "${lUBI_MNT_PT}" || true
       mount -t ubifs "${lUBI_DEV}" "${lUBI_MNT_PT}"
       print_output "[*] Copy mounted ubi device to ${ORANGE}${lEXTRACTION_DIR_%\/}/${lUBI_DEV}${NC}"
-      mkdir -p "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
-      cp -pri "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      mkdir -p -- "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
+      cp -pri -- "${lUBI_MNT_PT}" "${lEXTRACTION_DIR_%\/}/${lUBI_DEV}"
       # after this we should have a ubi image in our extraction directory. This should be extractable via unblob
       print_output "[*] Umount ubi device from ${ORANGE}${lUBI_MNT_PT}/${lUBI_DEV}${NC}"
       umount "${lUBI_MNT_PT}" || true
-      rm -r "${lUBI_MNT_PT}" || true
+      rm -r -- "${lUBI_MNT_PT}" || true
     done
 
     # do some cleanup

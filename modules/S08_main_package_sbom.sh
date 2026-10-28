@@ -43,7 +43,7 @@ S08_main_package_sbom() {
 
   local lS08_MODULE=""
 
-  if [[ ${THREADED} -eq 1 ]]; then
+  if [[ "${THREADED}" -eq 1 ]]; then
     for lS08_MODULE in "${S08_MODULES_ARR[@]}"; do
       print_output "[*] SBOM - starting ${lS08_MODULE}" "no_log"
       "${lS08_MODULE}" "${lOS_IDENTIFIED}" &
@@ -133,7 +133,7 @@ create_comp_dep_tree_threader() {
   fi
 
   if [[ ! -d "${SBOM_LOG_PATH%\/}/SBOM_deps" ]]; then
-    mkdir "${SBOM_LOG_PATH%\/}/SBOM_deps" 2>/dev/null || true
+    mkdir -- "${SBOM_LOG_PATH%\/}/SBOM_deps" 2>/dev/null || true
   fi
 
   # now we check every dependency for the current component
@@ -167,7 +167,7 @@ create_comp_dep_tree_threader() {
   write_log "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
 
   cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >>"${SBOM_LOG_PATH}/SBOM_dependencies.txt"
-  rm "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
+  rm -- "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
 
   jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" >>"${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
 }

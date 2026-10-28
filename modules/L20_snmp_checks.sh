@@ -26,11 +26,16 @@ L20_snmp_checks() {
     module_title "Live SNMP tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ ${IN_DOCKER} -eq 0 ]]; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing SNMP checks"
+        module_end_log "${FUNCNAME[0]}" "${SNMP_UP}"
+        return
+      fi
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing SNMP checks"
@@ -127,7 +132,7 @@ check_snmp_vulns() {
       tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${lIP_ADDRESS}"-"${lOID}".txt
       print_ln
     else
-      rm "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${lIP_ADDRESS}"-"${lOID}".txt || true
+      rm -- "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${lIP_ADDRESS}"-"${lOID}".txt || true
     fi
   done
 

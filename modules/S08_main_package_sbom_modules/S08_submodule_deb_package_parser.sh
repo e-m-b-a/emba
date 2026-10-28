@@ -40,6 +40,7 @@ S08_submodule_deb_package_parser() {
   local lPKG_CHECKED_ARR=()
   local lPKG_MD5=""
   local lPOS_RES=0
+  local lWAIT_PIDS_S08_ARR_LCK=()
 
   # mapfile -t lDEB_ARCHIVES_ARR < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f -name "*.deb")
   mapfile -t lDEB_ARCHIVES_ARR < <(grep "\.deb;" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
@@ -123,7 +124,7 @@ deb_package_parser_threader() {
 
   local lDEB_LOG_PATH="${TMP_DIR}/deb_package_${lPKG_MD5}"
   if ! [[ -d "${lDEB_LOG_PATH}" ]]; then
-    mkdir "${lDEB_LOG_PATH}" || true
+    mkdir -- "${lDEB_LOG_PATH}" || true
   fi
   ar x "${lDEB_ARCHIVE}" --output "${lDEB_LOG_PATH}" || print_error "[-] Extraction error for debian archive ${lDEB_ARCHIVE}"
 
@@ -231,5 +232,5 @@ deb_package_parser_threader() {
   write_log "[*] Debian deb package details: ${ORANGE}${lDEB_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
   write_csv_log "${lPACKAGING_SYSTEM}" "${lDEB_ARCHIVE}" "${lMD5_CHECKSUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
   lPOS_RES=1
-  rm -r "${lDEB_LOG_PATH}" || true
+  rm -r -- "${lDEB_LOG_PATH}" || true
 }

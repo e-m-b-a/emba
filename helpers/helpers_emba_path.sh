@@ -178,7 +178,7 @@ cut_path() {
   local lC_PATH=""
   lC_PATH="$(abs_path "${1:-}")"
 
-  if [[ ${SHORT_PATH} -eq 1 ]]; then
+  if [[ "${SHORT_PATH}" -eq 1 ]]; then
     local lSHORT=""
     local lFIRST=""
     local lPREFIX_PRE_CHECK=""
@@ -337,19 +337,19 @@ mod_path_array() {
 
 create_log_dir() {
   if ! [[ -d "${LOG_DIR}" ]]; then
-    mkdir "${LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
+    mkdir -- "${LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
   fi
   if ! [[ -d "${TMP_DIR}" ]]; then
-    mkdir "${TMP_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create TMP log directory" "no_log" && exit 1)
+    mkdir -- "${TMP_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create TMP log directory" "no_log" && exit 1)
   fi
   if ! [[ -d "${CSV_DIR}" ]]; then
-    mkdir "${CSV_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create CSV log directory" "no_log" && exit 1)
+    mkdir -- "${CSV_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create CSV log directory" "no_log" && exit 1)
   fi
   if ! [[ -d "${JSON_DIR}" ]]; then
-    mkdir "${JSON_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create JSON log directory" "no_log" && exit 1)
+    mkdir -- "${JSON_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create JSON log directory" "no_log" && exit 1)
   fi
   if ! [[ -d "${BASIC_DATA_LOG_DIR}" ]]; then
-    mkdir "${BASIC_DATA_LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create basic log directory" "no_log" && exit 1)
+    mkdir -- "${BASIC_DATA_LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create basic log directory" "no_log" && exit 1)
   fi
 
   if ! [[ -f "${MAIN_LOG}" ]]; then
@@ -358,13 +358,13 @@ create_log_dir() {
 
   export HTML_PATH="${LOG_DIR}""/html-report"
   if ! [[ -d "${HTML_PATH}" ]] && [[ "${HTML}" -eq 1 ]]; then
-    mkdir "${HTML_PATH}" 2>/dev/null || true
+    mkdir -- "${HTML_PATH}" 2>/dev/null || true
   fi
 
   export FIRMWARE_PATH_CP="${LOG_DIR}""/firmware"
-  mkdir -p "${FIRMWARE_PATH_CP}" 2>/dev/null || true
+  mkdir -p -- "${FIRMWARE_PATH_CP}" 2>/dev/null || true
   export SUPPL_PATH="${LOG_DIR}""/etc"
-  mkdir -p "${SUPPL_PATH}" 2>/dev/null || true
+  mkdir -p -- "${SUPPL_PATH}" 2>/dev/null || true
 }
 
 config_list() {
@@ -408,7 +408,9 @@ config_find() {
         fi
       done
 
-      eval "lFIND_RESULTS_ARR=($(for i in "${lFIND_RESULTS_ARR[@]}"; do echo "\"${i}\""; done | sort -u))"
+      if [[ "${#lFIND_RESULTS_ARR[@]}" -gt 0 ]]; then
+        mapfile -t lFIND_RESULTS_ARR < <(printf "%s\n" "${lFIND_RESULTS_ARR[@]}" | sort -u)
+      fi
       # Todo: we should remove this and use the lFIND_RESULTS_ARR array in the modules
       for lFOUND_ENTRY in "${lFIND_RESULTS_ARR[@]}"; do
         echo -e "${lFOUND_ENTRY}"

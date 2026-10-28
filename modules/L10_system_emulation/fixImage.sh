@@ -28,55 +28,55 @@ if ("${EMBA_BOOT}"); then
   fi
   "${BUSYBOX}" ln -s /firmadyne/busybox /firmadyne/sh
 
-  mkdir -p "$(resolve_link /proc)"
-  mkdir -p "$(resolve_link /dev/pts)"
-  mkdir -p "$(resolve_link /etc_ro)"
-  mkdir -p "$(resolve_link /tmp)"
-  mkdir -p "$(resolve_link /var)"
-  mkdir -p "$(resolve_link /run)"
-  mkdir -p "$(resolve_link /sys)"
-  mkdir -p "$(resolve_link /root)"
-  mkdir -p "$(resolve_link /tmp/var)"
-  mkdir -p "$(resolve_link /tmp/media)"
-  mkdir -p "$(resolve_link /tmp/etc)"
-  mkdir -p "$(resolve_link /tmp/var/run)"
-  mkdir -p "$(resolve_link /tmp/home/root)"
-  mkdir -p "$(resolve_link /tmp/mnt)"
-  mkdir -p "$(resolve_link /tmp/opt)"
-  mkdir -p "$(resolve_link /tmp/www)"
-  mkdir -p "$(resolve_link /var/run)"
-  mkdir -p "$(resolve_link /var/lock)"
-  mkdir -p "$(resolve_link /usr/bin)"
-  mkdir -p "$(resolve_link /usr/sbin)"
-  mkdir -p "$(resolve_link /var/tmp)"
-  mkdir -p "$(resolve_link /var/sys)"
-  mkdir -p "$(resolve_link /var/media)"
-  mkdir -p "$(resolve_link /var/wps)"
-  mkdir -p "$(resolve_link /var/ppp)"
+  mkdir -p -- "$(resolve_link /proc)"
+  mkdir -p -- "$(resolve_link /dev/pts)"
+  mkdir -p -- "$(resolve_link /etc_ro)"
+  mkdir -p -- "$(resolve_link /tmp)"
+  mkdir -p -- "$(resolve_link /var)"
+  mkdir -p -- "$(resolve_link /run)"
+  mkdir -p -- "$(resolve_link /sys)"
+  mkdir -p -- "$(resolve_link /root)"
+  mkdir -p -- "$(resolve_link /tmp/var)"
+  mkdir -p -- "$(resolve_link /tmp/media)"
+  mkdir -p -- "$(resolve_link /tmp/etc)"
+  mkdir -p -- "$(resolve_link /tmp/var/run)"
+  mkdir -p -- "$(resolve_link /tmp/home/root)"
+  mkdir -p -- "$(resolve_link /tmp/mnt)"
+  mkdir -p -- "$(resolve_link /tmp/opt)"
+  mkdir -p -- "$(resolve_link /tmp/www)"
+  mkdir -p -- "$(resolve_link /var/run)"
+  mkdir -p -- "$(resolve_link /var/lock)"
+  mkdir -p -- "$(resolve_link /usr/bin)"
+  mkdir -p -- "$(resolve_link /usr/sbin)"
+  mkdir -p -- "$(resolve_link /var/tmp)"
+  mkdir -p -- "$(resolve_link /var/sys)"
+  mkdir -p -- "$(resolve_link /var/media)"
+  mkdir -p -- "$(resolve_link /var/wps)"
+  mkdir -p -- "$(resolve_link /var/ppp)"
 
   for FILE in $("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -perm -u+x -exec "${BUSYBOX}" strings {} \; | "${BUSYBOX}" egrep "^(/var|/etc|/tmp)(.+)\/([^\/]+)$"); do
     DIR=$("${BUSYBOX}" dirname "${FILE}")
     if (! "${BUSYBOX}" echo "${DIR}" | "${BUSYBOX}" egrep -q "(%s|%c|%d|/tmp/services)"); then
       "${BUSYBOX}" echo "${DIR}" >>/firmadyne/dir_log
-      mkdir -p "$(resolve_link "${DIR}")"
+      mkdir -p -- "$(resolve_link "${DIR}")"
     fi
   done
 fi
 
 # make /etc and add some essential files
-mkdir -p "$(resolve_link /etc)"
+mkdir -p -- "$(resolve_link /etc)"
 if [ ! -s /etc/TZ ]; then
-  mkdir -p "$(dirname "$(resolve_link /etc/TZ)")"
+  mkdir -p -- "$(dirname "$(resolve_link /etc/TZ)")"
   echo "EST5EDT" >"$(resolve_link /etc/TZ)"
 fi
 
 if [ ! -s /etc/hosts ]; then
-  mkdir -p "$(dirname "$(resolve_link /etc/hosts)")"
+  mkdir -p -- "$(dirname "$(resolve_link /etc/hosts)")"
   echo "127.0.0.1 localhost" >"$(resolve_link /etc/hosts)"
 fi
 
 if [ ! -s /etc/passwd ]; then
-  mkdir -p "$(dirname "$(resolve_link /etc/passwd)")"
+  mkdir -p -- "$(dirname "$(resolve_link /etc/passwd)")"
   # nosemgrep
   echo "root::0:0:root:/root:/bin/sh" >"$(resolve_link /etc/passwd)"
 fi
@@ -84,7 +84,7 @@ fi
 # for busybox older v1.3.0 we need an rcS entry
 # we also use this rcS as fallback solution
 # for this we check different state files and execute the needed scripts
-mkdir -p "$(resolve_link /etc/init.d)"
+mkdir -p -- "$(resolve_link /etc/init.d)"
 
 # disabled for now
 if [ -s /etc/init.d/rcSX ]; then
@@ -108,7 +108,7 @@ if [ -s /etc/init.d/rcSX ]; then
 fi
 
 # make /dev and add default device nodes if these are not available
-mkdir -p "$(resolve_link /dev)"
+mkdir -p -- "$(resolve_link /dev)"
 echo "[*] Recreating device nodes!"
 
 "${BUSYBOX}" mknod -m 660 /dev/mem c 1 1
@@ -221,7 +221,7 @@ if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
   echo "Creating /dev/gpio/in!"
   if ("${EMBA_BOOT}"); then
-    rm /dev/gpio 2>/dev/null
+    rm -- /dev/gpio 2>/dev/null
   fi
   mkdir -p /dev/gpio
   echo -ne "\xff\xff\xff\xff" >/dev/gpio/in

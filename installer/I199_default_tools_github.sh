@@ -69,7 +69,7 @@ I199_default_tools_github() {
       cd ./external/jchroot/ || (echo "Could not install EMBA component jchroot" && exit 1)
       make
       if [[ -e ./jchroot ]] && [[ -e "/usr/sbin/jchroot" ]]; then
-        rm /usr/sbin/jchroot
+        rm -- /usr/sbin/jchroot
       fi
       if [[ -e ./jchroot ]]; then
         cp -r jchroot /usr/sbin/

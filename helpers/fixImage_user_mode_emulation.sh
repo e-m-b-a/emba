@@ -68,21 +68,21 @@ remove_file() {
   REMOVE="${1}"
   if [ -f "${REMOVE}" ]; then
     echo "[*] Removing ${REMOVE}"
-    "${BUSYBOX}" rm -f "${REMOVE}"
+    "${BUSYBOX}" rm -f -- "${REMOVE}"
   fi
 }
 
 # make /etc and add some essential files
-"${BUSYBOX}" mkdir -p "$(resolve_link /etc)"
+"${BUSYBOX}" mkdir -p -- "$(resolve_link /etc)"
 if [ ! -s /etc/TZ ]; then
   echo "[*] Creating /etc/TZ file"
-  "${BUSYBOX}" mkdir -p "$(dirname "$(resolve_link /etc/TZ)")"
+  "${BUSYBOX}" mkdir -p -- "$(dirname "$(resolve_link /etc/TZ)")"
   echo "EST5EDT" >"$(resolve_link /etc/TZ)"
 fi
 
 if [ ! -s /etc/hosts ]; then
   echo "[*] Creating /etc/hosts file"
-  "${BUSYBOX}" mkdir -p "$(dirname "$(resolve_link /etc/hosts)")"
+  "${BUSYBOX}" mkdir -p -- "$(dirname "$(resolve_link /etc/hosts)")"
   echo "127.0.0.1 localhost" >"$(resolve_link /etc/hosts)"
 fi
 "${BUSYBOX}" mkdir -p /var/run
@@ -91,7 +91,7 @@ PASSWD=$(resolve_link /etc/passwd)
 SHADOW=$(resolve_link /etc/shadow)
 if [ ! -s "${PASSWD}" ]; then
   echo "[*] Creating ${PASSWD} file"
-  "${BUSYBOX}" mkdir -p "$(dirname "${PASSWD}")"
+  "${BUSYBOX}" mkdir -p -- "$(dirname "${PASSWD}")"
   # nosemgrep
   echo "root::0:0:root:/root:/bin/sh" >"${PASSWD}"
 else

@@ -77,7 +77,7 @@ S99_grepit() {
 
   write_csv_log "Grepit test" "Number of results" "Used args for grep" "Regex used" "Grepit comment"
 
-  if [[ ${THREADED} -eq 1 ]]; then
+  if [[ "${THREADED}" -eq 1 ]]; then
     for GREPIT_MODULE in "${lGREPIT_MODULES_ARR[@]}"; do
       "${GREPIT_MODULE}" &
       local lTMP_PID="$!"
@@ -91,7 +91,7 @@ S99_grepit() {
     done
   fi
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S99_ARR[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S99_ARR[@]}"
 
   grepit_reporter
 
@@ -164,11 +164,11 @@ grepit_search() {
 
     if [[ "${lLOG_DETAILS}" -eq 1 ]]; then
       if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null) -gt 7 ]]; then
-        rm "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
+        rm -- "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
       fi
     else
       if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null) -gt 0 ]]; then
-        rm "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
+        rm -- "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
       fi
     fi
     if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]]; then

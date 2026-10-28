@@ -68,8 +68,8 @@ ext_extractor() {
     fi
 
     print_output "[*] Copying ${ORANGE}${lTMP_EXT_MOUNT}${NC} to firmware tmp directory (${lEXTRACTION_DIR_})"
-    mkdir -p "${lEXTRACTION_DIR_}"
-    cp -pri "${lTMP_EXT_MOUNT}"/* "${lEXTRACTION_DIR_}"
+    mkdir -p -- "${lEXTRACTION_DIR_}"
+    cp -pri -- "${lTMP_EXT_MOUNT}"/* "${lEXTRACTION_DIR_}"
     print_ln
     print_output "[*] Using the following firmware directory (${ORANGE}${lEXTRACTION_DIR_}${NC}) as base directory:"
     find "${lEXTRACTION_DIR_}" -xdev -maxdepth 1 -ls | tee -a "${LOG_FILE}"
@@ -92,5 +92,5 @@ ext_extractor() {
     write_csv_log "EXT filesystem extractor" "${lEXT_PATH_}" "${lEXTRACTION_DIR_}" "${#lFILES_EXT_ARR[@]}" "NA"
   fi
   umount "${lTMP_EXT_MOUNT}" || true
-  [[ -d "${lTMP_EXT_MOUNT}" ]] && rm -rf "${lTMP_EXT_MOUNT}"
+  [[ -d "${lTMP_EXT_MOUNT}" ]] && rm -rf -- "${lTMP_EXT_MOUNT:?lTMP_EXT_MOUNT is unset or empty}"
 }

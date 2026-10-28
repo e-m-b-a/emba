@@ -23,6 +23,8 @@ S65_config_file_check() {
 
   local lNEG_LOG=0
   export CONF_FILES_ARR=()
+  export FSTAB_USER_FILES=()
+  export FSTAB_PASS_FILES=()
 
   write_csv_log "type" "file"
 

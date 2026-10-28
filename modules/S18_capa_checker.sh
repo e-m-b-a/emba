@@ -26,7 +26,7 @@ S18_capa_checker() {
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
-  if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
+  if [[ "${BINARY_EXTENDED}" -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -79,7 +79,7 @@ S18_capa_checker() {
       lCAPA_RESULTS=$(grep -c "Capa results for " "${LOG_FILE}" || echo 0)
     fi
     print_output "[*] Found ${ORANGE}${lCAPA_RESULTS}${NC} capa results in ${ORANGE}${lBINS_AVAILABLE:-0}${NC} binaries"
-    rm "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
+    rm -- "${TMP_DIR}"/s18_checked.tmp 2>/dev/null
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lCAPA_RESULTS}"
@@ -112,7 +112,7 @@ capa_runner_fct() {
   if [[ ! -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || [[ ! -s "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]] || (grep -q "no capabilities found" "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log"); then
     print_output "[*] No capa results for $(print_path "${lBINARY}")" "no_log"
     if [[ -f "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" ]]; then
-      rm "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
+      rm -- "${LOG_PATH_MODULE}/capa_${lBIN_NAME}.log" || true
     fi
     return
   fi

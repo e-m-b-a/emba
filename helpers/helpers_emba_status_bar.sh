@@ -339,9 +339,9 @@ update_box_status_2() {
   local lMODE_STR=""
   local lLINES=""
 
-  if [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]]; then
+  if [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]]; then
     lMODE_STR+="DEV/"
-  elif [[ ${STRICT_MODE} -eq 1 ]]; then
+  elif [[ "${STRICT_MODE}" -eq 1 ]]; then
     lMODE_STR+="STRICT"
   else
     lMODE_STR+="DEFAULT"
@@ -452,7 +452,7 @@ box_updaters() {
   elif [[ -n "${PID_SYSTEM_LOAD}" && ${STATUS_BAR_BOX_COUNT} -le 0 ]]; then
     kill_box_pid "${PID_SYSTEM_LOAD}" &
     export PID_SYSTEM_LOAD=""
-    rm "${TMP_DIR}"/PID_SYSTEM_LOAD.log || true
+    rm -- "${TMP_DIR}"/PID_SYSTEM_LOAD.log || true
   fi
   if [[ -z "${PID_STATUS}" && ${STATUS_BAR_BOX_COUNT} -gt 1 ]]; then
     update_box_status &
@@ -461,7 +461,7 @@ box_updaters() {
   elif [[ -n "${PID_STATUS}" && ${STATUS_BAR_BOX_COUNT} -le 1 ]]; then
     kill_box_pid "${PID_STATUS}" &
     export PID_STATUS=""
-    rm "${TMP_DIR}"/PID_STATUS.log || true
+    rm -- "${TMP_DIR}"/PID_STATUS.log || true
   fi
   if [[ -z "${PID_MODULES}" && ${STATUS_BAR_BOX_COUNT} -gt 2 ]]; then
     update_box_modules &
@@ -470,7 +470,7 @@ box_updaters() {
   elif [[ -n "${PID_MODULES}" && ${STATUS_BAR_BOX_COUNT} -le 2 ]]; then
     kill_box_pid "${PID_MODULES}" &
     export PID_MODULES=""
-    rm "${TMP_DIR}"/PID_MODULES.log || true
+    rm -- "${TMP_DIR}"/PID_MODULES.log || true
   fi
   if [[ -z "${PID_STATUS_2}" && ${STATUS_BAR_BOX_COUNT} -gt 3 ]]; then
     update_box_status_2 &
@@ -479,7 +479,7 @@ box_updaters() {
   elif [[ -n "${PID_STATUS_2}" && ${STATUS_BAR_BOX_COUNT} -le 3 ]]; then
     kill_box_pid "${PID_STATUS_2}" &
     export PID_STATUS_2=""
-    rm "${TMP_DIR}"/PID_STATUS_2.log || true
+    rm -- "${TMP_DIR}"/PID_STATUS_2.log || true
   fi
 }
 
@@ -547,31 +547,31 @@ initial_status_bar() {
   # calculate boxes fitting and draw them
   local lINITIAL_STR=""
   lINITIAL_STR="\e[${lLINE_POS};1f\e[0J\e[0;${lLINE_POS}r\e[${lLINE_POS};1f"
-  if [[ ${LINES} -gt 10 ]]; then
+  if [[ "${LINES}" -gt 10 ]]; then
     # column has to be increased with 2 characters because of possible arrow column
     local lARROW_POS=0
     export STATUS_BAR_BOX_COUNT=0
-    if [[ ${COLUMNS} -ge 27 ]]; then
+    if [[ "${COLUMNS}" -ge 27 ]]; then
       lINITIAL_STR+="$(draw_box 26 "SYSTEM LOAD" 0)"
       STATUS_BAR_BOX_COUNT=1
       lARROW_POS=27
     fi
-    if [[ ${COLUMNS} -ge 54 ]]; then
+    if [[ "${COLUMNS}" -ge 54 ]]; then
       lINITIAL_STR+="$(draw_box 26 "STATUS" 27)"
       STATUS_BAR_BOX_COUNT=2
       lARROW_POS=53
     fi
-    if [[ ${COLUMNS} -ge 80 ]]; then
+    if [[ "${COLUMNS}" -ge 80 ]]; then
       lINITIAL_STR+="$(draw_box 26 "MODULES" 53)"
       STATUS_BAR_BOX_COUNT=3
       lARROW_POS=79
     fi
-    if [[ ${COLUMNS} -ge 104 ]]; then
+    if [[ "${COLUMNS}" -ge 104 ]]; then
       lINITIAL_STR+="$(draw_box 26 "STATUS 2" 79)"
       STATUS_BAR_BOX_COUNT=4
     fi
 
-    if [[ ${STATUS_BAR_BOX_COUNT} -lt 4 ]]; then
+    if [[ "${STATUS_BAR_BOX_COUNT}" -lt 4 ]]; then
       lINITIAL_STR+="$(draw_arrows "${lARROW_POS}")"
     fi
   fi

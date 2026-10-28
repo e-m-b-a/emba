@@ -120,7 +120,7 @@ s28_java_semgrep() {
   print_output "[*] Analysing ${ORANGE}${lJAVA_BIN_DIR}${NC} with semgrep" "no_log"
 
   local lJ_ANALYSE_DIR="${LOG_PATH_MODULE}/java_semgrep/"
-  [[ ! -d "${lJ_ANALYSE_DIR}" ]] && mkdir -p "${lJ_ANALYSE_DIR}"
+  [[ ! -d "${lJ_ANALYSE_DIR}" ]] && mkdir -p -- "${lJ_ANALYSE_DIR}"
   lJNAME="$(basename "${lJAVA_BIN_DIR}" 2>/dev/null)"
   local lJ_ANALYSE_RESULTS="${lJ_ANALYSE_DIR}/semgrep_${lJNAME}.json"
 
@@ -135,7 +135,7 @@ s28_java_decompile() {
   lJNAME=$(iconv -f UTF-8 -t ASCII//TRANSLIT <<<"${lJNAME}" || true)
   local lJ_DECOMPILE_DIR="${LOG_PATH_MODULE}/java_decompile/${lJNAME}_${RANDOM}"
   print_output "[*] Decompiling Java binary ${ORANGE}${lJNAME}${NC} to ${lJ_DECOMPILE_DIR}" "no_log"
-  [[ ! -d "${lJ_DECOMPILE_DIR}" ]] && mkdir -p "${lJ_DECOMPILE_DIR}"
+  [[ ! -d "${lJ_DECOMPILE_DIR}" ]] && mkdir -p -- "${lJ_DECOMPILE_DIR}"
 
   java -jar "${JAVA_DECOMPILER}" --silent "${lJAVA_BINARY}" "${lJ_DECOMPILE_DIR}" || true
 }

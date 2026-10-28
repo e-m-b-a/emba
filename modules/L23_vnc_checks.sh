@@ -31,6 +31,11 @@ L23_vnc_checks() {
     export VNC_UP=0
 
     if [[ -v IP_ADDRESS_ ]]; then
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing VNC checks"
+        module_end_log "${FUNCNAME[0]}" "${VNC_UP}"
+        return
+      fi
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing UPnP/HNAP checks"
@@ -42,6 +47,10 @@ L23_vnc_checks() {
       if [[ "$(grep -c "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap 2>/dev/null | cut -d ':' -f2 | awk '{s+=$1} END {print s}')" -gt 0 ]]; then
         mapfile -t lVNC_PORT_ARR < <(grep -h "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u || true)
         for lVNC_PORT in "${lVNC_PORT_ARR[@]}"; do
+          if ! check_for_valid_port "${lVNC_PORT}"; then
+            print_output "[-] Invalid VNC port ${ORANGE}${lVNC_PORT}${NC} detected - skipping"
+            continue
+          fi
           check_basic_vnc "${lVNC_PORT}"
           check_msf_vnc "${lVNC_PORT}"
         done

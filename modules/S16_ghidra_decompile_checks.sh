@@ -26,7 +26,7 @@ S16_ghidra_decompile_checks() {
 
   # Further testing needed:
   export INTERNAL_LINKING=1
-  if [[ ${BINARY_EXTENDED} -ne 1 ]]; then
+  if [[ "${BINARY_EXTENDED}" -ne 1 ]]; then
     print_output "[-] ${FUNCNAME[0]} - BINARY_EXTENDED not set to 1. You can set it up via a scan-profile."
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -148,7 +148,7 @@ S16_ghidra_decompile_checks() {
   wait_for_pid "${lWAIT_PIDS_S16_ARR[@]}"
 
   # cleanup - remove the rest without issues now
-  rm -r /tmp/haruspex_* 2>/dev/null || true
+  rm -r -- /tmp/haruspex_* 2>/dev/null || true
 
   if [[ -n "$(find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "semgrep_*.csv" -print -quit)" ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
@@ -207,7 +207,7 @@ ghidra_analyzer() {
   print_output "[*] Extracting decompiled code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra" "no_log"
   local lIDENTIFIER="${RANDOM}"
   if [[ ! -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}"
+    mkdir -- "${LOG_PATH_MODULE}"
   fi
 
   # adjust the max runtime for Ghidra with the current runtime
@@ -230,10 +230,10 @@ ghidra_analyzer() {
 
   # Ghidra cleanup:
   if [[ -d "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" ]]; then
-    rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
+    rm -r -- "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.rep" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.rep"
   fi
   if [[ -f "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" ]]; then
-    rm -r "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.gpr"
+    rm -r -- "${LOG_PATH_MODULE}/ghidra_${lNAME}_${lIDENTIFIER}.gpr" || print_error "[-] Error detected while removing Ghidra log file ghidra_${lNAME}.gpr"
   fi
 
   # if Ghidra was not able to produce code we can return now:
@@ -296,11 +296,11 @@ ghidra_analyzer() {
       # Todo: highlight the identified code areas in the decompiled code
     else
       print_output "[-] No C/C++ issues found for binary ${ORANGE}${lNAME}${NC}" "no_log"
-      rm "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
+      rm -- "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
       return
     fi
   else
-    rm "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
+    rm -- "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
     return
   fi
 
@@ -309,7 +309,7 @@ ghidra_analyzer() {
     mapfile -t lHARUSPEX_FILE_ARR < <(find /tmp/haruspex_"${lNAME}" -type f || true)
     # we only store decompiled code with issues:
     if ! [[ -d "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" ]]; then
-      mkdir "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}"
+      mkdir -- "${LOG_PATH_MODULE}"/haruspex_"${lNAME}" || print_error "[-] Error detected while creating ${LOG_PATH_MODULE}/haruspex_${lNAME}"
     fi
     for lHARUSPEX_FILE in "${lHARUSPEX_FILE_ARR[@]}"; do
       # threading is currently not working because of mangled output
@@ -337,7 +337,7 @@ s16_finish_the_log() {
   for lTMP_FILE in "${lSEMGREPLOG/\.json/}"_"${lNAME}"*.tmp; do
     if [[ -f "${lTMP_FILE}" ]]; then
       cat "${lTMP_FILE}" >>"${lSEMGREPLOG_TXT}" || print_error "[-] Error in logfile processing - ${lTMP_FILE}"
-      rm "${lTMP_FILE}" || true
+      rm -- "${lTMP_FILE}" || true
     fi
   done
 }

@@ -36,7 +36,7 @@ P55_unblob_extractor() {
   fi
 
   # If we have found a linux filesystem we do not need an unblob extraction
-  if [[ ${RTOS} -eq 0 ]]; then
+  if [[ "${RTOS}" -eq 0 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -181,7 +181,7 @@ unblobber() {
   print_output "[*] Extracting binary blob ${ORANGE}$(basename "${lFIRMWARE_PATH}")${NC} to directory ${ORANGE}${lOUTPUT_DIR_UNBLOB}${NC}"
 
   if ! [[ -d "${lOUTPUT_DIR_UNBLOB}" ]]; then
-    mkdir -p "${lOUTPUT_DIR_UNBLOB}"
+    mkdir -p -- "${lOUTPUT_DIR_UNBLOB}"
   fi
 
   if [[ "${lVERBOSE}" -eq 1 ]]; then

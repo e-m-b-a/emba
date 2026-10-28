@@ -25,7 +25,7 @@ run_web_reporter_mod_name() {
   local lLOG_FILES_ARR=()
   local lLOG_FILE=""
 
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     # usually we should only find one file:
     mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMOD_NAME}*.txt" | sort)
     for lLOG_FILE in "${lLOG_FILES_ARR[@]}"; do
@@ -189,8 +189,8 @@ cleaner() {
       print_output "[*] $(print_date) - Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu-.*-sta.* >/dev/null || true
       print_output "[*] $(print_date) - Cleaning the emulation environment\\n" "no_log"
-      find "${FIRMWARE_PATH_CP}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
-      find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
+      find "${FIRMWARE_PATH_CP}" -xdev -iname "qemu*static" -exec rm -- {} \; 2>/dev/null || true
+      find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm -- {} \; 2>/dev/null || true
 
       print_output "[*] $(print_date) - Umounting proc, sys and run" "no_log"
       local lCHECK_MOUNTS_ARR=()
@@ -205,7 +205,7 @@ cleaner() {
 
       if [[ -d "${LOG_DIR}/s115_usermode_emulator/firmware" ]]; then
         print_output "[*] $(print_date) - Removing emulation directory ${ORANGE}${LOG_DIR}/s115_usermode_emulator/firmware${NC}" "no_log"
-        rm -r "${LOG_DIR}/s115_usermode_emulator/firmware" || true
+        rm -r -- "${LOG_DIR}/s115_usermode_emulator/firmware" || true
       fi
     fi
 
@@ -269,16 +269,16 @@ cleaner() {
   fi
 
   if [[ -f "${LOG_DIR}"/print_running_modules.pid ]]; then
-    rm "${LOG_DIR}"/print_running_modules.pid >/dev/null || true
+    rm -- "${LOG_DIR}"/print_running_modules.pid >/dev/null || true
   fi
   if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
     if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
-      rm "${LOG_DIR}"/emba_error.log >/dev/null || true
+      rm -- "${LOG_DIR}"/emba_error.log >/dev/null || true
     fi
   fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -d "${TMP_DIR}" ]]; then
-    rm -r "${TMP_DIR}" 2>/dev/null || true
+    rm -r -- "${TMP_DIR}" 2>/dev/null || true
   fi
   export CLEANED=1
   if [[ "${lINTERRUPT_CLEAN}" -eq 1 ]]; then
@@ -365,7 +365,7 @@ restore_permissions() {
     lORIG_UID="$(grep "UID" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
     lORIG_GID="$(grep "GID" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
     chown "${lORIG_UID}":"${lORIG_GID}" "${LOG_DIR}" -R || true
-    # rm "${BASIC_DATA_LOG_DIR}"/orig_user.log || true
+    # rm -- "${BASIC_DATA_LOG_DIR}"/orig_user.log || true
   fi
 }
 
@@ -408,7 +408,7 @@ module_wait() {
 
 store_kill_pids() {
   local lPID="${1:-}"
-  ! [[ -d "${TMP_DIR}" ]] && mkdir -p "${TMP_DIR}"
+  ! [[ -d "${TMP_DIR}" ]] && mkdir -p -- "${TMP_DIR}"
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
     echo "${lPID}" >>"${TMP_DIR}"/EXIT_KILL_PIDS.log || true
   fi

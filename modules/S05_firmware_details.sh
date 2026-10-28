@@ -54,7 +54,7 @@ filesystem_tree() {
 
   # excluded paths will be also printed
   local lTREE_OPTS_ARR=(-p -s -a)
-  if [[ ${FORMAT_LOG} -eq 1 ]]; then
+  if [[ "${FORMAT_LOG}" -eq 1 ]]; then
     lTREE_OPTS_ARR+=(-C)
   else
     lTREE_OPTS_ARR+=(-n)

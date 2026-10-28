@@ -40,7 +40,7 @@ S130_binary_map_builder() {
   fi
 
   # needed if we start the module standalone via the helper script
-  [[ ! -d "${LOG_PATH_MODULE}" ]] && mkdir -p "${LOG_PATH_MODULE}"
+  [[ ! -d "${LOG_PATH_MODULE}" ]] && mkdir -p -- "${LOG_PATH_MODULE}"
 
   load_default_environment
   setup_environment
@@ -129,8 +129,8 @@ load_default_environment() {
 
   export DOT_FILE="${LOG_PATH_MODULE}/EMBA-dependency-map.dot"
   export DOT_FILE_tmp_dir="${LOG_PATH_MODULE}/tmp_dot"
-  rm -rf "${DOT_FILE_tmp_dir}"
-  mkdir "${DOT_FILE_tmp_dir}"
+  rm -rf -- "${DOT_FILE_tmp_dir:?DOT_FILE_tmp_dir is unset or empty}"
+  mkdir -- "${DOT_FILE_tmp_dir}"
 
   # External assets - downloaded once for offline capability.
   export JS_LIB="${EXT_DIR}/svg-pan-zoom.min.js"
@@ -198,7 +198,7 @@ system_emulator_init_runner() {
   fi
 
   print_output "[*] Adjusting emulation runner script ..."
-  cp -r "${lEMU_PATH}" "${LOG_PATH_MODULE}/emulation_engine" || {
+  cp -r -- "${lEMU_PATH}" "${LOG_PATH_MODULE}/emulation_engine" || {
     print_error "[-] S130 - Adjusting emulation runner script failed"
     return
   }
@@ -219,7 +219,7 @@ system_emulator_init_runner() {
     return
   }
 
-  if [[ ${EUID} -eq 0 ]]; then
+  if [[ "${EUID}" -eq 0 ]]; then
     timeout 360s ./run.sh
   else
     sudo timeout 360s ./run.sh
@@ -231,7 +231,7 @@ system_emulator_init_runner() {
   lTAP_INTERFACE=$(grep "ip route flush" ./run.sh || true)
   lTAP_INTERFACE=${lTAP_INTERFACE//*\ /}
   if [[ -n "${lTAP_INTERFACE}" ]]; then
-    if [[ ${EUID} -eq 0 ]]; then
+    if [[ "${EUID}" -eq 0 ]]; then
       ip route flush dev "${lTAP_INTERFACE}"
       ip link set "${lTAP_INTERFACE}" down
       # ip link delete "${lTAP_INTERFACE}"

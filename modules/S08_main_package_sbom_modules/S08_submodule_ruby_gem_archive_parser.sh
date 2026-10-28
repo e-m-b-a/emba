@@ -72,7 +72,7 @@ S08_submodule_ruby_gem_archive_parser() {
       lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
       if ! [[ -d "${TMP_DIR}"/gems ]]; then
-        mkdir "${TMP_DIR}"/gems || true
+        mkdir -- "${TMP_DIR}"/gems || true
       fi
       tar -x -f "${lGEM_ARCHIVE}" -C "${TMP_DIR}"/gems || print_error "[-] Extraction of Ruby gem file ${lGEM_ARCHIVE} failed"
       # └─$ gunzip -k metadata.gz
@@ -153,7 +153,7 @@ S08_submodule_ruby_gem_archive_parser() {
       write_log "[*] Ruby gems archive details: ${ORANGE}${lGEM_ARCHIVE}${NC} - ${ORANGE}${lAPP_NAME:-NA}${NC} - ${ORANGE}${lAPP_VERS:-NA}${NC}" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
       write_csv_log "${lPACKAGING_SYSTEM}" "${lGEM_ARCHIVE}" "${lPKG_MD5:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA}" "${lAPP_NAME}" "${lAPP_VERS}" "${lSTRIPPED_VERSION:-NA}" "${lAPP_LIC}" "${lAPP_MAINT}" "${lAPP_ARCH}" "${lCPE_IDENTIFIER}" "${lPURL_IDENTIFIER}" "${SBOM_COMP_BOM_REF:-NA}" "${lAPP_DESC}"
       lPOS_RES=1
-      rm -rf "${TMP_DIR}"/gems || true
+      rm -rf -- "${TMP_DIR:?TMP_DIR is unset or empty}/gems" || true
     done
 
     if [[ "${lPOS_RES}" -eq 0 ]]; then

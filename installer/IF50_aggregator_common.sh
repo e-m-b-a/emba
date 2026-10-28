@@ -48,12 +48,12 @@ IF50_aggregator_common() {
       pip_install "cve-searchsploit"
 
       # we try to avoid downloading the exploit-database multiple times:
-      CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')
-      if [[ -d "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
-        rm -r "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database"
+      CVE_SEARCH_PATH="$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')"
+      if [[ -d "${CVE_SEARCH_PATH}/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
+        rm -r -- "${CVE_SEARCH_PATH}/cve_searchsploit/exploit-database"
       fi
       if [[ -d "/usr/share/exploitdb" ]]; then
-        ln -s "/usr/share/exploitdb" "${CVE_SEARCH_PATH}""/cve_searchsploit/exploit-database"
+        ln -s -- "/usr/share/exploitdb" "${CVE_SEARCH_PATH}/cve_searchsploit/exploit-database"
       fi
 
       echo -e "\\n""${MAGENTA}""${BOLD}""Updating cve_searchsploit database mapping.""${NC}"

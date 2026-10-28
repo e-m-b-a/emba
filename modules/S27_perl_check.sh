@@ -56,7 +56,7 @@ S27_perl_check() {
   done
 
   wait_for_pid "${lWAIT_PIDS_S27[@]}"
-  [[ -d "${TMP_DIR}/s27" ]] && (rm -r "${TMP_DIR}"/s27 || true)
+  [[ -d "${TMP_DIR}/s27" ]] && (rm -r -- "${TMP_DIR}/s27" || true)
 
   if [[ -f "${TMP_DIR}/S27_VULNS.tmp" ]]; then
     lS27_PL_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S27_VULNS.tmp)
@@ -89,13 +89,13 @@ s27_zarn_perl_checks() {
   lPL_LOG="${LOG_PATH_MODULE}/zarn_${lNAME}.txt"
   if [[ "${lPL_SCRIPT: -4}" == ".cgi" ]]; then
     if ! [[ -d "${TMP_DIR}"/s27 ]]; then
-      mkdir "${TMP_DIR}"/s27
+      mkdir -- "${TMP_DIR}"/s27
     fi
     # as zarn does not like cgi's, we need to temp rename these files now
     cp "${lPL_SCRIPT}" "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}"
     if [[ -f "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" ]]; then
       perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" --sarif "${LOG_PATH_MODULE}/zarn_${lNAME}.sarif" | tee -a "${lPL_LOG}" || print_error "[-] Analysis of ${lNAME} failed"
-      rm "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" || true
+      rm -- "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" || true
     fi
   else
     perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${lPL_SCRIPT}" --sarif "${LOG_PATH_MODULE}/zarn_${lNAME}.sarif" | tee -a "${lPL_LOG}" || print_error "[-] Analysis of ${lNAME} failed"
@@ -104,7 +104,7 @@ s27_zarn_perl_checks() {
   ## reporting starts here
   lVULNS=$(grep -c "\[vuln\]" "${lPL_LOG}" 2>/dev/null || true)
   if [[ "${lVULNS}" -gt 0 ]]; then
-    [[ ! -d "${lS27_SOURCE_DIR}" ]] && mkdir -p "${lS27_SOURCE_DIR}"
+    [[ ! -d "${lS27_SOURCE_DIR}" ]] && mkdir -p -- "${lS27_SOURCE_DIR}"
     # check if this is common linux file:
     local lCOMMON_FILES_FOUND=""
     local lCFF=""

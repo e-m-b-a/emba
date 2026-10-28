@@ -153,7 +153,7 @@ print_debug() {
 print_output() {
   local lOUTPUT="${1:-}"
   local lLOG_SETTING="${2:-}"
-  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_FILE_MOD:-}" ]]; then
+  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_SETTINGS:-}" ]]; then
     local lLOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
@@ -424,7 +424,7 @@ write_json_module_log() {
   # as our json is not beautiful we remove all \n and further formatting should be done via jq
   tr -d '\n' <"${lJSON_LOG}" >"${lJSON_LOG/\.tmp/\.json}"
   find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete || true
-  rm "${lJSON_LOG}" || true
+  rm -- "${lJSON_LOG}" || true
 }
 
 # write_pid_log is a functions used for debugging
@@ -449,7 +449,7 @@ write_pid_log() {
 }
 
 write_link() {
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     local lLINK="${1:-}"
     lLINK="$(format_log "[REF] ${lLINK}" 1)"
     local lLOG_FILE_ALT="${2:-}"
@@ -476,7 +476,7 @@ copy_and_link_file() {
   local lLOG_FILE="${3:-}"
 
   if ! [[ -d "$(dirname "${lDST_FILE}")" ]]; then
-    mkdir -p "$(dirname "${lDST_FILE}")" || true
+    mkdir -p -- "$(dirname "${lDST_FILE}")" || true
   fi
   # we only copy if the lDST_FILE is not already there
   if ! [[ -f "${lDST_FILE}" ]]; then
@@ -492,7 +492,7 @@ copy_and_link_file() {
 }
 
 write_anchor() {
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     local lANCHOR="${1:-}"
     lANCHOR="$(format_log "[ANC] ""${lANCHOR}" 1)"
     local lLOG_FILE_ALT="${2:-}"
@@ -665,7 +665,7 @@ format_log() {
   local lLOG_STRING="${1:-}"
   # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
   local lOVERWRITE_SETTING="${2:-}"
-  if [[ ${FORMAT_LOG} -eq 0 ]] || [[ ${lOVERWRITE_SETTING} -eq 1 ]]; then
+  if [[ "${FORMAT_LOG}" -eq 0 ]] || [[ "${lOVERWRITE_SETTING}" -eq 1 ]]; then
     echo "${lLOG_STRING}" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" |
       sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" |
       sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" |
@@ -770,7 +770,7 @@ module_start_log() {
     mv "${LOG_PATH_MODULE}" "${OLD_LOG_DIR}" || true
   fi
   if ! [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mkdir "${LOG_PATH_MODULE}" || true
+    mkdir -- "${LOG_PATH_MODULE}" || true
   fi
 }
 
@@ -828,7 +828,7 @@ module_end_log() {
   if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "${LOG_PATH_MODULE}" ]]; then
       if [[ -z "$(find "${LOG_PATH_MODULE}" -type f -print -quit)" ]]; then
-        rm -r "${LOG_PATH_MODULE}"
+        rm -r -- "${LOG_PATH_MODULE}"
       fi
     fi
   fi
@@ -838,7 +838,7 @@ module_end_log() {
   lCSV_LOG="${LOG_FILE/\.txt/\.csv}"
   if [[ -f "${lCSV_LOG}" ]]; then
     if [[ $(wc -l "${lCSV_LOG}" | awk '{print $1}') -lt 2 ]]; then
-      rm "${lCSV_LOG}"
+      rm -- "${lCSV_LOG}"
     fi
   fi
 
@@ -975,7 +975,7 @@ write_csv_AI_tmp() {
 }
 
 write_anchor_AI() {
-  if [[ ${HTML} -eq 1 ]]; then
+  if [[ "${HTML}" -eq 1 ]]; then
     local lLINK="${1:-}"
     lLINK="$(format_log "[ASK_AI] ""${lLINK}" 1)"
     local lLOG_FILE_ALT="${2:-}"

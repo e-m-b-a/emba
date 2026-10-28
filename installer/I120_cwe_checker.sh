@@ -59,11 +59,11 @@ I120_cwe_checker() {
       # curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
       # mkdir external/jdk 2>/dev/null
       # tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
-      # rm external/jdk.tar.gz
+      # rm -- external/jdk.tar.gz
 
       # Ghidra
       if [[ -d ./external/ghidra ]]; then rm -R ./external/ghidra; fi
-      curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_"${GHIDRA_VERS}"_build/ghidra_"${GHIDRA_VERS}"_PUBLIC_"${GHIDRA_REL_DATE}".zip -Sf -o external/ghidra.zip
+      curl -L --url https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_"${GHIDRA_VERS}"_build/ghidra_"${GHIDRA_VERS}"_PUBLIC_"${GHIDRA_REL_DATE}".zip -Sf -o external/ghidra.zip
       mkdir external/ghidra 2>/dev/null
       unzip -qo external/ghidra.zip -d external/ghidra
       # if [[ "${IN_DOCKER}" -eq 1 ]]; then
@@ -73,7 +73,7 @@ I120_cwe_checker() {
       #   # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
       #   sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
       # fi
-      rm external/ghidra.zip
+      rm -- external/ghidra.zip
 
       # further Ghidra installation stuff:
       mkdir external/ghidra_scripts
@@ -90,15 +90,15 @@ I120_cwe_checker() {
         cd "${HOME_PATH}" || (echo "Could not install EMBA component cwe_checker" && exit 1)
 
         if [[ "${IN_DOCKER}" -eq 1 ]]; then
-          # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
+          # cp -pr -- "${HOME}/.cargo/bin" "external/cwe_checker/bin"
           echo '{"ghidra_path":"/external/ghidra/ghidra_'"${GHIDRA_VERS}"'_PUBLIC"}' >"${HOME}"/.config/cwe_checker/ghidra.json
 
           # save .config as we remount /root with tempfs -> now we can restore it in the module
-          cp -pr "${HOME}"/.config ./external/cwe_checker/
-          cp -pr "${HOME}"/.local ./external/cwe_checker/
+          cp -pr -- "${HOME}/.config" ./external/cwe_checker/
+          cp -pr -- "${HOME}/.local" ./external/cwe_checker/
 
           # cleanup
-          rm "${HOME}"/.config -r -f || true
+          rm -- "${HOME}"/.config -r -f || true
         fi
       else
         echo -e "\\n""${GREEN}""cwe-checker already installed - no further action performed.""${NC}"

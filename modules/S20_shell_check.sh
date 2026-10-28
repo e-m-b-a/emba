@@ -35,7 +35,7 @@ S20_shell_check() {
   mapfile -t lSH_SCRIPTS_ARR < <(grep "shell script, ASCII text executable" "${P99_CSV_LOG}" | cut -d ';' -f2 | sort -u || true)
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
-  if [[ ${SHELLCHECK} -eq 1 ]]; then
+  if [[ "${SHELLCHECK}" -eq 1 ]]; then
     sub_module_title "Check scripts with shellcheck"
     for lSH_SCRIPT in "${lSH_SCRIPTS_ARR[@]}"; do
       ((S20_SCRIPTS += 1))
@@ -55,7 +55,7 @@ S20_shell_check() {
 
     if [[ -f "${TMP_DIR}"/S20_VULNS.tmp ]]; then
       S20_SHELL_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S20_VULNS.tmp)
-      rm "${TMP_DIR}"/S20_VULNS.tmp
+      rm -- "${TMP_DIR}"/S20_VULNS.tmp
     fi
     [[ "${S20_SHELL_VULNS}" -gt 0 ]] && lNEG_LOG=1
 
@@ -129,7 +129,7 @@ s20_eval_script_check() {
       lEVAL_RESULTS=1
       lSH_SCRIPT_NAME="$(basename "${lSH_SCRIPT/;*/}")"
       local lSHELL_LOG="${LOG_PATH_MODULE}"/sh_eval_sources/"${lSH_SCRIPT_NAME}".log
-      ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/sh_eval_sources/
+      ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir -- "${LOG_PATH_MODULE}"/sh_eval_sources/
       [[ -f "${lSH_SCRIPT/;*/}" ]] && cp "${lSH_SCRIPT/;*/}" "${lSHELL_LOG}"
       sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "${lSHELL_LOG}"
       print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${lSH_SCRIPT_NAME}${NC}" "" "${lSHELL_LOG}"
@@ -180,7 +180,7 @@ s20_reporter() {
   local lS20_SOURCE_DIR="${LOG_PATH_MODULE}/sh_sources"
 
   if [[ "${lVULNS}" -ne 0 ]]; then
-    [[ ! -d "${lS20_SOURCE_DIR}" ]] && mkdir -p "${lS20_SOURCE_DIR}"
+    [[ ! -d "${lS20_SOURCE_DIR}" ]] && mkdir -p -- "${lS20_SOURCE_DIR}"
 
     # safe the sources and link it in the lSHELL_LOG
     write_log "" "${lSHELL_LOG}"

@@ -27,11 +27,16 @@ L22_upnp_hnap_checks() {
     module_title "Live UPnP/HNAP tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ ${IN_DOCKER} -eq 0 ]]; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+        print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing UPnP/HNAP checks"
+        module_end_log "${FUNCNAME[0]}" "${UPNP_UP}"
+        return
+      fi
       if ! system_online_check "${IP_ADDRESS_}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing UPnP/HNAP checks"
@@ -78,6 +83,10 @@ check_basic_upnp() {
     lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
     print_output "[*] UPnP reachability check for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}"
     if [[ "${lSERVICE}" == *"upnp"* && "${lTCP_UDP}" == *"tcp"* ]]; then
+      if ! check_for_valid_port "${lPORT}"; then
+        print_output "[-] Invalid port ${ORANGE}${lPORT}${NC} detected - skipping"
+        continue
+      fi
       print_output "[*] Testing UPnP reachability for ${ORANGE}${lPORT_SERVICE} - ${lPORT}/${lTCP_UDP} - ${IP_ADDRESS_}${NC}" "no_log"
       if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
@@ -145,6 +154,12 @@ check_basic_hnap_jnap() {
       lSERVICE=$(echo "${lPORT_SERVICE}" | awk '{print $2}' | tr -d "[:blank:]")
       print_output "[*] Analyzing service ${ORANGE}${lPORT_SERVICE} - ${lPORT} - ${IP_ADDRESS_}${NC}" "no_log"
       if [[ "${lSERVICE}" == "unknown" ]] || [[ "${lSERVICE}" == "tcpwrapped" ]]; then
+        continue
+      fi
+      if ! check_for_valid_port "${lPORT}"; then
+        continue
+      fi
+      if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
         continue
       fi
 
@@ -251,6 +266,7 @@ check_jnap_access() {
   local lJNAP_ENDPOINTS_ARR=()
   local lSYSINFO_CGI_ARR=()
   local lSYSINFO_CGI=""
+  local lSYSINFO_CGI_NAME=""
   local lJNAP_EPT=""
   local lJNAP_EPT_NAME=""
 
@@ -259,39 +275,61 @@ check_jnap_access() {
   # Todo: PORT!!!
   local lPORT=80
 
+  if ! check_for_valid_ip_address "${IP_ADDRESS_}"; then
+    print_output "[-] Invalid IP address ${ORANGE}${IP_ADDRESS_}${NC} - Not performing JNAP checks"
+    return
+  fi
+  if ! check_for_valid_port "${lPORT}"; then
+    print_output "[-] Invalid port ${ORANGE}${lPORT}${NC} - Not performing JNAP checks"
+    return
+  fi
+
   # https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt
-  mapfile -t lSYSINFO_CGI_ARR < <(find "${LOG_DIR}"/firmware -type f -name "sysinfo.cgi" -o -name "getstinfo.cgi" | sort -u 2>/dev/null || true)
+  mapfile -t lSYSINFO_CGI_ARR < <(find "${LOG_DIR}"/firmware -type f \( -name "sysinfo.cgi" -o -name "getstinfo.cgi" \) | sort -u 2>/dev/null || true)
 
   for lSYSINFO_CGI in "${lSYSINFO_CGI_ARR[@]}"; do
-    print_output "[*] Testing for sysinfo.cgi" "no_log"
-    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${lPORT}"/"${lSYSINFO_CGI}" >"${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log || true
+    lSYSINFO_CGI_NAME="${lSYSINFO_CGI##*/}"
+    if [[ ! "${lSYSINFO_CGI_NAME}" =~ ^(sysinfo|getstinfo)\.cgi$ ]]; then
+      print_output "[-] Invalid CGI filename ${ORANGE}${lSYSINFO_CGI_NAME}${NC} - skipping"
+      continue
+    fi
+    print_output "[*] Testing for ${ORANGE}${lSYSINFO_CGI_NAME}${NC}" "no_log"
+    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET --url "http://${IP_ADDRESS_}:${lPORT}/${lSYSINFO_CGI_NAME}" >"${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log || true
 
-    if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log ]]; then
-      if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log; then
-        print_output "[+] Found sensitive information in sysinfo.cgi - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
-        grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI}".log | tee -a "${LOG_FILE}"
+    if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log ]]; then
+      if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log; then
+        print_output "[+] Found sensitive information in ${ORANGE}${lSYSINFO_CGI_NAME}${NC} - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
+        grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${lSYSINFO_CGI_NAME}".log | tee -a "${LOG_FILE}"
       fi
     fi
   done
 
   for lJNAP_EPT in "${lJNAP_ENDPOINTS_ARR[@]}"; do
-    print_output "[*] Testing JNAP action: ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
+    if [[ "${lJNAP_EPT}" == *[[:space:][:cntrl:]]* ]] || [[ "${lJNAP_EPT}" != http*://* ]]; then
+      print_output "[-] Invalid JNAP action ${ORANGE}${lJNAP_EPT}${NC} - skipping"
+      continue
+    fi
     lJNAP_EPT_NAME="${lJNAP_EPT##*/}" # basename
+    if [[ ! "${lJNAP_EPT_NAME}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+      print_output "[-] Invalid JNAP endpoint name ${ORANGE}${lJNAP_EPT_NAME}${NC} - skipping"
+      continue
+    fi
+    print_output "[*] Testing JNAP action: ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
     local lJNAP_ACTION="X-JNAP-Action: ${lJNAP_EPT}"
     local lDATA="{}"
-    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "${lDATA}" http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >"${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log || true
+    curl -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X POST -H "${lJNAP_ACTION}" -d "${lDATA}" --url http://"${IP_ADDRESS_}":"${lPORT}"/JNAP/ >"${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log || true
 
     if [[ -s "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]]; then
       if grep -q "_ErrorUnauthorized" "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log; then
         print_output "[-] Authentication needed for ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
-        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
+        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm -- "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
       fi
       if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && grep -q "_ErrorInvalidInput" "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log; then
         print_output "[-] Invalid request detected for ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
-        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
+        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm -- "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
       fi
     else
-      rm "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
+      rm -- "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]]; then

@@ -66,9 +66,9 @@ S118_busybox_verifier() {
       mapfile -t lVERSION_IDENTIFIER_ARR < <(jq -r .grep_commands[] "${lVERSION_JSON_CFG}" 2>/dev/null || true)
       for lVERSION_IDENTIFIER in "${lVERSION_IDENTIFIER_ARR[@]}"; do
         lVERSION_IDENTIFIED=$(strings "${lBB_BIN}" | grep -a -E "${lVERSION_IDENTIFIER}" | sort -u | head -1 || true)
+        local lLICENSES_ARR=()
         if [[ -n ${lVERSION_IDENTIFIED} ]]; then
           local lRULE_IDENTIFIER=""
-          local lLICENSES_ARR=()
           local lPRODUCT_NAME_ARR=()
           local lVENDOR_NAME_ARR=()
           local lCSV_REGEX_ARR=()
@@ -165,7 +165,7 @@ S118_busybox_verifier() {
 
     if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" ]]; then
       mapfile -t BB_VERIFIED_APPLETS < <(sort -u "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp")
-      rm "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" || true
+      rm -- "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" || true
     fi
 
     print_output "[*] Create CVE vulnerabilities array for BusyBox version ${ORANGE}:${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}${NC} ..." "no_log"
@@ -233,7 +233,7 @@ S118_busybox_verifier() {
   fi
 
   if [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
-    rm -r "${LOG_PATH_MODULE}/tmp" || true
+    rm -r -- "${LOG_PATH_MODULE}/tmp" || true
   fi
 
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
@@ -251,7 +251,7 @@ busybox_vuln_testing_threader() {
   local lLOG_FILE_BB_MODULE="${LOG_PATH_MODULE}/tmp/${lCVE}"
 
   if ! [[ -d "${LOG_PATH_MODULE}/tmp" ]]; then
-    mkdir "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
+    mkdir -- "${LOG_PATH_MODULE}/tmp" 2>/dev/null || true
   fi
 
   lSUMMARY=$(jq -r '.descriptions[]? | select(.lang=="en") | .value' "${NVD_DIR}/${lCVE%-*}/${lCVE:0:11}"*"xx/${lCVE}.json" 2>/dev/null || true)
@@ -378,7 +378,7 @@ get_cve_busybox_data() {
 
     for lCVE_NICE_REPORT in "${CVE_DETAILS_PATH/.csv/_CVE-}"*; do
       cat "${lCVE_NICE_REPORT}" >>"${CVE_DETAILS_PATH/.csv/_nice.txt}"
-      rm "${lCVE_NICE_REPORT}" >/dev/null || true
+      rm -- "${lCVE_NICE_REPORT}" >/dev/null || true
     done
 
     print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.csv/_nice.txt}"

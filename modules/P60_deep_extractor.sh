@@ -129,7 +129,7 @@ deep_extractor() {
 
     populate_p99_backend "${lFILES_DEEP_PRE_LIST}" "${FUNCNAME[0]}" "${lFILES_DEEP_PRE_COUNT}" || return "$?"
     detect_root_dir_helper "${LOG_DIR}/firmware"
-    if [[ ${RTOS} -eq 0 ]]; then
+    if [[ "${RTOS}" -eq 0 ]]; then
       export NO_EXTRACTED=1
       return
     fi
@@ -178,9 +178,11 @@ deeper_extractor_helper() {
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
   print_output "[*] Deep extraction starting ..."
+  local lWAIT_PIDS_P60_init=()
   for lFILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
     [[ ! -f "${lFILE_TMP}" ]] && continue
     lFILE_MD5="$(md5sum "${lFILE_TMP}")"
+    # MD5_DONE_DEEP defined in emba defaults
     [[ "${MD5_DONE_DEEP[*]}" == *"${lFILE_MD5/\ */}"* ]] && continue
     MD5_DONE_DEEP+=("${lFILE_MD5/\ */}")
     deeper_extractor_threader "${lFILE_TMP}" "${lFILE_MD5/\ */}" &

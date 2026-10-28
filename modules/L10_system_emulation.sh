@@ -153,7 +153,7 @@ L10_system_emulation() {
             main_emulation "${R_PATH}" "${lARCH_END}"
 
             if [[ -d "${MNT_POINT}" ]]; then
-              rm -r "${MNT_POINT}" || true
+              rm -r -- "${MNT_POINT}" || true
             fi
 
             if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
@@ -300,7 +300,7 @@ create_emulation_filesystem() {
   if [[ -d "${MNT_POINT}" ]]; then
     MNT_POINT="${MNT_POINT}"-"${RANDOM}"
   fi
-  mkdir "${MNT_POINT}" || true
+  mkdir -- "${MNT_POINT}" || true
 
   print_output "[*] Create Qemu filesystem for emulation - ${lROOT_PATH}.\\n"
   lIMAGE_SIZE="$(du -b --max-depth=0 "${lROOT_PATH}" | awk '{print $1}')"
@@ -346,7 +346,7 @@ create_emulation_filesystem() {
 
   if mount | grep -q "${MNT_POINT}"; then
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf "${lROOT_PATH}"/* "${MNT_POINT}"/ || (print_output "[-] Warning: Root filesystem not copied!" && return)
+    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || (print_output "[-] Warning: Root filesystem not copied!" && return)
 
     print_output "[*] Binwalk v3+ creates raw files on extraction. We remove these files from our emulation root directory"
     find "${MNT_POINT}" -name "*.raw" -delete || true
@@ -357,8 +357,8 @@ create_emulation_filesystem() {
     "${HELP_DIR}"/fix_bins_lnk_emulation.sh "${MNT_POINT}"
 
     print_output "[*] Creating EMBA emulation helper directories within the firmware environment"
-    mkdir -p "${MNT_POINT}/firmadyne/libnvram/" || true
-    mkdir -p "${MNT_POINT}/firmadyne/libnvram.override/" || true
+    mkdir -p -- "${MNT_POINT}/firmadyne/libnvram/" || true
+    mkdir -p -- "${MNT_POINT}/firmadyne/libnvram.override/" || true
 
     print_output "[*] Patching filesystem (chroot)"
     cp "$(command -v busybox)" "${MNT_POINT}" || true
@@ -414,13 +414,13 @@ create_emulation_filesystem() {
     if [[ -e "${MNT_POINT}/kernelInit" ]]; then
       print_output "[*] Backup ${MNT_POINT}/kernelInit:"
       tee -a "${LOG_FILE}" <"${MNT_POINT}/kernelInit"
-      rm "${MNT_POINT}/kernelInit"
+      rm -- "${MNT_POINT}/kernelInit"
     fi
 
-    rm "${MNT_POINT}/fixImage.sh" || true
-    rm "${MNT_POINT}/inferFile.sh" || true
-    rm "${MNT_POINT}/busybox" || true
-    rm "${MNT_POINT}/bash-static" || true
+    rm -- "${MNT_POINT}/fixImage.sh" || true
+    rm -- "${MNT_POINT}/inferFile.sh" || true
+    rm -- "${MNT_POINT}/busybox" || true
+    rm -- "${MNT_POINT}/bash-static" || true
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
     # FirmAE/firmadyne recompiled binaries + addons
@@ -476,7 +476,7 @@ create_emulation_filesystem() {
     for lNVRAM_FILE in "${lNVRAM_FILE_LIST[@]}"; do
       if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
         if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
-          mkdir "${LOG_PATH_MODULE}"/nvram
+          mkdir -- "${LOG_PATH_MODULE}"/nvram
         fi
         lNVRAM_FILE="${lNVRAM_FILE/\./}"
         print_output "[*] Found possible NVRAM default file ${ORANGE}${lNVRAM_FILE}${NC} -> setup /firmadyne directory"
@@ -499,18 +499,18 @@ link_libnvram_so() {
 
   # ensure we have a dbg libnvram for the initial identification
   if [[ -s "${lMNT_POINT}/firmadyne/libnvram.so" ]]; then
-    rm "${lMNT_POINT}/firmadyne/libnvram.so"
+    rm -- "${lMNT_POINT}/firmadyne/libnvram.so"
   fi
   if [[ -s "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" ]]; then
-    rm "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
+    rm -- "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram.so"
-    ln -sr "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so" || true
+    ln -sr -- "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so" || true
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram_ioctl.so"
-    ln -sr "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" || true
+    ln -sr -- "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" || true
   fi
 }
 
@@ -589,7 +589,7 @@ main_emulation() {
 
     if [[ -n "${lBAK_INIT_ORIG}" ]]; then
       print_output "[*] Restoring old init file: ${lBAK_INIT_ORIG}"
-      cp -pr "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_error "[-] Error restoring old init file ${lBAK_INIT_ORIG}"
+      cp -pr -- "${lBAK_INIT_BACKUP}" "${lBAK_INIT_ORIG}" || print_error "[-] Error restoring old init file ${lBAK_INIT_ORIG}"
       lBAK_INIT_BACKUP=""
       lBAK_INIT_ORIG=""
     fi
@@ -610,7 +610,7 @@ main_emulation() {
 
       # write the init ELF file or sym link to the EMBA preInit script:
       # INIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
-      cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}" || true
+      cp -pr -- "${lINIT_OUT}" "${lBAK_INIT_BACKUP}" || true
 
       print_output "[*] Add ${lINIT_FILE} entry to ${ORANGE}${lINIT_OUT}${NC}"
       # we always add the identified init entry to the EMBA preInit script
@@ -634,7 +634,7 @@ main_emulation() {
       print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
       lBAK_INIT_ORIG="${lINIT_OUT}"
       lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${lINIT_OUT}".init)"
-      cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
+      cp -pr -- "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
 
       # identify mount operations for later handling and disabling
       mapfile -t lFS_MOUNTS_INIT_ARR < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "${MNT_POINT}""${lINIT_FILE}" | sort -u || true)
@@ -1058,13 +1058,13 @@ emulation_with_config() {
     fi
 
     # remove tmp files for next round
-    rm "${TMP_DIR}"/online_stats.tmp || true
+    rm -- "${TMP_DIR}"/online_stats.tmp || true
   fi
 
   # if our ip address has changed during analysis we restore this ip address now
   if [[ -f "${TMP_DIR}/emulation_changed_ip_address.tmp" ]]; then
     IP_ADDRESS_="$(cat "${TMP_DIR}/emulation_changed_ip_address.tmp")"
-    rm "${TMP_DIR}/emulation_changed_ip_address.tmp" || true
+    rm -- "${TMP_DIR}/emulation_changed_ip_address.tmp" || true
   fi
 
   write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lVLAN_ID}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
@@ -1108,7 +1108,7 @@ emulation_with_config() {
       fi
       # print_output "[-] Emulation archive: $ARCHIVE_PATH."
       # create_emulation_archive "$ARCHIVE_PATH"
-      rm -r "${ARCHIVE_PATH}" || true
+      rm -r -- "${ARCHIVE_PATH}" || true
     fi
   fi
 
@@ -1283,7 +1283,7 @@ handle_fs_mounts() {
 
       if ! [[ -d "${MNT_POINT}""${lMOUNT_PT}" ]]; then
         print_output "[*] Creating target directory ${MNT_POINT}${lMOUNT_PT}"
-        mkdir -p "${MNT_POINT}""${lMOUNT_PT}"
+        mkdir -p -- "${MNT_POINT}""${lMOUNT_PT}"
       fi
       print_output "[*] Let's copy the identified area to the root filesystem - ${ORANGE}${lN_PATH}${NC} to ${ORANGE}${MNT_POINT}${lMOUNT_PT}${NC}"
       cp -pr --update=none "${lN_PATH}"* "${MNT_POINT}""${lMOUNT_PT}"
@@ -1302,16 +1302,16 @@ handle_fs_mounts() {
   cp "${MODULE_SUB_PATH}/inferService.sh" "${MNT_POINT}" || true
   print_output "[*] inferService.sh (chroot)"
   EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
-  rm "${MNT_POINT}"/inferService.sh || true
-  rm "${MNT_POINT}"/bash-static || true
-  rm "${MNT_POINT}"/busybox || true
+  rm -- "${MNT_POINT}"/inferService.sh || true
+  rm -- "${MNT_POINT}"/bash-static || true
+  rm -- "${MNT_POINT}"/busybox || true
 
   if [[ -f "${MNT_POINT}"/firmadyne/service ]]; then
     # tp-link camset fix (e.g. NC200_2.1.8_Build_171109_Rel.28679.bin):
     if grep -q "lighttpd" "${MNT_POINT}"/firmadyne/service; then
       if ! [[ -d "${MNT_POINT}"/var/run/lighttpd ]]; then
         print_output "[*] Creating pid directory for lighttpd service"
-        mkdir -p "${MNT_POINT}"/var/run/lighttpd || true
+        mkdir -p -- "${MNT_POINT}"/var/run/lighttpd || true
       fi
     fi
   fi
@@ -1326,10 +1326,10 @@ cleanup_emulator() {
   fi
 
   # ugly cleanup:
-  rm -rf /tmp/qemu."${lIMAGE_NAME}" 2>/dev/null || true
-  rm -rf /tmp/qemu."${lIMAGE_NAME}".S1 2>/dev/null || true
+  rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}" 2>/dev/null || true
+  rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}".S1 2>/dev/null || true
   if [[ -f /tmp/do_not_create_run.sh ]]; then
-    rm /tmp/do_not_create_run.sh || true
+    rm -- /tmp/do_not_create_run.sh || true
   fi
 
   # losetup
@@ -1350,7 +1350,7 @@ delete_device_entry() {
     losetup -d "$(losetup | grep "$(basename "${lIMAGE_NAME}")" | awk '{print $1}' || true)"
   fi
   dmsetup remove "$(basename "${lDEVICE}")" &>/dev/null || true
-  rm -rf "${lMNT_POINT:?}/"* || true
+  rm -rf -- "${lMNT_POINT:?}/"* || true
   sleep 1
 }
 
@@ -1758,7 +1758,7 @@ get_networking_details_emulation() {
       fi
 
       # filter for non usable IP addresses:
-      if [[ "${IP_ADDRESS_}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "${IP_ADDRESS_}" == "127.0.0."* ]]; then
+      if check_for_valid_ip_address "${IP_ADDRESS_}" && ! [[ "${IP_ADDRESS_}" == "127.0.0."* ]]; then
         print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC} / ${ORANGE}${lINTERFACE_CAND}${NC}"
         DETECTED_IP=1
         # get the network device from our interface candidate
@@ -2118,7 +2118,7 @@ setup_network_emulation() {
   export ARCHIVE_PATH="${LOG_PATH_MODULE}"/archive-"${IMAGE_NAME}"-"${RANDOM}"
 
   if ! [[ -d "${ARCHIVE_PATH}" ]]; then
-    mkdir "${ARCHIVE_PATH}"
+    mkdir -- "${ARCHIVE_PATH}"
   fi
 
   lTAP_ID=$(shuf -i 1-1000 -n 1)
@@ -2224,7 +2224,7 @@ write_network_config_to_filesystem() {
         lDIR_NAME_MISSING=$(dirname "${lFILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}/${lDIR_NAME_MISSING#/}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}/${lDIR_NAME_MISSING#/}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
+          mkdir -p -- "${MNT_POINT}/${lDIR_NAME_MISSING#/}" 2>/dev/null || true
         fi
         lFOUND_MISSING=$(find "${MNT_POINT}" -type f -name "${lFILENAME_MISSING}" | head -1 || true)
         if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}/${lDIR_NAME_MISSING#/}/${lFILENAME_MISSING}" ]]; then
@@ -2241,7 +2241,7 @@ write_network_config_to_filesystem() {
     # before the next emulation testrun
     # This file is an indiator that the initial network config was done and we can start checking
     # the network config during emulation
-    rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
+    rm -- "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
 
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
@@ -2285,7 +2285,7 @@ nvram_check() {
       mapfile -t lNVRAM_FILE_LIST < <(find . -xdev -type f -not -path "*/firmadyne*" -exec file {} \; | grep "ASCII text" || true)
 
       if ! [[ -d "${LOG_PATH_MODULE}"/nvram ]]; then
-        mkdir "${LOG_PATH_MODULE}"/nvram
+        mkdir -- "${LOG_PATH_MODULE}"/nvram
       fi
 
       # need to check for firmadyne string in path
@@ -2961,7 +2961,7 @@ create_emulation_archive() {
     done
 
     mount "${lDEVICE}" "${MNT_POINT}" || true
-    rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
+    rm -- "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "$(basename "${lIMAGE}")" "${lDEVICE}" "${MNT_POINT}"
 

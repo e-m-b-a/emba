@@ -19,7 +19,7 @@ docker_container_extractor() {
   local lCONTAINER_ID="${1:-}"
   export LOG_FILE="${LOG_DIR}"/p00_docker_extractor.txt
   if ! [[ -d "${LOG_DIR}"/firmware/ ]]; then
-    mkdir "${LOG_DIR}"/firmware/
+    mkdir -- "${LOG_DIR}"/firmware/
   fi
   local lDOCKER_LS_OUTPUT=""
   lDOCKER_LS_OUTPUT=$(docker container ls -a)
@@ -53,7 +53,7 @@ binwalker_matryoshka() {
   print_output "[*] Extracting firmware to directory ${ORANGE}${lOUTPUT_DIR_BINWALK}${NC}"
 
   if ! [[ -d "${lOUTPUT_DIR_BINWALK}" ]]; then
-    mkdir -p "${lOUTPUT_DIR_BINWALK}"
+    mkdir -p -- "${lOUTPUT_DIR_BINWALK}"
   fi
 
   timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${BINWALK_BIN[@]}" -v -e -c -M -d "${lOUTPUT_DIR_BINWALK}" "${lFIRMWARE_PATH}" | tee -a "${lBINWALK_LOG_FILE}" || print_error "[-] WARNING: Binwalk returned with error state for ${lFIRMWARE_PATH}"

@@ -57,6 +57,7 @@ S09_firmware_base_version_check() {
   local lFILE=""
   local lBIN=""
   local lBIN_FILE=""
+  local lFILE_ARR_PKG=()
 
   # set default confidence level
   # 1 -> very-low
@@ -70,10 +71,10 @@ S09_firmware_base_version_check() {
     # Debian:
     find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u >"${LOG_PATH_MODULE}"/debian_known_files.txt || true
     # the extracted packages are used to further limit the static tests
-    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/debian_known_packages.txt || true
+    find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep -h "^Package: " {} + | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/debian_known_packages.txt || true
     # OpenWRT
     find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'cat "%"' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
-    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep "^Package: " {} \; | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
+    find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep -h "^Package: " {} + | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/rpmdb.sqlite" -type f -exec dirname {} \; | sort -u || true)
@@ -149,7 +150,7 @@ S09_firmware_base_version_check() {
   # lets start generating the strings from all our relevant binaries
   print_output "[*] Generate strings overview for static version analysis of ${ORANGE}${#FILE_ARR[@]}${NC} files ..."
   if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
-    mkdir "${LOG_PATH_MODULE}"/strings_bins || true 2>/dev/null
+    mkdir -- "${LOG_PATH_MODULE}"/strings_bins || true 2>/dev/null
   fi
   export WAIT_PIDS_S09_ARR_tmp=()
   for lBIN in "${FILE_ARR[@]}"; do
@@ -304,10 +305,10 @@ S09_identifier_threadings() {
       lBIN_FILE_DETAILS=$(cut -d ';' -f8 <<<"${lBINARY_ENTRY}") # field 8
       if [[ "${lBIN_FILE_DETAILS}" == *"ELF"* ]]; then
         # print_output "[*] Checking for strict bin ${lBINARY_ENTRY} - rule: ${lRULE_IDENTIFIER}" "no_log"
-        MD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")      # field 9
+        lMD5_SUM=$(cut -d ';' -f9 <<<"${lBINARY_ENTRY}")     # field 9
         lBINARY_PATH=$(cut -d ';' -f2 <<<"${lBINARY_ENTRY}") # field 2
         lAPP_NAME="$(basename "${lBINARY_PATH}")"
-        local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${lAPP_NAME}".txt
+        local lSTRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${lMD5_SUM}"_"${lAPP_NAME}".txt
         if ! [[ -f "${lSTRINGS_OUTPUT}" ]]; then
           continue
         fi
@@ -338,6 +339,7 @@ S09_identifier_threadings() {
     #   use zgrep regex via zgrep on these files
 
     # we create an array with testing candidates based on the paths from the json configuration
+    local lZGREP_BINS_ARR=()
     for lAPP_NAME in "${lAFFECTED_PATHS_ARR[@]}"; do
       local lZGREP_BINS_ARR_TMP=()
       mapfile -t lZGREP_BINS_ARR_TMP < <(grep "/${lAPP_NAME#/}" "${P99_CSV_LOG}" | sort -u || true)
@@ -548,7 +550,7 @@ version_parsing_logging() {
     # create component entry - this allows adding entries very flexible:
     build_sbom_json_component_arr "${PACKAGING_SYSTEM}" "${lAPP_TYPE:-library}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lAPP_MAINT:-NA}" "${lrLICENSES_ARR_ref[*]}" "${lCPE_IDENTIFIER:-NA}" "${lPURL_IDENTIFIER:-NA}" "${lAPP_DESC:-NA}"
 
-    write_log "${PACKAGING_SYSTEM};${lBINARY_PATH:-NA};${MD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE:-NA};${lrLICENSES_ARR_ref[*]};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
+    write_log "${PACKAGING_SYSTEM};${lBINARY_PATH:-NA};${lMD5_SUM:-NA}/${lSHA256_CHECKSUM:-NA}/${lSHA512_CHECKSUM:-NA};${lAPP_NAME,,};${lVERSION_IDENTIFIED:-NA};${lCSV_RULE:-NA};${lrLICENSES_ARR_ref[*]};maintainer unknown;${lBIN_ARCH:-NA};${lCPE_IDENTIFIER};${lPURL_IDENTIFIER};${SBOM_COMP_BOM_REF:-NA};DESC" "${S08_CSV_LOG}"
     # we continue with the next binary -> set return as marker to get the knowledge in the caller
     return 0
   done
@@ -560,6 +562,9 @@ version_parsing_logging() {
 build_final_bins_threader() {
   local lFILE="${1:-}"
   local lBIN_FILE="${2:-}"
+
+  # Todo:
+  local lLICENSES_ARR=()
 
   if [[ "${lFILE}" =~ .*\.padding$ || "${lFILE}" =~ .*\.unknown$ || "${lFILE}" =~ .*\.uncompressed$ || "${lFILE}" =~ .*\.raw$ || "${lFILE}" =~ .*\.elf$ || "${lFILE}" =~ .*\.decompressed\.bin$ ]]; then
     # binwalk and unblob are producing multiple files that are not relevant for the SBOM and can skip them here
@@ -855,7 +860,7 @@ bin_string_checker() {
         lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER/\"/}"
         lVERSION_IDENTIFIER="${lVERSION_IDENTIFIER%\"}"
       fi
-      if [[ ${RTOS} -eq 0 ]]; then
+      if [[ "${RTOS}" -eq 0 ]]; then
         if [[ "${lBIN_FILE}" == *ELF* || "${lBIN_FILE}" == *uImage* || "${lBIN_FILE}" == *Kernel\ Image* || "${lBIN_FILE}" == *"Linux\ kernel"* ]]; then
           # print_output "[!] Testing ${lBINARY_PATH} with version identifier ${lVERSION_IDENTIFIER}" "no_log"
           lVERSION_IDENTIFIED=$(grep -o -a -E "${lVERSION_IDENTIFIER}" "${lSTRINGS_OUTPUT}" | sort -u | head -1 || true)
@@ -941,7 +946,7 @@ create_minimal_binary_corpus() {
 
   local lCORPUS_PATH="${S09_LOG_DIR}/binary_corpus_tmp"
   local lCORPUS_log="${lCORPUS_PATH}/logfile.txt"
-  [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p "${lCORPUS_PATH}"
+  [[ ! -d "${lCORPUS_PATH}" ]] && mkdir -p -- "${lCORPUS_PATH}"
   touch "${lCORPUS_log}" 2>/dev/null || true
   local lCORPUS_FILE="${lCORPUS_PATH}/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}"
   local lORIG_CORPUS_FILE="${TESTS_DIR}/bin_version_testdata/${lRULE_IDENTIFIER}_${lIDENTIFIER_ID//$'\n'/_}.bin"
@@ -991,12 +996,12 @@ create_minimal_binary_corpus() {
   if [[ ! -f "${lCORPUS_FILE}" ]]; then
     if [[ -s "${lCORPUS_FILE_tmp}" ]]; then
       # mv -n does not overwrite existing files
-      if mv -n "${lCORPUS_FILE_tmp}" "${lCORPUS_FILE}"; then
+      if mv -n -- "${lCORPUS_FILE_tmp}" "${lCORPUS_FILE}"; then
         lCORP_SIZE=$(wc -c <"${lCORPUS_FILE}")
         write_log "[*] Generated final corpus for binary ${lBINARY_PATH} with size ${lCORP_SIZE} - rule ${lRULE_IDENTIFIER}/${lVERSION_IDENTIFIER_ORIG}" "${lCORPUS_log}"
       else
         # lCORPUS_FILE already available -> we can remove our tmp file
-        rm -f "${lCORPUS_FILE_tmp}"
+        rm -f -- "${lCORPUS_FILE_tmp}"
       fi
     fi
   fi

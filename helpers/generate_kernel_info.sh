@@ -31,12 +31,12 @@ KERNEL_RELEASES_FILE=$(mktemp) || {
 }
 KERNEL_OUTPUT_CSV="./config/kernel_details.csv"
 
-if ! curl -sf "${KERNEL_RELEASES_URL}" >"${KERNEL_RELEASES_FILE}"; then
+if ! curl -sf --url "${KERNEL_RELEASES_URL}" >"${KERNEL_RELEASES_FILE}"; then
   print_output "[-] Error downloading ${KERNEL_RELEASES_FILE}" "no_log"
   exit 1
 fi
 
-[[ -f "${KERNEL_OUTPUT_CSV}" ]] && rm "${KERNEL_OUTPUT_CSV}"
+[[ -f "${KERNEL_OUTPUT_CSV}" ]] && rm -- "${KERNEL_OUTPUT_CSV}"
 
 # get initial site with sub directories per kernel version
 mapfile -t KERNEL_SUB_DIR_ARR < <(grep "a href=\"v[0-9]\." "${KERNEL_RELEASES_FILE}")
@@ -45,8 +45,9 @@ mapfile -t KERNEL_SUB_DIR_ARR < <(grep "a href=\"v[0-9]\." "${KERNEL_RELEASES_FI
 for KERNEL_SUB_DIR in "${KERNEL_SUB_DIR_ARR[@]}"; do
   KERNEL_SUB_DIR=${KERNEL_SUB_DIR/<a href=\"/}
   KERNEL_SUB_DIR=${KERNEL_SUB_DIR/\">v*/}
+  [[ ! "${KERNEL_SUB_DIR}" =~ ^v[0-9]+(\.[0-9]+)*/$ ]] && continue
   print_output "[*] Testing kernel sub dir: ${ORANGE}${KERNEL_SUB_DIR}${NC}" "no_log"
-  curl -s "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >>"${KERNEL_RELEASES_FILE}"
+  curl -s --url "${KERNEL_RELEASES_URL}""${KERNEL_SUB_DIR}" >>"${KERNEL_RELEASES_FILE}"
 done
 
 # extract kernel versions and release dates:
@@ -63,4 +64,4 @@ for KERNEL_ENTRY in "${KERNEL_VER_ARR[@]}"; do
   echo "${KERNEL_VER};${KERNEL_RELEASE}" >>"${KERNEL_OUTPUT_CSV}"
 done
 
-[[ -f "${KERNEL_RELEASES_FILE}" ]] && rm "${KERNEL_RELEASES_FILE}"
+[[ -f "${KERNEL_RELEASES_FILE}" ]] && rm -- "${KERNEL_RELEASES_FILE}"

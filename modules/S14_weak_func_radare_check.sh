@@ -664,7 +664,7 @@ radare_output_function_details() {
 
     if [[ -f "${lLOG_FILE}" ]]; then
       cat "${lLOG_FILE}" >>"${lOLD_LOG_FILE}" || true
-      rm "${lLOG_FILE}" 2>/dev/null || true
+      rm -- "${lLOG_FILE}" 2>/dev/null || true
     fi
     lLOG_FILE="${lOLD_LOG_FILE}"
   }
@@ -720,7 +720,7 @@ radare_output_function_details() {
     lNW_CSV="no"
   fi
 
-  if [[ ${COUNT_FUNC} -ne 0 ]]; then
+  if [[ "${COUNT_FUNC}" -ne 0 ]]; then
     if [[ "${lFUNCTION}" == "strcpy" ]]; then
       lOUTPUT="[+] $(print_path "${lBINARY_}")${lCOMMON_FILES_FOUND}${NC} Vulnerable function: ${CYAN}${lFUNCTION} ${NC}/ ${RED}Function count: ${COUNT_FUNC} ${NC}/ ${ORANGE}strlen: ${COUNT_STRLEN} ${NC}/ ${lNETWORKING_}${NC}"
     elif [[ "${lFUNCTION}" == "mmap" ]]; then
