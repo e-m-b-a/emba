@@ -346,7 +346,7 @@ create_emulation_filesystem() {
 
   if mount | grep -q "${MNT_POINT}"; then
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || { print_output "[-] Warning: Root filesystem not copied!"; return }
+    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || { print_output "[-] Warning: Root filesystem not copied!"; return; }
 
     print_output "[*] Binwalk v3+ creates raw files on extraction. We remove these files from our emulation root directory"
     find "${MNT_POINT}" -name "*.raw" -delete || true
@@ -485,7 +485,6 @@ create_emulation_filesystem() {
       fi
     done
     cd "${lCURRENT_DIR}" || exit
-
   else
     print_output "[!] Filesystem mount failed"
   fi
