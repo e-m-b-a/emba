@@ -339,14 +339,23 @@ create_emulation_filesystem() {
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext2 "${DEVICE}" || { print_output "[-] Error in filesystem creation"; return; }
+  mkfs.ext2 "${DEVICE}" || {
+    print_output "[-] Error in filesystem creation"
+    return
+  }
 
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
-  mount "${DEVICE}" "${MNT_POINT}" || { print_output "[-] Error in mounting the filesystem"; return; }
+  mount "${DEVICE}" "${MNT_POINT}" || {
+    print_output "[-] Error in mounting the filesystem"
+    return
+  }
 
   if mount | grep -q "${MNT_POINT}"; then
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || { print_output "[-] Warning: Root filesystem not copied!"; return; }
+    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || {
+      print_output "[-] Warning: Root filesystem not copied!"
+      return
+    }
 
     print_output "[*] Binwalk v3+ creates raw files on extraction. We remove these files from our emulation root directory"
     find "${MNT_POINT}" -name "*.raw" -delete || true

@@ -337,19 +337,34 @@ mod_path_array() {
 
 create_log_dir() {
   if ! [[ -d "${LOG_DIR}" ]]; then
-    mkdir -- "${LOG_DIR}" 2>/dev/null || { print_output "[!] WARNING: Cannot create log directory" "no_log"; exit 1; }
+    mkdir -- "${LOG_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${TMP_DIR}" ]]; then
-    mkdir -- "${TMP_DIR}" 2>/dev/null || { print_output "[!] WARNING: Cannot create TMP log directory" "no_log"; exit 1; }
+    mkdir -- "${TMP_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create TMP log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${CSV_DIR}" ]]; then
-    mkdir -- "${CSV_DIR}" 2>/dev/null || { print_output "[!] WARNING: Cannot create CSV log directory" "no_log"; exit 1; }
+    mkdir -- "${CSV_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create CSV log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${JSON_DIR}" ]]; then
-    mkdir -- "${JSON_DIR}" 2>/dev/null || { print_output "[!] WARNING: Cannot create JSON log directory" "no_log"; exit 1; }
+    mkdir -- "${JSON_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create JSON log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${BASIC_DATA_LOG_DIR}" ]]; then
-    mkdir -- "${BASIC_DATA_LOG_DIR}" 2>/dev/null || { print_output "[!] WARNING: Cannot create basic log directory" "no_log"; exit 1; }
+    mkdir -- "${BASIC_DATA_LOG_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create basic log directory" "no_log"
+      exit 1
+    }
   fi
 
   if ! [[ -f "${MAIN_LOG}" ]]; then

@@ -303,26 +303,38 @@ emba_updater() {
 
   if [[ -d "${EXT_DIR}"/EPSS-data ]]; then
     print_output "[*] EMBA update - EPSS database update" "no_log"
-    cd "${EXT_DIR}"/EPSS-data || { print_output "[-] WARNING: Can't update EPSS database" "no_log"; exit 1; }
+    cd "${EXT_DIR}"/EPSS-data || {
+      print_output "[-] WARNING: Can't update EPSS database" "no_log"
+      exit 1
+    }
     if [[ -d ./.git ]]; then
       timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update EPSS database" "no_log"
     fi
-    cd "${lHOME_DIR}" || { print_output "[-] WARNING: Can't update EPSS database" "no_log"; exit 1; }
+    cd "${lHOME_DIR}" || {
+      print_output "[-] WARNING: Can't update EPSS database" "no_log"
+      exit 1
+    }
   else
     print_output "[-] WARNING: Can't update EPSS database" "no_log"
   fi
 
   if [[ -d "${NVD_DIR}" ]]; then
     print_output "[*] EMBA update - CVE database update" "no_log"
-    cd "${NVD_DIR}" || { print_output "[-] WARNING: Can't update CVE database" "no_log"; exit 1; }
+    cd "${NVD_DIR}" || {
+      print_output "[-] WARNING: Can't update CVE database" "no_log"
+      exit 1
+    }
     if [[ -d ./.git ]]; then
       timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update CVE database" "no_log"
     fi
-    cd "${lHOME_DIR}" || { print_output "[-] WARNING: Can't update CVE database" "no_log"; exit 1; }
+    cd "${lHOME_DIR}" || {
+      print_output "[-] WARNING: Can't update CVE database" "no_log"
+      exit 1
+    }
   else
     print_output "[-] WARNING: Can't update CVE database" "no_log"
   fi

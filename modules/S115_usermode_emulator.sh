@@ -312,7 +312,10 @@ prepare_emulator() {
       print_output "$(indent "$(red "Terminating Emulation module now.\\n")")"
       exit 1
     else
-      cp "$(command -v "${lEMULATOR}")" "${lR_PATH}" || { print_output "[-] Issues in copy emulator process for emulator ${lEMULATOR}"; return; }
+      cp "$(command -v "${lEMULATOR}")" "${lR_PATH}" || {
+        print_output "[-] Issues in copy emulator process for emulator ${lEMULATOR}"
+        return
+      }
     fi
 
     if ! [[ -d "${lR_PATH}""/proc" ]]; then
