@@ -139,7 +139,7 @@ run_modules() {
         local lMODULE_MAIN=${lMODULE_BN%.*}
         # module_start_log "${lMODULE_MAIN}"
         if [[ "${RESTART}" -eq 1 ]]; then
-          if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
+          if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -gt 0 ]]; then
             if [[ "${lMODULE_MAIN}" == "P99_"* ]] || [[ "${lMODULE_MAIN}" == "L1"* ]]; then
               print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished but essential - rerun it" "main"
               lMOD_FIN=0
@@ -217,7 +217,7 @@ run_modules() {
           local lMODULE_MAIN=${lMODULE_BN%.*}
           # module_start_log "${lMODULE_MAIN}"
           if [[ "${RESTART}" -eq 1 ]]; then
-            if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
+            if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -gt 0 ]]; then
               if [[ "${lMODULE_MAIN}" == "P99_"* ]] || [[ "${lMODULE_MAIN}" == "L1"* ]]; then
                 print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished but essential - rerun it" "main"
                 lMOD_FIN=0
@@ -293,7 +293,7 @@ run_modules() {
             local lMODULE_MAIN=${lMODULE_BN%.*}
             # module_start_log "${lMODULE_MAIN}"
             if [[ "${RESTART}" -eq 1 ]]; then
-              if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
+              if [[ $(grep -i -c "${lMODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -gt 0 ]]; then
                 if [[ "${lMODULE_MAIN}" == "P99_"* ]] || [[ "${lMODULE_MAIN}" == "L1"* ]]; then
                   print_output "[*] $(print_date) - Module ${ORANGE}${lMODULE_MAIN}${NC} already finished but essential - rerun it" "main"
                   lMOD_FIN=0
@@ -428,7 +428,7 @@ main() {
   # EMBA should be started with "sudo -E" to access the proxy settings from the user
   export PROXY_SETTINGS=""
   PROXY_SETTINGS="$(env | grep "http_proxy=http" | cut -d = -f2 | sort -u | head -1)"
-  if [[ -n "${PROXY_SETTINGS}" ]]; then
+  if [[ -z "${PROXY_SETTINGS}" ]]; then
     # 2nd try with the original user:
     PROXY_SETTINGS="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http_proxy=http" | cut -d = -f2 | sort -u | head -1)"
   else
@@ -525,7 +525,7 @@ main() {
       disown "${NOTIFICATION_PID}" 2>/dev/null || true
       print_output "[*] $(print_date) - Original user: ${ORANGE}${SUDO_USER:-${USER}}${NC}" "no_log"
       print_output "[*] $(print_date) - Notification process started with PID ${ORANGE}${NOTIFICATION_PID}${NC}" "no_log"
-      PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2 || true)"
+      PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)?_proxy" | cut -d = -f2 || true)"
       echo "${SUDO_USER:-${USER}}" >"${BASIC_DATA_LOG_DIR}"/orig_user.log
       {
         echo "UID: $(id -u "${SUDO_USER:-${USER}}")"

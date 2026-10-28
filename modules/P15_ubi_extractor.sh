@@ -72,7 +72,7 @@ ubi_extractor() {
 
   if [[ -d "${lEXTRACTION_DIR_}" ]]; then
     remove_uprintable_paths "${lEXTRACTION_DIR_}" || return 1
-    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%"' | grep "UBI.* image" || true)
+    mapfile -t lUBI_1st_ROUND_ARR < <(find "${lEXTRACTION_DIR_}" -type f -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1"' _ | grep "UBI.* image" || true)
 
     for lUBI_DATA in "${lUBI_1st_ROUND_ARR[@]}"; do
       lUBI_FILE="${lUBI_DATA%%:*}"               # field 1

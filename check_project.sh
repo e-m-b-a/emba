@@ -185,7 +185,7 @@ check() {
   for SOURCE in "${SOURCES[@]}"; do
     [[ ! -f "${SOURCE}" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}tab check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    if [[ $(grep -cP '\t' "${SOURCE}") -eq 0 ]]; then
+    if [[ $(grep -cP '\t' "${SOURCE}" || true) -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
@@ -225,7 +225,7 @@ check() {
     [[ "${SOURCE}" == *"check_project.sh" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}recursive grep check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
 
-    if [[ $(grep -cP "grep.* -R " "${SOURCE}") -eq 0 ]]; then
+    if [[ $(grep -cP "grep.* -R " "${SOURCE}" || true) -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"

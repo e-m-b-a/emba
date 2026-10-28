@@ -32,7 +32,7 @@ S23_lua_check() {
   local lLUA_CGI_FILES_ARR_3=()
 
   # find scripts with cgilua as contend:
-  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0 | xargs -r -0 -P 16 -I % sh -c 'grep -l cgilua\. "%" 2>/dev/null || true' | sort -u || true)
+  mapfile -t LUA_CGI_FILES_ARR < <(find "${FIRMWARE_PATH}" -type f -print0 | xargs -r -0 -P 16 -n 1 sh -c 'grep -l cgilua\. "$1" 2>/dev/null || true' _ | sort -u || true)
   # extract lua scripts that are known as lua scripts in out P99_CSV_LOG
   mapfile -t lLUA_CGI_FILES_ARR_2 < <(grep "Lua script" "${P99_CSV_LOG}" | cut -d ';' -f2 || true)
   # find files with lua in the name and some lua content

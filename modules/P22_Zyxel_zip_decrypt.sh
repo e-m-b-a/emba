@@ -119,8 +119,8 @@ zyxel_zip_extractor() {
         return
       fi
 
-      cp "$(command -v "${lEMULATOR}")" "${lZLD_DIR}" || (print_output "[-] Something went wrong" && return)
-      cp "${lRI_FILE_BIN_PATH}" "${lZLD_DIR}" || (print_output "[-] Something went wrong" && return)
+      cp "$(command -v "${lEMULATOR}")" "${lZLD_DIR}" || { print_output "[-] Something went wrong"; return; }
+      cp "${lRI_FILE_BIN_PATH}" "${lZLD_DIR}" || { print_output "[-] Something went wrong"; return; }
       lZLD_BIN=$(basename "${lZLD_BIN}")
 
       chmod +x "${lZLD_DIR}"/"${lZLD_BIN}"

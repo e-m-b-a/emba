@@ -36,7 +36,7 @@ kernel_downloader() {
     fi
   done
   if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
-    while [[ $(grep -c S24_kernel_bin_identifier "${LOG_DIR}"/"${MAIN_LOG_FILE}") -lt 2 ]]; do
+    while [[ $(grep -c S24_kernel_bin_identifier "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -lt 2 ]]; do
       sleep 1
       if check_emba_ended; then
         # as this is a threaded fct we can just exit it.

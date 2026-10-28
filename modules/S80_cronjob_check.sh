@@ -75,7 +75,7 @@ S80_cronjob_check() {
   done
 
   # mapfile -t lCJ_FILE_PATH_ARR < <(mod_path "/var/spool/cron/crontabs")
-  mapfile -t lCJ_FILE_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/spool/cron/crontabs")
+  mapfile -t lCJ_FILE_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "*/var/spool/cron/crontabs")
   for lCT_VAR in "${lCJ_FILE_PATH_ARR[@]}"; do
     local lCRONTABVAR=""
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -108,7 +108,7 @@ S80_cronjob_check() {
   done
 
   # mapfile -t lCJ_FILE_PATH_ARR < <(mod_path "/var/spool/anacron")
-  mapfile -t lCJ_FILE_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/spool/anacron")
+  mapfile -t lCJ_FILE_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "*/var/spool/anacron")
   for lCT_VAR in "${lCJ_FILE_PATH_ARR[@]}"; do
     local lANACRONTAB=""
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh

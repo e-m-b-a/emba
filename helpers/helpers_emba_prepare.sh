@@ -935,7 +935,8 @@ detect_root_dir_helper() {
         mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true)
         for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
           # remove the interpreter path from the full path:
-          lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+          # lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+          lR_PATH="${lR_PATH%"${lINTERPRETER_PATH}"}"
           # common false positive:
           if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
             [[ "${lR_PATH}" =~ \/lib\/$ ]] && continue

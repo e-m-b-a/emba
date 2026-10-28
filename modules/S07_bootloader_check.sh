@@ -227,7 +227,7 @@ check_bootloader() {
       print_output "[+] Found lilo.conf: ""$(print_path "${lLILO_FILE}")"" (LILO)"
       lFIND=$(grep 'password[[:space:]]?=' "${lLILO_FILE}" | grep -v "^#" || true)
       write_csv_log "bootloader status" "LILO configuration file" "found"
-      if [[ -z "${lFIND}" ]]; then
+      if [[ -n "${lFIND}" ]]; then
         print_output "[+] LILO has password protection"
         ((STARTUP_FINDS += 1))
       fi
@@ -316,16 +316,16 @@ check_bootloader() {
       print_output "[+] Found ""$(print_path "${lOPENBSD}")"" (OpenBSD)"
       write_csv_log "bootloader status" "OpenBSD configuration file" "found"
       lFIND=$(grep '^boot' "${lOPENBSD}" || true)
-      if [[ -z "${lFIND}" ]]; then
+      if [[ -n "${lFIND}" ]]; then
         print_output "[+] System can be booted into single user mode without password"
         ((STARTUP_FINDS += 1))
       fi
       mapfile -t lOPENBSD_PATH2_ARR < <(mod_path "/ETC_PATHS/rc.conf")
       for lOPENBSD2 in "${lOPENBSD_PATH2_ARR[@]}"; do
         if [[ -e "${lOPENBSD2}" ]]; then
-          lFIND=$(grep -v -i '^#|none' "${lOPENBSD2}" | grep-i '_enable.*(yes|on|1)' || true | sort | awk -F= '{ print $1 }' | sed 's/_enable//')
+          lFIND=$(grep -v -i '^#|none' "${lOPENBSD2}" | grep -i '_enable.*(yes|on|1)' || true | sort | awk -F= '{ print $1 }' | sed 's/_enable//')
           print_output "[+] Found OpenBSD boot services ""$(print_path "${lOPENBSD2}")"
-          if [[ -z "${lFIND}" ]]; then
+          if [[ -n "${lFIND}" ]]; then
             print_output "$(indent "$(orange "${lFIND}")")"
             ((STARTUP_FINDS += 1))
           fi
@@ -400,7 +400,7 @@ find_runlevel() {
       lDEFAULT_TARGET_PATH="${lSYSTEMD_P}""/system/default.target"
       if [[ -L "${lDEFAULT_TARGET_PATH}" ]]; then
         lFIND="$(read -r "${lDEFAULT_TARGET_PATH}"'' | grep "runlevel" || true)"
-        if [[ -z "${lFIND}" ]]; then
+        if [[ -n "${lFIND}" ]]; then
           print_output "[+] systemd run level information:"
           print_output "$(indent "${lFIND}")"
           ((STARTUP_FINDS += 1))

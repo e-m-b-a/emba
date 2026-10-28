@@ -57,7 +57,7 @@ check_lzma_backdoor() {
   local lOUTPUT="The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
   local lCHECK=0
 
-  mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF"' || true)
+  mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF"' _ || true)
   for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lSSH_FILE/:*/}${NC}:" "no_log"
 
@@ -80,7 +80,7 @@ check_lzma_backdoor() {
   done
 
   # letz find the library directly in the system:
-  mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF"' || true)
+  mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF"' _ || true)
   for lLZMA_FILE in "${lLZMA_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lLZMA_FILE/:*/}${NC}:" "no_log"
     if [[ "${lLZMA_FILE/:*/}" == *"5.6.0"* ]] || [[ "${lLZMA_FILE/:*/}" == *"5.6.1"* ]]; then
@@ -94,7 +94,7 @@ check_lzma_backdoor() {
   done
 
   # check for the xz binary in the vulnerable version
-  mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ELF"' || true)
+  mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF"' _ || true)
   for lXZ_FILE in "${lXZ_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lXZ_FILE/:*/}${NC}:" "no_log"
     lXZ_V_OUT=$(strings "${lXZ_FILE/:*/}" | grep "5\.6\.[01]" || true)
@@ -102,7 +102,7 @@ check_lzma_backdoor() {
       print_output "${lOUTPUT}"
       print_output "[+] Found ${ORANGE}${lXZ_FILE/:*/}${GREEN} with affected version."
       write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
-      strings "${lXZ_FILE}" | grep -q "5\.6\.[01]" | tee -a "${LOG_FILE}" || true
+      strings "${lXZ_FILE/:*/}" | grep -q "5\.6\.[01]" | tee -a "${LOG_FILE}" || true
       write_csv_log "xz/lzma backdoor" "${lXZ_FILE/:*/}" "CVE-2024-3094 (${lXZ_V_OUT})"
       ((SSH_VUL_CNT += 1))
       lCHECK=1
@@ -199,9 +199,9 @@ check_squid() {
       fi
       if [[ ${lCHECK} -eq 1 ]]; then
         print_output "[*] Check external access control list type:"
-        print_output "$(indent "$(grep "^external_acl_type" "${lSQUID_E}")")"
+        print_output "$(indent "$(grep -r "^external_acl_type" "${lSQUID_E}")")"
         print_output "[*] Check access control list:"
-        print_output "$(indent "$(grep "^acl" "${lSQUID_E}" | sed 's/ /!space!/g')")"
+        print_output "$(indent "$(grep -r "^acl" "${lSQUID_E}" | sed 's/ /!space!/g')")"
       fi
     done
   fi

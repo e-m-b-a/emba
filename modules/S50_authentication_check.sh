@@ -93,7 +93,7 @@ search_shadow() {
   local lHASH=""
   local lCHECK=0
 
-  mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*" -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" | grep "ASCII text" | cut -d: -f1' || true)
+  mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ASCII text" | cut -d: -f1' _ || true)
   for lSHADOW_FILE in "${lSHADOW_FILE_PATHS_ARR[@]}"; do
     if [[ -f "${lSHADOW_FILE}" ]]; then
       mapfile -t lHASHES_ARR < <(grep -E '\$[1-6][ay]?\$' "${lSHADOW_FILE}" || true)
@@ -143,7 +143,7 @@ user_zero() {
     if [[ -f "${lPASSWD_FILE}" ]]; then
       lCHECK=1
       local lFIND=""
-      lFIND=$(grep ':0:' "${lPASSWD_FILE}" | grep -v '^#|^root:|^(\+:\*)?:0:0:::' | cut -d ":" -f1,3 | grep ':0' || true)
+      lFIND=$(grep ':0:' "${lPASSWD_FILE}" | grep -E -v '^#|^root:|^(\+:\*)?:0:0:::' | cut -d ":" -f1,3 | grep ':0' || true)
       if [[ -n "${lFIND}" ]]; then
         print_output "[+] Found administrator account/s with UID 0 in ""$(print_path "${lPASSWD_FILE}")"
         print_output "$(indent "$(orange "Administrator account: ${lFIND}")")"
@@ -301,7 +301,7 @@ query_nis_plus_auth_supp() {
       lCHECK=1
       print_output "[+] ""$(print_path "${lNSS_PATH}")"" exist"
       local lFIND=""
-      lFIND="$(grep "^passwd" "${lNSS_PATH}" | grep "compat|nis" | grep -v "nisplus" || true)"
+      lFIND="$(grep "^passwd" "${lNSS_PATH}" | grep -E "compat|nis" | grep -v "nisplus" || true)"
       if [[ -z "${lFIND}" ]]; then
         print_output "[-] NIS/NIS+ authentication not enabled"
       else

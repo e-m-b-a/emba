@@ -263,7 +263,7 @@ S26_kernel_vuln_verifier() {
     if [[ -d "${LOG_DIR}/firmware" ]]; then
       print_output "[*] Identify kernel modules and extract binary symbols ..." "no_log"
       # shellcheck disable=SC2016
-      find "${LOG_DIR}/firmware" -name "*.ko" -print0 | xargs -r -0 -P 16 -I % sh -c 'readelf -W -a "%" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' >>"${LOG_PATH_MODULE}"/symbols.txt || true
+      find "${LOG_DIR}/firmware" -name "*.ko" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'readelf -W -a "$1" | grep FUNC | sed "s/.*FUNC//" | awk "{print $4}" | sed "s/\[\.\.\.\]//"' _ >>"${LOG_PATH_MODULE}"/symbols.txt || true
     fi
 
     uniq "${LOG_PATH_MODULE}"/symbols.txt >"${LOG_PATH_MODULE}"/symbols_uniq.txt

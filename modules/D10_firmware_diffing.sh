@@ -66,8 +66,8 @@ D10_firmware_diffing() {
     return
   fi
 
-  ! [[ -d "${OUTPUT_DIR_UNBLOB1}" ]] && (echo "No firmware directory 1 found" && return)
-  ! [[ -d "${OUTPUT_DIR_UNBLOB2}" ]] && (echo "No firmware directory 2 found" && return)
+  ! [[ -d "${OUTPUT_DIR_UNBLOB1}" ]] && { echo "No firmware directory 1 found"; return; }
+  ! [[ -d "${OUTPUT_DIR_UNBLOB2}" ]] && { echo "No firmware directory 2 found";  return; }
 
   # create an overview of the files in both firmware directories
   cd "${OUTPUT_DIR_UNBLOB1}" || return

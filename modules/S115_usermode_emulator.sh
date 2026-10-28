@@ -91,7 +91,7 @@ S115_usermode_emulator() {
 
       local lDIR=""
       lDIR=$(pwd)
-      mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" -o -name "*.raw" \) -print0 | xargs -r -0 -P 16 -I % sh -c 'file "%" 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' && cd "${lDIR}" || exit)
+      mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" -o -name "*.raw" \) -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' _ && cd "${lDIR}" || exit)
       # we re-create the lBIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in lMD5_DONE_INT_ARR (for all root dirs) we test every bin only once
       lBIN_EMU_ARR=()
@@ -312,7 +312,7 @@ prepare_emulator() {
       print_output "$(indent "$(red "Terminating Emulation module now.\\n")")"
       exit 1
     else
-      cp "$(command -v "${lEMULATOR}")" "${lR_PATH}" || (print_output "[-] Issues in copy emulator process for emulator ${lEMULATOR}" && return)
+      cp "$(command -v "${lEMULATOR}")" "${lR_PATH}" || { print_output "[-] Issues in copy emulator process for emulator ${lEMULATOR}"; return; }
     fi
 
     if ! [[ -d "${lR_PATH}""/proc" ]]; then
@@ -335,7 +335,8 @@ prepare_emulator() {
       mount proc "${lR_PATH}""/proc" -t proc 2>/dev/null || true
     fi
     if ! mount | grep "${lR_PATH}/run" >/dev/null; then
-      mount -o bind /run "${lR_PATH}""/run" 2>/dev/null || true
+      # mount -o bind /run "${lR_PATH}""/run" 2>/dev/null || true
+      mount -t tmpfs -o nosuid,nodev,noexec,size=64m tmpfs "${lR_PATH}/run" 2>/dev/null || true
     fi
     if ! mount | grep "${lR_PATH}/sys" >/dev/null; then
       # Bind-mounted read-only: the emulated init system (procd/ubus etc.) only needs to
@@ -687,11 +688,9 @@ emulate_binary() {
   fi
 
   for lPARAM in "${lEMULATION_PARAMS_ARR[@]}"; do
-    [[ -z "${lPARAM}" ]] && lPARAM="NONE"
-
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
     if [[ -z "${lCPU_CONFIG}" ]] || [[ "${lCPU_CONFIG}" == "NONE" ]]; then
-      write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM}${NC}" "${lLOG_FILE_BIN}"
+      write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM:-NONE}${NC}" "${lLOG_FILE_BIN}"
       if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
         timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
@@ -702,7 +701,7 @@ emulate_binary() {
         disown "${lPID}" 2>/dev/null || true
       fi
     else
-      write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM}${NC} and cpu configuration ${ORANGE}${lCPU_CONFIG}${NC}" "${lLOG_FILE_BIN}"
+      write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM:-NONE}${NC} and cpu configuration ${ORANGE}${lCPU_CONFIG}${NC}" "${lLOG_FILE_BIN}"
       if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
         timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
@@ -755,7 +754,7 @@ check_disk_space_emu() {
   local lCRITICAL_FILES_ARR=()
   local lKILL_PROC_NAME=""
 
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null | xargs -r -0 -P 16 -I % sh -c 'basename -s .txt % 2>/dev/null' || true)
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null | xargs -r -0 -P 16 -n 1 sh -c 'basename -s .txt $1 2>/dev/null' _ || true)
   for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_/}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_/}"

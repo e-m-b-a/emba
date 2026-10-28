@@ -184,7 +184,7 @@ cleaner() {
   # additionally we need to check some variable from a running EMBA instance
   # otherwise the unmounter runs crazy in some corner cases
   if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" && "${#FILE_ARR[@]}" -gt 0 ]]; then
-    if [[ $(grep -i -c S115 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; then
+    if [[ $(grep -i -c S115 "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
 
       print_output "[*] $(print_date) - Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu-.*-sta.* >/dev/null || true
@@ -209,7 +209,7 @@ cleaner() {
       fi
     fi
 
-    if [[ $(grep -i -c S120 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; then
+    if [[ $(grep -i -c S120 "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
       print_output "[*] $(print_date) - Terminating cwe-checker processes - check it with ps" "no_log"
       killall -9 --quiet -r .*cwe_checker.* >/dev/null || true
     fi
@@ -220,7 +220,7 @@ cleaner() {
       if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -i -c L10 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
         print_output "[*] $(print_date) - Resetting system emulation environment" "no_log"
         stopping_emulation_process
-        reset_network_emulation 2
+        reset_network_emulation "${IMAGE_NAME:-NA}" 2
       fi
     fi
   fi
@@ -303,26 +303,26 @@ emba_updater() {
 
   if [[ -d "${EXT_DIR}"/EPSS-data ]]; then
     print_output "[*] EMBA update - EPSS database update" "no_log"
-    cd "${EXT_DIR}"/EPSS-data || (print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1)
+    cd "${EXT_DIR}"/EPSS-data || { print_output "[-] WARNING: Can't update EPSS database" "no_log"; exit 1; }
     if [[ -d ./.git ]]; then
       timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update EPSS database" "no_log"
     fi
-    cd "${lHOME_DIR}" || (print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1)
+    cd "${lHOME_DIR}" || { print_output "[-] WARNING: Can't update EPSS database" "no_log"; exit 1; }
   else
     print_output "[-] WARNING: Can't update EPSS database" "no_log"
   fi
 
   if [[ -d "${NVD_DIR}" ]]; then
     print_output "[*] EMBA update - CVE database update" "no_log"
-    cd "${NVD_DIR}" || (print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1)
+    cd "${NVD_DIR}" || { print_output "[-] WARNING: Can't update CVE database" "no_log"; exit 1; }
     if [[ -d ./.git ]]; then
       timeout "${lUPDATE_TIMEOUT}" git pull
     else
       print_output "[-] WARNING: Can't update CVE database" "no_log"
     fi
-    cd "${lHOME_DIR}" || (print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1)
+    cd "${lHOME_DIR}" || { print_output "[-] WARNING: Can't update CVE database" "no_log"; exit 1; }
   else
     print_output "[-] WARNING: Can't update CVE database" "no_log"
   fi
