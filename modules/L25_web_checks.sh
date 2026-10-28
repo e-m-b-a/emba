@@ -624,7 +624,7 @@ web_access_crawler() {
   # extract started processes from all our qemu logs:
   #
   # find all qemu logs:
-  mapfile -t lFILENAME_ARR_QEMU_START < <(find "${LOG_DIR}/l10_system_emulation" -type f -name "qemu.*seriala.*log" | sort -u || true)
+  mapfile -t lFILENAME_ARR_QEMU_START < <(find "${LOG_DIR}/l10_system_emulation" -type f -name "qemu.*serial.*log" | sort -u || true)
   for lFILENAME_QEMU_START in "${lFILENAME_ARR_QEMU_START[@]}"; do
     # find open service names from qemu logs:
     print_output "[*] Testing Qemu log file: ${lFILENAME_QEMU_START}" "no_log"
