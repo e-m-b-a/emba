@@ -308,7 +308,7 @@ mod_path() {
   if [[ "${1}" == "/ETC_PATHS"* ]]; then
     for lETC_PATH_I in "${ETC_PATHS[@]}"; do
       lNEW_ETC_PATH="$(echo -e "${1}" | sed -e 's!/ETC_PATHS!'"${lETC_PATH_I}"'!g')"
-      lRET_PATHS_ARR=("${lRET_PATHS_ARR[@]}" "${lNEW_ETC_PATH}")
+      lRET_PATHS_ARR+=("${lNEW_ETC_PATH}")
     done
   else
     readarray -t lRET_PATHS_ARR <<<"${1}"

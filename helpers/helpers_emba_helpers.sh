@@ -386,7 +386,8 @@ backup_var() {
   local lVAR_VALUE="${2:-}"
   local lBACKUP_FILE="${LOG_DIR}""/backup_vars.log"
 
-  echo "export ${lVAR_NAME}=\"${lVAR_VALUE}\"" >>"${lBACKUP_FILE}"
+  # echo "export ${lVAR_NAME}=\"${lVAR_VALUE}\"" >>"${lBACKUP_FILE}"
+  printf 'export %s=%q\n' "${lVAR_NAME}" "${lVAR_VALUE}" >>"${lBACKUP_FILE}"
 }
 
 module_wait() {

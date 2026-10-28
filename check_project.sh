@@ -245,8 +245,9 @@ check() {
     fi
 
     echo -e "\\n""${GREEN}""Run ${ORANGE}semgrep${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    semgrep --disable-version-check --metrics=off --config "${EXT_DIR}"/semgrep-rules/bash "${SOURCE}" 2>&1 | tee /tmp/emba_semgrep.log
-    if grep -q ": 0 findings." /tmp/emba_semgrep.log; then
+    SEMGREP_LOG=$(mktemp /tmp/semgrep.XXXXXXX.log)
+    semgrep --disable-version-check --metrics=off --config "${EXT_DIR}"/semgrep-rules/bash "${SOURCE}" 2>&1 | tee "${SEMGREP_LOG}"
+    if grep -q ": 0 findings." "${SEMGREP_LOG}"; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
@@ -280,8 +281,8 @@ check() {
 }
 
 summary() {
-  if [[ -f /tmp/emba_semgrep.log ]]; then
-    rm -- /tmp/emba_semgrep.log
+  if [[ -f "${SEMGREP_LOG}" ]]; then
+    rm -- "${SEMGREP_LOG}"
   fi
 
   if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]]; then
