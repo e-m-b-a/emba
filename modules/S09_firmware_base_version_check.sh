@@ -69,11 +69,13 @@ S09_firmware_base_version_check() {
   if [[ " ${MODULES_EXPORTED[*]} " == *S08* ]]; then
     print_output "[*] Checking for common package manager environments to optimize static version detection"
     # Debian:
+    # shellcheck disable=SC2016
     find "${LOG_DIR}"/firmware -path "*dpkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -n 1 sh -c 'cat "$1"' _ | sort -u >"${LOG_PATH_MODULE}"/debian_known_files.txt || true
     # the extracted packages are used to further limit the static tests
     find "${LOG_DIR}"/firmware -path "*dpkg/status" -type f -exec grep -h "^Package: " {} + | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/debian_known_packages.txt || true
     # OpenWRT
-    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -n 1 sh -c 'cat "%"' _ | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
+    # shellcheck disable=SC2016
+    find "${LOG_DIR}"/firmware -path "*opkg/info/*.list" -type f -print0 | xargs -r -0 -P 16 -n 1 sh -c 'cat "$1"' _ | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_files.txt || true
     find "${LOG_DIR}"/firmware -path "*opkg/status" -type f -exec grep -h "^Package: " {} + | awk '{print $2}' | sort -u >"${LOG_PATH_MODULE}"/openwrt_known_packages.txt || true
     # Todo: rpm
     # lRPM_DIR=$(find "${LOG_DIR}"/firmware -xdev -path "*rpm/Package" -type f -exec dirname {} \; | sort -u || true)

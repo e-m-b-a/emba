@@ -93,6 +93,7 @@ search_shadow() {
   local lHASH=""
   local lCHECK=0
 
+  # shellcheck disable=SC2016
   mapfile -t lSHADOW_FILE_PATHS_ARR < <(find "${LOG_DIR}"/firmware -xdev -name "*shadow*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ASCII text" | cut -d: -f1' _ || true)
   for lSHADOW_FILE in "${lSHADOW_FILE_PATHS_ARR[@]}"; do
     if [[ -f "${lSHADOW_FILE}" ]]; then

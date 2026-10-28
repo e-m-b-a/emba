@@ -310,8 +310,10 @@ extract_kconfig() {
   export CF2='0123456789'
 
   # Prepare temp files:
-  export TMP1=$(mktemp "${TMP_DIR}/ikconfig$$.1.XXXXX")
-  export TMP2=$(mktemp "${TMP_DIR}/ikconfig$$.2.XXXXX")
+  export TMP1=""
+  TMP1=$(mktemp "${TMP_DIR}/ikconfig$$.1.XXXXX")
+  export TMP2=""
+  TMP2=$(mktemp "${TMP_DIR}/ikconfig$$.2.XXXXX")
   # shellcheck disable=SC2064
   trap 'rm -f -- "${TMP1}" "${TMP2}"' 0
 

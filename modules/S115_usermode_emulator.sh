@@ -91,6 +91,7 @@ S115_usermode_emulator() {
 
       local lDIR=""
       lDIR=$(pwd)
+      # shellcheck disable=SC2016
       mapfile -t lBIN_EMU_TMP_ARR < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" -o -name "*.raw" \) -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null' _ && cd "${lDIR}" || exit)
       # we re-create the lBIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in lMD5_DONE_INT_ARR (for all root dirs) we test every bin only once
@@ -757,6 +758,7 @@ check_disk_space_emu() {
   local lCRITICAL_FILES_ARR=()
   local lKILL_PROC_NAME=""
 
+  # shellcheck disable=SC2016
   mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null | xargs -r -0 -P 16 -n 1 sh -c 'basename -s .txt $1 2>/dev/null' _ || true)
   for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_/}"

@@ -97,6 +97,7 @@ os_identification() {
 
   strings "${FIRMWARE_PATH}" 2>/dev/null >"${LOG_PATH_MODULE}/strings_firmware.txt" || true &
   lWAIT_PIDS_S03_1_ARR+=("${!}")
+  # shellcheck disable=SC2016
   find "${OUTPUT_DIR}" -xdev -type f -print0 | xargs -0 -P 16 -n 1 sh -c 'strings "$1" | uniq >> '"${LOG_PATH_MODULE}/all_strings_firmware.txt"' 2> /dev/null' _ || true &
   lWAIT_PIDS_S03_1_ARR+=("${!}")
   wait_for_pid "${lWAIT_PIDS_S03_1_ARR[@]}"

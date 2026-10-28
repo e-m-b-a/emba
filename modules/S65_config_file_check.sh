@@ -65,7 +65,9 @@ check_fstab() {
   mapfile -t lFSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
   if [[ ${#lFSTAB_ARR[@]} -gt 0 ]]; then
+    # shellcheck disable=SC2016
     readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0 | xargs -r -0 -P 16 -n 1 sh -c 'grep "username" "$1"' _ 2>/dev/null || true)")
+    # shellcheck disable=SC2016
     readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${lFSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -print0 | xargs -r -0 -P 16 -n 1 sh -c 'grep "password" "$1"' _ 2>/dev/null || true)")
   fi
 

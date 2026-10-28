@@ -18,7 +18,6 @@
 S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
   local lNEG_LOG=0
-  local lVERSION_LINE=""
   local lWAIT_PIDS_S116_ARR=()
   # emulation result confidence level:
   export CONFIDENCE_LEVEL=3

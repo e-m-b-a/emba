@@ -105,6 +105,7 @@ check_live_metasploit() {
 
   # metasploit tries to parse env variables and our environment is wasted!
   export PORT=""
+  # shellcheck disable=SC2153
   lD_END="${D_END,,}"
   if [[ "${lD_END}" == "el" ]]; then lD_END="le"; fi
   if [[ "${lD_END}" == "eb" ]]; then lD_END="be"; fi

@@ -287,6 +287,7 @@ get_busybox_applets_stat() {
 
   # quite often we only have the firmware path without the filesytem area: /bin/busybox
   # This results in another search for our binary
+  # shellcheck disable=SC2016
   mapfile -t lBB_BINS_ARR < <(find "${LOG_DIR}"/firmware -wholename "*${lBB_BIN_}*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF" | cut -d: -f1' _ | sort -u || true)
   for lBB_BIN_ in "${lBB_BINS_ARR[@]}"; do
     print_output "[*] Extract applet data for BusyBox version ${ORANGE}${lBB_VERSION_}${NC} from binary ${ORANGE}${lBB_BIN_}${NC}"

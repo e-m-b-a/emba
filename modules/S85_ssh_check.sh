@@ -57,6 +57,7 @@ check_lzma_backdoor() {
   local lOUTPUT="The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
   local lCHECK=0
 
+  # shellcheck disable=SC2016
   mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF"' _ || true)
   for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lSSH_FILE/:*/}${NC}:" "no_log"
@@ -80,6 +81,7 @@ check_lzma_backdoor() {
   done
 
   # letz find the library directly in the system:
+  # shellcheck disable=SC2016
   mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF"' _ || true)
   for lLZMA_FILE in "${lLZMA_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lLZMA_FILE/:*/}${NC}:" "no_log"
@@ -94,6 +96,7 @@ check_lzma_backdoor() {
   done
 
   # check for the xz binary in the vulnerable version
+  # shellcheck disable=SC2016
   mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -print0 | xargs -r -0 -P 16 -n 1 sh -c 'file "$1" | grep "ELF"' _ || true)
   for lXZ_FILE in "${lXZ_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lXZ_FILE/:*/}${NC}:" "no_log"
