@@ -362,8 +362,8 @@ prepare_emulator() {
     else
       "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "${LOG_PATH_MODULE}"/chroot_fixes.txt || print_error "[-] Something weird going wrong in chroot filesystem fixing for ${lR_PATH}"
     fi
-    rm "${lR_PATH}"/fixImage_user_mode_emulation.sh || true
-    rm "${lR_PATH}"/busybox || true
+    rm -- "${lR_PATH}"/fixImage_user_mode_emulation.sh || true
+    rm -- "${lR_PATH}"/busybox || true
     print_bar
   fi
 }
@@ -402,7 +402,7 @@ run_init_test() {
       setup_chroot
     fi
     if [[ -f "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" ]]; then
-      rm "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" || true
+      rm -- "${LOG_PATH_MODULE}""/qemu_chroot_check_""${lBIN_EMU_NAME_}"".txt" || true
     fi
   fi
   run_init_qemu "${lCPU_CONFIG}" "${lBIN_EMU_NAME_}" "${lLOG_FILE_INIT}" "${lEMULATOR}"
@@ -419,7 +419,7 @@ run_init_test() {
 
     for lCPU_CONFIG in "${lCPU_CONFIGS_ARR[@]}"; do
       if [[ -f "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" ]]; then
-        rm "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || true
+        rm -- "${LOG_PATH_MODULE}""/qemu_initx_""${lBIN_EMU_NAME_}"".txt" || true
       fi
 
       run_init_qemu "${lCPU_CONFIG}" "${lBIN_EMU_NAME_}" "${lLOG_FILE_INIT}" "${lEMULATOR}"
@@ -836,7 +836,7 @@ s115_cleanup() {
   local lBINARY_FROM_LOG=""
   local lLOG_FILE=""
 
-  # rm "${LOG_PATH_MODULE}""/stracer_*.txt" 2>/dev/null || true
+  # rm -- "${LOG_PATH_MODULE}""/stracer_*.txt" 2>/dev/null || true
 
   # if no emulation at all was possible the $lEMULATOR variable is not defined
   if [[ -n "${lEMULATOR}" ]]; then
@@ -852,8 +852,8 @@ s115_cleanup() {
   kill -9 "${PID_killer}" >/dev/null || true
 
   print_output "[*] Cleaning the emulation environment\\n" "no_log"
-  find "${EMULATION_PATH_BASE}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
-  find "${EMULATION_PATH_BASE}" -xdev -iname "*.core" -exec rm {} \; 2>/dev/null || true
+  find "${EMULATION_PATH_BASE}" -xdev -iname "qemu*static" -exec rm -- {} \; 2>/dev/null || true
+  find "${EMULATION_PATH_BASE}" -xdev -iname "*.core" -exec rm -- {} \; 2>/dev/null || true
 
   print_ln "no_log"
   print_output "[*] Umounting proc, sys and run" "no_log"
@@ -883,7 +883,7 @@ s115_cleanup() {
       # print_output "[*] LOG_FILE: $lLOG_FILE - Lines: $lLINES_OF_LOG" "no_log"
       if ! [[ -s "${lLOG_FILE}" ]] || [[ "${lLINES_OF_LOG}" -eq 0 ]]; then
         # print_output "[*] Removing empty log file: $lLOG_FILE" "no_log"
-        rm "${lLOG_FILE}" 2>/dev/null || true
+        rm -- "${lLOG_FILE}" 2>/dev/null || true
         continue
       fi
       lBINARY_FROM_LOG=$(basename "${lLOG_FILE}")

@@ -40,7 +40,7 @@ if ! [[ -f "${GCC_RELEASES_FILE}" ]]; then
   exit 1
 fi
 
-[[ -f "${GCC_OUTPUT_CSV}" ]] && rm "${GCC_OUTPUT_CSV}"
+[[ -f "${GCC_OUTPUT_CSV}" ]] && rm -- "${GCC_OUTPUT_CSV}"
 
 mapfile -t GCC_RELEASES_ARR < <(grep "<tr><td>.*GCC [0-9].*</td></tr>" "${GCC_RELEASES_FILE}")
 
@@ -55,4 +55,4 @@ for GCC_ENTRY in "${GCC_RELEASES_ARR[@]}"; do
   echo "${GCC_VERSION};${GCC_RELEASE_DATE}" >>"${GCC_OUTPUT_CSV}"
 done
 
-[[ -f "${GCC_RELEASES_FILE}" ]] && rm "${GCC_RELEASES_FILE}"
+[[ -f "${GCC_RELEASES_FILE}" ]] && rm -- "${GCC_RELEASES_FILE}"

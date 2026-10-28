@@ -414,13 +414,13 @@ create_emulation_filesystem() {
     if [[ -e "${MNT_POINT}/kernelInit" ]]; then
       print_output "[*] Backup ${MNT_POINT}/kernelInit:"
       tee -a "${LOG_FILE}" <"${MNT_POINT}/kernelInit"
-      rm "${MNT_POINT}/kernelInit"
+      rm -- "${MNT_POINT}/kernelInit"
     fi
 
-    rm "${MNT_POINT}/fixImage.sh" || true
-    rm "${MNT_POINT}/inferFile.sh" || true
-    rm "${MNT_POINT}/busybox" || true
-    rm "${MNT_POINT}/bash-static" || true
+    rm -- "${MNT_POINT}/fixImage.sh" || true
+    rm -- "${MNT_POINT}/inferFile.sh" || true
+    rm -- "${MNT_POINT}/busybox" || true
+    rm -- "${MNT_POINT}/bash-static" || true
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
     # FirmAE/firmadyne recompiled binaries + addons
@@ -499,10 +499,10 @@ link_libnvram_so() {
 
   # ensure we have a dbg libnvram for the initial identification
   if [[ -s "${lMNT_POINT}/firmadyne/libnvram.so" ]]; then
-    rm "${lMNT_POINT}/firmadyne/libnvram.so"
+    rm -- "${lMNT_POINT}/firmadyne/libnvram.so"
   fi
   if [[ -s "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" ]]; then
-    rm "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
+    rm -- "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram.so"
@@ -1058,13 +1058,13 @@ emulation_with_config() {
     fi
 
     # remove tmp files for next round
-    rm "${TMP_DIR}"/online_stats.tmp || true
+    rm -- "${TMP_DIR}"/online_stats.tmp || true
   fi
 
   # if our ip address has changed during analysis we restore this ip address now
   if [[ -f "${TMP_DIR}/emulation_changed_ip_address.tmp" ]]; then
     IP_ADDRESS_="$(cat "${TMP_DIR}/emulation_changed_ip_address.tmp")"
-    rm "${TMP_DIR}/emulation_changed_ip_address.tmp" || true
+    rm -- "${TMP_DIR}/emulation_changed_ip_address.tmp" || true
   fi
 
   write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lVLAN_ID}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
@@ -1302,9 +1302,9 @@ handle_fs_mounts() {
   cp "${MODULE_SUB_PATH}/inferService.sh" "${MNT_POINT}" || true
   print_output "[*] inferService.sh (chroot)"
   EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
-  rm "${MNT_POINT}"/inferService.sh || true
-  rm "${MNT_POINT}"/bash-static || true
-  rm "${MNT_POINT}"/busybox || true
+  rm -- "${MNT_POINT}"/inferService.sh || true
+  rm -- "${MNT_POINT}"/bash-static || true
+  rm -- "${MNT_POINT}"/busybox || true
 
   if [[ -f "${MNT_POINT}"/firmadyne/service ]]; then
     # tp-link camset fix (e.g. NC200_2.1.8_Build_171109_Rel.28679.bin):
@@ -1329,7 +1329,7 @@ cleanup_emulator() {
   rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}" 2>/dev/null || true
   rm -rf /tmp/qemu."${lIMAGE_NAME:?lIMAGE_NAME is unset or empty}".S1 2>/dev/null || true
   if [[ -f /tmp/do_not_create_run.sh ]]; then
-    rm /tmp/do_not_create_run.sh || true
+    rm -- /tmp/do_not_create_run.sh || true
   fi
 
   # losetup
@@ -2241,7 +2241,7 @@ write_network_config_to_filesystem() {
     # before the next emulation testrun
     # This file is an indiator that the initial network config was done and we can start checking
     # the network config during emulation
-    rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
+    rm -- "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
 
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
@@ -2961,7 +2961,7 @@ create_emulation_archive() {
     done
 
     mount "${lDEVICE}" "${MNT_POINT}" || true
-    rm "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
+    rm -- "${MNT_POINT}"/tmp/EMBA_config_state 2>/dev/null || true
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "$(basename "${lIMAGE}")" "${lDEVICE}" "${MNT_POINT}"
 

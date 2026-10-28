@@ -55,7 +55,7 @@ S20_shell_check() {
 
     if [[ -f "${TMP_DIR}"/S20_VULNS.tmp ]]; then
       S20_SHELL_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S20_VULNS.tmp)
-      rm "${TMP_DIR}"/S20_VULNS.tmp
+      rm -- "${TMP_DIR}"/S20_VULNS.tmp
     fi
     [[ "${S20_SHELL_VULNS}" -gt 0 ]] && lNEG_LOG=1
 

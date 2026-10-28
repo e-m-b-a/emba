@@ -322,14 +322,14 @@ check_jnap_access() {
     if [[ -s "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]]; then
       if grep -q "_ErrorUnauthorized" "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log; then
         print_output "[-] Authentication needed for ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
-        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
+        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm -- "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
       fi
       if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && grep -q "_ErrorInvalidInput" "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log; then
         print_output "[-] Invalid request detected for ${ORANGE}${lJNAP_EPT}${NC}" "no_log"
-        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
+        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]] && rm -- "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
       fi
     else
-      rm "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
+      rm -- "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log
     fi
 
     if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${lJNAP_EPT_NAME}".log ]]; then

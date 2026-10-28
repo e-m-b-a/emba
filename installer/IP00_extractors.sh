@@ -100,7 +100,7 @@ IP00_extractors() {
         cd ./external || (echo "Could not install EMBA component buffalo decryptor" && exit 1)
         sed -i 's/#include "buffalo-lib.h"/#include "buffalo-lib.h"\n#include "buffalo-lib.c"/g' buffalo-enc.c
         gcc -o buffalo-enc.elf buffalo-enc.c
-        rm buffalo-enc.c buffalo-lib.c buffalo-lib.h
+        rm -- buffalo-enc.c buffalo-lib.c buffalo-lib.h
         cd "${HOME_PATH}" || (echo "Could not install EMBA component buffalo decryptor" && exit 1)
 
       fi

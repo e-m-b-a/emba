@@ -130,7 +130,7 @@ radare_decompilation() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG}" ]] && rm "${FUNC_LOG}"
+      [[ -f "${FUNC_LOG}" ]] && rm -- "${FUNC_LOG}"
       continue
     fi
   done
@@ -252,7 +252,7 @@ radare_decomp_output_function_details() {
 
     if [[ -f "${lLOG_FILE}" ]]; then
       cat "${lLOG_FILE}" >>"${lOLD_LOG_FILE}" || true
-      rm "${lLOG_FILE}" 2>/dev/null || true
+      rm -- "${lLOG_FILE}" 2>/dev/null || true
     fi
     lLOG_FILE="${lOLD_LOG_FILE}"
   }

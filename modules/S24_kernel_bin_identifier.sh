@@ -55,7 +55,7 @@ S24_kernel_bin_identifier() {
     if [[ $(wc -l <"${S24_CSV_LOG}") -gt 1 ]]; then
       lNEG_LOG=$(wc -l <"${S24_CSV_LOG}" 2>/dev/null || echo 0)
     else
-      rm "${S24_CSV_LOG:?S24_CSV_LOG is unset or empty}"
+      rm -- "${S24_CSV_LOG:?S24_CSV_LOG is unset or empty}"
     fi
   fi
   if [[ -n "$(find "${LOG_PATH_MODULE}" -name "threading_*.tmp" -print -quit)" ]]; then

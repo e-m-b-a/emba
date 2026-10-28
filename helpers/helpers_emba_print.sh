@@ -424,7 +424,7 @@ write_json_module_log() {
   # as our json is not beautiful we remove all \n and further formatting should be done via jq
   tr -d '\n' <"${lJSON_LOG}" >"${lJSON_LOG/\.tmp/\.json}"
   find "${LOG_PATH_MODULE}" -maxdepth 1 -type f -name "JSON_tmp_*.json" -delete || true
-  rm "${lJSON_LOG}" || true
+  rm -- "${lJSON_LOG}" || true
 }
 
 # write_pid_log is a functions used for debugging
@@ -838,7 +838,7 @@ module_end_log() {
   lCSV_LOG="${LOG_FILE/\.txt/\.csv}"
   if [[ -f "${lCSV_LOG}" ]]; then
     if [[ $(wc -l "${lCSV_LOG}" | awk '{print $1}') -lt 2 ]]; then
-      rm "${lCSV_LOG}"
+      rm -- "${lCSV_LOG}"
     fi
   fi
 

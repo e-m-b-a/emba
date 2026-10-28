@@ -273,7 +273,7 @@ build_sbom_json_component_arr() {
     # we should not work with the tmp file trick but otherwise jo does not handle our json correctly
     jo -p license="$(jo -n "${lAPP_LIC_ARR[@]}")" >"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json
     lCOMPONENT_ARR+=("licenses=$(jo -a :"${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json)")
-    rm "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
+    rm -- "${TMP_DIR}"/sbom_lic_"${lAPP_NAME}"_"${lTMP_IDENTIFIER}".json || true
   fi
   lCOMPONENT_ARR+=("scope=${lAPP_SCOPE}")
   lCOMPONENT_ARR+=("cpe=${lCPE_IDENTIFIER}")

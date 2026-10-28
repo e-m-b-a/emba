@@ -664,7 +664,7 @@ radare_output_function_details() {
 
     if [[ -f "${lLOG_FILE}" ]]; then
       cat "${lLOG_FILE}" >>"${lOLD_LOG_FILE}" || true
-      rm "${lLOG_FILE}" 2>/dev/null || true
+      rm -- "${lLOG_FILE}" 2>/dev/null || true
     fi
     lLOG_FILE="${lOLD_LOG_FILE}"
   }

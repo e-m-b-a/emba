@@ -77,7 +77,7 @@ I13_disasm() {
           echo "Could not install EMBA component Capa"
           exit 1
         }
-        rm external/capa-v"${CAPA_VERSION}"-linux.zip
+        rm -- external/capa-v"${CAPA_VERSION}"-linux.zip
       fi
 
       if ! [[ -f "external/objdump" ]]; then
@@ -99,7 +99,7 @@ I13_disasm() {
         if [[ -f "external/${BINUTIL_VERSION_NAME}/binutils/objdump" ]]; then
           mv "external/${BINUTIL_VERSION_NAME}/binutils/objdump" "external/objdump"
           rm -R -- "external/${BINUTIL_VERSION_NAME}"
-          rm "external/""${BINUTIL_VERSION_NAME}"".tar.gz"
+          rm -- "external/""${BINUTIL_VERSION_NAME}"".tar.gz"
           if [[ -f "external/objdump" ]]; then
             echo -e "${GREEN}""objdump installed successfully""${NC}"
           fi

@@ -74,7 +74,7 @@ IF17_cve_bin_tool() {
         echo "[*] CVE query results for busybox query after initial import (should be around 2886):"
         wc -l "/tmp/cve_bin_tool_health_check_results.csv"
         # should be around 2886
-        rm "/tmp/cve_bin_tool_health_check_results.csv"
+        rm -- "/tmp/cve_bin_tool_health_check_results.csv"
       else
         echo "[-] WARNING: No CVE database update file available from installer directory /installer/cve-database.db"
       fi
@@ -89,7 +89,7 @@ IF17_cve_bin_tool() {
       if [[ -f /tmp/cve_bin_tool_health_check_results.csv ]]; then
         echo "[*] CVE query results for busybox query after database update (should be around 2888):"
         wc -l /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
-        rm /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
+        rm -- /tmp/cve_bin_tool_health_check_results.csv || echo "[-] No temporary cve check results available ... manual checks needed"
       else
         echo "[-] WARNING: No CVE search results available - manual checks needed!"
       fi
@@ -101,7 +101,7 @@ IF17_cve_bin_tool() {
 
       # cleanup
       rm -r -- "${HOME}/.cache/cve-bin-tool"
-      rm external/cve-bin-tool/cve_bin_tool_health_check.csv
+      rm -- external/cve-bin-tool/cve_bin_tool_health_check.csv
 
       if [[ -f external/cve-bin-tool/cve-database.db ]]; then
         echo -e "${GREEN}[+] CVE database installed${NC}"

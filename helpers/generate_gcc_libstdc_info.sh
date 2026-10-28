@@ -47,7 +47,7 @@ if ! [[ -f "${GCC_RELEASES_FILE}" ]]; then
   exit 1
 fi
 
-[[ -f "${GCC_OUTPUT_CSV}" ]] && rm "${GCC_OUTPUT_CSV}"
+[[ -f "${GCC_OUTPUT_CSV}" ]] && rm -- "${GCC_OUTPUT_CSV}"
 
 mapfile -t GCC_STC_MATCHING_ARR < <(grep "div\ class.*libstdc" "${GCC_STC_MATCHING_FILE}" | tr '<p>' '\n' | grep GCC | grep -v "next")
 
@@ -68,5 +68,5 @@ for GCC_STC_MATCHING_ENTRY in "${GCC_STC_MATCHING_ARR[@]}"; do
   echo "${GCC_ENTRY};${LIBSTDC_ENTRY};${GCC_RELEASE_DATE}" >>"${GCC_OUTPUT_CSV}"
 done
 
-[[ -f "${GCC_STC_MATCHING_FILE}" ]] && rm "${GCC_STC_MATCHING_FILE}"
-[[ -f "${GCC_RELEASES_FILE}" ]] && rm "${GCC_RELEASES_FILE}"
+[[ -f "${GCC_STC_MATCHING_FILE}" ]] && rm -- "${GCC_STC_MATCHING_FILE}"
+[[ -f "${GCC_RELEASES_FILE}" ]] && rm -- "${GCC_RELEASES_FILE}"

@@ -132,7 +132,7 @@ check_snmp_vulns() {
       tee -a "${LOG_FILE}" <"${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${lIP_ADDRESS}"-"${lOID}".txt
       print_ln
     else
-      rm "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${lIP_ADDRESS}"-"${lOID}".txt || true
+      rm -- "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${lIP_ADDRESS}"-"${lOID}".txt || true
     fi
   done
 

@@ -123,10 +123,10 @@ os_identification() {
   fi
 
   if [[ -f "${LOG_PATH_MODULE}/strings_firmware.txt" ]]; then
-    rm "${LOG_PATH_MODULE}/strings_firmware.txt" || true
+    rm -- "${LOG_PATH_MODULE}/strings_firmware.txt" || true
   fi
   if [[ -f "${LOG_PATH_MODULE}/all_strings_firmware.txt" ]]; then
-    rm "${LOG_PATH_MODULE}/all_strings_firmware.txt" || true
+    rm -- "${LOG_PATH_MODULE}/all_strings_firmware.txt" || true
   fi
 }
 

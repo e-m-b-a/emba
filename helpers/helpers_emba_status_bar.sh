@@ -452,7 +452,7 @@ box_updaters() {
   elif [[ -n "${PID_SYSTEM_LOAD}" && ${STATUS_BAR_BOX_COUNT} -le 0 ]]; then
     kill_box_pid "${PID_SYSTEM_LOAD}" &
     export PID_SYSTEM_LOAD=""
-    rm "${TMP_DIR}"/PID_SYSTEM_LOAD.log || true
+    rm -- "${TMP_DIR}"/PID_SYSTEM_LOAD.log || true
   fi
   if [[ -z "${PID_STATUS}" && ${STATUS_BAR_BOX_COUNT} -gt 1 ]]; then
     update_box_status &
@@ -461,7 +461,7 @@ box_updaters() {
   elif [[ -n "${PID_STATUS}" && ${STATUS_BAR_BOX_COUNT} -le 1 ]]; then
     kill_box_pid "${PID_STATUS}" &
     export PID_STATUS=""
-    rm "${TMP_DIR}"/PID_STATUS.log || true
+    rm -- "${TMP_DIR}"/PID_STATUS.log || true
   fi
   if [[ -z "${PID_MODULES}" && ${STATUS_BAR_BOX_COUNT} -gt 2 ]]; then
     update_box_modules &
@@ -470,7 +470,7 @@ box_updaters() {
   elif [[ -n "${PID_MODULES}" && ${STATUS_BAR_BOX_COUNT} -le 2 ]]; then
     kill_box_pid "${PID_MODULES}" &
     export PID_MODULES=""
-    rm "${TMP_DIR}"/PID_MODULES.log || true
+    rm -- "${TMP_DIR}"/PID_MODULES.log || true
   fi
   if [[ -z "${PID_STATUS_2}" && ${STATUS_BAR_BOX_COUNT} -gt 3 ]]; then
     update_box_status_2 &
@@ -479,7 +479,7 @@ box_updaters() {
   elif [[ -n "${PID_STATUS_2}" && ${STATUS_BAR_BOX_COUNT} -le 3 ]]; then
     kill_box_pid "${PID_STATUS_2}" &
     export PID_STATUS_2=""
-    rm "${TMP_DIR}"/PID_STATUS_2.log || true
+    rm -- "${TMP_DIR}"/PID_STATUS_2.log || true
   fi
 }
 

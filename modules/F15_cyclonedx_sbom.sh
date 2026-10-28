@@ -26,7 +26,7 @@ F15_cyclonedx_sbom() {
 
   if [[ -d "${SBOM_LOG_PATH}" ]]; then
     if [[ -f "${CSV_DIR}"/f15_cyclonedx_sbom.json ]]; then
-      rm "${CSV_DIR}"/f15_cyclonedx_sbom.json
+      rm -- "${CSV_DIR}"/f15_cyclonedx_sbom.json
     fi
 
     local lSBOM_LOG_FILE="${SBOM_LOG_PATH%\/}/EMBA_cyclonedx_sbom"

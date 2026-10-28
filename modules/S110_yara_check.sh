@@ -78,7 +78,7 @@ S110_yara_check() {
     write_log "[*] Statistics:${lCOUNTING}"
 
     [[ "${lCOUNTING}" -eq 0 ]] && print_output "[-] No code patterns found with yara."
-    [[ -f "${lDIR_COMB_YARA}" ]] && rm "${lDIR_COMB_YARA}"
+    [[ -f "${lDIR_COMB_YARA}" ]] && rm -- "${lDIR_COMB_YARA}"
   else
     print_output "[!] YARA checks disabled - enable it in your scanning profile with ${ORANGE}export YARA=1${NC}."
   fi

@@ -93,7 +93,7 @@ vmdk_extractor() {
         print_error "[-] Extracting VMDK ${lTMP_VMDK_MNT} to ${lEXTRACTION_DIR_}/${lDEV_NAME} failed ..."
         continue
       }
-      rm "${lTMP_VMDK_MNT}" || true
+      rm -- "${lTMP_VMDK_MNT}" || true
     fi
   done
 

@@ -281,7 +281,7 @@ check() {
 
 summary() {
   if [[ -f /tmp/emba_semgrep.log ]]; then
-    rm /tmp/emba_semgrep.log
+    rm -- /tmp/emba_semgrep.log
   fi
 
   if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]]; then

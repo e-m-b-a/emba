@@ -223,7 +223,7 @@ F17_cve_bin_tool() {
 
     # Handle EMBA_sbom_vex_tmp.json if it exists
     if [[ -f "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json" ]]; then
-      rm "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
+      rm -- "${SBOM_LOG_PATH}/EMBA_sbom_vex_tmp.json"
     fi
   fi
 
@@ -387,7 +387,7 @@ cve_bin_tool_threader() {
   python3 "${lCVE_BIN_TOOL}" -i "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" --disable-version-check --disable-validation-check --no-0-cve-report --offline -f csv -o "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}" || true
 
   #  if [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
-  #    rm "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
+  #    rm -- "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" || true
   #  fi
 
   # walk through "${LOG_PATH_MODULE}/${lBOM_REF}_${lPROD}_${lVERS}".csv and check for exploits, EPSS and print as in F20
@@ -472,7 +472,7 @@ cve_bin_tool_threader() {
 
   # we can now delete the temp log file
   if [[ -f "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" ]]; then
-    rm "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true
+    rm -- "${LOG_PATH_MODULE}/cve_sum/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.txt" || true
   fi
 
   # now, lets write the main f20 log file with the results of the current binary:
@@ -907,7 +907,7 @@ tear_down_cve_threader() {
   jq . "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" >"${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.json"
 
   # cleanup
-  rm "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || true
+  rm -- "${LOG_PATH_MODULE}/json/${lVULN_BOM_REF}_${lPRODUCT_NAME}_${lVERS}.tmp.json" || true
 }
 
 get_kernel_s25_data() {

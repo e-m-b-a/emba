@@ -296,11 +296,11 @@ ghidra_analyzer() {
       # Todo: highlight the identified code areas in the decompiled code
     else
       print_output "[-] No C/C++ issues found for binary ${ORANGE}${lNAME}${NC}" "no_log"
-      rm "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
+      rm -- "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
       return
     fi
   else
-    rm "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
+    rm -- "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
     return
   fi
 
@@ -337,7 +337,7 @@ s16_finish_the_log() {
   for lTMP_FILE in "${lSEMGREPLOG/\.json/}"_"${lNAME}"*.tmp; do
     if [[ -f "${lTMP_FILE}" ]]; then
       cat "${lTMP_FILE}" >>"${lSEMGREPLOG_TXT}" || print_error "[-] Error in logfile processing - ${lTMP_FILE}"
-      rm "${lTMP_FILE}" || true
+      rm -- "${lTMP_FILE}" || true
     fi
   done
 }

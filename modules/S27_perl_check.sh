@@ -95,7 +95,7 @@ s27_zarn_perl_checks() {
     cp "${lPL_SCRIPT}" "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}"
     if [[ -f "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" ]]; then
       perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" --sarif "${LOG_PATH_MODULE}/zarn_${lNAME}.sarif" | tee -a "${lPL_LOG}" || print_error "[-] Analysis of ${lNAME} failed"
-      rm "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" || true
+      rm -- "${TMP_DIR}/s27/${lNAME/.cgi/.pl}" || true
     fi
   else
     perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${lPL_SCRIPT}" --sarif "${LOG_PATH_MODULE}/zarn_${lNAME}.sarif" | tee -a "${lPL_LOG}" || print_error "[-] Analysis of ${lNAME} failed"

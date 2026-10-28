@@ -23,7 +23,7 @@ F50_base_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "${RESTART}" -eq 1 ]] && [[ -f "${LOG_FILE}" ]]; then
-    rm "${LOG_FILE}"
+    rm -- "${LOG_FILE}"
   fi
 
   get_data

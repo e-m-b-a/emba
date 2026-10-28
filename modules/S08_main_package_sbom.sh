@@ -167,7 +167,7 @@ create_comp_dep_tree_threader() {
   write_log "" "${SBOM_LOG_PATH}/SBOM_dependencies.txt"
 
   cat "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" >>"${SBOM_LOG_PATH}/SBOM_dependencies.txt"
-  rm "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
+  rm -- "${TMP_DIR}/SBOM_dependencies_${lSBOM_COMP_REF}.txt" || true
 
   jo -p ref="${lSBOM_COMP_REF}" dependsOn="$(jo -a -- "${lSBOM_COMP_DEPS_ARR[@]}")" >>"${SBOM_LOG_PATH}/SBOM_deps/SBOM_dependency_${lSBOM_COMP_REF}".json
 }

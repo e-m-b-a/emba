@@ -78,7 +78,7 @@ IP61_unblob() {
       download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-6/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
       echo "[*] Installing sasquatch"
       dpkg -i external/sasquatch_1.0_amd64.deb
-      rm external/sasquatch_1.0_amd64.deb
+      rm -- external/sasquatch_1.0_amd64.deb
 
       echo "[*] Cloning unblob"
       git clone https://github.com/onekey-sec/unblob.git external/unblob

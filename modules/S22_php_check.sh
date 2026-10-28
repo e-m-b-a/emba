@@ -267,7 +267,7 @@ s22_vuln_check() {
     echo "${lVULNS}" >>"${TMP_DIR}"/S22_VULNS.tmp
   else
     # print_output "[*] Warning: No VULNS detected in $lPHP_LOG" "no_log"
-    rm "${lPHP_LOG}" 2>/dev/null || true
+    rm -- "${lPHP_LOG}" 2>/dev/null || true
   fi
 }
 

@@ -59,7 +59,7 @@ I120_cwe_checker() {
       # curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
       # mkdir external/jdk 2>/dev/null
       # tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
-      # rm external/jdk.tar.gz
+      # rm -- external/jdk.tar.gz
 
       # Ghidra
       if [[ -d ./external/ghidra ]]; then rm -R ./external/ghidra; fi
@@ -73,7 +73,7 @@ I120_cwe_checker() {
       #   # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
       #   sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
       # fi
-      rm external/ghidra.zip
+      rm -- external/ghidra.zip
 
       # further Ghidra installation stuff:
       mkdir external/ghidra_scripts
@@ -98,7 +98,7 @@ I120_cwe_checker() {
           cp -pr -- "${HOME}/.local" ./external/cwe_checker/
 
           # cleanup
-          rm "${HOME}"/.config -r -f || true
+          rm -- "${HOME}"/.config -r -f || true
         fi
       else
         echo -e "\\n""${GREEN}""cwe-checker already installed - no further action performed.""${NC}"

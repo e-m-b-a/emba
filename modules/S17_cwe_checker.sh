@@ -278,7 +278,7 @@ cwe_checker_threaded() {
 
   if [[ -f "${LOG_FILE}" ]]; then
     cat "${LOG_FILE}" >>"${lOLD_LOG_FILE}"
-    rm "${LOG_FILE}" 2>/dev/null
+    rm -- "${LOG_FILE}" 2>/dev/null
   fi
   LOG_FILE="${lOLD_LOG_FILE}"
 }

@@ -164,11 +164,11 @@ grepit_search() {
 
     if [[ "${lLOG_DETAILS}" -eq 1 ]]; then
       if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null) -gt 7 ]]; then
-        rm "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
+        rm -- "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
       fi
     else
       if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null) -gt 0 ]]; then
-        rm "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
+        rm -- "${LOG_PATH_MODULE}/${lOUTFILE}" 2>/dev/null
       fi
     fi
     if [[ -f "${LOG_PATH_MODULE}/${lOUTFILE}" ]]; then

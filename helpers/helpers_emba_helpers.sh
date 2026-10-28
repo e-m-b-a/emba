@@ -189,8 +189,8 @@ cleaner() {
       print_output "[*] $(print_date) - Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu-.*-sta.* >/dev/null || true
       print_output "[*] $(print_date) - Cleaning the emulation environment\\n" "no_log"
-      find "${FIRMWARE_PATH_CP}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
-      find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
+      find "${FIRMWARE_PATH_CP}" -xdev -iname "qemu*static" -exec rm -- {} \; 2>/dev/null || true
+      find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm -- {} \; 2>/dev/null || true
 
       print_output "[*] $(print_date) - Umounting proc, sys and run" "no_log"
       local lCHECK_MOUNTS_ARR=()
@@ -269,11 +269,11 @@ cleaner() {
   fi
 
   if [[ -f "${LOG_DIR}"/print_running_modules.pid ]]; then
-    rm "${LOG_DIR}"/print_running_modules.pid >/dev/null || true
+    rm -- "${LOG_DIR}"/print_running_modules.pid >/dev/null || true
   fi
   if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
     if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
-      rm "${LOG_DIR}"/emba_error.log >/dev/null || true
+      rm -- "${LOG_DIR}"/emba_error.log >/dev/null || true
     fi
   fi
 
@@ -365,7 +365,7 @@ restore_permissions() {
     lORIG_UID="$(grep "UID" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
     lORIG_GID="$(grep "GID" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"
     chown "${lORIG_UID}":"${lORIG_GID}" "${LOG_DIR}" -R || true
-    # rm "${BASIC_DATA_LOG_DIR}"/orig_user.log || true
+    # rm -- "${BASIC_DATA_LOG_DIR}"/orig_user.log || true
   fi
 }
 

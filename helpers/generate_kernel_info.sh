@@ -36,7 +36,7 @@ if ! curl -sf --url "${KERNEL_RELEASES_URL}" >"${KERNEL_RELEASES_FILE}"; then
   exit 1
 fi
 
-[[ -f "${KERNEL_OUTPUT_CSV}" ]] && rm "${KERNEL_OUTPUT_CSV}"
+[[ -f "${KERNEL_OUTPUT_CSV}" ]] && rm -- "${KERNEL_OUTPUT_CSV}"
 
 # get initial site with sub directories per kernel version
 mapfile -t KERNEL_SUB_DIR_ARR < <(grep "a href=\"v[0-9]\." "${KERNEL_RELEASES_FILE}")
@@ -64,4 +64,4 @@ for KERNEL_ENTRY in "${KERNEL_VER_ARR[@]}"; do
   echo "${KERNEL_VER};${KERNEL_RELEASE}" >>"${KERNEL_OUTPUT_CSV}"
 done
 
-[[ -f "${KERNEL_RELEASES_FILE}" ]] && rm "${KERNEL_RELEASES_FILE}"
+[[ -f "${KERNEL_RELEASES_FILE}" ]] && rm -- "${KERNEL_RELEASES_FILE}"

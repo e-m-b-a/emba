@@ -78,7 +78,7 @@ fwhunter() {
 
   # delete empty log files
   if [[ $(wc -l <"${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt") -eq 1 ]]; then
-    rm "${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt" || true
+    rm -- "${LOG_PATH_MODULE}""/fwhunt_scan_${lFWHUNTER_CHECK_FILE_NAME}.txt" || true
   fi
 }
 

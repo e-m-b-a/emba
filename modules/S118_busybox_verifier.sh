@@ -165,7 +165,7 @@ S118_busybox_verifier() {
 
     if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" ]]; then
       mapfile -t BB_VERIFIED_APPLETS < <(sort -u "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp")
-      rm "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" || true
+      rm -- "${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION}.tmp" || true
     fi
 
     print_output "[*] Create CVE vulnerabilities array for BusyBox version ${ORANGE}:${lBB_VENDOR}:${lBB_PRODUCT}:${lBB_VERSION}${NC} ..." "no_log"
@@ -378,7 +378,7 @@ get_cve_busybox_data() {
 
     for lCVE_NICE_REPORT in "${CVE_DETAILS_PATH/.csv/_CVE-}"*; do
       cat "${lCVE_NICE_REPORT}" >>"${CVE_DETAILS_PATH/.csv/_nice.txt}"
-      rm "${lCVE_NICE_REPORT}" >/dev/null || true
+      rm -- "${lCVE_NICE_REPORT}" >/dev/null || true
     done
 
     print_output "[+] Extracted ${ORANGE}${lVULN_CNT}${GREEN} vulnerabilities based on BusyBox version only" "" "${CVE_DETAILS_PATH/.csv/_nice.txt}"

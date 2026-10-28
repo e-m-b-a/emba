@@ -119,7 +119,7 @@ S13_weak_func_check() {
     wait_for_pid "${lWAIT_PIDS_S13_ARR[@]}"
 
     # ensure that we do not have result files without real results:
-    find "${LOG_DIR}"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; 2>/dev/null || true
+    find "${LOG_DIR}"/s13_weak_func_check/vul_func_0*.txt -exec rm -- {} \; 2>/dev/null || true
 
     print_top10_statistics "${lVULNERABLE_FUNCTIONS_ARR[@]}"
 
@@ -214,7 +214,7 @@ function_check_NIOS2() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -- "${FUNC_LOG:-}"
       continue
     fi
   done
@@ -279,7 +279,7 @@ function_check_PPC32() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -- "${FUNC_LOG:-}"
       continue
     fi
   done
@@ -357,7 +357,7 @@ function_check_MIPS() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -- "${FUNC_LOG:-}"
       continue
     fi
   done
@@ -423,7 +423,7 @@ function_check_ARM64() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -- "${FUNC_LOG:-}"
       continue
     fi
   done
@@ -553,7 +553,7 @@ function_check_x86() {
     fi
 
     if [[ "${COUNT_FUNC}" -eq 0 ]]; then
-      [[ -f "${FUNC_LOG:-}" ]] && rm "${FUNC_LOG:-}"
+      [[ -f "${FUNC_LOG:-}" ]] && rm -- "${FUNC_LOG:-}"
       continue
     fi
   done
@@ -744,7 +744,7 @@ output_function_details() {
 
     if [[ -f "${lLOG_FILE}" ]]; then
       cat "${lLOG_FILE}" >>"${lOLD_LOG_FILE}"
-      rm "${lLOG_FILE}" 2>/dev/null || true
+      rm -- "${lLOG_FILE}" 2>/dev/null || true
     fi
     lLOG_FILE="${lOLD_LOG_FILE}"
   }

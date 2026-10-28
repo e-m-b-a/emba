@@ -264,7 +264,7 @@ uefi_extractor() {
   fi
 
   if [[ -f "${lEXTRACTION_DIR_}"/firmware ]]; then
-    rm "${lEXTRACTION_DIR_}"/firmware
+    rm -- "${lEXTRACTION_DIR_}"/firmware
   fi
 
   if [[ -f "${LOG_PATH_MODULE}"/uefi_extractor_"${lFIRMWARE_NAME_}".log ]]; then

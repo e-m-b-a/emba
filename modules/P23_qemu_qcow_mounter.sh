@@ -41,7 +41,7 @@ P23_qemu_qcow_mounter() {
     qcow_extractor "${FIRMWARE_PATH}" "${lEXTRACTION_DIR}"
 
     #    if [[ -f "${TMP_DIR}"/firmware ]]; then
-    #      rm "${TMP_DIR}"/firmware
+    #      rm -- "${TMP_DIR}"/firmware
     #    fi
 
     if [[ -s "${P99_CSV_LOG}" ]] && grep -q "^${FUNCNAME[0]};" "${P99_CSV_LOG}"; then
@@ -90,7 +90,7 @@ qcow_extractor() {
       l7ZIP_BROKEN_LNK_TARGET_NAME=${l7ZIP_BROKEN_LNK##*:\ }
       find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1
       l7ZIP_BROKEN_LNK_SOURCE=$(find "${lEXTRACTION_DIR}" -path "*${l7ZIP_BROKEN_LNK_SOURCE}" | sort -u | head -1)
-      rm "${l7ZIP_BROKEN_LNK_SOURCE}" || true
+      rm -- "${l7ZIP_BROKEN_LNK_SOURCE}" || true
       l7ZIP_BROKEN_LNK_TARGET=$(find "${lEXTRACTION_DIR}" -path "*/${l7ZIP_BROKEN_LNK_TARGET_NAME}" | sort -u | head -1)
       ln -s -r -- "${l7ZIP_BROKEN_LNK_TARGET}" "${l7ZIP_BROKEN_LNK_SOURCE}" || true
     done
