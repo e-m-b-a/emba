@@ -238,7 +238,7 @@ F02_toolchain() {
       fi
 
       # print_output "[*] Testing GCC version ${lBINARY_COMPILER_GUESSED}" "no_log"
-      if [[ "${lBINARY_COMPILER_GUESSED}" == *"Buildroot" ]]; then
+      if [[ "${lBINARY_COMPILER_GUESSED}" == *"Buildroot"* ]]; then
         # e.g. GCC (Buildroot 2012.11.1)
         lGCC_VERSION_STRIPPED=$(echo "${lBINARY_COMPILER_GUESSED}" | grep -o -E " [0-9]{4}\.[0-9]+(\.[0-9]+)+?" | head -1 || true)
       else
