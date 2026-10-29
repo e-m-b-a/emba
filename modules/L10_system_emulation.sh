@@ -369,6 +369,13 @@ create_emulation_filesystem() {
     mkdir -p -- "${MNT_POINT}/firmadyne/libnvram/" || true
     mkdir -p -- "${MNT_POINT}/firmadyne/libnvram.override/" || true
 
+    # just in case there is something in here we delete it
+    rm -f -- "${MNT_POINT}/busybox" || true
+    rm -f -- "${MNT_POINT}/bash-static" || true
+    rm -f -- "${MNT_POINT}/fixImage.sh" || true
+    rm -f -- "${MNT_POINT}/inferFile.sh" || true
+    rm -f -- "${MNT_POINT}/inferService.sh" || true
+
     print_output "[*] Patching filesystem (chroot)"
     cp "$(command -v busybox)" "${MNT_POINT}" || true
     cp "$(command -v bash-static)" "${MNT_POINT}" || true
@@ -405,11 +412,13 @@ create_emulation_filesystem() {
       # injection checker - future extension
       local lINJECTION_MARKER="${RANDOM}"
       if [[ -d "${MNT_POINT}"/bin ]]; then
+        rm -f -- "${MNT_POINT}/bin/a" || true
         cp "${MODULE_SUB_PATH}/injection_check.sh" "${MNT_POINT}"/bin/a || true
         chmod a+x "${MNT_POINT}/bin/a" || true
         sed -i 's/asdfqwertz/'"d34d_${lINJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
       fi
       if [[ -d "${MNT_POINT}"/sbin ]]; then
+        rm -f -- "${MNT_POINT}/sbin/a" || true
         cp "${MODULE_SUB_PATH}/injection_check.sh" "${MNT_POINT}"/sbin/a || true
         chmod a+x "${MNT_POINT}/sbin/a" || true
         sed -i 's/asdfqwertz/'"d34d_${lINJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
@@ -461,6 +470,11 @@ create_emulation_filesystem() {
     mknod -m 666 "${MNT_POINT}/firmadyne/ttyAMA1" c 4 65
 
     print_output "[*] Setting up emulation scripts"
+    rm -f -- "${MNT_POINT}/firmadyne/preInit.sh" || true
+    rm -f -- "${MNT_POINT}/firmadyne/network.sh" || true
+    rm -f -- "${MNT_POINT}/firmadyne/init_service.sh" || true
+    rm -f -- "${MNT_POINT}/firmadyne/run_service.sh" || true
+
     cp "${MODULE_SUB_PATH}/preInit.sh" "${MNT_POINT}/firmadyne/preInit.sh" || true
     chmod a+x "${MNT_POINT}/firmadyne/preInit.sh"
 
