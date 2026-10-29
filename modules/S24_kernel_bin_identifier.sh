@@ -227,7 +227,7 @@ binary_kernel_check_threader() {
 
         local lCFG_CNT=0
         if [[ -f "${lKCONFIG_EXTRACTED}" ]]; then
-          lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}")
+          lCFG_CNT=$(grep -c CONFIG_ "${lKCONFIG_EXTRACTED}" || true)
         fi
         # double check we really have a Kernel config extracted
         if [[ -f "${lKCONFIG_EXTRACTED}" ]] && [[ "${lCFG_CNT}" -gt 50 ]]; then
@@ -310,8 +310,10 @@ extract_kconfig() {
   export CF2='0123456789'
 
   # Prepare temp files:
-  export TMP1="${TMP_DIR}"/ikconfig$$.1
-  export TMP2="${TMP_DIR}"/ikconfig$$.2
+  export TMP1=""
+  TMP1=$(mktemp "${TMP_DIR}/ikconfig$$.1.XXXXX")
+  export TMP2=""
+  TMP2=$(mktemp "${TMP_DIR}/ikconfig$$.2.XXXXX")
   # shellcheck disable=SC2064
   trap 'rm -f -- "${TMP1}" "${TMP2}"' 0
 
@@ -382,7 +384,7 @@ dump_config() {
 
 try_decompress() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
-  local lLOG_FILE="${1:-}"
+  local lLOG_FILE="${4:-}"
 
   export POS=""
   for POS in $(tr "$1\n$2" "\n$2=" <"${IMG}" | grep -abo "^$2"); do

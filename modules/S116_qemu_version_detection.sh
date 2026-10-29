@@ -18,7 +18,6 @@
 S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
   local lNEG_LOG=0
-  local lVERSION_LINE=""
   local lWAIT_PIDS_S116_ARR=()
   # emulation result confidence level:
   export CONFIDENCE_LEVEL=3
@@ -63,17 +62,6 @@ S116_qemu_version_detection() {
       mapfile -t lVERSION_IDENTIFIER_CFG_ARR < <(find "${lVERSION_IDENTIFIER_CFG_PATH}" -name "*.json")
 
       for lVERSION_JSON_CFG in "${lVERSION_IDENTIFIER_CFG_ARR[@]}"; do
-        if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
-          # this should prevent double checking - if a version identifier was already successful we do not need to
-          # test the other identifiers. In threaded mode this usually does not decrease testing speed
-          local lBINARY=""
-          lBINARY="${lVERSION_LINE%%;*}" # field 1
-          if [[ "$(tail -n +2 "${CSV_DIR}"/s116_qemu_version_detection.csv | cut -d\; -f2 | grep -c "^${lBINARY}$")" -gt 0 ]]; then
-            print_output "[*] Already identified component for identifier ${ORANGE}${lBINARY}${NC} ... skipping further tests" "no_log"
-            continue
-          fi
-        fi
-
         version_detection_thread "${lVERSION_JSON_CFG}" &
         local lTMP_PID="$!"
         store_kill_pids "${lTMP_PID}"

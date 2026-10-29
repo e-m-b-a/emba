@@ -83,8 +83,12 @@ main_web_check() {
       # handle first https and afterwards http
       if [[ "${lSERVICE}" == *"ssl|http"* ]] || [[ "${lSERVICE}" == *"ssl/http"* ]]; then
         export LEGACY_SSL_DETECTED=0
+
         # enable old ciphers and test access:
-        sed -i -E 's/MinProtocol[=\ ]+.*/MinProtocol = None/g' /etc/ssl/openssl.cnf
+        cp /etc/ssl/openssl.cnf /tmp
+        sed -i -E 's/MinProtocol[=\ ]+.*/MinProtocol = None/g' "${TMP_DIR}/openssl.cnf"
+        export OPENSSL_CONF="${TMP_DIR}/openssl.cnf"
+
         local lCURL_OPTS_ARR=("-sS" "--noproxy" '*' '-k')
         timeout --preserve-status --signal SIGINT 4 "${CURL_CMD_ARR[@]}" "${lCURL_OPTS_ARR[@]}" "https://${lIP_ADDRESS_}:${lPORT}" |& tee "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log" || true
         if grep -q "unsupported protocol" "${LOG_PATH_MODULE}/ssl_check_${lIP_ADDRESS_}-${lPORT}.log"; then
@@ -226,23 +230,23 @@ check_for_basic_auth_init() {
     disable_strict_mode "${STRICT_MODE}" 1
     print_output "[*] Web server with basic auth protected ... performing login attempt"
     # basic auth from nmap found
-    "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+    "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET "http://${lIP_}:${lPORT_}/" 2> >(tee -a "${LOG_FILE}")
     local lCURL_RET="$?"
 
     # if authentication required, we try user "admin" without password and "admin":"password"
     if [[ "${lCURL_RET}" == 22 ]]; then
       local lCREDS="admin:"
-      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" "http://${lIP_}:${lPORT_}/" 2> >(tee -a "${LOG_FILE}")
       local lCURL_RET="$?"
     fi
     if [[ "${lCURL_RET}" == 22 ]]; then
       local lCREDS="user:"
-      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" "http://${lIP_}:${lPORT_}/" 2> >(tee -a "${LOG_FILE}")
       local lCURL_RET="$?"
     fi
     if [[ "${lCURL_RET}" == 22 ]]; then
       local lCREDS="admin:password"
-      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" http://"${lIP_}"/ 2> >(tee -a "${LOG_FILE}")
+      "${CURL_CMD_ARR[@]}" -v -L --noproxy '*' --max-redirs 0 -f -m 5 -s -X GET -u "${lCREDS}" "http://${lIP_}:${lPORT_}/" 2> >(tee -a "${LOG_FILE}")
       local lCURL_RET="$?"
     fi
     enable_strict_mode "${STRICT_MODE}" 1
@@ -620,7 +624,7 @@ web_access_crawler() {
   # extract started processes from all our qemu logs:
   #
   # find all qemu logs:
-  mapfile -t lFILENAME_ARR_QEMU_START < <(find "${LOG_DIR}/l10_system_emulation" -type f -name "qemu.serial.log" | sort -u || true)
+  mapfile -t lFILENAME_ARR_QEMU_START < <(find "${LOG_DIR}/l10_system_emulation" -type f -name "qemu.*serial.*log" | sort -u || true)
   for lFILENAME_QEMU_START in "${lFILENAME_ARR_QEMU_START[@]}"; do
     # find open service names from qemu logs:
     print_output "[*] Testing Qemu log file: ${lFILENAME_QEMU_START}" "no_log"

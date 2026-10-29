@@ -94,6 +94,7 @@ check_basic_upnp() {
           return
         fi
       fi
+      # we break on a system that should be reachable via our lPORT
       break
     fi
   done
@@ -110,7 +111,7 @@ check_basic_upnp() {
       ((lUPNP_CNT += 1))
       [[ "${lUPNP_CNT}" -gt 5 ]] && break
 
-      if ! system_online_check "${IP_ADDRESS_}" "${lPORT}"; then
+      if ! system_online_check "${IP_ADDRESS_}" "${lPORT:-NA}"; then
         if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}" 1; then
           print_output "[-] System not responding - Not performing further UPnP checks"
           return
@@ -163,7 +164,7 @@ check_basic_hnap_jnap() {
         continue
       fi
 
-      local lCURL_OPTS=("-v" "-L" "--noproxy" "'*'" "--max-redirs" "0" "-f" "-m" "5" "-s")
+      local lCURL_OPTS=("-v" "-L" "--noproxy" "*" "--max-redirs" "0" "-f" "-m" "5" "-s")
       if [[ "${lSERVICE}" == *"ssl|http"* ]] || [[ "${lSERVICE}" == *"ssl/http"* ]]; then
         local lURL="https://${IP_ADDRESS_}:${lPORT}"
         lCURL_OPTS+=("-k")

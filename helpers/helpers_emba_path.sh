@@ -308,7 +308,7 @@ mod_path() {
   if [[ "${1}" == "/ETC_PATHS"* ]]; then
     for lETC_PATH_I in "${ETC_PATHS[@]}"; do
       lNEW_ETC_PATH="$(echo -e "${1}" | sed -e 's!/ETC_PATHS!'"${lETC_PATH_I}"'!g')"
-      lRET_PATHS_ARR=("${lRET_PATHS_ARR[@]}" "${lNEW_ETC_PATH}")
+      lRET_PATHS_ARR+=("${lNEW_ETC_PATH}")
     done
   else
     readarray -t lRET_PATHS_ARR <<<"${1}"
@@ -337,19 +337,34 @@ mod_path_array() {
 
 create_log_dir() {
   if ! [[ -d "${LOG_DIR}" ]]; then
-    mkdir -- "${LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
+    mkdir -- "${LOG_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${TMP_DIR}" ]]; then
-    mkdir -- "${TMP_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create TMP log directory" "no_log" && exit 1)
+    mkdir -- "${TMP_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create TMP log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${CSV_DIR}" ]]; then
-    mkdir -- "${CSV_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create CSV log directory" "no_log" && exit 1)
+    mkdir -- "${CSV_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create CSV log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${JSON_DIR}" ]]; then
-    mkdir -- "${JSON_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create JSON log directory" "no_log" && exit 1)
+    mkdir -- "${JSON_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create JSON log directory" "no_log"
+      exit 1
+    }
   fi
   if ! [[ -d "${BASIC_DATA_LOG_DIR}" ]]; then
-    mkdir -- "${BASIC_DATA_LOG_DIR}" 2>/dev/null || (print_output "[!] WARNING: Cannot create basic log directory" "no_log" && exit 1)
+    mkdir -- "${BASIC_DATA_LOG_DIR}" 2>/dev/null || {
+      print_output "[!] WARNING: Cannot create basic log directory" "no_log"
+      exit 1
+    }
   fi
 
   if ! [[ -f "${MAIN_LOG}" ]]; then
@@ -400,6 +415,9 @@ config_find() {
         if [[ -L "${lFOUND_ENTRY}" ]]; then
           local lREAL_PATH=""
           lREAL_PATH="$(realpath "${lFOUND_ENTRY}" 2>/dev/null || true)"
+          lREAL_PATH_FW="$(realpath -s "${FIRMWARE_PATH}" 2>/dev/null || true)/"
+          # if the real path does not start with our firmware path we have some invalid path and skip it
+          [[ ! "${lREAL_PATH}" == "${lREAL_PATH_FW}"* ]] && continue
           if [[ -f "${lREAL_PATH}" ]]; then
             lFIND_RESULTS_ARR+=("${lREAL_PATH}")
           fi

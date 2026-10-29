@@ -30,6 +30,8 @@ if [[ -z "${BUSYBOX_PATH}" ]]; then
   echo "[-] BusyBox not found on host ... exit helper script"
   exit 1
 fi
+# just in case there is something in here
+rm -f "${ROOT_DIR}"/busybox || true
 cp "${BUSYBOX_PATH}" "${ROOT_DIR}"
 chmod +x "${ROOT_DIR}"/busybox
 

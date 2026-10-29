@@ -115,7 +115,7 @@ rpm_extractor() {
       for lRPM in "${lRPM_ARCHIVES_ARR[@]}"; do
         lRPM_NAME=$(basename "${lRPM}")
         print_output "[*] Extracting ${ORANGE}${lRPM_NAME}${NC} package to the root directory ${ORANGE}${lR_PATH}${NC}."
-        rpm2cpio "${lRPM}" | cpio -D "${lR_PATH}" -idm || true
+        rpm2cpio "${lRPM}" | cpio --no-absolute-filenames -D "${lR_PATH}" -idm || true
       done
     done
 

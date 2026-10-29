@@ -28,7 +28,7 @@ source ./helpers/helpers_emba_print.sh
 GCC_RELEASES_HTML="https://gcc.gnu.org/releases.html"
 
 # local temp files
-GCC_RELEASES_FILE="/tmp/gcc_releases.html"
+GCC_RELEASES_FILE=$(mktemp "/tmp/gcc_releases.XXXX.html")
 
 # final EMBA csv config file
 GCC_OUTPUT_CSV="./config/gcc_details.csv"

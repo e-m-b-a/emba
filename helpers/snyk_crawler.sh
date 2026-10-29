@@ -18,7 +18,7 @@
 
 URL="https://security.snyk.io/vuln"
 LINKS="snyk_adv_links.txt"
-SAVE_PATH="/tmp/snyk"
+SAVE_PATH=$(mktemp "/tmp/snyk.XXXX")
 EMBA_CONFIG_PATH="./config/"
 
 if ! [[ -d "${EMBA_CONFIG_PATH}" ]]; then
