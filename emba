@@ -431,7 +431,8 @@ main() {
   if [[ -z "${PROXY_SETTINGS}" ]]; then
     # 2nd try with the original user:
     PROXY_SETTINGS="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http_proxy=http" | cut -d = -f2 | sort -u | head -1)"
-  else
+  fi
+  if [[ -z "${PROXY_SETTINGS}" ]]; then
     if [[ -f "${BASIC_DATA_LOG_DIR}"/orig_user.log ]]; then
       if grep -q "PROXY: http" "${BASIC_DATA_LOG_DIR}"/orig_user.log; then
         PROXY_SETTINGS="$(grep "PROXY: http" "${BASIC_DATA_LOG_DIR}"/orig_user.log | awk '{print $2}')"

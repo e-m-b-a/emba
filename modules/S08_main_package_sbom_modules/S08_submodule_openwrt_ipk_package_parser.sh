@@ -129,14 +129,7 @@ ipk_package_parser_threader() {
     return
   fi
 
-  # if we have found multiple status files but all are the same -> we do not need to test duplicates
   lPKG_MD5="$(md5sum "${lIPK_ARCHIVE}" | awk '{print $1}')"
-  if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-    print_output "[*] ${ORANGE}${lIPK_ARCHIVE}${NC} already analyzed" "no_log"
-    return
-  fi
-  lPKG_CHECKED_ARR+=("${lPKG_MD5}")
-
   local lIPK_LOG_PATH="${TMP_DIR}/ipk_package_${lPKG_MD5}"
   if ! [[ -d "${lIPK_LOG_PATH}" ]]; then
     mkdir -- "${lIPK_LOG_PATH}" || true

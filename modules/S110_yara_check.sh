@@ -59,14 +59,12 @@ S110_yara_check() {
         lMATCH_FILE_NAME=$(basename "${lMATCH_FILE}")
         # this rule does not help us a lot ... remove it from results
         [[ "${lYRULE}" =~ .*IsSuspicious.* ]] && continue
-        if ! [[ -f "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt" ]]; then
-          print_output "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
-          write_log "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
-          write_log "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
-          echo "" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
-          write_csv_log "${lYRULE}" "${lMATCH_FILE}"
-          lCOUNTING=$((lCOUNTING + 1))
-        fi
+        print_output "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
+        write_log "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
+        write_log "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
+        echo "" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
+        write_csv_log "${lYRULE}" "${lMATCH_FILE}"
+        lCOUNTING=$((lCOUNTING + 1))
       fi
       [[ -v lMATCH_FILE_NAME ]] && echo "${lYARA_OUT_LINE}" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
     done <"${LOG_PATH_MODULE}"/yara_complete_output.txt

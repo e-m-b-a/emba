@@ -85,7 +85,7 @@ main_web_check() {
         export LEGACY_SSL_DETECTED=0
 
         # enable old ciphers and test access:
-        cp /etc/ssl/openssl.cnf /tmp
+        cp /etc/ssl/openssl.cnf "${TMP_DIR}/openssl.cnf"
         sed -i -E 's/MinProtocol[=\ ]+.*/MinProtocol = None/g' "${TMP_DIR}/openssl.cnf"
         export OPENSSL_CONF="${TMP_DIR}/openssl.cnf"
 
