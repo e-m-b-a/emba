@@ -180,7 +180,7 @@ check_bootloader() {
     fi
   else
     print_output "[-] No Grub configuration check"
-    write_csv_log "bootloader status" "Grub configuration check" "found"
+    write_csv_log "bootloader status" "Grub configuration check" "not_found"
   fi
 
   # FreeBSD or DragonFly
@@ -274,7 +274,7 @@ check_bootloader() {
   done
   if [[ ${lCHECK} -eq 0 ]]; then
     print_output "[-] No YABOOT configuration file found"
-    write_csv_log "bootloader status" "YABOOT configuration fileot_found"
+    write_csv_log "bootloader status" "YABOOT configuration file" "not_found"
   fi
 
   # OpenBSD
@@ -323,7 +323,7 @@ check_bootloader() {
       mapfile -t lOPENBSD_PATH2_ARR < <(mod_path "/ETC_PATHS/rc.conf")
       for lOPENBSD2 in "${lOPENBSD_PATH2_ARR[@]}"; do
         if [[ -e "${lOPENBSD2}" ]]; then
-          lFIND=$(grep -v -i '^#|none' "${lOPENBSD2}" | grep -i '_enable.*(yes|on|1)' || true | sort | awk -F= '{ print $1 }' | sed 's/_enable//')
+          lFIND=$(grep -v -i -E '^#|none' "${lOPENBSD2}" | grep -i -E '_enable.*(yes|on|1)' | sort | awk -F= '{ print $1 }' | sed 's/_enable//' || true)
           print_output "[+] Found OpenBSD boot services ""$(print_path "${lOPENBSD2}")"
           if [[ -n "${lFIND}" ]]; then
             print_output "$(indent "$(orange "${lFIND}")")"
@@ -399,7 +399,7 @@ find_runlevel() {
       print_output "[*] Check runlevel in systemd directory: ""$(print_path "${lSYSTEMD_P}")"
       lDEFAULT_TARGET_PATH="${lSYSTEMD_P}""/system/default.target"
       if [[ -L "${lDEFAULT_TARGET_PATH}" ]]; then
-        lFIND="$(read -r "${lDEFAULT_TARGET_PATH}"'' | grep "runlevel" || true)"
+        lFIND="$(readlink -- "${lDEFAULT_TARGET_PATH}"'' | grep "runlevel" || true)"
         if [[ -n "${lFIND}" ]]; then
           print_output "[+] systemd run level information:"
           print_output "$(indent "${lFIND}")"

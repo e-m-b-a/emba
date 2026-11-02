@@ -29,7 +29,7 @@ S90_mail_check() {
 
   write_csv_log "type" "path"
 
-  mapfile -t lMAILS_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail")
+  mapfile -t lMAILS_PATH_ARR < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "*/var/mail")
   for lELEM in "${lMAILS_PATH_ARR[@]}"; do
     if [[ -e "${lELEM}" ]]; then
       # lMAILS="$(ls -la "${lELEM}" 2>/dev/null)"
@@ -47,7 +47,7 @@ S90_mail_check() {
   local lELEM=""
   local lMAILS_ROOT=""
 
-  mapfile -t lMAILS_PATH_ROOT < <(find "${FIRMWARE_PATH}" -xdev -type d -iwholename "/var/mail/root")
+  mapfile -t lMAILS_PATH_ROOT < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "*/var/mail/root")
   for lELEM in "${lMAILS_PATH_ROOT[@]}"; do
     if [[ -e "${lELEM}" ]]; then
       lMAILS_ROOT="$(head "${lELEM}" 2>/dev/null)"

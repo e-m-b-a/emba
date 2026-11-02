@@ -54,11 +54,13 @@ S110_yara_check() {
     while read -r lYARA_OUT_LINE; do
       local lAUTHOR_STRING=" [] [author="
       if [[ "${lYARA_OUT_LINE}" == *"${lAUTHOR_STRING}"* ]]; then
+        lMATCH_FILE_NAME=""
         lYRULE="$(awk '{print $1}' <<<"${lYARA_OUT_LINE}")" # field 1
+        [[ "${lYRULE}" =~ .*IsSuspicious.* ]] && continue
+
         lMATCH_FILE=$(echo "${lYARA_OUT_LINE}" | grep "\ \[\]\ \[author=\"" | rev | awk '{print $1}' | rev)
         lMATCH_FILE_NAME=$(basename "${lMATCH_FILE}")
         # this rule does not help us a lot ... remove it from results
-        [[ "${lYRULE}" =~ .*IsSuspicious.* ]] && continue
         print_output "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
         write_log "" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
         write_log "[+] Yara rule ${ORANGE}${lYRULE}${GREEN} matched in ${ORANGE}${lMATCH_FILE}${NC}" "${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
@@ -66,7 +68,7 @@ S110_yara_check() {
         write_csv_log "${lYRULE}" "${lMATCH_FILE}"
         lCOUNTING=$((lCOUNTING + 1))
       fi
-      [[ -v lMATCH_FILE_NAME ]] && echo "${lYARA_OUT_LINE}" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
+      [[ -n "${lMATCH_FILE_NAME}" ]] && echo "${lYARA_OUT_LINE}" >>"${LOG_PATH_MODULE}/${lMATCH_FILE_NAME}.txt"
     done <"${LOG_PATH_MODULE}"/yara_complete_output.txt
 
     print_ln

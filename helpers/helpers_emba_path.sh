@@ -415,7 +415,7 @@ config_find() {
         if [[ -L "${lFOUND_ENTRY}" ]]; then
           local lREAL_PATH=""
           lREAL_PATH="$(realpath "${lFOUND_ENTRY}" 2>/dev/null || true)"
-          lREAL_PATH_FW="$(realpath -s "${FIRMWARE_PATH}" 2>/dev/null || true)/"
+          lREAL_PATH_FW="$(realpath "${FIRMWARE_PATH}" 2>/dev/null || true)/"
           # if the real path does not start with our firmware path we have some invalid path and skip it
           [[ ! "${lREAL_PATH}" == "${lREAL_PATH_FW}"* ]] && continue
           if [[ -f "${lREAL_PATH}" ]]; then

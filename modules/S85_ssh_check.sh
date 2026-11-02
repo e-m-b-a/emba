@@ -189,6 +189,7 @@ check_squid() {
     print_output "[!] Config not found"
   elif [[ "${#lSQUID_PATHS_ARR[@]}" -ne 0 ]]; then
     for lSQUID_E in "${lSQUID_PATHS_ARR[@]}"; do
+      lCHECK=0
       if [[ -f "${lSQUID_E}""/squid.conf" ]]; then
         lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${lSQUID_E}")${NC}"
@@ -202,9 +203,9 @@ check_squid() {
       fi
       if [[ ${lCHECK} -eq 1 ]]; then
         print_output "[*] Check external access control list type:"
-        print_output "$(indent "$(grep -r "^external_acl_type" "${lSQUID_E}")")"
+        print_output "$(indent "$(grep -r "^external_acl_type" "${lSQUID_E}" || true)")"
         print_output "[*] Check access control list:"
-        print_output "$(indent "$(grep -r "^acl" "${lSQUID_E}" | sed 's/ /!space!/g')")"
+        print_output "$(indent "$(grep -r "^acl" "${lSQUID_E}" | sed 's/ /!space!/g' || true)")"
       fi
     done
   fi

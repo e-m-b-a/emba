@@ -759,7 +759,7 @@ check_disk_space_emu() {
   local lKILL_PROC_NAME=""
 
   # shellcheck disable=SC2016
-  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null | xargs -r -0 -P 16 -n 1 sh -c 'basename -s .txt $1 2>/dev/null' _ || true)
+  mapfile -t lCRITICAL_FILES_ARR < <(find "${LOG_PATH_MODULE}" -xdev -maxdepth 1 -type f -size +"${QEMU_KILL_SIZE}" -print0 2>/dev/null | xargs -r -0 -P 16 -n 1 sh -c 'basename -s .txt "$1" 2>/dev/null' _ || true)
   for lKILL_PROC_NAME in "${lCRITICAL_FILES_ARR[@]}"; do
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_tmp_/}"
     lKILL_PROC_NAME="${lKILL_PROC_NAME/qemu_initx_/}"
@@ -891,7 +891,7 @@ s115_cleanup() {
         continue
       fi
       lBINARY_FROM_LOG=$(basename "${lLOG_FILE}")
-      lBINARY_FROM_LOG=$(echo "${lBINARY_FROM_LOG}" | cut -d_ -f3 | sed 's/.txt$//')
+      lBINARY_FROM_LOG=$(echo "${lBINARY_FROM_LOG}" | cut -d_ -f3- | sed 's/.txt$//')
       print_output "[+]""${NC}"" Emulated binary ""${GREEN}""${lBINARY_FROM_LOG}""${NC}"" generated output in ""${GREEN}""${lLOG_FILE}""${NC}""." "" "${lLOG_FILE}"
     done
   fi

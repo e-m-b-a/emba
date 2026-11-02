@@ -219,6 +219,7 @@ ghidra_analyzer() {
     # minimum Ghidra runtime of 60 seconds
     if [[ "${lS16_GHIDRA_MAX_RUNTIME}" -lt 60 ]]; then
       print_error "[-] Out of time for decompiling code from binary ${ORANGE}${lNAME} / ${lBINARY}${NC} with Ghidra - skipping"
+      rm -f "/tmp/haruspex_${lNAME}" 2>/dev/null
       return
     else
       # add unit for our calculated time
@@ -297,10 +298,12 @@ ghidra_analyzer() {
     else
       print_output "[-] No C/C++ issues found for binary ${ORANGE}${lNAME}${NC}" "no_log"
       rm -- "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
+      rm -rf -- "/tmp/haruspex_${lNAME}" 2>/dev/null
       return
     fi
   else
     rm -- "${lSEMGREPLOG}" || print_error "[-] Error detected while removing ${lSEMGREPLOG}"
+    rm -rf -- "/tmp/haruspex_${lNAME}" 2>/dev/null
     return
   fi
 
