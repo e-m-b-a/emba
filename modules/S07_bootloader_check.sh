@@ -225,7 +225,7 @@ check_bootloader() {
     if [[ -f "${lLILO_FILE}" ]]; then
       lCHECK=1
       print_output "[+] Found lilo.conf: ""$(print_path "${lLILO_FILE}")"" (LILO)"
-      lFIND=$(grep 'password[[:space:]]?=' "${lLILO_FILE}" | grep -v "^#" || true)
+      lFIND=$(grep -E "password[[:space:]]?=" "${lLILO_FILE}" | grep -v "^#" || true)
       write_csv_log "bootloader status" "LILO configuration file" "found"
       if [[ -n "${lFIND}" ]]; then
         print_output "[+] LILO has password protection"

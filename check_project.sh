@@ -253,6 +253,7 @@ check() {
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
       MODULES_TO_CHECK_ARR_SEMGREP+=("${SOURCE}")
     fi
+    [[ -f "${SEMGREP_LOG}" ]] && rm -f -- "${SEMGREP_LOG}"
   done
 
   echo -e "\\n""${GREEN}""Check JSON with json_pp:""${NC}""\\n"
@@ -281,9 +282,7 @@ check() {
 }
 
 summary() {
-  if [[ -f "${SEMGREP_LOG}" ]]; then
-    rm -- "${SEMGREP_LOG}"
-  fi
+  rm -f -- /tmp/semgrep.*.log 2>/dev/null
 
   if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"

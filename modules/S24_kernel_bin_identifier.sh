@@ -62,6 +62,9 @@ S24_kernel_bin_identifier() {
     lNEG_LOG=$((lNEG_LOG + 1))
   fi
 
+  # final cleanup
+  rm -f -- "${TMP_DIR}"/ikconfig* 2>/dev/null
+
   module_end_log "${FUNCNAME[0]}" "${lNEG_LOG}"
 }
 
