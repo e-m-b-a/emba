@@ -65,7 +65,7 @@ S60_cert_file_check() {
           for ((i = 1; i <= lNESTED_CERT_CNT; i++)); do
             index=$((i - 1))
             local lRAW_DATE=""
-            lRAW_DATE="$(grep 'Not After :' "${lCERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}')"
+            lRAW_DATE="$(grep 'Not After :' "${lCERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}' || true)"
             [[ -z "${lRAW_DATE}" ]] && continue
             lCERT_DATE=$(date --date="${lRAW_DATE}" --iso-8601 || true)
             [[ -z "${lCERT_DATE}" ]] && continue
