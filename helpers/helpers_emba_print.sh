@@ -153,7 +153,7 @@ print_debug() {
 print_output() {
   local lOUTPUT="${1:-}"
   local lLOG_SETTING="${2:-}"
-  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_SETTINGS:-}" ]]; then
+  if [[ -n "${lLOG_SETTING}" && -d "$(dirname "${lLOG_SETTING}")" && "${LOG_FILE:-}" != "${lLOG_SETTING:-}" ]]; then
     local lLOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report

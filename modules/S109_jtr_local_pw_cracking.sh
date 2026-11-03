@@ -80,18 +80,8 @@ S109_jtr_local_pw_cracking() {
       continue
     fi
 
-    if [[ "${lHASH}" == "\$"*"\$"* ]]; then
-      print_output "[*] Found password data ${ORANGE}${lHASH}${NC} for further processing in ${ORANGE}${lHASH_SOURCE}${NC}"
-      # put ontop if linux-hash
-      if [[ ! -s "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
-        echo "${lHASH}" >"${LOG_PATH_MODULE}"/jtr_hashes.txt
-      else
-        sed -i "1s#^#${lHASH}\n#" "${LOG_PATH_MODULE}"/jtr_hashes.txt
-      fi
-    else
-      print_output "[*] Found password data ${ORANGE}${lHASH}${NC} for further processing in ${ORANGE}${lHASH_SOURCE}${NC}"
-      echo "${lHASH}" >>"${LOG_PATH_MODULE}"/jtr_hashes.txt
-    fi
+    print_output "[*] Found password data ${ORANGE}${lHASH}${NC} for further processing in ${ORANGE}${lHASH_SOURCE}${NC}"
+    echo "${lHASH}" >>"${LOG_PATH_MODULE}"/jtr_hashes.txt
   done
 
   # sort and make unique

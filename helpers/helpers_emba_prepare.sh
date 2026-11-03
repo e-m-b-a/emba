@@ -913,7 +913,7 @@ detect_root_dir_helper() {
   local lINTERPRETER_PATH=""
   local lINTERPRETER_FULL_RPATH_ARR=()
   local lR_PATH=""
-  local lINTERPRETER_ESCAPED=""
+  # local lINTERPRETER_ESCAPED=""
   local lCNT=0
 
   if [[ ! -f "${P99_CSV_LOG}" ]]; then
@@ -930,12 +930,13 @@ detect_root_dir_helper() {
       for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
         # now we have a result like this "/lib/ld-uClibc.so.0"
         # lets escape it
-        lINTERPRETER_ESCAPED=$(sed -e 's/\//\\\//g' <<<"${lINTERPRETER_PATH}")
+        # lINTERPRETER_ESCAPED=$(sed -e 's/\//\\\//g' <<<"${lINTERPRETER_PATH}")
         # mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
         mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(cut -d ';' -f2 "${P99_CSV_LOG}" 2>/dev/null | grep "${lINTERPRETER_PATH}" | sort -u || true)
         for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
           # remove the interpreter path from the full path:
-          lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+          # lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+          lR_PATH="${lR_PATH%"${lINTERPRETER_PATH}"}"
           # common false positive:
           if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
             [[ "${lR_PATH}" =~ \/lib\/$ ]] && continue

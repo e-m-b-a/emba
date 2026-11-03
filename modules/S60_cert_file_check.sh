@@ -64,8 +64,13 @@ S60_cert_file_check() {
           lTOTAL_CERT_CNT=$((lTOTAL_CERT_CNT + lNESTED_CERT_CNT))
           for ((i = 1; i <= lNESTED_CERT_CNT; i++)); do
             index=$((i - 1))
-            lCERT_DATE=$(date --date="$(grep 'Not After :' "${lCERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}')" --iso-8601 || true)
+            local lRAW_DATE=""
+            lRAW_DATE="$(grep 'Not After :' "${lCERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}' || true)"
+            [[ -z "${lRAW_DATE}" ]] && continue
+            lCERT_DATE=$(date --date="${lRAW_DATE}" --iso-8601 || true)
+            [[ -z "${lCERT_DATE}" ]] && continue
             lCERT_DATE_=$(date --date="$(grep 'Not After :' "${lCERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}')" +%s || true)
+            [[ "${lCERT_DATE_}" =~ ^-?[0-9]+$ ]] || continue
             lSIGNATURE=$(sed -n '/Signature Value:/!b;n;p' "${lCERT_LOG}" | sed -n "${i}p" | xargs)
             lSPECIFIC_CERT=$(head -n -1 <"${lCERT_LOG}" | awk -v idx="${index}" '
             BEGIN { found = 0 }

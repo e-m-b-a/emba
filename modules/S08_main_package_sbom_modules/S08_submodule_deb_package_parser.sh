@@ -57,6 +57,14 @@ S08_submodule_deb_package_parser() {
     write_log "" "${LOG_PATH_MODULE}/${lPACKAGING_SYSTEM}.txt"
 
     for lDEB_ARCHIVE in "${lDEB_ARCHIVES_ARR[@]}"; do
+      # if we have found multiple status files but all are the same -> we do not need to test duplicates
+      lPKG_MD5="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
+      if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
+        print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
+        continue
+      fi
+      lPKG_CHECKED_ARR+=("${lPKG_MD5}")
+
       deb_package_parser_threader "${lPACKAGING_SYSTEM}" "${lOS_IDENTIFIED}" "${lDEB_ARCHIVE}" &
       local lTMP_PID="$!"
       store_kill_pids "${lTMP_PID}"
@@ -114,13 +122,7 @@ deb_package_parser_threader() {
     return
   fi
 
-  # if we have found multiple status files but all are the same -> we do not need to test duplicates
   lPKG_MD5="$(md5sum "${lDEB_ARCHIVE}" | awk '{print $1}')"
-  if [[ "${lPKG_CHECKED_ARR[*]}" == *"${lPKG_MD5}"* ]]; then
-    print_output "[*] ${ORANGE}${lDEB_ARCHIVE}${NC} already analyzed" "no_log"
-    return
-  fi
-  lPKG_CHECKED_ARR+=("${lPKG_MD5}")
 
   local lDEB_LOG_PATH="${TMP_DIR}/deb_package_${lPKG_MD5}"
   if ! [[ -d "${lDEB_LOG_PATH}" ]]; then

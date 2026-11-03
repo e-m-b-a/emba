@@ -40,7 +40,7 @@ S08_submodule_rpm_package_parser() {
   local lPURL_IDENTIFIER="NA"
   local lRPM_FILES_ARR=()
   local lRPM_FILE=""
-  local lRPM_DEP_ARR=()
+  local lRPM_DEPS_ARR=()
   local lRPM_DEP=""
 
   # if we have found multiple status files but all are the same -> we do not need to test duplicates
@@ -128,7 +128,7 @@ S08_submodule_rpm_package_parser() {
 
       # add dependencies to properties
       if [[ "${#lRPM_DEPS_ARR[@]}" -gt 0 ]]; then
-        for lRPM_DEP in "${lRPM_DEP_ARR[@]}"; do
+        for lRPM_DEP in "${lRPM_DEPS_ARR[@]}"; do
           lPROP_ARRAY_INIT_ARR+=("dependency:${lRPM_DEP}")
         done
       fi

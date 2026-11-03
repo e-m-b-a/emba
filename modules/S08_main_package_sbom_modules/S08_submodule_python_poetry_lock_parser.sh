@@ -136,6 +136,7 @@ S08_submodule_python_poetry_lock_parser() {
           lPOETRY_FILE_ENTRY=$(cut -d '"' -f2 <<<"${lPOETRY_FILE_ENTRY}") # field 2
           lPROP_ARRAY_INIT_ARR+=("path:${lPOETRY_FILE_ENTRY}")
           # we limit the logging of the package files to 500 files per package
+          lCNT=$((lCNT + 1))
           if [[ "${lCNT}" -gt "${SBOM_MAX_FILE_LOG}" ]]; then
             lPROP_ARRAY_INIT_ARR+=("path:limit-to-${SBOM_MAX_FILE_LOG}-results")
             break

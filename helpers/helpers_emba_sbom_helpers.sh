@@ -154,7 +154,15 @@ build_sbom_json_hashes_arr() {
         # write_log "[*] Duplicate detected - merge needed for ${lAPP_NAME}-${lAPP_VERS} / ${lDUP_CHECK_FILE}" "${SBOM_LOG_PATH}"/duplicates.txt
         write_log "[*] Duplicate detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
         lJQ_ELEMENTS=$(jq '.properties | length' "${lDUP_CHECK_FILE}")
-        jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS + 1))"':additional_source_path", "value": "'"${lBINARY}"'" }' "${lDUP_CHECK_FILE}" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp"
+        lJQ_NEW_ELEMENTS=$((lJQ_ELEMENTS + 1))
+        # jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:source_location:'"$((lJQ_ELEMENTS + 1))"':additional_source_path", "value": "'"${lBINARY}"'" }' \
+        # "${lDUP_CHECK_FILE}" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp"
+
+        jq --arg name "EMBA:sbom:source_location:${lJQ_NEW_ELEMENTS}:additional_source_path" \
+          --arg value "${lBINARY}" \
+          '.properties[.properties | length] |= . + { "name": $name, "value": $value }' \
+          "${lDUP_CHECK_FILE}" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp"
+
         if ! [[ -f "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" ]]; then
           continue
         fi
@@ -163,7 +171,13 @@ build_sbom_json_hashes_arr() {
         # on the 2nd case we also add this different version to the properties
         if [[ "${lAPP_VERS}" != "${lDUP_CHECK_VERS}" ]]; then
           write_log "[*] Version difference detected - merging ${lAPP_NAME} - ${lAPP_VERS} / ${lDUP_CHECK_VERS}" "${SBOM_LOG_PATH}"/duplicates.txt
-          jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS + 2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
+          # jq '.properties[.properties| length] |= . + { "name": "EMBA:sbom:version:'"$((lJQ_ELEMENTS + 2))"':additional_version_identified", "value": "'"${lAPP_VERS}"'" }' "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
+          lJQ_NEW_ELEMENTS=$((lJQ_ELEMENTS + 2))
+          jq --arg name "EMBA:sbom:version:${lJQ_NEW_ELEMENTS}:additional_version_identified" \
+            --arg value "${lAPP_VERS}" \
+            '.properties[.properties | length] |= . + { "name": $name, "value": $value }' \
+            "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
+
           mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" 2>/dev/null || true
         fi
 

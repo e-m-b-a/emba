@@ -28,6 +28,7 @@ S95_interesting_files_check() {
   local lCOMP_COUNT=0
   local lWAIT_PIDS_S95_ARR=()
 
+  write_csv_log "file type" "file"
   if [[ "${THREADED}" -eq 1 ]]; then
     interesting_binaries &
     lWAIT_PIDS_S95_ARR+=("$!")

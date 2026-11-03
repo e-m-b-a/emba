@@ -55,7 +55,7 @@ restart_emulation() {
   fi
 
   stopping_emulation_process "${lIMAGE_NAME}"
-  [[ "${lRESTART_SCAN}" -eq 0 ]] && reset_network_emulation 2
+  [[ "${lRESTART_SCAN}" -eq 0 ]] && reset_network_emulation "${lIMAGE_NAME}" 2
 
   check_qemu_instance_l10
 

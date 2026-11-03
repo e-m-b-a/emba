@@ -121,7 +121,9 @@ update_box_system_load() {
     fi
   }
 
-  update_cpu
+  local lUCPU_PID=""
+  update_cpu &
+  lUCPU_PID="$!"
 
   local lBOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]]; then
@@ -140,7 +142,12 @@ update_box_system_load() {
       lACTUAL_CPU=0
     fi
     printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$((lLINES - 3))" "${lACTUAL_CPU}" "$((lLINES - 2))" "${lMEM_PERCENTAGE_STR}" "$((lLINES - 1))" "${lDISK_PERCENTAGE_STR}" || true
-    update_cpu &
+    # check if we have a PID stored and if this PID is running
+    # if it is running we do not need to update the cpu details
+    if [[ ! -e /proc/"${lUCPU_PID}" ]]; then
+      update_cpu &
+      lUCPU_PID="$!"
+    fi
     sleep .2
     if [[ -f "${STATUS_TMP_PATH}" ]]; then
       lBOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2>/dev/null || true)"

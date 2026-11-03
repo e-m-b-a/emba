@@ -105,11 +105,10 @@ check_live_metasploit() {
 
   # metasploit tries to parse env variables and our environment is wasted!
   export PORT=""
-  # lD_END="$(echo "${lD_END}" | tr '[:upper:]' '[:lower:]')"
-  lD_END="${lD_END,,}"
+  # shellcheck disable=SC2153
+  lD_END="${D_END,,}"
   if [[ "${lD_END}" == "el" ]]; then lD_END="le"; fi
   if [[ "${lD_END}" == "eb" ]]; then lD_END="be"; fi
-  # lARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${lD_END}" | tr '[:upper:]' '[:lower:]')"
   lARCH_END="${ARCH,,}""${lD_END,,}"
 
   timeout --signal SIGINT -k 60 60m msfconsole -q -n -r "${HELP_DIR}"/l35_msf_check.rc "${IP_ADDRESS_}" "${lPORTS}" "${lARCH_END}" | tee -a "${LOG_PATH_MODULE}"/metasploit-check-"${IP_ADDRESS_}".txt || true

@@ -309,7 +309,7 @@ create_emulation_filesystem() {
   print_output "[*] Size of filesystem for emulation - ${ORANGE}${lIMAGE_SIZE}${NC}.\\n"
   print_output "[*] Name of filesystem for emulation - ${ORANGE}${IMAGE_NAME}${NC}.\\n"
   qemu-img create -f raw "${LOG_PATH_MODULE}/${IMAGE_NAME}" "${lIMAGE_SIZE}"
-  chmod a+rw "${LOG_PATH_MODULE}/${IMAGE_NAME}"
+  chmod 600 "${LOG_PATH_MODULE}/${IMAGE_NAME}"
 
   print_output "[*] Creating Partition Table"
   echo -e "o\nn\np\n1\n\n\nw" | /sbin/fdisk "${LOG_PATH_MODULE}/${IMAGE_NAME}"
@@ -339,14 +339,23 @@ create_emulation_filesystem() {
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext2 "${DEVICE}" || (print_output "[-] Error in filesystem creation" && return)
+  mkfs.ext2 "${DEVICE}" || {
+    print_output "[-] Error in filesystem creation"
+    return
+  }
 
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
-  mount "${DEVICE}" "${MNT_POINT}" || (print_output "[-] Error in mounting the filesystem" && return)
+  mount "${DEVICE}" "${MNT_POINT}" || {
+    print_output "[-] Error in mounting the filesystem"
+    return
+  }
 
   if mount | grep -q "${MNT_POINT}"; then
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || (print_output "[-] Warning: Root filesystem not copied!" && return)
+    cp -prf -- "${lROOT_PATH}"/* "${MNT_POINT}/" || {
+      print_output "[-] Warning: Root filesystem not copied!"
+      return
+    }
 
     print_output "[*] Binwalk v3+ creates raw files on extraction. We remove these files from our emulation root directory"
     find "${MNT_POINT}" -name "*.raw" -delete || true
@@ -359,6 +368,13 @@ create_emulation_filesystem() {
     print_output "[*] Creating EMBA emulation helper directories within the firmware environment"
     mkdir -p -- "${MNT_POINT}/firmadyne/libnvram/" || true
     mkdir -p -- "${MNT_POINT}/firmadyne/libnvram.override/" || true
+
+    # just in case there is something in here we delete it
+    rm -f -- "${MNT_POINT}/busybox" || true
+    rm -f -- "${MNT_POINT}/bash-static" || true
+    rm -f -- "${MNT_POINT}/fixImage.sh" || true
+    rm -f -- "${MNT_POINT}/inferFile.sh" || true
+    rm -f -- "${MNT_POINT}/inferService.sh" || true
 
     print_output "[*] Patching filesystem (chroot)"
     cp "$(command -v busybox)" "${MNT_POINT}" || true
@@ -396,11 +412,13 @@ create_emulation_filesystem() {
       # injection checker - future extension
       local lINJECTION_MARKER="${RANDOM}"
       if [[ -d "${MNT_POINT}"/bin ]]; then
+        rm -f -- "${MNT_POINT}/bin/a" || true
         cp "${MODULE_SUB_PATH}/injection_check.sh" "${MNT_POINT}"/bin/a || true
         chmod a+x "${MNT_POINT}/bin/a" || true
         sed -i 's/asdfqwertz/'"d34d_${lINJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
       fi
       if [[ -d "${MNT_POINT}"/sbin ]]; then
+        rm -f -- "${MNT_POINT}/sbin/a" || true
         cp "${MODULE_SUB_PATH}/injection_check.sh" "${MNT_POINT}"/sbin/a || true
         chmod a+x "${MNT_POINT}/sbin/a" || true
         sed -i 's/asdfqwertz/'"d34d_${lINJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
@@ -452,6 +470,11 @@ create_emulation_filesystem() {
     mknod -m 666 "${MNT_POINT}/firmadyne/ttyAMA1" c 4 65
 
     print_output "[*] Setting up emulation scripts"
+    rm -f -- "${MNT_POINT}/firmadyne/preInit.sh" || true
+    rm -f -- "${MNT_POINT}/firmadyne/network.sh" || true
+    rm -f -- "${MNT_POINT}/firmadyne/init_service.sh" || true
+    rm -f -- "${MNT_POINT}/firmadyne/run_service.sh" || true
+
     cp "${MODULE_SUB_PATH}/preInit.sh" "${MNT_POINT}/firmadyne/preInit.sh" || true
     chmod a+x "${MNT_POINT}/firmadyne/preInit.sh"
 
@@ -485,7 +508,6 @@ create_emulation_filesystem() {
       fi
     done
     cd "${lCURRENT_DIR}" || exit
-
   else
     print_output "[!] Filesystem mount failed"
   fi
@@ -1602,6 +1624,7 @@ get_networking_details_emulation() {
     export NVRAMS=()
     export TCP_SERVICES_STARTUP=()
     export UDP_SERVICES_STARTUP=()
+    export SERVICES_STARTUP=()
 
     local lNVRAM_ARR=()
     local lNVRAM_TMP=()
@@ -1852,11 +1875,11 @@ get_networking_details_emulation() {
               # set typical default values - this is just in case we have not found br_add_if entries:
               lVLAN_ID="NONE"
               l_NW_ENTRY_PRIO=$((3 + lADJUST_PRIO))
-              if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+              if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" -gt 0 ]]; then
                 lETH_INT="eth0"
                 store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
               fi
-              if [[ "$(grep -ac "eth1" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+              if [[ "$(grep -ac "eth1" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" -gt 0 ]]; then
                 lETH_INT="eth1"
                 store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
               fi
@@ -1912,18 +1935,18 @@ get_networking_details_emulation() {
         for lIP_ADDR_BACKUP in "${lIP_ADDR_BACKUP_ARR[@]}"; do
           # if we have bridge interfaces found and we have some eth0 entries in our qemu log we guess a shiny configuration
           if [[ -v lBRIDGE_INTERFACES[@] ]]; then
-            if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+            if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" -gt 0 ]]; then
               l_NW_ENTRY_PRIO=$((2 + lADJUST_PRIO))
               store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "bridge" "${l_NW_ENTRY_PRIO}"
               store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "0" "bridge" "${l_NW_ENTRY_PRIO}"
             fi
           fi
           l_NW_ENTRY_PRIO=1
-          if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+          if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" -gt 0 ]]; then
             store_interface_details "${lIP_ADDR_BACKUP}" "eth0" "eth0" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
             store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "default" "${l_NW_ENTRY_PRIO}"
           fi
-          if [[ "$(grep -ac "eth1" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+          if [[ "$(grep -ac "eth1" "${LOG_PATH_MODULE}"/qemu.initial.serial.log || true)" -gt 0 ]]; then
             store_interface_details "${lIP_ADDR_BACKUP}" "eth1" "eth1" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
             store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth1" "NONE" "default" "${l_NW_ENTRY_PRIO}"
           fi
@@ -2003,6 +2026,7 @@ get_networking_details_emulation() {
     for PANIC in "${PANICS[@]}"; do
       print_output "[!] WARNING: Kernel Panic detected: ${ORANGE}${PANIC}${NC}"
       print_output "${NC}"
+      # only print a panic and then clear the array
       PANICS=()
     done
     color_qemu_log "${LOG_PATH_MODULE}/qemu.initial.serial.log"
@@ -2630,7 +2654,7 @@ get_emu_runtime() {
 
 check_online_stat() {
   local lIPS_INT_VLAN_CFG="${1:-}"
-  local lIMAGE_NAME="${3:-}"
+  local lIMAGE_NAME="${2:-}"
 
   local lIP_ADDRESS=""
   lIP_ADDRESS="$(cut -d\; -f2 <<<"${lIPS_INT_VLAN_CFG}")" # field 2
@@ -2864,8 +2888,8 @@ check_online_stat() {
       print_ln
 
       # work with this:
-      lUDP_SERV_ARR=("${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" "${#lNMAP_SERV_UDP_ARR[@]}")
-      lTCP_SERV_ARR=("${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" "${#lNMAP_SERV_TCP_ARR[@]}")
+      lUDP_SERV_ARR=("${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" "${lNMAP_SERV_UDP_ARR[@]}")
+      lTCP_SERV_ARR=("${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" "${lNMAP_SERV_TCP_ARR[@]}")
       # we add some default services that we always check in our final Nmap scan
       lTCP_SERV_ARR+=(21)
       lTCP_SERV_ARR+=(22)

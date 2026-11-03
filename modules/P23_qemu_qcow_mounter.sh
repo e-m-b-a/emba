@@ -74,7 +74,9 @@ qcow_extractor() {
   local l7ZIP_BROKEN_LNK_TARGET=""
 
   l7ZIP_LOG_FILE="${LOG_PATH_MODULE}/7z_extraction_$(basename "${lQCOW_PATH}").log"
-  7z x -r -spf -snld -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}" |& tee -a "${l7ZIP_LOG_FILE}" || true
+  # 7z looses links - could be enabled it via -snld but this is dangerous
+  # This results in further issues in system emulation.
+  7z x -r -spf -aos -o"${lEXTRACTION_DIR}" "${lQCOW_PATH}" |& tee -a "${l7ZIP_LOG_FILE}" || true
 
   mapfile -t l7ZIP_BROKEN_LINKS_ARR < <(grep "Dangerous link via another link was ignored" "${l7ZIP_LOG_FILE}" || true)
   if [[ "${#l7ZIP_BROKEN_LINKS_ARR[@]}" -gt 0 ]]; then

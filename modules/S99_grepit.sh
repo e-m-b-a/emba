@@ -219,7 +219,7 @@ grepit_module_java() {
   grepit_search "Bouncycastle is a common Java crypto provider" \
     'import org.bouncycastle.bla;' \
     'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-    "bouncy.{0,${WILDCARD_SHORT}}}castle" \
+    "bouncy.{0,${WILDCARD_SHORT}}castle" \
     "8_java_crypto_bouncycastle.txt" \
     "-i"
 

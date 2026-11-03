@@ -132,7 +132,7 @@ check_live_nmap_basic() {
       print_output "[*] Service detected: ${ORANGE}${lSERVICE}${NC}"
       lSERVICE_NAME="$(escape_echo "$(echo "${lSERVICE}" | awk '{print $2}')")"
       # just in case we have a / in our lSERVICE_NAME
-      lSERVICE_NAME="${lSERVICE_NAME/\//\\\/}"
+      lSERVICE_NAME="${lSERVICE_NAME//\//\\\/}"
       if [[ "${lSERVICE_NAME}" == "unknown" ]] || [[ "${lSERVICE_NAME}" == "tcpwrapped" ]] || [[ -z "${lSERVICE_NAME}" ]]; then
         continue
       fi
