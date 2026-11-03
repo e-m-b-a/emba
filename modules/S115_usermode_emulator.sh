@@ -692,26 +692,28 @@ emulate_binary() {
   fi
 
   for lPARAM in "${lEMULATION_PARAMS_ARR[@]}"; do
+    local lPARAM_ARR=()
+    [[ -n "${lPARAM}" ]] && lPARAM_ARR=("${lPARAM}")
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
     if [[ -z "${lCPU_CONFIG}" ]] || [[ "${lCPU_CONFIG}" == "NONE" ]]; then
       write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM:-NONE}${NC}" "${lLOG_FILE_BIN}"
       if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM_ARR[@]}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
         disown "${lPID}" 2>/dev/null || true
       else
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" "${lBINARY_MIN_PATH}" "${lPARAM_ARR[@]}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
         disown "${lPID}" 2>/dev/null || true
       fi
     else
       write_log "[*] Emulating binary ${ORANGE}${lBINARY_MIN_PATH}${NC} with parameter ${ORANGE}${lPARAM:-NONE}${NC} and cpu configuration ${ORANGE}${lCPU_CONFIG}${NC}" "${lLOG_FILE_BIN}"
       if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" -- ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM_ARR[@]}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
         disown "${lPID}" 2>/dev/null || true
       else
-        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM}" &>>"${lLOG_FILE_BIN}" || true &
+        timeout --preserve-status --signal SIGINT "${QRUNTIME}" "${CHROOT}" "${OPTS[@]}" "${lR_PATH}" ./"${lEMULATOR}" -cpu "${lCPU_CONFIG}" "${lBINARY_MIN_PATH}" "${lPARAM_ARR[@]}" &>>"${lLOG_FILE_BIN}" || true &
         local lPID="$!"
         disown "${lPID}" 2>/dev/null || true
       fi

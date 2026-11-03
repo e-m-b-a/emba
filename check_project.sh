@@ -282,8 +282,6 @@ check() {
 }
 
 summary() {
-  rm -f -- /tmp/semgrep.*.log 2>/dev/null
-
   if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (tab vs spaces): ${#MODULES_TO_CHECK_ARR_TAB[@]}\\n"
