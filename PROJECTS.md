@@ -3,6 +3,20 @@
 
 In this document we list all known projects around EMBA and EMBArk. Feel free to open issues or a pull request to list your project also in here.
 
+## OFRAK integration
+
+[Repository](https://github.com/bw1lson/emba/tree/ofrak)
+
+## ARM64 port
+
+[Repository](https://github.com/jonathan-buttner/emba/tree/codex/arm64)
+
+## EMBA-GUI
+
+A desktop GUI for the EMBA firmware analyzer.
+
+[Repository](https://github.com/bias0/guemba/tree/feat/emba-gui)
+
 
 ## EMBA-MCP
 
