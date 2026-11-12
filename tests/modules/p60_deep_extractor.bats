@@ -113,7 +113,8 @@ teardown() {
     printf 'payload-%s\n' "${lFILE_ID}" >"${FIRMWARE_PATH_CP}/file_${lFILE_ID}"
   done
   touch "${FIRMWARE_PATH_CP}/ignored.raw"
-  find "${FIRMWARE_PATH_CP}" -type f -print0 >"${lFILE_LIST}"
+  # find "${FIRMWARE_PATH_CP}" -type f -print0 >"${lFILE_LIST}"
+  printf '%s\0' "${FIRMWARE_PATH_CP}/ignored.raw" "${FIRMWARE_PATH_CP}"/file_{1..10} >"${lFILE_LIST}"
 
   populate_p99_backend "${lFILE_LIST}" test 11
 
