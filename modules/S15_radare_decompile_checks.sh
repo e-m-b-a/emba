@@ -106,11 +106,16 @@ radare_decompilation() {
     export COUNT_FUNC=0
     FUNC_LOG="${LOG_PATH_MODULE}/decompilation_vul_func_${lFUNCTION}-${lBIN_NAME}-${lBIN_MD5_SUM}.txt"
     radare_decomp_log_bin_hardening "${lBIN_NAME}" "${lFUNCTION}" "${FUNC_LOG}"
+    # Usage-file path must not include the firmware basename: that name is
+    # attacker-controlled and is interpolated into r2's -c script (which can
+    # reach system()). Identify the file with the already-computed MD5 instead.
+    # ${lFUNCTION} comes from the built-in weak-function list, not the firmware.
+    local lUSAGE_FILE="${LOG_PATH_MODULE}/${lFUNCTION}_${lBIN_MD5_SUM}_usage"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
     # We analyse only 150 functions per binary
     timeout --preserve-status --signal SIGINT 3600 r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${lFUNCTION}""_""${lBIN_NAME}"'_usage`' "${lBINARY}" >>"${FUNC_LOG}" || print_error "[-] r2 error on ${lBINARY}"
+      'axt `is~'"${lFUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${lUSAGE_FILE}"'; pdda @@ `cat '"${lUSAGE_FILE}"'`' "${lBINARY}" >>"${FUNC_LOG}" || print_error "[-] r2 error on ${lBINARY}"
 
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l <"${FUNC_LOG}") -gt 3 ]]; then
       radare_decomp_color_output "${lFUNCTION}" "${FUNC_LOG}"
