@@ -138,7 +138,7 @@ s20_eval_script_check() {
         lAI_ANCHOR_="$(openssl rand -hex 8)"
         if [[ -f "${BASE_LINUX_FILES}" ]]; then
           # if we have the base linux config file we are checking it:
-          if ! grep -E -q "^${lSH_SCRIPT_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+          if ! grep -F -x -q -- "${lSH_SCRIPT_NAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
             lGPT_PRIO_=$((lGPT_PRIO_ + 1))
           fi
         fi
@@ -193,7 +193,7 @@ s20_reporter() {
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       lCOMMON_FILES_FOUND="(${RED}common linux file: no${GREEN})"
       lCFF="no"
-      if grep -q "^${lSH_NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lSH_NAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         lCOMMON_FILES_FOUND="(${CYAN}common linux file: yes${GREEN})"
         lCFF="yes"
       fi

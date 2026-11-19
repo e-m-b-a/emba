@@ -25,7 +25,8 @@
 sanitize_firmware_basename() {
   local -n lrBASENAME="${1}"
   local -x LC_ALL=C
-  lrBASENAME="${lrBASENAME//[;[:cntrl:]]/_}"
+  local lUNSAFE_PATH_CHARS='[;[:cntrl:]"'\''`$|&<>()]'
+  lrBASENAME="${lrBASENAME//${lUNSAFE_PATH_CHARS}/_}"
 }
 
 apply_firmware_path_renames() {
@@ -66,12 +67,13 @@ remove_uprintable_paths() {
   local lABSOLUTE_TARGETS_ARR=()
 
   # Never traverse symlink roots or rename the caller's root/parent directory.
-  if [[ ! -d "${lROOT}" || -L "${lROOT}" || "${lROOT}" == *[\;[:cntrl:]]* ]]; then
+  local lUNSAFE_PATH_CHARS='[;[:cntrl:]"'\''`$|&<>()]'
+  if [[ ! -d "${lROOT}" || -L "${lROOT}" || "${lROOT}" =~ ${lUNSAFE_PATH_CHARS} ]]; then
     print_output "[-] Invalid firmware cleanup root: ${lROOT}" "no_log"
     return 1
   fi
   lLIST="$(mktemp "${TMP_DIR}/firmware_cleanup.XXXXXX")" || return 1
-  if ! find -P "${lROOT}" -depth -mindepth 1 -name '*[;[:cntrl:]]*' -print0 >|"${lLIST}"; then
+  if ! find -P "${lROOT}" -depth -mindepth 1 -name "*${lUNSAFE_PATH_CHARS}*" -print0 >|"${lLIST}"; then
     rm -f -- "${lLIST}"
     return 1
   fi
@@ -90,7 +92,7 @@ remove_uprintable_paths() {
   for ((lID = 0; lID < ${#lLINK_RECORDS_ARR[@]}; lID += 2)); do
     lLINK="${lLINK_RECORDS_ARR[lID]}"
     lTARGET="${lLINK_RECORDS_ARR[lID + 1]}"
-    if [[ "${lLINK%/*}${lTARGET}" != *[\;[:cntrl:]]* ]]; then
+    if [[ "${lLINK%/*}${lTARGET}" != *${lUNSAFE_PATH_CHARS}* ]]; then
       continue
     fi
     lLINKS_ARR+=("${lLINK}")

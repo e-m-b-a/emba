@@ -47,7 +47,7 @@ S28_java_check() {
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
       lJNAME=$(basename "$(cut -d ';' -f2 <<<"${lJAVA_BINARY}")" 2>/dev/null) # field 2
-      if grep -E -q "^${lJNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lJNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi

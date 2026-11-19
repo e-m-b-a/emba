@@ -44,7 +44,7 @@ S18_capa_checker() {
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
       lNAME=$(basename "${lBINARY}" 2>/dev/null)
-      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue 2
       fi
     fi

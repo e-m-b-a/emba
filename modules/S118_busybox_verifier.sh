@@ -44,7 +44,7 @@ S118_busybox_verifier() {
     # first grep is for identification of possible binary files - only the ELF files from P99
     # are used below, so only grep those (a recursive grep over all extracted files buffers
     # huge newline-free files as one "line", which can exhaust memory)
-    mapfile -t lBB_BINS_ARR < <(awk -F';' '$8 ~ /ELF/ {print $2}' "${P99_CSV_LOG}" | sort -u | xargs -r -d '\n' grep -l -E "BusyBox" 2>/dev/null || true)
+    mapfile -t lBB_BINS_ARR < <(awk -F';' '$8 ~ /ELF/ {print $2}' "${P99_CSV_LOG}" | sort -u | xargs -r -d '\n' grep -l -E -- "BusyBox" 2>/dev/null || true)
 
     for lBB_BIN in "${lBB_BINS_ARR[@]}"; do
       if [[ "${lBB_BIN}" == *".raw" ]]; then
@@ -56,7 +56,7 @@ S118_busybox_verifier() {
       local lVERSION_JSON_CFG="${CONFIG_DIR}"/bin_version_identifiers/busybox.json
       local lVERSION_IDENTIFIER_ARR=()
       local lVERSION_IDENTIFIER=""
-      lBINARY_DATA=$(grep ";${lBB_BIN};.*ELF" "${P99_CSV_LOG}" | head -1 || true)
+      lBINARY_DATA=$(grep -F -- ";${lBB_BIN};" "${P99_CSV_LOG}" | grep "ELF" | head -1 || true)
       if [[ -z ${lBINARY_DATA} ]]; then
         # we have not found our binary as ELF
         continue
@@ -123,7 +123,7 @@ S118_busybox_verifier() {
       print_error "[-] S118 - No file detected for ${lBB_BIN} ... testing for further SBOM entries"
       continue
     fi
-    if ! [[ "$(grep "${lBB_BIN}" "${P99_CSV_LOG}" | cut -d ';' -f8 || true)" == *"ELF"* ]]; then
+    if ! [[ "$(grep -F -- "${lBB_BIN}" "${P99_CSV_LOG}" | cut -d ';' -f8 || true)" == *"ELF"* ]]; then
       print_error "[-] No ELF file detected for ${lBB_BIN} ... testing for further SBOM entries"
       continue
     fi
@@ -293,7 +293,7 @@ get_busybox_applets_stat() {
     print_output "[*] Extract applet data for BusyBox version ${ORANGE}${lBB_VERSION_}${NC} from binary ${ORANGE}${lBB_BIN_}${NC}"
     mapfile -t lBB_DETECTED_APPLETS_ARR < <(grep -oUaP "\x00\x5b(\x5b)?\x00.*\x00\x00" "${lBB_BIN_}" | strings | sort -u || true)
     for lBB_DETECTED_APPLET in "${lBB_DETECTED_APPLETS_ARR[@]}"; do
-      if grep -E -q "^${lBB_DETECTED_APPLET}$" "${CONFIG_DIR}/busybox_commands.cfg"; then
+      if grep -F -x -q -- "${lBB_DETECTED_APPLET}" "${CONFIG_DIR}/busybox_commands.cfg"; then
         print_output "[*] BusyBox Applet found and identified as real BusyBox applet ... ${ORANGE}${lBB_DETECTED_APPLET}${NC}" "no_log"
         echo "${lBB_DETECTED_APPLET}" >>"${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION_/*:/}_stat.txt"
         lAPP_CNT=$((lAPP_CNT + 1))
@@ -320,7 +320,7 @@ get_busybox_applets_emu() {
     print_output "[*] Extract applet data for BusyBox version ${ORANGE}${lBB_VERSION_}${NC} from emulation logs" "" "${lBB_FILE}"
     mapfile -t lBB_DETECTED_APPLETS_ARR < <(sed -e '1,/Currently defined functions:/d' "${lBB_FILE}" | grep ", " | tr ',' '\n' | tr -d '[' | tr -d ']' | tr -d "[:blank:]" | tr -s '\n' '\n' | sort -u || true)
     for lBB_DETECTED_APPLET in "${lBB_DETECTED_APPLETS_ARR[@]}"; do
-      if grep -E -q "^${lBB_DETECTED_APPLET}$" "${CONFIG_DIR}/busybox_commands.cfg"; then
+      if grep -F -x -q -- "${lBB_DETECTED_APPLET}" "${CONFIG_DIR}/busybox_commands.cfg"; then
         print_output "[*] BusyBox Applet found and identified as real BusyBox applet ... ${ORANGE}${lBB_DETECTED_APPLET}${NC}" "no_log"
         echo "${lBB_DETECTED_APPLET}" >>"${LOG_PATH_MODULE}/busybox_applets_${lBB_VERSION_/*:/}_emu.txt"
         lAPP_CNT=$((lAPP_CNT + 1))

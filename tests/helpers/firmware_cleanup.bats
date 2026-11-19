@@ -153,3 +153,35 @@ teardown() {
   [ ! -e "${TMP_DIR}/p99_md5sum_done.initialized" ]
   [ "$(find "${CSV_DIR}" -name hash | wc -l)" -eq 1 ]
 }
+
+@test "cleanup sanitizes shell metacharacters in basenames and extracted trees" {
+  local lROOT="${LOG_DIR}/firmware"
+  local lRENAMED=0
+  local lDOLLAR=$'\x24'
+  local lTICK=$'\x60'
+  local lSQUOTE=$'\x27'
+  local lMETACHAR_NAME="x\"${lSQUOTE}${lTICK}${lDOLLAR}(id>>pwn||id&&id|cat<in>out)_det.so"
+  local IFS=$'\n\t'
+  set -euo pipefail
+  sanitize_firmware_basename lMETACHAR_NAME
+  [ "${lMETACHAR_NAME}" = 'x_____id__pwn__id__id_cat_in_out__det.so' ]
+
+  mkdir -p "${lROOT}/lib"
+  printf 'ELF' >"${lROOT}/lib/x\"${lDOLLAR}(id>>PWN_S15_DET_1||id&&cd ${lDOLLAR}HOME)\"_det.so"
+  printf 'ELF2' >"${lROOT}/lib/back${lTICK}tick${lTICK}${lSQUOTE}single${lSQUOTE}|pipe&amp<lt>gt(paren).so"
+  remove_uprintable_paths "${lROOT}" lRENAMED
+  [ "${lRENAMED}" -eq 2 ]
+  [ -f "${lROOT}/lib/x___id__PWN_S15_DET_1__id__cd _HOME___det.so" ]
+  [ -f "${lROOT}/lib/back_tick__single__pipe_amp_lt_gt_paren_.so" ]
+  remove_uprintable_paths "${lROOT}" lRENAMED
+  [ "${lRENAMED}" -eq 0 ]
+}
+
+@test "P99 writer rejects paths containing shell metacharacters" {
+  local lCHAR=""
+  for lCHAR in ';' $'\n' '"' "'" $'\x60' '$' '|' '&' '<' '>' '(' ')'; do
+    run write_csv_log_to_path "${P99_CSV_LOG}" test "/firmware/bad${lCHAR}name.bin" data
+    [ "${status}" -eq 1 ]
+    [ ! -e "${P99_CSV_LOG}" ]
+  done
+}

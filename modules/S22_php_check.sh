@@ -141,7 +141,7 @@ s22_vuln_check_semgrep() {
 
       if [[ "${AI_OPTION}" -gt 0 ]]; then
         lAI_ANCHOR="$(openssl rand -hex 8)"
-        if ! grep -E -q "^${lSEMG_SOURCE_FILE_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        if ! grep -F -x -q -- "${lSEMG_SOURCE_FILE_NAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
           lGPT_PRIO_=$((lGPT_PRIO_ + 1))
         else
           # on well known files we lower the priority
@@ -234,7 +234,7 @@ s22_vuln_check() {
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       lCOMMON_FILES_FOUND=" (${RED}common linux file: no${GREEN})"
       lCFF="no"
-      if grep -q "^${lPHP_SCRIPT_NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lPHP_SCRIPT_NAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         lCOMMON_FILES_FOUND=" (${CYAN}common linux file: yes${GREEN})"
         lCFF="yes"
         lGPT_PRIO_=1
@@ -278,6 +278,7 @@ s22_check_php_ini() {
   local lPHP_INI_WARNINGS=0
   local lPHP_INI_FILES_ARR=()
   local lPHP_FILE=""
+  local lPHP_PATH=""
   local lINISCAN_RESULT_ARR=()
   local lINI_RESULT_LINE=""
   local lPHP_INISCAN_PATH="${EXT_DIR}/iniscan/vendor/bin/iniscan"
@@ -292,7 +293,8 @@ s22_check_php_ini() {
   disable_strict_mode "${STRICT_MODE}"
   for lPHP_FILE in "${lPHP_INI_FILES_ARR[@]}"; do
     # print_output "[*] iniscan check of $(print_path "${lPHP_FILE}")"
-    mapfile -t lINISCAN_RESULT_ARR < <("${lPHP_INISCAN_PATH}" scan --path="${lPHP_FILE/;*/}" || true)
+    lPHP_PATH=$(cut -d ';' -f2 <<<"${lPHP_FILE}")
+    mapfile -t lINISCAN_RESULT_ARR < <("${lPHP_INISCAN_PATH}" scan --path="${lPHP_PATH}" || true)
     for lINI_RESULT_LINE in "${lINISCAN_RESULT_ARR[@]}"; do
       local lLIMIT_CHECK=""
       # nosemgrep
@@ -328,7 +330,7 @@ s22_check_php_ini() {
     done
     if [[ "${S22_PHP_INI_ISSUES}" -gt 0 ]]; then
       print_ln
-      print_output "[+] Found ${ORANGE}${S22_PHP_INI_ISSUES}${GREEN} PHP configuration issues in php config file :${ORANGE} $(print_path "${lPHP_FILE/;*/}")"
+      print_output "[+] Found ${ORANGE}${S22_PHP_INI_ISSUES}${GREEN} PHP configuration issues in php config file :${ORANGE} $(print_path "${lPHP_PATH}")"
       print_ln
     else
       print_output "[-] No PHP.ini issues found"
@@ -346,6 +348,8 @@ add_recommendations() {
   if [[ ${lVALUE} == *"M"* ]]; then
     lLIMIT="${lVALUE//M/}"
   fi
+
+  [[ "${lLIMIT}" =~ ^[0-9]+$ ]] || return 0
 
   if [[ ${lKEY} == *"memory_limit"* ]] && [[ $((lLIMIT)) -gt 50 ]]; then
     return 1
