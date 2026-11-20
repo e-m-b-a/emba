@@ -589,7 +589,7 @@ radare_print_top10_statistics() {
 
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
             # if we have the base linux config file we are checking it:
-            if grep -E -q "^${lSEARCH_TERM}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+            if grep -F -x -q -- "${lSEARCH_TERM}" "${BASE_LINUX_FILES}" 2>/dev/null; then
               # shellcheck disable=SC2153
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "${lF_COUNTER}" "${lSEARCH_TERM}" | tee -a "${LOG_FILE}" || true
             else
@@ -633,7 +633,7 @@ radare_log_bin_hardening() {
     lHEAD_BIN_PROT=$(grep "FORTI.*FILE" "${S12_LOG}" | sed 's/FORTI.*//' | sort -u || true)
     write_log "  ${lHEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
-    lBIN_PROT=$(grep '/'"${lBIN_NAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    lBIN_PROT=$(grep -F -- '/'"${lBIN_NAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
     write_log "  ${lBIN_PROT}" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
   fi
@@ -692,7 +692,7 @@ radare_output_function_details() {
 
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     lSEARCH_TERM="${lBIN_NAME}"
-    if grep -q "^${lSEARCH_TERM}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+    if grep -F -x -q -- "${lSEARCH_TERM}" "${BASE_LINUX_FILES}" 2>/dev/null; then
       lCOMMON_FILES_FOUND="${CYAN} - common linux file: yes - "
       write_log "[+] File $(print_path "${lBINARY_}") found in default Linux file dictionary" "${LOG_PATH_MODULE}/common_linux_files.txt"
       lCFF_CSV="true"

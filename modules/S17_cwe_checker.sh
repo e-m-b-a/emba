@@ -99,7 +99,7 @@ cwe_check() {
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
       lNAME=$(basename "${lBIN_TO_CHECK}")
-      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
@@ -250,7 +250,7 @@ cwe_checker_threaded() {
       # check for known linux files
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
         # if we have the base linux config file we are checking it:
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
           # shellcheck disable=SC2153
           print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT_ARR[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN}):${NC}" "" "${lCWE_CHECKER_TXT_LOG_FILE}"
         else

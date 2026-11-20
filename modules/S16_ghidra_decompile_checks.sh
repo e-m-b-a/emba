@@ -98,7 +98,7 @@ S16_ghidra_decompile_checks() {
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
-      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
@@ -281,7 +281,7 @@ ghidra_analyzer() {
       # check for known linux files
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
         # if we have the base linux config file we are checking it:
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
           # shellcheck disable=SC2153
           print_output "[+] Found ${ORANGE}${lS16_SEMGREP_ISSUES} issues${GREEN} in native binary ${ORANGE}${lNAME}${GREEN} (${CYAN}common linux file: yes${GREEN})${NC}" "" "${lSEMGREPLOG_TXT}"
         else
@@ -448,7 +448,7 @@ s16_semgrep_logger() {
     lGPT_PRIO=$((lGPT_PRIO + lSEMGREP_CNT))
   fi
   # if it is not a default (known) linux file we increase the priority
-  if ! grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+  if ! grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
     lGPT_PRIO=$((lGPT_PRIO + 1))
   fi
   write_csv_AI_tmp "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "${lGPT_ANCHOR}" "${lGPT_PRIO}" "${GPT_QUESTION}" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" "" ""

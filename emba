@@ -554,7 +554,8 @@ main() {
 
     # Preserve the supplied image. Unsafe input names are copied into the scan
     # workspace under a clean name before any extractor derives output paths.
-    if [[ -f "${FIRMWARE_PATH}" && "${FIRMWARE_PATH}" == *[\;[:cntrl:]]* && -z "${FIRMWARE_PATH1}" && "${RESCAN_SBOM}" -eq 0 ]]; then
+    local lUNSAFE_PATH_CHARS='[;[:cntrl:]"'\''`$|&<>()]'
+    if [[ -f "${FIRMWARE_PATH}" && "${FIRMWARE_PATH}" =~ ${lUNSAFE_PATH_CHARS} && -z "${FIRMWARE_PATH1}" && "${RESCAN_SBOM}" -eq 0 ]]; then
       local lINPUT_COPY_DIR=""
       local lINPUT_COPY_NAME="${FIRMWARE_PATH##*/}"
       sanitize_firmware_basename lINPUT_COPY_NAME

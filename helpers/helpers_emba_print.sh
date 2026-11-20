@@ -359,10 +359,11 @@ write_csv_log_to_path() {
   shift 2
   local lCSV_ITEMS=("$@")
   local lCSV_LINE=""
+  local lUNSAFE_PATH_CHARS='[;[:cntrl:]"'\''`$|&<>()]'
 
   # All P99 producers must clean their extracted tree before enumerating files.
   # Reject a missed caller rather than corrupting the plain line-based CSV.
-  if [[ "${lCSV_LOG}" == "${P99_CSV_LOG:-}" && "${lCSV_ITEMS[0]:-}" == *[\;[:cntrl:]]* ]]; then
+  if [[ "${lCSV_LOG}" == "${P99_CSV_LOG:-}" && "${lCSV_ITEMS[0]:-}" =~ ${lUNSAFE_PATH_CHARS} ]]; then
     print_output "[-] Unclean firmware path passed to P99: ${lCSV_ITEMS[0]}" "no_log"
     return 1
   fi

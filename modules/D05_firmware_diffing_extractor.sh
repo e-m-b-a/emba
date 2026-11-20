@@ -48,10 +48,14 @@ D05_firmware_diffing_extractor() {
   fi
 
   sub_module_title "Firmware extraction - firmware image 1"
-  OUTPUT_DIR_UNBLOB1="${LOG_PATH_MODULE}"/extractor_"$(basename "${FIRMWARE_PATH}")"
+
+  local lFW_NAME1="${FIRMWARE_PATH##*/}"
+  sanitize_firmware_basename lFW_NAME1
+  OUTPUT_DIR_UNBLOB1="${LOG_PATH_MODULE}/extractor_${lFW_NAME1}"
   unblobber "${FIRMWARE_PATH}" "${OUTPUT_DIR_UNBLOB1}" 0
 
   if [[ -d "${OUTPUT_DIR_UNBLOB1}" ]]; then
+    remove_uprintable_paths "${OUTPUT_DIR_UNBLOB1}"
     lNEG_LOG=1
     prepare_binary_arr "${OUTPUT_DIR_UNBLOB1}"
     lLINUX_PATH_COUNTER=$(linux_basic_identification "${OUTPUT_DIR_UNBLOB1}")
@@ -71,10 +75,14 @@ D05_firmware_diffing_extractor() {
   fi
 
   sub_module_title "Firmware extraction - firmware image 2"
-  OUTPUT_DIR_UNBLOB2="${LOG_PATH_MODULE}"/extractor_"$(basename "${FIRMWARE_PATH1}")"
+
+  local lFW_NAME2="${FIRMWARE_PATH1##*/}"
+  sanitize_firmware_basename lFW_NAME2
+  OUTPUT_DIR_UNBLOB2="${LOG_PATH_MODULE}/extractor_${lFW_NAME2}"
   unblobber "${FIRMWARE_PATH1}" "${OUTPUT_DIR_UNBLOB2}" 0
 
   if [[ -d "${OUTPUT_DIR_UNBLOB2}" ]]; then
+    remove_uprintable_paths "${OUTPUT_DIR_UNBLOB2}"
     lNEG_LOG=1
     prepare_binary_arr "${OUTPUT_DIR_UNBLOB2}"
     lLINUX_PATH_COUNTER=$(linux_basic_identification "${OUTPUT_DIR_UNBLOB2}")

@@ -183,7 +183,7 @@ s23_luacheck() {
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       lCOMMON_FILES_FOUND="(${RED}common linux file: no${GREEN})"
       lCFF="no"
-      if grep -q "^${lSCRIPT_NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lSCRIPT_NAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         lCOMMON_FILES_FOUND="(${CYAN}common linux file: yes${GREEN})"
         lCFF="yes"
       fi

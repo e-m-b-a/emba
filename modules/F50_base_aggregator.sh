@@ -605,23 +605,23 @@ binary_fct_output() {
   local lBINS_CWE_CHCK_CNT=0
   local lBINS_SEMGREP_CNT=0
 
-  if grep -q "${BINARY}" "${S12_LOG}" 2>/dev/null; then
-    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "No RELRO"; then
+  if grep -F -q -- "${BINARY}" "${S12_LOG}" 2>/dev/null; then
+    if grep -F -- "${BINARY}" "${S12_LOG}" | grep -o -q "No RELRO"; then
       lBIN_RELRO_STRING="${RED_}""No RELRO${NC_}"
     else
       lBIN_RELRO_STRING="${GREEN_}""RELRO   ${NC_}"
     fi
-    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "No Canary found"; then
+    if grep -F -- "${BINARY}" "${S12_LOG}" | grep -o -q "No Canary found"; then
       lBIN_CANARY_STRING="${RED_}""No Canary${NC_}"
     else
       lBIN_CANARY_STRING="${GREEN_}""Canary   ${NC_}"
     fi
-    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "NX disabled"; then
+    if grep -F -- "${BINARY}" "${S12_LOG}" | grep -o -q "NX disabled"; then
       lBIN_NX_STRING="${RED_}""NX disabled${NC_}"
     else
       lBIN_NX_STRING="${GREEN_}""NX enabled ${NC_}"
     fi
-    if grep "${BINARY}" "${S12_LOG}" | grep -o -q "No Symbols"; then
+    if grep -F -- "${BINARY}" "${S12_LOG}" | grep -o -q "No Symbols"; then
       lBIN_SYMBOLS_STRING="${GREEN_}""No Symbols${NC_}"
     else
       lBIN_SYMBOLS_STRING="${RED_}""Symbols   ${NC_}"
@@ -634,8 +634,8 @@ binary_fct_output() {
   fi
 
   # networking
-  if grep -q "/${BINARY} " "${CSV_DIR}"/s1[34]_*.csv 2>/dev/null; then
-    if grep "/${BINARY} " "${CSV_DIR}"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
+  if grep -F -q -- "/${BINARY} " "${CSV_DIR}"/s1[34]_*.csv 2>/dev/null; then
+    if grep -F -- "/${BINARY} " "${CSV_DIR}"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
       lBINS_NETWORKING_CNT="${GREEN_}""No Networking     ${NC_}"
     else
       lBINS_NETWORKING_CNT="${RED_}""Networking        ${NC_}"
@@ -668,7 +668,7 @@ binary_fct_output() {
     [[ "${lBINS_CWE_CHCK_CNT:-0}" -eq 0 ]] && lBINS_CWE_CHCK_CNT="NA"
 
     # if we have the base linux config file we are checking it:
-    if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+    if grep -F -x -q -- "${BINARY}" "${BASE_LINUX_FILES}" 2>/dev/null; then
       printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: yes | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"
     else
       printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: no  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${lBINS_CWE_CHCK_CNT}" "${lBINS_SEMGREP_CNT}" "${lBIN_RELRO_STRING}" "${lBIN_CANARY_STRING}" "${lBIN_NX_STRING}" "${lBIN_SYMBOLS_STRING}" "${lBINS_NETWORKING_CNT}" | tee -a "${LOG_FILE}"

@@ -44,7 +44,7 @@ S21_python_check() {
         # if we have the base linux config file we only test non known Linux binaries
         # with this we do not waste too much time on open source Linux stuff
         lNAME=$(basename "$(cut -d ';' -f2 <<<"${lPY_SCRIPT}")" 2>/dev/null) # field 2
-        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
           continue
         fi
       fi
@@ -114,7 +114,7 @@ s21_script_bandit() {
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       lCOMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       lCFF="no"
-      if grep -q "^${lSCRIPT_NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lSCRIPT_NAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         lCOMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
         lCFF="yes"
       fi
@@ -135,7 +135,7 @@ s21_script_bandit() {
       # if we have some default python packages we rate them lower
       if [[ "${lPY_SCRIPT_}" == *"dist-packages"* || "${lPY_SCRIPT_}" == *"site-packages"* ]]; then
         lGPT_PRIO_=$((lGPT_PRIO_ - 1))
-      elif ! grep -E -q "^$(basename "${lPY_SCRIPT_}")$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      elif ! grep -F -x -q -- "$(basename "${lPY_SCRIPT_}")" "${BASE_LINUX_FILES}" 2>/dev/null; then
         # if no entry in our BASE_LINUX_FILES config we do not have a default
         # linux file and we rate it higher for faster AI test
         lGPT_PRIO_=$((lGPT_PRIO_ + 1))

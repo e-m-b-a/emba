@@ -44,7 +44,7 @@ S27_perl_check() {
       # if we have the base linux config file we only test non known Linux binaries
       # with this we do not waste too much time on open source Linux stuff
       lNAME=$(basename "$(cut -d ';' -f2 <<<"${lPL_SCRIPT}")" 2>/dev/null) # field 2
-      if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         continue
       fi
     fi
@@ -111,7 +111,7 @@ s27_zarn_perl_checks() {
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       lCOMMON_FILES_FOUND="(${RED}common linux file: no${GREEN})"
       lCFF="no"
-      if grep -q "^${lNAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      if grep -F -x -q -- "${lNAME}" "${BASE_LINUX_FILES}" 2>/dev/null; then
         lCOMMON_FILES_FOUND="(${CYAN}common linux file: yes${GREEN})"
         lCFF="yes"
       fi
@@ -158,7 +158,7 @@ s27_zarn_perl_checks() {
       lAI_ANCHOR="$(openssl rand -hex 8)"
       if [[ -f "${BASE_LINUX_FILES}" ]]; then
         # if we have the base linux config file we are checking it:
-        if ! grep -E -q "^$(basename "${lPL_SCRIPT}")$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        if ! grep -F -x -q -- "$(basename "${lPL_SCRIPT}")" "${BASE_LINUX_FILES}" 2>/dev/null; then
           lGPT_PRIO=$((lGPT_PRIO + 1))
         fi
       fi

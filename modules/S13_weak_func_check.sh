@@ -657,7 +657,7 @@ print_top10_statistics() {
           [[ "${lF_COUNTER}" -eq 0 ]] && continue
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
             # if we have the base linux config file we are checking it:
-            if grep -E -q "^${lSEARCH_TERM}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+            if grep -F -x -q -- "${lSEARCH_TERM}" "${BASE_LINUX_FILES}" 2>/dev/null; then
               # shellcheck disable=SC2153
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "${lF_COUNTER}" "${lSEARCH_TERM}" | tee -a "${LOG_FILE}" || true
             else
@@ -698,15 +698,15 @@ log_bin_hardening() {
     # #1 - the full binary path
     # #2 - stripped binary path from cut_path()
     # #3 - only binary name - weakest mechanism
-    if [[ "$(grep "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+    if [[ "$(grep -F -- "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
       # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}${lBIN}${NC}"
-      lBIN_PROT=$(grep "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    elif [[ "$(grep "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
+      lBIN_PROT=$(grep -F -- "${lBIN} " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    elif [[ "$(grep -F -- "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u | wc -l)" -gt 0 ]]; then
       # print_output "[*] Binary protection state of ${lNAME} / ${GREEN}$(cut_path ${lBIN})${NC}"
-      lBIN_PROT=$(grep "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+      lBIN_PROT=$(grep -F -- "$(cut_path "${lBIN}") " "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
     else
       # print_output "[*] Binary protection state of ${GREEN}${lNAME}${NC} / ${lBIN}"
-      lBIN_PROT=$(grep '/'"${lNAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
+      lBIN_PROT=$(grep -F -- '/'"${lNAME}"' ' "${S12_LOG}" | sed 's/Symbols.*/Symbols/' | sort -u || true)
     fi
     write_log "  ${lBIN_PROT}${NC}" "${lFUNC_LOG}"
     write_log "" "${lFUNC_LOG}"
@@ -771,7 +771,7 @@ output_function_details() {
 
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     lSEARCH_TERM=$(basename "${lBINARY_}")
-    if grep -q "^${lSEARCH_TERM}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+    if grep -F -x -q -- "${lSEARCH_TERM}" "${BASE_LINUX_FILES}" 2>/dev/null; then
       lCOMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
       write_log "[+] File $(print_path "${lBINARY_}") found in default Linux file dictionary" "${LOG_PATH_MODULE}/common_linux_files.txt"
       lCFF_CSV="true"
