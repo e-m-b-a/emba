@@ -43,6 +43,7 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 
 ## Latest news
 
+* [*EMBA v2.0.5 - Iced latte edition*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.5-ice-edt)
 * [*EMBA v2.0.4 - summer edition*](https://github.com/e-m-b-a/emba/releases/tag/v2.0.4-summer_edition)
 * [*EMBA demo report available*](https://www.securefirmware.de/emba/index.html)
 * *Happy 6th birthday EMBA*

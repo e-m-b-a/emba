@@ -134,7 +134,7 @@ L10_system_emulation() {
               lARCH_END+="hf"
             fi
 
-            if [[ "${lARCH_END}" == "armbe"* ]] || [[ "${lARCH_END}" == "mips64r2"* ]] || [[ "${lARCH_END}" == "mips64_3"* ]]; then
+            if [[ "${lARCH_END}" == "armbe"* ]] || [[ "${lARCH_END}" == "mips64r2"* ]] || [[ "${lARCH_END}" == "mips64_iii"* ]]; then
               print_output "[-] Found NOT supported architecture ${ORANGE}${lARCH_END}${NC}"
               [[ -f "${P99_LOG}" ]] && write_link "p99"
               print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
@@ -1568,11 +1568,9 @@ run_network_id_emulation() {
       print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
       return
     fi
-  elif [[ "${lARCH_END}" == *"x86el"* ]] && [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}" ]]; then
-      # x86el kernel has issues in version 4.1.52 - need further investigation
-      print_output "[!] Bypassing known issues with kernel v${L10_KERNEL_V_LONG} - switching to v4.1.17"
-      lKERNEL="${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}"
+  elif [[ "${lARCH_END}" == *"x86el"* ]]; then
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
     else
       print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
       return
@@ -3006,10 +3004,6 @@ create_emulation_archive() {
     # fix the path for the kernel which is currently something like ./Linux-Kernel/vmlinux.mipsel.4
     # and should be ./vmlinux.mipsel.4
     local lL10_KERNEL_V_LONG_TMP="${L10_KERNEL_V_LONG}"
-    if [[ "${lARCH_END}" == *"x86el"* ]] && [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
-      # for x86el we currently have kernel issues
-      lL10_KERNEL_V_LONG_TMP="4.1.17"
-    fi
     sed -i "s/\.\/Linux-Kernel-v${lL10_KERNEL_V_LONG_TMP}\//\.\//g" "${lARCHIVE_PATH}"/run.sh
 
     if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
