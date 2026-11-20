@@ -14,6 +14,14 @@
 
 load ../setup.bash
 
+setup() {
+  setup_emba_test_env
+}
+
+teardown() {
+  teardown_emba_test_env
+}
+
 # Static regression for #2201: firmware basenames used to be interpolated into
 # the radare2 -c script (which can reach system()), so a name containing
 # $(...) executed as the EMBA user. The usage-file path must be built from the
@@ -28,5 +36,6 @@ load ../setup.bash
   ! grep -n "r2 " -A2 "${lMOD}" | grep -q 'lBIN_NAME'
 
   grep -q 'lUSAGE_FILE="${LOG_PATH_MODULE}/${lFUNCTION}_${lBIN_MD5_SUM}_usage"' "${lMOD}"
-  grep -q 'pdda @@ `cat '"'"'"${lUSAGE_FILE}"'"' "${lMOD}" || grep -q '"\${lUSAGE_FILE}"' "${lMOD}"
+  grep -q 'pdda @@ `cat ' "${lMOD}"
+  grep -F '"${lUSAGE_FILE}"' "${lMOD}"
 }
