@@ -122,9 +122,11 @@ version_detection_thread() {
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -a -h "Emulating binary:" "${lEMULATION_LOG_ENTRY}" | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
             local lBINARY_ENTRY=""
-            lBINARY_ENTRY=$(grep "${lBINARY_PATH_}.*ELF" "${P99_CSV_LOG}" | sort -u | head -1 || true)
+            # the path ends at the CSV separator: .../bin/foo must not match .../bin/foo-bar;
+            # ";ELF": a column after the path starts with ELF (readelf class or file output)
+            lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_};" "${P99_CSV_LOG}" | grep -F ";ELF" | sort -u | head -1 || true)
             if [[ -z "${lBINARY_ENTRY}" ]]; then
-              lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
+              lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_};" "${P99_CSV_LOG}" | sort -u | head -1 || true)
             fi
             if [[ -n "${lBINARY_ENTRY}" ]]; then
               print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_ENTRY}"
@@ -155,9 +157,11 @@ version_detection_thread() {
           mapfile -t lBINARY_PATHS_ARR < <(strip_color_codes "$(grep -h -a "Emulating binary:" "${lEMULATION_LOG_MATCH}" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
           for lBINARY_PATH_ in "${lBINARY_PATHS_ARR[@]}"; do
             local lBINARY_ENTRY=""
-            lBINARY_ENTRY=$(grep "${lBINARY_PATH_}.*ELF" "${P99_CSV_LOG}" | sort -u | head -1 || true)
+            # the path ends at the CSV separator: .../bin/foo must not match .../bin/foo-bar;
+            # ";ELF": a column after the path starts with ELF (readelf class or file output)
+            lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_};" "${P99_CSV_LOG}" | grep -F ";ELF" | sort -u | head -1 || true)
             if [[ -z "${lBINARY_ENTRY}" ]]; then
-              lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_}" "${P99_CSV_LOG}" | sort -u | head -1 || true)
+              lBINARY_ENTRY=$(grep -F "${lBINARY_PATH_};" "${P99_CSV_LOG}" | sort -u | head -1 || true)
             fi
             if [[ -n "${lBINARY_ENTRY}" ]]; then
               print_output "[+] Version information found ${RED}${lVERSION_IDENTIFIED}${NC}${GREEN} in binary ${ORANGE}${lBINARY_PATH_}${GREEN} (license: ${ORANGE}${lLICENSES_ARR[*]}${GREEN}) (${ORANGE}${TYPE}${GREEN})." "" "${lEMULATION_LOG_MATCH}"
