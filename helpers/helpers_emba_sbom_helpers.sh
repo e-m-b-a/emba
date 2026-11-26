@@ -93,6 +93,8 @@ build_sbom_json_hashes_arr() {
   local lAPP_VERS="${3:-}"
   local lPACKAGING_SYSTEM="${4:-NA}"
   local lCONFIDENCE_LEVEL="${5:-NA}"
+  # optional "name:value" property added to the component this binary is merged into
+  local lMERGE_PROPERTY="${6:-}"
 
   # HASHES_ARR is used in the caller
   export HASHES_ARR=()
@@ -186,6 +188,14 @@ build_sbom_json_hashes_arr() {
 
         if ! [[ -f "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" ]]; then
           continue
+        fi
+
+        if [[ -n "${lMERGE_PROPERTY}" ]] && ! jq -e --arg value "${lMERGE_PROPERTY#*:}" --arg name ":${lMERGE_PROPERTY%%:*}" \
+          '.properties[] | select((.name | endswith($name)) and (.value | gsub("'"'"'"; "")) == $value)' \
+          "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" >/dev/null; then
+          jq --arg name "EMBA:sbom:$((lJQ_ELEMENTS + 3)):${lMERGE_PROPERTY%%:*}" --arg value "${lMERGE_PROPERTY#*:}" \
+            '.properties += [{"name": $name, "value": $value}]' "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" >"${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1"
+          mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp1" "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" 2>/dev/null || true
         fi
 
         # with the following check we find out if we have the same version or some extended version
