@@ -69,6 +69,24 @@ build_sbom_json_properties_arr() {
 # We currently build md5, sha256 and sha512
 # parameter: binary/file to check
 # returns global array HASHES_ARR
+# The duplicate check of build_sbom_json_hashes_arr and the component written by
+# build_sbom_json_component_arr run under one lock: detections running in parallel would otherwise
+# miss each other and write one component each, or overwrite each other's merges
+sbom_component_lock() {
+  # a lock still held (the caller wrote no component) is released first: flock on a second
+  # descriptor of the same file would wait on our own lock forever
+  sbom_component_unlock
+  export SBOM_COMPONENT_LOCK_FD=""
+  exec {SBOM_COMPONENT_LOCK_FD}>>"${TMP_DIR}/sbom_duplicates.lock"
+  flock "${SBOM_COMPONENT_LOCK_FD}"
+}
+
+sbom_component_unlock() {
+  [[ -n "${SBOM_COMPONENT_LOCK_FD:-}" ]] || return 0
+  exec {SBOM_COMPONENT_LOCK_FD}>&-
+  SBOM_COMPONENT_LOCK_FD=""
+}
+
 build_sbom_json_hashes_arr() {
   local lBINARY="${1:-}"
   local lAPP_NAME="${2:-}"
@@ -123,6 +141,8 @@ build_sbom_json_hashes_arr() {
   # if all are matching this is duplicate and we do not need to log it
   # we return 1 if we already found something and the caller needs to handle it
   if [[ -d "${SBOM_LOG_PATH}" ]] && [[ "${lAPP_NAME}" != "NA" && "${lAPP_VERS}" != "NA" && "${lAPP_VERS}" != "null" ]]; then
+    # released once merged, or by build_sbom_json_component_arr once the new component is written
+    sbom_component_lock
     # first check is for same hash, same name, same version:
     if grep -qr '"alg":"SHA-512","content":"'"${lSHA512_CHECKSUM}" "${SBOM_LOG_PATH}" 2>/dev/null; then
       # if we have found some sbom log file with the matching sha512 checksum, we then check if
@@ -132,6 +152,7 @@ build_sbom_json_hashes_arr() {
         lDUP_CHECK_NAME=$(jq -r .name "${lDUP_CHECK_FILE}")
         lDUP_CHECK_VERS=$(jq -r .version "${lDUP_CHECK_FILE}")
         if [[ "${lDUP_CHECK_NAME}" == "${lAPP_NAME}" ]] && [[ "${lDUP_CHECK_VERS}" == "${lAPP_VERS}" ]]; then
+          sbom_component_unlock
           return 1
         fi
       done
@@ -196,6 +217,7 @@ build_sbom_json_hashes_arr() {
           fi
         fi
         mv "${lDUP_CHECK_FILE/\.json/}_${lDUP_RAND_ID}.tmp" "${lDUP_CHECK_FILE}" 2>/dev/null || true
+        sbom_component_unlock
         return 1
       fi
     done
@@ -303,6 +325,7 @@ build_sbom_json_component_arr() {
   fi
 
   jo -n -- "${lCOMPONENT_ARR[@]}" >"${SBOM_LOG_PATH}/${lPACKAGING_SYSTEM}_${lAPP_NAME}_${SBOM_COMP_BOM_REF:-NA}.json"
+  sbom_component_unlock
 
   # we can unset it here again
   unset HASHES_ARR
