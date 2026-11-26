@@ -4,6 +4,9 @@ services:
     image: embeddedanalyzer/emba:2.0.5a
     container_name: emba
     read_only: false
+    # resource limits, set in .env (see .env.example), 0 = no limit
+    mem_limit: ${EMBA_MEM_LIMIT:-0}
+    cpus: ${EMBA_CPUS:-0}
     # all pre-checker mount modules need privileged mode
     # nosemgrep
     privileged: true
@@ -57,6 +60,8 @@ services:
     image: embeddedanalyzer/emba:2.0.5a
     container_name: emba_quest
     read_only: true
+    mem_limit: ${EMBA_QUEST_MEM_LIMIT:-0}
+    cpus: ${EMBA_QUEST_CPUS:-0}
     tmpfs:
       - /tmp
       - /root
