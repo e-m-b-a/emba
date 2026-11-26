@@ -215,12 +215,22 @@ preparing_cve_bin_tool() {
 
   local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
   # first: import the database
+  # Opt-in: set CVE_BIN_TOOL_OFFLINE_IMPORT=1 in the environment before
+  # invoking emba to pass --offline here. --offline forces db_update="never"
+  # inside cve-bin-tool, skipping its post-import get_cvelist_if_stale()/
+  # refresh_cache_and_update_db() network calls to NVD/OSV/RedHat/GAD - by
+  # default (unset), this "health check" import keeps doing a full online
+  # CVE database refresh on every single run, which can take 15-30+ minutes
+  # (and hang/retry without network access). That default is left unchanged
+  # here since other callers may rely on it; --offline is opt-in only.
+  local lCVE_BIN_TOOL_OFFLINE_ARGS=()
+  [[ "${CVE_BIN_TOOL_OFFLINE_IMPORT:-0}" -eq 1 ]] && lCVE_BIN_TOOL_OFFLINE_ARGS=("--offline")
   if [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA config directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" &>/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" "${lCVE_BIN_TOOL_OFFLINE_ARGS[@]}" &>/dev/null || true
   elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA docker external directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" &>/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" "${lCVE_BIN_TOOL_OFFLINE_ARGS[@]}" &>/dev/null || true
   fi
 
   # 2nd: check the database
