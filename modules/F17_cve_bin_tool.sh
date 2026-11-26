@@ -195,7 +195,10 @@ F17_cve_bin_tool() {
     lBOM_REF=$(jq --raw-output '."bom-ref"' <<<"${lSBOM_ENTRY}" || print_error "[-] BOM_REF failed to extract from ${lSBOM_ENTRY}")
     lORIG_SOURCE=$(jq --raw-output '.group' <<<"${lSBOM_ENTRY}" || print_error "[-] ORIG_SOURCE failed to extract from ${lSBOM_ENTRY}")
 
-    cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR &
+    local lADDITIONAL_VERS_ARR=()
+    mapfile -t lADDITIONAL_VERS_ARR < <(get_additional_versions "${lSBOM_ENTRY}")
+
+    cve_bin_tool_threader "${lBOM_REF}" "${lPRODUCT_VERSION}" "${lORIG_SOURCE}" lVENDOR_ARR lPRODUCT_ARR "${lADDITIONAL_VERS_ARR[@]}" &
     local lTMP_PID="$!"
     store_kill_pids "${lTMP_PID}"
     lWAIT_PIDS_F17_ARR+=("${lTMP_PID}")
@@ -331,12 +334,37 @@ sbom_preprocessing_threader() {
   print_output "[*] Vulnerability details for ${ORANGE}${lPRODUCT_ARR[0]//\'/}${NC} - vendor ${ORANGE}${lVENDOR_ARR[0]//\'/}${NC} - version ${ORANGE}${lPRODUCT_VERSION}${NC} - BOM reference ${ORANGE}${lBOM_REF}${NC}" "" "f17#${lANCHOR}"
 }
 
+# The SBOM merges the detections of one component whose versions only differ by a suffix (lua 5.1.5
+# from the binary, 5.1.5-3 from the package) and keeps as its version the one written first. Modules
+# run in parallel, so that version changes from one scan to the other, and with it the CVEs found.
+# Opt-in: with F17_CHECK_ADDITIONAL_VERSIONS=1 the CVEs of the merged versions are searched too.
+get_additional_versions() {
+  local lSBOM_ENTRY="${1:-}"
+
+  [[ "${F17_CHECK_ADDITIONAL_VERSIONS:-0}" -eq 1 ]] || return 0
+  jq --raw-output '.properties[]? | select(.name | endswith(":additional_version_identified")) | .value' <<<"${lSBOM_ENTRY}" | sort -u
+}
+
+# The results of all the searched versions belong to one SBOM component, and the VEX refers to it by
+# its version: without F17_CHECK_ADDITIONAL_VERSIONS the cve-bin-tool lines are left untouched.
+set_component_version() {
+  local lCOMPONENT_VERS="${1:-}"
+
+  if [[ "${F17_CHECK_ADDITIONAL_VERSIONS:-0}" -eq 1 ]]; then
+    awk -F, -v OFS=, -v lVERS="${lCOMPONENT_VERS}" '{ $3 = lVERS; print }'
+  else
+    cat
+  fi
+}
+
 cve_bin_tool_threader() {
   local lBOM_REF="${1:-}"
   local lVERS="${2:-}"
   local lORIG_SOURCE="${3:-}"
   local -n lrVENDOR_ARR="${4:-}"
   local -n lrPRODUCT_ARR="${5:-}"
+  local lVERS_TO_CHECK_ARR=("${lVERS}" "${@:6}")
+  local lVERS_TO_CHECK=""
   local lWAIT_PIDS_F17_ARR_2=()
 
   if [[ "${#lrPRODUCT_ARR[@]}" -eq 0 ]]; then
@@ -357,13 +385,14 @@ cve_bin_tool_threader() {
         print_output "[-] WARNING: ${lPROD} -> No CVE queries performed."
         continue
       fi
-      write_log "${lPROD},${lVENDOR:-NOTDEFINED},${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
-      # the vendor cpe entries are very inconsistent and the generated vendors are often not matching
-      # this results in the following entry to search for product name only
-      if [[ "${lVENDOR}" != "NOTDEFINED" ]]; then
-        write_log "${lPROD},NOTDEFINED,${lVERS},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
-      fi
-
+      for lVERS_TO_CHECK in "${lVERS_TO_CHECK_ARR[@]}"; do
+        write_log "${lPROD},${lVENDOR:-NOTDEFINED},${lVERS_TO_CHECK},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
+        # the vendor cpe entries are very inconsistent and the generated vendors are often not matching
+        # this results in the following entry to search for product name only
+        if [[ "${lVENDOR}" != "NOTDEFINED" ]]; then
+          write_log "${lPROD},NOTDEFINED,${lVERS_TO_CHECK},${lBOM_REF}" "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv"
+        fi
+      done
     done
   done
   if ! [[ -f "${LOG_PATH_MODULE}/${lBOM_REF}.tmp.csv" ]]; then
@@ -399,7 +428,7 @@ cve_bin_tool_threader() {
       local lTMP_PID="$!"
       lWAIT_PIDS_F17_ARR_2+=("${lTMP_PID}")
       max_pids_protection "${MAX_MOD_THREADS}" lWAIT_PIDS_F17_ARR_2
-    done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" | sort -u -t, -k4,4)
+    done < <(tail -n +2 "${LOG_PATH_MODULE}/${lBOM_REF}_${lPRODUCT_NAME}_${lVERS}.csv" | set_component_version "${lVERS}" | sort -u -t, -k4,4)
   fi
   wait_for_pid "${lWAIT_PIDS_F17_ARR_2[@]}"
 
