@@ -209,6 +209,13 @@ check_docker_version() {
 
 preparing_cve_bin_tool() {
   print_output "    Preparing cve-bin-tool ..." "no_log"
+  # Opt-in: CVE_BIN_TOOL_SHARED_CACHE points to a persistent cve-bin-tool
+  # cache mounted by an extra compose file (e.g. FWMapper's cve-service).
+  # Link it in place of the default one on the /root/.cache tmpfs. Unset by
+  # default, so plain EMBA keeps its per-scan cache.
+  if [[ -n "${CVE_BIN_TOOL_SHARED_CACHE:-}" ]] && [[ -d "${CVE_BIN_TOOL_SHARED_CACHE}" ]] && [[ ! -e "${HOME}"/.cache/cve-bin-tool ]]; then
+    ln -s -- "${CVE_BIN_TOOL_SHARED_CACHE}" "${HOME}"/.cache/cve-bin-tool
+  fi
   [[ ! -d "${HOME}"/.cache/cve-bin-tool ]] && mkdir -- "${HOME}"/.cache/cve-bin-tool
 
   # this is a health check of the cve-bin-tool with our database
