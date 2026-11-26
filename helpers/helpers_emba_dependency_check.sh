@@ -225,7 +225,19 @@ preparing_cve_bin_tool() {
   # here since other callers may rely on it; --offline is opt-in only.
   local lCVE_BIN_TOOL_OFFLINE_ARGS=()
   [[ "${CVE_BIN_TOOL_OFFLINE_IMPORT:-0}" -eq 1 ]] && lCVE_BIN_TOOL_OFFLINE_ARGS=("--offline")
+  # --import overwrites cve.db with the snapshot. With the same opt-in flag,
+  # keep an existing cve.db that is newer than the snapshot instead (e.g. the
+  # cve_bin_tool_cache volume kept up to date by FWMapper).
+  local lCVE_DB="${HOME}/.cache/cve-bin-tool/cve.db"
+  local lCVE_SNAPSHOT=""
   if [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
+    lCVE_SNAPSHOT="${CONFIG_DIR}/cve-database.db"
+  elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
+    lCVE_SNAPSHOT="${EXT_DIR}/cve-bin-tool/cve-database.db"
+  fi
+  if [[ "${CVE_BIN_TOOL_OFFLINE_IMPORT:-0}" -eq 1 ]] && [[ -s "${lCVE_DB}" ]] && [[ -n "${lCVE_SNAPSHOT}" ]] && [[ ! "${lCVE_SNAPSHOT}" -nt "${lCVE_DB}" ]]; then
+    print_output "[*] Keeping existing cve-bin-tool database, newer than ${lCVE_SNAPSHOT}" "no_log"
+  elif [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA config directory" "no_log"
     python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" "${lCVE_BIN_TOOL_OFFLINE_ARGS[@]}" &>/dev/null || true
   elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
