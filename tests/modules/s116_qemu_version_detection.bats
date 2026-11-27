@@ -159,3 +159,101 @@ EOF
     [ ! -s "${VERSION_LOG_CAPTURE_FILE}" ]
   fi
 }
+
+@test "version_detection_thread does not match a binary whose path only starts with the emulated one" {
+  mkdir -p "${LOG_DIR}/s115_usermode_emulator"
+  cat >"${LOG_DIR}/s115_usermode_emulator/qemu_tmp_python3_1.txt" <<'EOT'
+Emulating binary: /usr/bin/python3
+Python 3.9.2
+EOT
+  # /usr/bin/python3.11 sorts before /usr/bin/python3; (C and UTF-8 locales) and would be taken by a
+  # prefix match
+  cat >"${P99_CSV_LOG}" <<'EOT'
+entry;/usr/bin/python3.11;3;4;5;6;7;ELF 64-bit;py311000
+entry;/usr/bin/python3;3;4;5;6;7;ELF 64-bit;py300000
+EOT
+  cat >"${TMP_DIR}/s116_rule_prefix.json" <<'EOT'
+{
+  "parsing_mode": ["normal"],
+  "identifier": "python",
+  "licenses": ["unknown"],
+  "product_names": ["python"],
+  "vendor_names": ["python"],
+  "version_extraction": ["sed -E 's/Python ([0-9.]+)/\\1/'"],
+  "grep_commands": ["Python [0-9]+\\.[0-9]+\\.[0-9]+"],
+  "affected_paths": ["/usr/bin/python3"]
+}
+EOT
+
+  version_detection_thread "${TMP_DIR}/s116_rule_prefix.json"
+
+  [ -f "${VERSION_LOG_CAPTURE_FILE}" ]
+  grep -q "/usr/bin/python3;3;4;5;6;7;ELF 64-bit;py300000" "${VERSION_LOG_CAPTURE_FILE}"
+  run grep -q "py311000" "${VERSION_LOG_CAPTURE_FILE}"
+  [ "${status}" -ne 0 ]
+}
+
+@test "version_detection_thread prefers the entry with a column starting with ELF" {
+  mkdir -p "${LOG_DIR}/s115_usermode_emulator"
+  cat >"${LOG_DIR}/s115_usermode_emulator/qemu_tmp_foo_1.txt" <<'EOT'
+Emulating binary: /usr/bin/foo
+foo version 1.2.3
+EOT
+  # both entries contain ELF after the path, only the second one has a column starting with it
+  cat >"${P99_CSV_LOG}" <<'EOT'
+entry;/usr/bin/foo;3;4;5;6;7;ASCII text, not an ELF;text0000
+entry;/usr/bin/foo;3;4;5;6;7;ELF 64-bit;elf00000
+EOT
+  cat >"${TMP_DIR}/s116_rule_elf.json" <<'EOT'
+{
+  "parsing_mode": ["normal"],
+  "identifier": "foo",
+  "licenses": ["unknown"],
+  "product_names": ["foo"],
+  "vendor_names": ["foo"],
+  "version_extraction": ["sed -E 's/.* ([0-9.]+)/\\1/'"],
+  "grep_commands": ["foo version [0-9]+\\.[0-9]+\\.[0-9]+"],
+  "affected_paths": ["/usr/bin/foo"]
+}
+EOT
+
+  version_detection_thread "${TMP_DIR}/s116_rule_elf.json"
+
+  [ -f "${VERSION_LOG_CAPTURE_FILE}" ]
+  grep -q "ELF 64-bit;elf00000" "${VERSION_LOG_CAPTURE_FILE}"
+  run grep -q "text0000" "${VERSION_LOG_CAPTURE_FILE}"
+  [ "${status}" -ne 0 ]
+}
+
+@test "version_detection_thread does not take ELF in the path itself as an ELF entry" {
+  mkdir -p "${LOG_DIR}/s115_usermode_emulator"
+  cat >"${LOG_DIR}/s115_usermode_emulator/qemu_tmp_bar_1.txt" <<'EOT'
+Emulating binary: /opt/ELFtools/bin/bar
+bar version 4.5.6
+EOT
+  # ELF is only in the path of the first entry, the second one has a column starting with ELF;
+  # the first one sorts first and would be taken if ELF were searched anywhere in the line
+  cat >"${P99_CSV_LOG}" <<'EOT'
+entry;/opt/ELFtools/bin/bar;3;4;5;6;7;ASCII text;text0000
+entry;/opt/ELFtools/bin/bar;3;4;5;6;7;ELF 64-bit;elf00000
+EOT
+  cat >"${TMP_DIR}/s116_rule_elf_path.json" <<'EOT'
+{
+  "parsing_mode": ["normal"],
+  "identifier": "bar",
+  "licenses": ["unknown"],
+  "product_names": ["bar"],
+  "vendor_names": ["bar"],
+  "version_extraction": ["sed -E 's/.* ([0-9.]+)/\\1/'"],
+  "grep_commands": ["bar version [0-9]+\\.[0-9]+\\.[0-9]+"],
+  "affected_paths": ["/opt/ELFtools/bin/bar"]
+}
+EOT
+
+  version_detection_thread "${TMP_DIR}/s116_rule_elf_path.json"
+
+  [ -f "${VERSION_LOG_CAPTURE_FILE}" ]
+  grep -q "ELF 64-bit;elf00000" "${VERSION_LOG_CAPTURE_FILE}"
+  run grep -q "text0000" "${VERSION_LOG_CAPTURE_FILE}"
+  [ "${status}" -ne 0 ]
+}
