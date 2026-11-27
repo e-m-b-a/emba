@@ -209,18 +209,47 @@ check_docker_version() {
 
 preparing_cve_bin_tool() {
   print_output "    Preparing cve-bin-tool ..." "no_log"
+  # Opt-in: CVE_BIN_TOOL_SHARED_CACHE points to a persistent cve-bin-tool
+  # cache mounted by an extra compose file (e.g. FWMapper's cve-service).
+  # Link it in place of the default one on the /root/.cache tmpfs. Unset by
+  # default, so plain EMBA keeps its per-scan cache.
+  if [[ -n "${CVE_BIN_TOOL_SHARED_CACHE:-}" ]] && [[ -d "${CVE_BIN_TOOL_SHARED_CACHE}" ]] && [[ ! -e "${HOME}"/.cache/cve-bin-tool ]]; then
+    ln -s -- "${CVE_BIN_TOOL_SHARED_CACHE}" "${HOME}"/.cache/cve-bin-tool
+  fi
   [[ ! -d "${HOME}"/.cache/cve-bin-tool ]] && mkdir -- "${HOME}"/.cache/cve-bin-tool
 
   # this is a health check of the cve-bin-tool with our database
 
   local lCVE_BIN_TOOL="/external/cve-bin-tool/cve_bin_tool/cli.py"
   # first: import the database
+  # Opt-in: set CVE_BIN_TOOL_OFFLINE_IMPORT=1 in the environment before
+  # invoking emba to pass --offline here. --offline forces db_update="never"
+  # inside cve-bin-tool, skipping its post-import get_cvelist_if_stale()/
+  # refresh_cache_and_update_db() network calls to NVD/OSV/RedHat/GAD - by
+  # default (unset), this "health check" import keeps doing a full online
+  # CVE database refresh on every single run, which can take 15-30+ minutes
+  # (and hang/retry without network access). That default is left unchanged
+  # here since other callers may rely on it; --offline is opt-in only.
+  local lCVE_BIN_TOOL_OFFLINE_ARGS=()
+  [[ "${CVE_BIN_TOOL_OFFLINE_IMPORT:-0}" -eq 1 ]] && lCVE_BIN_TOOL_OFFLINE_ARGS=("--offline")
+  # --import overwrites cve.db with the snapshot. With the same opt-in flag,
+  # keep an existing cve.db that is newer than the snapshot instead (e.g. the
+  # cve_bin_tool_cache volume kept up to date by FWMapper).
+  local lCVE_DB="${HOME}/.cache/cve-bin-tool/cve.db"
+  local lCVE_SNAPSHOT=""
   if [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
+    lCVE_SNAPSHOT="${CONFIG_DIR}/cve-database.db"
+  elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
+    lCVE_SNAPSHOT="${EXT_DIR}/cve-bin-tool/cve-database.db"
+  fi
+  if [[ "${CVE_BIN_TOOL_OFFLINE_IMPORT:-0}" -eq 1 ]] && [[ -s "${lCVE_DB}" ]] && [[ -n "${lCVE_SNAPSHOT}" ]] && [[ ! "${lCVE_SNAPSHOT}" -nt "${lCVE_DB}" ]]; then
+    print_output "[*] Keeping existing cve-bin-tool database, newer than ${lCVE_SNAPSHOT}" "no_log"
+  elif [[ -f "${CONFIG_DIR}/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA config directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" &>/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --import "${CONFIG_DIR}/cve-database.db" "${lCVE_BIN_TOOL_OFFLINE_ARGS[@]}" &>/dev/null || true
   elif [[ -f "${EXT_DIR}/cve-bin-tool/cve-database.db" ]]; then
     print_output "[*] Importing CVE config from EMBA docker external directory" "no_log"
-    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" &>/dev/null || true
+    python3 "${lCVE_BIN_TOOL}" --import "${EXT_DIR}/cve-bin-tool/cve-database.db" "${lCVE_BIN_TOOL_OFFLINE_ARGS[@]}" &>/dev/null || true
   fi
 
   # 2nd: check the database
