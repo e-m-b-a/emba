@@ -12,6 +12,7 @@ config/module_blacklist.txt
 config/jtr_wordlist.txt
 config/ai_config.env
 config/dependencytrack.env
+.env
 *config/cve-database.db
 tests/bats-core/
 tests/bin_version_testdata/corpus_generator.log
