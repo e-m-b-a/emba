@@ -97,6 +97,8 @@ windows_exifparser_threader() {
   local lSHA512_CHECKSUM="NA"
   local lPURL_IDENTIFIER="NA"
   local lPKG_MD5=""
+  local lAPP_INTERNAL_NAME=""
+  local lMERGE_PROPERTY=""
 
   lR_FILE=$(file -b "${lEXE_ARCHIVE}")
   if [[ ! "${lR_FILE}" == *"PE32 executable"* ]] && [[ ! "${lR_FILE}" == *"PE32+ executable"* ]]; then
@@ -191,13 +193,27 @@ windows_exifparser_threader() {
   lPROP_ARRAY_INIT_ARR+=("minimal_identifier:${lSTRIPPED_VERSION}")
   lPROP_ARRAY_INIT_ARR+=("vendor_name:${lAPP_VENDOR%.exe}")
   lPROP_ARRAY_INIT_ARR+=("product_name:${lAPP_NAME%.exe}")
+  # Opt-in: the Product Name is free text ("PuTTY suite") that often differs from the CPE product
+  # ("putty"); F17 searches the Internal Name when the product name finds no CVE
+  if [[ "${F17_INTERNAL_NAME_FALLBACK:-0}" -eq 1 ]]; then
+    lAPP_INTERNAL_NAME=$(grep "Internal Name" "${lEXIF_LOG}" || true)
+    lAPP_INTERNAL_NAME=${lAPP_INTERNAL_NAME/*:\ /}
+    lAPP_INTERNAL_NAME=$(clean_package_details "${lAPP_INTERNAL_NAME}")
+    lAPP_INTERNAL_NAME=$(clean_package_versions "${lAPP_INTERNAL_NAME}")
+    lAPP_INTERNAL_NAME="${lAPP_INTERNAL_NAME%.exe}"
+    if [[ -n "${lAPP_INTERNAL_NAME}" ]] && [[ "${lAPP_INTERNAL_NAME}" != "${lAPP_NAME%.exe}" ]]; then
+      lPROP_ARRAY_INIT_ARR+=("internal_name:${lAPP_INTERNAL_NAME}")
+      # also kept when this executable is merged into the component of another one
+      lMERGE_PROPERTY="internal_name:${lAPP_INTERNAL_NAME}"
+    fi
+  fi
   lPROP_ARRAY_INIT_ARR+=("confidence:high")
 
   build_sbom_json_properties_arr "${lPROP_ARRAY_INIT_ARR[@]}"
 
   # build_json_hashes_arr sets lHASHES_ARR globally and we unset it afterwards
   # final array with all hash values
-  if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}"; then
+  if ! build_sbom_json_hashes_arr "${lEXE_ARCHIVE}" "${lAPP_NAME:-NA}" "${lAPP_VERS:-NA}" "${lPACKAGING_SYSTEM:-NA}" "NA" "${lMERGE_PROPERTY}"; then
     write_log "[*] Already found results for ${lAPP_NAME} / ${lAPP_VERS} / ${lPACKAGING_SYSTEM}" "${S08_DUPLICATES_LOG}"
     return
   fi
